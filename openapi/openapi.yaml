@@ -1,0 +1,470 @@
+openapi: 3.0.1
+info:
+  title: CGN Onboarding Portal
+  description: Carta Giovani Nazionale Onboarding Portal
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+
+servers:
+  - url: https://TBD/v1 #TODO
+
+tags:
+  - name: operator
+    description: Operator
+  - name: facilitation
+    description: Facilitation
+
+paths:
+  /operators:
+    post:
+      tags:
+        - operator
+      summary: Create an operator
+      operationId: createOperator
+      requestBody:
+        description: Operator to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOperator'
+      responses:
+        201:
+          description: Operator created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /operators/{operatorId}:
+    get:
+      tags:
+        - operator
+      summary: Get an operator
+      operationId: getOperator
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+      responses:
+        200:
+          description: Operator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags:
+        - operator
+      summary: Update an operator
+      operationId: updateOperator
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+      requestBody:
+        description: Operator to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOperator'
+      responses:
+        200:
+          description: Operator updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Operator'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /operators/{operatorId}/facilitations:
+    get:
+      tags:
+        - facilitation
+      summary: Get facilitations of an operator
+      operationId: getFacilitations
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+      responses:
+        200:
+          description: List of facilitations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Facilitations'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags:
+        - facilitation
+      summary: Create a facilitation
+      operationId: createFacilitation
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+      requestBody:
+        description: Facilitation to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFacilitation'
+      responses:
+        201:
+          description: Facilitation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Facilitation'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /operators/{operatorId}/facilitations/{facilitationId}:
+    put:
+      tags:
+        - facilitation
+      summary: Update a facilitation
+      operationId: updateFacilitation
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+        - $ref: '#/components/parameters/FacilitationId'
+      requestBody:
+        description: Facilitation to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFacilitation'
+      responses:
+        200:
+          description: Facilitation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Facilitation'
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - facilitation
+      summary: Delete a facilitation
+      operationId: deleteFacilitation
+      parameters:
+        - $ref: '#/components/parameters/OperatorId'
+        - $ref: '#/components/parameters/FacilitationId'
+      responses:
+        204:
+          description: Facilitation deleted
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    OperatorId:
+      name: operatorId
+      in: path
+      description: Operator id
+      required: true
+      schema:
+        type: string
+    FacilitationId:
+      name: facilitationId
+      in: path
+      description: Facilitation id
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    CreateOperator:
+      type: object
+      required:
+        - fullName
+        - name
+        - taxCodeOrVat
+        - pecAddress
+        - referent
+        - description
+        - productCategory
+        - salesChannel
+      properties:
+        fullName:
+          type: string
+        name:
+          type: string
+        taxCodeOrVat:
+          type: string
+        pecAddress:
+          type: string
+        referent:
+          $ref: '#/components/schemas/Referent'
+        description:
+          type: string
+        productCategory:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        salesChannel:
+          $ref: '#/components/schemas/SalesChannel'
+        websiteUrl:
+          type: string
+
+    UpdateOperator:
+      type: object
+      required:
+        - fullName
+        - name
+        - taxCodeOrVat
+        - pecAddress
+        - referent
+        - description
+        - productCategory
+        - salesChannel
+      properties:
+        fullName:
+          type: string
+        name:
+          type: string
+        taxCodeOrVat:
+          type: string
+        pecAddress:
+          type: string
+        referent:
+          $ref: '#/components/schemas/Referent'
+        description:
+          type: string
+        productCategory:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        salesChannel:
+          $ref: '#/components/schemas/SalesChannel'
+        websiteUrl:
+          type: string
+
+    Operator:
+      type: object
+      required:
+        - id
+        - fullName
+        - name
+        - taxCodeOrVat
+        - pecAddress
+        - referent
+        - description
+        - productCategory
+        - salesChannel
+        - completionDate
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        name:
+          type: string
+        taxCodeOrVat:
+          type: string
+        pecAddress:
+          type: string
+        referent:
+          $ref: '#/components/schemas/Referent'
+        description:
+          type: string
+        productCategory:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        salesChannel:
+          $ref: '#/components/schemas/SalesChannel'
+        websiteUrl:
+          type: string
+        completionDate:
+          type: string
+          format: date
+
+    Referent:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - emailAddress
+        - telephoneNumber
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emailAddress:
+          type: string
+        telephoneNumber:
+          type: string
+
+    SalesChannel:
+      type: string
+      enum:
+        - online
+        - physicalStore
+        - both
+
+    CreateFacilitation:
+      type: object
+      required:
+        - name
+        - description
+        - startDate
+        - endDate
+        - discount
+        - productCategory
+        - condition
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        discount:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        productCategory:
+          type: array
+          items:
+            type: string
+        condition:
+          type: string
+        staticCode:
+          type: string
+
+    UpdateFacilitation:
+      type: object
+      required:
+        - name
+        - description
+        - startDate
+        - endDate
+        - discount
+        - productCategory
+        - condition
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        discount:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        productCategory:
+          type: array
+          items:
+            type: string
+        condition:
+          type: string
+        staticCode:
+          type: string
+
+    Facilitations:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facilitation'
+
+    Facilitation:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - startDate
+        - endDate
+        - discount
+        - productCategory
+        - condition
+        - completionDate
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        discount:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        productCategory:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        condition:
+          type: string
+        staticCode:
+          type: string
+        completionDate:
+          type: string
+          format: date
+
+  responses:
+    InvalidRequest:
+      description: Bad request
+      content: {} #TODO
+    Forbidden:
+      description: Forbidden
+      content: {} #TODO
+    NotFound:
+      description: Not found
+      content: {} #TODO
