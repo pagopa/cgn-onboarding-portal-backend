@@ -1,8 +1,8 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
   title: CGN Onboarding Portal
   description: Carta Giovani Nazionale Onboarding Portal
-  version: "0.0.1"
+  version: '0.0.1'
 host: cgn.pagopa.it
 basePath: /api/v1
 schemes:
@@ -27,9 +27,9 @@ paths:
         200:
           description: Subscription
           schema:
-            $ref: "#/definitions/Subscription"
+            $ref: '#/definitions/Subscription'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
 
   /subscriptions/{subscriptionId}/validation:
     post:
@@ -38,16 +38,16 @@ paths:
       summary: Request validation
       operationId: requestValidation
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
+        - $ref: '#/parameters/SubscriptionId'
       responses:
         204:
           description: Validation requested
         400:
-          $ref: "#/responses/InvalidRequest"
+          $ref: '#/responses/InvalidRequest'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
   /subscriptions/{subscriptionId}/registry:
     post:
@@ -56,24 +56,24 @@ paths:
       summary: Create an registry
       operationId: createRegistry
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
+        - $ref: '#/parameters/SubscriptionId'
         - in: body
           description: Registry to create
           name: registry
           required: true
           schema:
-            $ref: "#/definitions/CreateRegistry"
+            $ref: '#/definitions/CreateRegistry'
       responses:
         201:
           description: Registry created
           schema:
-            $ref: "#/definitions/Registry"
+            $ref: '#/definitions/Registry'
         400:
-          $ref: "#/responses/InvalidRequest"
+          $ref: '#/responses/InvalidRequest'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
     get:
       tags:
@@ -81,16 +81,16 @@ paths:
       summary: Get an registry
       operationId: getRegistry
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
+        - $ref: '#/parameters/SubscriptionId'
       responses:
         200:
           description: Registry
           schema:
-            $ref: "#/definitions/Registry"
+            $ref: '#/definitions/Registry'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
     put:
       tags:
@@ -103,19 +103,19 @@ paths:
           name: registry
           required: true
           schema:
-            $ref: "#/definitions/UpdateRegistry"
-        - $ref: "#/parameters/SubscriptionId"
+            $ref: '#/definitions/UpdateRegistry'
+        - $ref: '#/parameters/SubscriptionId'
       responses:
         200:
           description: Registry updated
           schema:
-            $ref: "#/definitions/Registry"
+            $ref: '#/definitions/Registry'
         400:
-          $ref: "#/responses/InvalidRequest"
+          $ref: '#/responses/InvalidRequest'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
   /subscriptions/{subscriptionId}/facilitations:
     get:
@@ -124,16 +124,16 @@ paths:
       summary: Get facilitations of an registry
       operationId: getFacilitations
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
+        - $ref: '#/parameters/SubscriptionId'
       responses:
         200:
           description: List of facilitations
           schema:
-            $ref: "#/definitions/Facilitations"
+            $ref: '#/definitions/Facilitations'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
     post:
       tags:
@@ -141,24 +141,24 @@ paths:
       summary: Create a facilitation
       operationId: createFacilitation
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
+        - $ref: '#/parameters/SubscriptionId'
         - in: body
           description: Facilitation to create
           name: facilitation
           required: true
           schema:
-            $ref: "#/definitions/CreateFacilitation"
+            $ref: '#/definitions/CreateFacilitation'
       responses:
         201:
           description: Facilitation created
           schema:
-            $ref: "#/definitions/Facilitation"
+            $ref: '#/definitions/Facilitation'
         400:
-          $ref: "#/responses/InvalidRequest"
+          $ref: '#/responses/InvalidRequest'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
   /subscriptions/{subscriptionId}/facilitations/{facilitationId}:
     put:
@@ -167,25 +167,25 @@ paths:
       summary: Update a facilitation
       operationId: updateFacilitation
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
-        - $ref: "#/parameters/FacilitationId"
+        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/FacilitationId'
         - in: body
           description: Facilitation to update
           name: facilitation
           required: true
           schema:
-            $ref: "#/definitions/UpdateFacilitation"
+            $ref: '#/definitions/UpdateFacilitation'
       responses:
         200:
           description: Facilitation updated
           schema:
-            $ref: "#/definitions/Facilitation"
+            $ref: '#/definitions/Facilitation'
         400:
-          $ref: "#/responses/InvalidRequest"
+          $ref: '#/responses/InvalidRequest'
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
     delete:
       tags:
@@ -193,15 +193,15 @@ paths:
       summary: Delete a facilitation
       operationId: deleteFacilitation
       parameters:
-        - $ref: "#/parameters/SubscriptionId"
-        - $ref: "#/parameters/FacilitationId"
+        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/FacilitationId'
       responses:
         204:
           description: Facilitation deleted
         403:
-          $ref: "#/responses/Forbidden"
+          $ref: '#/responses/Forbidden'
         404:
-          $ref: "#/responses/NotFound"
+          $ref: '#/responses/NotFound'
 
 consumes:
   - application/json
@@ -229,7 +229,7 @@ definitions:
       - state
     properties:
       state:
-        $ref: "#/definitions/SubscriptionState"
+        $ref: '#/definitions/SubscriptionState'
       registryLastModifiedDate:
         type: string
         format: date
@@ -272,7 +272,7 @@ definitions:
       pecAddress:
         type: string
       referent:
-        $ref: "#/definitions/CreateReferent"
+        $ref: '#/definitions/CreateReferent'
       description:
         type: string
       productCategories:
@@ -281,13 +281,13 @@ definitions:
           type: string
         minItems: 1
       salesChannel:
-        $ref: "#/definitions/SalesChannel"
+        $ref: '#/definitions/SalesChannel'
       websiteUrl:
         type: string
       addresses:
         type: array
         items:
-          $ref: "#/definitions/Address"
+          $ref: '#/definitions/Address'
 
   UpdateRegistry:
     type: object
@@ -304,7 +304,7 @@ definitions:
       pecAddress:
         type: string
       referent:
-        $ref: "#/definitions/UpdateReferent"
+        $ref: '#/definitions/UpdateReferent'
       description:
         type: string
       productCategories:
@@ -313,7 +313,7 @@ definitions:
           type: string
         minItems: 1
       salesChannel:
-        $ref: "#/definitions/SalesChannel"
+        $ref: '#/definitions/SalesChannel'
       websiteUrl:
         type: string
 
@@ -342,7 +342,7 @@ definitions:
       pecAddress:
         type: string
       referent:
-        $ref: "#/definitions/Referent"
+        $ref: '#/definitions/Referent'
       description:
         type: string
       productCategories:
@@ -351,7 +351,7 @@ definitions:
           type: string
         minItems: 1
       salesChannel:
-        $ref: "#/definitions/SalesChannel"
+        $ref: '#/definitions/SalesChannel'
       websiteUrl:
         type: string
       completionDate:
@@ -486,7 +486,7 @@ definitions:
       items:
         type: array
         items:
-          $ref: "#/definitions/Facilitation"
+          $ref: '#/definitions/Facilitation'
 
   Facilitation:
     type: object
@@ -532,7 +532,7 @@ definitions:
         type: string
         format: date
       state:
-        $ref: "#/definitions/FacilitationState"
+        $ref: '#/definitions/FacilitationState'
 
   FacilitationState:
     type: string
