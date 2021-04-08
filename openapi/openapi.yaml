@@ -31,17 +31,17 @@ paths:
         403:
           $ref: '#/responses/Forbidden'
 
-  /subscriptions/{subscriptionId}/validation:
+  /subscriptions/{subscriptionId}/approval:
     post:
       tags:
         - subscription
-      summary: Request validation
-      operationId: requestValidation
+      summary: Request approval
+      operationId: requestApproval
       parameters:
         - $ref: '#/parameters/SubscriptionId'
       responses:
         204:
-          description: Validation requested
+          description: Approval requested
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -225,9 +225,13 @@ parameters:
 definitions:
   Subscription:
     type: object
+    discriminator: state
     required:
+      - id
       - state
     properties:
+      id:
+        type: string
       state:
         $ref: '#/definitions/SubscriptionState'
       registryLastModifiedDate:
@@ -239,20 +243,44 @@ definitions:
       documentsLastModifiedDate:
         type: string
         format: date
-      startDate:
-        type: string
-        format: date
-      endDate:
-        type: string
-        format: date
+
+  DraftSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+
+  ValidatingSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+
+  ApprovedSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+        required:
+          - startDate
+          - endDate
+        properties:
+          startDate:
+            type: string
+            format: date
+          endDate:
+            type: string
+            format: date
+
+  RejectedSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
 
   SubscriptionState:
-      type: string
-      enum:
-        - draft
-        - validating
-        - approved
-        - rejected
+    type: string
+    enum:
+      - DraftSubscription
+      - ValidatingSubscription
+      - ApprovedSubscription
+      - RejectedSubscription
 
   CreateRegistry:
     type: object
@@ -282,12 +310,6 @@ definitions:
         minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      websiteUrl:
-        type: string
-      addresses:
-        type: array
-        items:
-          $ref: '#/definitions/Address'
 
   UpdateRegistry:
     type: object
@@ -314,8 +336,6 @@ definitions:
         minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      websiteUrl:
-        type: string
 
   Registry:
     type: object
@@ -352,8 +372,6 @@ definitions:
         minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      websiteUrl:
-        type: string
       completionDate:
         type: string
         format: date
@@ -375,6 +393,61 @@ definitions:
       telephoneNumber:
         type: string
 
+  SalesChannel:
+    type: object
+    discriminator: channelType
+    required:
+      - channelType
+    properties:
+      channelType:
+        $ref: '#/definitions/SalesChannelType'
+
+  OnlineChannel:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - websiteUrl
+        properties:
+          websiteUrl:
+            type: string
+
+  PhysicalStoreChannel:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - addresses
+        properties:
+          websiteUrl:
+            type: string
+          addresses:
+            type: array
+            items:
+              $ref: '#/definitions/Address'
+
+  BothChannels:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - websiteUrl
+          - addresses
+        properties:
+          websiteUrl:
+            type: string
+          addresses:
+            type: array
+            items:
+              $ref: '#/definitions/Address'
+
+  SalesChannelType:
+    type: string
+    enum:
+      - OnlineChannel
+      - PhysicalStoreChannel
+      - BothChannels
+
   CreateReferent:
     type: object
     required:
@@ -395,20 +468,19 @@ definitions:
   UpdateReferent:
     type: object
     required:
+      - firstName
+      - lastName
       - emailAddress
       - telephoneNumber
     properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
       emailAddress:
         type: string
       telephoneNumber:
         type: string
-
-  SalesChannel:
-    type: string
-    enum:
-      - online
-      - physicalStore
-      - both
 
   CreateFacilitation:
     type: object
@@ -492,6 +564,7 @@ definitions:
     type: object
     required:
       - id
+      - state
       - name
       - description
       - startDate
@@ -500,10 +573,11 @@ definitions:
       - productCategories
       - condition
       - completionDate
-      - state
     properties:
       id:
         type: number
+      state:
+        $ref: '#/definitions/FacilitationState'
       name:
         type: string
       description:
@@ -531,14 +605,12 @@ definitions:
       completionDate:
         type: string
         format: date
-      state:
-        $ref: '#/definitions/FacilitationState'
 
   FacilitationState:
     type: string
     enum:
       - draft
-      - approved
+      - published
       - rejected
 
   Address:
