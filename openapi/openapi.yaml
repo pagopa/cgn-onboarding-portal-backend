@@ -290,7 +290,6 @@ definitions:
       - pecAddress
       - referent
       - description
-      - productCategories
       - salesChannel
     properties:
       fullName:
@@ -303,11 +302,6 @@ definitions:
         $ref: '#/definitions/CreateReferent'
       description:
         type: string
-      productCategories:
-        type: array
-        items:
-          type: string
-        minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
@@ -318,7 +312,6 @@ definitions:
       - pecAddress
       - referent
       - description
-      - productCategories
       - salesChannel
     properties:
       name:
@@ -329,11 +322,6 @@ definitions:
         $ref: '#/definitions/UpdateReferent'
       description:
         type: string
-      productCategories:
-        type: array
-        items:
-          type: string
-        minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
@@ -347,7 +335,6 @@ definitions:
       - pecAddress
       - referent
       - description
-      - productCategories
       - salesChannel
       - completionDate
     properties:
@@ -365,11 +352,6 @@ definitions:
         $ref: '#/definitions/Referent'
       description:
         type: string
-      productCategories:
-        type: array
-        items:
-          type: string
-        minItems: 1
       salesChannel:
         $ref: '#/definitions/SalesChannel'
       completionDate:
@@ -510,6 +492,7 @@ definitions:
         type: array
         items:
           type: string
+          minItems: 1
       condition:
         type: string
       staticCode:
@@ -545,6 +528,7 @@ definitions:
         type: array
         items:
           type: string
+          minItems: 1
       condition:
         type: string
       staticCode:
