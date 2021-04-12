@@ -121,7 +121,7 @@ paths:
     get:
       tags:
         - facilitation
-      summary: Get facilitations of an registry
+      summary: Get list of facilitations
       operationId: getFacilitations
       parameters:
         - $ref: '#/parameters/SubscriptionId'
