@@ -1,0 +1,624 @@
+swagger: '2.0'
+info:
+  title: CGN Onboarding Portal
+  description: Carta Giovani Nazionale Onboarding Portal
+  version: '0.0.1'
+host: cgn.pagopa.it
+basePath: /api/v1
+schemes:
+  - https
+
+tags:
+  - name: subscription
+    description: Subscription
+  - name: registry
+    description: Registry
+  - name: facilitation
+    description: Facilitation
+
+paths:
+  /subscriptions:
+    post:
+      tags:
+        - subscription
+      summary: Create a subscription
+      operationId: createSubscription
+      responses:
+        200:
+          description: Subscription
+          schema:
+            $ref: '#/definitions/Subscription'
+        403:
+          $ref: '#/responses/Forbidden'
+
+  /subscriptions/{subscriptionId}/approval:
+    post:
+      tags:
+        - subscription
+      summary: Request approval
+      operationId: requestApproval
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+      responses:
+        204:
+          description: Approval requested
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /subscriptions/{subscriptionId}/registry:
+    post:
+      tags:
+        - registry
+      summary: Create an registry
+      operationId: createRegistry
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+        - in: body
+          description: Registry to create
+          name: registry
+          required: true
+          schema:
+            $ref: '#/definitions/CreateRegistry'
+      responses:
+        201:
+          description: Registry created
+          schema:
+            $ref: '#/definitions/Registry'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+    get:
+      tags:
+        - registry
+      summary: Get an registry
+      operationId: getRegistry
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+      responses:
+        200:
+          description: Registry
+          schema:
+            $ref: '#/definitions/Registry'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+    put:
+      tags:
+        - registry
+      summary: Update an registry
+      operationId: updateRegistry
+      parameters:
+        - in: body
+          description: Registry to update
+          name: registry
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateRegistry'
+        - $ref: '#/parameters/SubscriptionId'
+      responses:
+        200:
+          description: Registry updated
+          schema:
+            $ref: '#/definitions/Registry'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /subscriptions/{subscriptionId}/facilitations:
+    get:
+      tags:
+        - facilitation
+      summary: Get list of facilitations
+      operationId: getFacilitations
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+      responses:
+        200:
+          description: List of facilitations
+          schema:
+            $ref: '#/definitions/Facilitations'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+    post:
+      tags:
+        - facilitation
+      summary: Create a facilitation
+      operationId: createFacilitation
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+        - in: body
+          description: Facilitation to create
+          name: facilitation
+          required: true
+          schema:
+            $ref: '#/definitions/CreateFacilitation'
+      responses:
+        201:
+          description: Facilitation created
+          schema:
+            $ref: '#/definitions/Facilitation'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /subscriptions/{subscriptionId}/facilitations/{facilitationId}:
+    put:
+      tags:
+        - facilitation
+      summary: Update a facilitation
+      operationId: updateFacilitation
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/FacilitationId'
+        - in: body
+          description: Facilitation to update
+          name: facilitation
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateFacilitation'
+      responses:
+        200:
+          description: Facilitation updated
+          schema:
+            $ref: '#/definitions/Facilitation'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+    delete:
+      tags:
+        - facilitation
+      summary: Delete a facilitation
+      operationId: deleteFacilitation
+      parameters:
+        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/FacilitationId'
+      responses:
+        204:
+          description: Facilitation deleted
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+parameters:
+  SubscriptionId:
+    name: subscriptionId
+    in: path
+    description: Subscription id
+    required: true
+    type: string
+  FacilitationId:
+    name: facilitationId
+    in: path
+    description: Facilitation id
+    required: true
+    type: string
+
+definitions:
+  Subscription:
+    type: object
+    discriminator: state
+    required:
+      - id
+      - state
+    properties:
+      id:
+        type: string
+      state:
+        $ref: '#/definitions/SubscriptionState'
+      registryLastModifiedDate:
+        type: string
+        format: date
+      facilitationsLastModifiedDate:
+        type: string
+        format: date
+      documentsLastModifiedDate:
+        type: string
+        format: date
+
+  DraftSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+
+  ValidatingSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+
+  ApprovedSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+        required:
+          - startDate
+          - endDate
+        properties:
+          startDate:
+            type: string
+            format: date
+          endDate:
+            type: string
+            format: date
+
+  RejectedSubscription:
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - type: object
+
+  SubscriptionState:
+    type: string
+    enum:
+      - DraftSubscription
+      - ValidatingSubscription
+      - ApprovedSubscription
+      - RejectedSubscription
+
+  CreateRegistry:
+    type: object
+    required:
+      - fullName
+      - name
+      - pecAddress
+      - referent
+      - description
+      - salesChannel
+    properties:
+      fullName:
+        type: string
+      name:
+        type: string
+      pecAddress:
+        type: string
+      referent:
+        $ref: '#/definitions/CreateReferent'
+      description:
+        type: string
+      salesChannel:
+        $ref: '#/definitions/SalesChannel'
+
+  UpdateRegistry:
+    type: object
+    required:
+      - name
+      - pecAddress
+      - referent
+      - description
+      - salesChannel
+    properties:
+      name:
+        type: string
+      pecAddress:
+        type: string
+      referent:
+        $ref: '#/definitions/UpdateReferent'
+      description:
+        type: string
+      salesChannel:
+        $ref: '#/definitions/SalesChannel'
+
+  Registry:
+    type: object
+    required:
+      - id
+      - subscriptionId
+      - fullName
+      - name
+      - taxCodeOrVat
+      - pecAddress
+      - referent
+      - description
+      - salesChannel
+    properties:
+      id:
+        type: string
+      subscriptionId:
+        type: string
+      fullName:
+        type: string
+      name:
+        type: string
+      taxCodeOrVat:
+        type: string
+      pecAddress:
+        type: string
+      referent:
+        $ref: '#/definitions/Referent'
+      description:
+        type: string
+      salesChannel:
+        $ref: '#/definitions/SalesChannel'
+
+  Referent:
+    type: object
+    required:
+      - firstName
+      - lastName
+      - emailAddress
+      - telephoneNumber
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      emailAddress:
+        type: string
+      telephoneNumber:
+        type: string
+
+  SalesChannel:
+    type: object
+    discriminator: channelType
+    required:
+      - channelType
+    properties:
+      channelType:
+        $ref: '#/definitions/SalesChannelType'
+
+  OnlineChannel:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - websiteUrl
+        properties:
+          websiteUrl:
+            type: string
+
+  PhysicalStoreChannel:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - addresses
+        properties:
+          websiteUrl:
+            type: string
+          addresses:
+            type: array
+            items:
+              $ref: '#/definitions/Address'
+
+  BothChannels:
+    allOf:
+      - $ref: '#/definitions/SalesChannel'
+      - type: object
+        required:
+          - websiteUrl
+          - addresses
+        properties:
+          websiteUrl:
+            type: string
+          addresses:
+            type: array
+            items:
+              $ref: '#/definitions/Address'
+
+  SalesChannelType:
+    type: string
+    enum:
+      - OnlineChannel
+      - PhysicalStoreChannel
+      - BothChannels
+
+  CreateReferent:
+    type: object
+    required:
+      - firstName
+      - lastName
+      - emailAddress
+      - telephoneNumber
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      emailAddress:
+        type: string
+      telephoneNumber:
+        type: string
+
+  UpdateReferent:
+    type: object
+    required:
+      - firstName
+      - lastName
+      - emailAddress
+      - telephoneNumber
+    properties:
+      firstName:
+        type: string
+      lastName:
+        type: string
+      emailAddress:
+        type: string
+      telephoneNumber:
+        type: string
+
+  CreateFacilitation:
+    type: object
+    required:
+      - name
+      - startDate
+      - endDate
+      - discount
+      - productCategories
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      discount:
+        type: number
+        format: double
+        minimum: 0
+        maximum: 100
+      productCategories:
+        type: array
+        items:
+          type: string
+          minItems: 1
+      condition:
+        type: string
+      staticCode:
+        type: string
+
+  UpdateFacilitation:
+    type: object
+    required:
+      - name
+      - description
+      - startDate
+      - endDate
+      - discount
+      - productCategories
+      - condition
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      discount:
+        type: number
+        format: double
+        minimum: 0
+        maximum: 100
+      productCategories:
+        type: array
+        items:
+          type: string
+          minItems: 1
+      condition:
+        type: string
+      staticCode:
+        type: string
+
+  Facilitations:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/Facilitation'
+
+  Facilitation:
+    type: object
+    required:
+      - id
+      - subscriptionId
+      - state
+      - name
+      - description
+      - startDate
+      - endDate
+      - discount
+      - productCategories
+      - condition
+    properties:
+      id:
+        type: string
+      subscriptionId:
+        type: string
+      state:
+        $ref: '#/definitions/FacilitationState'
+      name:
+        type: string
+      description:
+        type: string
+      startDate:
+        type: string
+        format: date
+      endDate:
+        type: string
+        format: date
+      discount:
+        type: number
+        format: double
+        minimum: 0
+        maximum: 100
+      productCategories:
+        type: array
+        items:
+          type: string
+        minItems: 1
+      condition:
+        type: string
+      staticCode:
+        type: string
+
+  FacilitationState:
+    type: string
+    enum:
+      - draft
+      - published
+      - rejected
+
+  Address:
+    type: object
+    required:
+      - street
+      - zipCode
+      - city
+      - district
+    properties:
+      street:
+        type: string
+      zipCode:
+        type: string
+      city:
+        type: string
+      district:
+        type: string
+
+responses:
+  InvalidRequest:
+    description: Bad request
+    #content: {} #TODO
+  Forbidden:
+    description: Forbidden
+    #content: {} #TODO
+  NotFound:
+    description: Not found
+    #content: {} #TODO
