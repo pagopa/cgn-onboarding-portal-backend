@@ -329,6 +329,7 @@ definitions:
     type: object
     required:
       - id
+      - subscriptionId
       - fullName
       - name
       - taxCodeOrVat
@@ -336,9 +337,10 @@ definitions:
       - referent
       - description
       - salesChannel
-      - completionDate
     properties:
       id:
+        type: string
+      subscriptionId:
         type: string
       fullName:
         type: string
@@ -354,9 +356,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      completionDate:
-        type: string
-        format: date
 
   Referent:
     type: object
@@ -548,6 +547,7 @@ definitions:
     type: object
     required:
       - id
+      - subscriptionId
       - state
       - name
       - description
@@ -556,10 +556,11 @@ definitions:
       - discount
       - productCategories
       - condition
-      - completionDate
     properties:
       id:
-        type: number
+        type: string
+      subscriptionId:
+        type: string
       state:
         $ref: '#/definitions/FacilitationState'
       name:
@@ -586,9 +587,6 @@ definitions:
         type: string
       staticCode:
         type: string
-      completionDate:
-        type: string
-        format: date
 
   FacilitationState:
     type: string
