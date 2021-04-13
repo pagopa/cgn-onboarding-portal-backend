@@ -9,39 +9,39 @@ schemes:
   - https
 
 tags:
-  - name: subscription
-    description: Subscription
-  - name: registry
-    description: Registry
-  - name: facilitation
-    description: Facilitation
+  - name: agreement
+    description: Agreement
+  - name: profile
+    description: Profile
+  - name: discount
+    description: Discount
 
 paths:
-  /subscriptions:
+  /agreements:
     post:
       tags:
-        - subscription
-      summary: Create a subscription
-      operationId: createSubscription
+        - agreement
+      summary: Create a agreement
+      operationId: createAgreement
       responses:
         200:
-          description: Subscription
+          description: Agreement
           schema:
-            $ref: '#/definitions/Subscription'
+            $ref: '#/definitions/Agreement'
         403:
           $ref: '#/responses/Forbidden'
 
-  /subscriptions/{subscriptionId}/approval:
+  /agreements/{agreementId}/approval:
     post:
       tags:
-        - subscription
+        - agreement
       summary: Request approval
       operationId: requestApproval
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/AgreementId'
       responses:
         204:
-          description: Approval requested
+          description: Agreement approval requested
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -49,25 +49,25 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /subscriptions/{subscriptionId}/registry:
+  /agreements/{agreementId}/profile:
     post:
       tags:
-        - registry
-      summary: Create an registry
-      operationId: createRegistry
+        - profile
+      summary: Create a profile
+      operationId: createProfile
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/AgreementId'
         - in: body
-          description: Registry to create
-          name: registry
+          description: Profile to create
+          name: profile
           required: true
           schema:
-            $ref: '#/definitions/CreateRegistry'
+            $ref: '#/definitions/CreateProfile'
       responses:
         201:
-          description: Registry created
+          description: Profile created
           schema:
-            $ref: '#/definitions/Registry'
+            $ref: '#/definitions/Profile'
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -77,16 +77,16 @@ paths:
 
     get:
       tags:
-        - registry
-      summary: Get an registry
-      operationId: getRegistry
+        - profile
+      summary: Get a profile
+      operationId: getProfile
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/AgreementId'
       responses:
         200:
-          description: Registry
+          description: Profile
           schema:
-            $ref: '#/definitions/Registry'
+            $ref: '#/definitions/Profile'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -94,22 +94,22 @@ paths:
 
     put:
       tags:
-        - registry
-      summary: Update an registry
-      operationId: updateRegistry
+        - profile
+      summary: Update a profile
+      operationId: updateProfile
       parameters:
         - in: body
-          description: Registry to update
-          name: registry
+          description: Profile to update
+          name: profile
           required: true
           schema:
-            $ref: '#/definitions/UpdateRegistry'
-        - $ref: '#/parameters/SubscriptionId'
+            $ref: '#/definitions/UpdateProfile'
+        - $ref: '#/parameters/AgreementId'
       responses:
         200:
-          description: Registry updated
+          description: Profile updated
           schema:
-            $ref: '#/definitions/Registry'
+            $ref: '#/definitions/Profile'
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -117,19 +117,19 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /subscriptions/{subscriptionId}/facilitations:
+  /agreements/{agreementId}/discounts:
     get:
       tags:
-        - facilitation
-      summary: Get list of facilitations
-      operationId: getFacilitations
+        - discount
+      summary: Get list of discounts
+      operationId: getDiscounts
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/AgreementId'
       responses:
         200:
-          description: List of facilitations
+          description: List of discounts
           schema:
-            $ref: '#/definitions/Facilitations'
+            $ref: '#/definitions/Discounts'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -137,22 +137,22 @@ paths:
 
     post:
       tags:
-        - facilitation
-      summary: Create a facilitation
-      operationId: createFacilitation
+        - discount
+      summary: Create a discount
+      operationId: createDiscount
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
+        - $ref: '#/parameters/AgreementId'
         - in: body
-          description: Facilitation to create
-          name: facilitation
+          description: Discount to create
+          name: discount
           required: true
           schema:
-            $ref: '#/definitions/CreateFacilitation'
+            $ref: '#/definitions/CreateDiscount'
       responses:
         201:
-          description: Facilitation created
+          description: Discount created
           schema:
-            $ref: '#/definitions/Facilitation'
+            $ref: '#/definitions/Discount'
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -160,26 +160,26 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /subscriptions/{subscriptionId}/facilitations/{facilitationId}:
+  /agreements/{agreementId}/discounts/{discountId}:
     put:
       tags:
-        - facilitation
-      summary: Update a facilitation
-      operationId: updateFacilitation
+        - discount
+      summary: Update a discount
+      operationId: updateDiscount
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
-        - $ref: '#/parameters/FacilitationId'
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
         - in: body
-          description: Facilitation to update
-          name: facilitation
+          description: Discount to update
+          name: discount
           required: true
           schema:
-            $ref: '#/definitions/UpdateFacilitation'
+            $ref: '#/definitions/UpdateDiscount'
       responses:
         200:
-          description: Facilitation updated
+          description: Discount updated
           schema:
-            $ref: '#/definitions/Facilitation'
+            $ref: '#/definitions/Discount'
         400:
           $ref: '#/responses/InvalidRequest'
         403:
@@ -189,15 +189,15 @@ paths:
 
     delete:
       tags:
-        - facilitation
-      summary: Delete a facilitation
-      operationId: deleteFacilitation
+        - discount
+      summary: Delete a discount
+      operationId: deleteDiscount
       parameters:
-        - $ref: '#/parameters/SubscriptionId'
-        - $ref: '#/parameters/FacilitationId'
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
       responses:
         204:
-          description: Facilitation deleted
+          description: Discount deleted
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -209,21 +209,21 @@ produces:
   - application/json
 
 parameters:
-  SubscriptionId:
-    name: subscriptionId
+  AgreementId:
+    name: agreementId
     in: path
-    description: Subscription id
+    description: Agreement id
     required: true
     type: string
-  FacilitationId:
-    name: facilitationId
+  DiscountId:
+    name: discountId
     in: path
-    description: Facilitation id
+    description: Discount id
     required: true
     type: string
 
 definitions:
-  Subscription:
+  Agreement:
     type: object
     discriminator: state
     required:
@@ -233,30 +233,30 @@ definitions:
       id:
         type: string
       state:
-        $ref: '#/definitions/SubscriptionState'
-      registryLastModifiedDate:
+        $ref: '#/definitions/AgreementState'
+      profileLastModifiedDate:
         type: string
         format: date
-      facilitationsLastModifiedDate:
+      discountsLastModifiedDate:
         type: string
         format: date
       documentsLastModifiedDate:
         type: string
         format: date
 
-  DraftSubscription:
+  DraftAgreement:
     allOf:
-      - $ref: '#/definitions/Subscription'
+      - $ref: '#/definitions/Agreement'
       - type: object
 
-  ValidatingSubscription:
+  PendingAgreement:
     allOf:
-      - $ref: '#/definitions/Subscription'
+      - $ref: '#/definitions/Agreement'
       - type: object
 
-  ApprovedSubscription:
+  ApprovedAgreement:
     allOf:
-      - $ref: '#/definitions/Subscription'
+      - $ref: '#/definitions/Agreement'
       - type: object
         required:
           - startDate
@@ -269,20 +269,20 @@ definitions:
             type: string
             format: date
 
-  RejectedSubscription:
+  RejectedAgreement:
     allOf:
-      - $ref: '#/definitions/Subscription'
+      - $ref: '#/definitions/Agreement'
       - type: object
 
-  SubscriptionState:
+  AgreementState:
     type: string
     enum:
-      - DraftSubscription
-      - ValidatingSubscription
-      - ApprovedSubscription
-      - RejectedSubscription
+      - DraftAgreement
+      - PendingAgreement
+      - ApprovedAgreement
+      - RejectedAgreement
 
-  CreateRegistry:
+  CreateProfile:
     type: object
     required:
       - fullName
@@ -305,7 +305,7 @@ definitions:
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
-  UpdateRegistry:
+  UpdateProfile:
     type: object
     required:
       - name
@@ -325,11 +325,11 @@ definitions:
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
-  Registry:
+  Profile:
     type: object
     required:
       - id
-      - subscriptionId
+      - agreementId
       - fullName
       - name
       - taxCodeOrVat
@@ -340,7 +340,7 @@ definitions:
     properties:
       id:
         type: string
-      subscriptionId:
+      agreementId:
         type: string
       fullName:
         type: string
@@ -393,7 +393,7 @@ definitions:
           websiteUrl:
             type: string
 
-  PhysicalStoreChannel:
+  OfflineChannel:
     allOf:
       - $ref: '#/definitions/SalesChannel'
       - type: object
@@ -426,7 +426,7 @@ definitions:
     type: string
     enum:
       - OnlineChannel
-      - PhysicalStoreChannel
+      - OfflineChannel
       - BothChannels
 
   CreateReferent:
@@ -463,7 +463,7 @@ definitions:
       telephoneNumber:
         type: string
 
-  CreateFacilitation:
+  CreateDiscount:
     type: object
     required:
       - name
@@ -497,7 +497,7 @@ definitions:
       staticCode:
         type: string
 
-  UpdateFacilitation:
+  UpdateDiscount:
     type: object
     required:
       - name
@@ -533,7 +533,7 @@ definitions:
       staticCode:
         type: string
 
-  Facilitations:
+  Discounts:
     type: object
     required:
       - items
@@ -541,13 +541,13 @@ definitions:
       items:
         type: array
         items:
-          $ref: '#/definitions/Facilitation'
+          $ref: '#/definitions/Discount'
 
-  Facilitation:
+  Discount:
     type: object
     required:
       - id
-      - subscriptionId
+      - agreementId
       - state
       - name
       - description
@@ -559,10 +559,10 @@ definitions:
     properties:
       id:
         type: string
-      subscriptionId:
+      agreementId:
         type: string
       state:
-        $ref: '#/definitions/FacilitationState'
+        $ref: '#/definitions/DiscountState'
       name:
         type: string
       description:
@@ -588,7 +588,7 @@ definitions:
       staticCode:
         type: string
 
-  FacilitationState:
+  DiscountState:
     type: string
     enum:
       - draft
