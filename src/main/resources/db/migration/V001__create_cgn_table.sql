@@ -2,7 +2,7 @@
 CREATE TABLE AGREEMENT_USER (
     AGREEMENT_USER_K                    VARCHAR (16),
     AGREEMENT_ID                        VARCHAR(36) NOT NULL,
-    INSERT_DATE                         TIME DEFAULT SYSDATE NOT NULL,
+    INSERT_DATE                         TIME DEFAULT NOW() NOT NULL,
     UPDATE_DATE                         TIME,
     CONSTRAINT AGREEMENT_USER_PK PRIMARY KEY (AGREEMENT_USER_K)
 );
@@ -16,7 +16,7 @@ CREATE TABLE AGREEMENT (
     PROFILE_MODIFIED_DATE               DATE,
     DISCOUNTS_MODIFIED_DATE             DATE,
     DOCUMENTS_MODIFIED_DATE             DATE,
-    INSERT_DATE                         TIME DEFAULT SYSDATE NOT NULL,
+    INSERT_DATE                         TIME DEFAULT NOW() NOT NULL,
     UPDATE_DATE                         TIME,
     CONSTRAINT AGREEMENT_PK PRIMARY KEY (AGREEMENT_K),
     CONSTRAINT AGREEMENT_FK FOREIGN KEY (AGREEMENT_K) REFERENCES AGREEMENT_USER(AGREEMENT_ID)
@@ -28,7 +28,7 @@ CREATE TABLE REFERENT (
     LAST_NAME                           VARCHAR (50) NOT NULL,
     EMAIL_ADDRESS                       VARCHAR (320) NOT NULL,
     TELEPHONE_NUMBER                    VARCHAR (15) NOT NULL,
-    INSERT_DATE                         TIME DEFAULT SYSDATE NOT NULL,
+    INSERT_DATE                         TIME DEFAULT NOW() NOT NULL,
     UPDATE_DATE                         TIME,
     CONSTRAINT REFERENT_PK PRIMARY KEY (REFERENT_K)
 );
@@ -42,7 +42,7 @@ CREATE TABLE PROFILE (
     DESCRIPTION                         VARCHAR (300) NOT NULL,
     SALES_CHANNEL                       VARCHAR (50) NOT NULL,
     WEBSITE_URL                         VARCHAR (500),
-    INSERT_DATE                         TIME DEFAULT SYSDATE NOT NULL,
+    INSERT_DATE                         TIME DEFAULT NOW() NOT NULL,
     UPDATE_DATE                         TIME,
     AGREEMENT_FK                        VARCHAR(36) NOT NULL,
     REFERENT_FK                         BIGINT NOT NULL,
@@ -60,10 +60,10 @@ CREATE TABLE ADDRESS (
     ZIP_CODE                            VARCHAR(5) NOT NULL,
     CITY                                VARCHAR(255) NOT NULL,
     DISTRICT                            VARCHAR(2) NOT NULL,
-    LATITUDE                            DOUBLE,
-    LONGITUDE                           DOUBLE,
+    LATITUDE                            DOUBLE PRECISION,
+    LONGITUDE                           DOUBLE PRECISION,
     PROFILE_FK                          BIGINT NOT NULL,
-    INSERT_DATE                         TIME DEFAULT SYSDATE NOT NULL,
+    INSERT_DATE                         TIME DEFAULT NOW() NOT NULL,
     UPDATE_DATE                         TIME,
     CONSTRAINT ADDRESS_PK PRIMARY KEY (ADDRESS_K),
     CONSTRAINT ADDRESS_PROFILE_FK FOREIGN KEY (PROFILE_FK) REFERENCES PROFILE(PROFILE_K)
