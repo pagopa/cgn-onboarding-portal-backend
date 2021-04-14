@@ -404,6 +404,7 @@ definitions:
             type: string
           addresses:
             type: array
+            minItems: 1
             items:
               $ref: '#/definitions/Address'
 
@@ -419,6 +420,7 @@ definitions:
             type: string
           addresses:
             type: array
+            minItems: 1
             items:
               $ref: '#/definitions/Address'
 

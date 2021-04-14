@@ -41,8 +41,7 @@ public class ReferentEntity extends BaseEntity {
     private String telephoneNumber;
 
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PROFILE_FK", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "referent")
     private ProfileEntity profile;
 
 }

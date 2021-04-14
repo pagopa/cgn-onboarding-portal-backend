@@ -54,7 +54,8 @@ public class ProfileEntity extends BaseEntity {
     @JoinColumn(name = "AGREEMENT_FK", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "profile", optional = false, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "REFERENT_FK", nullable = false)
     private ReferentEntity referent;
 
     @EqualsAndHashCode.Exclude

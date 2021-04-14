@@ -21,7 +21,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setReferent(this.referentConverter.toEntity(dto.getReferent()));
         return entity;
     };
-    protected Function<ProfileEntity, Profile> toDto = (entity) -> {
+    protected Function<ProfileEntity, Profile> toDto = entity -> {
         Profile dto = new Profile();
         dto.setId(String.valueOf(entity.getId()));
         dto.setTaxCodeOrVat("FAKE");
@@ -31,6 +31,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         dto.setPecAddress(entity.getPecAddress());
         dto.setReferent(this.referentConverter.toDto(entity.getReferent()));
         dto.setSalesChannel(this.salesChannelToDto.apply(entity));
+        dto.setAgreementId(entity.getAgreement().getId());
         return dto;
     };
 

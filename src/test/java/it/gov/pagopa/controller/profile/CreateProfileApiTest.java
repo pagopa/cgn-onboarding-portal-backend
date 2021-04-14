@@ -1,10 +1,10 @@
-package it.gov.pagopa.controller;
+package it.gov.pagopa.controller.profile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import it.gov.pagopa.BaseTest;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.service.AgreementService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -23,8 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class AgreementControllerTest {
-    private static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
+class CreateProfileApiTest extends BaseTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,26 +31,17 @@ class AgreementControllerTest {
     @Autowired
     private AgreementService agreementService;
 
-    @Test
-    void Create_CreateSubscription_Ok() throws Exception {
-        this.mockMvc.perform(
-                post(AGREEMENTS_CONTROLLER_PATH))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.profileLastModifiedDate").isEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.discountsLastModifiedDate").isEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.documentsLastModifiedDate").isEmpty());
+    private String createProfilePath;
 
+    @BeforeEach
+    void beforeEach() {
+        AgreementEntity agreement = agreementService.createAgreementIfNotExists();
+        createProfilePath = getProfilePath(agreement.getId());
     }
 
     @Test
     void Create_CreateProfile_Ok() throws Exception {
-        AgreementEntity agreement = agreementService.createAgreementIfNotExists();
-        final String createProfilePath = AGREEMENTS_CONTROLLER_PATH +  agreement.getId() + "/profile";
-        CreateProfile createProfile = createSampleCreateProfile();
+        CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
                 post(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
@@ -69,10 +59,44 @@ class AgreementControllerTest {
     }
 
     @Test
+    void Create_CreateIncompleteOfflineProfile_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
+
+        this.mockMvc.perform(
+                post(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void Create_CreateIncompleteOnlineProfile_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOnlineProfile();
+        // set to null required field websiteUrl
+        OnlineChannel onlineChannel = (OnlineChannel) createProfile.getSalesChannel();
+        onlineChannel.setWebsiteUrl(null);
+
+        this.mockMvc.perform(
+                post(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void Create_CreateIncompleteBothProfile_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateBothWithoutRequiredWebsiteUrlProfile();
+
+        this.mockMvc.perform(
+                post(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
     void Create_CreateProfileMultipleTimes_InvalidRequest() throws Exception {
-        AgreementEntity agreement = agreementService.createAgreementIfNotExists();
-        final String createProfilePath = AGREEMENTS_CONTROLLER_PATH +  agreement.getId() + "/profile";
-        CreateProfile createProfile = createSampleCreateProfile();
+        CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
                 post(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
@@ -85,15 +109,38 @@ class AgreementControllerTest {
 
     }
 
+    private CreateProfile createSampleCreateOnlineProfile() {
+        CreateProfile createProfile = createSampleCreateProfile();
+        OnlineChannel onlineChannel = new OnlineChannel();
+        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        createProfile.setSalesChannel(onlineChannel);
+        return createProfile;
+    }
+
+    private CreateProfile createSampleCreateOfflineWithoutRequiredAddressesProfile() {
+        CreateProfile createProfile = createSampleCreateProfile();
+        OfflineChannel offlineChannel = new OfflineChannel();
+        offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        createProfile.setSalesChannel(offlineChannel);
+        return createProfile;
+    }
+
+    private CreateProfile createSampleCreateBothWithoutRequiredWebsiteUrlProfile() {
+        CreateProfile createProfile = createSampleCreateProfile();
+        BothChannels bothChannels = new BothChannels();
+        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setAddresses(createSampleAddressDto());
+        createProfile.setSalesChannel(bothChannels);
+        return createProfile;
+    }
+
     private CreateProfile createSampleCreateProfile() {
         CreateProfile createProfile = new CreateProfile();
         createProfile.setFullName("profile_full_name");
         createProfile.setName("profile_name");
         createProfile.setDescription("profile_description");
-        OnlineChannel onlineChannel = new OnlineChannel();
-        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
-        onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
-        createProfile.setSalesChannel(onlineChannel);
         createProfile.setPecAddress("pec.address@pagopa.it");
         createProfile.setReferent(createSampleCreateReferent());
         return createProfile;
@@ -108,8 +155,5 @@ class AgreementControllerTest {
         return createReferent;
     }
 
-    private String getJson(Object obj) throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(obj);
-    }
 }
 

@@ -1,6 +1,6 @@
 package it.gov.pagopa.converter.referent;
 
-import it.gov.pagopa.cgnonboardingportal.model.Referent;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.converter.AbstractConverter;
 import it.gov.pagopa.model.ReferentEntity;
 import org.springframework.stereotype.Component;
@@ -8,21 +8,21 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-public class ReferentConverter extends AbstractConverter<ReferentEntity, Referent> {
+public class UpdateReferentConverter extends AbstractConverter<ReferentEntity, UpdateReferent> {
 
     @Override
-    protected Function<ReferentEntity, Referent> toDtoFunction() {
+    protected Function<ReferentEntity, UpdateReferent> toDtoFunction() {
         return toDto;
     }
 
     @Override
-    protected Function<Referent, ReferentEntity> toEntityFunction() {
+    protected Function<UpdateReferent, ReferentEntity> toEntityFunction() {
         return toEntity;
     }
 
-    protected Function<ReferentEntity, Referent> toDto =
+    protected Function<ReferentEntity, UpdateReferent> toDto =
             entity -> {
-                Referent dto = new Referent();
+                UpdateReferent dto = new UpdateReferent();
                 dto.setFirstName(entity.getFirstName());
                 dto.setLastName(entity.getLastName());
                 dto.setEmailAddress(entity.getEmailAddress());
@@ -30,7 +30,7 @@ public class ReferentConverter extends AbstractConverter<ReferentEntity, Referen
                 return dto;
             };
 
-    protected Function<Referent, ReferentEntity> toEntity =
+    protected  Function<UpdateReferent, ReferentEntity> toEntity =
             dto -> {
                 ReferentEntity entity = new ReferentEntity();
                 entity.setFirstName(dto.getFirstName());

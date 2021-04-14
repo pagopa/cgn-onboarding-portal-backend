@@ -44,23 +44,15 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
-                if (CollectionUtils.isEmpty(entity.getAddressList())) {
-                    throw new InvalidRequestException("OfflineChannel must have at least on address");
-                } else {
-                    physicalStoreChannel.setAddresses(
+                physicalStoreChannel.setAddresses(
                             entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
-                }
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
-                if (CollectionUtils.isEmpty(entity.getAddressList())) {
-                    throw new InvalidRequestException("BothChannels must have at least on address");
-                } else {
-                    bothChannels.setAddresses(
+                bothChannels.setAddresses(
                             entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
-                }
                 return bothChannels;
             default:
                 throw new IllegalArgumentException("Sales Channel not mapped");
@@ -76,12 +68,9 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 if (salesChannelDto instanceof OnlineChannel) {
                     OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.ONLINE);
-                    if (StringUtils.isBlank(onlineChannel.getWebsiteUrl())) {   //todo implement test to understand if must implement manually
-                        throw new InvalidRequestException("OnlineChannel must have website Url");
-                    }
                     entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throwInvalidSalesChannel();
                 }
                 break;
             case OFFLINECHANNEL:
@@ -89,37 +78,33 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
                     entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
-                    if (CollectionUtils.isEmpty(physicalStoreChannel.getAddresses())) {
-                        throw new InvalidRequestException("OfflineChannel must have at least on address");
-                    }
+                    //addressList must be not empty
                     entity.setAddressList(
                             physicalStoreChannel.getAddresses().stream()
                                     .map(address -> addressToEntity.apply(address))
                                     .collect(Collectors.toList()));
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throwInvalidSalesChannel();
                 }
                 break;
             case BOTHCHANNELS:
                 if (salesChannelDto instanceof BothChannels) {
                     BothChannels bothChannels = (BothChannels) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.BOTH);
-                    if (StringUtils.isBlank(bothChannels.getWebsiteUrl())) {   //todo implement test to understand if must implement manually
-                        throw new InvalidRequestException("OnlineChannel must have website Url");
-                    }
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
-                    if (CollectionUtils.isEmpty(bothChannels.getAddresses())) {
-                        throw new InvalidRequestException("BothChannels must have at least on address");
-                    }
                     entity.setAddressList(
                             bothChannels.getAddresses().stream()
                                     .map(address -> addressToEntity.apply(address))
                                     .collect(Collectors.toList()));
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throwInvalidSalesChannel();
                 }
                 break;
         }
     };
+
+    private void throwInvalidSalesChannel() {
+        throw new InvalidRequestException("SalesChannel is invalid");
+    }
 }
 

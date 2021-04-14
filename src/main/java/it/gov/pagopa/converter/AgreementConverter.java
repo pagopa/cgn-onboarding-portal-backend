@@ -3,6 +3,7 @@ package it.gov.pagopa.converter;
 
 import it.gov.pagopa.cgnonboardingportal.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
+import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
 import it.gov.pagopa.enums.AgreementStateEnum;
 import it.gov.pagopa.exception.InvalidRequestException;
 import it.gov.pagopa.model.AgreementEntity;
@@ -45,10 +46,23 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                     .map(Map.Entry::getKey)
                     .findFirst().orElseThrow();
 
+    private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
+        Agreement dto;
+        if (AgreementStateEnum.APPROVED.equals(entity.getState())) {
+            ApprovedAgreement approvedAgreement;
+            approvedAgreement = new ApprovedAgreement();
+            approvedAgreement.setStartDate(entity.getStartDate());
+            approvedAgreement.setEndDate(entity.getEndDate());
+            dto = approvedAgreement;
+        } else {
+            dto = new Agreement();
+        }
+        return dto;
+    };
 
     protected Function<AgreementEntity, Agreement> toDto =
             entity -> {
-                Agreement dto = new Agreement();
+                Agreement dto = toDtoWithStatusFilled.apply(entity);
                 dto.setId(entity.getId());
                 dto.setState(toDtoEnum.apply(entity.getState()));
                 dto.setProfileLastModifiedDate(entity.getProfileModifiedDate());
@@ -57,9 +71,19 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                 return dto;
             };
 
+    protected Function<Agreement, AgreementEntity> toEntityWithStatusFilled = dto -> {
+        AgreementEntity entity = new AgreementEntity();
+        if (AgreementState.APPROVEDAGREEMENT.equals(dto.getState())) {
+            ApprovedAgreement state = (ApprovedAgreement) dto;
+            entity.setStartDate(state.getStartDate());
+            entity.setEndDate(state.getEndDate());
+        }
+        return entity;
+    };
+
     protected Function<Agreement, AgreementEntity> toEntity =
             dto -> {
-                AgreementEntity entity = new AgreementEntity();
+                AgreementEntity entity = toEntityWithStatusFilled.apply(dto);
                 entity.setId(dto.getId());
                 entity.setState(toEntityEnum.apply(dto.getState()));
                 entity.setProfileModifiedDate(dto.getProfileLastModifiedDate());

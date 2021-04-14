@@ -1,8 +1,10 @@
 package it.gov.pagopa.service;
 
+import it.gov.pagopa.BaseTest;
 import it.gov.pagopa.enums.SalesChannelEnum;
 import it.gov.pagopa.exception.InvalidRequestException;
-import it.gov.pagopa.model.*;
+import it.gov.pagopa.model.AgreementEntity;
+import it.gov.pagopa.model.ProfileEntity;
 import it.gov.pagopa.repository.ProfileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
@@ -15,14 +17,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("dev")
 @Slf4j
 @Transactional
-class RegistryServiceTest {
+class ProfileServiceTest extends BaseTest {
 
     @Autowired
     private ProfileService profileService;
@@ -143,39 +143,6 @@ class RegistryServiceTest {
         Assertions.assertNotNull(profileDB.getAgreement());
         Assertions.assertNotNull(profileDB.getAgreement().getProfileModifiedDate());
         Assertions.assertEquals(LocalDate.now(), profileDB.getAgreement().getProfileModifiedDate());
-    }
-
-
-    private ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
-        ReferentEntity referentEntity = new ReferentEntity();
-        referentEntity.setFirstName("FIRST_NAME");
-        referentEntity.setLastName("LAST_NAME");
-        referentEntity.setEmailAddress("referent.registry@pagopa.it");
-        referentEntity.setTelephoneNumber("+390123456789");
-        referentEntity.setProfile(profileEntity);
-        return referentEntity;
-    }
-
-    private ProfileEntity createSampleProfileWithCommonFields() {
-        ProfileEntity profileEntity = new ProfileEntity();
-        profileEntity.setFullName("FULL_NAME");
-        profileEntity.setName("NAME");
-        profileEntity.setPecAddress("pec.address@pagopa.it");
-        profileEntity.setDescription("A Description");
-        profileEntity.setReferent(createSampleReferent(profileEntity));
-        return profileEntity;
-    }
-
-    private List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
-        AddressEntity addressEntity = new AddressEntity();
-        addressEntity.setProfile(profileEntity);
-        addressEntity.setStreet("GARIBALDI 1");
-        addressEntity.setCity("ROME");
-        addressEntity.setDistrict("RM");
-        addressEntity.setZipCode("00100");
-        addressEntity.setLatitude(42.92439);
-        addressEntity.setLongitude(12.50181);
-        return Collections.singletonList(addressEntity);
     }
 
 }
