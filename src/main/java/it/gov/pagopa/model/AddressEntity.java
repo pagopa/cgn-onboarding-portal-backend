@@ -2,6 +2,7 @@ package it.gov.pagopa.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -44,6 +45,7 @@ public class AddressEntity extends BaseEntity {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
+    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "PROFILE_FK", nullable = false)

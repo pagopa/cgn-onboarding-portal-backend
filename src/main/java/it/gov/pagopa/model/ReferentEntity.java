@@ -2,6 +2,7 @@ package it.gov.pagopa.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -40,6 +41,7 @@ public class ReferentEntity extends BaseEntity {
     @Column(name = "TELEPHONE_NUMBER", length = 15)
     private String telephoneNumber;
 
+    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "referent")
     private ProfileEntity profile;

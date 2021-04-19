@@ -182,6 +182,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>it/gov/pagopa/cgnonboardingportal/**/*</exclude>
+                        <exclude>org/openapitools/**/*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

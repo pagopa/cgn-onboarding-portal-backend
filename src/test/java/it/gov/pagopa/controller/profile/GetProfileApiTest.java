@@ -35,13 +35,13 @@ class GetProfileApiTest extends BaseTest {
     @Autowired
     private ProfileService profileService;
 
-    private String createProfilePath;
+    private String profilePath;
     private AgreementEntity agreement;
 
     @BeforeEach
     void beforeEach() {
         agreement = agreementService.createAgreementIfNotExists();
-        createProfilePath = getProfilePath(agreement.getId());;
+        profilePath = getProfilePath(agreement.getId());;
     }
 
     @Test
@@ -55,7 +55,7 @@ class GetProfileApiTest extends BaseTest {
     @Test
     void Get_GetProfile_NotFound() throws Exception {
         this.mockMvc.perform(
-                get(createProfilePath).contentType(MediaType.APPLICATION_JSON))
+                get(profilePath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNotFound());
     }
@@ -65,7 +65,7 @@ class GetProfileApiTest extends BaseTest {
         ProfileEntity profileEntity = createSampleProfileEntity(agreement);
         profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
         this.mockMvc.perform(
-                get(createProfilePath).contentType(MediaType.APPLICATION_JSON))
+                get(profilePath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

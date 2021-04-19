@@ -6,8 +6,6 @@ import it.gov.pagopa.enums.SalesChannelEnum;
 import it.gov.pagopa.exception.InvalidRequestException;
 import it.gov.pagopa.model.AddressEntity;
 import it.gov.pagopa.model.ProfileEntity;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.CollectionUtils;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;

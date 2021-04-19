@@ -14,7 +14,6 @@ public abstract class AbstractConverter<E, D> {
     protected abstract Function<E, D> toDtoFunction();
     protected abstract Function<D, E> toEntityFunction();
 
-    //todo maybe is not required
     public Optional<D> toDto(Optional<E> entityOpt) {
         return convertToDto(entityOpt, toDtoFunction());
     }
@@ -29,7 +28,6 @@ public abstract class AbstractConverter<E, D> {
                 entityCollection.stream().map(toDtoFunction()).collect(Collectors.toList());
     }
 
-    //todo maybe is not required
     public Optional<E> toEntity(Optional<D> dtoOpt) {
         return convertToEntity(dtoOpt, toEntityFunction());
     }

@@ -4,24 +4,25 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import java.io.Serializable;
 import java.time.LocalTime;
 
 @MappedSuperclass
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Serializable {
 
-    @Column(name = "INSERT_DATE", nullable = false, updatable = false)
-    protected LocalTime insertDate;
+    @Column(name = "INSERT_TIME", nullable = false, updatable = false)
+    protected LocalTime insertTime;
 
-    @Column(name = "UPDATE_DATE")
-    protected LocalTime updateDate;
+    @Column(name = "UPDATE_TIME")
+    protected LocalTime updateTime;
 
     @PrePersist
     protected void onInsert() {
-        insertDate = LocalTime.now();
+        insertTime = LocalTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updateDate = LocalTime.now();
+        updateTime = LocalTime.now();
     }
 }

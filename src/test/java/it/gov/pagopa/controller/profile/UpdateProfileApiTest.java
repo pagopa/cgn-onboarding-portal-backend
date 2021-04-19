@@ -38,13 +38,13 @@ class UpdateProfileApiTest extends BaseTest {
     @Autowired
     private ProfileService profileService;
 
-    private String createProfilePath;
+    private String profilePath;
     private AgreementEntity agreement;
 
     @BeforeEach
     void beforeEach() {
         agreement = agreementService.createAgreementIfNotExists();
-        createProfilePath = getProfilePath(agreement.getId());
+        profilePath = getProfilePath(agreement.getId());
     }
 
     @Test
@@ -58,7 +58,7 @@ class UpdateProfileApiTest extends BaseTest {
     @Test
     void Update_UpdateProfileNotExists_NotFound() throws Exception {
         this.mockMvc.perform(
-                get(createProfilePath).contentType(MediaType.APPLICATION_JSON))
+                get(profilePath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNotFound());
     }
@@ -75,7 +75,7 @@ class UpdateProfileApiTest extends BaseTest {
         updateProfile.setSalesChannel(offlineChannel);
 
         this.mockMvc.perform(
-                put(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
+                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -106,7 +106,7 @@ class UpdateProfileApiTest extends BaseTest {
         updateProfile.setSalesChannel(bothChannels);
 
         this.mockMvc.perform(
-                put(createProfilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
+                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

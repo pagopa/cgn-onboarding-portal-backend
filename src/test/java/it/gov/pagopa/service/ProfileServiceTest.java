@@ -6,7 +6,6 @@ import it.gov.pagopa.exception.InvalidRequestException;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
 import it.gov.pagopa.repository.ProfileRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +19,6 @@ import java.time.LocalDate;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@Slf4j
 @Transactional
 class ProfileServiceTest extends BaseTest {
 
@@ -36,12 +34,12 @@ class ProfileServiceTest extends BaseTest {
     @Autowired
     private SessionFactory sessionFactory;
 
-    private AgreementEntity subscription;
+    private AgreementEntity agreementEntity;
 
 
     @BeforeEach
     void beforeEach() {
-        subscription = agreementService.createAgreementIfNotExists();
+        agreementEntity = agreementService.createAgreementIfNotExists();
     }
 
     @Test
@@ -49,7 +47,7 @@ class ProfileServiceTest extends BaseTest {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields();
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, subscription.getId());
+        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
         Assertions.assertNotNull(profileDB.getReferent().getId());
@@ -63,7 +61,7 @@ class ProfileServiceTest extends BaseTest {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields();
         profileEntity.setAddressList(createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, subscription.getId());
+        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
 
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
@@ -82,7 +80,7 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setAddressList(createSampleAddress(profileEntity));
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.BOTH);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, subscription.getId());
+        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
 
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
@@ -101,12 +99,12 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setAddressList(createSampleAddress(profileEntity));
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.BOTH);
-        profileService.createRegistry(profileEntity, subscription.getId());
+        profileService.createRegistry(profileEntity, agreementEntity.getId());
 
         ProfileEntity profileEntity2 = createSampleProfileWithCommonFields();
         profileEntity2.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity2.setSalesChannel(SalesChannelEnum.ONLINE);
-        Assertions.assertThrows(InvalidRequestException.class, () -> profileService.createRegistry(profileEntity2, subscription.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> profileService.createRegistry(profileEntity2, agreementEntity.getId()));
     }
 
     @Test
@@ -115,7 +113,7 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setWebsiteUrl("pagopa.gov.it");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
-            profileService.createRegistry(profileEntity, subscription.getId());
+            profileService.createRegistry(profileEntity, agreementEntity.getId());
             sessionFactory.getCurrentSession().flush();
 
         });
@@ -128,7 +126,7 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
-            profileService.createRegistry(profileEntity, subscription.getId());
+            profileService.createRegistry(profileEntity, agreementEntity.getId());
             sessionFactory.getCurrentSession().flush();
         });
     }
@@ -138,7 +136,7 @@ class ProfileServiceTest extends BaseTest {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields();
         profileEntity.setAddressList(createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, subscription.getId());
+        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
         Assertions.assertNotNull(profileDB);
         Assertions.assertNotNull(profileDB.getAgreement());
         Assertions.assertNotNull(profileDB.getAgreement().getProfileModifiedDate());

@@ -3,12 +3,17 @@ package it.gov.pagopa.service;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.converter.profile.ProfileConverter;
 import it.gov.pagopa.exception.InvalidRequestException;
-import it.gov.pagopa.model.ProfileEntity;
+import it.gov.pagopa.model.AddressEntity;
 import it.gov.pagopa.model.AgreementEntity;
+import it.gov.pagopa.model.ProfileEntity;
+import it.gov.pagopa.model.ReferentEntity;
+import it.gov.pagopa.repository.AddressRepository;
 import it.gov.pagopa.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -18,6 +23,7 @@ public class ProfileService {
     private final AgreementService agreementService;
     private final ProfileRepository profileRepository;
     private final ProfileConverter profileConverter;
+    private  AddressRepository addressRepository;
 
 
     public ProfileEntity createRegistry(ProfileEntity profileEntity, String agreementId) {
@@ -43,10 +49,11 @@ public class ProfileService {
 
     @Autowired
     public ProfileService(ProfileRepository profileRepository, AgreementService agreementService,
-                          ProfileConverter profileConverter) {
+                          ProfileConverter profileConverter, AddressRepository addressRepository) {
         this.profileRepository = profileRepository;
         this.agreementService = agreementService;
         this.profileConverter = profileConverter;
+        this.addressRepository = addressRepository;
     }
 
     private ProfileEntity getProfileFromAgreementId(String agreementId) {
@@ -58,13 +65,31 @@ public class ProfileService {
         //todo check agreementId with token
         return profileRepository.findByAgreementId(agreementId);
     }
+    private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {
+        dbEntity.setFirstName(toUpdateEntity.getFirstName());
+        dbEntity.setLastName(toUpdateEntity.getLastName());
+        dbEntity.setEmailAddress(toUpdateEntity.getEmailAddress());
+        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+    };
+
+    private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
+        if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
+            profileEntity.getAddressList().forEach(a -> {
+            //    a.setProfile(null);
+                addressRepository.delete(a);
+            });
+        }
+        addressesList.forEach(addressEntity -> addressEntity.setProfile(profileEntity));
+        profileEntity.setAddressList(addressesList);
+    };
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
       dbEntity.setName(toUpdateEntity.getName());
       dbEntity.setDescription(toUpdateEntity.getDescription());
       dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
       dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
-      dbEntity.setReferent(toUpdateEntity.getReferent());
+      updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
+      updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
       dbEntity.setAddressList(toUpdateEntity.getAddressList());
       dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
     };
