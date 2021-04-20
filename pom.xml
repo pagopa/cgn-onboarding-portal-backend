@@ -144,7 +144,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>it.gov.pagopa.CGNOnboardingPortal</mainClass>
+                    <mainClass>it.gov.pagopa.cgn.portal.CGNOnboardingPortal</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
