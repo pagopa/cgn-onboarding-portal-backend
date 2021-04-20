@@ -3,10 +3,6 @@ package it.gov.pagopa.controller;
 import it.gov.pagopa.cgn.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
-import it.gov.pagopa.repository.AgreementRepository;
-import it.gov.pagopa.repository.AgreementUserRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,19 +22,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private AgreementRepository agreementRepository;
-
-    @Autowired
-    private AgreementUserRepository userRepository;
-
-    @AfterEach
-    @BeforeEach
-    void clean() {
-        agreementRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Test
     void Create_CreateAgreement_Ok() throws Exception {

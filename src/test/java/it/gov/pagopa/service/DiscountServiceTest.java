@@ -5,9 +5,6 @@ import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.DiscountEntity;
 import it.gov.pagopa.repository.AgreementRepository;
-import it.gov.pagopa.repository.AgreementUserRepository;
-import it.gov.pagopa.repository.DiscountRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,26 +27,13 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     private AgreementService agreementService;
 
     @Autowired
-    private DiscountRepository discountRepository;
-
-    @Autowired
     private AgreementRepository agreementRepository;
-
-    @Autowired
-    private AgreementUserRepository userRepository;
 
     private AgreementEntity agreementEntity;
 
     @BeforeEach
-    void beforeEach() {
+    void init() {
         agreementEntity = agreementService.createAgreementIfNotExists();
-    }
-
-    @AfterEach
-    void clean() {
-        discountRepository.deleteAll();
-        agreementRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test
@@ -82,7 +66,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertFalse(discounts.isEmpty());
         Assertions.assertNotNull(discounts.get(0));
         DiscountEntity discountDB = discounts.get(0);
-        Assertions.assertEquals(discountEntity.getAgreement(), agreementEntity);
+        Assertions.assertEquals(discountEntity.getAgreement().getId(), agreementEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), discountDB.getId());
         Assertions.assertEquals(discountEntity.getName(), discountDB.getName());
         Assertions.assertEquals(discountEntity.getDescription(), discountDB.getDescription());

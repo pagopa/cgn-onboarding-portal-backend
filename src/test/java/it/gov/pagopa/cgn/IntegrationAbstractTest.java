@@ -1,5 +1,11 @@
 package it.gov.pagopa.cgn;
 
+import it.gov.pagopa.repository.AgreementRepository;
+import it.gov.pagopa.repository.AgreementUserRepository;
+import it.gov.pagopa.repository.DiscountRepository;
+import it.gov.pagopa.repository.ProfileRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -46,5 +52,26 @@ public class IntegrationAbstractTest {
             );
             environment.getPropertySources().addFirst(testcontainers);
         }
+    }
+
+
+    @Autowired
+    protected DiscountRepository discountRepository;
+
+    @Autowired
+    protected AgreementRepository agreementRepository;
+
+    @Autowired
+    protected ProfileRepository profileRepository;
+
+    @Autowired
+    protected AgreementUserRepository userRepository;
+
+    @AfterEach
+    protected void cleanAll() {
+        discountRepository.deleteAll();
+        profileRepository.deleteAll();
+        agreementRepository.deleteAll();
+        userRepository.deleteAll();
     }
 }

@@ -8,10 +8,8 @@ import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
-import it.gov.pagopa.repository.ProfileRepository;
 import it.gov.pagopa.service.AgreementService;
 import it.gov.pagopa.service.ProfileService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,17 +36,12 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     @Autowired
     private ProfileService profileService;
 
-    @Autowired
-    private ProfileRepository profileRepository;
-
     private String profilePath;
     private AgreementEntity agreement;
 
-    @AfterEach
     @BeforeEach
-    void clean() {
+    void init() {
         agreement = agreementService.createAgreementIfNotExists();
-        profileRepository.deleteAll();
         profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 

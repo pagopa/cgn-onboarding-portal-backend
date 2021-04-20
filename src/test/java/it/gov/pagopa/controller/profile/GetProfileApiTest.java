@@ -37,9 +37,8 @@ class GetProfileApiTest extends IntegrationAbstractTest {
     private String profilePath;
     private AgreementEntity agreement;
 
-    @AfterEach
     @BeforeEach
-    void clean() {
+    void init() {
         agreement = agreementService.createAgreementIfNotExists();
         profilePath = TestUtils.getProfilePath(agreement.getId());;
     }

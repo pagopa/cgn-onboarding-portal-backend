@@ -7,10 +7,8 @@ import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.DiscountEntity;
 import it.gov.pagopa.model.DiscountProductEntity;
-import it.gov.pagopa.repository.DiscountRepository;
 import it.gov.pagopa.service.AgreementService;
 import it.gov.pagopa.service.DiscountService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,17 +41,12 @@ class DiscountApiTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
-    @Autowired
-    private DiscountRepository discountRepository;
-
     private String discountPath;
     private AgreementEntity agreement;
 
-    @AfterEach
     @BeforeEach
-    void clean() {
+    void init() {
         agreement = agreementService.createAgreementIfNotExists();
-        discountRepository.deleteAll();
         discountPath = TestUtils.getDiscountPath(agreement.getId());
     }
 

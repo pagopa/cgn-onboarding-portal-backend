@@ -8,10 +8,6 @@ import it.gov.pagopa.model.AddressEntity;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
 import it.gov.pagopa.repository.AddressRepository;
-import it.gov.pagopa.repository.AgreementRepository;
-import it.gov.pagopa.repository.AgreementUserRepository;
-import it.gov.pagopa.repository.ProfileRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,26 +32,11 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Autowired
     private AddressRepository addressRepository;
 
-    @Autowired
-    private ProfileRepository profileRepository;
-
-    @Autowired
-    private AgreementRepository agreementRepository;
-
-    @Autowired
-    private AgreementUserRepository userRepository;
-
     private AgreementEntity agreementEntity;
 
     @BeforeEach
-    void beforeEach() {
+    void init() {
         agreementEntity = agreementService.createAgreementIfNotExists();
-    }
-    @AfterEach
-    void clean() {
-        profileRepository.deleteAll();
-        agreementRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
     @Test

@@ -4,9 +4,7 @@ import it.gov.pagopa.cgn.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.model.AgreementEntity;
-import it.gov.pagopa.repository.ProfileRepository;
 import it.gov.pagopa.service.AgreementService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +28,12 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private AgreementService agreementService;
-    @Autowired
-    private ProfileRepository profileRepository;
 
     private String profilePath;
 
-    @AfterEach
     @BeforeEach
-    void clean() {
+    void init() {
         AgreementEntity agreement = agreementService.createAgreementIfNotExists();
-        profileRepository.deleteAll();
         profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 
