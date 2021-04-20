@@ -1,10 +1,8 @@
 package it.gov.pagopa.service;
 
 import it.gov.pagopa.BaseTest;
-import it.gov.pagopa.enums.DiscountStateEnum;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.DiscountEntity;
-import it.gov.pagopa.model.DiscountProductEntity;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,15 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@Transactional
 class DiscountServiceTest extends BaseTest {
 
     @Autowired
@@ -35,10 +30,10 @@ class DiscountServiceTest extends BaseTest {
 
     private AgreementEntity agreementEntity;
 
-
     @BeforeEach
     void beforeEach() {
         agreementEntity = agreementService.createAgreementIfNotExists();
+        discountRepository.deleteAll();
     }
 
     @Test
@@ -88,7 +83,10 @@ class DiscountServiceTest extends BaseTest {
         Assertions.assertNotNull(discountDB.getProducts());
         Assertions.assertEquals(discountEntity.getProducts().size(), discountDB.getProducts().size());
         IntStream.range(0, discountEntity.getProducts().size()).forEach(idx -> {
-            Assertions.assertEquals(discountEntity.getProducts().get(idx), discountDB.getProducts().get(idx));
+            Assertions.assertEquals(
+                    discountEntity.getProducts().get(idx).getProductCategory(),
+                    discountDB.getProducts().get(idx).getProductCategory());
+
         });
     }
 
@@ -103,25 +101,31 @@ class DiscountServiceTest extends BaseTest {
     void Update_UpdateDiscountWithValidData_Ok() {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        discountEntity.setName("updated_name");
-        discountEntity.setDescription("updated_description");
-        discountEntity.setStartDate(LocalDate.now().plusDays(1));
-        discountEntity.setEndDate(LocalDate.now().plusMonths(3));
-        discountEntity.setDiscountValue(40.0);
-        discountEntity.getProducts().forEach(p->p.setProductCategory(p.getProductCategory() + "_updated"));
-        discountEntity.setCondition("update_condition");
-        discountEntity.setStaticCode("update_static_code");
+        DiscountEntity updatedDiscount = createSampleDiscountEntity(agreementEntity);
+        updatedDiscount.setName("updated_name");
+        updatedDiscount.setDescription("updated_description");
+        updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
+        updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
+        updatedDiscount.setDiscountValue(40.0);
+        updatedDiscount.getProducts().forEach(p->p.setProductCategory(p.getProductCategory() + "_updated"));
+        updatedDiscount.setCondition("update_condition");
+        updatedDiscount.setStaticCode("update_static_code");
 
-        DiscountEntity updatedDiscount;
-        updatedDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), discountEntity);
-        Assertions.assertEquals(discountEntity.getName(), updatedDiscount.getName());
-        Assertions.assertEquals(discountEntity.getDescription(), updatedDiscount.getDescription());
-        Assertions.assertEquals(discountEntity.getStartDate(), updatedDiscount.getStartDate());
-        Assertions.assertEquals(discountEntity.getEndDate(), updatedDiscount.getEndDate());
-        Assertions.assertEquals(discountEntity.getDiscountValue(), updatedDiscount.getDiscountValue());
-        Assertions.assertEquals(discountEntity.getProducts(), updatedDiscount.getProducts());
-        Assertions.assertEquals(discountEntity.getCondition(), updatedDiscount.getCondition());
-        Assertions.assertEquals(discountEntity.getStaticCode(), updatedDiscount.getStaticCode());
+
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
+        Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
+        Assertions.assertEquals(updatedDiscount.getDescription(), dbDiscount.getDescription());
+        Assertions.assertEquals(updatedDiscount.getStartDate(), dbDiscount.getStartDate());
+        Assertions.assertEquals(updatedDiscount.getEndDate(), dbDiscount.getEndDate());
+        Assertions.assertEquals(updatedDiscount.getDiscountValue(), dbDiscount.getDiscountValue());
+        Assertions.assertNotNull(dbDiscount.getProducts());
+        Assertions.assertFalse(dbDiscount.getProducts().isEmpty());
+        Assertions.assertNotNull(updatedDiscount.getProducts());
+        Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
+        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getProducts().get(1), dbDiscount.getProducts().get(1));
+        Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
+        Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
 
     }
 

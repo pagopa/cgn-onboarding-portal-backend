@@ -1,20 +1,18 @@
 package it.gov.pagopa.service;
 
+import it.gov.pagopa.BaseTest;
 import it.gov.pagopa.model.AgreementUserEntity;
 import it.gov.pagopa.repository.AgreementUserRepository;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.transaction.Transactional;
-
 @SpringBootTest
 @ActiveProfiles("dev")
-@Transactional
-class AgreementUserServiceTest {
+class AgreementUserServiceTest extends BaseTest {
 
     @Autowired
     private AgreementUserService userService;
@@ -22,8 +20,11 @@ class AgreementUserServiceTest {
     @Autowired
     private AgreementUserRepository userRepository;
 
-    @Autowired
-    private SessionFactory sessionFactory;
+    @BeforeEach
+    void beforeEach() {
+        userRepository.deleteAll();
+    }
+
 
     @Test
     void Create_CreateSubscriptionUserWithSubscriptionIdAndUserId_Ok() {
@@ -39,7 +40,6 @@ class AgreementUserServiceTest {
         userCreated.setSubscriptionId("NEW_SUBSCRIPTION");
         Assertions.assertThrows(Exception.class, () -> {
             userRepository.save(userCreated);
-            sessionFactory.getCurrentSession().flush();
         });
 
     }

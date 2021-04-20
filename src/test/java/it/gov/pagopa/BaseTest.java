@@ -10,15 +10,47 @@ import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.enums.DiscountStateEnum;
 import it.gov.pagopa.enums.SalesChannelEnum;
 import it.gov.pagopa.model.*;
+import it.gov.pagopa.repository.AgreementRepository;
+import it.gov.pagopa.repository.AgreementUserRepository;
+import it.gov.pagopa.repository.DiscountRepository;
+import it.gov.pagopa.repository.ProfileRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Slf4j
 public class BaseTest {
 
     protected static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
+
+    @Autowired
+    protected AgreementUserRepository userRepository;
+
+    @Autowired
+    protected AgreementRepository agreementRepository;
+
+    @Autowired
+    protected DiscountRepository discountRepository;
+
+    @Autowired
+    protected ProfileRepository profileRepository;
+
+   // @AfterAll
+    public void afterAll() {
+        log.info("AfterAll-->");
+        discountRepository.deleteAll();
+        profileRepository.deleteAll();
+        agreementRepository.deleteAll();
+        userRepository.deleteAll();
+        log.info("<--AfterAll");
+    }
 
     protected String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/profile";
@@ -57,7 +89,9 @@ public class BaseTest {
         addressEntity.setZipCode("00100");
         addressEntity.setLatitude(42.92439);
         addressEntity.setLongitude(12.50181);
-        return Collections.singletonList(addressEntity);
+        List<AddressEntity> list = new ArrayList<>(1);
+        list.add(addressEntity);
+        return list;
     }
 
     protected List<Address> createSampleAddressDto() {
@@ -122,8 +156,7 @@ public class BaseTest {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        String json = mapper.writeValueAsString(obj);
-        return json;
+        return mapper.writeValueAsString(obj);
     }
 
 

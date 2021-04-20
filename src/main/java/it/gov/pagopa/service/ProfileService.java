@@ -1,31 +1,29 @@
 package it.gov.pagopa.service;
 
-import it.gov.pagopa.cgnonboardingportal.model.Profile;
-import it.gov.pagopa.converter.profile.ProfileConverter;
 import it.gov.pagopa.exception.InvalidRequestException;
 import it.gov.pagopa.model.AddressEntity;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
 import it.gov.pagopa.model.ReferentEntity;
-import it.gov.pagopa.repository.AddressRepository;
 import it.gov.pagopa.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
+@Transactional(Transactional.TxType.NOT_SUPPORTED)
 @Service
 public class ProfileService {
 
     private final AgreementService agreementService;
     private final ProfileRepository profileRepository;
-    private final ProfileConverter profileConverter;
-    private  AddressRepository addressRepository;
 
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity createRegistry(ProfileEntity profileEntity, String agreementId) {
         AgreementEntity agreement = agreementService.findById(agreementId);
         profileEntity.setAgreement(agreement);
@@ -36,24 +34,23 @@ public class ProfileService {
         return profileRepository.save(profileEntity);
     }
 
-    public Optional<Profile> getProfile(String agreementId) {
-        return profileConverter.toDto(getOptProfileFromAgreementId(agreementId));
+    @Transactional(Transactional.TxType.REQUIRED)
+    public Optional<ProfileEntity> getProfile(String agreementId) {
+        return getOptProfileFromAgreementId(agreementId);
     }
 
-    public Profile updateProfile(String agreementId, ProfileEntity newUpdateProfile) {
+    @Transactional(Transactional.TxType.REQUIRED)
+    public ProfileEntity updateProfile(String agreementId, ProfileEntity newUpdateProfile) {
         ProfileEntity profileEntity = getProfileFromAgreementId(agreementId);
         updateConsumer.accept(newUpdateProfile, profileEntity);
-        return profileConverter.toDto(profileRepository.save(profileEntity));
+        return profileRepository.save(profileEntity);
     }
 
 
     @Autowired
-    public ProfileService(ProfileRepository profileRepository, AgreementService agreementService,
-                          ProfileConverter profileConverter, AddressRepository addressRepository) {
+    public ProfileService(ProfileRepository profileRepository, AgreementService agreementService) {
         this.profileRepository = profileRepository;
         this.agreementService = agreementService;
-        this.profileConverter = profileConverter;
-        this.addressRepository = addressRepository;
     }
 
     private ProfileEntity getProfileFromAgreementId(String agreementId) {
@@ -74,13 +71,9 @@ public class ProfileService {
 
     private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
         if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
-            profileEntity.getAddressList().forEach(a -> {
-            //    a.setProfile(null);
-                addressRepository.delete(a);
-            });
+            profileEntity.removeAllAddress();
         }
-        addressesList.forEach(addressEntity -> addressEntity.setProfile(profileEntity));
-        profileEntity.setAddressList(addressesList);
+        profileEntity.addAddressList(addressesList);
     };
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
@@ -90,7 +83,6 @@ public class ProfileService {
       dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
       updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
       updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
-      dbEntity.setAddressList(toUpdateEntity.getAddressList());
       dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
     };
 

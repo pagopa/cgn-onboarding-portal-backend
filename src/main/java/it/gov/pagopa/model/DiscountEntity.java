@@ -2,10 +2,13 @@ package it.gov.pagopa.model;
 
 import it.gov.pagopa.enums.DiscountStateEnum;
 import lombok.Data;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -65,4 +68,22 @@ public class DiscountEntity extends BaseEntity {
     @Size(min = 1)
     private List<DiscountProductEntity> products;
 
+    public void removeAllProduct() {
+        this.products.clear();
+    }
+
+    public void addProductList(Collection<DiscountProductEntity> productList) {
+        if (!CollectionUtils.isEmpty(productList)) {
+            if (this.products == null) {
+                this.products = new ArrayList<>();
+            }
+            productList.forEach(p-> {
+                if (!products.contains(p)) {
+                    this.products.add(p);
+                    p.setDiscount(this);
+                }
+
+            });
+        }
+    }
 }

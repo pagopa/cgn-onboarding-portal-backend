@@ -8,6 +8,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "DISCOUNT_PRODUCT_CATEGORY")
 @Data
+@IdClass(DiscountProductKey.class)
 public class DiscountProductEntity extends BaseEntity {
 
     @Id

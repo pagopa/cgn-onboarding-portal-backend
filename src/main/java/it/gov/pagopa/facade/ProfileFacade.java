@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Component
@@ -23,21 +24,25 @@ public class ProfileFacade {
     private final UpdateProfileConverter updateProfileConverter;
     private final ProfileConverter profileConverter;
 
-
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Profile> createProfile(String agreementId, CreateProfile createRegistryDto) {
         ProfileEntity registry = createProfileConverter.toEntity(createRegistryDto);
         registry = profileService.createRegistry(registry, agreementId);
         return ResponseEntity.ok(profileConverter.toDto(registry));
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Profile> getProfile(String agreementId) {
-        Optional<Profile> optionalProfile = profileService.getProfile(agreementId);
-        return optionalProfile.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        Optional<ProfileEntity> optionalProfile = profileService.getProfile(agreementId);
+        Optional<Profile> profile = profileConverter.toDto(optionalProfile);
+        return profile.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Profile> updateProfile(String agreementId, UpdateProfile updateProfile) {
         ProfileEntity profileEntity = updateProfileConverter.toEntity(updateProfile);
-        return ResponseEntity.ok(profileService.updateProfile(agreementId, profileEntity));
+        profileEntity = profileService.updateProfile(agreementId, profileEntity);
+        return ResponseEntity.ok(profileConverter.toDto(profileEntity));
     }
 
     @Autowired

@@ -1,28 +1,29 @@
 package it.gov.pagopa.service;
 
+import it.gov.pagopa.BaseTest;
 import it.gov.pagopa.enums.AgreementStateEnum;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.AgreementUserEntity;
-import it.gov.pagopa.repository.AgreementRepository;
-import it.gov.pagopa.repository.AgreementUserRepository;
-import java.util.Optional;
-import javax.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Optional;
+
 @SpringBootTest
 @ActiveProfiles({"dev"})
-@Transactional
-class AgreementServiceTest {
+class AgreementServiceTest extends BaseTest {
     @Autowired
     private AgreementService agreementService;
-    @Autowired
-    private AgreementUserRepository userRepository;
-    @Autowired
-    private AgreementRepository agreementRepository;
+
+    @BeforeEach
+    void beforeEach() {
+        agreementRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {

@@ -3,23 +3,23 @@ package it.gov.pagopa.service;
 import it.gov.pagopa.BaseTest;
 import it.gov.pagopa.enums.SalesChannelEnum;
 import it.gov.pagopa.exception.InvalidRequestException;
+import it.gov.pagopa.model.AddressEntity;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
-import it.gov.pagopa.repository.ProfileRepository;
-import org.hibernate.SessionFactory;
+import it.gov.pagopa.repository.AddressRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.CollectionUtils;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@Transactional
 class ProfileServiceTest extends BaseTest {
 
     @Autowired
@@ -29,17 +29,14 @@ class ProfileServiceTest extends BaseTest {
     private AgreementService agreementService;
 
     @Autowired
-    private ProfileRepository profileRepository;
-
-    @Autowired
-    private SessionFactory sessionFactory;
+    private AddressRepository addressRepository;
 
     private AgreementEntity agreementEntity;
-
 
     @BeforeEach
     void beforeEach() {
         agreementEntity = agreementService.createAgreementIfNotExists();
+        profileRepository.deleteAll();
     }
 
     @Test
@@ -114,7 +111,6 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
             profileService.createRegistry(profileEntity, agreementEntity.getId());
-            sessionFactory.getCurrentSession().flush();
 
         });
     }
@@ -127,7 +123,6 @@ class ProfileServiceTest extends BaseTest {
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
             profileService.createRegistry(profileEntity, agreementEntity.getId());
-            sessionFactory.getCurrentSession().flush();
         });
     }
 
@@ -141,6 +136,66 @@ class ProfileServiceTest extends BaseTest {
         Assertions.assertNotNull(profileDB.getAgreement());
         Assertions.assertNotNull(profileDB.getAgreement().getProfileModifiedDate());
         Assertions.assertEquals(LocalDate.now(), profileDB.getAgreement().getProfileModifiedDate());
+    }
+
+    @Test
+    void Update_UpdateOnlineProfileWithSameSalesChannel_Ok() {
+        ProfileEntity profileEntity = createSampleProfileWithCommonFields();
+        profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
+        profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
+        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity toUpdateProfile = createSampleProfileWithCommonFields();
+        toUpdateProfile.setName("updated_name");
+        toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setSalesChannel(SalesChannelEnum.ONLINE);
+        ProfileEntity profileDB = profileService.updateProfile(agreementEntity.getId(), toUpdateProfile);
+        Assertions.assertNotNull(profileDB);
+        Assertions.assertNotNull(profileDB.getAgreement());
+        Assertions.assertEquals(toUpdateProfile.getName(), profileDB.getName());
+        Assertions.assertEquals(toUpdateProfile.getWebsiteUrl(), profileDB.getWebsiteUrl());
+        Assertions.assertTrue(CollectionUtils.isEmpty(profileDB.getAddressList()));
+    }
+
+    @Test
+    void Update_UpdateOfflineProfileWithSameSalesChannel_Ok() {
+        ProfileEntity profileEntity = createSampleProfileWithCommonFields();
+        profileEntity.setAddressList(createSampleAddress(profileEntity));
+        profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
+        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity toUpdateProfile = createSampleProfileWithCommonFields();
+        toUpdateProfile.setName("updated_name");
+        toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setAddressList(createSampleAddress(profileEntity));
+        toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        ProfileEntity profileDB = profileService.updateProfile(agreementEntity.getId(), toUpdateProfile);
+        Assertions.assertNotNull(profileDB);
+        Assertions.assertNotNull(profileDB.getAgreement());
+        Assertions.assertEquals(toUpdateProfile.getName(), profileDB.getName());
+        Assertions.assertEquals(toUpdateProfile.getWebsiteUrl(), profileDB.getWebsiteUrl());
+        Assertions.assertNotNull(profileDB.getAddressList());
+        List<AddressEntity> addresses = addressRepository.findByProfileId(profileDB.getId());
+        Assertions.assertEquals(profileDB.getAddressList().size(), addresses.size());
+    }
+
+    @Test
+    void Update_UpdateOfflineProfileWithDifferentSalesChannel_Ok() {
+        ProfileEntity profileEntity = createSampleProfileWithCommonFields();
+        profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
+        profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
+        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity toUpdateProfile = createSampleProfileWithCommonFields();
+        toUpdateProfile.setName("updated_name");
+        toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setAddressList(createSampleAddress(profileEntity));
+        toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        ProfileEntity profileDB = profileService.updateProfile(agreementEntity.getId(), toUpdateProfile);
+        Assertions.assertNotNull(profileDB);
+        Assertions.assertNotNull(profileDB.getAgreement());
+        Assertions.assertEquals(toUpdateProfile.getName(), profileDB.getName());
+        Assertions.assertEquals(toUpdateProfile.getWebsiteUrl(), profileDB.getWebsiteUrl());
+        Assertions.assertNotNull(profileDB.getAddressList());
+        List<AddressEntity> addresses = addressRepository.findByProfileId(profileDB.getId());
+        Assertions.assertEquals(profileDB.getAddressList().size(), addresses.size());
     }
 
 }

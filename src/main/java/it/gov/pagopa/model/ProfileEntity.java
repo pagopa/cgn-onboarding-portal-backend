@@ -4,12 +4,13 @@ import it.gov.pagopa.enums.SalesChannelEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.URL;
+import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "PROFILE")
@@ -54,13 +55,30 @@ public class ProfileEntity extends BaseEntity {
     @JoinColumn(name = "AGREEMENT_FK", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
 
+    @EqualsAndHashCode.Exclude
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "REFERENT_FK", nullable = false)
     private ReferentEntity referent;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addressList;
+
+    public void removeAllAddress() {
+        this.addressList.clear();
+    }
+
+    public void addAddressList(Collection<AddressEntity> addresses) {
+        if (!CollectionUtils.isEmpty(addresses)) {
+            if (this.addressList == null) {
+                this.addressList = new ArrayList<>();
+            }
+            addresses.forEach(a -> {
+                addressList.add(a);
+                a.setProfile(this);
+            });
+        }
+    }
 
 }
 
