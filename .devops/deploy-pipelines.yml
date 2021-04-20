@@ -9,9 +9,8 @@ parameters:
   - name: environment
     displayName: Target Environment
     type: string
-    default: dev
+    default: uat
     values:
-      - dev
       - uat
       - prod
 
@@ -20,10 +19,14 @@ variables:
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
   BUILD_NUMBER: $(Build.BuildNumber)
   imageRepository: 'cgn-onboarding-portal-backend'
-  ${{ if eq(parameters['environment'], 'dev') }}:
+  ${{ if eq(parameters['environment'], 'uat') }}:
     dockerRegistryServiceConnection: 'cstarregistry-connection'
-    containerRegistry: 'cstarregistry.azurecr.io'
-    connectedServiceName: $(DEV_AZURE_SUBSCRIPTION)
+    containerRegistry: $(UAT_CONTAINER_REGISTRY)
+    connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
+  ${{ if eq(parameters['environment'], 'prod') }}:
+    dockerRegistryServiceConnection: 'cstarregistry-connection'
+    containerRegistry: $(UAT_CONTAINER_REGISTRY)
+    connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
 steps:
   - task: Cache@2
     inputs:
