@@ -1,14 +1,17 @@
 package it.gov.pagopa.controller.profile;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.BothChannels;
 import it.gov.pagopa.cgnonboardingportal.model.OfflineChannel;
 import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
+import it.gov.pagopa.repository.ProfileRepository;
 import it.gov.pagopa.service.AgreementService;
 import it.gov.pagopa.service.ProfileService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.transaction.Transactional;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -26,8 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-class UpdateProfileApiTest extends BaseTest {
+class UpdateProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,19 +38,24 @@ class UpdateProfileApiTest extends BaseTest {
     @Autowired
     private ProfileService profileService;
 
+    @Autowired
+    private ProfileRepository profileRepository;
+
     private String profilePath;
     private AgreementEntity agreement;
 
+    @AfterEach
     @BeforeEach
-    void beforeEach() {
+    void clean() {
         agreement = agreementService.createAgreementIfNotExists();
-        profilePath = getProfilePath(agreement.getId());
+        profileRepository.deleteAll();
+        profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 
     @Test
     void Update_UpdateProfileWithInvalidAgreementId_NotFound() throws Exception {
         this.mockMvc.perform(
-                get(getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
+                get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNotFound());
     }
@@ -65,17 +70,17 @@ class UpdateProfileApiTest extends BaseTest {
 
     @Test
     void Update_UpdateOnlineProfileToOffline_Ok() throws Exception {
-        ProfileEntity profileEntity = createSampleProfileEntity(agreement);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
-        UpdateProfile updateProfile = createSampleUpdateProfileWithCommonFields();
+        UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         OfflineChannel offlineChannel = new OfflineChannel();
         offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
-        offlineChannel.setAddresses(createSampleAddressDto());
+        offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         updateProfile.setSalesChannel(offlineChannel);
 
         this.mockMvc.perform(
-                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
+                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateProfile)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -96,17 +101,17 @@ class UpdateProfileApiTest extends BaseTest {
 
     @Test
     void Update_UpdateOnlineProfileToBoth_Ok() throws Exception {
-        ProfileEntity profileEntity = createSampleProfileEntity(agreement);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
-        UpdateProfile updateProfile = createSampleUpdateProfileWithCommonFields();
+        UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         BothChannels bothChannels = new BothChannels();
         bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
-        bothChannels.setAddresses(createSampleAddressDto());
+        bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         updateProfile.setSalesChannel(bothChannels);
 
         this.mockMvc.perform(
-                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(updateProfile)))
+                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateProfile)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

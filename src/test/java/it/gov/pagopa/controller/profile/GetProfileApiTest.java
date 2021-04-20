@@ -1,10 +1,12 @@
 package it.gov.pagopa.controller.profile;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.ProfileEntity;
 import it.gov.pagopa.service.AgreementService;
 import it.gov.pagopa.service.ProfileService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.transaction.Transactional;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -23,8 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-class GetProfileApiTest extends BaseTest {
+class GetProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,16 +37,17 @@ class GetProfileApiTest extends BaseTest {
     private String profilePath;
     private AgreementEntity agreement;
 
+    @AfterEach
     @BeforeEach
-    void beforeEach() {
+    void clean() {
         agreement = agreementService.createAgreementIfNotExists();
-        profilePath = getProfilePath(agreement.getId());;
+        profilePath = TestUtils.getProfilePath(agreement.getId());;
     }
 
     @Test
     void Get_GetProfileWithInvalidAgreementId_NotFound() throws Exception {
         this.mockMvc.perform(
-                get(getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
+                get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNotFound());
     }
@@ -62,7 +62,7 @@ class GetProfileApiTest extends BaseTest {
 
     @Test
     void Get_GetProfile_Ok() throws Exception {
-        ProfileEntity profileEntity = createSampleProfileEntity(agreement);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
         this.mockMvc.perform(
                 get(profilePath).contentType(MediaType.APPLICATION_JSON))

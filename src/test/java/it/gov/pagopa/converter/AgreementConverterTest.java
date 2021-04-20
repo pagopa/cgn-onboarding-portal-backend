@@ -5,92 +5,89 @@ import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
 import it.gov.pagopa.enums.AgreementStateEnum;
 import it.gov.pagopa.model.AgreementEntity;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 
-@SpringBootTest
-@ActiveProfiles({"dev"})
-class AgreementConverterTest {
+@RunWith(SpringRunner.class)
+public class AgreementConverterTest {
 
-    @Autowired
-    private AgreementConverter agreementConverter;
+    private AgreementConverter agreementConverter = new AgreementConverter();
 
     @Test
-    void Convert_ConvertPendingAgreementEntityToDTO_Ok() {
+    public void Convert_ConvertPendingAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.PENDING);
         Agreement pendingDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, pendingDto);
-        Assertions.assertEquals(AgreementState.PENDINGAGREEMENT, pendingDto.getState());
+        Assert.assertEquals(AgreementState.PENDINGAGREEMENT, pendingDto.getState());
     }
 
     @Test
-    void Convert_ConvertPendingAgreementDtoToEntity_Ok() {
+    public void Convert_ConvertPendingAgreementDtoToEntity_Ok() {
         Agreement dto = createSampleAgreementDtoWithCommonFields();
         dto.setState(AgreementState.PENDINGAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
-        Assertions.assertEquals(AgreementStateEnum.PENDING, entity.getState());
+        Assert.assertEquals(AgreementStateEnum.PENDING, entity.getState());
     }
 
     @Test
-    void Convert_ConvertDraftAgreementEntityToDTO_Ok() {
+    public void Convert_ConvertDraftAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.DRAFT);
         Agreement draftDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, draftDto);
-        Assertions.assertEquals(AgreementState.DRAFTAGREEMENT, draftDto.getState());
+        Assert.assertEquals(AgreementState.DRAFTAGREEMENT, draftDto.getState());
     }
 
     @Test
-    void Convert_ConvertDraftAgreementDtoToEntity_Ok() {
+    public void Convert_ConvertDraftAgreementDtoToEntity_Ok() {
         Agreement dto = createSampleAgreementDtoWithCommonFields();
         dto.setState(AgreementState.DRAFTAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
-        Assertions.assertEquals(AgreementStateEnum.DRAFT, entity.getState());
+        Assert.assertEquals(AgreementStateEnum.DRAFT, entity.getState());
     }
 
     @Test
-    void Convert_ConvertRejectedAgreementEntityToDTO_Ok() {
+    public void Convert_ConvertRejectedAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.REJECTED);
         Agreement rejectedDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, rejectedDto);
-        Assertions.assertEquals(AgreementState.REJECTEDAGREEMENT, rejectedDto.getState());
+        Assert.assertEquals(AgreementState.REJECTEDAGREEMENT, rejectedDto.getState());
     }
 
     @Test
-    void Convert_ConvertRejectedAgreementDtoToEntity_Ok() {
+    public void Convert_ConvertRejectedAgreementDtoToEntity_Ok() {
         Agreement dto = createSampleAgreementDtoWithCommonFields();
         dto.setState(AgreementState.REJECTEDAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
-        Assertions.assertEquals(AgreementStateEnum.REJECTED, entity.getState());
+        Assert.assertEquals(AgreementStateEnum.REJECTED, entity.getState());
     }
 
     @Test
-    void Convert_ConvertApprovedAgreementEntityToDTO_Ok() {
+    public void Convert_ConvertApprovedAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setEndDate(LocalDate.of(2021, 12, 31));
         agreementEntity.setStartDate(LocalDate.now());
         Agreement agreementDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, agreementDto);
-        Assertions.assertEquals(AgreementState.APPROVEDAGREEMENT, agreementDto.getState());
-        Assertions.assertTrue(agreementDto instanceof ApprovedAgreement);
+        Assert.assertEquals(AgreementState.APPROVEDAGREEMENT, agreementDto.getState());
+        Assert.assertTrue(agreementDto instanceof ApprovedAgreement);
         ApprovedAgreement approvedDto = (ApprovedAgreement) agreementDto;
-        Assertions.assertEquals(agreementEntity.getStartDate(), approvedDto.getStartDate());
-        Assertions.assertEquals(agreementEntity.getEndDate(), approvedDto.getEndDate());
+        Assert.assertEquals(agreementEntity.getStartDate(), approvedDto.getStartDate());
+        Assert.assertEquals(agreementEntity.getEndDate(), approvedDto.getEndDate());
     }
 
     @Test
-    void Convert_ConvertApprovedAgreementDtoToEntity_Ok() {
+    public void Convert_ConvertApprovedAgreementDtoToEntity_Ok() {
         Agreement dto = createSampleAgreementDtoWithCommonFields(new ApprovedAgreement());
         dto.setState(AgreementState.APPROVEDAGREEMENT);
         ApprovedAgreement approvedDto = (ApprovedAgreement) dto;
@@ -98,27 +95,27 @@ class AgreementConverterTest {
         approvedDto.setEndDate(LocalDate.of(2021, 12, 31));
         AgreementEntity entity = agreementConverter.toEntity(approvedDto);
         commonAssertionsDtoToEntity(entity, dto);
-        Assertions.assertEquals(AgreementStateEnum.APPROVED, entity.getState());
-        Assertions.assertEquals(approvedDto.getStartDate(), entity.getStartDate());
-        Assertions.assertEquals(approvedDto.getEndDate(), entity.getEndDate());
+        Assert.assertEquals(AgreementStateEnum.APPROVED, entity.getState());
+        Assert.assertEquals(approvedDto.getStartDate(), entity.getStartDate());
+        Assert.assertEquals(approvedDto.getEndDate(), entity.getEndDate());
 
     }
 
     private void commonAssertionsEntityToDto(AgreementEntity agreementEntity, Agreement agreementDto) {
-        Assertions.assertEquals(agreementEntity.getId(), agreementDto.getId());
-        Assertions.assertNotNull(agreementEntity.getState());
-        Assertions.assertNotNull(agreementDto.getState());
-        Assertions.assertEquals(agreementEntity.getDiscountsModifiedDate(), agreementDto.getDiscountsLastModifiedDate());
-        Assertions.assertEquals(agreementEntity.getDocumentsModifiedDate(), agreementDto.getDocumentsLastModifiedDate());
-        Assertions.assertEquals(agreementEntity.getProfileModifiedDate(), agreementDto.getProfileLastModifiedDate());
+        Assert.assertEquals(agreementEntity.getId(), agreementDto.getId());
+        Assert.assertNotNull(agreementEntity.getState());
+        Assert.assertNotNull(agreementDto.getState());
+        Assert.assertEquals(agreementEntity.getDiscountsModifiedDate(), agreementDto.getDiscountsLastModifiedDate());
+        Assert.assertEquals(agreementEntity.getDocumentsModifiedDate(), agreementDto.getDocumentsLastModifiedDate());
+        Assert.assertEquals(agreementEntity.getProfileModifiedDate(), agreementDto.getProfileLastModifiedDate());
     }
 
     private void commonAssertionsDtoToEntity(AgreementEntity entity, Agreement dto) {
-        Assertions.assertEquals(dto.getId(), entity.getId());
-        Assertions.assertNotNull(entity.getState());
-        Assertions.assertEquals(dto.getDiscountsLastModifiedDate(), entity.getDiscountsModifiedDate());
-        Assertions.assertEquals(dto.getDocumentsLastModifiedDate(), entity.getDocumentsModifiedDate());
-        Assertions.assertEquals(dto.getProfileLastModifiedDate(), entity.getProfileModifiedDate());
+        Assert.assertEquals(dto.getId(), entity.getId());
+        Assert.assertNotNull(entity.getState());
+        Assert.assertEquals(dto.getDiscountsLastModifiedDate(), entity.getDiscountsModifiedDate());
+        Assert.assertEquals(dto.getDocumentsLastModifiedDate(), entity.getDocumentsModifiedDate());
+        Assert.assertEquals(dto.getProfileLastModifiedDate(), entity.getProfileModifiedDate());
     }
 
     private AgreementEntity createSampleAgreementEntityWithCommonFields() {

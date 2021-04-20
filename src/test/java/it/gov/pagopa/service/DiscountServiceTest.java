@@ -1,9 +1,13 @@
 package it.gov.pagopa.service;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.DiscountEntity;
-import org.hibernate.SessionFactory;
+import it.gov.pagopa.repository.AgreementRepository;
+import it.gov.pagopa.repository.AgreementUserRepository;
+import it.gov.pagopa.repository.DiscountRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +21,7 @@ import java.util.stream.IntStream;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class DiscountServiceTest extends BaseTest {
+class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private DiscountService discountService;
@@ -26,19 +30,31 @@ class DiscountServiceTest extends BaseTest {
     private AgreementService agreementService;
 
     @Autowired
-    private SessionFactory sessionFactory;
+    private DiscountRepository discountRepository;
+
+    @Autowired
+    private AgreementRepository agreementRepository;
+
+    @Autowired
+    private AgreementUserRepository userRepository;
 
     private AgreementEntity agreementEntity;
 
     @BeforeEach
     void beforeEach() {
         agreementEntity = agreementService.createAgreementIfNotExists();
+    }
+
+    @AfterEach
+    void clean() {
         discountRepository.deleteAll();
+        agreementRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
     void Create_CreateDiscountWithValidData_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -52,17 +68,14 @@ class DiscountServiceTest extends BaseTest {
 
     @Test
     void Create_CreateDiscountWithoutProducts_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setProducts(null);
-        Assertions.assertThrows(Exception.class, ()-> {
-            discountService.createDiscount(agreementEntity.getId(), discountEntity);
-            sessionFactory.getCurrentSession().flush();
-        });
+        Assertions.assertThrows(Exception.class, ()-> discountService.createDiscount(agreementEntity.getId(), discountEntity));
     }
 
     @Test
     void Get_GetDiscountList_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         List<DiscountEntity> discounts = discountService.getDiscounts(agreementEntity.getId());
         Assertions.assertNotNull(discounts);
@@ -99,9 +112,9 @@ class DiscountServiceTest extends BaseTest {
 
     @Test
     void Update_UpdateDiscountWithValidData_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        DiscountEntity updatedDiscount = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDescription("updated_description");
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
@@ -131,18 +144,17 @@ class DiscountServiceTest extends BaseTest {
 
     @Test
     void Update_UpdateDiscountWithRequiredFieldToNull_ThrowException() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         discountEntity.setDescription(null);
         Assertions.assertThrows(Exception.class, () -> {
             discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), discountEntity);
-            sessionFactory.getCurrentSession().flush();
         });
     }
 
     @Test
     void Update_UpdateDiscountNotExists_ThrowException() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDescription(null);
         Assertions.assertThrows(Exception.class,
                 () -> discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), discountEntity));
@@ -150,7 +162,7 @@ class DiscountServiceTest extends BaseTest {
 
     @Test
     void Delete_DeleteDiscount_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Long discountId = discountEntity.getId();
 

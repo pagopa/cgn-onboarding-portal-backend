@@ -1,9 +1,12 @@
 package it.gov.pagopa.controller.profile;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.model.AgreementEntity;
+import it.gov.pagopa.repository.ProfileRepository;
 import it.gov.pagopa.service.AgreementService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.transaction.Transactional;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -22,21 +23,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-class CreateProfileApiTest extends BaseTest {
+class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private AgreementService agreementService;
+    @Autowired
+    private ProfileRepository profileRepository;
 
     private String profilePath;
 
+    @AfterEach
     @BeforeEach
-    void beforeEach() {
+    void clean() {
         AgreementEntity agreement = agreementService.createAgreementIfNotExists();
-        profilePath = getProfilePath(agreement.getId());
+        profileRepository.deleteAll();
+        profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 
     @Test
@@ -44,7 +48,7 @@ class CreateProfileApiTest extends BaseTest {
         CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -63,7 +67,7 @@ class CreateProfileApiTest extends BaseTest {
         CreateProfile createProfile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
 
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
 
@@ -77,7 +81,7 @@ class CreateProfileApiTest extends BaseTest {
         onlineChannel.setWebsiteUrl(null);
 
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
 
@@ -88,7 +92,7 @@ class CreateProfileApiTest extends BaseTest {
         CreateProfile createProfile = createSampleCreateBothWithoutRequiredWebsiteUrlProfile();
 
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
 
@@ -99,11 +103,11 @@ class CreateProfileApiTest extends BaseTest {
         CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().is2xxSuccessful());
         this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(getJson(createProfile)))
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
 
@@ -131,7 +135,7 @@ class CreateProfileApiTest extends BaseTest {
         CreateProfile createProfile = createSampleCreateProfile();
         BothChannels bothChannels = new BothChannels();
         bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
-        bothChannels.setAddresses(createSampleAddressDto());
+        bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         createProfile.setSalesChannel(bothChannels);
         return createProfile;
     }

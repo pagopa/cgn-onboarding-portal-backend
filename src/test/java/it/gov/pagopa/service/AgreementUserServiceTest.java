@@ -1,8 +1,9 @@
 package it.gov.pagopa.service;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
 import it.gov.pagopa.model.AgreementUserEntity;
 import it.gov.pagopa.repository.AgreementUserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class AgreementUserServiceTest extends BaseTest {
+class AgreementUserServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private AgreementUserService userService;
@@ -21,10 +22,10 @@ class AgreementUserServiceTest extends BaseTest {
     private AgreementUserRepository userRepository;
 
     @BeforeEach
-    void beforeEach() {
+    @AfterEach
+    void clean() {
         userRepository.deleteAll();
     }
-
 
     @Test
     void Create_CreateSubscriptionUserWithSubscriptionIdAndUserId_Ok() {

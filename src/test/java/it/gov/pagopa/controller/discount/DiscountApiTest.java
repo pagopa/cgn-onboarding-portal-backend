@@ -1,13 +1,16 @@
 package it.gov.pagopa.controller.discount;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.model.AgreementEntity;
 import it.gov.pagopa.model.DiscountEntity;
 import it.gov.pagopa.model.DiscountProductEntity;
+import it.gov.pagopa.repository.DiscountRepository;
 import it.gov.pagopa.service.AgreementService;
 import it.gov.pagopa.service.DiscountService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -30,8 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-class DiscountApiTest extends BaseTest {
+class DiscountApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,21 +43,25 @@ class DiscountApiTest extends BaseTest {
     @Autowired
     private DiscountService discountService;
 
+    @Autowired
+    private DiscountRepository discountRepository;
+
     private String discountPath;
     private AgreementEntity agreement;
 
-
+    @AfterEach
     @BeforeEach
-    void beforeEach() {
+    void clean() {
         agreement = agreementService.createAgreementIfNotExists();
-        discountPath = getDiscountPath(agreement.getId());
+        discountRepository.deleteAll();
+        discountPath = TestUtils.getDiscountPath(agreement.getId());
     }
 
     @Test
     void Create_CreateDiscount_Ok() throws Exception {
         CreateDiscount discount = createSampleCreateDiscount();
         this.mockMvc.perform(
-                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(getJson(discount)))
+                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -79,14 +84,14 @@ class DiscountApiTest extends BaseTest {
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStartDate(null);
         this.mockMvc.perform(
-                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(getJson(discount)))
+                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void Get_GetDiscount_Found() throws Exception {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount( agreement.getId(), discountEntity);
 
         this.mockMvc.perform(
@@ -115,7 +120,7 @@ class DiscountApiTest extends BaseTest {
 
     @Test
     void Delete_DeleteDiscount_Ok() throws Exception {
-        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
         this.mockMvc.perform(
                 delete(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))

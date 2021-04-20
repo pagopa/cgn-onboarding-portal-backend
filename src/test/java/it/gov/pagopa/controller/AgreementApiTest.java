@@ -1,7 +1,12 @@
 package it.gov.pagopa.controller;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
+import it.gov.pagopa.repository.AgreementRepository;
+import it.gov.pagopa.repository.AgreementUserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,8 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.transaction.Transactional;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -19,16 +22,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-class AgreementApiTest extends BaseTest {
+class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private AgreementRepository agreementRepository;
+
+    @Autowired
+    private AgreementUserRepository userRepository;
+
+    @AfterEach
+    @BeforeEach
+    void clean() {
+        agreementRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void Create_CreateAgreement_Ok() throws Exception {
         this.mockMvc.perform(
-                post(AGREEMENTS_CONTROLLER_PATH))
+                post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

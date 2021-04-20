@@ -1,41 +1,38 @@
 package it.gov.pagopa.converter.referent;
 
-import it.gov.pagopa.BaseTest;
+import it.gov.pagopa.cgn.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.Referent;
 import it.gov.pagopa.model.ReferentEntity;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@SpringBootTest
-@ActiveProfiles({"dev"})
-class ReferentConverterTest extends BaseTest {
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+public class ReferentConverterTest {
 
-    @Autowired
-    private ReferentConverter referentConverter;
+    private ReferentConverter referentConverter = new ReferentConverter();
 
     @Test
-    void Convert_ConvertReferentEntityToDTO_Ok() {
-        ReferentEntity referentEntity = createSampleProfileWithCommonFields().getReferent();
+    public void Convert_ConvertReferentEntityToDTO_Ok() {
+        ReferentEntity referentEntity = TestUtils.createSampleProfileWithCommonFields().getReferent();
         Referent referentDto = referentConverter.toDto(referentEntity);
-        Assertions.assertEquals(referentEntity.getFirstName(), referentDto.getFirstName());
+        Assert.assertEquals(referentEntity.getFirstName(), referentDto.getFirstName());
 
-        Assertions.assertEquals(referentEntity.getLastName(), referentDto.getLastName());
-        Assertions.assertEquals(referentEntity.getEmailAddress(), referentDto.getEmailAddress());
-        Assertions.assertEquals(referentEntity.getTelephoneNumber(), referentDto.getTelephoneNumber());
+        Assert.assertEquals(referentEntity.getLastName(), referentDto.getLastName());
+        Assert.assertEquals(referentEntity.getEmailAddress(), referentDto.getEmailAddress());
+        Assert.assertEquals(referentEntity.getTelephoneNumber(), referentDto.getTelephoneNumber());
     }
 
     @Test
-    void Convert_ConvertReferentDTOToEntity_Ok() {
+    public void Convert_ConvertReferentDTOToEntity_Ok() {
         Referent referentDto = createSampleReferent();
         ReferentEntity referentEntity  = referentConverter.toEntity(referentDto);
-        Assertions.assertEquals(referentDto.getFirstName(), referentEntity.getFirstName());
-        Assertions.assertEquals(referentDto.getLastName(), referentEntity.getLastName());
-        Assertions.assertEquals(referentDto.getEmailAddress(), referentEntity.getEmailAddress());
-        Assertions.assertEquals(referentDto.getTelephoneNumber(), referentEntity.getTelephoneNumber());
+        Assert.assertEquals(referentDto.getFirstName(), referentEntity.getFirstName());
+        Assert.assertEquals(referentDto.getLastName(), referentEntity.getLastName());
+        Assert.assertEquals(referentDto.getEmailAddress(), referentEntity.getEmailAddress());
+        Assert.assertEquals(referentDto.getTelephoneNumber(), referentEntity.getTelephoneNumber());
     }
 
 

@@ -1,4 +1,4 @@
-package it.gov.pagopa;
+package it.gov.pagopa.cgn;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,57 +10,25 @@ import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.enums.DiscountStateEnum;
 import it.gov.pagopa.enums.SalesChannelEnum;
 import it.gov.pagopa.model.*;
-import it.gov.pagopa.repository.AgreementRepository;
-import it.gov.pagopa.repository.AgreementUserRepository;
-import it.gov.pagopa.repository.DiscountRepository;
-import it.gov.pagopa.repository.ProfileRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Slf4j
-public class BaseTest {
+public class TestUtils {
+    public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
 
-    protected static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
 
-    @Autowired
-    protected AgreementUserRepository userRepository;
-
-    @Autowired
-    protected AgreementRepository agreementRepository;
-
-    @Autowired
-    protected DiscountRepository discountRepository;
-
-    @Autowired
-    protected ProfileRepository profileRepository;
-
-   // @AfterAll
-    public void afterAll() {
-        log.info("AfterAll-->");
-        discountRepository.deleteAll();
-        profileRepository.deleteAll();
-        agreementRepository.deleteAll();
-        userRepository.deleteAll();
-        log.info("<--AfterAll");
-    }
-
-    protected String getProfilePath(String agreementId) {
+    public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/profile";
     }
 
-    protected String getDiscountPath(String agreementId) {
+    public static String getDiscountPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/discounts";
     }
 
-    protected ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
+    public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
         referentEntity.setFirstName("FIRST_NAME");
         referentEntity.setLastName("LAST_NAME");
@@ -70,7 +38,7 @@ public class BaseTest {
         return referentEntity;
     }
 
-    protected ProfileEntity createSampleProfileWithCommonFields() {
+    public static ProfileEntity createSampleProfileWithCommonFields() {
         ProfileEntity profileEntity = new ProfileEntity();
         profileEntity.setFullName("FULL_NAME");
         profileEntity.setName("NAME");
@@ -80,7 +48,7 @@ public class BaseTest {
         return profileEntity;
     }
 
-    protected List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
+    public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
         addressEntity.setProfile(profileEntity);
         addressEntity.setStreet("GARIBALDI 1");
@@ -94,7 +62,7 @@ public class BaseTest {
         return list;
     }
 
-    protected List<Address> createSampleAddressDto() {
+    public static List<Address> createSampleAddressDto() {
         Address address = new Address();
         address.setStreet("GARIBALDI 1");
         address.setCity("ROME");
@@ -103,7 +71,7 @@ public class BaseTest {
         return Collections.singletonList(address);
     }
 
-    protected ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity) {
+    public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity) {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields();
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
@@ -111,7 +79,7 @@ public class BaseTest {
         return profileEntity;
     }
 
-    protected UpdateProfile createSampleUpdateProfileWithCommonFields() {
+    public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
         profileDto.setName("name_dto");
         profileDto.setDescription("description_dto");
@@ -125,7 +93,7 @@ public class BaseTest {
         return profileDto;
     }
 
-    protected DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
+    public static DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
         DiscountEntity discountEntity = new DiscountEntity();
         discountEntity.setState(DiscountStateEnum.DRAFT);
         discountEntity.setName("discount_name");
@@ -140,7 +108,7 @@ public class BaseTest {
         return discountEntity;
     }
 
-    protected List<DiscountProductEntity> getProductEntityList(DiscountEntity discountEntity) {
+    public static List<DiscountProductEntity> getProductEntityList(DiscountEntity discountEntity) {
         List<DiscountProductEntity> productEntityList = new ArrayList<>();
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory("VIAGGI");
@@ -152,13 +120,10 @@ public class BaseTest {
         return productEntityList;
     }
 
-    protected String getJson(Object obj) throws JsonProcessingException {
+    public static String getJson(Object obj) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper.writeValueAsString(obj);
     }
-
-
-
 }
