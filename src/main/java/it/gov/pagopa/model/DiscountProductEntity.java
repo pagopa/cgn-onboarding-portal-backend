@@ -6,19 +6,19 @@ import lombok.ToString;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "DISCOUNT_PRODUCT_CATEGORY")
+@Table(name = "discount_product_category")
 @Data
 @IdClass(DiscountProductKey.class)
 public class DiscountProductEntity extends BaseEntity {
 
     @Id
-    @Column(name = "PRODUCT_CATEGORY", length = 100)
+    @Column(name = "product_category", length = 100)
     private String productCategory;
 
     @ToString.Exclude
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DISCOUNT_FK", nullable = false)
+    @JoinColumn(name = "discount_fk", nullable = false)
     private DiscountEntity discount;
 
 }

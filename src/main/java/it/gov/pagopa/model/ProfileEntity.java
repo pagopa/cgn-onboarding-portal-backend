@@ -13,19 +13,22 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 @Entity
-@Table(name = "PROFILE")
-@SequenceGenerator(name = "PROFILE_SEQUENCE", sequenceName = "PROFILE_SEQ", allocationSize = 1)
+@Table(name = "profile")
 @Data
 public class ProfileEntity extends BaseEntity {
 
     @Id
-    @Column(name = "PROFILE_K")
-    @GeneratedValue(generator = "PROFILE_SEQUENCE")
+    @Column(name = "profile_k")
+    @SequenceGenerator(name="profile_profile_k_seq",
+            sequenceName="profile_profile_k_seq",
+            allocationSize=1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator="profile_profile_k_seq")
     private Long id;
 
     @NotNull
     @NotBlank
-    @Column(name = "FULL_NAME", length = 100)
+    @Column(name = "full_name", length = 100)
     private String fullName;
 
     @Column(name = "name", length = 100)
@@ -34,30 +37,30 @@ public class ProfileEntity extends BaseEntity {
     @NotNull
     @NotBlank
     @Email
-    @Column(name = "PEC_ADDRESS", length = 320)
+    @Column(name = "pec_address", length = 320)
     private String pecAddress;
 
     @NotNull
     @NotBlank
-    @Column(name = "DESCRIPTION", length = 300)
+    @Column(name = "description", length = 300)
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "SALES_CHANNEL", length = 50)
+    @Column(name = "sales_channel", length = 50)
     @NotNull
     private SalesChannelEnum salesChannel;
 
     @URL
-    @Column(name = "WEBSITE_URL", length = 500)
+    @Column(name = "website_url", length = 500)
     private String websiteUrl;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "AGREEMENT_FK", updatable = false, nullable = false, unique = true)
+    @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
 
     @EqualsAndHashCode.Exclude
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "REFERENT_FK", nullable = false)
+    @JoinColumn(name = "referent_fk", nullable = false)
     private ReferentEntity referent;
 
     @EqualsAndHashCode.Exclude

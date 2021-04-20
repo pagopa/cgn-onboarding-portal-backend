@@ -5,24 +5,24 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.io.Serializable;
-import java.time.LocalTime;
+import java.time.OffsetDateTime;
 
 @MappedSuperclass
 public abstract class BaseEntity implements Serializable {
 
-    @Column(name = "INSERT_TIME", nullable = false, updatable = false)
-    protected LocalTime insertTime;
+    @Column(name = "insert_time", nullable = false, updatable = false)
+    protected OffsetDateTime insertTime;
 
-    @Column(name = "UPDATE_TIME")
-    protected LocalTime updateTime;
+    @Column(name = "update_time")
+    protected OffsetDateTime updateTime;
 
     @PrePersist
     protected void onInsert() {
-        insertTime = LocalTime.now();
+        insertTime = OffsetDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updateTime = LocalTime.now();
+        updateTime = OffsetDateTime.now();
     }
 }

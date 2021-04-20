@@ -9,19 +9,19 @@ import javax.validation.constraints.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "AGREEMENT_USER")
+@Table(name = "agreement_user")
 @Data
 public class AgreementUserEntity extends BaseEntity {
 
     @Id
     @NotBlank
     @NotNull
-    @Column(name = "AGREEMENT_USER_K", length = 16)
+    @Column(name = "agreement_user_k", length = 16)
     private String userId;
 
     @NotNull
     @NotBlank
-    @Column(name = "AGREEMENT_ID", length = 36)
+    @Column(name = "agreement_id", length = 36)
     private String subscriptionId;
 
     @PreUpdate

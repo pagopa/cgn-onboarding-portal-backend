@@ -10,34 +10,34 @@ import java.time.LocalDate;
 
 
 @Entity
-@Table(name = "AGREEMENT")
+@Table(name = "agreement")
 @Data
 public class AgreementEntity extends BaseEntity {
 
     @Id
     @NotNull
     @NotBlank
-    @Column(name = "AGREEMENT_K", length = 36)
+    @Column(name = "agreement_k", length = 36)
     private String id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", length = 50)
+    @Column(name = "state", length = 50)
     @NotNull
     private AgreementStateEnum state;
 
-    @Column(name = "START_DATE")
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "END_DATE")
+    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "PROFILE_MODIFIED_DATE")
+    @Column(name = "profile_modified_date")
     private LocalDate profileModifiedDate;
 
-    @Column(name = "DISCOUNTS_MODIFIED_DATE")
+    @Column(name = "discounts_modified_date")
     private LocalDate discountsModifiedDate;
 
-    @Column(name = "DOCUMENTS_MODIFIED_DATE")
+    @Column(name = "documents_modified_date")
     private LocalDate documentsModifiedDate;
 
 }

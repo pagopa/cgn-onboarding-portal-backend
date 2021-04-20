@@ -9,46 +9,49 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "ADDRESS")
-@SequenceGenerator(name = "ADDRESS_SEQUENCE", sequenceName = "ADDRESS_SEQ", allocationSize = 1)
+@Table(name = "address")
 @Data
 public class AddressEntity extends BaseEntity {
 
     @Id
-    @Column(name = "ADDRESS_K")
-    @GeneratedValue(generator = "ADDRESS_SEQUENCE")
+    @Column(name = "address_k")
+    @SequenceGenerator(name="address_address_k_seq",
+            sequenceName="address_address_k_seq",
+            allocationSize=1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator="address_address_k_seq")
     private Long id;
 
     @NotNull
     @NotBlank
-    @Column(name = "STREET")
+    @Column(name = "street")
     private String street;
 
     @NotNull
     @NotBlank
-    @Column(name = "ZIP_CODE", length = 5)
+    @Column(name = "zip_code", length = 5)
     private String zipCode;
 
     @NotNull
     @NotBlank
-    @Column(name = "CITY")
+    @Column(name = "city")
     private String city;
 
     @NotNull
     @NotBlank
-    @Column(name = "DISTRICT", length = 2)
+    @Column(name = "district", length = 2)
     private String district;
 
-    @Column(name = "LATITUDE")
+    @Column(name = "latitude")
     private Double latitude;
 
-    @Column(name = "LONGITUDE")
+    @Column(name = "longitude")
     private Double longitude;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne
-    @JoinColumn(name = "PROFILE_FK", nullable = false)
+    @JoinColumn(name = "profile_fk", nullable = false)
     private ProfileEntity profile;
 
 }

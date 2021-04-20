@@ -10,35 +10,38 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "REFERENT")
-@SequenceGenerator(name = "REFERENT_SEQUENCE", sequenceName = "REFERENT_SEQ", allocationSize = 1)
+@Table(name = "referent")
 @Data
 public class ReferentEntity extends BaseEntity {
 
     @Id
-    @Column(name = "REFERENT_K")
-    @GeneratedValue(generator = "REFERENT_SEQUENCE")
+    @Column(name = "referent_k")
+    @SequenceGenerator(name="referent_referent_k_seq",
+            sequenceName="referent_referent_k_seq",
+            allocationSize=1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator="referent_referent_k_seq")
     private Long id;
 
     @NotNull
     @NotBlank
-    @Column(name = "FIRST_NAME", length = 50)
+    @Column(name = "first_name", length = 50)
     private String firstName;
 
     @NotNull
     @NotBlank
-    @Column(name = "LAST_NAME", length = 50)
+    @Column(name = "last_name", length = 50)
     private String lastName;
 
     @NotNull
     @NotBlank
     @Email
-    @Column(name = "EMAIL_ADDRESS", length = 320)
+    @Column(name = "email_address", length = 320)
     private String emailAddress;
 
     @NotNull
     @NotBlank
-    @Column(name = "TELEPHONE_NUMBER", length = 15)
+    @Column(name = "telephone_number", length = 15)
     private String telephoneNumber;
 
     @ToString.Exclude

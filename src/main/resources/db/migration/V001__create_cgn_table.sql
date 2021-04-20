@@ -1,104 +1,124 @@
+CREATE TABLE agreement_user
+(
+    agreement_user_k VARCHAR(16) NOT NULL,
+    agreement_id     VARCHAR(36) NOT NULL,
+    insert_time      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time      TIMESTAMPTZ,
 
-CREATE TABLE AGREEMENT_USER (
-    AGREEMENT_USER_K                    VARCHAR (16),
-    AGREEMENT_ID                        VARCHAR(36) NOT NULL,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT AGREEMENT_USER_PK PRIMARY KEY (AGREEMENT_USER_K)
-);
-CREATE UNIQUE INDEX IDX_AGREEMENT_USER_SUBSC_ID ON AGREEMENT_USER(AGREEMENT_ID);
-
-CREATE TABLE AGREEMENT (
-    AGREEMENT_K                         VARCHAR(36) NOT NULL,
-    STATE                               VARCHAR(50) NOT NULL,
-    START_DATE                          DATE,
-    END_DATE                            DATE,
-    PROFILE_MODIFIED_DATE               DATE,
-    DISCOUNTS_MODIFIED_DATE             DATE,
-    DOCUMENTS_MODIFIED_DATE             DATE,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT AGREEMENT_PK PRIMARY KEY (AGREEMENT_K),
-    CONSTRAINT AGREEMENT_FK FOREIGN KEY (AGREEMENT_K) REFERENCES AGREEMENT_USER(AGREEMENT_ID)
+    CONSTRAINT agreement_user_pk PRIMARY KEY (agreement_user_k),
+    CONSTRAINT agreement_user_agreement_id_uk UNIQUE (agreement_id)
 );
 
-CREATE TABLE REFERENT (
-    REFERENT_K                          BIGINT NOT NULL,
-    FIRST_NAME                          VARCHAR (50) NOT NULL,
-    LAST_NAME                           VARCHAR (50) NOT NULL,
-    EMAIL_ADDRESS                       VARCHAR (320) NOT NULL,
-    TELEPHONE_NUMBER                    VARCHAR (15) NOT NULL,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT REFERENT_PK PRIMARY KEY (REFERENT_K)
-);
-CREATE SEQUENCE REFERENT_SEQ START WITH 1 INCREMENT BY 1;
 
-CREATE TABLE PROFILE (
-    PROFILE_K                           BIGINT NOT NULL,
-    FULL_NAME                           VARCHAR(100) NOT NULL,
-    NAME                                VARCHAR(100),
-    PEC_ADDRESS                         VARCHAR (320) NOT NULL,
-    DESCRIPTION                         VARCHAR (300) NOT NULL,
-    SALES_CHANNEL                       VARCHAR (50) NOT NULL,
-    WEBSITE_URL                         VARCHAR (500),
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    AGREEMENT_FK                        VARCHAR(36) NOT NULL,
-    REFERENT_FK                         BIGINT NOT NULL,
-    CONSTRAINT PROFILE_PK PRIMARY KEY (PROFILE_K),
-    CONSTRAINT PROFILE_AGREEMENT_FK FOREIGN KEY (AGREEMENT_FK) REFERENCES AGREEMENT(AGREEMENT_K),
-    CONSTRAINT PROFILE_REFERENT_FK FOREIGN KEY (REFERENT_FK) REFERENCES REFERENT(REFERENT_K)
-);
-CREATE SEQUENCE PROFILE_SEQ START WITH 1 INCREMENT BY 1;
-CREATE UNIQUE INDEX IDX_PROFILE_AGREEMENT ON PROFILE(AGREEMENT_FK);
-CREATE UNIQUE INDEX IDX_PROFILE_REFERENT_FK ON PROFILE(REFERENT_FK);
+CREATE TYPE agreement_state_enum AS ENUM ('DRAFT', 'PENDING', 'APPROVED', 'REJECTED');
+CREATE CAST (character varying AS agreement_state_enum) WITH INOUT AS ASSIGNMENT;
 
-CREATE TABLE ADDRESS (
-    ADDRESS_K                           BIGINT NOT NULL,
-    STREET                              VARCHAR(255) NOT NULL,
-    ZIP_CODE                            VARCHAR(5) NOT NULL,
-    CITY                                VARCHAR(255) NOT NULL,
-    DISTRICT                            VARCHAR(2) NOT NULL,
-    LATITUDE                            DOUBLE PRECISION,
-    LONGITUDE                           DOUBLE PRECISION,
-    PROFILE_FK                          BIGINT NOT NULL,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT ADDRESS_PK PRIMARY KEY (ADDRESS_K),
-    CONSTRAINT ADDRESS_PROFILE_FK FOREIGN KEY (PROFILE_FK) REFERENCES PROFILE(PROFILE_K)
- );
-CREATE SEQUENCE ADDRESS_SEQ START WITH 1 INCREMENT BY 1;
-CREATE INDEX IDX_ADDRESS_PROFILE_FK ON ADDRESS(PROFILE_FK);
+CREATE TABLE agreement
+(
+    agreement_k             VARCHAR(36)          NOT NULL,
+    state                   agreement_state_enum NOT NULL,
+    start_date              DATE,
+    end_date                DATE,
+    profile_modified_date   DATE,
+    discounts_modified_date DATE,
+    documents_modified_date DATE,
+    insert_time             TIMESTAMPTZ          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time             TIMESTAMPTZ,
 
-
-CREATE TABLE DISCOUNT (
-    DISCOUNT_K                          BIGINT NOT NULL,
-    STATE                               VARCHAR (50) NOT NULL,
-    NAME                                VARCHAR (100) NOT NULL,
-    DESCRIPTION                         VARCHAR (250) NOT NULL,
-    START_DATE                          DATE NOT NULL,
-    END_DATE                            DATE NOT NULL,
-    DISCOUNT_VALUE                      DOUBLE PRECISION NOT NULL,
-    CONDITION                           VARCHAR (200) NOT NULL,        
-    STATIC_CODE                         VARCHAR (100),
-    AGREEMENT_FK                        VARCHAR(36) NOT NULL,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT DISCOUNT_PK PRIMARY KEY (DISCOUNT_K),
-    CONSTRAINT DISCOUNT_AGREEMENT_FK FOREIGN KEY (AGREEMENT_FK) REFERENCES AGREEMENT(AGREEMENT_K)
-);
-CREATE SEQUENCE DISCOUNT_SEQ START WITH 1 INCREMENT BY 1;
-CREATE INDEX IDX_DISCOUNT_AGREEMENT ON DISCOUNT(AGREEMENT_FK);
-
-
-CREATE TABLE DISCOUNT_PRODUCT_CATEGORY (
-    PRODUCT_CATEGORY                    VARCHAR (100) NOT NULL,
-    DISCOUNT_FK                         BIGINT NOT NULL,
-    INSERT_TIME                         TIME DEFAULT NOW() NOT NULL,
-    UPDATE_TIME                         TIME,
-    CONSTRAINT DISCOUNT_PRODUCT_CATEGORY_PK PRIMARY KEY (DISCOUNT_FK, PRODUCT_CATEGORY),
-    CONSTRAINT DISCOUNT_PRODUCT_CATEGORY_FK FOREIGN KEY (DISCOUNT_FK) REFERENCES DISCOUNT(DISCOUNT_K)
+    CONSTRAINT agreement_pk PRIMARY KEY (agreement_k),
+    CONSTRAINT agreement_fk FOREIGN KEY (agreement_k) REFERENCES agreement_user (agreement_id)
 );
 
-   
+
+CREATE TABLE referent
+(
+    referent_k       BIGSERIAL    NOT NULL,
+    first_name       VARCHAR(50)  NOT NULL,
+    last_name        VARCHAR(50)  NOT NULL,
+    email_address    VARCHAR(320) NOT NULL,
+    telephone_number VARCHAR(15)  NOT NULL,
+    insert_time      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time      TIMESTAMPTZ,
+
+    CONSTRAINT referent_pk PRIMARY KEY (referent_k)
+);
+
+
+CREATE TYPE sales_channel_enum AS ENUM ('ONLINE', 'OFFLINE', 'BOTH');
+CREATE CAST (character varying AS sales_channel_enum) WITH INOUT AS ASSIGNMENT;
+
+CREATE TABLE profile
+(
+    profile_k     BIGSERIAL          NOT NULL,
+    full_name     VARCHAR(100)       NOT NULL,
+    name          VARCHAR(100),
+    pec_address   VARCHAR(320)       NOT NULL,
+    description   VARCHAR(300)       NOT NULL,
+    sales_channel sales_channel_enum NOT NULL,
+    website_url   VARCHAR(500),
+    insert_time   TIMESTAMPTZ        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMPTZ,
+    agreement_fk  VARCHAR(36)        NOT NULL,
+    referent_fk   BIGINT             NOT NULL,
+
+    CONSTRAINT profile_pk PRIMARY KEY (profile_k),
+    CONSTRAINT profile_agreement_uk UNIQUE (agreement_fk),
+    CONSTRAINT profile_referent_uk UNIQUE (referent_fk),
+    CONSTRAINT profile_agreement_fk FOREIGN KEY (agreement_fk) REFERENCES agreement (agreement_k),
+    CONSTRAINT profile_referent_fk FOREIGN KEY (referent_fk) REFERENCES referent (referent_k)
+);
+
+
+CREATE TABLE address
+(
+    address_k   BIGSERIAL    NOT NULL,
+    street      VARCHAR(255) NOT NULL,
+    zip_code    VARCHAR(5)   NOT NULL,
+    city        VARCHAR(255) NOT NULL,
+    district    VARCHAR(2)   NOT NULL,
+    latitude    DOUBLE PRECISION,
+    longitude   DOUBLE PRECISION,
+    profile_fk  BIGINT       NOT NULL,
+    insert_time TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ,
+
+    CONSTRAINT address_pk PRIMARY KEY (address_k),
+    CONSTRAINT address_profile_fk FOREIGN KEY (profile_fk) REFERENCES profile (profile_k)
+);
+CREATE INDEX address_profile_fk_idx ON address (profile_fk);
+
+
+CREATE TYPE discount_state_enum AS ENUM ('DRAFT', 'PUBLISHED', 'REJECTED');
+CREATE CAST (character varying AS discount_state_enum) WITH INOUT AS ASSIGNMENT;
+
+CREATE TABLE discount
+(
+    discount_k     BIGSERIAL           NOT NULL,
+    state          discount_state_enum NOT NULL,
+    name           VARCHAR(100)        NOT NULL,
+    description    VARCHAR(250)        NOT NULL,
+    start_date     DATE                NOT NULL,
+    end_date       DATE                NOT NULL,
+    discount_value DOUBLE PRECISION    NOT NULL CHECK (discount_value > 0 AND discount_value < 100),
+    condition      VARCHAR(200)        NOT NULL,
+    static_code    VARCHAR(100),
+    agreement_fk   VARCHAR(36)         NOT NULL,
+    insert_time    TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time    TIMESTAMPTZ,
+
+    CONSTRAINT discount_pk PRIMARY KEY (discount_k),
+    CONSTRAINT discount_agreement_fk FOREIGN KEY (agreement_fk) REFERENCES agreement (agreement_k)
+);
+CREATE INDEX discount_agreement_fk ON discount (agreement_fk);
+
+
+CREATE TABLE discount_product_category
+(
+    product_category VARCHAR(100) NOT NULL,
+    discount_fk      BIGINT       NOT NULL,
+    insert_time      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time      TIMESTAMPTZ,
+
+    CONSTRAINT discount_product_category_pk PRIMARY KEY (discount_fk, product_category),
+    CONSTRAINT discount_product_category_fk FOREIGN KEY (discount_fk) REFERENCES DISCOUNT (discount_k)
+);

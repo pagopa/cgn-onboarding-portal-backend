@@ -12,55 +12,58 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "DISCOUNT")
-@SequenceGenerator(name = "DISCOUNT_SEQUENCE", sequenceName = "DISCOUNT_SEQ", allocationSize = 1)
+@Table(name = "discount")
 @Data
 public class DiscountEntity extends BaseEntity {
 
     @Id
-    @Column(name = "DISCOUNT_K")
-    @GeneratedValue(generator = "DISCOUNT_SEQUENCE")
+    @Column(name = "discount_k")
+    @SequenceGenerator(name="discount_discount_k_seq",
+            sequenceName="discount_discount_k_seq",
+            allocationSize=1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator="discount_discount_k_seq")
     private Long id;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", length = 50)
+    @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
     @NotNull
     @NotBlank
-    @Column(name = "NAME", length = 100)
+    @Column(name = "name", length = 100)
     private String name;
 
     @NotNull
     @NotBlank
-    @Column(name = "DESCRIPTION", length = 250)
+    @Column(name = "description", length = 250)
     private String description;
 
     @NotNull
-    @Column(name = "START_DATE")
+    @Column(name = "start_date")
     private LocalDate startDate;
 
     @NotNull
-    @Column(name = "END_DATE")
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     @NotNull
     @Min(value = 0)
     @Max(value = 100)
-    @Column(name = "DISCOUNT_VALUE")
+    @Column(name = "discount_value")
     private Double discountValue;
 
     @NotNull
     @NotBlank
-    @Column(name = "CONDITION", length = 200)
+    @Column(name = "condition", length = 200)
     private String condition;
 
-    @Column(name = "STATIC_CODE", length = 100)
+    @Column(name = "static_code", length = 100)
     private String staticCode;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "AGREEMENT_FK", updatable = false, nullable = false, unique = true)
+    @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
 
     @NotNull
