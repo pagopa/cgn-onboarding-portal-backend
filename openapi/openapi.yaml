@@ -15,13 +15,17 @@ tags:
     description: Profile
   - name: discount
     description: Discount
+  - name: document-template
+    description: Document template
+  - name: document
+    description: Document
 
 paths:
   /agreements:
     post:
       tags:
         - agreement
-      summary: Create a agreement
+      summary: Create an agreement
       operationId: createAgreement
       responses:
         200:
@@ -31,11 +35,35 @@ paths:
         403:
           $ref: '#/responses/Forbidden'
 
+  /agreements/{agreementId}/images:
+    post:
+      tags:
+        - agreement
+      summary: Upload an image
+      operationId: uploadImage
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - in: formData
+          name: image
+          type: file
+          required: true
+      responses:
+        200:
+          description: Image uploaded
+          schema:
+            $ref: '#/definitions/UploadedImage'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
   /agreements/{agreementId}/approval:
     post:
       tags:
         - agreement
-      summary: Request approval
+      summary: Request agreement approval
       operationId: requestApproval
       parameters:
         - $ref: '#/parameters/AgreementId'
@@ -203,6 +231,101 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
+  /agreements/{agreementId}/discounts/{discountId}/publishing:
+    post:
+      tags:
+        - discount
+      summary: Publish a discount
+      operationId: publishDiscount
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
+      responses:
+        204:
+          description: Discount published
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /agreements/{agreementId}/document-templates/{documentType}:
+    get:
+      tags:
+        - document-template
+      summary: Download a document template
+      operationId: downloadDocumentTemplate
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DocumentType'
+      responses:
+        200:
+          description: Document template
+          schema:
+            type: file
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /agreements/{agreementId}/documents:
+    get:
+      tags:
+        - document
+      summary: Get documents
+      operationId: getDocuments
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+      responses:
+        200:
+          description: List of documents
+          schema:
+            $ref: '#/definitions/Documents'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /agreements/{agreementId}/documents/{documentType}:
+    post:
+      tags:
+        - document
+      summary: Upload a document
+      operationId: uploadDocument
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DocumentType'
+        - in: formData
+          name: document
+          type: file
+          required: true
+      responses:
+        200:
+          description: Document uploaded
+          schema:
+            $ref: '#/definitions/Document'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+    delete:
+      tags:
+        - document
+      summary: Delete a document
+      operationId: deleteDocument
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DocumentType'
+      responses:
+        204:
+          description: Document deleted
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
 consumes:
   - application/json
 produces:
@@ -221,6 +344,12 @@ parameters:
     description: Discount id
     required: true
     type: string
+  DocumentType:
+    name: documentType
+    in: path
+    description: Document type
+    required: true
+    type: string
 
 definitions:
   Agreement:
@@ -234,16 +363,8 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/AgreementState'
-      profileLastModifiedDate:
+      logoUrl:
         type: string
-        format: date
-      discountsLastModifiedDate:
-        type: string
-        format: date
-      documentsLastModifiedDate:
-        type: string
-        format: date
-
   DraftAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
@@ -268,11 +389,19 @@ definitions:
           endDate:
             type: string
             format: date
+          firstDiscountPublishingDate:
+            type: string
+            format: date
 
   RejectedAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
       - type: object
+        required:
+          - reasonMessage
+        properties:
+          reasonMessage:
+            type: string
 
   AgreementState:
     type: string
@@ -282,12 +411,24 @@ definitions:
       - ApprovedAgreement
       - RejectedAgreement
 
+  UploadedImage:
+    type: object
+    required:
+      - imageUrl
+    properties:
+      imageUrl:
+        type: string
+
   CreateProfile:
     type: object
     required:
       - fullName
       - name
       - pecAddress
+      - legalOffice
+      - telephoneNumber
+      - legalRepresentativeFullName
+      - legalRepresentativeTaxCode
       - referent
       - description
       - salesChannel
@@ -299,6 +440,15 @@ definitions:
       pecAddress:
         type: string
         format: email
+      legalOffice:
+        type: string
+      telephoneNumber:
+        type: string
+        maxLength: 15
+      legalRepresentativeFullName:
+        type: string
+      legalRepresentativeTaxCode:
+        type: string
       referent:
         $ref: '#/definitions/CreateReferent'
       description:
@@ -311,6 +461,10 @@ definitions:
     required:
       - name
       - pecAddress
+      - legalOffice
+      - telephoneNumber
+      - legalRepresentativeFullName
+      - legalRepresentativeTaxCode
       - referent
       - description
       - salesChannel
@@ -320,6 +474,15 @@ definitions:
       pecAddress:
         type: string
         format: email
+      legalOffice:
+        type: string
+      telephoneNumber:
+        type: string
+        maxLength: 15
+      legalRepresentativeFullName:
+        type: string
+      legalRepresentativeTaxCode:
+        type: string
       referent:
         $ref: '#/definitions/UpdateReferent'
       description:
@@ -336,6 +499,10 @@ definitions:
       - name
       - taxCodeOrVat
       - pecAddress
+      - legalOffice
+      - telephoneNumber
+      - legalRepresentativeFullName
+      - legalRepresentativeTaxCode
       - referent
       - description
       - salesChannel
@@ -353,6 +520,15 @@ definitions:
       pecAddress:
         type: string
         format: email
+      legalOffice:
+        type: string
+      telephoneNumber:
+        type: string
+        maxLength: 15
+      legalRepresentativeFullName:
+        type: string
+      legalRepresentativeTaxCode:
+        type: string
       referent:
         $ref: '#/definitions/Referent'
       description:
@@ -365,6 +541,7 @@ definitions:
     required:
       - firstName
       - lastName
+      - role
       - emailAddress
       - telephoneNumber
     properties:
@@ -372,8 +549,11 @@ definitions:
         type: string
       lastName:
         type: string
+      role:
+        type: string
       emailAddress:
         type: string
+        format: email
       telephoneNumber:
         type: string
         maxLength: 15
@@ -393,9 +573,12 @@ definitions:
       - type: object
         required:
           - websiteUrl
+          - discountCodeType
         properties:
           websiteUrl:
             type: string
+          discountCodeType:
+            $ref: '#/definitions/DiscountCodeType'
 
   OfflineChannel:
     allOf:
@@ -427,6 +610,8 @@ definitions:
             minItems: 1
             items:
               $ref: '#/definitions/Address'
+          discountCodeType:
+            $ref: '#/definitions/DiscountCodeType'
 
   SalesChannelType:
     type: string
@@ -435,17 +620,26 @@ definitions:
       - OfflineChannel
       - BothChannels
 
+  DiscountCodeType:
+    type: string
+    enum:
+      - Static
+      - API
+
   CreateReferent:
     type: object
     required:
       - firstName
       - lastName
+      - role
       - emailAddress
       - telephoneNumber
     properties:
       firstName:
         type: string
       lastName:
+        type: string
+      role:
         type: string
       emailAddress:
         type: string
@@ -459,12 +653,15 @@ definitions:
     required:
       - firstName
       - lastName
+      - role
       - emailAddress
       - telephoneNumber
     properties:
       firstName:
         type: string
       lastName:
+        type: string
+      role:
         type: string
       emailAddress:
         type: string
@@ -484,8 +681,10 @@ definitions:
     properties:
       name:
         type: string
+        maxLength: 100
       description:
         type: string
+        maxLength: 250
       startDate:
         type: string
         format: date
@@ -504,6 +703,7 @@ definitions:
           minItems: 1
       condition:
         type: string
+        maxLength: 200
       staticCode:
         type: string
 
@@ -520,8 +720,10 @@ definitions:
     properties:
       name:
         type: string
+        maxLength: 100
       description:
         type: string
+        maxLength: 250
       startDate:
         type: string
         format: date
@@ -540,6 +742,7 @@ definitions:
           minItems: 1
       condition:
         type: string
+        maxLength: 200
       staticCode:
         type: string
 
@@ -617,9 +820,34 @@ definitions:
         type: string
       zipCode:
         type: string
+        minLength: 5
+        maxLength: 5
       city:
         type: string
       district:
+        type: string
+        minLength: 2
+        maxLength: 2
+
+  Documents:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/Document'
+
+  Document:
+    type: object
+    required:
+      - documentType
+      - documentUrl
+    properties:
+      documentType:
+        type: string
+      documentUrl:
         type: string
 
 responses:
