@@ -18,23 +18,23 @@ public class AgreementService {
 
     private final AgreementUserService userService;
 
-    public AgreementEntity findById(String subscriptionId) {
-        return agreementRepository.findById(subscriptionId)
+    public AgreementEntity findById(String agreementId) {
+        return agreementRepository.findById(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
     }
 
     public AgreementEntity createAgreementIfNotExists() {
         AgreementEntity agreementEntity;
-        AgreementUserEntity userSubscription;
+        AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser();
         if (userAgreementOpt.isPresent()) {
-            userSubscription = userAgreementOpt.get();
+            userAgreement = userAgreementOpt.get();
             // current user has already an agreement. Find it
-            agreementEntity = agreementRepository.findById(userSubscription.getSubscriptionId())
-                    .orElseThrow(() -> new RuntimeException("User " + userSubscription.getUserId() + " doesn't have an agreement"));
+            agreementEntity = agreementRepository.findById(userAgreement.getAgreementId())
+                    .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
         } else {
-            userSubscription = userService.create();
-            agreementEntity = createSubscription(userSubscription.getSubscriptionId());
+            userAgreement = userService.create();
+            agreementEntity = createAgreement(userAgreement.getAgreementId());
         }
         return agreementEntity;
     }
@@ -44,9 +44,9 @@ public class AgreementService {
         agreementRepository.save(agreementEntity);
     }
 
-    public void setDiscountsModifiedDate(AgreementEntity subscription) {
-        subscription.setDiscountsModifiedDate(LocalDate.now());
-        agreementRepository.save(subscription);
+    public void setDiscountsModifiedDate(AgreementEntity agreementEntity) {
+        agreementEntity.setDiscountsModifiedDate(LocalDate.now());
+        agreementRepository.save(agreementEntity);
     }
 
     public void setDocumentsModifiedDate(AgreementEntity agreementEntity) {
@@ -54,7 +54,7 @@ public class AgreementService {
         agreementRepository.save(agreementEntity);
     }
 
-    private AgreementEntity createSubscription(String agreementId) {
+    private AgreementEntity createAgreement(String agreementId) {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);

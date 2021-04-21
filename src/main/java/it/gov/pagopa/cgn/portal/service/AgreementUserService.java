@@ -22,7 +22,7 @@ public class AgreementUserService {
     public AgreementUserEntity create() {
         AgreementUserEntity userEntity = new AgreementUserEntity();
         userEntity.setUserId(FAKE_ID);  //TODO get ID from token
-        userEntity.setSubscriptionId(UUID.randomUUID().toString());
+        userEntity.setAgreementId(UUID.randomUUID().toString());
         return userRepository.save(userEntity);
     }
 

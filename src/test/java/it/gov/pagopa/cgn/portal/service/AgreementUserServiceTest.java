@@ -16,17 +16,17 @@ class AgreementUserServiceTest extends IntegrationAbstractTest {
     private AgreementUserService userService;
 
     @Test
-    void Create_CreateSubscriptionUserWithSubscriptionIdAndUserId_Ok() {
+    void Create_CreateAgreementUserWithAgreementIdAndUserId_Ok() {
         AgreementUserEntity userCreated = userService.create();
-        Assertions.assertNotNull(userCreated.getSubscriptionId());
-        Assertions.assertEquals(36, userCreated.getSubscriptionId().length());
+        Assertions.assertNotNull(userCreated.getAgreementId());
+        Assertions.assertEquals(36, userCreated.getAgreementId().length());
         Assertions.assertNotNull(userCreated.getUserId());
     }
 
     @Test
-    void Update_UpdateSubscriptionUser_ThrowsException() {
+    void Update_UpdateAgreementUser_ThrowsException() {
         AgreementUserEntity userCreated = userService.create();
-        userCreated.setSubscriptionId("NEW_SUBSCRIPTION");
+        userCreated.setAgreementId("NEW_AGREEMENT");
         Assertions.assertThrows(Exception.class, () -> {
             userRepository.save(userCreated);
         });

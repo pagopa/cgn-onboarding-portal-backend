@@ -35,7 +35,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
         Optional<AgreementUserEntity> userEntityOptional;
         userEntityOptional = this.userRepository.findAll().stream()
-                .filter((user) -> user.getSubscriptionId().equals(agreementEntity.getId())).findFirst();
+                .filter((user) -> user.getAgreementId().equals(agreementEntity.getId())).findFirst();
         Assertions.assertTrue(userEntityOptional.isPresent());
     }
 

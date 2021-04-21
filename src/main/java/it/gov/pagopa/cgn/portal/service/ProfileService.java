@@ -55,7 +55,7 @@ public class ProfileService {
 
     private ProfileEntity getProfileFromAgreementId(String agreementId) {
         return getOptProfileFromAgreementId(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Profile not found for agreement " + agreementId));
+                .orElseThrow(() -> new InvalidRequestException("Updating profile was not found for agreement " + agreementId));
     }
 
     private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {

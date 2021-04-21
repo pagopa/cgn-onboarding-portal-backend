@@ -22,7 +22,7 @@ public class AgreementUserEntity extends BaseEntity {
     @NotNull
     @NotBlank
     @Column(name = "agreement_id", length = 36)
-    private String subscriptionId;
+    private String agreementId;
 
     @PreUpdate
     @Override

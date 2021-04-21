@@ -127,7 +127,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateProfileAndCheckSubscriptionRegistryDate_DateUpdated() {
+    void Create_CreateProfileAndCheckAgreementRegistryDate_DateUpdated() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);

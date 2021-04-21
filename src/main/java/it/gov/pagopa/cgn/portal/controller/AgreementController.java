@@ -27,8 +27,8 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
-    public ResponseEntity<Profile> createProfile(String subscriptionId, CreateProfile createRegistryDto) {
-        return profileFacade.createProfile(subscriptionId, createRegistryDto);
+    public ResponseEntity<Profile> createProfile(String agreementId, CreateProfile createRegistryDto) {
+        return profileFacade.createProfile(agreementId, createRegistryDto);
     }
 
     @Override
@@ -51,6 +51,7 @@ public class AgreementController implements AgreementsApi {
         return discountFacade.getDiscounts(agreementId);
     }
 
+    @Override
     public ResponseEntity<Discount> updateDiscount(String agreementId, String discountId, UpdateDiscount discount) {
         return discountFacade.updateDiscount(agreementId, discountId, discount);
     }
