@@ -20,13 +20,13 @@ variables:
   BUILD_NUMBER: $(Build.BuildNumber)
   imageRepository: 'cgn-onboarding-portal-backend'
   ${{ if eq(parameters['environment'], 'uat') }}:
-    dockerRegistryServiceConnection: 'cstarregistry-connection'
-    containerRegistry: $(UAT_CONTAINER_REGISTRY)
+    dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY)
     connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
+    webAppName: 'cgnonboardingportal-u-portal-backend1'
   ${{ if eq(parameters['environment'], 'prod') }}:
-    dockerRegistryServiceConnection: 'cstarregistry-connection'
-    containerRegistry: $(UAT_CONTAINER_REGISTRY)
-    connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
+    dockerRegistryServiceConnection: $(PRODUCTION_CONTAINER_REGISTRY)
+    connectedServiceName: $(PRODUCTION_AZURE_SUBSCRIPTION)
+    webAppName: 'cgnonboardingportal-p-portal-backend1'
 steps:
   - task: Cache@2
     inputs:
