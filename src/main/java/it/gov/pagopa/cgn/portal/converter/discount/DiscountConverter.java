@@ -32,10 +32,9 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
     }
 
     protected Function<List<DiscountEntity>, Discounts> toDiscountsDto = discountEntities -> {
-        List<Discount> discountList;
-        Discounts discounts = new Discounts();
-        discountList = CollectionUtils.isEmpty(discountEntities) ?
+        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities) ?
                 Collections.emptyList() : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
+        Discounts discounts = new Discounts();
         discounts.setItems(discountList);
         return discounts;
     };
