@@ -298,6 +298,7 @@ definitions:
         type: string
       pecAddress:
         type: string
+        format: email
       referent:
         $ref: '#/definitions/CreateReferent'
       description:
@@ -318,6 +319,7 @@ definitions:
         type: string
       pecAddress:
         type: string
+        format: email
       referent:
         $ref: '#/definitions/UpdateReferent'
       description:
@@ -350,6 +352,7 @@ definitions:
         type: string
       pecAddress:
         type: string
+        format: email
       referent:
         $ref: '#/definitions/Referent'
       description:
@@ -373,6 +376,7 @@ definitions:
         type: string
       telephoneNumber:
         type: string
+        maxLength: 15
 
   SalesChannel:
     type: object
@@ -404,6 +408,7 @@ definitions:
             type: string
           addresses:
             type: array
+            minItems: 1
             items:
               $ref: '#/definitions/Address'
 
@@ -419,6 +424,7 @@ definitions:
             type: string
           addresses:
             type: array
+            minItems: 1
             items:
               $ref: '#/definitions/Address'
 
@@ -443,8 +449,10 @@ definitions:
         type: string
       emailAddress:
         type: string
+        format: email
       telephoneNumber:
         type: string
+        maxLength: 15
 
   UpdateReferent:
     type: object
@@ -460,8 +468,10 @@ definitions:
         type: string
       emailAddress:
         type: string
+        format: email
       telephoneNumber:
         type: string
+        maxLength: 15
 
   CreateDiscount:
     type: object
