@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.15.3</version>
+           <testcontainer-version>1.15.3</testcontainer-version>
             <scope>test</scope>
         </dependency>
         <dependency>
