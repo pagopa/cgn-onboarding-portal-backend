@@ -1,11 +1,11 @@
 package it.gov.pagopa.cgn.portal.controller;
 
-import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +24,12 @@ public class AgreementController implements AgreementsApi {
     public ResponseEntity<Agreement> createAgreement() {
         return ResponseEntity.ok(
                 agreementConverter.toDto(agreementService.createAgreementIfNotExists()));
+    }
+
+    @Override
+    public ResponseEntity<Void> requestApproval(String agreementId) {
+        agreementService.requestApproval(agreementId);
+        return ResponseEntity.noContent().build();
     }
 
     @Override

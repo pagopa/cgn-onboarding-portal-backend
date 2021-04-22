@@ -7,6 +7,7 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -89,4 +90,9 @@ public class DiscountEntity extends BaseEntity {
             });
         }
     }
+
+    public OffsetDateTime getInsertTime() {
+        return insertTime;
+    }
+
 }

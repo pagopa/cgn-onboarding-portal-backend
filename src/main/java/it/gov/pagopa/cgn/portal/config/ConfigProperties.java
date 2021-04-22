@@ -14,6 +14,9 @@ public class ConfigProperties {
     @Value("${exception_generic_message}")
     private String exceptionGenericMessage;
 
+    @Value("${spring_cors_origin}")
+    private String CORSOrigin;
+
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

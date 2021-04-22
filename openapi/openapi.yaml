@@ -363,7 +363,7 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/AgreementState'
-      logoUrl:
+      imageUrl:
         type: string
   DraftAgreement:
     allOf:
@@ -800,7 +800,9 @@ definitions:
         type: string
       staticCode:
         type: string
-
+      creationDate:
+        type: string
+        format: date
   DiscountState:
     type: string
     enum:

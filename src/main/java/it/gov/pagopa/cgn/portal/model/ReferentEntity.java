@@ -44,6 +44,11 @@ public class ReferentEntity extends BaseEntity {
     @Column(name = "telephone_number", length = 15)
     private String telephoneNumber;
 
+    @NotNull
+    @NotBlank
+    @Column(name = "role", length = 100)
+    private String role;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "referent")

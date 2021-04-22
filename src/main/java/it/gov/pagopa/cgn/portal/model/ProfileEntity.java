@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,30 @@ public class ProfileEntity extends BaseEntity {
     @URL
     @Column(name = "website_url", length = 500)
     private String websiteUrl;
+
+    @NotNull
+    @NotBlank
+    @Column(name = "legal_office", length = 200)
+    private String legalOffice;
+
+    @NotNull
+    @NotBlank
+    @Column(name = "telephone_number", length = 15)
+    private String telephoneNumber;
+
+    @NotNull
+    @NotBlank
+    @Column(name = "legal_representative_full_name", length = 200)
+    private String legalRepresentativeFullName;
+
+    @NotNull
+    @NotBlank
+    @Column(name = "legal_representative_tax_code", length = 16)
+    private String legalRepresentativeTaxCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_code_type", length = 20)
+    private DiscountCodeTypeEnum discountCodeType;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)

@@ -1,17 +1,37 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, D> {
+
+    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(DiscountCodeTypeEnum.class);
+    static {
+        discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
+        discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
+    }
+
+    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum ->
+            Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
+                    .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + entityEnum));
+
+    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType ->
+            discountCodeTypeMap.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(discountCodeType))
+                    .map(Map.Entry::getKey)
+                    .findFirst().orElseThrow();
 
     protected Function<Address, AddressEntity> addressToEntity = dto -> {
         AddressEntity entity = new AddressEntity();
@@ -37,6 +57,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 OnlineChannel onlineChannel = new OnlineChannel();
                 onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
                 onlineChannel.setWebsiteUrl(entity.getWebsiteUrl());
+                onlineChannel.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 return onlineChannel;
             case OFFLINE:
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
@@ -51,6 +72,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
                 bothChannels.setAddresses(
                             entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 return bothChannels;
             default:
                 throw new IllegalArgumentException("Sales Channel not mapped");
@@ -67,6 +89,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.ONLINE);
                     entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
+                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
                 } else {
                     throwInvalidSalesChannel();
                 }
@@ -94,6 +117,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                             bothChannels.getAddresses().stream()
                                     .map(address -> addressToEntity.apply(address))
                                     .collect(Collectors.toList()));
+                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
                 } else {
                     throwInvalidSalesChannel();
                 }

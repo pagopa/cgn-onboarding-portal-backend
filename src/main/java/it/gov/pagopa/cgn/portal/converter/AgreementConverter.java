@@ -7,6 +7,7 @@ import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgnonboardingportal.model.RejectedAgreement;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -48,14 +49,22 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;
-        if (AgreementStateEnum.APPROVED.equals(entity.getState())) {
-            ApprovedAgreement approvedAgreement;
-            approvedAgreement = new ApprovedAgreement();
-            approvedAgreement.setStartDate(entity.getStartDate());
-            approvedAgreement.setEndDate(entity.getEndDate());
-            dto = approvedAgreement;
-        } else {
-            dto = new Agreement();
+        switch (entity.getState()) {
+            case APPROVED:
+                ApprovedAgreement approvedAgreement;
+                approvedAgreement = new ApprovedAgreement();
+                approvedAgreement.setStartDate(entity.getStartDate());
+                approvedAgreement.setEndDate(entity.getEndDate());
+                approvedAgreement.setFirstDiscountPublishingDate(entity.getFirstDiscountPublishingDate());
+                dto = approvedAgreement;
+                break;
+            case REJECTED:
+                RejectedAgreement rejectedAgreement = new RejectedAgreement();
+                rejectedAgreement.setReasonMessage(entity.getRejectReasonMessage());
+                dto = rejectedAgreement;
+                break;
+            default:
+                dto = new Agreement();
         }
         return dto;
     };
@@ -65,9 +74,7 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                 Agreement dto = toDtoWithStatusFilled.apply(entity);
                 dto.setId(entity.getId());
                 dto.setState(toDtoEnum.apply(entity.getState()));
-                dto.setProfileLastModifiedDate(entity.getProfileModifiedDate());
-                dto.setDiscountsLastModifiedDate(entity.getDiscountsModifiedDate());
-                dto.setDocumentsLastModifiedDate(entity.getDocumentsModifiedDate());
+                dto.setImageUrl(entity.getImageUrl());
                 return dto;
             };
 
@@ -77,6 +84,11 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
             ApprovedAgreement state = (ApprovedAgreement) dto;
             entity.setStartDate(state.getStartDate());
             entity.setEndDate(state.getEndDate());
+            entity.setFirstDiscountPublishingDate(state.getFirstDiscountPublishingDate());
+        }
+        if (AgreementState.REJECTEDAGREEMENT.equals(dto.getState())) {
+            RejectedAgreement rejectedAgreement = (RejectedAgreement) dto;
+            entity.setRejectReasonMessage(rejectedAgreement.getReasonMessage());
         }
         return entity;
     };
@@ -86,9 +98,7 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                 AgreementEntity entity = toEntityWithStatusFilled.apply(dto);
                 entity.setId(dto.getId());
                 entity.setState(toEntityEnum.apply(dto.getState()));
-                entity.setProfileModifiedDate(dto.getProfileLastModifiedDate());
-                entity.setDiscountsModifiedDate(dto.getDiscountsLastModifiedDate());
-                entity.setDocumentsModifiedDate(dto.getDocumentsLastModifiedDate());
+                entity.setImageUrl(dto.getImageUrl());
                 return entity;
             };
 

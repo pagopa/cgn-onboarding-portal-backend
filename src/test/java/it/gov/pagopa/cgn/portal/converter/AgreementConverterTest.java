@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @RunWith(SpringRunner.class)
 public class AgreementConverterTest {
 
-    private AgreementConverter agreementConverter = new AgreementConverter();
+    private final AgreementConverter agreementConverter = new AgreementConverter();
 
     @Test
     public void Convert_ConvertPendingAgreementEntityToDTO_Ok() {
@@ -88,16 +88,17 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertApprovedAgreementDtoToEntity_Ok() {
-        Agreement dto = createSampleAgreementDtoWithCommonFields(new ApprovedAgreement());
+        ApprovedAgreement dto = new ApprovedAgreement();
+        dto.setId("agreement_dto_id");
+        dto.setImageUrl("imageURL");
         dto.setState(AgreementState.APPROVEDAGREEMENT);
-        ApprovedAgreement approvedDto = (ApprovedAgreement) dto;
-        approvedDto.setStartDate(LocalDate.now());
-        approvedDto.setEndDate(LocalDate.of(2021, 12, 31));
-        AgreementEntity entity = agreementConverter.toEntity(approvedDto);
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.of(2021, 12, 31));
+        AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
         Assert.assertEquals(AgreementStateEnum.APPROVED, entity.getState());
-        Assert.assertEquals(approvedDto.getStartDate(), entity.getStartDate());
-        Assert.assertEquals(approvedDto.getEndDate(), entity.getEndDate());
+        Assert.assertEquals(dto.getStartDate(), entity.getStartDate());
+        Assert.assertEquals(dto.getEndDate(), entity.getEndDate());
 
     }
 
@@ -105,42 +106,26 @@ public class AgreementConverterTest {
         Assert.assertEquals(agreementEntity.getId(), agreementDto.getId());
         Assert.assertNotNull(agreementEntity.getState());
         Assert.assertNotNull(agreementDto.getState());
-        Assert.assertEquals(agreementEntity.getDiscountsModifiedDate(), agreementDto.getDiscountsLastModifiedDate());
-        Assert.assertEquals(agreementEntity.getDocumentsModifiedDate(), agreementDto.getDocumentsLastModifiedDate());
-        Assert.assertEquals(agreementEntity.getProfileModifiedDate(), agreementDto.getProfileLastModifiedDate());
+        Assert.assertEquals(agreementEntity.getImageUrl(), agreementDto.getImageUrl());
     }
 
     private void commonAssertionsDtoToEntity(AgreementEntity entity, Agreement dto) {
         Assert.assertEquals(dto.getId(), entity.getId());
         Assert.assertNotNull(entity.getState());
-        Assert.assertEquals(dto.getDiscountsLastModifiedDate(), entity.getDiscountsModifiedDate());
-        Assert.assertEquals(dto.getDocumentsLastModifiedDate(), entity.getDocumentsModifiedDate());
-        Assert.assertEquals(dto.getProfileLastModifiedDate(), entity.getProfileModifiedDate());
+        Assert.assertEquals(dto.getImageUrl(), entity.getImageUrl());
     }
 
     private AgreementEntity createSampleAgreementEntityWithCommonFields() {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId("agreement_id");
-        agreementEntity.setDiscountsModifiedDate(LocalDate.now());
-        agreementEntity.setDocumentsModifiedDate(LocalDate.now());
-        agreementEntity.setProfileModifiedDate(LocalDate.now());
+        agreementEntity.setImageUrl("image12345.png");
         return agreementEntity;
     }
 
     private Agreement createSampleAgreementDtoWithCommonFields() {
         Agreement dto = new Agreement();
         dto.setId("agreement_dto_id");
-        dto.setDiscountsLastModifiedDate(LocalDate.now());
-        dto.setProfileLastModifiedDate(LocalDate.now());
-        dto.setDocumentsLastModifiedDate(LocalDate.now());
-        return dto;
-    }
-
-    private Agreement createSampleAgreementDtoWithCommonFields(Agreement dto) {
-        dto.setId("agreement_dto_id");
-        dto.setDiscountsLastModifiedDate(LocalDate.now());
-        dto.setProfileLastModifiedDate(LocalDate.now());
-        dto.setDocumentsLastModifiedDate(LocalDate.now());
+        dto.setImageUrl("image12345.png");
         return dto;
     }
 }

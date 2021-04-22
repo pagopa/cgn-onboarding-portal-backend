@@ -6,6 +6,8 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
+import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -61,22 +63,30 @@ class GetProfileApiTest extends IntegrationAbstractTest {
     @Test
     void Get_GetProfile_Ok() throws Exception {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
-        profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
+        profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         this.mockMvc.perform(
                 get(profilePath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(profileEntity.getId()))
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.salesChannel.websiteUrl").value(profileEntity.getWebsiteUrl()))
+                .andExpect(jsonPath("$.salesChannel.discountCodeType").value(DiscountCodeType.STATIC.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.fullName").value(profileEntity.getFullName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(profileEntity.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.taxCodeOrVat").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.pecAddress").value(profileEntity.getPecAddress()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(profileEntity.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.referent").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.salesChannel").isNotEmpty());
-
+                .andExpect(jsonPath("$.fullName").value(profileEntity.getFullName()))
+                .andExpect(jsonPath("$.name").value(profileEntity.getName()))
+                .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
+                .andExpect(jsonPath("$.pecAddress").value(profileEntity.getPecAddress()))
+                .andExpect(jsonPath("$.description").value(profileEntity.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(profileEntity.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(profileEntity.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(profileEntity.getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.lastName").value(profileEntity.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(profileEntity.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(profileEntity.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(profileEntity.getReferent().getRole()));
     }
 
 }
