@@ -30,7 +30,7 @@ variables:
 steps:
   - task: Cache@2
     inputs:
-      key: 'maven | "$(Agent.OS)" | **/pom.xml'
+      key: 'maven | "$(Agent.OS)" | pom.xml'
       restoreKeys: |
         maven | "$(Agent.OS)"
         maven
@@ -44,9 +44,10 @@ steps:
       javaHomeOption: 'JDKVersion'
       jdkVersionOption: '1.11'
       jdkArchitectureOption: 'x64'
-      publishJUnitResults: false
+      publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
+      sonarQubeRunAnalysis: false
 
   - task: Bash@3
     displayName: Get POM version
