@@ -22,15 +22,15 @@ variables:
   ${{ if eq(parameters['environment'], 'uat') }}:
     dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY)
     connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
-    webAppName: 'cgnonboardingportal-u-portal-backend1'
+    webAppName: $(UAT_WEB_APP_NAME)
   ${{ if eq(parameters['environment'], 'prod') }}:
-    dockerRegistryServiceConnection: $(PRODUCTION_CONTAINER_REGISTRY)
-    connectedServiceName: $(PRODUCTION_AZURE_SUBSCRIPTION)
-    webAppName: 'cgnonboardingportal-p-portal-backend1'
+    dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY)
+    connectedServiceName: $(PROD_AZURE_SUBSCRIPTION)
+    webAppName: $(PROD_WEB_APP_NAME)
 steps:
   - task: Cache@2
     inputs:
-      key: 'maven | "$(Agent.OS)" | **/pom.xml'
+      key: 'maven | "$(Agent.OS)" | pom.xml'
       restoreKeys: |
         maven | "$(Agent.OS)"
         maven
@@ -44,9 +44,10 @@ steps:
       javaHomeOption: 'JDKVersion'
       jdkVersionOption: '1.11'
       jdkArchitectureOption: 'x64'
-      publishJUnitResults: false
+      publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
+      sonarQubeRunAnalysis: false
 
   - task: Bash@3
     displayName: Get POM version
