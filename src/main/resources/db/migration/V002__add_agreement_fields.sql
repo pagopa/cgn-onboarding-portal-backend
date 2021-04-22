@@ -12,8 +12,12 @@ ALTER TABLE referent ADD COLUMN role VARCHAR(100) NOT NULL;
 CREATE TYPE discount_code_type_enum AS ENUM ('STATIC', 'API');
 CREATE CAST (character varying AS discount_code_type_enum) WITH INOUT AS ASSIGNMENT;
 
-ALTER TABLE profile ADD COLUMN legal_office VARCHAR(200) NOT NULL;
-ALTER TABLE profile ADD COLUMN telephone_number VARCHAR(15) NOT NULL;
-ALTER TABLE profile ADD COLUMN legal_representative_full_name VARCHAR(200) NOT NULL;
-ALTER TABLE profile ADD COLUMN legal_representative_tax_code VARCHAR(16) NOT NULL;
+ALTER TABLE profile ADD COLUMN legal_office VARCHAR(200) NOT NULL DEFAULT 'N/A';
+ALTER TABLE profile ALTER COLUMN legal_office DROP DEFAULT;
+ALTER TABLE profile ADD COLUMN telephone_number VARCHAR(15) NOT NULL DEFAULT 'N/A';
+ALTER TABLE profile ALTER COLUMN telephone_number DROP DEFAULT;
+ALTER TABLE profile ADD COLUMN legal_representative_full_name VARCHAR(200) NOT NULL DEFAULT 'N/A';
+ALTER TABLE profile ALTER COLUMN legal_representative_full_name DROP DEFAULT;
+ALTER TABLE profile ADD COLUMN legal_representative_tax_code VARCHAR(16) NOT NULL DEFAULT 'N/A';
+ALTER TABLE profile ALTER COLUMN legal_representative_tax_code DROP DEFAULT;
 ALTER TABLE profile ADD COLUMN discount_code_type discount_code_type_enum;
