@@ -7,7 +7,8 @@ ALTER TABLE agreement DROP COLUMN discounts_modified_date;
 ALTER TABLE agreement DROP COLUMN documents_modified_date;
 
 
-ALTER TABLE referent ADD COLUMN role VARCHAR(100) NOT NULL;
+ALTER TABLE referent ADD COLUMN role VARCHAR(100) NOT NULL DEFAULT 'N/A';
+ALTER TABLE referent ALTER COLUMN role DROP DEFAULT;
 
 CREATE TYPE discount_code_type_enum AS ENUM ('STATIC', 'API');
 CREATE CAST (character varying AS discount_code_type_enum) WITH INOUT AS ASSIGNMENT;
