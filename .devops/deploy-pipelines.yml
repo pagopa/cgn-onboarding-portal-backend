@@ -22,11 +22,11 @@ variables:
   ${{ if eq(parameters['environment'], 'uat') }}:
     dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY)
     connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
-    webAppName: 'cgnonboardingportal-u-portal-backend1'
+    webAppName: $(UAT_WEB_APP_NAME)
   ${{ if eq(parameters['environment'], 'prod') }}:
-    dockerRegistryServiceConnection: $(PRODUCTION_CONTAINER_REGISTRY)
-    connectedServiceName: $(PRODUCTION_AZURE_SUBSCRIPTION)
-    webAppName: 'cgnonboardingportal-p-portal-backend1'
+    dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY)
+    connectedServiceName: $(PROD_AZURE_SUBSCRIPTION)
+    webAppName: $(PROD_WEB_APP_NAME)
 steps:
   - task: Cache@2
     inputs:
