@@ -62,11 +62,18 @@ public class AgreementController implements AgreementsApi {
         return discountFacade.updateDiscount(agreementId, discountId, discount);
     }
 
-        @Override
+    @Override
     public ResponseEntity<Void> deleteDiscount(String agreementId, String discountId) {
         discountFacade.deleteDiscount(agreementId, discountId);
         return ResponseEntity.noContent().build();
     }
+
+    @Override
+    public ResponseEntity<Void> publishDiscount(String agreementId, String discountId) {
+        discountFacade.publishDiscount(agreementId, discountId);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @Autowired
     public AgreementController(AgreementService agreementService,

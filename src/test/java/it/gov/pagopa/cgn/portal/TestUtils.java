@@ -29,6 +29,10 @@ public class TestUtils {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/discounts";
     }
 
+    public static String getDiscountPublishingPath(String agreementId, Long discountId) {
+        return getDiscountPath(agreementId) + "/" + discountId + "/publishing";
+    }
+
     public static String getAgreementApprovalPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
     }
