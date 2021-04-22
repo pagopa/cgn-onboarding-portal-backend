@@ -2,6 +2,8 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -41,12 +43,17 @@ class DiscountApiTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
+    @Autowired
+    private ProfileService profileService;
+
     private String discountPath;
     private AgreementEntity agreement;
 
     @BeforeEach
     void init() {
         agreement = agreementService.createAgreementIfNotExists();
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
     }
 
@@ -69,7 +76,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.productCategories").isArray())
                 .andExpect(jsonPath("$.productCategories").isNotEmpty())
                 .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
-                .andExpect(jsonPath("$.condition").value(discount.getCondition()));
+                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()));
     }
 
     @Test
@@ -83,9 +91,19 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithoutStaticCode_Ok() throws Exception {
+        CreateDiscount discount = createSampleCreateDiscount();
+        discount.setStaticCode(null);
+        this.mockMvc.perform(
+                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void Get_GetDiscount_Found() throws Exception {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
-        discountService.createDiscount( agreement.getId(), discountEntity);
+        discountService.createDiscount(agreement.getId(), discountEntity);
 
         this.mockMvc.perform(
                 get(discountPath).contentType(MediaType.APPLICATION_JSON))

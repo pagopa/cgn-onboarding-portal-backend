@@ -39,6 +39,10 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = createReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
+        entity.setLegalOffice(dto.getLegalOffice());
+        entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
+        entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
+        entity.setTelephoneNumber(dto.getTelephoneNumber());
         return entity;
     };
 }

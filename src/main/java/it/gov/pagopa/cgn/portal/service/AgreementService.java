@@ -4,24 +4,26 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AgreementService {
+public class AgreementService extends AgreementServiceLight {
 
-    private final AgreementRepository agreementRepository;
 
     private final AgreementUserService userService;
 
-    public AgreementEntity findById(String agreementId) {
-        return agreementRepository.findById(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
-    }
+    private final ProfileService profileService;
+
+    private final DiscountService discountService;
+
 
     public AgreementEntity createAgreementIfNotExists() {
         AgreementEntity agreementEntity;
@@ -39,18 +41,24 @@ public class AgreementService {
         return agreementEntity;
     }
 
-    public void setRegistryDoneModifiedDate(AgreementEntity agreementEntity) {
-        agreementEntity.setProfileModifiedDate(LocalDate.now());
+
+    public void setFirstDiscountPublishingDate(AgreementEntity agreementEntity) {
+        agreementEntity.setFirstDiscountPublishingDate(LocalDate.now());
         agreementRepository.save(agreementEntity);
     }
 
-    public void setDiscountsModifiedDate(AgreementEntity agreementEntity) {
-        agreementEntity.setDiscountsModifiedDate(LocalDate.now());
-        agreementRepository.save(agreementEntity);
-    }
+    public void requestApproval(String agreementId) {
+        AgreementEntity agreementEntity = findById(agreementId);
 
-    public void setDocumentsModifiedDate(AgreementEntity agreementEntity) {
-        agreementEntity.setDocumentsModifiedDate(LocalDate.now());
+        profileService.getProfile(agreementId)
+                .orElseThrow(() -> new InvalidRequestException("Profile not found. Agreement not approvable"));
+        List<DiscountEntity> discounts = discountService.getDiscounts(agreementId);
+        if (CollectionUtils.isEmpty(discounts)) {
+            throw new InvalidRequestException("Discounts not found. Agreement not approvable");
+        }
+        //TODO check documents
+
+        agreementEntity.setState(AgreementStateEnum.PENDING);
         agreementRepository.save(agreementEntity);
     }
 
@@ -62,9 +70,12 @@ public class AgreementService {
     }
 
     @Autowired
-    public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService) {
-        this.agreementRepository = agreementRepository;
+    public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService,
+                            ProfileService profileService, DiscountService discountService) {
+        super(agreementRepository);
         this.userService = userService;
+        this.profileService = profileService;
+        this.discountService = discountService;
     }
 
 }

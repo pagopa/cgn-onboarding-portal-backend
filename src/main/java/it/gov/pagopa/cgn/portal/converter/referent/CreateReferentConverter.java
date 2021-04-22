@@ -27,6 +27,7 @@ public class CreateReferentConverter extends AbstractConverter<ReferentEntity, C
                 dto.setLastName(entity.getLastName());
                 dto.setEmailAddress(entity.getEmailAddress());
                 dto.setTelephoneNumber(entity.getTelephoneNumber());
+                dto.setRole(entity.getRole());
                 return dto;
             };
 
@@ -37,6 +38,7 @@ public class CreateReferentConverter extends AbstractConverter<ReferentEntity, C
                 entity.setLastName(dto.getLastName());
                 entity.setEmailAddress(dto.getEmailAddress());
                 entity.setTelephoneNumber(dto.getTelephoneNumber());
+                entity.setRole(dto.getRole());
                 return entity;
             };
 

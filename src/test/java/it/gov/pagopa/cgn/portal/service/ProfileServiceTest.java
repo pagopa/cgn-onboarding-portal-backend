@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -44,13 +43,17 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity profileDB = profileService.createProfile(profileEntity, agreementEntity.getId());
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
         Assertions.assertNotNull(profileDB.getReferent().getId());
         Assertions.assertNull(profileDB.getAddressList());
         Assertions.assertEquals(SalesChannelEnum.ONLINE, profileDB.getSalesChannel());
-
+        Assertions.assertEquals(profileEntity.getLegalRepresentativeTaxCode(), profileDB.getLegalRepresentativeTaxCode());
+        Assertions.assertEquals(profileEntity.getLegalRepresentativeFullName(), profileDB.getLegalRepresentativeFullName());
+        Assertions.assertEquals(profileEntity.getLegalOffice(), profileDB.getLegalOffice());
+        Assertions.assertEquals(profileEntity.getDiscountCodeType(), profileDB.getDiscountCodeType());
+        Assertions.assertEquals(profileEntity.getTelephoneNumber(), profileDB.getTelephoneNumber());
     }
 
     @Test
@@ -58,7 +61,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity profileDB = profileService.createProfile(profileEntity, agreementEntity.getId());
 
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
@@ -77,7 +80,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.BOTH);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
+        ProfileEntity profileDB = profileService.createProfile(profileEntity, agreementEntity.getId());
 
         Assertions.assertNotNull(profileDB.getId());
         Assertions.assertNotNull(profileDB.getReferent());
@@ -96,12 +99,12 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.BOTH);
-        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
 
         ProfileEntity profileEntity2 = TestUtils.createSampleProfileWithCommonFields();
         profileEntity2.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity2.setSalesChannel(SalesChannelEnum.ONLINE);
-        Assertions.assertThrows(InvalidRequestException.class, () -> profileService.createRegistry(profileEntity2, agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> profileService.createProfile(profileEntity2, agreementEntity.getId()));
     }
 
     @Test
@@ -110,7 +113,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         profileEntity.setWebsiteUrl("pagopa.gov.it");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
-            profileService.createRegistry(profileEntity, agreementEntity.getId());
+            profileService.createProfile(profileEntity, agreementEntity.getId());
 
         });
     }
@@ -122,20 +125,8 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {
-            profileService.createRegistry(profileEntity, agreementEntity.getId());
+            profileService.createProfile(profileEntity, agreementEntity.getId());
         });
-    }
-
-    @Test
-    void Create_CreateProfileAndCheckAgreementRegistryDate_DateUpdated() {
-        ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
-        profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
-        profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        ProfileEntity profileDB = profileService.createRegistry(profileEntity, agreementEntity.getId());
-        Assertions.assertNotNull(profileDB);
-        Assertions.assertNotNull(profileDB.getAgreement());
-        Assertions.assertNotNull(profileDB.getAgreement().getProfileModifiedDate());
-        Assertions.assertEquals(LocalDate.now(), profileDB.getAgreement().getProfileModifiedDate());
     }
 
     @Test
@@ -143,7 +134,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
-        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
         toUpdateProfile.setName("updated_name");
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
@@ -161,7 +152,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
         toUpdateProfile.setName("updated_name");
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
@@ -182,7 +173,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
-        profileService.createRegistry(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
         toUpdateProfile.setName("updated_name");
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");

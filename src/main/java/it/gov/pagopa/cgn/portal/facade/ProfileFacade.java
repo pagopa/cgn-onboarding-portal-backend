@@ -27,7 +27,7 @@ public class ProfileFacade {
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Profile> createProfile(String agreementId, CreateProfile createRegistryDto) {
         ProfileEntity registry = createProfileConverter.toEntity(createRegistryDto);
-        registry = profileService.createRegistry(registry, agreementId);
+        registry = profileService.createProfile(registry, agreementId);
         return ResponseEntity.ok(profileConverter.toDto(registry));
     }
 

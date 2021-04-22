@@ -1,16 +1,15 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
 
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Discount;
 import it.gov.pagopa.cgnonboardingportal.model.Discounts;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,17 +52,9 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
                 dto.setStaticCode(entity.getStaticCode());
                 dto.setState(toDtoEnum.apply(entity.getState()));
                 dto.setProductCategories(toProductDto.apply(entity.getProducts()));
+                dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
                 return dto;
             };
-
-    protected BiFunction<List<String>, DiscountEntity, List<DiscountProductEntity>> toEntityDiscountProduct =
-            (productDtoList, discount) ->
-                    productDtoList.stream().map(productCategory -> {
-                        DiscountProductEntity productEntity = new DiscountProductEntity();
-                        productEntity.setDiscount(discount);
-                        productEntity.setProductCategory(productCategory);
-                        return productEntity;
-                    }).collect(Collectors.toList());
 
     protected Function<Discount, DiscountEntity> toEntity =
             dto -> {

@@ -19,18 +19,17 @@ import java.util.function.BiConsumer;
 @Service
 public class ProfileService {
 
-    private final AgreementService agreementService;
+    private final AgreementServiceLight agreementServiceLight;
     private final ProfileRepository profileRepository;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public ProfileEntity createRegistry(ProfileEntity profileEntity, String agreementId) {
-        AgreementEntity agreement = agreementService.findById(agreementId);
+    public ProfileEntity createProfile(ProfileEntity profileEntity, String agreementId) {
+        AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         profileEntity.setAgreement(agreement);
         if (profileRepository.existsProfileEntityByAgreementId(agreementId)) {
             throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
         }
-        agreementService.setRegistryDoneModifiedDate(agreement);
         return profileRepository.save(profileEntity);
     }
 
@@ -48,9 +47,9 @@ public class ProfileService {
 
 
     @Autowired
-    public ProfileService(ProfileRepository profileRepository, AgreementService agreementService) {
+    public ProfileService(ProfileRepository profileRepository, AgreementServiceLight agreementServiceLight) {
         this.profileRepository = profileRepository;
-        this.agreementService = agreementService;
+        this.agreementServiceLight = agreementServiceLight;
     }
 
     private ProfileEntity getProfileFromAgreementId(String agreementId) {
@@ -67,6 +66,7 @@ public class ProfileService {
         dbEntity.setLastName(toUpdateEntity.getLastName());
         dbEntity.setEmailAddress(toUpdateEntity.getEmailAddress());
         dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+        dbEntity.setRole(toUpdateEntity.getRole());
     };
 
     private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
@@ -81,6 +81,11 @@ public class ProfileService {
       dbEntity.setDescription(toUpdateEntity.getDescription());
       dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
       dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
+      dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());
+      dbEntity.setLegalRepresentativeTaxCode(toUpdateEntity.getLegalRepresentativeTaxCode());
+      dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
+      dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
+      dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
       updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
       updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
       dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());

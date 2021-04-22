@@ -2,9 +2,9 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +12,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,13 +44,21 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                 .andDo(log())
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.fullName").value(createProfile.getFullName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.taxCodeOrVat").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(createProfile.getDescription()));
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
+                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
 
     }
 
@@ -112,6 +118,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         OnlineChannel onlineChannel = new OnlineChannel();
         onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        onlineChannel.setDiscountCodeType(DiscountCodeType.API);
         createProfile.setSalesChannel(onlineChannel);
         return createProfile;
     }
@@ -140,6 +147,10 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createProfile.setName("profile_name");
         createProfile.setDescription("profile_description");
         createProfile.setPecAddress("pec.address@pagopa.it");
+        createProfile.setLegalOffice("legalOffice");
+        createProfile.setLegalRepresentativeFullName("legal representative full name");
+        createProfile.setTelephoneNumber("12345678");
+        createProfile.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         createProfile.setReferent(createSampleCreateReferent());
         return createProfile;
     }
@@ -150,6 +161,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createReferent.setLastName("last_name");
         createReferent.setEmailAddress("referent.registry@pagopa.it");
         createReferent.setTelephoneNumber("+390123456789");
+        createReferent.setRole("CEO");
         return createReferent;
     }
 

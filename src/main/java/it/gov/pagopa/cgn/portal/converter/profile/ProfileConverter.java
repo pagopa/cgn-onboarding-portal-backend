@@ -19,6 +19,10 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setPecAddress(dto.getPecAddress());
         this.salesChannelConsumer.accept(dto.getSalesChannel(), entity);
         entity.setReferent(this.referentConverter.toEntity(dto.getReferent()));
+        entity.setTelephoneNumber(dto.getTelephoneNumber());
+        entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
+        entity.setLegalOffice(dto.getLegalOffice());
+        entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
         return entity;
     };
     protected Function<ProfileEntity, Profile> toDto = entity -> {
@@ -32,6 +36,10 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         dto.setReferent(this.referentConverter.toDto(entity.getReferent()));
         dto.setSalesChannel(this.salesChannelToDto.apply(entity));
         dto.setAgreementId(entity.getAgreement().getId());
+        dto.setTelephoneNumber(entity.getTelephoneNumber());
+        dto.setLegalRepresentativeFullName(entity.getLegalRepresentativeFullName());
+        dto.setLegalOffice(entity.getLegalOffice());
+        dto.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
         return dto;
     };
 

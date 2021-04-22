@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.Address;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
@@ -28,6 +29,10 @@ public class TestUtils {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/discounts";
     }
 
+    public static String getAgreementApprovalPath(String agreementId) {
+        return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
+    }
+
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
         referentEntity.setFirstName("FIRST_NAME");
@@ -35,6 +40,7 @@ public class TestUtils {
         referentEntity.setEmailAddress("referent.registry@pagopa.it");
         referentEntity.setTelephoneNumber("+390123456789");
         referentEntity.setProfile(profileEntity);
+        referentEntity.setRole("CEO");
         return referentEntity;
     }
 
@@ -45,6 +51,11 @@ public class TestUtils {
         profileEntity.setPecAddress("pec.address@pagopa.it");
         profileEntity.setDescription("A Description");
         profileEntity.setReferent(createSampleReferent(profileEntity));
+        profileEntity.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
+        profileEntity.setLegalRepresentativeFullName("full name");
+        profileEntity.setLegalOffice("legal office");
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
+        profileEntity.setTelephoneNumber("12345678");
         return profileEntity;
     }
 
@@ -84,11 +95,17 @@ public class TestUtils {
         profileDto.setName("name_dto");
         profileDto.setDescription("description_dto");
         profileDto.setPecAddress("myname.profile@pagopa.it");
+        profileDto.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
+        profileDto.setLegalRepresentativeFullName("full name");
+        profileDto.setLegalOffice("legal office");
+        profileDto.setTelephoneNumber("12345678");
         UpdateReferent updateReferent = new UpdateReferent();
         updateReferent.setFirstName("referent_first_name");
         updateReferent.setLastName("referent_last_name");
         updateReferent.setEmailAddress("referent.profile@pagopa.it");
         updateReferent.setTelephoneNumber("01234567");
+        updateReferent.setRole("updatedRole");
+
         profileDto.setReferent(updateReferent);
         return profileDto;
     }

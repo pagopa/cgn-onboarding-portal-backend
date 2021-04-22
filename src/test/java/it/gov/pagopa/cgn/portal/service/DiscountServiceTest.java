@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,9 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     private AgreementService agreementService;
 
     @Autowired
+    private ProfileService profileService;
+
+    @Autowired
     private AgreementRepository agreementRepository;
 
     private AgreementEntity agreementEntity;
@@ -34,6 +38,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() {
         agreementEntity = agreementService.createAgreementIfNotExists();
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
     }
 
     @Test

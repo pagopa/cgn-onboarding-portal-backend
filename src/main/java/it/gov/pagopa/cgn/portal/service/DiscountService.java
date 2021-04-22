@@ -1,17 +1,18 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -19,15 +20,15 @@ import java.util.function.BiConsumer;
 public class DiscountService {
 
     private final DiscountRepository discountRepository;
-    private final AgreementService agreementService;
-    @Autowired
-    private EntityManager entityManager;
+    private final AgreementServiceLight agreementServiceLight;
+    private final ProfileService profileService;
+
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
-        AgreementEntity agreement = agreementService.findById(agreementId);
+        AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
-        agreement.setDiscountsModifiedDate(LocalDate.now());
+        validateDiscount(agreementId, discountEntity);
         return discountRepository.save(discountEntity);
     }
 
@@ -38,26 +39,40 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
-        AgreementEntity agreement = agreementService.findById(agreementId);
+        agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = discountRepository.findById(discountId)
                 .orElseThrow(() -> new InvalidRequestException("Discount not found"));
-        //TODO to valuate if check on agreementId of discount is required
+        if (!agreementId.equals(dbEntity.getAgreement().getId())) {
+            throw new InvalidRequestException("Discount is not related to agreement provided");
+        }
         updateConsumer.accept(discountEntity, dbEntity);
-        agreement.setDiscountsModifiedDate(LocalDate.now());
+        validateDiscount(agreementId, dbEntity);
         return discountRepository.save(dbEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void deleteDiscount(String agreementId, Long discountId) {
-        agreementService.findById(agreementId);
+        agreementServiceLight.findById(agreementId);
         discountRepository.deleteById(discountId);
     }
 
     @Autowired
-    public DiscountService(AgreementService agreementService, DiscountRepository discountRepository) {
+    public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
+                           ProfileService profileService) {
         this.discountRepository = discountRepository;
-        this.agreementService = agreementService;
+        this.agreementServiceLight = agreementServiceLight;
+        this.profileService = profileService;
+    }
+
+    private void validateDiscount(String agreementId, DiscountEntity discountEntity) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementId)
+                .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
+        if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
+                StringUtils.isBlank(discountEntity.getStaticCode())) {
+            throw new InvalidRequestException(
+                    "Discount cannot have empty static code for a profile with discount code type static");
+        }
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {

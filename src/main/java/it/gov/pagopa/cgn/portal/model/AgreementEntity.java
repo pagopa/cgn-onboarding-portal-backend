@@ -31,14 +31,14 @@ public class AgreementEntity extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "profile_modified_date")
-    private LocalDate profileModifiedDate;
+    @Column(name = "first_discount_publishing_date")
+    private LocalDate firstDiscountPublishingDate;
 
-    @Column(name = "discounts_modified_date")
-    private LocalDate discountsModifiedDate;
+    @Column(name = "reject_reason_msg", length = 500)
+    private String rejectReasonMessage;
 
-    @Column(name = "documents_modified_date")
-    private LocalDate documentsModifiedDate;
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
 
 }
 

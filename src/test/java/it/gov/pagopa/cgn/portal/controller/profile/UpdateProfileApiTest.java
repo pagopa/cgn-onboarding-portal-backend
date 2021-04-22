@@ -2,10 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.BothChannels;
-import it.gov.pagopa.cgnonboardingportal.model.OfflineChannel;
-import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
@@ -64,7 +61,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     @Test
     void Update_UpdateOnlineProfileToOffline_Ok() throws Exception {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
-        profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
+        profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         OfflineChannel offlineChannel = new OfflineChannel();
         offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
@@ -84,7 +81,15 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
                 .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
                 .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
                 .andExpect(jsonPath("$.referent").isNotEmpty())
+                .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
                 .andExpect(jsonPath("$.salesChannel").isNotEmpty())
                 .andExpect(jsonPath("$.salesChannel.channelType").value(offlineChannel.getChannelType().getValue()))
                 .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
@@ -95,12 +100,13 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     @Test
     void Update_UpdateOnlineProfileToBoth_Ok() throws Exception {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
-        profileEntity = profileService.createRegistry(profileEntity, agreement.getId());
+        profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         BothChannels bothChannels = new BothChannels();
         bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
+        bothChannels.setDiscountCodeType(DiscountCodeType.STATIC);
         updateProfile.setSalesChannel(bothChannels);
 
         this.mockMvc.perform(
@@ -115,12 +121,20 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
                 .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
                 .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
                 .andExpect(jsonPath("$.referent").isNotEmpty())
+                .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
                 .andExpect(jsonPath("$.salesChannel").isNotEmpty())
                 .andExpect(jsonPath("$.salesChannel.channelType").value(bothChannels.getChannelType().getValue()))
                 .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
+                .andExpect(jsonPath("$.salesChannel.discountCodeType").value(bothChannels.getDiscountCodeType().getValue()))
                 .andExpect(jsonPath("$.salesChannel.websiteUrl").value(bothChannels.getWebsiteUrl()));
-
     }
 
 }
