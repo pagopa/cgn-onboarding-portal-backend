@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -26,6 +29,7 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
+        // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
         validateDiscount(agreementId, discountEntity);
@@ -39,13 +43,11 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
+        // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findById(agreementId);
 
-        DiscountEntity dbEntity = discountRepository.findById(discountId)
-                .orElseThrow(() -> new InvalidRequestException("Discount not found"));
-        if (!agreementId.equals(dbEntity.getAgreement().getId())) {
-            throw new InvalidRequestException("Discount is not related to agreement provided");
-        }
+        DiscountEntity dbEntity = findById(discountId);
+        checkDiscountRelatedSameAgreement(dbEntity, agreementId);
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity);
         return discountRepository.save(dbEntity);
@@ -53,8 +55,26 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void deleteDiscount(String agreementId, Long discountId) {
+        // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findById(agreementId);
         discountRepository.deleteById(discountId);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity publishDiscount(String agreementId, Long discountId) {
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        DiscountEntity discount = findById(discountId);
+        validatePublishingDiscount(agreementEntity, discount);
+        discount.setState(DiscountStateEnum.PUBLISHED);
+        discount = discountRepository.save(discount);
+        // check if exists almost one discount already published
+        if (agreementEntity.getFirstDiscountPublishingDate() == null) {
+            long numPublishedDiscount = discountRepository.countPublishedDiscountByAgreementId(agreementId);
+            if (numPublishedDiscount == 1) {    //1 -> discount just created
+                agreementServiceLight.setFirstDiscountPublishingDate(agreementEntity);
+            }
+        }
+        return discount;
     }
 
     @Autowired
@@ -65,6 +85,18 @@ public class DiscountService {
         this.profileService = profileService;
     }
 
+
+    private DiscountEntity findById(Long discountId) {
+        return discountRepository.findById(discountId)
+                .orElseThrow(() -> new InvalidRequestException("Discount not found"));
+    }
+
+    private void checkDiscountRelatedSameAgreement(DiscountEntity discountEntity, String agreementId) {
+        if (!agreementId.equals(discountEntity.getAgreement().getId())) {
+            throw new InvalidRequestException("Discount is not related to agreement provided");
+        }
+    }
+
     private void validateDiscount(String agreementId, DiscountEntity discountEntity) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
@@ -73,6 +105,20 @@ public class DiscountService {
             throw new InvalidRequestException(
                     "Discount cannot have empty static code for a profile with discount code type static");
         }
+    }
+
+    private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
+        if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
+            throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
+        }
+        if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
+        }
+
+        if (!isContainsToday(discount.getStartDate(), discount.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish a discount because the discount doesn't include today's date");
+        }
+        checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {
@@ -93,5 +139,10 @@ public class DiscountService {
         dbEntity.setCondition(toUpdateEntity.getCondition());
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
     };
+
+    private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
+        LocalDate now = LocalDate.now();
+        return (!now.isBefore(startDate)) && (now.isBefore(endDate));
+    }
 
 }

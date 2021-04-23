@@ -6,6 +6,8 @@ import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class AgreementServiceLight {
 
@@ -14,6 +16,11 @@ public class AgreementServiceLight {
     public AgreementEntity findById(String agreementId) {
         return agreementRepository.findById(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
+    }
+
+    public void setFirstDiscountPublishingDate(AgreementEntity agreementEntity) {
+        agreementEntity.setFirstDiscountPublishingDate(LocalDate.now());
+        agreementRepository.save(agreementEntity);
     }
 
     @Autowired

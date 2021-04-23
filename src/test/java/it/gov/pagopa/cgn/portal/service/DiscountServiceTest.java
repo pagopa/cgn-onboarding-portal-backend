@@ -2,6 +2,9 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -165,5 +168,128 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                 () -> discountService.deleteDiscount(agreementEntity.getId(), Long.MAX_VALUE));
     }
 
+    @Test
+    void Publish_PublishDiscountWithApprovedAgreement_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_PublishDiscountWithStartDateAfterToday_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setStartDate(LocalDate.now().plusDays(2));
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId()));
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_PublishDiscountWithEndDateBeforeToday_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setStartDate(LocalDate.now().minusDays(20));
+        discountEntity.setEndDate(LocalDate.now().minusDays(2));
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId()));
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_PublishDiscountWithAgreementStartDateAfterToday_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        agreementEntity.setStartDate(LocalDate.now().plusDays(2));
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity.setStartDate(LocalDate.now().plusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId()));
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_FirstDiscountPublishDateNotUpdatedIfDiscountWasPublished_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // simulating that discount was published 2 days ago
+        agreementEntity.setFirstDiscountPublishingDate(LocalDate.now().minusDays(2));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        //creating the second discount
+        discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+
+        //first publication date wasn't updated
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now().minusDays(2), agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_PublishDiscountWithNotApprovedAgreement_ThrowException() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                () ->discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId()));
+
+        List<DiscountEntity> discounts = discountService.getDiscounts(agreementEntity.getId());
+        Assertions.assertNotNull(discounts);
+        Assertions.assertFalse(discounts.isEmpty());
+        discountEntity = discounts.stream().filter(d -> d.getId().equals(dbDiscount.getId())).findFirst().orElseThrow();
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, discountEntity.getState());
+
+    }
+
+
+    private void approveAgreement() {
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+    }
 }
 

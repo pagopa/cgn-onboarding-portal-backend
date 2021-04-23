@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,13 +40,7 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
-
-    public void setFirstDiscountPublishingDate(AgreementEntity agreementEntity) {
-        agreementEntity.setFirstDiscountPublishingDate(LocalDate.now());
-        agreementRepository.save(agreementEntity);
-    }
-
-    public void requestApproval(String agreementId) {
+    public AgreementEntity requestApproval(String agreementId) {
         AgreementEntity agreementEntity = findById(agreementId);
 
         profileService.getProfile(agreementId)
@@ -59,7 +52,7 @@ public class AgreementService extends AgreementServiceLight {
         //TODO check documents
 
         agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementRepository.save(agreementEntity);
+        return agreementRepository.save(agreementEntity);
     }
 
     private AgreementEntity createAgreement(String agreementId) {

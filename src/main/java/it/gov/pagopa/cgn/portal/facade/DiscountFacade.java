@@ -45,6 +45,10 @@ public class DiscountFacade {
         discountService.deleteDiscount(agreementId, Long.valueOf(discountId));
     }
 
+    public void publishDiscount(String agreementId, String discountId) {
+        discountService.publishDiscount(agreementId, Long.valueOf(discountId));
+    }
+
     @Autowired
     public DiscountFacade(DiscountService discountService, CreateDiscountConverter createDiscountConverter,
                           DiscountConverter discountConverter, UpdateDiscountConverter updateDiscountConverter) {
