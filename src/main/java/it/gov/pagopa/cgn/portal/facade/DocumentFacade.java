@@ -7,6 +7,10 @@ import it.gov.pagopa.cgn.portal.service.DocumentService;
 import it.gov.pagopa.cgnonboardingportal.model.Document;
 import it.gov.pagopa.cgnonboardingportal.model.Documents;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +24,16 @@ public class DocumentFacade {
     private final DocumentService documentService;
     private final DocumentConverter documentConverter;
 
+    public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
+        byte[] document = documentService.renderDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase())).toByteArray();
+
+        return ResponseEntity
+                .ok()
+                .contentLength(document.length)
+                .contentType( MediaType.APPLICATION_PDF)
+                .cacheControl(CacheControl.noCache().mustRevalidate())
+                .body(new ByteArrayResource(document));
+    }
 
     public ResponseEntity<Documents> getDocuments(String agreementId) {
         List<DocumentEntity> documentList = documentService.getDocuments(agreementId);

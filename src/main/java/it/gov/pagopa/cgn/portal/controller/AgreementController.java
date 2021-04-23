@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +78,11 @@ public class AgreementController implements AgreementsApi {
     @Override
     public ResponseEntity<Documents> getDocuments(String agreementId) {
         return documentFacade.getDocuments(agreementId);
+    }
+
+    @Override
+    public ResponseEntity<Resource> downloadDocumentTemplate(String agreementId, String documentType) {
+        return documentFacade.getDocumentTemplate(agreementId, documentType);
     }
 
     @Override
