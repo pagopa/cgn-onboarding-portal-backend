@@ -18,6 +18,12 @@ import java.util.stream.Stream;
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
 public class IntegrationAbstractTest {
 
+    protected String getAzureConnectionString() {
+        return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
+                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
+                "BlobEndpoint=http://127.0.0.1:" + Initializer.azurite.getMappedPort(10000) + "/devstoreaccount1;";
+    }
+
 
     protected static class Initializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {

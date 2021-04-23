@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -23,8 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class DocumentServiceTest extends IntegrationAbstractTest {
-
+class DocumentServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private AgreementService agreementService;
@@ -32,19 +32,19 @@ public class DocumentServiceTest extends IntegrationAbstractTest {
     @Autowired
     private DocumentService documentService;
 
+    @Autowired
+    private ConfigProperties configProperties;
+
     private BlobContainerClient documentContainerClient;
 
     private AgreementEntity agreementEntity;
 
     @BeforeEach
     void init() {
-        var connectionString = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
-                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
-                "BlobEndpoint=http://127.0.0.1:" + Initializer.azurite.getMappedPort(10000) + "/devstoreaccount1;";
 
         documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(connectionString)
-                .containerName("userdocuments")
+                .connectionString(getAzureConnectionString())
+                .containerName(configProperties.getDocumentsContainerName())
                 .buildClient();
         documentContainerClient.create();
 

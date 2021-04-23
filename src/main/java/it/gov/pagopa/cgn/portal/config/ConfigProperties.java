@@ -17,6 +17,32 @@ public class ConfigProperties {
     @Value("${spring_cors_origin}")
     private String CORSOrigin;
 
+    @Value("${cgn.pe.storage.azure.default-endpoints-protocol}")
+    private String defaultEndpointsProtocol;
+
+    @Value("${cgn.pe.storage.azure.account-name}")
+    private String accountName;
+
+    @Value("${cgn.pe.storage.azure.account-key}")
+    private String accountKey;
+
+    @Value("${cgn.pe.storage.azure.blob-endpoint}")
+    private String blobEndpoint;
+
+
+    @Value("${cgn.pe.storage.azure.documents-container-name}")
+    private String documentsContainerName;
+
+    @Value("${cgn.pe.storage.azure.images-container-name}")
+    private String imagesContainerName;
+
+    public String getAzureConnectionString() {
+        return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol +
+                ";AccountName=" + accountName +
+                ";AccountKey=" + accountKey +
+                ";BlobEndpoint=" + blobEndpoint + ";";
+
+    }
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

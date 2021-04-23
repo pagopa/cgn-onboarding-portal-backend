@@ -449,6 +449,8 @@ definitions:
         type: string
       legalRepresentativeTaxCode:
         type: string
+        minLength: 16
+        maxLength: 16
       referent:
         $ref: '#/definitions/CreateReferent'
       description:
@@ -483,6 +485,8 @@ definitions:
         type: string
       legalRepresentativeTaxCode:
         type: string
+        minLength: 16
+        maxLength: 16
       referent:
         $ref: '#/definitions/UpdateReferent'
       description:
@@ -529,6 +533,8 @@ definitions:
         type: string
       legalRepresentativeTaxCode:
         type: string
+        minLength: 16
+        maxLength: 16
       referent:
         $ref: '#/definitions/Referent'
       description:

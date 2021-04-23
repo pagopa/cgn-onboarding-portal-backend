@@ -14,7 +14,7 @@ public class DocumentEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Column(name = "agreement_k", length = 36)
+    @Column(name = "agreement_fk", length = 36)
     private String agreementId;
 
     @Enumerated(EnumType.STRING)

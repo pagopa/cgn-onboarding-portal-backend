@@ -3,17 +3,16 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -27,6 +26,9 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private DiscountService discountService;
+
+    @Autowired
+    private DocumentService documentService;
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {
@@ -65,7 +67,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        //todo add documents when will be implemented
+        saveSampleDocuments(agreementEntity.getId());
         Assertions.assertDoesNotThrow(() -> agreementService.requestApproval(agreementEntity.getId()));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.PENDING, pendingAgreement.getState());
@@ -83,6 +85,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
 
+        saveSampleDocuments(agreementEntity.getId());
         Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
@@ -96,6 +99,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     void RequestApproval_RequestApprovalWithoutProfile_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        saveSampleDocuments(agreementEntity.getId());
 
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -108,4 +112,50 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
     }
+
+    @Test
+    void RequestApproval_RequestApprovalWithoutDocuments_Ok() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
+        Assertions.assertNull(pendingAgreement.getStartDate());
+        Assertions.assertNull(pendingAgreement.getEndDate());
+        Assertions.assertNull(pendingAgreement.getImageUrl());
+        Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
+    }
+
+    @Test
+    void RequestApproval_RequestApprovalWithoutOneDocument_Ok() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        DocumentEntity documentEntity = TestUtils.createDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
+        documentRepository.save(documentEntity);
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
+        Assertions.assertNull(pendingAgreement.getStartDate());
+        Assertions.assertNull(pendingAgreement.getEndDate());
+        Assertions.assertNull(pendingAgreement.getImageUrl());
+        Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
+    }
+
+    void saveSampleDocuments(String agreementId) {
+        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementId);
+        documentRepository.saveAll(documentList);
+    }
+
 }

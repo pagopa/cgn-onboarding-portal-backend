@@ -103,6 +103,14 @@ public class AgreementController implements AgreementsApi {
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    public ResponseEntity<UploadedImage> uploadImage(String agreementId, MultipartFile image) {
+        String imageUrl = agreementService.uploadImage(agreementId, image);
+        UploadedImage uploadedImage = new UploadedImage();
+        uploadedImage.setImageUrl(imageUrl);
+        return ResponseEntity.ok(uploadedImage);
+    }
+
 
     @Autowired
     public AgreementController(AgreementService agreementService,
