@@ -28,6 +28,23 @@ variables:
     connectedServiceName: $(PROD_AZURE_SUBSCRIPTION)
     webAppName: $(PROD_WEB_APP_NAME)
 steps:
+  - task: Bash@3
+    displayName: Check Version and Branch
+    inputs:
+      targetType: 'inline'
+      script: |
+        version=$(cat pom.xml | grep '^.*<version>' | sed -n 2p | awk -F'[><]' '{print $3}')
+        branch="$(Build.SourceBranch)"
+        if [[ "$branch" != "refs/heads/master" && ! "$branch" =~ "refs/tags/.*" && "${{ parameters.environment }}" == "prod" ]]; then
+           echo "Deploy branch $branch is not allowed."
+           exit 1
+        fi
+        if [[ "$version" == *SNAPSHOT && "${{ parameters.environment }}" == "prod" ]]; then
+           echo "Version $version is not allowed."
+           exit 1
+        fi
+      failOnStderr: true
+
   - task: Cache@2
     inputs:
       key: 'maven | "$(Agent.OS)" | pom.xml'
