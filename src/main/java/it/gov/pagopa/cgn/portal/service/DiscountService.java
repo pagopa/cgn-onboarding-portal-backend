@@ -29,6 +29,7 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
+        // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
         validateDiscount(agreementId, discountEntity);
@@ -42,6 +43,7 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
+        // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
@@ -53,6 +55,7 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void deleteDiscount(String agreementId, Long discountId) {
+        // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findById(agreementId);
         discountRepository.deleteById(discountId);
     }
