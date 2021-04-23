@@ -68,7 +68,7 @@ steps:
       tags: |
         $(Build.BuildId)
         latest
-        $(pomversion)
+        $(getpomversion.outputpomversion)
 
   - task: AzureRMWebAppDeployment@4
     displayName: Azure App Service Deploy
@@ -78,4 +78,4 @@ steps:
       WebAppName: '$(webAppName)'
       DockerNamespace: '$(dockerRegistryServiceConnection)'
       DockerRepository: '$(imageRepository)'
-      DockerImageTag: '$(pomversion)'
+      DockerImageTag: '$(getpomversion.outputpomversion)'
