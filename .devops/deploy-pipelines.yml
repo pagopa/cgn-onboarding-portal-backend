@@ -21,10 +21,12 @@ variables:
   imageRepository: 'cgn-onboarding-portal-backend'
   ${{ if eq(parameters['environment'], 'uat') }}:
     dockerRegistryServiceConnection: $(UAT_CONTAINER_REGISTRY)
+    dockerNamespace: cgnonboardingportaluarc.azurecr.io
     connectedServiceName: $(UAT_AZURE_SUBSCRIPTION)
     webAppName: $(UAT_WEB_APP_NAME)
   ${{ if eq(parameters['environment'], 'prod') }}:
     dockerRegistryServiceConnection: $(PROD_CONTAINER_REGISTRY)
+    dockerNamespace: cgnonboardingportalparc.azurecr.io
     connectedServiceName: $(PROD_AZURE_SUBSCRIPTION)
     webAppName: $(PROD_WEB_APP_NAME)
 steps:
@@ -93,6 +95,6 @@ steps:
       appType: webAppContainer
       ConnectedServiceName: '$(connectedServiceName)'
       WebAppName: '$(webAppName)'
-      DockerNamespace: '$(dockerRegistryServiceConnection)'
+      DockerNamespace: '$(dockerNamespace)'
       DockerRepository: '$(imageRepository)'
       DockerImageTag: '$(getpomversion.outputpomversion)'
