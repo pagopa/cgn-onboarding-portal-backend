@@ -115,6 +115,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
@@ -137,6 +138,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
 
         this.mockMvc.perform(
