@@ -12,7 +12,7 @@
             margin: 0;
             color: #000000;
             font-size: 11pt;
-            font-family: "Helvetica"
+            font-family: 'Titillium Web'
         }
 
         table td,
@@ -25,7 +25,7 @@
             margin: 1.3in;
 
             @bottom-right {
-                font-family: "Helvetica";
+                font-family: 'Titillium Web';
                 content: counter(page);
             }
         }
@@ -148,7 +148,7 @@
             text-decoration: none;
             vertical-align: baseline;
             font-size: 12pt;
-            font-family: "Helvetica";
+            font-family: 'Titillium Web';
             font-style: normal
         }
 
@@ -308,7 +308,7 @@
             text-decoration: none;
             vertical-align: baseline;
             font-size: 12pt;
-            font-family: "Helvetica";
+            font-family: 'Titillium Web';
             font-style: normal
         }
 
@@ -318,7 +318,7 @@
             text-decoration: none;
             vertical-align: baseline;
             font-size: 10pt;
-            font-family: "Helvetica";
+            font-family: 'Titillium Web';
             font-style: italic
         }
 
@@ -806,7 +806,7 @@
         <tr class="c56">
             <td class="c65" colspan="1" rowspan="1">
                 <ul th:each="item : ${merchant_address_list}">
-                    <li ><span th:text="${item}"></span></li>
+                    <li ><span class="c6" th:text="${item}"></span></li>
                 </ul>
             </td>
         </tr>
