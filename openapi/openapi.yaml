@@ -423,7 +423,7 @@ definitions:
     type: object
     required:
       - fullName
-      - name
+      - taxCodeOrVat
       - pecAddress
       - legalOffice
       - telephoneNumber
@@ -437,6 +437,10 @@ definitions:
         type: string
       name:
         type: string
+      taxCodeOrVat:
+        type: string
+        minLength: 11
+        maxLength: 16
       pecAddress:
         type: string
         format: email
@@ -461,7 +465,6 @@ definitions:
   UpdateProfile:
     type: object
     required:
-      - name
       - pecAddress
       - legalOffice
       - telephoneNumber
@@ -500,7 +503,6 @@ definitions:
       - id
       - agreementId
       - fullName
-      - name
       - taxCodeOrVat
       - pecAddress
       - legalOffice

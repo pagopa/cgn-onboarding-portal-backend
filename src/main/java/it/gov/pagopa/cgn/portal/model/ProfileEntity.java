@@ -4,14 +4,15 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.validator.constraints.URL;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "profile")
@@ -37,6 +38,11 @@ public class ProfileEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
+    @Column(name = "tax_code_or_vat", length = 16)
+    private String taxCodeOrVat;
+
+    @NotNull
+    @NotBlank
     @Email
     @Column(name = "pec_address", length = 320)
     private String pecAddress;
@@ -51,7 +57,6 @@ public class ProfileEntity extends BaseEntity {
     @NotNull
     private SalesChannelEnum salesChannel;
 
-    @URL
     @Column(name = "website_url", length = 500)
     private String websiteUrl;
 

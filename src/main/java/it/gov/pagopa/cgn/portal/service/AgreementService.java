@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class AgreementService extends AgreementServiceLight {
     private final DocumentService documentService;
     private final AzureStorage azureStorage;
 
-
+    @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity createAgreementIfNotExists() {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
@@ -47,6 +48,7 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity requestApproval(String agreementId) {
         AgreementEntity agreementEntity = findById(agreementId);
 

@@ -11,7 +11,7 @@ import java.util.function.Function;
 @Component
 public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Profile> {
     private ReferentConverter referentConverter;
-    protected Function<Profile, ProfileEntity> toEntity = (dto) -> {
+    protected Function<Profile, ProfileEntity> toEntity = dto -> {
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
         entity.setName(dto.getName());
@@ -28,7 +28,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
     protected Function<ProfileEntity, Profile> toDto = entity -> {
         Profile dto = new Profile();
         dto.setId(String.valueOf(entity.getId()));
-        dto.setTaxCodeOrVat("FAKE");
+        dto.setTaxCodeOrVat(entity.getTaxCodeOrVat());
         dto.setFullName(entity.getFullName());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());

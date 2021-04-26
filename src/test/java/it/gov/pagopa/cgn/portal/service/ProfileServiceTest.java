@@ -108,17 +108,6 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateProfileWithInvalidWebsiteUrl_ThrowException() {
-        ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
-        profileEntity.setWebsiteUrl("pagopa.gov.it");
-        profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
-        Assertions.assertThrows(Exception.class, () -> {
-            profileService.createProfile(profileEntity, agreementEntity.getId());
-
-        });
-    }
-
-    @Test
     void Create_CreateProfileWithInvalidEmail_ThrowException() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setPecAddress("fakeemail.it");
