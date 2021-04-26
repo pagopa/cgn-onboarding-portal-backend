@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -17,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 
 import java.time.LocalDate;
 
@@ -65,6 +68,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
 
+        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity.getId());
+        documentRepository.saveAll(documentList);
+
         this.mockMvc.perform(
                 post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
                 .andDo(log())
@@ -83,6 +89,23 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void RequestApproval_RequestApprovalWithoutDocuments_BadRequest() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        this.mockMvc.perform(
+                post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void PublishDiscount_PublishDiscount_Ok() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
@@ -92,6 +115,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
@@ -114,6 +138,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
 
         this.mockMvc.perform(

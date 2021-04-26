@@ -43,6 +43,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.createAgreementIfNotExists();
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
     }
 
     @Test

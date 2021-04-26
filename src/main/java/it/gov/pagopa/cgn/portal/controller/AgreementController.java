@@ -1,7 +1,9 @@
 package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
+import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
@@ -9,6 +11,9 @@ import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 public class AgreementController implements AgreementsApi {
@@ -17,6 +22,7 @@ public class AgreementController implements AgreementsApi {
 
     private final ProfileFacade profileFacade;
     private final DiscountFacade discountFacade;
+    private final DocumentFacade documentFacade;
 
     private final AgreementConverter agreementConverter;
 
@@ -69,14 +75,46 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<Documents> getDocuments(String agreementId) {
+        return documentFacade.getDocuments(agreementId);
+    }
+
+    @Override
+    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
+        try {
+            if (document.getOriginalFilename() == null || !document.getOriginalFilename().endsWith("pdf")) {
+                throw new InvalidRequestException("Invalid file extension. Upload a PDF document.");
+            }
+            return documentFacade.uploadDocument(agreementId, documentType, document.getInputStream(), document.getSize());
+        } catch (IOException exc) {
+            throw new RuntimeException("Upload document failed", exc);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteDocument(String agreementId, String documentType) {
+        documentFacade.deleteDocument(agreementId, documentType);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     public ResponseEntity<Void> publishDiscount(String agreementId, String discountId) {
         discountFacade.publishDiscount(agreementId, discountId);
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    public ResponseEntity<UploadedImage> uploadImage(String agreementId, MultipartFile image) {
+        String imageUrl = agreementService.uploadImage(agreementId, image);
+        UploadedImage uploadedImage = new UploadedImage();
+        uploadedImage.setImageUrl(imageUrl);
+        return ResponseEntity.ok(uploadedImage);
+    }
+
 
     @Autowired
     public AgreementController(AgreementService agreementService,
+                               DocumentFacade documentFacade,
                                ProfileFacade profileFacade,
                                AgreementConverter agreementConverter,
                                DiscountFacade discountFacade) {
@@ -84,6 +122,7 @@ public class AgreementController implements AgreementsApi {
         this.agreementConverter = agreementConverter;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
+        this.documentFacade = documentFacade;
     }
 }
 

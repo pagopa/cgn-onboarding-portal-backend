@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.Address;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
@@ -139,6 +140,21 @@ public class TestUtils {
         productEntityList.add(productEntity);
         productEntityList.forEach(p -> p.setDiscount(discountEntity));
         return productEntityList;
+    }
+
+    public static List<DocumentEntity> createSampleDocumentList(String agreementId) {
+        List<DocumentEntity> documentList = new ArrayList<>();
+        documentList.add(createDocument(agreementId, DocumentTypeEnum.AGREEMENT));
+        documentList.add(createDocument(agreementId, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
+        return documentList;
+    }
+
+    public static DocumentEntity createDocument(String agreementId, DocumentTypeEnum documentTypeEnum) {
+        DocumentEntity documentEntity = new DocumentEntity();
+        documentEntity.setDocumentType(documentTypeEnum);
+        documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode());
+        documentEntity.setAgreementId(agreementId);
+        return documentEntity;
     }
 
     public static String getJson(Object obj) throws JsonProcessingException {

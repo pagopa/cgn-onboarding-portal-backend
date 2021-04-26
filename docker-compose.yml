@@ -10,6 +10,7 @@ services:
     - 8080:8080
     depends_on:
       - db
+      - azurite
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
@@ -24,3 +25,10 @@ services:
     environment:
       - POSTGRES_USER=compose-postgres
       - POSTGRES_PASSWORD=compose-postgres
+
+  azurite:
+    image: 'mcr.microsoft.com/azure-storage/azurite:3.11.0'
+    container_name: azurite
+    ports:
+      - 10000:10000
+      - 10001:10001

@@ -1,14 +1,18 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +26,9 @@ public class AgreementService extends AgreementServiceLight {
     private final ProfileService profileService;
 
     private final DiscountService discountService;
+
+    private final DocumentService documentService;
+    private final AzureStorage azureStorage;
 
 
     public AgreementEntity createAgreementIfNotExists() {
@@ -49,10 +56,20 @@ public class AgreementService extends AgreementServiceLight {
         if (CollectionUtils.isEmpty(discounts)) {
             throw new InvalidRequestException("Discounts not found. Agreement not approvable");
         }
-        //TODO check documents
-
+        List<DocumentEntity> documents = documentService.getDocuments(agreementId);
+        if (documents == null || documents.size() < DocumentTypeEnum.values().length) {
+            throw new InvalidRequestException("Documents not or partially loaded. Agreement not approvable");
+        }
         agreementEntity.setState(AgreementStateEnum.PENDING);
         return agreementRepository.save(agreementEntity);
+    }
+
+    public String uploadImage(String agreementId, MultipartFile image) {
+        AgreementEntity agreementEntity = findById(agreementId);
+        String imageUrl = azureStorage.storeImage(agreementId, image);
+        agreementEntity.setImageUrl(imageUrl);
+        agreementRepository.save(agreementEntity);
+        return imageUrl;
     }
 
     private AgreementEntity createAgreement(String agreementId) {
@@ -64,11 +81,14 @@ public class AgreementService extends AgreementServiceLight {
 
     @Autowired
     public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService,
-                            ProfileService profileService, DiscountService discountService) {
+                            ProfileService profileService, DiscountService discountService,
+                            DocumentService documentService, AzureStorage azureStorage) {
         super(agreementRepository);
         this.userService = userService;
         this.profileService = profileService;
         this.discountService = discountService;
+        this.documentService = documentService;
+        this.azureStorage = azureStorage;
     }
 
 }
