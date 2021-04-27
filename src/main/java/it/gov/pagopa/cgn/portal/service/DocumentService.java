@@ -69,13 +69,13 @@ public class DocumentService {
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
-        context.setVariable("merchant_tax_code", ".....");
+        context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
         context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
         context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
         context.setVariable("legal_office", profileEntity.getLegalOffice());
         context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
         context.setVariable("pec_address", profileEntity.getPecAddress());
-        context.setVariable("department_reference_email", "......");
+        context.setVariable("department_reference_email", "......");  // TODO add department reference email
         context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         String renderedContent = templateEngine.process("pdf/pe-agreement.html", context);
@@ -93,7 +93,7 @@ public class DocumentService {
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
-        context.setVariable("merchant_tax_code", ".....");
+        context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
         context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
         context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
         context.setVariable("legal_office", profileEntity.getLegalOffice());
