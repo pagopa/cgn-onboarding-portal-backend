@@ -53,6 +53,7 @@ public class TestUtils {
         ProfileEntity profileEntity = new ProfileEntity();
         profileEntity.setFullName("FULL_NAME");
         profileEntity.setName("NAME");
+        profileEntity.setTaxCodeOrVat("abcdeghilmnopqrs");
         profileEntity.setPecAddress("pec.address@pagopa.it");
         profileEntity.setDescription("A Description");
         profileEntity.setReferent(createSampleReferent(profileEntity));

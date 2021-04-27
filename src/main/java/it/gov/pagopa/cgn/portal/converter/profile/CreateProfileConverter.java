@@ -33,6 +33,7 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
         entity.setName(dto.getName());
+        entity.setTaxCodeOrVat(dto.getTaxCodeOrVat());
         entity.setDescription(dto.getDescription());
         entity.setPecAddress(dto.getPecAddress());
         salesChannelConsumer.accept(dto.getSalesChannel(), entity);
