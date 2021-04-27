@@ -30,7 +30,7 @@ public class DocumentFacade {
         return ResponseEntity
                 .ok()
                 .contentLength(document.length)
-                .contentType( MediaType.APPLICATION_PDF)
+                .contentType(MediaType.APPLICATION_PDF)
                 .cacheControl(CacheControl.noCache().mustRevalidate())
                 .body(new ByteArrayResource(document));
     }
