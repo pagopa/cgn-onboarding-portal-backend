@@ -16,7 +16,7 @@ public interface DocumentRepository extends JpaRepository<DocumentEntity, String
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM document d " +
-            "WHERE d.agreement_k = :agreement_id "+
+            "WHERE d.agreement_fk = :agreement_id "+
             "AND cast(d.document_type as text) = :document_type", nativeQuery = true)
     void deleteByAgreementIdAndDocumentType(@Param("agreement_id") String agreementId, @Param("document_type") String documentType);
 
