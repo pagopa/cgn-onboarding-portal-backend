@@ -48,7 +48,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
                 .andExpect(jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
+                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
                 .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
                 .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
                 .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
@@ -145,6 +145,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         CreateProfile createProfile = new CreateProfile();
         createProfile.setFullName("profile_full_name");
         createProfile.setName("profile_name");
+        createProfile.setTaxCodeOrVat("abcdeghilmnopqrs");
         createProfile.setDescription("profile_description");
         createProfile.setPecAddress("pec.address@pagopa.it");
         createProfile.setLegalOffice("legalOffice");

@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.repository.AgreementUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class AgreementUserService {
         return userRepository.findById(FAKE_ID);    //TODO get ID from token
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public AgreementUserEntity create() {
         AgreementUserEntity userEntity = new AgreementUserEntity();
         userEntity.setUserId(FAKE_ID);  //TODO get ID from token

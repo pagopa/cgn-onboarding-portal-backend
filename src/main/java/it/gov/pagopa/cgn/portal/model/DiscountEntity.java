@@ -36,8 +36,6 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "name", length = 100)
     private String name;
 
-    @NotNull
-    @NotBlank
     @Column(name = "description", length = 250)
     private String description;
 
@@ -55,8 +53,6 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "discount_value")
     private Double discountValue;
 
-    @NotNull
-    @NotBlank
     @Column(name = "condition", length = 200)
     private String condition;
 
