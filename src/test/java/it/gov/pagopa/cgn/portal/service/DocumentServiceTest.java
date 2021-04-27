@@ -21,10 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.CollectionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 @SpringBootTest
@@ -84,6 +86,17 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         BlobClient client = documentContainerClient.getBlobClient(agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
 
         Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
+    }
+
+    @Test
+    void Delete_DeleteDocument_Ok() throws IOException {
+        byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
+
+        documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
+        documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
+        List<DocumentEntity> documents = documentService.getDocuments(agreementEntity.getId());
+        Assertions.assertTrue(CollectionUtils.isEmpty(documents));
+
     }
 
 
