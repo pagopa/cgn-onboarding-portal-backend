@@ -113,7 +113,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("Allegato 1"));
         Assertions.assertTrue(actual.contains("MANIFESTAZIONE DI INTERESSE"));
         Assertions.assertTrue(actual.contains("PER L’ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
-        Assertions.assertTrue(actual.contains("full name"));
+        Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
         Assertions.assertTrue(actual.contains("A Description"));
         Assertions.assertTrue(actual.contains("15.99%"));
