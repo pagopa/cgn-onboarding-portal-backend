@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -9,12 +10,14 @@ import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +33,8 @@ public class AgreementService extends AgreementServiceLight {
 
     private final DocumentService documentService;
     private final AzureStorage azureStorage;
+
+    private final ConfigProperties configProperties;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity createAgreementIfNotExists() {
@@ -63,11 +68,13 @@ public class AgreementService extends AgreementServiceLight {
             throw new InvalidRequestException("Documents not or partially loaded. Agreement not approvable");
         }
         agreementEntity.setState(AgreementStateEnum.PENDING);
+        agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
         return agreementRepository.save(agreementEntity);
     }
 
     public String uploadImage(String agreementId, MultipartFile image) {
         AgreementEntity agreementEntity = findById(agreementId);
+        CGNUtils.validateImage(image, configProperties.getMinWidth(), configProperties.getMinHeight());
         String imageUrl = azureStorage.storeImage(agreementId, image);
         agreementEntity.setImageUrl(imageUrl);
         agreementRepository.save(agreementEntity);
@@ -84,14 +91,17 @@ public class AgreementService extends AgreementServiceLight {
     @Autowired
     public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService,
                             ProfileService profileService, DiscountService discountService,
-                            DocumentService documentService, AzureStorage azureStorage) {
+                            DocumentService documentService, AzureStorage azureStorage,
+                            ConfigProperties configProperties) {
         super(agreementRepository);
         this.userService = userService;
         this.profileService = profileService;
         this.discountService = discountService;
         this.documentService = documentService;
         this.azureStorage = azureStorage;
+        this.configProperties = configProperties;
     }
+
 
 }
 

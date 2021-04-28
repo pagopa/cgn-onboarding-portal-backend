@@ -79,7 +79,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
 
-        Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreementId());
+        Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
         Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
 
@@ -129,7 +129,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
         Assertions.assertTrue(actual.contains("A Description"));
-        Assertions.assertTrue(actual.contains("15.99%"));
+        Assertions.assertTrue(actual.contains("15%"));
         Assertions.assertTrue(actual.contains("VIAGGI"));
         Assertions.assertTrue(actual.contains("SPORT"));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));

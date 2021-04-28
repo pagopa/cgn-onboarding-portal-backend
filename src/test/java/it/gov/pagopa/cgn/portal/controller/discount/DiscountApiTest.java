@@ -157,7 +157,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount createDiscount = new CreateDiscount();
         createDiscount.setName("create_discount_name");
         createDiscount.setDescription("create_discount_description");
-        createDiscount.setDiscount(15.99);
+        createDiscount.setDiscount(15);
         createDiscount.setCondition("create_discount_condition");
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));

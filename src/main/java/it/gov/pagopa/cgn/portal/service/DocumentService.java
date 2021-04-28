@@ -28,6 +28,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final ProfileRepository profileRepository;
     private final DiscountRepository discountRepository;
+    private final AgreementServiceLight agreementServiceLight;
     private final AzureStorage azureStorage;
     private final TemplateEngine templateEngine;
 
@@ -38,12 +39,13 @@ public class DocumentService {
     }
 
     public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) throws IOException {
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
 
         DocumentEntity document = new DocumentEntity();
         document.setDocumentUrl(url);
         document.setDocumentType(documentType);
-        document.setAgreementId(agreementId);
+        document.setAgreement(agreementEntity);
 
         return documentRepository.save(document);
     }
@@ -135,12 +137,15 @@ public class DocumentService {
     }
 
 
-    public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository, DiscountRepository discountRepository, AzureStorage azureStorage, TemplateEngine templateEngine) {
+    public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository,
+                           DiscountRepository discountRepository, AzureStorage azureStorage,
+                           TemplateEngine templateEngine, AgreementServiceLight agreementServiceLight) {
         this.documentRepository = documentRepository;
         this.profileRepository = profileRepository;
         this.discountRepository = discountRepository;
         this.azureStorage = azureStorage;
         this.templateEngine = templateEngine;
+        this.agreementServiceLight = agreementServiceLight;
 
         try {
             ITextFontResolver fontResolver = renderer.getFontResolver();

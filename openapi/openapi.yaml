@@ -189,6 +189,23 @@ paths:
           $ref: '#/responses/NotFound'
 
   /agreements/{agreementId}/discounts/{discountId}:
+    get:
+      tags:
+        - discount
+      summary: Get discount by id
+      operationId: getDiscountById
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
+      responses:
+        200:
+          description: Discount
+          schema:
+            $ref: '#/definitions/Discount'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
     put:
       tags:
         - discount
@@ -700,8 +717,8 @@ definitions:
         type: string
         format: date
       discount:
-        type: number
-        format: double
+        type: integer
+        format: int32
         minimum: 0
         maximum: 100
       productCategories:
@@ -739,8 +756,8 @@ definitions:
         type: string
         format: date
       discount:
-        type: number
-        format: double
+        type: integer
+        format: int32
         minimum: 0
         maximum: 100
       productCategories:
@@ -795,8 +812,8 @@ definitions:
         type: string
         format: date
       discount:
-        type: number
-        format: double
+        type: integer
+        format: int32
         minimum: 0
         maximum: 100
       productCategories:

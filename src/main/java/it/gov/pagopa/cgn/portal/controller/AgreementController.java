@@ -65,6 +65,11 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<Discount> getDiscountById(String agreementId, String discountId) {
+        return discountFacade.getDiscountById(agreementId, discountId);
+    }
+
+    @Override
     public ResponseEntity<Discount> updateDiscount(String agreementId, String discountId, UpdateDiscount discount) {
         return discountFacade.updateDiscount(agreementId, discountId, discount);
     }
