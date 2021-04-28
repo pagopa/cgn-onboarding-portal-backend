@@ -27,12 +27,12 @@ steps:
   - task: SonarCloudPrepare@1
     displayName: 'Prepare SonarCloud analysis configuration'
     inputs:
-      SonarCloud: '$(SONARCLOUD-SERVICE-CONN)'
-      organization: '$(SONARCLOUD-ORG)'
+      SonarCloud: '$(SONARCLOUD_SERVICE_CONN)'
+      organization: '$(SONARCLOUD_ORG)'
       scannerMode: Other
       extraProperties: |
-        sonar.projectKey=$(SONARCLOUD-PROJECT-KEY)
-        sonar.projectName=$(SONARCLOUD-PROJECT-NAME)
+        sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+        sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
 
   - task: Maven@3
     inputs:
