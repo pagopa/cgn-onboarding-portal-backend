@@ -42,8 +42,6 @@ services:
       context: ./auth-spid
     environment:
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-    env_file:
-      - ./auth-spid-config-testenv/.env
     command: ["yarn", "start"]
     depends_on:
       - redis
@@ -54,6 +52,7 @@ services:
       - "5859:5859"
     volumes:
       - "./certs:/usr/src/app/certs:ro"
+      - "./auth-spid-config-testenv/.env:/usr/src/app/.env:ro"
   spid-testenv2:
     container_name: spid-testenv2
     image: italia/spid-testenv2:1.1.0
