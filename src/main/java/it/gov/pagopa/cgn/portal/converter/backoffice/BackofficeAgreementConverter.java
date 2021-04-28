@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.codehaus.plexus.util.StringUtils;

@@ -9,6 +9,9 @@ import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
@@ -81,6 +84,9 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     }
 
+
+
+
     @Test
     void DeleteDocument_DeleteDocument_Ok() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
@@ -144,7 +150,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.*", hasSize(0)));
     }
-
 
     private void createPendingAgreement() {
         // creating agreement (and user)
