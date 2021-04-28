@@ -1,0 +1,3 @@
+[submodule "auth-spid"]
+	path = auth-spid
+	url = git@github.com:pagopa/hub-spid-login-ms.git
