@@ -47,6 +47,7 @@ public class DocumentFacade {
 
     public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, InputStream content, long size) throws IOException {
         DocumentEntity documentEntity = documentService.storeDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), content, size);
+        documentEntity.setDocumentUrl(azureStorage.getDocumentSasFileUrl(documentEntity.getDocumentUrl()));
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
     }
 
@@ -65,7 +66,7 @@ public class DocumentFacade {
     private void setUrlBasePathToDocuments(List<DocumentEntity> documentList) {
         if (!CollectionUtils.isEmpty(documentList)) {
             documentList.forEach(
-                    d -> d.setDocumentUrl(azureStorage.getDocumentSasFilePath(d.getDocumentUrl())));
+                    d -> d.setDocumentUrl(azureStorage.getDocumentSasFileUrl(d.getDocumentUrl())));
         }
     }
 }

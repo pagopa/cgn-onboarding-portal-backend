@@ -6,6 +6,7 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.StorageSharedKeyCredential;
+import com.azure.storage.common.sas.SasProtocol;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import org.apache.commons.io.FilenameUtils;
@@ -76,19 +77,18 @@ public class AzureStorage {
         return configProperties.getImagesContainerName() + "/" + blobName;
     }
 
-    public String getDocumentSasFilePath(String documentUrl) {
-
+    public String getDocumentSasFileUrl(String documentUrl) {
         BlobClient blobClient = documentContainerClient.getBlobClient(getBlobName(documentUrl));
         BlobServiceSasSignatureValues blobServiceSasSignatureValues = new BlobServiceSasSignatureValues(
                 OffsetDateTime.now().plusHours(configProperties.getSasExpiryTimeHours()),
-                new BlobSasPermission().setReadPermission(true));
-        return blobClient.generateSas(blobServiceSasSignatureValues);
+                new BlobSasPermission().setReadPermission(true)).setProtocol(SasProtocol.HTTPS_ONLY);
+        return String.format("%s?%s", blobClient.getBlobUrl(), blobClient.generateSas(blobServiceSasSignatureValues));
 
     }
 
     private String getBlobName(String documentUrl) {
         if (documentUrl.contains("/")) {
-            return documentUrl.substring(documentUrl.lastIndexOf("/"));
+            return documentUrl.substring(documentUrl.indexOf("/")+1);
         }
         return documentUrl;
     }
