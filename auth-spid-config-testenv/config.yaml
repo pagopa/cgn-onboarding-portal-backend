@@ -38,8 +38,8 @@ https: true
 
 # Se si abilita HTTPS è necessario specificare chiave e certificato
 # (indipendenti da chiave e certificato SAML)
-https_key_file: "./conf/idp.key"
-https_cert_file: "./conf/idp.crt"
+https_key_file: "./conf/key.key"
+https_cert_file: "./conf/certificate.crt"
 
 # Endpoint del server IdP (path relativi)
 endpoints:
