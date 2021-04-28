@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 @Service
@@ -39,6 +40,16 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public List<DiscountEntity> getDiscounts(String agreementId) {
         return discountRepository.findByAgreementId(agreementId);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity getDiscountById(String agreementId, Long discountId) {
+        Optional<DiscountEntity> discountEntityOptional = discountRepository.findById(discountId);
+        if (discountEntityOptional.isEmpty() ||
+                !agreementId.equals(discountEntityOptional.get().getAgreement().getId())) {
+            throw new InvalidRequestException("Discount not found or agreement is invalid");
+        }
+        return discountEntityOptional.get();
     }
 
     @Transactional(Transactional.TxType.REQUIRED)

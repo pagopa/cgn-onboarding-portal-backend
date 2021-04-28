@@ -35,6 +35,11 @@ public class DiscountFacade {
         return ResponseEntity.ok(discounts);
     }
 
+    public ResponseEntity<Discount> getDiscountById(String agreementId, String discountId) {
+        DiscountEntity discountEntity = discountService.getDiscountById(agreementId, Long.valueOf(discountId));
+        return ResponseEntity.ok(discountConverter.toDto(discountEntity));
+    }
+
     public ResponseEntity<Discount> updateDiscount(String agreementId, String discountId, UpdateDiscount updateDiscountDto) {
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(updateDiscountDto);
         discountEntity = discountService.updateDiscount(agreementId, Long.valueOf(discountId), discountEntity);

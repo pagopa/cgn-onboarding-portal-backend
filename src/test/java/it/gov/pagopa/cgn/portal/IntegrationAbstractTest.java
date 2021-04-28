@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal;
 
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
@@ -87,4 +90,10 @@ public class IntegrationAbstractTest {
         agreementRepository.deleteAll();
         userRepository.deleteAll();
     }
+
+    protected void saveSampleDocuments(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
+        documentRepository.saveAll(documentList);
+    }
+
 }

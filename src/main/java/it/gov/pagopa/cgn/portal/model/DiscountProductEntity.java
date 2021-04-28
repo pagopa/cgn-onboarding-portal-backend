@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ public class DiscountProductEntity extends BaseEntity {
     private String productCategory;
 
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_fk", nullable = false)
