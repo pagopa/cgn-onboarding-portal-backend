@@ -3,11 +3,13 @@ version: '2'
 services:
   app:
     image: 'cgn-onboarding-portal-backend:latest'
+    cpus: 1.0
+    mem_limit: "1g"
     build:
       context: .
     container_name: app
     ports:
-    - 8080:8080
+    - 9090:8080
     depends_on:
       - db
       - azurite
@@ -16,6 +18,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication
 
   db:
     image: 'postgres:11-alpine'
@@ -32,3 +35,38 @@ services:
     ports:
       - 10000:10000
       - 10001:10001
+
+  hub-spid-login-ms:
+    container_name: hub-spid-login-ms
+    build:
+      context: ./auth-spid
+    environment:
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    env_file:
+      - ./auth-spid-config-testenv/.env
+    command: ["yarn", "start"]
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+      - "5859:5859"
+    volumes:
+      - "./certs:/usr/src/app/certs:ro"
+
+  spid-testenv2:
+    container_name: spid-testenv2
+    image: italia/spid-testenv2:1.1.0
+    ports:
+      - "8088:8088"
+    volumes:
+      - "./auth-spid-config-testenv:/app/conf:cached"
+
+  redis:
+    container_name: redis
+    image: wodby/redis:3.2-2.1.5
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_TIMEOUT: 300
+      REDIS_TCP_KEEPALIVE: 60
+      REDIS_MAXMEMORY: 182m
