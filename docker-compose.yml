@@ -45,6 +45,8 @@ services:
     env_file:
       - ./auth-spid-config-testenv/.env
     command: ["yarn", "start"]
+    depends_on:
+      - redis
     expose:
       - "8080"
     ports:
@@ -52,7 +54,6 @@ services:
       - "5859:5859"
     volumes:
       - "./certs:/usr/src/app/certs:ro"
-
   spid-testenv2:
     container_name: spid-testenv2
     image: italia/spid-testenv2:1.1.0
