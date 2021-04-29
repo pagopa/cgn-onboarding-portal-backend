@@ -45,7 +45,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
         createPendingAgreement();
         this.mockMvc.perform(
-                get(TestUtils.BACKOFFICE_CONTROLLER_PATH + "agreements"))
+                get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

@@ -2,7 +2,7 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
-import it.gov.pagopa.cgnonboardingportal.backoffice.api.BackofficeApi;
+import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 
 @RestController
-public class BackofficeAgreementController implements BackofficeApi {
+public class BackofficeAgreementController implements AgreementRequestsApi {
 
     private final BackofficeAgreementFacade agreementFacade;
 

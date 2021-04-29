@@ -20,7 +20,7 @@ import java.util.List;
 
 public class TestUtils {
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
-    public static final String BACKOFFICE_CONTROLLER_PATH = "/backoffice/";
+    public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/profile";
