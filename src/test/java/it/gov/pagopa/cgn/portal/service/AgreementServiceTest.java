@@ -32,7 +32,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         Assertions.assertNotNull(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
@@ -43,7 +43,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreatedAgreementWithValidId_Ok() {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         Optional<AgreementUserEntity> userEntityOptional;
         userEntityOptional = this.userRepository.findAll().stream()
                 .filter((user) -> user.getAgreementId().equals(agreementEntity.getId())).findFirst();
@@ -52,15 +52,15 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateMultipleAgreement_CreatedOnlyOneAgreement() {
-        AgreementEntity userCreated1 = this.agreementService.createAgreementIfNotExists();
-        AgreementEntity userCreated2 = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity userCreated1 = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity userCreated2 = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         Assertions.assertEquals(userCreated1, userCreated2);
     }
 
     @Test
     void RequestApproval_RequestApprovalWithAllRequiredData_Ok() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -80,7 +80,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApprovalWithoutDiscount_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -98,7 +98,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApprovalWithoutProfile_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         saveSampleDocuments(agreementEntity.getId());
 
         //creating discount
@@ -116,7 +116,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApprovalWithoutDocuments_Ok() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -135,7 +135,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApprovalWithoutOneDocument_Ok() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());

@@ -7,6 +7,8 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -29,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -46,6 +50,10 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateAgreement_Ok() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
+
         this.mockMvc.perform(
                 post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
                 .andDo(log())
@@ -60,7 +68,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApproval_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -79,7 +87,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void RequestApproval_RequestApprovalWithoutDiscount_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         this.mockMvc.perform(
@@ -91,7 +99,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Test
     void RequestApproval_RequestApprovalWithoutDocuments_BadRequest() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -108,7 +116,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Test
     void PublishDiscount_PublishDiscount_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -131,7 +139,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Test
     void PublishDiscount_PublishDiscountOfNotApprovedAgreement_BadRequest() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());

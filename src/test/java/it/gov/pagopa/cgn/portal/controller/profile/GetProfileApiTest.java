@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class GetProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -40,8 +40,8 @@ class GetProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists();
-        profilePath = TestUtils.getProfilePath(agreement.getId());;
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 
     @Test

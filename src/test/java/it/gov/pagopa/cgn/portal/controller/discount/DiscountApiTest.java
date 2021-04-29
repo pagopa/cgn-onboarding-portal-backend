@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class DiscountApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -51,7 +51,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists();
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
