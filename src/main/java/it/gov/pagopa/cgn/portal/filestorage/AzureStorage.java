@@ -47,8 +47,9 @@ public class AzureStorage {
         String blobName = agreementId + "/" + documentType.getCode().toLowerCase() + ".pdf";
 
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
-        ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content));
-        blobClient.upload(contentIs, size, true);
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
+            blobClient.upload(contentIs, size, true);
+        }
 
         return configProperties.getDocumentsContainerName() + "/" + blobName;
     }
@@ -63,11 +64,15 @@ public class AzureStorage {
         }
     }
 
-    public String storeImage(String agreementId, String extension, InputStream content, long size) {
+    public String storeImage(String agreementId, String extension, InputStream content, long size){
         String blobName = "image-" + agreementId + "." + extension;
 
         BlobClient blobClient = imagesContainerClient.getBlobClient(blobName);
-        blobClient.upload(content, size, true);
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
+            blobClient.upload(contentIs, size, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return configProperties.getImagesContainerName() + "/" + blobName;
     }

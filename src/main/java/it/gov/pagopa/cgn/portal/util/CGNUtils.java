@@ -10,6 +10,8 @@ import java.time.LocalDate;
 
 public class CGNUtils {
 
+    private CGNUtils() {}
+
     public static LocalDate getDefaultAgreementEndDate() {
         return LocalDate.now().plusYears(1);
     }
