@@ -17,7 +17,7 @@ import java.util.List;
 
 public class TestUtils {
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
-  
+
     public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
 
     public static final String FAKE_ID = "FAKE_ID";
