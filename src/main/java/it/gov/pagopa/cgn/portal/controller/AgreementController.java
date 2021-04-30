@@ -1,11 +1,10 @@
 package it.gov.pagopa.cgn.portal.controller;
 
-import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.facade.AgreementFacade;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +18,19 @@ import java.io.IOException;
 @RestController
 public class AgreementController implements AgreementsApi {
 
-    private final AgreementService agreementService;
-
     private final ProfileFacade profileFacade;
     private final DiscountFacade discountFacade;
     private final DocumentFacade documentFacade;
-
-    private final AgreementConverter agreementConverter;
+    private final AgreementFacade agreementFacade;
 
     @Override
     public ResponseEntity<Agreement> createAgreement() {
-        return ResponseEntity.ok(
-                agreementConverter.toDto(agreementService.createAgreementIfNotExists()));
+        return agreementFacade.createAgreement();
     }
 
     @Override
     public ResponseEntity<Void> requestApproval(String agreementId) {
-        agreementService.requestApproval(agreementId);
-        return ResponseEntity.noContent().build();
+        return agreementFacade.requestApproval(agreementId);
     }
 
     @Override
@@ -116,21 +110,16 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<UploadedImage> uploadImage(String agreementId, MultipartFile image) {
-        String imageUrl = agreementService.uploadImage(agreementId, image);
-        UploadedImage uploadedImage = new UploadedImage();
-        uploadedImage.setImageUrl(imageUrl);
-        return ResponseEntity.ok(uploadedImage);
+        return agreementFacade.uploadImage(agreementId, image);
     }
 
 
     @Autowired
-    public AgreementController(AgreementService agreementService,
+    public AgreementController(AgreementFacade agreementFacade,
                                DocumentFacade documentFacade,
                                ProfileFacade profileFacade,
-                               AgreementConverter agreementConverter,
                                DiscountFacade discountFacade) {
-        this.agreementService = agreementService;
-        this.agreementConverter = agreementConverter;
+        this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
         this.documentFacade = documentFacade;

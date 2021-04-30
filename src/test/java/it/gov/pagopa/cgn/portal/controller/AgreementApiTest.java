@@ -12,22 +12,21 @@ import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
+import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import java.util.List;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -52,9 +51,74 @@ class AgreementApiTest extends IntegrationAbstractTest {
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.imageUrl").isEmpty());
+                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.imageUrl").isEmpty())
+                .andExpect(jsonPath("$.completedSteps").isEmpty());
+
+    }
+
+    @Test
+    void GetAgreement_GetAgreementWithProfile_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        this.mockMvc.perform(
+                post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.imageUrl").isEmpty())
+                .andExpect(jsonPath("$.completedSteps").isArray())
+                .andExpect(jsonPath("$.completedSteps", hasSize(1)))
+                .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()));
+    }
+
+    @Test
+    void GetAgreement_GetAgreementWithProfileAndDiscount_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        this.mockMvc.perform(
+                post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.imageUrl").isEmpty())
+                .andExpect(jsonPath("$.completedSteps").isArray())
+                .andExpect(jsonPath("$.completedSteps", hasSize(2)));
+
+    }
+
+    @Test
+    void GetAgreement_GetAgreementWithAllStepsCompleted_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
+        documentRepository.saveAll(documentList);
+        this.mockMvc.perform(
+                post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.imageUrl").isEmpty())
+                .andExpect(jsonPath("$.completedSteps").isArray())
+                .andExpect(jsonPath("$.completedSteps", hasSize(3)));
 
     }
 
