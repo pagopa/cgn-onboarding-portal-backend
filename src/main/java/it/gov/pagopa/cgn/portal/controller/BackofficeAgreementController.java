@@ -2,14 +2,18 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 public class BackofficeAgreementController implements AgreementRequestsApi {
@@ -43,6 +47,22 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     @Override
     public ResponseEntity<Void> rejectAgreement(String agreementId, RefuseAgreement refusal) {
         return agreementFacade.rejectAgreement(agreementId, refusal);
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteDocument(String agreementId, String documentType) {
+        return agreementFacade.deleteDocument(agreementId, documentType);
+    }
+
+    @Override
+    public ResponseEntity<List<Document>> getDocuments(String agreementId) {
+        return agreementFacade.getDocuments(agreementId);
+    }
+
+    @Override
+    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
+        CGNUtils.checkIfPdfFile(document.getOriginalFilename());
+        return agreementFacade.uploadDocument(agreementId, documentType, document);
     }
 
     @Autowired

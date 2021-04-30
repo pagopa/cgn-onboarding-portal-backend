@@ -38,6 +38,9 @@ public class TestUtils {
     public static String getAgreementApprovalPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
     }
+    public static String getBackofficeDocumentPath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
+    }
 
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
@@ -155,6 +158,13 @@ public class TestUtils {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
+        return documentList;
+    }
+
+    public static List<DocumentEntity> createSampleBackofficeDocumentList(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = new ArrayList<>();
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_AGREEMENT));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST));
         return documentList;
     }
 

@@ -39,7 +39,7 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
 
     protected Function<ProductCategoryEnum, ProductCategory> toProductDtoEnum = productCategoryEnum ->
             Optional.ofNullable(productEnumMaps.get(productCategoryEnum))
-                    .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + productCategoryEnum));
+                    .orElseThrow(() -> getInvalidEnumMapping(productCategoryEnum.name()));
 
     protected Function<ProductCategory, ProductCategoryEnum> toProductEntityEnum = productDto ->
             productEnumMaps.entrySet().stream()

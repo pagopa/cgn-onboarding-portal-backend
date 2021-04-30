@@ -25,7 +25,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
 
     protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum ->
             Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
-                    .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + entityEnum));
+                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
     protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType ->
             discountCodeTypeMap.entrySet().stream()

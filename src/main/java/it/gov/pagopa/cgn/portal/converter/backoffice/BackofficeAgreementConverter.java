@@ -58,11 +58,9 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
 
 
     public static AgreementStateEnum getAgreementStateEnumFromDtoCode(String statusDtoCode) {
-        AgreementStateEnum agreementStateEnum = enumMap.get(statusDtoCode);
-        if (Objects.isNull(agreementStateEnum)) {
-            throw new InvalidRequestException("Enum " + statusDtoCode + " not mapped");
-        }
-        return agreementStateEnum;
+        return Optional.ofNullable(enumMap.get(statusDtoCode))
+                .orElseThrow(() -> getInvalidEnumMapping(statusDtoCode));
+
     }
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {

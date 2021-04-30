@@ -96,4 +96,9 @@ public class IntegrationAbstractTest {
         documentRepository.saveAll(documentList);
     }
 
+    protected void saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
+        documentRepository.saveAll(documentList);
+    }
+
 }

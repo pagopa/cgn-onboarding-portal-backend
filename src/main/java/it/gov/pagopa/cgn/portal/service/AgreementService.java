@@ -63,7 +63,7 @@ public class AgreementService extends AgreementServiceLight {
         if (CollectionUtils.isEmpty(discounts)) {
             throw new InvalidRequestException("Discounts not found. Agreement not approvable");
         }
-        List<DocumentEntity> documents = documentService.getDocuments(agreementId);
+        List<DocumentEntity> documents = documentService.getPrioritizedDocuments(agreementId);
         if (documents == null || documents.size() < DocumentTypeEnum.getNumberOfDocumentProfile()) {
             throw new InvalidRequestException("Documents not or partially loaded. Agreement not approvable");
         }

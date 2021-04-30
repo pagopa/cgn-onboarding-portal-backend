@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -58,8 +60,10 @@ public class BackofficeAgreementService {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
-        List<DocumentEntity> documents = documentService.getDocuments(agreementId);
-        //todo check admin document
+        List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
+        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.values().length) {
+            throw new InvalidRequestException("Not all documents are loaded");
+        }
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());

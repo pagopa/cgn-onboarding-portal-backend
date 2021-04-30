@@ -3,8 +3,10 @@ package it.gov.pagopa.cgn.portal.repository;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.criteria.internal.OrderImpl;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -47,8 +50,12 @@ public class BackofficeAgreementToValidateSpecification implements Specification
     public Predicate toPredicate(Root<AgreementEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         root.fetch("profile");
         root.fetch("discountList");
+        Join<AgreementEntity, DocumentEntity> documentJoin = root.join("documentList", JoinType.INNER);
         List<Predicate> predicateList = addFiltersPredicate(root, cb);
+        //todo avoid cast
         predicateList.add(cb.equal(root.get("state").as(String.class), AgreementStateEnum.PENDING.name()));
+        predicateList.add(documentJoin.get("documentType")
+                .in(Arrays.asList(DocumentTypeEnum.AGREEMENT, DocumentTypeEnum.MANIFESTATION_OF_INTEREST)));
         query.where(predicateList.toArray(new Predicate[predicateList.size()]));
         query.orderBy(getOrder(root, cb));
         return null;

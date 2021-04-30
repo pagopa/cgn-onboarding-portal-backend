@@ -2,8 +2,10 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -16,7 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,6 +69,71 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items[0].documents", hasSize(2)));
 
     }
+
+    @Test
+    void DeleteDocument_DeleteDocument_Ok() throws Exception {
+        String documentTypeDto = "ManifestationOfInterest";
+        createPendingAgreement();
+        DocumentEntity document = TestUtils.createDocument(
+                pendingAgreement, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
+        documentRepository.save(document);
+        this.mockMvc.perform(
+                delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
+                .andDo(log())
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
+    void DeleteDocument_DeleteDocumentNotFound_BadRequest() throws Exception {
+        String documentTypeDto = "ManifestationOfInterest";
+        createPendingAgreement();
+        this.mockMvc.perform(
+                delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void DeleteDocument_DeleteDocumentWithWrongType_BadRequest() throws Exception {
+        String documentTypeDto = "Invalid";
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        this.mockMvc.perform(
+                delete(TestUtils.getBackofficeDocumentPath(agreementEntity.getId()) + "/" + documentTypeDto))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void GetDocuments_GetDocuments_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        List<DocumentEntity> documents = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
+        documentRepository.saveAll(documents);
+
+        this.mockMvc.perform(
+                get(TestUtils.getBackofficeDocumentPath(agreementEntity.getId())))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.*", hasSize(2)))
+                .andExpect(jsonPath("$.[0].documentUrl").isNotEmpty())
+                .andExpect(jsonPath("$.[0].creationDate").value(LocalDate.now().toString()));
+    }
+
+    @Test
+    void GetDocuments_GetDocumentNotFound_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+
+        this.mockMvc.perform(
+                get(TestUtils.getBackofficeDocumentPath(agreementEntity.getId())))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.*", hasSize(0)));
+    }
+
 
     private void createPendingAgreement() {
         // creating agreement (and user)
