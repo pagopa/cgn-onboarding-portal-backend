@@ -4,13 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgnonboardingportal.model.Address;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.*;
 
 import java.time.LocalDate;
@@ -117,7 +114,14 @@ public class TestUtils {
         return profileDto;
     }
 
+
     public static DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
+        DiscountEntity discountEntity = createSampleDiscountEntityWithoutProduct(agreement);
+        discountEntity.setProducts(getProductEntityList(discountEntity));
+        return discountEntity;
+    }
+
+    public static DiscountEntity createSampleDiscountEntityWithoutProduct(AgreementEntity agreement) {
         DiscountEntity discountEntity = new DiscountEntity();
         discountEntity.setState(DiscountStateEnum.DRAFT);
         discountEntity.setName("discount_name");
@@ -128,17 +132,16 @@ public class TestUtils {
         discountEntity.setEndDate(LocalDate.now().plusMonths(6));
         discountEntity.setStaticCode("discount_static_code");
         discountEntity.setAgreement(agreement);
-        discountEntity.setProducts(getProductEntityList(discountEntity));
         return discountEntity;
     }
 
     public static List<DiscountProductEntity> getProductEntityList(DiscountEntity discountEntity) {
         List<DiscountProductEntity> productEntityList = new ArrayList<>();
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory("VIAGGI");
+        productEntity.setProductCategory(ProductCategoryEnum.TRAVELS);
         productEntityList.add(productEntity);
         productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory("SPORT");
+        productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
         productEntityList.add(productEntity);
         productEntityList.forEach(p -> p.setDiscount(discountEntity));
         return productEntityList;
