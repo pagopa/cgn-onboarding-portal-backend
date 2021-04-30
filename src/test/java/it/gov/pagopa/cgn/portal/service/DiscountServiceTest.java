@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
 
     @Test
@@ -105,6 +106,15 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void GetById_GetDiscountById_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        DiscountEntity dbDiscount = discountService.getDiscountById(agreementEntity.getId(), discountEntity.getId());
+        Assertions.assertNotNull(dbDiscount);
+        Assertions.assertEquals(discountEntity.getId(), dbDiscount.getId());
+    }
+
+    @Test
     void Update_UpdateDiscountWithValidData_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -113,7 +123,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setDescription("updated_description");
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
-        updatedDiscount.setDiscountValue(40.0);
+        updatedDiscount.setDiscountValue(40);
         updatedDiscount.getProducts().forEach(p->p.setProductCategory(p.getProductCategory() + "_updated"));
         updatedDiscount.setCondition("update_condition");
         updatedDiscount.setStaticCode("update_static_code");
@@ -244,7 +254,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         approveAgreement();  //simulation of approved
-        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
         //publish discount
@@ -290,7 +300,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     private void approveAgreement() {
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
     }
 }
 

@@ -21,6 +21,8 @@ import java.util.List;
 public class TestUtils {
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
 
+    public static final String BACKOFFICE_CONTROLLER_PATH = "/backoffice/";
+
     public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {
@@ -35,9 +37,14 @@ public class TestUtils {
         return getDiscountPath(agreementId) + "/" + discountId + "/publishing";
     }
 
+    public static String getDocumentPath(String agreementId) {
+        return AGREEMENTS_CONTROLLER_PATH + agreementId + "/documents";
+    }
+
     public static String getAgreementApprovalPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
     }
+
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
@@ -122,7 +129,7 @@ public class TestUtils {
         discountEntity.setState(DiscountStateEnum.DRAFT);
         discountEntity.setName("discount_name");
         discountEntity.setDescription("discount_description");
-        discountEntity.setDiscountValue(15.99);
+        discountEntity.setDiscountValue(15);
         discountEntity.setCondition("discount_condition");
         discountEntity.setStartDate(LocalDate.now());
         discountEntity.setEndDate(LocalDate.now().plusMonths(6));
@@ -144,18 +151,18 @@ public class TestUtils {
         return productEntityList;
     }
 
-    public static List<DocumentEntity> createSampleDocumentList(String agreementId) {
+    public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
-        documentList.add(createDocument(agreementId, DocumentTypeEnum.AGREEMENT));
-        documentList.add(createDocument(agreementId, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
         return documentList;
     }
 
-    public static DocumentEntity createDocument(String agreementId, DocumentTypeEnum documentTypeEnum) {
+    public static DocumentEntity createDocument(AgreementEntity agreementEntity, DocumentTypeEnum documentTypeEnum) {
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setDocumentType(documentTypeEnum);
         documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode());
-        documentEntity.setAgreementId(agreementId);
+        documentEntity.setAgreement(agreementEntity);
         return documentEntity;
     }
 

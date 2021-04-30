@@ -12,6 +12,7 @@ import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +77,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
 
-        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity.getId());
+        List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
         documentRepository.saveAll(documentList);
 
         this.mockMvc.perform(
@@ -123,11 +124,11 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
 
         this.mockMvc.perform(
@@ -146,7 +147,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity.getId()));
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
 
         this.mockMvc.perform(

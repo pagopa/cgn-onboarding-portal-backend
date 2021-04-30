@@ -2,11 +2,15 @@ package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 
 @Entity
@@ -39,6 +43,31 @@ public class AgreementEntity extends BaseEntity {
 
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)
+    private ProfileEntity profile;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "agreement", fetch = FetchType.LAZY)
+    private List<DiscountEntity> discountList;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "agreement", fetch = FetchType.LAZY)
+    private List<DocumentEntity> documentList;
+
+    @Column(name = "assignee", length = 100)
+    private String backofficeAssignee;
+
+    @Column(name = "request_approval_time")
+    private OffsetDateTime requestApprovalTime;
+
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
 
 }
 

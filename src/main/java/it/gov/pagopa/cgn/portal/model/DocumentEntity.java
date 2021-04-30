@@ -6,24 +6,29 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "document")
 @Data
 public class DocumentEntity extends BaseEntity {
 
+    @Id
     @NotNull
-    @NotBlank
-    @Column(name = "agreement_fk", length = 36)
-    private String agreementId;
+    @Column(name = "document_url")
+    private String documentUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type")
     @NotNull
     private DocumentTypeEnum documentType;
 
-    @Id
-    @NotNull
-    @Column(name = "document_url")
-    private String documentUrl;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
+    private AgreementEntity agreement;
+
+    public LocalDate getInsertDate() {
+        return insertTime.toLocalDate();
+    }
 }

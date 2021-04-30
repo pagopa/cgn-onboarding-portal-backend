@@ -24,6 +24,16 @@ steps:
       path: $(MAVEN_CACHE_FOLDER)
     displayName: Cache Maven local repo
 
+  - task: SonarCloudPrepare@1
+    displayName: 'Prepare SonarCloud analysis configuration'
+    inputs:
+      SonarCloud: '$(SONARCLOUD_SERVICE_CONN)'
+      organization: '$(SONARCLOUD_ORG)'
+      scannerMode: Other
+      extraProperties: |
+        sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+        sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
+
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml'
@@ -34,4 +44,9 @@ steps:
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
-      sonarQubeRunAnalysis: false
+      sonarQubeRunAnalysis: true
+
+  - task: SonarCloudPublish@1
+    displayName: 'Publish SonarCloud results on build summary'
+    inputs:
+      pollingTimeoutSec: '300'

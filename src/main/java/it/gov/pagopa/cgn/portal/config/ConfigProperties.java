@@ -17,6 +17,7 @@ public class ConfigProperties {
     @Value("${spring_cors_origin}")
     private String CORSOrigin;
 
+    //storage configs
     @Value("${cgn.pe.storage.azure.default-endpoints-protocol}")
     private String defaultEndpointsProtocol;
 
@@ -29,12 +30,14 @@ public class ConfigProperties {
     @Value("${cgn.pe.storage.azure.blob-endpoint}")
     private String blobEndpoint;
 
-
     @Value("${cgn.pe.storage.azure.documents-container-name}")
     private String documentsContainerName;
 
     @Value("${cgn.pe.storage.azure.images-container-name}")
     private String imagesContainerName;
+
+    @Value("${cgn.storage.document.sas.expiry.time.hours}")
+    private Integer sasExpiryTimeHours;
 
     public String getAzureConnectionString() {
         return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol +
@@ -43,6 +46,13 @@ public class ConfigProperties {
                 ";BlobEndpoint=" + blobEndpoint + ";";
 
     }
+
+    @Value("${cgn.image.minWidth}")
+    private Integer minWidth;
+
+    @Value("${cgn.image.minHeight}")
+    private Integer minHeight;
+
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

@@ -51,7 +51,7 @@ public class DiscountEntity extends BaseEntity {
     @Min(value = 0)
     @Max(value = 100)
     @Column(name = "discount_value")
-    private Double discountValue;
+    private Integer discountValue;
 
     @Column(name = "condition", length = 200)
     private String condition;
