@@ -1,12 +1,15 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import com.google.common.collect.Lists;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
@@ -18,7 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -118,18 +121,23 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Update_UpdateDiscountWithValidData_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
+
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDescription("updated_description");
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
-        updatedDiscount.getProducts().forEach(p->p.setProductCategory(p.getProductCategory() + "_updated"));
+        DiscountProductEntity productEntity = new DiscountProductEntity();
+        productEntity.setProductCategory(ProductCategoryEnum.ARTS);
+        productEntity.setDiscount(updatedDiscount);
+        updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
         updatedDiscount.setStaticCode("update_static_code");
 
 
-        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
+        DiscountEntity dbDiscount;
+        dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertEquals(updatedDiscount.getDescription(), dbDiscount.getDescription());
         Assertions.assertEquals(updatedDiscount.getStartDate(), dbDiscount.getStartDate());
@@ -140,7 +148,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(updatedDiscount.getProducts());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
         Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
-        Assertions.assertEquals(updatedDiscount.getProducts().get(1), dbDiscount.getProducts().get(1));
+        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
 

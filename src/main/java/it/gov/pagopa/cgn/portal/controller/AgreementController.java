@@ -1,19 +1,17 @@
 package it.gov.pagopa.cgn.portal.controller;
 
-import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.facade.AgreementFacade;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,27 +21,22 @@ import java.io.IOException;
 @RestController
 public class AgreementController implements AgreementsApi {
 
-    private final AgreementService agreementService;
-
     private final ProfileFacade profileFacade;
     private final DiscountFacade discountFacade;
     private final DocumentFacade documentFacade;
-
-    private final AgreementConverter agreementConverter;
+    private final AgreementFacade agreementFacade;
 
     @Override
     public ResponseEntity<Agreement> createAgreement() {
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         JwtOperatorUser user = (JwtOperatorUser) authentication.getPrincipal();
 
-        return ResponseEntity.ok(
-                agreementConverter.toDto(agreementService.createAgreementIfNotExists(user.getMerchantTaxCode())));
+        return agreementFacade.createAgreement(user.getMerchantTaxCode());
     }
 
     @Override
     public ResponseEntity<Void> requestApproval(String agreementId) {
-        agreementService.requestApproval(agreementId);
-        return ResponseEntity.noContent().build();
+        return agreementFacade.requestApproval(agreementId);
     }
 
     @Override
@@ -123,21 +116,16 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<UploadedImage> uploadImage(String agreementId, MultipartFile image) {
-        String imageUrl = agreementService.uploadImage(agreementId, image);
-        UploadedImage uploadedImage = new UploadedImage();
-        uploadedImage.setImageUrl(imageUrl);
-        return ResponseEntity.ok(uploadedImage);
+        return agreementFacade.uploadImage(agreementId, image);
     }
 
 
     @Autowired
-    public AgreementController(AgreementService agreementService,
+    public AgreementController(AgreementFacade agreementFacade,
                                DocumentFacade documentFacade,
                                ProfileFacade profileFacade,
-                               AgreementConverter agreementConverter,
                                DiscountFacade discountFacade) {
-        this.agreementService = agreementService;
-        this.agreementConverter = agreementConverter;
+        this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
         this.documentFacade = documentFacade;
