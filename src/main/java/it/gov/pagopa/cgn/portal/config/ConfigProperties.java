@@ -36,6 +36,9 @@ public class ConfigProperties {
     @Value("${cgn.pe.storage.azure.images-container-name}")
     private String imagesContainerName;
 
+    @Value("${cgn.storage.document.sas.expiry.time.hours}")
+    private Integer sasExpiryTimeHours;
+
     public String getAzureConnectionString() {
         return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol +
                 ";AccountName=" + accountName +

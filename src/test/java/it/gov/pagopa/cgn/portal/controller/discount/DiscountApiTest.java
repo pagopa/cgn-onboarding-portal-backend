@@ -2,15 +2,15 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -113,9 +112,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items").isNotEmpty())
                 .andExpect(jsonPath("$.items", hasSize(1)))
                 .andExpect(jsonPath("$.items[0].id").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].productCategories", containsInAnyOrder(
-                        discountEntity.getProducts().stream().map(DiscountProductEntity::getProductCategory)
-                                .toArray())));
+                .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
     }
 
     @Test
@@ -162,10 +159,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setStaticCode("create_discount_static_code");
-        createDiscount.setProductCategories(Arrays.asList("VIAGGI", "SPORT"));
+        createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELS, ProductCategory.SPORTS));
         return createDiscount;
     }
-
-
-
 }

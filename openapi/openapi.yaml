@@ -375,6 +375,7 @@ definitions:
     required:
       - id
       - state
+      - completedSteps
     properties:
       id:
         type: string
@@ -382,6 +383,10 @@ definitions:
         $ref: '#/definitions/AgreementState'
       imageUrl:
         type: string
+      completedSteps:
+        type: array
+        items:
+          $ref: '#/definitions/CompletedStep'
   DraftAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
@@ -427,7 +432,12 @@ definitions:
       - PendingAgreement
       - ApprovedAgreement
       - RejectedAgreement
-
+  CompletedStep:
+    type: string
+    enum:
+      - Profile
+      - Discount
+      - Document
   UploadedImage:
     type: object
     required:
@@ -724,8 +734,8 @@ definitions:
       productCategories:
         type: array
         items:
-          type: string
-          minItems: 1
+          $ref: '#/definitions/ProductCategory'
+        minItems: 1
       condition:
         type: string
         maxLength: 200
@@ -763,8 +773,8 @@ definitions:
       productCategories:
         type: array
         items:
-          type: string
-          minItems: 1
+          $ref: '#/definitions/ProductCategory'
+        minItems: 1
       condition:
         type: string
         maxLength: 200
@@ -819,7 +829,7 @@ definitions:
       productCategories:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/ProductCategory'
         minItems: 1
       condition:
         type: string
@@ -834,7 +844,17 @@ definitions:
       - draft
       - published
       - rejected
-
+  ProductCategory:
+    type: string
+    enum:
+      - Entertainments
+      - Travels
+      - Transportation
+      - Connectivity
+      - Books
+      - Arts
+      - Sports
+      - Health
   Address:
     type: object
     required:
