@@ -20,7 +20,7 @@ WITH merchant AS (
          WHERE d.state = 'PUBLISHED'
            AND d.start_date <= CURRENT_TIMESTAMP
            AND CURRENT_TIMESTAMP <= d.end_date
-           AND d.agreement_fk IN (SELECT agreement_k FROM merchant)
+           AND EXISTS(SELECT 1 FROM merchant m WHERE m.agreement_k = d.agreement_fk)
      ),
      merchant_with_categories AS (
          SELECT m.agreement_k,
