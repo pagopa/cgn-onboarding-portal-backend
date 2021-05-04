@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.filter;
 
+import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +17,7 @@ public class BackofficeFilter implements Serializable {
 
     private String profileFullName;
 
-    private String assignee;
+    private AssigneeEnum assignee;
 
     private LocalDate requestDateFrom;
 

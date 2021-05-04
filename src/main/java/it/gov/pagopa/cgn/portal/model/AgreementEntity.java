@@ -1,9 +1,12 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -16,6 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "agreement")
 @Data
+@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 public class AgreementEntity extends BaseEntity {
 
     @Id
@@ -26,6 +30,7 @@ public class AgreementEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", length = 50)
+    @Type( type = "agreement_state_enum" )
     @NotNull
     private AgreementStateEnum state;
 

@@ -27,8 +27,8 @@ public class DocumentEntity extends BaseEntity {
     @NotNull
     private DocumentTypeEnum documentType;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "agreement_fk", updatable = false, nullable = false)
     private AgreementEntity agreement;
 
     public LocalDate getInsertDate() {

@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
+import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
@@ -75,7 +76,7 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
         return BackofficeFilter.builder()
                 .agreementState(state)
                 .profileFullName(profileFullName)
-                .assignee(assignee)
+                .assignee(AssigneeEnum.fromValue(assignee))
                 .requestDateFrom(startDateFrom)
                 .requestDateTo(startDateTo)
                 .page(page)

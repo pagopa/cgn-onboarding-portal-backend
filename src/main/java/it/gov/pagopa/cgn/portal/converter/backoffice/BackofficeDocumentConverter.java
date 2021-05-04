@@ -17,15 +17,16 @@ import java.util.function.Function;
 public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntity, Document> {
 
     private static final Map<DocumentTypeEnum, DocumentType> enumMap = new EnumMap<>(DocumentTypeEnum.class);
-    private static final Map<String, DocumentTypeEnum> dtoDocumentTypeMap = new HashMap<>(2);
+    private static final Map<String, DocumentTypeEnum> backofficeDocumentTypeMap = new HashMap<>(2);
 
     static {
         enumMap.put(DocumentTypeEnum.BACKOFFICE_AGREEMENT, DocumentType.AGREEMENT);
         enumMap.put(DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST, DocumentType.MANIFESTATIONOFINTEREST);
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
         enumMap.put(DocumentTypeEnum.MANIFESTATION_OF_INTEREST, DocumentType.MANIFESTATIONOFINTEREST);
-        dtoDocumentTypeMap.put("Agreement", DocumentTypeEnum.BACKOFFICE_AGREEMENT);
-        dtoDocumentTypeMap.put("ManifestationOfInterest", DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
+        backofficeDocumentTypeMap.put(DocumentType.AGREEMENT.getValue(), DocumentTypeEnum.BACKOFFICE_AGREEMENT);
+        backofficeDocumentTypeMap.put(
+                DocumentType.MANIFESTATIONOFINTEREST.getValue(), DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
     }
 
     @Override
@@ -42,9 +43,8 @@ public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntit
         return toBackofficeDocumentTypeEnum.apply(dtoDocumentType);
     }
 
-    //todo review if is possible to reuse enumMap
     protected Function<String, DocumentTypeEnum> toBackofficeDocumentTypeEnum = documentTypeDto ->
-            Optional.ofNullable(dtoDocumentTypeMap.get(documentTypeDto))
+            Optional.ofNullable(backofficeDocumentTypeMap.get(documentTypeDto))
             .orElseThrow(() -> getInvalidEnumMapping(documentTypeDto));
 
     protected Function<DocumentEntity, Document> toDto =

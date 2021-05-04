@@ -17,16 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Transactional(Transactional.TxType.NOT_SUPPORTED)
 @Component
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class BackofficeAgreementFacade {
 
     private final BackofficeAgreementService service;
@@ -40,7 +41,7 @@ public class BackofficeAgreementFacade {
     private final AzureStorage azureStorage;
 
 
-    @Transactional(Transactional.TxType.REQUIRED)   // for converter
+    @Transactional(readOnly = true)  // for converter
     public ResponseEntity<Agreements> getAgreements(BackofficeFilter filter) {
         Page<AgreementEntity> agreements = service.getAgreements(filter);
         return ResponseEntity.ok(agreementConverter.getAgreementFromPage(agreements));

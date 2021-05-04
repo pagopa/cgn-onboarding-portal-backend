@@ -14,11 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BackofficeAgreementService {
@@ -31,15 +32,24 @@ public class BackofficeAgreementService {
 
     private final DocumentService documentService;
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
+
         BackofficeAgreementToValidateSpecification spec;
         spec = new BackofficeAgreementToValidateSpecification(filter, FAKE_BACKOFFICE_ID);  //todo get from token
-        Pageable page = spec.getPage();
-        return agreementRepository.findAll(spec, page);
+        Pageable pageable = spec.getPage();
+        Page<AgreementEntity> agreementEntityPage = agreementRepository.findAll(spec, pageable);
+
+        // exclude backoffice documents
+        agreementEntityPage.getContent().forEach(agreementEntity -> {
+            List<DocumentEntity> documents = agreementEntity.getDocumentList().stream()
+                    .filter(d -> !d.getDocumentType().isBackoffice()).collect(Collectors.toList());
+            agreementEntity.setDocumentList(documents);
+        });
+        return agreementEntityPage;
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity assignAgreement(String agreementId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         validateForAssignment(agreementEntity);
@@ -47,7 +57,7 @@ public class BackofficeAgreementService {
         return agreementRepository.save(agreementEntity);
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity unassignAgreement(String agreementId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         validateForUnassignment(agreementEntity);
@@ -55,7 +65,7 @@ public class BackofficeAgreementService {
         return agreementRepository.save(agreementEntity);
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity approveAgreement(String agreementId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
@@ -73,7 +83,7 @@ public class BackofficeAgreementService {
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
