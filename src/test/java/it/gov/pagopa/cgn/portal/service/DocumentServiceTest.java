@@ -90,16 +90,23 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Delete_DeleteDocument_Ok() throws IOException {
+    void Delete_DeleteDocument_Ok() {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
         documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
-        documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
-        List<DocumentEntity> documents = documentService.getDocuments(agreementEntity.getId());
+        long deleteDocument = documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
+        Assertions.assertEquals(1, deleteDocument);
+        List<DocumentEntity> documents = documentService.getPrioritizedDocuments(agreementEntity.getId());
         Assertions.assertTrue(CollectionUtils.isEmpty(documents));
 
     }
 
+    @Test
+    void Delete_DeleteDocumentNotFound_Return0DocumentDeleted() {
+        Assertions.assertEquals(0, documentService.deleteDocument(
+                agreementEntity.getId(), DocumentTypeEnum.AGREEMENT));
+
+    }
 
     @Test
     void Get_GenerateAgreementDocument_Ok() throws Exception {

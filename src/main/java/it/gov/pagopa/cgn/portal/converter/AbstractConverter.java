@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.converter;
 
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -48,6 +49,10 @@ public abstract class AbstractConverter<E, D> {
 
     protected Optional<E> convertToEntity(Optional<D> entityOpt, Function<D, E> function) {
         return entityOpt.isEmpty() ? Optional.empty() : Optional.of(function.apply(entityOpt.get()));
+    }
+
+    protected static InvalidRequestException getInvalidEnumMapping(String inputString) {
+        return new InvalidRequestException("Enum mapping not found for " + inputString);
     }
 
 }

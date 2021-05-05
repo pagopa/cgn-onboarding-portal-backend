@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
@@ -19,13 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional(Transactional.TxType.REQUIRED)
+@Slf4j
 public class DocumentService {
 
     private final DocumentRepository documentRepository;
@@ -37,25 +38,40 @@ public class DocumentService {
 
     private final ITextRenderer renderer = new ITextRenderer();
 
-    public List<DocumentEntity> getDocuments(String agreementId) {
-        List<DocumentEntity> documentEntityList = documentRepository.findByAgreementId(agreementId);
-        return filterDocumentsByPriority(documentEntityList);
+    public List<DocumentEntity> getPrioritizedDocuments(String agreementId) {
+        return filterDocumentsByPriority(getAllDocuments(agreementId));
     }
 
-    public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) throws IOException {
+    public List<DocumentEntity> getAllDocuments(String agreementId) {
+        return documentRepository.findByAgreementId(agreementId);
+    }
+
+    public List<DocumentEntity> getAllDocuments(String agreementId, Predicate<DocumentEntity> documentFilter) {
+        List<DocumentEntity> documents = getAllDocuments(agreementId);
+        if (!CollectionUtils.isEmpty(documents)) {
+            return documents.stream().filter(documentFilter).collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
-
+        // Delete old document if exists
+        long deleted = documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
+        if (deleted > 0) {
+            documentRepository.flush();
+            log.debug(String.format("delete document for agreement id %s and with type %s", agreementId, documentType));
+        }
         DocumentEntity document = new DocumentEntity();
-        document.setDocumentUrl(url);
         document.setDocumentType(documentType);
         document.setAgreement(agreementEntity);
-
+        document.setDocumentUrl(url);
         return documentRepository.save(document);
     }
 
-    public void deleteDocument(String agreementId, DocumentTypeEnum documentType) {
-        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType.toString());
+    public long deleteDocument(String agreementId, DocumentTypeEnum documentType) {
+        return documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
     }
 
     // if there are documents created by profile and backoffice user, the document made by backoffice user will be returned
