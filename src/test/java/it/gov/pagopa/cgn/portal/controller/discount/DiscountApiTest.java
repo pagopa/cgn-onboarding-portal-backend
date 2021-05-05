@@ -3,6 +3,8 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -55,6 +58,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
     }
 
     @Test

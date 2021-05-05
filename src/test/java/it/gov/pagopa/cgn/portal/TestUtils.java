@@ -19,16 +19,19 @@ import java.util.Collections;
 import java.util.List;
 
 public class TestUtils {
-    public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
+
+    public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements";  //needed to bypass interceptor
+
+    private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
 
     public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {
-        return AGREEMENTS_CONTROLLER_PATH + agreementId + "/profile";
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
     }
 
     public static String getDiscountPath(String agreementId) {
-        return AGREEMENTS_CONTROLLER_PATH + agreementId + "/discounts";
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/discounts";
     }
 
     public static String getDiscountPublishingPath(String agreementId, Long discountId) {
@@ -36,7 +39,7 @@ public class TestUtils {
     }
 
     public static String getAgreementApprovalPath(String agreementId) {
-        return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/approval";
     }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {

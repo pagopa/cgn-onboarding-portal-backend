@@ -13,7 +13,7 @@ import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
+@PreAuthorize("hasRole('ROLE_MERCHANT')")
 public class AgreementController implements AgreementsApi {
 
     private final AgreementService agreementService;
