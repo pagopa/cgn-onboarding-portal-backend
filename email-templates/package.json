@@ -1,0 +1,13 @@
+{
+  "name": "mjml-thymeleaf",
+  "version": "0.0.1",
+  "dependencies": {
+    "gulp": "^4.0.2",
+    "gulp-mjml": "^4.0.2"
+  },
+  "scripts": {
+    "mjml": "node node_modules/.bin/gulp mjml",
+    "watch": "node node_modules/.bin/gulp watch"
+  }
+}
+
