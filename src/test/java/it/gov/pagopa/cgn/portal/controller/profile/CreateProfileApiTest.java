@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -31,7 +31,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        AgreementEntity agreement = agreementService.createAgreementIfNotExists();
+        AgreementEntity agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         profilePath = TestUtils.getProfilePath(agreement.getId());
     }
 

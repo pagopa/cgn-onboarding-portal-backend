@@ -27,8 +27,8 @@ public class AgreementFacade {
     private final AgreementConverter agreementConverter;
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public ResponseEntity<Agreement> createAgreement() {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists();
+    public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(merchantTaxCode);
         Agreement dto = agreementConverter.toDto(agreementEntity);
         dto.setCompletedSteps(getCompletedSteps(agreementEntity));
         return ResponseEntity.ok(dto);

@@ -35,7 +35,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreementEntity = agreementService.createAgreementIfNotExists();
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
     }
 
     @Test

@@ -17,7 +17,10 @@ import java.util.List;
 
 public class TestUtils {
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
+
     public static final String BACKOFFICE_CONTROLLER_PATH = "/backoffice/";
+
+    public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/profile";

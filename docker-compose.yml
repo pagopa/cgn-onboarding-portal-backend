@@ -3,11 +3,13 @@ version: '2'
 services:
   app:
     image: 'cgn-onboarding-portal-backend:latest'
+    cpus: 1.0
+    mem_limit: "1g"
     build:
       context: .
     container_name: app
     ports:
-    - 8080:8080
+    - 9090:9090
     depends_on:
       - db
       - azurite
@@ -16,6 +18,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication
 
   db:
     image: 'postgres:11-alpine'
