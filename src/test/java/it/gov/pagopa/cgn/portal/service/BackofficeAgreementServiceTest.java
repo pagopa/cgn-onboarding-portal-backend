@@ -188,7 +188,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void AssignAgreement_AssignAgreementWithStatusDraft_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -239,7 +239,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementWithDraftStatus_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -275,7 +275,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RejectAgreement_RejectAgreementWithDraftStatus_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -298,7 +298,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     private void createPendingAgreement() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());

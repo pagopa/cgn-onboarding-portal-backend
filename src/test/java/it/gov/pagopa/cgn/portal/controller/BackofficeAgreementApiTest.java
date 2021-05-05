@@ -7,15 +7,19 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -28,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -46,6 +50,13 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     private AgreementEntity pendingAgreement;
 
     private DiscountEntity discountEntity;
+
+    @BeforeEach
+    void beforeEach() {
+     SecurityContextHolder.getContext().setAuthentication(
+             new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+            );
+}
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
@@ -98,7 +109,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentWithWrongType_BadRequest() throws Exception {
         String documentTypeDto = "Invalid";
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(agreementEntity.getId()) + "/" + documentTypeDto))
                 .andDo(log())
@@ -108,7 +119,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocuments_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         List<DocumentEntity> documents = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
         documentRepository.saveAll(documents);
 
@@ -124,7 +135,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocumentNotFound_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
 
         this.mockMvc.perform(
                 get(TestUtils.getBackofficeDocumentPath(agreementEntity.getId())))
@@ -137,7 +148,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     private void createPendingAgreement() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
