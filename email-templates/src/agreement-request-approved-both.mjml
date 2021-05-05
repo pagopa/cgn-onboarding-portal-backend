@@ -1,6 +1,6 @@
 <mjml lang="it">
   <mj-head>
-    <mj-title>Agevolazione in scadenza</mj-title>
+    <mj-title>Richiesta di convenzione approvata</mj-title>
     <mj-font name="Titillium Web" href="https://fonts.googleapis.com/css?family=Titillium+Web:regular,bold" />
     <mj-attributes>
       <mj-all font-family="Titillium Web, Arial" />
@@ -69,13 +69,19 @@
       <mj-section background-color="#ffffff">
         <mj-column>
           <mj-text padding-left="100px" color="#17324D" font-weight="bold" align="left" css-class="titolo">
-            <h1 style="font-size:32px; line-height:40px;">La tua agevolazione sta per scadere</h1>
+            <h1 style="font-size:32px; line-height:40px;">Richiesta di convenzione approvata</h1>
           </mj-text>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>Ti informiamo che l’agevolazione {titolo dell’agevolazione in scadenza} sta per scadere.</p>
+            <p>La tua richiesta di convenzione è stata approvata.</p>
           </mj-text>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>Puoi accedere al portale per estenderla o riattivarla.</p>
+            <p>Accedi al portale per scaricare i documenti controfirmati dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale.</p>
+          </mj-text>
+          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
+            <p>Assicurati di aver portato a termine gli sviluppi necessari a riconoscere i codici sconto, prima di pubblicare le tue agevolazioni.</p>
+          </mj-text>
+          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
+            <p>In particolare se effettui la validazione dei codici sconto tramite API, ti informiamo che nel tuo Profilo troverai l’API key necessaria per le implementazioni tecniche sul tuo portale.</p>
           </mj-text>
         </mj-column>
       </mj-section>

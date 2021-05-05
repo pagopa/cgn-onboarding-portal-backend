@@ -1,6 +1,6 @@
-<mjml lang="it">
+<mjml lang="it" xmlns:th>
   <mj-head>
-    <mj-title>Agevolazione in scadenza</mj-title>
+    <mj-title>Nuova richiesta di convenzione</mj-title>
     <mj-font name="Titillium Web" href="https://fonts.googleapis.com/css?family=Titillium+Web:regular,bold" />
     <mj-attributes>
       <mj-all font-family="Titillium Web, Arial" />
@@ -69,13 +69,10 @@
       <mj-section background-color="#ffffff">
         <mj-column>
           <mj-text padding-left="100px" color="#17324D" font-weight="bold" align="left" css-class="titolo">
-            <h1 style="font-size:32px; line-height:40px;">La tua agevolazione sta per scadere</h1>
+            <h1 style="font-size:32px; line-height:40px;">Nuova richiesta di convenzione da <span th:text="${merchant_fullname}"></span></h1>
           </mj-text>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>Ti informiamo che l’agevolazione {titolo dell’agevolazione in scadenza} sta per scadere.</p>
-          </mj-text>
-          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>Puoi accedere al portale per estenderla o riattivarla.</p>
+            <p><span th:text="${merchant_fullname}"></span> ha appena inviato la richiesta di convenzione.</p>
           </mj-text>
         </mj-column>
       </mj-section>
