@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
@@ -18,7 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,28 +31,55 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final ProfileRepository profileRepository;
     private final DiscountRepository discountRepository;
+    private final AgreementServiceLight agreementServiceLight;
     private final AzureStorage azureStorage;
     private final TemplateEngine templateEngine;
 
     private final ITextRenderer renderer = new ITextRenderer();
 
     public List<DocumentEntity> getDocuments(String agreementId) {
-        return documentRepository.findByAgreementId(agreementId);
+        List<DocumentEntity> documentEntityList = documentRepository.findByAgreementId(agreementId);
+        return filterDocumentsByPriority(documentEntityList);
     }
 
     public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) throws IOException {
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
 
         DocumentEntity document = new DocumentEntity();
         document.setDocumentUrl(url);
         document.setDocumentType(documentType);
-        document.setAgreementId(agreementId);
+        document.setAgreement(agreementEntity);
 
         return documentRepository.save(document);
     }
 
     public void deleteDocument(String agreementId, DocumentTypeEnum documentType) {
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType.toString());
+    }
+
+    // if there are documents created by profile and backoffice user, the document made by backoffice user will be returned
+    private List<DocumentEntity> filterDocumentsByPriority(List<DocumentEntity> documentEntityList) {
+        if (CollectionUtils.isEmpty(documentEntityList)) {
+            return documentEntityList;
+        }
+        return Arrays.stream(DocumentTypeEnum.Type.values())
+                .map(type -> filterDocumentsByPriorityAndType(type, documentEntityList))
+                .filter(t -> !Objects.isNull(t))
+                .collect(Collectors.toList());
+    }
+
+    private DocumentEntity filterDocumentsByPriorityAndType(DocumentTypeEnum.Type typeEnum, List<DocumentEntity> documentEntityList) {
+        DocumentEntity toReturn = null;
+        for (DocumentEntity documentEntity : documentEntityList) {
+            if (typeEnum.equals(documentEntity.getDocumentType().getType())) {
+                if (documentEntity.getDocumentType().isBackoffice()) {
+                    return documentEntity;
+                }
+                toReturn = documentEntity;
+            }
+        }
+        return toReturn;
     }
 
 
@@ -135,12 +165,15 @@ public class DocumentService {
     }
 
 
-    public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository, DiscountRepository discountRepository, AzureStorage azureStorage, TemplateEngine templateEngine) {
+    public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository,
+                           DiscountRepository discountRepository, AzureStorage azureStorage,
+                           TemplateEngine templateEngine, AgreementServiceLight agreementServiceLight) {
         this.documentRepository = documentRepository;
         this.profileRepository = profileRepository;
         this.discountRepository = discountRepository;
         this.azureStorage = azureStorage;
         this.templateEngine = templateEngine;
+        this.agreementServiceLight = agreementServiceLight;
 
         try {
             ITextFontResolver fontResolver = renderer.getFontResolver();
@@ -173,7 +206,8 @@ public class DocumentService {
         public static RenderableDiscount fromEntity(DiscountEntity entity) {
             RenderableDiscount discount = new RenderableDiscount();
 
-            String categories = String.join(",\n", entity.getProducts().stream().map(DiscountProductEntity::getProductCategory).collect(Collectors.toList()));
+            String categories = entity.getProducts().stream()
+                    .map(p -> p.getProductCategory().name()).collect(Collectors.joining(",\n"));
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();

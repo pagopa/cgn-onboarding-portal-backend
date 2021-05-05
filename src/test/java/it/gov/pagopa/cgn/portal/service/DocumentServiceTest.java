@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -79,7 +80,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
 
-        Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreementId());
+        Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
         Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
 
@@ -129,8 +130,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
         Assertions.assertTrue(actual.contains("A Description"));
-        Assertions.assertTrue(actual.contains("15.99%"));
-        Assertions.assertTrue(actual.contains("VIAGGI"));
+        Assertions.assertTrue(actual.contains("15%"));
+        Assertions.assertTrue(actual.contains(ProductCategoryEnum.TRAVELS.name()));
         Assertions.assertTrue(actual.contains("SPORT"));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));

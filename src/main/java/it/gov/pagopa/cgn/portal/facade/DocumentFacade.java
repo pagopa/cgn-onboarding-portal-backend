@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.DocumentConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import it.gov.pagopa.cgnonboardingportal.model.Document;
@@ -13,6 +14,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +25,7 @@ public class DocumentFacade {
 
     private final DocumentService documentService;
     private final DocumentConverter documentConverter;
+    private final AzureStorage azureStorage;
 
     public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
         byte[] document = documentService.renderDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase())).toByteArray();
@@ -37,12 +40,14 @@ public class DocumentFacade {
 
     public ResponseEntity<Documents> getDocuments(String agreementId) {
         List<DocumentEntity> documentList = documentService.getDocuments(agreementId);
+        setUrlBasePathToDocuments(documentList);
         Documents documents = documentConverter.getDocumentsDtoFromDocumentEntityList(documentList);
         return ResponseEntity.ok(documents);
     }
 
     public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, InputStream content, long size) throws IOException {
         DocumentEntity documentEntity = documentService.storeDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), content, size);
+        documentEntity.setDocumentUrl(azureStorage.getDocumentSasFileUrl(documentEntity.getDocumentUrl()));
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
     }
 
@@ -51,8 +56,17 @@ public class DocumentFacade {
     }
 
     @Autowired
-    public DocumentFacade(DocumentService documentService, DocumentConverter documentConverter) {
+    public DocumentFacade(DocumentService documentService, DocumentConverter documentConverter,
+                          AzureStorage azureStorage) {
         this.documentService = documentService;
         this.documentConverter = documentConverter;
+        this.azureStorage = azureStorage;
+    }
+
+    private void setUrlBasePathToDocuments(List<DocumentEntity> documentList) {
+        if (!CollectionUtils.isEmpty(documentList)) {
+            documentList.forEach(
+                    d -> d.setDocumentUrl(azureStorage.getDocumentSasFileUrl(d.getDocumentUrl())));
+        }
     }
 }
