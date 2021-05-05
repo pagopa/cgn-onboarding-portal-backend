@@ -25,8 +25,7 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     public ResponseEntity<Agreements> getAgreements(String states, String assignee, String profileFullName,
                                                     LocalDate requestDateFrom, LocalDate requestDateTo,
                                                     Integer pageSize, Integer page) {
-        BackofficeFilter filter;
-        filter = getFilter(states, profileFullName, assignee, requestDateFrom, requestDateTo, pageSize, page);
+        BackofficeFilter filter = getFilter(states, profileFullName, assignee, requestDateFrom, requestDateTo, pageSize, page);
         return agreementFacade.getAgreements(filter);
     }
 
