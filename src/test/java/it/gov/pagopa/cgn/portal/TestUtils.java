@@ -17,8 +17,8 @@ import java.util.List;
 
 public class TestUtils {
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements/";
-
-    public static final String BACKOFFICE_CONTROLLER_PATH = "/backoffice/";
+  
+    public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
 
     public static final String FAKE_ID = "FAKE_ID";
 
@@ -40,6 +40,9 @@ public class TestUtils {
 
     public static String getAgreementApprovalPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH + agreementId + "/approval";
+    }
+    public static String getBackofficeDocumentPath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
 
 
@@ -158,6 +161,13 @@ public class TestUtils {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
+        return documentList;
+    }
+
+    public static List<DocumentEntity> createSampleBackofficeDocumentList(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = new ArrayList<>();
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_AGREEMENT));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST));
         return documentList;
     }
 

@@ -3,7 +3,7 @@ info:
   title: CGN Onboarding Portal
   description: Carta Giovani Nazionale Onboarding Portal
   version: '0.0.1'
-host: cgn.pagopa.it
+host: api.cgn.pagopa.it
 basePath: /api/v1
 schemes:
   - https

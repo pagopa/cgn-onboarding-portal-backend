@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
@@ -39,7 +38,7 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
 
     protected Function<AgreementStateEnum, AgreementState> toDtoEnum = entityEnum ->
             Optional.ofNullable(enumMap.get(entityEnum))
-                    .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + entityEnum));
+                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
     protected Function<AgreementState, AgreementStateEnum> toEntityEnum = agreementState ->
             enumMap.entrySet().stream()

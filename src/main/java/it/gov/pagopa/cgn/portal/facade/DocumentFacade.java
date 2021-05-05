@@ -14,10 +14,9 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @Component
@@ -39,20 +38,28 @@ public class DocumentFacade {
     }
 
     public ResponseEntity<Documents> getDocuments(String agreementId) {
-        List<DocumentEntity> documentList = documentService.getDocuments(agreementId);
-        setUrlBasePathToDocuments(documentList);
+        List<DocumentEntity> documentList = documentService.getPrioritizedDocuments(agreementId);
+        azureStorage.setSecureDocumentUrl(documentList);
         Documents documents = documentConverter.getDocumentsDtoFromDocumentEntityList(documentList);
         return ResponseEntity.ok(documents);
     }
 
-    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, InputStream content, long size) throws IOException {
-        DocumentEntity documentEntity = documentService.storeDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), content, size);
-        documentEntity.setDocumentUrl(azureStorage.getDocumentSasFileUrl(documentEntity.getDocumentUrl()));
+
+    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document){
+        DocumentEntity documentEntity;
+        try {
+            documentEntity = documentService.storeDocument(
+                    agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), document.getInputStream(),
+                    document.getSize());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        azureStorage.setSecureDocumentUrl(documentEntity);
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
     }
 
-    public void deleteDocument(String agreementId, String documentType) {
-        documentService.deleteDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()));
+    public long deleteDocument(String agreementId, String documentType) {
+        return documentService.deleteDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()));
     }
 
     @Autowired
@@ -63,10 +70,8 @@ public class DocumentFacade {
         this.azureStorage = azureStorage;
     }
 
-    private void setUrlBasePathToDocuments(List<DocumentEntity> documentList) {
-        if (!CollectionUtils.isEmpty(documentList)) {
-            documentList.forEach(
-                    d -> d.setDocumentUrl(azureStorage.getDocumentSasFileUrl(d.getDocumentUrl())));
-        }
-    }
+
+
+
+
 }
