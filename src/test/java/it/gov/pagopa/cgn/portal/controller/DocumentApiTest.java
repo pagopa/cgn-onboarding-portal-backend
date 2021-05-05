@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 class DocumentApiTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -58,7 +58,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocuments_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists();
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
         documentService.storeDocument(agreementEntity.getId(),
                 DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);

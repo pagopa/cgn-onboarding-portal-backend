@@ -37,17 +37,17 @@ public class AgreementService extends AgreementServiceLight {
     private final ConfigProperties configProperties;
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public AgreementEntity createAgreementIfNotExists() {
+    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
-        Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser();
+        Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
         if (userAgreementOpt.isPresent()) {
             userAgreement = userAgreementOpt.get();
             // current user has already an agreement. Find it
             agreementEntity = agreementRepository.findById(userAgreement.getAgreementId())
                     .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
         } else {
-            userAgreement = userService.create();
+            userAgreement = userService.create(merchantTaxCode);
             agreementEntity = createAgreement(userAgreement.getAgreementId());
         }
         return agreementEntity;

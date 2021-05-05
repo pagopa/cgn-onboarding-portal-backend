@@ -65,7 +65,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
             documentContainerClient.create();
         }
 
-        agreementEntity = agreementService.createAgreementIfNotExists();
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
 

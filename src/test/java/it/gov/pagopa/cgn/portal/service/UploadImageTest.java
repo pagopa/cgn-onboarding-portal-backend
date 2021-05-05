@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -35,7 +36,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        agreementEntity = this.agreementService.createAgreementIfNotExists();
+        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         multipartFile = new MockMultipartFile("fileItem", "test-image.png", "image/png", image);
 
         BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()

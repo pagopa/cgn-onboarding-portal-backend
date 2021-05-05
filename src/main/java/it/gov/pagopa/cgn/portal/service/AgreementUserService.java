@@ -12,18 +12,16 @@ import java.util.UUID;
 @Service
 public class AgreementUserService {
 
-    private static final String FAKE_ID = "FAKE_ID";
-
     private final AgreementUserRepository userRepository;
 
-    public Optional<AgreementUserEntity> findCurrentAgreementUser() {
-        return userRepository.findById(FAKE_ID);    //TODO get ID from token
+    public Optional<AgreementUserEntity> findCurrentAgreementUser(String merchantTaxCode) {
+        return userRepository.findById(merchantTaxCode);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public AgreementUserEntity create() {
+    public AgreementUserEntity create(String merchantTaxCode) {
         AgreementUserEntity userEntity = new AgreementUserEntity();
-        userEntity.setUserId(FAKE_ID);  //TODO get ID from token
+        userEntity.setUserId(merchantTaxCode);
         userEntity.setAgreementId(UUID.randomUUID().toString());
         return userRepository.save(userEntity);
     }
