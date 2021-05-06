@@ -22,19 +22,21 @@
         p {
           margin-top: 0px;
         }
+
+        .box-shadow {
+      	  border: 1px solid black;
+        }
       </style>
       <style type="text/css">
         @media (min-width:600px) {
           body {
-            background-color: #E6E9F2;
+            background-color: white;
           }
         }
       </style>
       <style type="text/css">
         @media print {
-          body {
-            background-color: white !important;
-          }
+
 
           .spaziatura,
           .intro {
@@ -52,7 +54,7 @@
       </style>
     </mj-raw>
   </mj-head>
-  <mj-body width="840px" padding="0">
+  <mj-body css-class="box-shadow" width="840px" padding="0">
     <mj-wrapper padding="0">
       <!-- Logo -->
       <mj-section background-color="#ffffff" border-top="solid 8px #94C0DD">
@@ -83,11 +85,6 @@
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
             <p>In particolare se effettui la validazione dei codici sconto tramite API, ti informiamo che nel tuo Profilo troverai l’API key necessaria per le implementazioni tecniche sul tuo portale.</p>
           </mj-text>
-        </mj-column>
-      </mj-section>
-      <!-- Footer -->
-      <mj-section background-color="#ffffff" border-left="solid 1px #E6E9F2" border-bottom="solid 1px #E6E9F2">
-        <mj-column>
           <mj-text padding-left="100px" color="#455B71" font-size="16px" line-height="24px">
             <p>Il team di Carta Giovani Nazionale</p>
           </mj-text>
