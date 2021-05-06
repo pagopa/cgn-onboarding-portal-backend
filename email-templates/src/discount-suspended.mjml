@@ -72,8 +72,25 @@
             <h1 style="font-size:32px; line-height:40px;">Agevolazione sospesa</h1>
           </mj-text>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>Ti informiamo che l’agevolazione {titolo dell’agevolazione sospesa} è stata sospesa dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale, con la seguente motivazione: {nota di agevolazione sospesa inviata}.</p>
+            <p>Ti informiamo che l’agevolazione {titolo dell’agevolazione sospesa} è stata sospesa dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale, con la seguente motivazione:</p>
           </mj-text>
+          <mj-text padding-left="100px" font-size="18px" font-weight="bold" line-height="24px" color="#455B71" font-weight="400" align="left" css-class="intro">
+            <p>Nota del dipartimento</p>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <!-- Notes -->
+      <mj-section background-color="#ffffff">
+        <mj-column background-color="#FAFAFC" width="640px">
+          <mj-text padding-top="16px" padding-bottom="16px" font-size="16px" line-height="24px" 
+          color="#17324D" font-weight="400" align="left" css-class="intro">
+            <p>{nota di rifiuto inviata}</p>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <!-- Footer -->
+      <mj-section background-color="#ffffff">
+        <mj-column>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
             <p>Accedi al portale per modificarla.</p>
           </mj-text>
