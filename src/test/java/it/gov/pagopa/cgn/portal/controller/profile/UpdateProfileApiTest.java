@@ -2,11 +2,11 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +40,15 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     void init() {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         profilePath = TestUtils.getProfilePath(agreement.getId());
+        setOperatorAuth();
     }
 
     @Test
-    void Update_UpdateProfileWithInvalidAgreementId_NotFound() throws Exception {
+    void Update_UpdateProfileWithInvalidAgreementId_Forbidden() throws Exception {
         this.mockMvc.perform(
                 get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isForbidden());
     }
 
     @Test

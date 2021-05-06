@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum CgnUserRoleEnum {
 
-    OPERATOR("merchant"), ADMIN("admin");
+    OPERATOR("ROLE_MERCHANT"), ADMIN("ROLE_ADMIN");
 
     private final String code;
 

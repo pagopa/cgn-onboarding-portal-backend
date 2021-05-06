@@ -58,7 +58,6 @@ public class ProfileService {
     }
 
     private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
-        //todo check agreementId with token
         return profileRepository.findByAgreementId(agreementId);
     }
     private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {

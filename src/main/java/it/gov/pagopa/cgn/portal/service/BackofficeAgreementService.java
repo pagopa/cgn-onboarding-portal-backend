@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,9 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class BackofficeAgreementService {
-
-    public static final String FAKE_BACKOFFICE_ID = "FAKE";
 
     private final AgreementRepository agreementRepository;
 
@@ -36,7 +36,7 @@ public class BackofficeAgreementService {
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
         BackofficeAgreementToValidateSpecification spec;
-        spec = new BackofficeAgreementToValidateSpecification(filter, FAKE_BACKOFFICE_ID);  //todo get from token
+        spec = new BackofficeAgreementToValidateSpecification(filter, CGNUtils.getJwtAdminUserName());
         Pageable pageable = spec.getPage();
         Page<AgreementEntity> agreementEntityPage = agreementRepository.findAll(spec, pageable);
 
@@ -53,7 +53,7 @@ public class BackofficeAgreementService {
     public AgreementEntity assignAgreement(String agreementId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         validateForAssignment(agreementEntity);
-        agreementEntity.setBackofficeAssignee(FAKE_BACKOFFICE_ID);
+        agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         return agreementRepository.save(agreementEntity);
     }
 
@@ -102,7 +102,7 @@ public class BackofficeAgreementService {
     }
 
     private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
-        if (!FAKE_BACKOFFICE_ID.equals(agreementEntity.getBackofficeAssignee())) {
+        if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
             throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " isn't assigned to current user");
         }
     }
@@ -110,11 +110,12 @@ public class BackofficeAgreementService {
     private void validateForAssignment(AgreementEntity agreementEntity) {
         checkPendingStatus(agreementEntity);
         if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
-            if (FAKE_BACKOFFICE_ID.equals(agreementEntity.getBackofficeAssignee())) {
+            if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
                 throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " is already assigned to current user");
             }
-            //todo to understand if this check is required
-            throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " is assigned to another user");
+            log.info(String.format(
+                    "User %s is being assigned the agreement %s currently assigned to user %s",
+                    CGNUtils.getJwtAdminUserName(), agreementEntity.getId(), agreementEntity.getBackofficeAssignee()));
         }
     }
 

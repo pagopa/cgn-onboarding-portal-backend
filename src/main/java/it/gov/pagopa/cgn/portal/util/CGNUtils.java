@@ -3,6 +3,10 @@ package it.gov.pagopa.cgn.portal.util;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -39,6 +43,30 @@ public class CGNUtils {
 
     public static void setSecureDocumentUrl(DocumentEntity documentEntity, AzureStorage azureStorage) {
         documentEntity.setDocumentUrl(azureStorage.getDocumentSasFileUrl(documentEntity.getDocumentUrl()));
+    }
+
+    public static String getJwtOperatorUserId() {
+        return getJwtOperatorUser().getUserTaxCode();
+    }
+
+    public static String getJwtAdminUserName() {
+        return getJwtAdminUser().getUserFullName();
+    }
+
+    public static JwtOperatorUser getJwtOperatorUser() {
+        JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        if (token.getPrincipal() instanceof JwtOperatorUser) {
+            return (JwtOperatorUser) token.getPrincipal();
+        }
+       throw new RuntimeException("Expected an operator token, but was of type " + token.getPrincipal());
+    }
+
+    public static JwtAdminUser getJwtAdminUser() {
+        JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        if (token.getPrincipal() instanceof JwtAdminUser) {
+            return (JwtAdminUser) token.getPrincipal();
+        }
+        throw new RuntimeException("Expected an admin token, but was of type " + token.getPrincipal());
     }
 
 }

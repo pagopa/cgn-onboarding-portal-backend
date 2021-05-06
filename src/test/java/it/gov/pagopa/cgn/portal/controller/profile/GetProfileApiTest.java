@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -42,14 +41,15 @@ class GetProfileApiTest extends IntegrationAbstractTest {
     void init() {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         profilePath = TestUtils.getProfilePath(agreement.getId());
+        setOperatorAuth();
     }
 
     @Test
-    void Get_GetProfileWithInvalidAgreementId_NotFound() throws Exception {
+    void Get_GetProfileWithInvalidAgreementId_Forbidden() throws Exception {
         this.mockMvc.perform(
                 get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isForbidden());
     }
 
     @Test

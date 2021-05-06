@@ -7,7 +7,9 @@ host: api.cgn.pagopa.it
 basePath: /api/v1
 schemes:
   - https
-
+security:
+  - Bearer: [ ]
+    UserRole: [ ]
 tags:
   - name: agreement
     description: Agreement
@@ -907,3 +909,15 @@ responses:
   NotFound:
     description: Not found
     #content: {} #TODO
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    in: header
+    name: Authorization
+    description: JWT Authorization header using the Bearer scheme
+  UserRole:
+    type: apiKey
+    in: header
+    name: X-CGN-USER-ROLE
+    description: Custom header containing requesting user role

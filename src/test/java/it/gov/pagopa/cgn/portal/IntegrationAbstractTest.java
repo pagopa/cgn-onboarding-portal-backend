@@ -3,12 +3,16 @@ package it.gov.pagopa.cgn.portal;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -99,6 +103,18 @@ public class IntegrationAbstractTest {
     protected void saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
         documentRepository.saveAll(documentList);
+    }
+
+    protected void setOperatorAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
+    }
+
+    protected void setAdminAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+        );
     }
 
 }
