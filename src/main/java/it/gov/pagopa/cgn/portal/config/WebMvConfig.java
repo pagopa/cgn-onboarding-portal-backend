@@ -15,6 +15,7 @@ public class WebMvConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptor).addPathPatterns("/agreements/**")
-                .excludePathPatterns("/agreements");    //create agreements API doesn't have parameter
+                .excludePathPatterns("/agreements") //create agreements API doesn't have parameter
+                .excludePathPatterns("/agreement-requests/**");
     }
 }

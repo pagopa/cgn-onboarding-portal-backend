@@ -45,7 +45,7 @@ public class TestUtils {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/approval";
     }
     public static String getBackofficeDocumentPath(String agreementId) {
-        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/documents";
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
 
 

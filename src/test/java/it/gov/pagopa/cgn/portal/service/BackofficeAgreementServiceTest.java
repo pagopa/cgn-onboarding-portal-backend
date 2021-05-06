@@ -3,17 +3,16 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,6 +41,10 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     private AgreementEntity pendingAgreement;
     private ProfileEntity profileEntity;
 
+    @BeforeEach
+    void beforeEach() {
+        setAdminAuth();
+    }
 
     @Test
     void GetAgreement_GetAgreementWithoutFilter_AgreementFound() {
@@ -226,7 +229,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreement_Ok() {
         createPendingAgreement();
-        pendingAgreement.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());

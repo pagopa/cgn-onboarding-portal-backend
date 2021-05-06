@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import org.junit.jupiter.api.AfterEach;
@@ -107,6 +108,12 @@ public class IntegrationAbstractTest {
     protected void setOperatorAuth() {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
+    }
+
+    protected void setAdminAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
         );
     }
 
