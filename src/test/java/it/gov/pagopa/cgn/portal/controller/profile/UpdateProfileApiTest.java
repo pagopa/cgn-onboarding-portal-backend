@@ -44,7 +44,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_UpdateProfileWithInvalidAgreementId_NotFound() throws Exception {
+    void Update_UpdateProfileWithInvalidAgreementId_Forbidden() throws Exception {
         this.mockMvc.perform(
                 get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())

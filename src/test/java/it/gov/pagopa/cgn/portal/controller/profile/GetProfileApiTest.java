@@ -45,7 +45,7 @@ class GetProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GetProfileWithInvalidAgreementId_NotFound() throws Exception {
+    void Get_GetProfileWithInvalidAgreementId_Forbidden() throws Exception {
         this.mockMvc.perform(
                 get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())

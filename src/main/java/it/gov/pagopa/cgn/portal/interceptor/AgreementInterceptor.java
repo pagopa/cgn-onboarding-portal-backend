@@ -30,7 +30,7 @@ public class AgreementInterceptor implements HandlerInterceptor {
         if (agreementUserEntity.getAgreementId().equals(agreementIdParam)) {
             return true;
         }
-        throw new SecurityException("Current user trying to use different agreementId");
+        throw new SecurityException("Current user is trying to use different agreementId");
 
 
     }
