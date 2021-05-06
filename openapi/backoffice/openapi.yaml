@@ -3,307 +3,160 @@ info:
   title: CGN Onboarding Portal Backoffice
   description: Carta Giovani Nazionale Onboarding Portal Backoffice
   version: '0.0.1'
-host: cgn.pagopa.it
-basePath: /api/v1
+host: api.cgn.pagopa.it
+basePath: /backoffice/v1
 schemes:
   - https
 
 tags:
   - name: agreement
     description: Agreement
-  - name: profile
-    description: Profile
-  - name: discount
-    description: Discount
-  - name: document-template
-    description: Document template
   - name: document
     description: Document
+  - name: discount
+    description: Discount
 
 paths:
-  /agreements:
-    post:
+  /agreement-requests:
+    get:
       tags:
         - agreement
-      summary: Create an agreement
-      operationId: createAgreement
-      responses:
-        200:
-          description: Agreement
-          schema:
-            $ref: '#/definitions/Agreement'
-        403:
-          $ref: '#/responses/Forbidden'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-  /agreements/{agreementId}/images:
-    post:
-      tags:
-        - agreement
-      summary: Upload an image
-      operationId: uploadImage
-      consumes:
-        - multipart/form-data
+      summary: Get list of agreements
+      operationId: getAgreements
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - in: formData
-          name: image
-          type: file
-          required: true
+        - in: query
+          name: states
+          description: Values from `AgreementState`
+          required: false
+          type: string
+        - in: query
+          name: assignee
+          description: Assigned agreement assignee
+          required: false
+          type: string
+          enum:
+            - Me
+            - Others
+        - in: query
+          name: profileFullName
+          description: String to search in profile full name
+          required: false
+          type: string
+        - in: query
+          name: requestDateFrom
+          description: Agreement request date lower bound
+          required: false
+          type: string
+          format: date
+        - in: query
+          name: requestDateTo
+          description: Agreement request date upper bound
+          required: false
+          type: string
+          format: date
+        - $ref: '#/parameters/PageSize'
+        - $ref: '#/parameters/PageNumber'
       responses:
         200:
-          description: Image uploaded
+          description: List of agreements
           schema:
-            $ref: '#/definitions/UploadedImage'
+            $ref: '#/definitions/Agreements'
         403:
           $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
       security:
         - Bearer: [ ]
           UserRole: [ ]
 
-  /agreements/{agreementId}/approval:
-    post:
+  /agreement-requests/{agreementId}/assignee:
+    put:
       tags:
         - agreement
-      summary: Request agreement approval
-      operationId: requestApproval
+      summary: Assign an agreement to the user
+      operationId: assignAgreement
       parameters:
         - $ref: '#/parameters/AgreementId'
       responses:
         204:
-          description: Agreement approval requested
-        400:
-          $ref: '#/responses/InvalidRequest'
+          description: Agreement assigned to the user
         403:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-  /agreements/{agreementId}/profile:
-    post:
-      tags:
-        - profile
-      summary: Create a profile
-      operationId: createProfile
-      parameters:
-        - $ref: '#/parameters/AgreementId'
-        - in: body
-          description: Profile to create
-          name: profile
-          required: true
-          schema:
-            $ref: '#/definitions/CreateProfile'
-      responses:
-        201:
-          description: Profile created
-          schema:
-            $ref: '#/definitions/Profile'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-    get:
-      tags:
-        - profile
-      summary: Get a profile
-      operationId: getProfile
-      parameters:
-        - $ref: '#/parameters/AgreementId'
-      responses:
-        200:
-          description: Profile
-          schema:
-            $ref: '#/definitions/Profile'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-    put:
-      tags:
-        - profile
-      summary: Update a profile
-      operationId: updateProfile
-      parameters:
-        - in: body
-          description: Profile to update
-          name: profile
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateProfile'
-        - $ref: '#/parameters/AgreementId'
-      responses:
-        200:
-          description: Profile updated
-          schema:
-            $ref: '#/definitions/Profile'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-  /agreements/{agreementId}/discounts:
-    get:
-      tags:
-        - discount
-      summary: Get list of discounts
-      operationId: getDiscounts
-      parameters:
-        - $ref: '#/parameters/AgreementId'
-      responses:
-        200:
-          description: List of discounts
-          schema:
-            $ref: '#/definitions/Discounts'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-    post:
-      tags:
-        - discount
-      summary: Create a discount
-      operationId: createDiscount
-      parameters:
-        - $ref: '#/parameters/AgreementId'
-        - in: body
-          description: Discount to create
-          name: discount
-          required: true
-          schema:
-            $ref: '#/definitions/CreateDiscount'
-      responses:
-        201:
-          description: Discount created
-          schema:
-            $ref: '#/definitions/Discount'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-      security:
-        - Bearer: [ ]
-          UserRole: [ ]
-
-  /agreements/{agreementId}/discounts/{discountId}:
-    put:
-      tags:
-        - discount
-      summary: Update a discount
-      operationId: updateDiscount
-      parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
-        - in: body
-          description: Discount to update
-          name: discount
-          required: true
-          schema:
-            $ref: '#/definitions/UpdateDiscount'
-      responses:
-        200:
-          description: Discount updated
-          schema:
-            $ref: '#/definitions/Discount'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
       security:
         - Bearer: [ ]
           UserRole: [ ]
 
     delete:
       tags:
-        - discount
-      summary: Delete a discount
-      operationId: deleteDiscount
+        - agreement
+      summary: Unassign an agreement to the user
+      operationId: unassignAgreement
       parameters:
         - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
       responses:
         204:
-          description: Discount deleted
+          description: Agreement unassigned to the user
         403:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
       security:
         - Bearer: [ ]
           UserRole: [ ]
 
-  /agreements/{agreementId}/discounts/{discountId}/publishing:
+  /agreement-requests/{agreementId}/approval:
     post:
       tags:
-        - discount
-      summary: Publish a discount
-      operationId: publishDiscount
+        - agreement
+      summary: Approve an agreement
+      operationId: approveAgreement
       parameters:
         - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
       responses:
         204:
-          description: Discount published
+          description: Agreement approved
         403:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
       security:
         - Bearer: [ ]
           UserRole: [ ]
 
-  /agreements/{agreementId}/document-templates/{documentType}:
-    get:
+  /agreement-requests/{agreementId}/refusal:
+    post:
       tags:
-        - document-template
-      summary: Download a document template
-      operationId: downloadDocumentTemplate
+        - agreement
+      summary: Reject an agreement
+      operationId: rejectAgreement
       parameters:
         - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DocumentType'
-      responses:
-        200:
-          description: Document template
+        - in: body
+          description: Agreement refusal
+          name: refusal
+          required: true
           schema:
-            type: file
+            $ref: '#/definitions/RefuseAgreement'
+      responses:
+        204:
+          description: Agreement rejected
         403:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
       security:
         - Bearer: [ ]
           UserRole: [ ]
 
-  /agreements/{agreementId}/documents:
+  /agreement-requests/{agreementId}/documents:
     get:
       tags:
         - document
@@ -324,7 +177,7 @@ paths:
         - Bearer: [ ]
           UserRole: [ ]
 
-  /agreements/{agreementId}/documents/{documentType}:
+  /agreement-requests/{agreementId}/documents/{documentType}:
     post:
       tags:
         - document
@@ -348,6 +201,8 @@ paths:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
       security:
         - Bearer: [ ]
           UserRole: [ ]
@@ -371,6 +226,31 @@ paths:
         - Bearer: [ ]
           UserRole: [ ]
 
+  /agreement-requests/{agreementId}/discounts/{discountId}/suspension:
+    post:
+      tags:
+        - discount
+      summary: Suspend a discount
+      operationId: suspendDiscount
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
+        - in: body
+          description: Discount suspension
+          name: suspension
+          required: true
+          schema:
+            $ref: '#/definitions/SuspendDiscount'
+      responses:
+        204:
+          description: Discount suspended
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
+
 consumes:
   - application/json
 produces:
@@ -383,6 +263,20 @@ parameters:
     description: Agreement id
     required: true
     type: string
+  PageSize:
+    name: pageSize
+    in: query
+    description: Page size
+    required: false
+    type: integer
+    default: 20
+  PageNumber:
+    name: page
+    in: query
+    description: Page number
+    required: false
+    type: integer
+    default: 0
   DiscountId:
     name: discountId
     in: path
@@ -395,8 +289,23 @@ parameters:
     description: Document type
     required: true
     type: string
+    enum:
+      - Agreement
+      - ManifestationOfInterest
 
 definitions:
+  Agreements:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/Agreement'
+      total:
+        type: integer
+
   Agreement:
     type: object
     discriminator: state
@@ -408,35 +317,32 @@ definitions:
         type: string
       state:
         $ref: '#/definitions/AgreementState'
-      imageUrl:
-        type: string
-  DraftAgreement:
-    allOf:
-      - $ref: '#/definitions/Agreement'
-      - type: object
+      profile:
+        $ref: '#/definitions/Profile'
+      discounts:
+        $ref: '#/definitions/Discounts'
+      documents:
+        $ref: '#/definitions/Documents'
 
   PendingAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
       - type: object
 
-  ApprovedAgreement:
+  AssignedAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
       - type: object
         required:
-          - startDate
-          - endDate
+          - assignee
         properties:
-          startDate:
-            type: string
-            format: date
-          endDate:
-            type: string
-            format: date
-          firstDiscountPublishingDate:
-            type: string
-            format: date
+          assignee:
+            $ref: '#/definitions/Assignee'
+
+  ApprovedAgreement:
+    allOf:
+      - $ref: '#/definitions/Agreement'
+      - type: object
 
   RejectedAgreement:
     allOf:
@@ -451,96 +357,26 @@ definitions:
   AgreementState:
     type: string
     enum:
-      - DraftAgreement
       - PendingAgreement
+      - AssignedAgreement
       - ApprovedAgreement
       - RejectedAgreement
 
-  UploadedImage:
+  RefuseAgreement:
     type: object
     required:
-      - imageUrl
+      - reasonMessage
     properties:
-      imageUrl:
+      reasonMessage:
         type: string
 
-  CreateProfile:
+  Assignee:
     type: object
     required:
       - fullName
-      - taxCodeOrVat
-      - pecAddress
-      - legalOffice
-      - telephoneNumber
-      - legalRepresentativeFullName
-      - legalRepresentativeTaxCode
-      - referent
-      - description
-      - salesChannel
     properties:
       fullName:
         type: string
-      name:
-        type: string
-      taxCodeOrVat:
-        type: string
-        minLength: 11
-        maxLength: 16
-      pecAddress:
-        type: string
-        format: email
-      legalOffice:
-        type: string
-      telephoneNumber:
-        type: string
-        maxLength: 15
-      legalRepresentativeFullName:
-        type: string
-      legalRepresentativeTaxCode:
-        type: string
-        minLength: 16
-        maxLength: 16
-      referent:
-        $ref: '#/definitions/CreateReferent'
-      description:
-        type: string
-      salesChannel:
-        $ref: '#/definitions/SalesChannel'
-
-  UpdateProfile:
-    type: object
-    required:
-      - pecAddress
-      - legalOffice
-      - telephoneNumber
-      - legalRepresentativeFullName
-      - legalRepresentativeTaxCode
-      - referent
-      - description
-      - salesChannel
-    properties:
-      name:
-        type: string
-      pecAddress:
-        type: string
-        format: email
-      legalOffice:
-        type: string
-      telephoneNumber:
-        type: string
-        maxLength: 15
-      legalRepresentativeFullName:
-        type: string
-      legalRepresentativeTaxCode:
-        type: string
-        minLength: 16
-        maxLength: 16
-      referent:
-        $ref: '#/definitions/UpdateReferent'
-      description:
-        type: string
-      salesChannel:
-        $ref: '#/definitions/SalesChannel'
 
   Profile:
     type: object
@@ -548,12 +384,7 @@ definitions:
       - id
       - agreementId
       - fullName
-      - taxCodeOrVat
       - pecAddress
-      - legalOffice
-      - telephoneNumber
-      - legalRepresentativeFullName
-      - legalRepresentativeTaxCode
       - referent
       - description
       - salesChannel
@@ -564,37 +395,14 @@ definitions:
         type: string
       fullName:
         type: string
-      name:
-        type: string
-      taxCodeOrVat:
-        type: string
-      pecAddress:
-        type: string
-        format: email
-      legalOffice:
-        type: string
-      telephoneNumber:
-        type: string
-        maxLength: 15
-      legalRepresentativeFullName:
-        type: string
-      legalRepresentativeTaxCode:
-        type: string
-        minLength: 16
-        maxLength: 16
       referent:
         $ref: '#/definitions/Referent'
-      description:
-        type: string
-      salesChannel:
-        $ref: '#/definitions/SalesChannel'
 
   Referent:
     type: object
     required:
       - firstName
       - lastName
-      - role
       - emailAddress
       - telephoneNumber
     properties:
@@ -602,212 +410,16 @@ definitions:
         type: string
       lastName:
         type: string
-      role:
-        type: string
       emailAddress:
         type: string
-        format: email
       telephoneNumber:
         type: string
         maxLength: 15
-
-  SalesChannel:
-    type: object
-    discriminator: channelType
-    required:
-      - channelType
-    properties:
-      channelType:
-        $ref: '#/definitions/SalesChannelType'
-
-  OnlineChannel:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - websiteUrl
-          - discountCodeType
-        properties:
-          websiteUrl:
-            type: string
-          discountCodeType:
-            $ref: '#/definitions/DiscountCodeType'
-
-  OfflineChannel:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - addresses
-        properties:
-          websiteUrl:
-            type: string
-          addresses:
-            type: array
-            minItems: 1
-            items:
-              $ref: '#/definitions/Address'
-
-  BothChannels:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - websiteUrl
-          - addresses
-        properties:
-          websiteUrl:
-            type: string
-          addresses:
-            type: array
-            minItems: 1
-            items:
-              $ref: '#/definitions/Address'
-          discountCodeType:
-            $ref: '#/definitions/DiscountCodeType'
-
-  SalesChannelType:
-    type: string
-    enum:
-      - OnlineChannel
-      - OfflineChannel
-      - BothChannels
-
-  DiscountCodeType:
-    type: string
-    enum:
-      - Static
-      - API
-
-  CreateReferent:
-    type: object
-    required:
-      - firstName
-      - lastName
-      - role
-      - emailAddress
-      - telephoneNumber
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
-      role:
-        type: string
-      emailAddress:
-        type: string
-        format: email
-      telephoneNumber:
-        type: string
-        maxLength: 15
-
-  UpdateReferent:
-    type: object
-    required:
-      - firstName
-      - lastName
-      - role
-      - emailAddress
-      - telephoneNumber
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
-      role:
-        type: string
-      emailAddress:
-        type: string
-        format: email
-      telephoneNumber:
-        type: string
-        maxLength: 15
-
-  CreateDiscount:
-    type: object
-    required:
-      - name
-      - startDate
-      - endDate
-      - discount
-      - productCategories
-    properties:
-      name:
-        type: string
-        maxLength: 100
-      description:
-        type: string
-        maxLength: 250
-      startDate:
-        type: string
-        format: date
-      endDate:
-        type: string
-        format: date
-      discount:
-        type: number
-        format: double
-        minimum: 0
-        maximum: 100
-      productCategories:
-        type: array
-        items:
-          type: string
-          minItems: 1
-      condition:
-        type: string
-        maxLength: 200
-      staticCode:
-        type: string
-
-  UpdateDiscount:
-    type: object
-    required:
-      - name
-      - description
-      - startDate
-      - endDate
-      - discount
-      - productCategories
-      - condition
-    properties:
-      name:
-        type: string
-        maxLength: 100
-      description:
-        type: string
-        maxLength: 250
-      startDate:
-        type: string
-        format: date
-      endDate:
-        type: string
-        format: date
-      discount:
-        type: number
-        format: double
-        minimum: 0
-        maximum: 100
-      productCategories:
-        type: array
-        items:
-          type: string
-          minItems: 1
-      condition:
-        type: string
-        maxLength: 200
-      staticCode:
-        type: string
 
   Discounts:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: array
-        items:
-          $ref: '#/definitions/Discount'
+    type: array
+    items:
+      $ref: '#/definitions/Discount'
 
   Discount:
     type: object
@@ -816,12 +428,6 @@ definitions:
       - agreementId
       - state
       - name
-      - description
-      - startDate
-      - endDate
-      - discount
-      - productCategories
-      - condition
     properties:
       id:
         type: string
@@ -831,31 +437,7 @@ definitions:
         $ref: '#/definitions/DiscountState'
       name:
         type: string
-      description:
-        type: string
-      startDate:
-        type: string
-        format: date
-      endDate:
-        type: string
-        format: date
-      discount:
-        type: number
-        format: double
-        minimum: 0
-        maximum: 100
-      productCategories:
-        type: array
-        items:
-          type: string
-        minItems: 1
-      condition:
-        type: string
-      staticCode:
-        type: string
-      creationDate:
-        type: string
-        format: date
+
   DiscountState:
     type: string
     enum:
@@ -863,46 +445,38 @@ definitions:
       - published
       - rejected
 
-  Address:
-    type: object
-    required:
-      - street
-      - zipCode
-      - city
-      - district
-    properties:
-      street:
-        type: string
-      zipCode:
-        type: string
-        minLength: 5
-        maxLength: 5
-      city:
-        type: string
-      district:
-        type: string
-        minLength: 2
-        maxLength: 2
-
   Documents:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: array
-        items:
-          $ref: '#/definitions/Document'
+    type: array
+    items:
+      $ref: '#/definitions/Document'
 
   Document:
     type: object
     required:
       - documentType
       - documentUrl
+      - creationDate
     properties:
       documentType:
-        type: string
+        $ref: '#/definitions/DocumentType'
       documentUrl:
+        type: string
+      creationDate:
+        type: string
+        format: date
+
+  DocumentType:
+    type: string
+    enum:
+      - Agreement
+      - ManifestationOfInterest
+
+  SuspendDiscount:
+    type: object
+    required:
+      - reasonMessage
+    properties:
+      reasonMessage:
         type: string
 
 responses:
@@ -914,6 +488,9 @@ responses:
     #content: {} #TODO
   NotFound:
     description: Not found
+    #content: {} #TODO
+  Conflict:
+    description: Conflict
     #content: {} #TODO
 
 securityDefinitions:

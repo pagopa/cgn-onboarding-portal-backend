@@ -99,6 +99,11 @@ public class IntegrationAbstractTest {
         documentRepository.saveAll(documentList);
     }
 
+    protected void saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
+        documentRepository.saveAll(documentList);
+    }
+
     protected void setOperatorAuth() {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))

@@ -1,10 +1,10 @@
 package it.gov.pagopa.cgn.portal.controller;
 
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.facade.AgreementFacade;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
@@ -16,8 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_MERCHANT')")
@@ -94,14 +92,8 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
-        try {
-            if (document.getOriginalFilename() == null || !document.getOriginalFilename().endsWith("pdf")) {
-                throw new InvalidRequestException("Invalid file extension. Upload a PDF document.");
-            }
-            return documentFacade.uploadDocument(agreementId, documentType, document.getInputStream(), document.getSize());
-        } catch (IOException exc) {
-            throw new RuntimeException("Upload document failed", exc);
-        }
+        CGNUtils.checkIfPdfFile(document.getOriginalFilename());
+        return documentFacade.uploadDocument(agreementId, documentType, document);
     }
 
     @Override
