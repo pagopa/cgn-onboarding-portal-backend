@@ -1,12 +1,14 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import com.google.common.collect.Lists;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
@@ -24,6 +26,10 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+
 @SpringBootTest
 @ActiveProfiles("dev")
 class DiscountServiceTest extends IntegrationAbstractTest {
@@ -32,6 +38,20 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     private DiscountService discountService;
 
     @Autowired
+    DocumentService documentService;
+
+    @Autowired
+    AzureStorage azureStorage;
+
+    @Autowired
+    ConfigProperties configProperties;
+
+    @Autowired
+    private AgreementUserService userService;
+
+
+    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
+
     private AgreementService agreementService;
 
     @Autowired
@@ -44,6 +64,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
+        agreementService = new AgreementService(agreementRepository, userService, profileService,
+                discountService, documentService, azureStorage, emailNotificationService, configProperties);
+
+        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
+
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());

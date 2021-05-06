@@ -2,11 +2,15 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +19,25 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+
 @SpringBootTest
 @ActiveProfiles({"dev"})
 class AgreementServiceTest extends IntegrationAbstractTest {
+
     @Autowired
+    AzureStorage azureStorage;
+
+    @Autowired
+    ConfigProperties configProperties;
+
+    @Autowired
+    private AgreementUserService userService;
+
+    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
+
     private AgreementService agreementService;
 
     @Autowired
@@ -29,6 +48,15 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private DocumentService documentService;
+
+    @BeforeEach
+    void beforeEach() {
+
+        agreementService = new AgreementService(agreementRepository, userService, profileService,
+                discountService, documentService, azureStorage, emailNotificationService, configProperties);
+
+        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
+    }
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {

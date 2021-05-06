@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -31,6 +32,8 @@ public class BackofficeAgreementService {
     private final AgreementServiceLight agreementServiceLight;
 
     private final DocumentService documentService;
+
+    private final EmailNotificationService emailNotificationService;
 
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
@@ -78,8 +81,13 @@ public class BackofficeAgreementService {
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
-        //TODO SEND NOTIFICATION
-        return agreementRepository.save(agreementEntity);
+
+        var saved = agreementRepository.save(agreementEntity);
+
+        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
+        emailNotificationService.notifyMerchantAgreementRequestApproved(referentEmail);
+
+        return saved;
     }
 
 
@@ -87,10 +95,16 @@ public class BackofficeAgreementService {
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
-        //TODO SEND NOTIFICATION
+
         agreementEntity.setRejectReasonMessage(reasonMessage);
         agreementEntity.setState(AgreementStateEnum.REJECTED);
-        return agreementRepository.save(agreementEntity);
+
+        var saved = agreementRepository.save(agreementEntity);
+
+        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
+        emailNotificationService.notifyMerchantAgreementRequestRejected(referentEmail, reasonMessage);
+
+        return saved;
     }
 
     private void validateForUnassignment(AgreementEntity agreementEntity) {
@@ -127,9 +141,11 @@ public class BackofficeAgreementService {
 
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
-                                      AgreementServiceLight agreementServiceLight, DocumentService documentService) {
+                                      AgreementServiceLight agreementServiceLight, DocumentService documentService,
+                                      EmailNotificationService emailNotificationService) {
         this.agreementRepository = agreementRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
+        this.emailNotificationService = emailNotificationService;
     }
 }

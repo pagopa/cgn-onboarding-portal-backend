@@ -2,16 +2,17 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.DiscountService;
-import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -39,7 +41,13 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private AgreementService agreementService;
+    DocumentService documentService;
+
+    @Autowired
+    AzureStorage azureStorage;
+
+    @Autowired
+    ConfigProperties configProperties;
 
     @Autowired
     private ProfileService profileService;
@@ -47,16 +55,30 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
+    @Autowired
+    private AgreementUserService userService;
+
+    private AgreementService agreementService;
+
+    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
+
     private AgreementEntity pendingAgreement;
 
     private DiscountEntity discountEntity;
 
     @BeforeEach
     void beforeEach() {
-     SecurityContextHolder.getContext().setAuthentication(
-             new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
-            );
-}
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+        );
+
+        agreementService = new AgreementService(agreementRepository, userService, profileService,
+                discountService, documentService, azureStorage, emailNotificationService, configProperties);
+
+        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
+        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestApproved(anyString());
+        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestRejected(anyString(), anyString());
+    }
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
