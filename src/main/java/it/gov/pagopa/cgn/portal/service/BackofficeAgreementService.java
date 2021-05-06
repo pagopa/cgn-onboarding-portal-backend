@@ -71,13 +71,14 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
-        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.values().length) {
+        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.getNumberOfDocumentProfile()) {
             throw new InvalidRequestException("Not all documents are loaded");
         }
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
         //TODO SEND NOTIFICATION
         return agreementRepository.save(agreementEntity);
     }

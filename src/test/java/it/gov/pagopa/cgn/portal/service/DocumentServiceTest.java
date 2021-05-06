@@ -35,19 +35,10 @@ import java.util.List;
 class DocumentServiceTest extends IntegrationAbstractTest {
 
     @Autowired
-    private AgreementService agreementService;
-
-    @Autowired
     private DocumentService documentService;
 
     @Autowired
     private ConfigProperties configProperties;
-
-    @Autowired
-    private ProfileService profileService;
-
-    @Autowired
-    private DiscountService discountService;
 
     private BlobContainerClient documentContainerClient;
 

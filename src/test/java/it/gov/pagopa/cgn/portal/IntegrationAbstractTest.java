@@ -1,8 +1,13 @@
 package it.gov.pagopa.cgn.portal;
 
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
@@ -82,6 +87,15 @@ public class IntegrationAbstractTest {
     @Autowired
     protected DocumentRepository documentRepository;
 
+    @Autowired
+    protected AgreementService agreementService;
+
+    @Autowired
+    protected ProfileService profileService;
+
+    @Autowired
+    protected DiscountService discountService;
+
     @AfterEach
     protected void cleanAll() {
         documentRepository.deleteAll();
@@ -99,6 +113,19 @@ public class IntegrationAbstractTest {
     protected void saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
         documentRepository.saveAll(documentList);
+    }
+
+    protected AgreementEntity createPendingAgreement() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveSampleDocuments(agreementEntity);
+        return agreementService.requestApproval(agreementEntity.getId());
     }
 
 }

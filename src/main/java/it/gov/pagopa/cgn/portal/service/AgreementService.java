@@ -77,6 +77,9 @@ public class AgreementService extends AgreementServiceLight {
         CGNUtils.validateImage(image, configProperties.getMinWidth(), configProperties.getMinHeight());
         String imageUrl = azureStorage.storeImage(agreementId, image);
         agreementEntity.setImageUrl(imageUrl);
+        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
+            setInformationLastUpdateDate(agreementEntity);
+        }
         agreementRepository.save(agreementEntity);
         return imageUrl;
     }

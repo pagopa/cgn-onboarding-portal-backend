@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import com.google.common.collect.Lists;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
@@ -11,7 +10,6 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +19,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -29,16 +28,7 @@ import java.util.stream.IntStream;
 class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Autowired
-    private DiscountService discountService;
-
-    @Autowired
-    private AgreementService agreementService;
-
-    @Autowired
-    private ProfileService profileService;
-
-    @Autowired
-    private AgreementRepository agreementRepository;
+    private BackofficeAgreementService backofficeAgreementService;
 
     private AgreementEntity agreementEntity;
 
@@ -303,6 +293,55 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DiscountStateEnum.DRAFT, discountEntity.getState());
 
     }
+
+    @Test
+    void Publish_PublishApprovedAgreement_UpdateLastModifyDate() {
+        //AgreementEntity agreement = createPendingAgreement();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        agreementEntity = agreementRepository.save(agreementEntity);
+        agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
+
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+
+    }
+
+    @Test
+    void Update_UpdateApprovedAgreement_UpdateLastModifyDate() {
+        //AgreementEntity agreement = createPendingAgreement();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        agreementEntity = agreementRepository.save(agreementEntity);
+        agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
+
+        discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+        // simulate publishing was made 3 days ago
+        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(3));
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertEquals(LocalDate.now().minusDays(3), agreementEntity.getInformationLastUpdateDate());
+        //update discount should be update informationLastModifyDate to today
+        DiscountEntity toUpdateDiscountEntity = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
+        DiscountProductEntity productEntity = new DiscountProductEntity();
+        productEntity.setDiscount(toUpdateDiscountEntity);
+        productEntity.setProductCategory(ProductCategoryEnum.ARTS);
+        toUpdateDiscountEntity.setProducts(Collections.singletonList(productEntity));
+        toUpdateDiscountEntity.setDiscountValue(70);
+        discountEntity = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), toUpdateDiscountEntity);
+
+        Assertions.assertEquals(70, discountEntity.getDiscountValue());
+        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+
+    }
+
+
 
 
     private void approveAgreement() {

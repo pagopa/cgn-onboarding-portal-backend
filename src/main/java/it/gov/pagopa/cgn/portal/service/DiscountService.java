@@ -55,13 +55,17 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
-        agreementServiceLight.findById(agreementId);
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity);
-        return discountRepository.save(dbEntity);
+        // if state is Published, last modify must be updated because public information was modified
+        if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
+            agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
+        }
+       return discountRepository.save(dbEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -78,6 +82,7 @@ public class DiscountService {
         validatePublishingDiscount(agreementEntity, discount);
         discount.setState(DiscountStateEnum.PUBLISHED);
         discount = discountRepository.save(discount);
+        agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         // check if exists almost one discount already published
         if (agreementEntity.getFirstDiscountPublishingDate() == null) {
             long numPublishedDiscount = discountRepository.countPublishedDiscountByAgreementId(agreementId);
