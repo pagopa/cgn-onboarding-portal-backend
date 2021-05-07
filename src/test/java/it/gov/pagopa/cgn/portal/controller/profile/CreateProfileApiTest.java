@@ -33,6 +33,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void init() {
         AgreementEntity agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         profilePath = TestUtils.getProfilePath(agreement.getId());
+        setOperatorAuth();
     }
 
     @Test

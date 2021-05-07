@@ -49,6 +49,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
+        setOperatorAuth();
     }
 
 

@@ -6,8 +6,9 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
-import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -34,12 +34,23 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private AgreementService agreementService;
+
+    @Autowired
+    private ProfileService profileService;
+
+    @Autowired
+    private DiscountService discountService;
+
+    private AgreementEntity pendingAgreement;
+
+    private DiscountEntity discountEntity;
+
     @BeforeEach
     void beforeEach() {
-     SecurityContextHolder.getContext().setAuthentication(
-             new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
-            );
-}
+        setAdminAuth();
+    }
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {

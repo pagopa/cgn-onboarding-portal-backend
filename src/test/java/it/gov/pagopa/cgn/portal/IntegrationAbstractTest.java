@@ -5,6 +5,9 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
@@ -14,6 +17,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,6 +27,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
 public class IntegrationAbstractTest {
 
@@ -127,5 +132,18 @@ public class IntegrationAbstractTest {
         saveSampleDocuments(agreementEntity);
         return agreementService.requestApproval(agreementEntity.getId());
     }
+
+    protected void setOperatorAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
+    }
+
+    protected void setAdminAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+        );
+    }
+
 
 }

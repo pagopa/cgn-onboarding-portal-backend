@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.security;
 
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 
 @Configuration
@@ -25,6 +26,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
 
+    @Autowired
+    private ConfigProperties configProperties;
+
     @Bean
     public JwtAuthenticationTokenFilter authenticationTokenFilterBean() {
         return new JwtAuthenticationTokenFilter();
@@ -33,8 +37,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*");
-        configuration.setAllowedMethods(Arrays.asList("POST, PUT, GET, OPTIONS, DELETE"));
+        configuration.addAllowedOrigin(configProperties.getCORSOrigin());
+        configuration.setAllowedMethods(Collections.singletonList("POST, PUT, GET, OPTIONS, DELETE"));
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -50,7 +54,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
-                .authorizeRequests().anyRequest().authenticated();
+                .authorizeRequests()
+                .antMatchers("/actuator/**").permitAll()
+                .anyRequest().authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

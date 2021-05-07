@@ -1,18 +1,11 @@
 package it.gov.pagopa.cgn.portal.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenUtil {
-
-    Logger logger = LoggerFactory.getLogger(JwtTokenUtil.class);
-
 
     static final String CLAIM_KEY_USER_TAX_CODE = "fiscal_number";
     static final String CLAIM_KEY_USER_FAMILY_NAME = "family_name";
@@ -20,12 +13,10 @@ public class JwtTokenUtil {
     static final String CLAIM_KEY_MERCHANT_TAX_CODE =  "fiscal_number"; //"merchant_tax_code"; TODO wait for SPID professional integration
     static final String CLAIM_KEY_MERCHANT_LEGAL_NAME = "family_name"; //"merchant_legal_name"; TODO wait for SPID professional integration
 
-    @Autowired
-    ObjectMapper objectMapper;
 
     public JwtUser getUserDetails(String token, String cgnRole) {
 
-        if(token == null){
+        if (token == null) {
             return null;
         }
 
@@ -44,25 +35,14 @@ public class JwtTokenUtil {
                     claims.get(CLAIM_KEY_USER_NAME, String.class) + " " + claims.get(CLAIM_KEY_USER_FAMILY_NAME, String.class)
             );
         } else {
-            logger.error("Invalid role value: " + cgnRole);
-            return null;
+            throw new SecurityException("Invalid role value: " + cgnRole);
         }
     }
 
     private Claims getClaimsFromToken(String token) {
-        Claims claims;
-        try {
-            String[] splitToken = token.split("\\.");
-            String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
+        String[] splitToken = token.split("\\.");
+        String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
 
-            claims = (Claims) Jwts.parser()
-                    .parse(unsignedToken)
-                    .getBody();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            claims = null;
-        }
-        return claims;
+        return (Claims) Jwts.parser().parse(unsignedToken).getBody();
     }
 }
