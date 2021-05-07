@@ -1,4 +1,4 @@
-package it.gov.pagopa.cgn.portal.controller;
+package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
@@ -54,8 +54,9 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
-        AgreementEntity pendingAgreement = createPendingAgreement();
-        List<DiscountEntity> discounts = discountService.getDiscounts(pendingAgreement.getId());
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity pendingAgreement = agreementTestObject.getAgreementEntity();
+        List<DiscountEntity> discounts = agreementTestObject.getDiscountEntityList();
         DiscountEntity discountEntity = discounts.get(0);
         this.mockMvc.perform(
                 get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
@@ -80,7 +81,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocument_Ok() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         DocumentEntity document = TestUtils.createDocument(
                 pendingAgreement, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
         documentRepository.save(document);
@@ -94,7 +95,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentNotFound_BadRequest() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
                 .andDo(log())

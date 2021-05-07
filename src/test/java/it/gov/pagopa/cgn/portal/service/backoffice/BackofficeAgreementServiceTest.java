@@ -1,17 +1,20 @@
-package it.gov.pagopa.cgn.portal.service;
+package it.gov.pagopa.cgn.portal.service.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,9 +31,14 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Autowired
     private BackofficeAgreementService backofficeAgreementService;
 
+    @BeforeEach
+    void beforeEach() {
+        setAdminAuth();
+    }
+
     @Test
     void GetAgreement_GetAgreementWithoutFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder().build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
@@ -42,7 +50,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithProfileFullNameFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .profileFullName(pendingAgreement.getProfile().getFullName()).build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
@@ -55,7 +63,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithProfileFullNameLowerCaseFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .profileFullName(pendingAgreement.getProfile().getFullName().toLowerCase()).build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
@@ -68,9 +76,9 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithRequestDateFromFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
-                .requestDateFrom(LocalDate.now().minusDays(2)).build();
+                .dateFrom(LocalDate.now().minusDays(2)).build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
@@ -81,9 +89,9 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithRequestDateToFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
-                .requestDateTo(LocalDate.now().plusMonths(1)).build();
+                .dateTo(LocalDate.now().plusMonths(1)).build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
@@ -94,10 +102,10 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithRequestDateFromAndToFilter_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
-                .requestDateFrom(LocalDate.now().minusDays(2))
-                .requestDateTo(LocalDate.now().plusMonths(1))
+                .dateFrom(LocalDate.now().minusDays(2))
+                .dateTo(LocalDate.now().plusMonths(1))
                 .build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
@@ -111,8 +119,8 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     void GetAgreement_GetAgreementWithRequestDateFuture_AgreementNotFound() {
         createPendingAgreement();
         BackofficeFilter filter = BackofficeFilter.builder()
-                .requestDateFrom(LocalDate.now().plusDays(2))
-                .requestDateTo(LocalDate.now().plusMonths(1))
+                .dateFrom(LocalDate.now().plusDays(2))
+                .dateTo(LocalDate.now().plusMonths(1))
                 .build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(0L, page.getTotalElements());
@@ -123,7 +131,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreement_GetAgreementWithAssignedStatus_AgreementFound() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .agreementState(AgreementState.ASSIGNEDAGREEMENT.getValue())
                 .build();
@@ -151,7 +159,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void AssignAgreement_AssignAgreement_Ok() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         AgreementEntity agreementEntity = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
         Assertions.assertTrue(StringUtils.isNotBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
@@ -160,7 +168,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void AssignAgreement_AssignAgreementMultipleTimes_ThrowException() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         AgreementEntity agreementEntity = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
 
         Assertions.assertTrue(StringUtils.isNotBlank(agreementEntity.getBackofficeAssignee()));
@@ -189,7 +197,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void UnassignAgreement_UnassignAgreement_Ok() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         backofficeAgreementService.assignAgreement(pendingAgreement.getId());
 
         AgreementEntity agreementEntity = backofficeAgreementService.unassignAgreement(pendingAgreement.getId());
@@ -199,7 +207,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void UnassignAgreement_UnassignAgreementWithoutAssignment_ThrowException() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
 
         Assertions.assertThrows(InvalidRequestException.class,
                 () ->backofficeAgreementService.unassignAgreement(pendingAgreement.getId()));
@@ -210,8 +218,8 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     @Test
     void ApproveAgreement_ApproveAgreement_Ok() {
-        AgreementEntity pendingAgreement = createPendingAgreement();
-        pendingAgreement = pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
@@ -248,7 +256,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RejectAgreement_RejectAgreement_Ok() {
         String reasonMsg = "Reason";
-        AgreementEntity pendingAgreement = createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         AgreementEntity rejectAgreement = backofficeAgreementService.rejectAgreement(
                 pendingAgreement.getId(), reasonMsg);
         Assertions.assertEquals(AgreementStateEnum.REJECTED, rejectAgreement.getState());
@@ -281,4 +289,29 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     }
 
+    @Test
+    void SuspendDiscount_SuspendDiscount_Ok() {
+        AgreementTestObject testObject = createApprovedAgreement();
+        AgreementEntity agreementEntity = testObject.getAgreementEntity();
+        DiscountEntity discountEntity = testObject.getDiscountEntityList().get(0);
+        discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+        String reasonMsg = "reasonMessage";
+        discountEntity = discountService.suspendDiscount(
+                agreementEntity.getId(), discountEntity.getId(), reasonMsg);
+        Assertions.assertEquals(DiscountStateEnum.SUSPENDED, discountEntity.getState());
+        Assertions.assertEquals(reasonMsg, discountEntity.getSuspendedReasonMessage());
+    }
+
+
+    @Test
+    void SuspendDiscount_SuspendDiscountOfNotPublicDiscount_ThrowException() {
+        AgreementTestObject testObject = createApprovedAgreement();
+        AgreementEntity agreementEntity = testObject.getAgreementEntity();
+        DiscountEntity discountEntity = testObject.getDiscountEntityList().get(0);
+        String reasonMsg = "reasonMessage";
+        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.suspendDiscount(
+                agreementEntity.getId(), discountEntity.getId(), reasonMsg));
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, discountEntity.getState());
+        Assertions.assertNull(discountEntity.getSuspendedReasonMessage());
+    }
 }

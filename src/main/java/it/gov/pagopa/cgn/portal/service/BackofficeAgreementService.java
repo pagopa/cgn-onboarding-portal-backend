@@ -8,12 +8,12 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
+import it.gov.pagopa.cgn.portal.repository.BackofficeApprovedAgreementSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -37,8 +37,7 @@ public class BackofficeAgreementService {
 
         BackofficeAgreementToValidateSpecification spec;
         spec = new BackofficeAgreementToValidateSpecification(filter, CGNUtils.getJwtAdminUserName());
-        Pageable pageable = spec.getPage();
-        Page<AgreementEntity> agreementEntityPage = agreementRepository.findAll(spec, pageable);
+        Page<AgreementEntity> agreementEntityPage = agreementRepository.findAll(spec, spec.getPage());
 
         // exclude backoffice documents
         agreementEntityPage.getContent().forEach(agreementEntity -> {
@@ -47,6 +46,14 @@ public class BackofficeAgreementService {
             agreementEntity.setDocumentList(documents);
         });
         return agreementEntityPage;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<AgreementEntity> getApprovedAgreements(BackofficeFilter filter) {
+
+        BackofficeApprovedAgreementSpecification spec;
+        spec = new BackofficeApprovedAgreementSpecification(filter, CGNUtils.getJwtAdminUserName());
+        return agreementRepository.findAll(spec, spec.getPage());
     }
 
     @Transactional

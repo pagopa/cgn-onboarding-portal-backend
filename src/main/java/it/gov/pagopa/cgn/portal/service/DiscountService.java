@@ -93,6 +93,21 @@ public class DiscountService {
         return discount;
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
+        DiscountEntity discount = findById(discountId);
+        if (!discount.getAgreement().getId().equals(agreementId)) {
+            throw new InvalidRequestException("Discount not correspond with agreement id provided");
+        }
+        if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot suspend a discount not Public");
+        }
+        discount.setState(DiscountStateEnum.SUSPENDED);
+        discount.setSuspendedReasonMessage(reasonMessage);
+        return discountRepository.save(discount);
+        //todo send notification
+    }
+
     @Autowired
     public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
                            ProfileService profileService) {

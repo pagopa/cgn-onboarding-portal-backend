@@ -403,7 +403,6 @@ definitions:
     required:
       - agreementId
       - profile
-      - discounts
       - documents
     properties:
       agreementId:
@@ -466,6 +465,7 @@ definitions:
       - fullName
       - taxCodeOrVat
       - pecAddress
+      - legalOffice
       - telephoneNumber
       - legalRepresentativeFullName
       - legalRepresentativeTaxCode
@@ -492,6 +492,8 @@ definitions:
       pecAddress:
         type: string
         format: email
+      legalOffice:
+        type: string
       telephoneNumber:
         type: string
         maxLength: 15
@@ -581,6 +583,7 @@ definitions:
       - productCategories
       - condition
       - lastUpateDate
+      - state
     properties:
       id:
         type: string
@@ -607,13 +610,16 @@ definitions:
       lastUpateDate:
         type: string
         format: date
+      state:
+        $ref: '#/definitions/DiscountState'
 
   DiscountState:
     type: string
     enum:
       - draft
       - published
-      - rejected
+      - suspended
+      - expired
 
   ProductCategory:
     type: string

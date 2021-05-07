@@ -2,17 +2,19 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeDocumentConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.approved.BackofficeApprovedAgreementConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.approved.BackofficeApprovedAgreementDetailConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -30,40 +32,59 @@ import java.util.List;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class BackofficeAgreementFacade {
 
-    private final BackofficeAgreementService service;
+    private final BackofficeAgreementService backofficeAgreementService;
+
+    private final AgreementService agreementService;
 
     private final BackofficeAgreementConverter agreementConverter;
 
     private final BackofficeDocumentConverter documentConverter;
 
+    private final BackofficeApprovedAgreementDetailConverter agreementDetailConverter;
+
+    private final BackofficeApprovedAgreementConverter approvedAgreementConverter;
+
     private final DocumentService documentService;
+
+    private final DiscountService discountService;
 
     private final AzureStorage azureStorage;
 
 
     @Transactional(readOnly = true)  // for converter
     public ResponseEntity<Agreements> getAgreements(BackofficeFilter filter) {
-        Page<AgreementEntity> agreements = service.getAgreements(filter);
+        Page<AgreementEntity> agreements = backofficeAgreementService.getAgreements(filter);
         return ResponseEntity.ok(agreementConverter.getAgreementFromPage(agreements));
     }
 
+    public ResponseEntity<ApprovedAgreements> getApprovedAgreements(BackofficeFilter filter) {
+        Page<AgreementEntity> agreements = backofficeAgreementService.getApprovedAgreements(filter);
+        return ResponseEntity.ok(approvedAgreementConverter.getApprovedAgreementsFromPage(agreements));
+    }
+
+    @Transactional(readOnly = true)  // for converter
+    public ResponseEntity<ApprovedAgreementDetail> getApprovedAgreementDetail(String agreementId) {
+        AgreementEntity agreement = agreementService.getApprovedAgreement(agreementId);
+        return ResponseEntity.ok(agreementDetailConverter.toDto(agreement));
+    }
+
     public ResponseEntity<Void> assignAgreement(String agreementId) {
-        service.assignAgreement(agreementId);
+        backofficeAgreementService.assignAgreement(agreementId);
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<Void> unassignAgreement(String agreementId) {
-        service.unassignAgreement(agreementId);
+        backofficeAgreementService.unassignAgreement(agreementId);
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<Void> approveAgreement(String agreementId) {
-        service.approveAgreement(agreementId);
+        backofficeAgreementService.approveAgreement(agreementId);
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<Void> rejectAgreement(String agreementId, RefuseAgreement refusal) {
-        service.rejectAgreement(agreementId, refusal.getReasonMessage());
+        backofficeAgreementService.rejectAgreement(agreementId, refusal.getReasonMessage());
         return ResponseEntity.noContent().build();
     }
 
@@ -97,15 +118,25 @@ public class BackofficeAgreementFacade {
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
     }
 
-
+    public ResponseEntity<Void> suspendDiscount(String agreementId, String discountId, SuspendDiscount suspension) {
+        discountService.suspendDiscount(agreementId, Long.valueOf(discountId), suspension.getReasonMessage());
+        return ResponseEntity.noContent().build();
+    }
 
     @Autowired
-    public BackofficeAgreementFacade(BackofficeAgreementService service, BackofficeAgreementConverter agreementConverter,
+    public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService, BackofficeAgreementConverter agreementConverter,
                                      BackofficeDocumentConverter documentConverter, DocumentService documentService,
+                                     AgreementService agreementService, DiscountService discountService,
+                                     BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
+                                     BackofficeApprovedAgreementConverter approvedAgreementConverter,
                                      AzureStorage azureStorage) {
-        this.service = service;
+        this.backofficeAgreementService = backofficeAgreementService;
+        this.agreementService = agreementService;
+        this.discountService = discountService;
         this.agreementConverter = agreementConverter;
         this.documentConverter = documentConverter;
+        this.agreementDetailConverter = agreementDetailConverter;
+        this.approvedAgreementConverter = approvedAgreementConverter;
         this.documentService = documentService;
         this.azureStorage = azureStorage;
     }

@@ -300,7 +300,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
 
@@ -312,11 +312,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Update_UpdateApprovedAgreement_UpdateLastModifyDate() {
-        //AgreementEntity agreement = createPendingAgreement();
+        setAdminAuth();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
 

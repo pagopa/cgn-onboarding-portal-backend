@@ -10,6 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -111,6 +112,14 @@ public class ProfileEntity extends BaseEntity {
                 a.setProfile(this);
             });
         }
+    }
+
+    public OffsetDateTime getInsertTime() {
+        return insertTime;
+    }
+
+    public OffsetDateTime getUpdateTime() {
+        return updateTime;
     }
 
 }

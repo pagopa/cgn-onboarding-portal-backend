@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -180,9 +181,10 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Test
     @Transactional
     void Update_UpdateApprovedAgreementUpdateLastModifyDate_Ok() {
+        setAdminAuth();
         final String legalOffice = "new_legalOffice";
-        AgreementEntity agreement = createPendingAgreement();
-        agreement.setBackofficeAssignee(BackofficeAgreementService.FAKE_BACKOFFICE_ID);
+        AgreementEntity agreement = createPendingAgreement().getAgreementEntity();
+        agreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementRepository.save(agreement);
         agreement = backofficeAgreementService.approveAgreement(agreement.getId());
         ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
@@ -198,8 +200,9 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Transactional
     void Update_UpdatePendingAgreementNotUpdateLastModifyDate_Ok() {
         final String legalOffice = "new_legalOffice";
-        AgreementEntity agreement = createPendingAgreement();
-        ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity agreement = agreementTestObject.getAgreementEntity();
+        ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
         profileEntity.setLegalOffice(legalOffice);
         profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
         Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
