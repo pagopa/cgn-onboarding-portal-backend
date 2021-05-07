@@ -53,6 +53,18 @@ public class ConfigProperties {
     @Value("${cgn.image.minHeight}")
     private Integer minHeight;
 
+    @Value("${cgn.apim.resourceGroup}")
+    private String apimResouceGroup;
+
+    @Value("${cgn.apim.resource}")
+    private String apimResouce;
+
+    @Value("${cgn.apim.productId}")
+    private String apimProductId;
+
+    @Value("${cgn.apim.subscriptionKeyPrefix}")
+    private String apimSubscriptionKeyPrefix;
+
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
