@@ -2,11 +2,8 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -15,7 +12,6 @@ import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,30 +21,14 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-
 @SpringBootTest
 @ActiveProfiles({"dev"})
 class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
-    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
-
     @Autowired
-    private AgreementServiceLight agreementServiceLight;
-
     private BackofficeAgreementService backofficeAgreementService;
 
     @Autowired
-    AzureStorage azureStorage;
-
-    @Autowired
-    ConfigProperties configProperties;
-
-    @Autowired
-    private AgreementUserService userService;
-
     private AgreementService agreementService;
 
     @Autowired
@@ -57,26 +37,8 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
-    @Autowired
-    private DocumentService documentService;
-
     private AgreementEntity pendingAgreement;
     private ProfileEntity profileEntity;
-
-
-    @BeforeEach
-    void beforeEach() {
-
-        agreementService = new AgreementService(agreementRepository, userService, profileService,
-                discountService, documentService, azureStorage, emailNotificationService, configProperties);
-
-        backofficeAgreementService = new BackofficeAgreementService(agreementRepository,
-                agreementServiceLight, documentService, emailNotificationService);
-
-        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
-        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestApproved(anyString());
-        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestRejected(anyString(), anyString());
-    }
 
     @Test
     void GetAgreement_GetAgreementWithoutFilter_AgreementFound() {

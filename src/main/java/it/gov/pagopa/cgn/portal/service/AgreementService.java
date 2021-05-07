@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -32,7 +32,7 @@ public class AgreementService extends AgreementServiceLight {
     private final DocumentService documentService;
     private final AzureStorage azureStorage;
 
-    private final EmailNotificationService emailNotificationService;
+    private final EmailNotificationFacade emailNotificationFacade;
 
     private final ConfigProperties configProperties;
 
@@ -72,7 +72,7 @@ public class AgreementService extends AgreementServiceLight {
 
         var saved = agreementRepository.save(agreementEntity);
 
-        emailNotificationService.notifyDepartmentNewAgreementRequest(profile.getFullName());
+        emailNotificationFacade.notifyDepartmentNewAgreementRequest(profile.getFullName());
 
         return saved;
     }
@@ -97,7 +97,7 @@ public class AgreementService extends AgreementServiceLight {
     public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService,
                             ProfileService profileService, DiscountService discountService,
                             DocumentService documentService, AzureStorage azureStorage,
-                            EmailNotificationService emailNotificationService,
+                            EmailNotificationFacade emailNotificationFacade,
                             ConfigProperties configProperties) {
         super(agreementRepository);
         this.userService = userService;
@@ -105,7 +105,7 @@ public class AgreementService extends AgreementServiceLight {
         this.discountService = discountService;
         this.documentService = documentService;
         this.azureStorage = azureStorage;
-        this.emailNotificationService = emailNotificationService;
+        this.emailNotificationFacade = emailNotificationFacade;
         this.configProperties = configProperties;
     }
 

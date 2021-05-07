@@ -28,16 +28,6 @@ import static org.mockito.Mockito.mock;
 class AgreementServiceTest extends IntegrationAbstractTest {
 
     @Autowired
-    AzureStorage azureStorage;
-
-    @Autowired
-    ConfigProperties configProperties;
-
-    @Autowired
-    private AgreementUserService userService;
-
-    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
-
     private AgreementService agreementService;
 
     @Autowired
@@ -46,17 +36,6 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
-    @Autowired
-    private DocumentService documentService;
-
-    @BeforeEach
-    void beforeEach() {
-
-        agreementService = new AgreementService(agreementRepository, userService, profileService,
-                discountService, documentService, azureStorage, emailNotificationService, configProperties);
-
-        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
-    }
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {

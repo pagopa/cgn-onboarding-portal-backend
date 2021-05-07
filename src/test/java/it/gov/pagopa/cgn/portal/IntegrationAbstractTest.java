@@ -40,8 +40,13 @@ public class IntegrationAbstractTest {
                 new GenericContainer<>(DockerImageName.parse("mcr.microsoft.com/azure-storage/azurite:3.11.0"))
                         .withExposedPorts(10000);
 
+        public static GenericContainer<?> greenMailContainer =
+                new GenericContainer<>(DockerImageName.parse("greenmail/standalone:1.6.3"))
+                        .withExposedPorts(3025);
+
+
         private static void startContainers() {
-            Startables.deepStart(Stream.of(postgres, azurite)).join();
+            Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
         }
 
         private static Map<String, String> createConnectionConfiguration() {
@@ -49,7 +54,9 @@ public class IntegrationAbstractTest {
                     "spring.datasource.url", postgres.getJdbcUrl(),
                     "spring.datasource.username", postgres.getUsername(),
                     "spring.datasource.password", postgres.getPassword(),
-                    "cgn.pe.storage.azure.blob-endpoint", "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1"
+                    "cgn.pe.storage.azure.blob-endpoint", "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1",
+                    "spring.mail.host", greenMailContainer.getHost(),
+                    "spring.mail.port", String.valueOf(greenMailContainer.getFirstMappedPort())
             );
         }
 

@@ -41,26 +41,13 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     private MockMvc mockMvc;
 
     @Autowired
-    DocumentService documentService;
-
-    @Autowired
-    AzureStorage azureStorage;
-
-    @Autowired
-    ConfigProperties configProperties;
-
-    @Autowired
     private ProfileService profileService;
 
     @Autowired
     private DiscountService discountService;
 
     @Autowired
-    private AgreementUserService userService;
-
     private AgreementService agreementService;
-
-    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
 
     private AgreementEntity pendingAgreement;
 
@@ -71,13 +58,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
         );
-
-        agreementService = new AgreementService(agreementRepository, userService, profileService,
-                discountService, documentService, azureStorage, emailNotificationService, configProperties);
-
-        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
-        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestApproved(anyString());
-        doNothing().when(emailNotificationService).notifyMerchantAgreementRequestRejected(anyString(), anyString());
     }
 
     @Test

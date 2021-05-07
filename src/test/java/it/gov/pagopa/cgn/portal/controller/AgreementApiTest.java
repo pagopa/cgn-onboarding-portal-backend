@@ -46,19 +46,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
     private MockMvc mockMvc;
 
     @Autowired
-    DocumentService documentService;
-
-    @Autowired
-    AzureStorage azureStorage;
-
-    @Autowired
-    ConfigProperties configProperties;
-
-    @Autowired
-    private AgreementUserService userService;
-
-    private EmailNotificationService emailNotificationService = mock(EmailNotificationService.class);
-
     private AgreementService agreementService;
 
     @Autowired
@@ -68,14 +55,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
     private DiscountService discountService;
 
 
-    @BeforeEach
-    void beforeEach() {
-
-        agreementService = new AgreementService(agreementRepository, userService, profileService,
-                discountService, documentService, azureStorage, emailNotificationService, configProperties);
-
-        doNothing().when(emailNotificationService).notifyDepartmentNewAgreementRequest(anyString());
-    }
 
     @Test
     void Create_CreateAgreement_Ok() throws Exception {
