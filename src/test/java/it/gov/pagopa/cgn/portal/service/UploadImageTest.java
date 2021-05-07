@@ -24,9 +24,6 @@ import java.io.IOException;
 class UploadImageTest extends IntegrationAbstractTest {
 
     @Autowired
-    private AgreementService agreementService;
-
-    @Autowired
     private ConfigProperties configProperties;
 
     private MultipartFile multipartFile;

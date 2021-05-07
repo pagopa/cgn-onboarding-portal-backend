@@ -18,14 +18,6 @@ import java.util.Optional;
 @SpringBootTest
 @ActiveProfiles({"dev"})
 class AgreementServiceTest extends IntegrationAbstractTest {
-    @Autowired
-    private AgreementService agreementService;
-
-    @Autowired
-    private ProfileService profileService;
-
-    @Autowired
-    private DiscountService discountService;
 
     @Autowired
     private DocumentService documentService;

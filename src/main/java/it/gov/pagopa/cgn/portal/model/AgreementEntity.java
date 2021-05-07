@@ -70,6 +70,9 @@ public class AgreementEntity extends BaseEntity {
     @Column(name = "request_approval_time")
     private OffsetDateTime requestApprovalTime;
 
+    @Column(name = "information_last_update_date")
+    private LocalDate informationLastUpdateDate;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;

@@ -23,6 +23,8 @@ public class TestUtils {
 
     public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
 
+    public static final String AGREEMENT_APPROVED_CONTROLLER_PATH = "/approved-agreements/";
+
     public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {

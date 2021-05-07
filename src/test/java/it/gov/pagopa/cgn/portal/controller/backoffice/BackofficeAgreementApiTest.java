@@ -1,4 +1,4 @@
-package it.gov.pagopa.cgn.portal.controller;
+package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
@@ -6,7 +6,6 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
@@ -55,7 +54,10 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
-        createPendingAgreement();
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity pendingAgreement = agreementTestObject.getAgreementEntity();
+        List<DiscountEntity> discounts = agreementTestObject.getDiscountEntityList();
+        DiscountEntity discountEntity = discounts.get(0);
         this.mockMvc.perform(
                 get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
                 .andDo(log())
@@ -79,7 +81,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocument_Ok() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         DocumentEntity document = TestUtils.createDocument(
                 pendingAgreement, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
         documentRepository.save(document);
@@ -93,7 +95,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentNotFound_BadRequest() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
                 .andDo(log())
@@ -138,20 +140,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.*", hasSize(0)));
-    }
-
-
-    private void createPendingAgreement() {
-        // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        //creating profile
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
-        //creating discount
-        discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        saveSampleDocuments(agreementEntity);
-        pendingAgreement = agreementService.requestApproval(agreementEntity.getId());
     }
 
 }

@@ -845,7 +845,8 @@ definitions:
     enum:
       - draft
       - published
-      - rejected
+      - suspended
+      - expired
   ProductCategory:
     type: string
     enum:
