@@ -1,29 +1,23 @@
 package it.gov.pagopa.cgn.portal.apim;
 
-import com.azure.core.credential.TokenCredential;
-import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.exception.ManagementException;
-import com.azure.core.management.profile.AzureProfile;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.apimanagement.ApiManagementManager;
 import com.azure.resourcemanager.apimanagement.models.*;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AzureApimClient {
 
-
     private ConfigProperties configProperties;
+    private ApiManagementManager manager;
 
-    private AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
-    private TokenCredential credential = new DefaultAzureCredentialBuilder().authorityHost(profile.getEnvironment().getActiveDirectoryEndpoint()).build();
-    private ApiManagementManager manager = ApiManagementManager.authenticate(credential, profile);
-
-
-    public AzureApimClient(ConfigProperties configProperties) {
+    @Autowired
+    public AzureApimClient(ConfigProperties configProperties, ApiManagementManager manager) {
         this.configProperties = configProperties;
+        this.manager = manager;
     }
 
     public ApiTokens getTokens(String merchantTaxCode) {
@@ -47,7 +41,6 @@ public class AzureApimClient {
                 return createSubscription(merchantTaxCode);
             }
             throw exc;
-
         }
     }
 
@@ -69,18 +62,12 @@ public class AzureApimClient {
                 .withState(SubscriptionState.ACTIVE)
                 .withDisplayName(getApimSubscriptionKey(merchantTaxCode));
 
-        System.out.println("PRAMS-> " + configProperties.getApimProductId());
-        System.out.println("PRAMS-> " + getApimSubscriptionKey(merchantTaxCode));
-        System.out.println("PRAMS-> " + configProperties.getApimResouceGroup());
-        System.out.println("PRAMS-> " + configProperties.getApimResouce());
-
         SubscriptionContract subscription = subscriptionApi.createOrUpdate(
                 configProperties.getApimResouceGroup(),
                 configProperties.getApimResouce(),
                 getApimSubscriptionKey(merchantTaxCode),
                 subscriptionCreateParameters
         );
-
 
         ApiTokens tokens = new ApiTokens();
         tokens.setPrimaryToken(subscription.primaryKey());
