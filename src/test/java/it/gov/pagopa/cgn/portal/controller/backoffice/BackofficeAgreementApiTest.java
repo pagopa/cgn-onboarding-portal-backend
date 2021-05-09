@@ -1,4 +1,4 @@
-package it.gov.pagopa.cgn.portal.controller;
+package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
@@ -6,10 +6,6 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
-import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
@@ -24,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;

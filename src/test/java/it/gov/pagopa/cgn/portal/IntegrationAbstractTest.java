@@ -1,6 +1,9 @@
 package it.gov.pagopa.cgn.portal;
 
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
