@@ -13,6 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,7 +40,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateProfile_Ok() throws Exception {
+    void Create_CreateOnlineProfile_Ok() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
@@ -64,7 +67,42 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateIncompleteOfflineProfile_Ok() throws Exception {
+    void Create_CreateOfflineProfile_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOffline();
+        OfflineChannel offlineChannel = (OfflineChannel) createProfile.getSalesChannel();
+        Address firstAddress = offlineChannel.getAddresses().get(0);
+
+        this.mockMvc.perform(
+                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
+                .andExpect(jsonPath("$.salesChannel.addresses").isArray())
+                .andExpect(jsonPath("$.salesChannel.addresses[0].street").value(firstAddress.getStreet()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].city").value(firstAddress.getCity()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].zipCode").value(firstAddress.getZipCode()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].district").value(firstAddress.getDistrict()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+
+    }
+
+    @Test
+    void Create_CreateIncompleteOfflineProfile_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
 
         this.mockMvc.perform(
@@ -75,7 +113,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateIncompleteOnlineProfile_Ok() throws Exception {
+    void Create_CreateIncompleteOnlineProfile_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile();
         // set to null required field websiteUrl
         OnlineChannel onlineChannel = (OnlineChannel) createProfile.getSalesChannel();
@@ -89,7 +127,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateIncompleteBothProfile_Ok() throws Exception {
+    void Create_CreateIncompleteBothProfile_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateBothWithoutRequiredWebsiteUrlProfile();
 
         this.mockMvc.perform(
@@ -100,7 +138,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateProfileMultipleTimes_InvalidRequest() throws Exception {
+    void Create_CreateProfileMultipleTimes_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile();
 
         this.mockMvc.perform(
@@ -131,6 +169,16 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         createProfile.setSalesChannel(offlineChannel);
         return createProfile;
+    }
+
+    private CreateProfile createSampleCreateOffline() {
+        CreateProfile profile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
+        OfflineChannel offlineChannel = (OfflineChannel) profile.getSalesChannel();
+        List<Address> addressList = new ArrayList<>();
+        addressList.add(createSampleAddressDto());
+        offlineChannel.setAddresses(addressList);
+        profile.setSalesChannel(offlineChannel);
+        return profile;
     }
 
     private CreateProfile createSampleCreateBothWithoutRequiredWebsiteUrlProfile() {
@@ -165,6 +213,15 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createReferent.setTelephoneNumber("+390123456789");
         createReferent.setRole("CEO");
         return createReferent;
+    }
+
+    private Address createSampleAddressDto() {
+        Address address = new Address();
+        address.setStreet("Street address");
+        address.setCity("City");
+        address.setDistrict("ME");
+        address.setZipCode("98981");
+        return address;
     }
 
 }

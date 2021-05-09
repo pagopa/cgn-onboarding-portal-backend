@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,12 +34,13 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     .map(Map.Entry::getKey)
                     .findFirst().orElseThrow();
 
-    protected Function<Address, AddressEntity> addressToEntity = dto -> {
+    protected BiFunction<Address, ProfileEntity, AddressEntity> addressToEntity = (addressDto, profileEntity) -> {
         AddressEntity entity = new AddressEntity();
-        entity.setStreet(dto.getStreet());
-        entity.setCity(dto.getCity());
-        entity.setDistrict(dto.getDistrict());
-        entity.setZipCode(dto.getZipCode());
+        entity.setStreet(addressDto.getStreet());
+        entity.setCity(addressDto.getCity());
+        entity.setDistrict(addressDto.getDistrict());
+        entity.setZipCode(addressDto.getZipCode());
+        entity.setProfile(profileEntity);
         return entity;
     };
 
@@ -102,7 +104,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     //addressList must be not empty
                     entity.setAddressList(
                             physicalStoreChannel.getAddresses().stream()
-                                    .map(address -> addressToEntity.apply(address))
+                                    .map(address -> addressToEntity.apply(address, entity))
                                     .collect(Collectors.toList()));
                 } else {
                     throwInvalidSalesChannel();
@@ -115,7 +117,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
                     entity.setAddressList(
                             bothChannels.getAddresses().stream()
-                                    .map(address -> addressToEntity.apply(address))
+                                    .map(address -> addressToEntity.apply(address, entity))
                                     .collect(Collectors.toList()));
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
                 } else {
