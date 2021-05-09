@@ -2,22 +2,19 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-import it.gov.pagopa.cgn.portal.service.*;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,9 +28,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -54,14 +48,13 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
-
+    @BeforeEach
+    void beforeEach() {
+        setOperatorAuth();
+    }
 
     @Test
     void Create_CreateAgreement_Ok() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
-        );
-
         this.mockMvc.perform(
                 post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
                 .andDo(log())
@@ -137,6 +130,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.completedSteps", hasSize(3)));
 
     }
+
 
     @Test
     void RequestApproval_RequestApproval_Ok() throws Exception {

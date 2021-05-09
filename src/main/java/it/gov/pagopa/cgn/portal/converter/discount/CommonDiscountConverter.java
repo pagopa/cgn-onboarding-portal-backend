@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
 
+import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
     static {
         enumMap.put(DiscountStateEnum.DRAFT, DiscountState.DRAFT);
         enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
-        enumMap.put(DiscountStateEnum.REJECTED, DiscountState.REJECTED);
+        enumMap.put(DiscountStateEnum.SUSPENDED, DiscountState.SUSPENDED);
 
         productEnumMaps.put(ProductCategoryEnum.ARTS, ProductCategory.ARTS);
         productEnumMaps.put(ProductCategoryEnum.BOOKS, ProductCategory.BOOKS);
@@ -52,9 +53,13 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
                     .map(discountProductEntity -> toProductDtoEnum.apply(discountProductEntity.getProductCategory()))
                     .collect(Collectors.toList());
 
-    protected Function<DiscountStateEnum, DiscountState> toDtoEnum = entityEnum ->
-            Optional.ofNullable(enumMap.get(entityEnum))
-                    .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + entityEnum));
+    protected BiFunction<DiscountStateEnum, LocalDate, DiscountState> toDtoEnum = (entityEnum, endDate) -> {
+        if (LocalDate.now().isAfter(endDate)) {
+            return DiscountState.EXPIRED;
+        }
+        return Optional.ofNullable(enumMap.get(entityEnum))
+                .orElseThrow(() -> new InvalidRequestException("Enum mapping not found for " + entityEnum));
+    };
 
     protected BiFunction<List<ProductCategory>, DiscountEntity, List<DiscountProductEntity>> toEntityDiscountProduct =
             (productDtoList, discountEntity) ->

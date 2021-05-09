@@ -2,17 +2,16 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
-import it.gov.pagopa.cgn.portal.service.*;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -46,23 +42,21 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private DiscountService discountService;
 
-    @Autowired
-    private AgreementService agreementService;
-
     private AgreementEntity pendingAgreement;
 
     private DiscountEntity discountEntity;
 
     @BeforeEach
     void beforeEach() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
-        );
+        setAdminAuth();
     }
 
     @Test
     void GetAgreements_GetAgreementsPending_Ok() throws Exception {
-        createPendingAgreement();
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity pendingAgreement = agreementTestObject.getAgreementEntity();
+        List<DiscountEntity> discounts = agreementTestObject.getDiscountEntityList();
+        DiscountEntity discountEntity = discounts.get(0);
         this.mockMvc.perform(
                 get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
                 .andDo(log())
@@ -86,7 +80,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocument_Ok() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         DocumentEntity document = TestUtils.createDocument(
                 pendingAgreement, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
         documentRepository.save(document);
@@ -100,7 +94,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentNotFound_BadRequest() throws Exception {
         String documentTypeDto = "ManifestationOfInterest";
-        createPendingAgreement();
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
                 .andDo(log())
@@ -145,20 +139,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.*", hasSize(0)));
-    }
-
-
-    private void createPendingAgreement() {
-        // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        //creating profile
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
-        //creating discount
-        discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        saveSampleDocuments(agreementEntity);
-        pendingAgreement = agreementService.requestApproval(agreementEntity.getId());
     }
 
 }

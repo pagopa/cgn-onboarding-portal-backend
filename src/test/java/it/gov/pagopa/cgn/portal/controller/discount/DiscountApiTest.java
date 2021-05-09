@@ -54,6 +54,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
+        setOperatorAuth();
     }
 
     @Test

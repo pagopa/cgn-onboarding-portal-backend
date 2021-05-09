@@ -29,6 +29,12 @@ public class AppExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = {SecurityException.class})
+    public ResponseEntity<Object> handleForbidden(Exception ex) {
+        log.warn("Permission Denied", ex);
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
         String errorMsg = configProperties.isActiveProfileDev() ?

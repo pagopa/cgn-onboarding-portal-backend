@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
+import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -23,13 +26,10 @@ import java.util.List;
 class ProfileServiceTest extends IntegrationAbstractTest {
 
     @Autowired
-    private ProfileService profileService;
-
-    @Autowired
-    private AgreementService agreementService;
-
-    @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private BackofficeAgreementService backofficeAgreementService;
 
     private AgreementEntity agreementEntity;
 
@@ -176,6 +176,39 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profileDB.getAddressList());
         List<AddressEntity> addresses = addressRepository.findByProfileId(profileDB.getId());
         Assertions.assertEquals(profileDB.getAddressList().size(), addresses.size());
+    }
+
+    @Test
+    @Transactional
+    void Update_UpdateApprovedAgreementUpdateLastModifyDate_Ok() {
+        setAdminAuth();
+        final String legalOffice = "new_legalOffice";
+        AgreementEntity agreement = createPendingAgreement().getAgreementEntity();
+        agreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        agreementRepository.save(agreement);
+        agreement = backofficeAgreementService.approveAgreement(agreement.getId());
+        ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
+        profileEntity.setLegalOffice(legalOffice);
+        profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
+        Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        Assertions.assertEquals(LocalDate.now(), agreement.getInformationLastUpdateDate());
+
+    }
+
+    @Test
+    @Transactional
+    void Update_UpdatePendingAgreementNotUpdateLastModifyDate_Ok() {
+        final String legalOffice = "new_legalOffice";
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity agreement = agreementTestObject.getAgreementEntity();
+        ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
+        profileEntity.setLegalOffice(legalOffice);
+        profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
+        Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        Assertions.assertNull(agreement.getInformationLastUpdateDate());
+
     }
 
 }

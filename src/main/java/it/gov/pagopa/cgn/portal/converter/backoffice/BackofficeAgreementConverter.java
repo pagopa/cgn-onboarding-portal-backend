@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.codehaus.plexus.util.StringUtils;
@@ -65,32 +64,20 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;
-        switch (entity.getState()) {
-            case APPROVED:
-                dto = new ApprovedAgreement();
-                dto.setState(AgreementState.APPROVEDAGREEMENT);
-                break;
-            case REJECTED:
-                RejectedAgreement rejectedAgreement = new RejectedAgreement();
-                rejectedAgreement.setReasonMessage(entity.getRejectReasonMessage());
-                dto = rejectedAgreement;
-                dto.setState(AgreementState.REJECTEDAGREEMENT);
-                break;
-            case PENDING:
-                if (StringUtils.isBlank(entity.getBackofficeAssignee())) {
-                    dto = new PendingAgreement();
-                    dto.setState(AgreementState.PENDINGAGREEMENT);
-                } else {
-                    AssignedAgreement assignedAgreement = new AssignedAgreement();
-                    Assignee assignee = new Assignee();
-                    assignee.setFullName(entity.getBackofficeAssignee());
-                    assignedAgreement.setAssignee(assignee);
-                    dto = assignedAgreement;
-                    dto.setState(AgreementState.ASSIGNEDAGREEMENT);
-                }
-                break;
-            default:
-                throw new RuntimeException("Enum mapping not found for " + entity.getState());
+        if (entity.getState() == AgreementStateEnum.PENDING) {
+            if (StringUtils.isBlank(entity.getBackofficeAssignee())) {
+                dto = new PendingAgreement();
+                dto.setState(AgreementState.PENDINGAGREEMENT);
+            } else {
+                AssignedAgreement assignedAgreement = new AssignedAgreement();
+                Assignee assignee = new Assignee();
+                assignee.setFullName(entity.getBackofficeAssignee());
+                assignedAgreement.setAssignee(assignee);
+                dto = assignedAgreement;
+                dto.setState(AgreementState.ASSIGNEDAGREEMENT);
+            }
+        } else {
+            throw new RuntimeException("Enum mapping not found for " + entity.getState());
         }
         return dto;
     };

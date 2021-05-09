@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum DiscountStateEnum {
 
-    DRAFT("DRAFT"), PUBLISHED("PUBLISHED"), REJECTED("REJECTED");
+    DRAFT("DRAFT"), PUBLISHED("PUBLISHED"), SUSPENDED("SUSPENDED");
 
     private final String code;
 

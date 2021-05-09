@@ -1,7 +1,10 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
 import lombok.Data;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
@@ -15,6 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "discount")
 @Data
+@TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 public class DiscountEntity extends BaseEntity {
 
     @Id
@@ -28,6 +32,7 @@ public class DiscountEntity extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Type( type = "discount_state_enum" )
     @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
@@ -59,6 +64,9 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "static_code", length = 100)
     private String staticCode;
 
+    @Column(name = "suspended_reason_message", length = 250)
+    private String suspendedReasonMessage;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
@@ -89,6 +97,10 @@ public class DiscountEntity extends BaseEntity {
 
     public OffsetDateTime getInsertTime() {
         return insertTime;
+    }
+
+    public OffsetDateTime getUpdateTime() {
+        return updateTime;
     }
 
 }

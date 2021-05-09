@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -42,6 +43,9 @@ public class ProfileService {
     public ProfileEntity updateProfile(String agreementId, ProfileEntity newUpdateProfile) {
         ProfileEntity profileEntity = getProfileFromAgreementId(agreementId);
         updateConsumer.accept(newUpdateProfile, profileEntity);
+        if (AgreementStateEnum.APPROVED.equals(profileEntity.getAgreement().getState())) {
+            agreementServiceLight.setInformationLastUpdateDate(profileEntity.getAgreement());
+        }
         return profileRepository.save(profileEntity);
     }
 
@@ -58,7 +62,6 @@ public class ProfileService {
     }
 
     private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
-        //todo check agreementId with token
         return profileRepository.findByAgreementId(agreementId);
     }
     private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {

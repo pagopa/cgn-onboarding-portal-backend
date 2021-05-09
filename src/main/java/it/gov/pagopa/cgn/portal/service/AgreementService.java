@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
@@ -11,13 +12,14 @@ import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AgreementService extends AgreementServiceLight {
@@ -36,7 +38,7 @@ public class AgreementService extends AgreementServiceLight {
 
     private final ConfigProperties configProperties;
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity createAgreementIfNotExists(String merchantTaxCode) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
@@ -53,7 +55,7 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional
     public AgreementEntity requestApproval(String agreementId) {
         AgreementEntity agreementEntity = findById(agreementId);
 
@@ -77,13 +79,33 @@ public class AgreementService extends AgreementServiceLight {
         return saved;
     }
 
+    @Transactional
     public String uploadImage(String agreementId, MultipartFile image) {
         AgreementEntity agreementEntity = findById(agreementId);
         CGNUtils.validateImage(image, configProperties.getMinWidth(), configProperties.getMinHeight());
         String imageUrl = azureStorage.storeImage(agreementId, image);
         agreementEntity.setImageUrl(imageUrl);
+        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
+            setInformationLastUpdateDate(agreementEntity);
+        }
         agreementRepository.save(agreementEntity);
         return imageUrl;
+    }
+
+    @Transactional(readOnly = true)
+    public AgreementEntity getApprovedAgreement(String agreementId) {
+        AgreementEntity agreementEntity = findById(agreementId);
+        List<DiscountEntity> discounts = agreementEntity.getDiscountList();
+        if (!CollectionUtils.isEmpty(discounts)) {
+            discounts = discounts.stream()
+                    .filter(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()))
+                    .collect(Collectors.toList());
+            agreementEntity.setDiscountList(discounts);
+        }
+        agreementEntity.setDocumentList(documentService.getAllDocuments(agreementId,
+                documentEntity -> documentEntity.getDocumentType().isBackoffice()));
+
+        return agreementEntity;
     }
 
     private AgreementEntity createAgreement(String agreementId) {
