@@ -18,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -30,7 +29,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     private AddressRepository addressRepository;
 
     @Autowired
-    private TestReferentRepository testReferentRepository;
+    private TestReferentRepository referentRepository;
 
     @Autowired
     private BackofficeAgreementService backofficeAgreementService;
@@ -193,7 +192,8 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
         profileEntity.setLegalOffice(legalOffice);
         //added to avoid LazyInitializationException
-        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+
+        profileEntity.setReferent(referentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
 
         profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
@@ -204,7 +204,6 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    @Transactional
     void Update_UpdatePendingAgreementNotUpdateLastModifyDate_Ok() {
         final String legalOffice = "new_legalOffice";
         AgreementTestObject agreementTestObject = createPendingAgreement();
