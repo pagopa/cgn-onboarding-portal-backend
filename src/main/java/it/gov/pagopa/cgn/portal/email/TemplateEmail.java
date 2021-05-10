@@ -11,7 +11,8 @@ public enum TemplateEmail {
     APPROVED_AGREEMENT("email/agreement-request-approved-both.html"),
     REJECTED_AGREEMENT("email/agreement-request-rejected.html"),
     SUSPENDED_DISCOUNT("email/discount-suspended.html"),
-    EXPIRED_DISCOUNT("email/discount-expiring.html");
+    EXPIRED_DISCOUNT("email/discount-expiring.html"),
+    HELP_REQUEST("email/help-request.html");
 
     private final String templateName;
 }

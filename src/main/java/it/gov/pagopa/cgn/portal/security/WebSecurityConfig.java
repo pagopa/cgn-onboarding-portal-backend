@@ -55,7 +55,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers("/actuator/**").permitAll()
+                .antMatchers("/actuator/**", "/help").permitAll()
                 .anyRequest().authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain

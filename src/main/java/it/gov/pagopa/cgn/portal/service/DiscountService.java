@@ -143,6 +143,10 @@ public class DiscountService {
             throw new InvalidRequestException(
                     "Discount cannot have empty static code for a profile with discount code type static");
         }
+        // If profile use API, static code will not used
+        if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
+            discountEntity.setStaticCode(null);
+        }
     }
 
     private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {

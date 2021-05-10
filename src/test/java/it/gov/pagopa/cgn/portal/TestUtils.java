@@ -40,6 +40,8 @@ public class TestUtils {
 
     public static final String AGREEMENT_APPROVED_CONTROLLER_PATH = "/approved-agreements/";
 
+    public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
+
     public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {
@@ -63,6 +65,9 @@ public class TestUtils {
     }
     public static String getBackofficeDocumentPath(String agreementId) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
+    }
+    public static String getAuthenticatedHelpPath(String agreementId) {
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
 
 
@@ -142,6 +147,26 @@ public class TestUtils {
 
         profileDto.setReferent(updateReferent);
         return profileDto;
+    }
+
+    public static it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest createSamplePublicApiHelpRequest() {
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
+        helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest.CategoryEnum.ACCESS);
+        helpRequest.setTopic("a topic");
+        helpRequest.setMessage("I need help");
+        helpRequest.setEmailAddress("myname.help@pagopa.it");
+        helpRequest.setLegalName("PagoPa");
+        helpRequest.setReferentFirstName("Me");
+        helpRequest.setReferentLastName("You");
+        return helpRequest;
+    }
+
+    public static it.gov.pagopa.cgnonboardingportal.model.HelpRequest createSampleAuthenticatedHelpRequest() {
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
+        helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.model.HelpRequest.CategoryEnum.ACCESS);
+        helpRequest.setTopic("a topic");
+        helpRequest.setMessage("I need help");
+        return helpRequest;
     }
 
 
