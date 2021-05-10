@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convenzione</title>
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 3cm;
+            counter-increment: page;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+        }
+
+        .ol {
+            counter-reset: item
+        }
+
+        .ol>li {
+            display: block
+        }
+
+        .ol>li:before {
+            content: counters(item, ".") " ";
+            counter-increment: item;
+            font-weight: bold;
+        }
+
+        ol.parentheses {
+            counter-reset: list;
+            margin: 0;
+        }
+
+        ol.parentheses>li {
+            list-style: none;
+            position: relative;
+        }
+
+        ol.parentheses>li:before {
+            counter-increment: list;
+            content: counter(list, lower-alpha) ") ";
+            position: absolute;
+            left: -1.4em;
+        }
+
+        ul.dashed {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul.dashed>li {
+            padding-left: 16px;
+        }
+
+        ul.dashed>li::before {
+            content: "- ";
+            padding-right: 8px;
+        }
+
+        .title {
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        .title-dash {
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 12pt;
+            display: block;
+        }
+
+        .list-title {
+            font-weight: bold;
+            font-size: 12pt;
+            text-align: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .letter-list>li::before {
+            content: counters(item, ")") " "
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .sign {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+        .mt {
+            margin-top: 1em;
+        }
+
+        mark {
+            background-color: #ffff00;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- First page -->
+    <div class="text-center">
+        <img src="data:image/jpeg;base64,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"
+            style="margin: auto" />
+    </div>
+    <p class="text-center">Dipartimento per le politiche giovanili e il Servizio civile universale</p>
+    <h1 class="title text-center">CONVENZIONE<br />PER L’ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE<br />tra</h1>
+    <p><strong>Presidenza del Consiglio dei Ministri Dipartimento per le Politiche
+            Giovanili e il Servizio Civile Universale</strong> rappresentata dal Dott. Flavio
+        SINISCALCHI nella sua qualità di Capo del Dipartimento per le politiche
+        giovanili e il Servizio civile universale con sede in Roma (c.a.p. 00184), Via
+        della Ferratella in Laterano n. 51</p>
+    <p class="title text-center">E</p>
+    <p><span th:text="${legal_name}"></span>, Codice fiscale o partita IVA<br />
+        <span th:text="${merchant_tax_code}"></span>, in persona del legale rappresentante<br />
+        <span th:text="${legal_representative_fullname}"></span> Codice Fiscale del legale rappresentante<br />
+        <span th:text="${legal_representative_fiscal_code}"></span> sede legale <span th:text="${legal_office}"></span>
+        Tel<span th:text="${telephone_nr}"></span> PEC<br />
+        <span th:text="${pec_address}"></span> di seguito “l’Operatore”</p>
+    <p>di seguito anche indicate collettivamente “le Parti”</p>
+    <h1 class="title text-center">Premesso che</h1>
+    <ul class="dashed">
+        <li>con decreto del Ministro per le politiche giovanili e lo sport del
+            27.2.2020 è stata istituita la Carta Giovani Nazionale (CGN) prevista
+            dall’art. 1 comma 413, della legge 27 dicembre 2019 n.160, finalizzata
+            a promuovere una migliore qualità della vita delle giovani generazioni,
+            sostenendone anche il processo di crescita e incentivando le opportunità
+            volte a favorire la formazione e la partecipazione ad attività culturali,
+            sportive e ricreative;</li>
+        <div class="page-break"></div>
+        <!-- Second page -->
+        <li>la CGN è uno strumento virtuale – aderente al network delle youth card
+            dei Paesi europei associati all’EYCA – dedicato ai giovani italiani ed
+            europei residenti in Italia, a partire dal compimento del diciottesimo
+            anno e fino al compimento del trentaseiesimo anno di età, cui è
+            possibile aderire registrandosi attraverso l’APP IO realizzata dalla
+            società PagoPA S.p.A. al fine di poter usufruire di particolari
+            agevolazioni nell’acquisto di beni e servizi in vari ambiti, quali, in
+            particolare a titolo esemplificativo non esaustivo, la cultura, lo sport, il
+            benessere, il turismo, l’editoria e i trasporti;</li>
+        <li>il Dipartimento per le politiche giovanili e il Servizio Civile Universale
+            della Presidenza del Consiglio dei Ministri (di seguito “il
+            Dipartimento”), anche con il supporto della società pubblica <em>in house</em>
+            Studiare Sviluppo S.r.l., ha avviato il processo di coinvolgimento di
+            operatori economici, fornitori di beni o servizi a livello nazionale ed
+            europeo, che intendano aderire al progetto della Carta Giovani
+            Nazionale (CGN) ed impegnarsi a praticare ai giovani iscritti alla CGN
+            (beneficiari) agevolazioni e/o condizioni di acquisto particolarmente
+            favorevoli senza alcun onere per il Dipartimento;</li>
+        <li>a tal fine, il Dipartimento, nel rispetto dei principi di economicità,
+            efficacia, imparzialità pubblicità e trasparenza ha invitato gli operatori
+            potenzialmente interessati ad aderire allo spirito del progetto CGN e
+            alle finalità allo stesso sottese, conformandosi ai presupposti richiesti
+            per l’adesione e al relativo procedimento di convenzionamento con
+            l’Amministrazione;</li>
+        <li>l’Operatore ha presentato una manifestazione di interesse ad aderire al
+            progetto CGN, dichiarandosi in possesso delle competenze,
+            dell’affidabilità e dell’esperienza necessaria, impegnandosi a garantire
+            ai beneficiari della CGN le specifiche agevolazioni di cui all’Allegato
+            n. 1, approvando anche il testo della presente convenzione;</li>
+    </ul>
+    <span class="title-dash text-center">-</span>
+    <h1 class="title text-center">Tanto premesso</h1>
+    <p>Le parti convengono quanto segue</p>
+    <ol class="ol">
+        <li><span class="list-title">Premesse e Allegati.</span>
+            <ol class="ol">
+                <li>Le premesse e gli Allegati sono parte integrante della presente
+                    convenzione.</li>
+                <li> In particolare l’<strong>Allegato n. 1</strong> reca la proposta di adesione
+                    dell’Operatore, contenente la specifica indicazione delle agevolazioni
+                    proposte agli iscritti alla CGN (“beneficiari”) e le autodichiarazioni da lui<div
+                        class="page-break"></div>
+                    <!-- Third page --> rese, nonché
+                    l’informativa privacy relativa al trattamento dei dati
+                    dell’Operatore.</li>
+                <li>Le condizioni e le istruzioni tecniche attuative della convenzione
+                    (“<strong>Documentazione Tecnica</strong>”) sono pubblicate sui siti web ufficiali dedicati
+                    all’iniziativa, direttamente consultabili agli indirizzi
+                    io.italia.it/carta-giovani-nazionale e
+                    <mark>giovani2030.gov.it/carta-giovani-nazionale</mark> e formano parte integrante e
+                    sostanziale della convenzione.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Oggetto.</span>
+            <ol class="ol">
+                <li>Con la presente convenzione le Parti definiscono l’adesione
+                    dell’Operatore al progetto CGN, la sua iscrizione al relativo elenco pubblico
+                    e l’assunzione dell’impegno a garantire ai giovani iscritti, tramite l’App IO,
+                    alla CGN (“beneficiari”), a seguito di loro richiesta, le specifiche
+                    agevolazioni funzionali, tecniche e/o economiche proposte (Allegato n. 1)
+                    per l’accesso e/o l’acquisto dei beni e/o servizi ivi indicati e forniti.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Assenza di corrispettivi.</span>
+            <ol class="ol">
+                <li>La presente convenzione ha natura non onerosa e non prevede
+                    riconoscimento od erogazione di corrispettivi economici tra le Parti.</li>
+                <li> All’Operatore non spetta alcun tipo di compenso, indennità corrispettivo
+                    o rimborso, generato nell’ambito dell’iniziativa CGN e per l’assunzione
+                    degli impegni che questa comporta, ivi inclusi quelli derivanti dalla gestione
+                    della presente convenzione.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Impegni ed obblighi dell’Operatore. </span>
+            <ol class="ol">
+                <li>L’Operatore dichiara di essere in possesso delle competenze,
+                    dell’affidabilità e dell’esperienza necessaria per l’adesione al progetto CGN,
+                    di tutte le autorizzazioni necessarie per la commercializzazione dei beni e/o
+                    servizi indicati nell’Allegato 1 e si obbliga a dotarsi dei requisiti informatici
+                    (hardware e software) meglio indicati nella Documentazione Tecnica, al fine
+                    di garantire: <ol class="parentheses" type="a">
+                        <li>la sua registrazione alla piattaforma web utilizzata per declinare la
+                            Scheda Operatore e la comunicazione con i servizi esposti dall’APP
+                            IO di PagoPA;</li>
+                        <li>il riconoscimento del codice di agevolazione (o codice sconto)
+                            generato dai beneficiari della CGN tramite l’APP IO per l’acquisto
+                            di beni e/o servizi dell’Operatore medesimo</li>
+                    </ol>
+                </li>
+                <li> L’Operatore dichiara di aver ricevuto tutte le informazioni necessarie per
+                    interconnettersi con l’APP IO meglio indicate nella Documentazione
+                    Tecnica; si obbliga inoltre ad adeguare le proprie dotazioni (hardware e
+                    software) agli eventuali aggiornamenti che potranno essergli richiesti in
+                    <div class="page-break"></div> conseguenza dello sviluppo del progetto CGN e/o della
+                    piattaforma web e
+                    relativa APP IO di PagoPA, salvo il suo diritto di recesso come previsto dal
+                    seguente art. 10.2.</li>
+                <li>L’Operatore si obbliga a rispettare nella attuazione della presente
+                    convenzione le istruzioni contenute nella Documentazione Tecnica.
+                    L’Operatore accetta e riconosce che, per il numero di soggetti coinvolti in
+                    qualità di Operatori, e al fine dell’uniforme applicazione dei termini ivi
+                    contenuti, la Documentazione Tecnica potrebbe essere aggiornata nel tempo
+                    senza ulteriore avviso al fine di garantire l’efficienza dell’iniziativa; resta
+                    dunque inteso che è onere dell’Operatore tenersi informato ed adeguarsi ai
+                    relativi aggiornamenti, fermo restando il diritto di recesso di cui all’art.
+                    10.2.</li>
+                <li>L’Operatore riconosce che i costi, le spese e/o gli oneri da lui sostenuti
+                    per l’adesione al progetto CGN, e in particolare per gli adempimenti
+                    necessari a garantire la conformità alla Documentazione Tecnica, compresi i
+                    relativi aggiornamenti, rimarranno a suo esclusivo carico.</li>
+                <li>L’Operatore, nella attuazione della convenzione, si obbliga ad
+                    individuare e riconoscere il codice di agevolazione generato in favore dei
+                    beneficiari della CGN tramite l’APP IO per l’acquisto di beni e/o servizi
+                    dallo stesso commercializzati e ad applicare in modo pieno ed effettivo a
+                    vantaggio dei beneficiari medesimi le agevolazioni tecniche, funzionali e/o
+                    economiche proposte come da Allegato n.1 ed eventuali successive
+                    modifiche. Resta inteso che il riconoscimento del codice agevolazione
+                    generato dall’APP IO, da eseguirsi secondo le istruzioni di cui alla
+                    Documentazione Tecnica, potrà riguardare richieste di acquisto presentate
+                    dai beneficiari della CGN in presenza fisica nei locali di vendita
+                    dell’Operatore o richieste di acquisto presentate dai beneficiari della CGN
+                    <em>online</em> sul sito di <em>e-commerce</em> dell’Operatore, qualora questo sia a ciò
+                    abilitato. Il riconoscimento delle agevolazioni in favore anche dei giovani
+                    titolari della youth card EYCA (European Youth Card Association) sarà
+                    effettuato dall’Operatore secondo le specifiche previsioni indicate nella
+                    Documentazione Tecnica.</li>
+                <li>L’Operatore può, nel corso della esecuzione della convenzione, chiedere
+                    di sostituire, modificare e/o aggiornare le agevolazioni proposte (Allegato 1)
+                    seguendo le istruzioni e le procedure di validazione meglio indicate nella
+                    Documentazione Tecnica.</li>
+                <li>L’Operatore si obbliga nell’attuazione della presente convenzione a
+                    rispettare lo spirito del progetto CGN teso a promuovere una migliore
+                    qualità della vita delle giovani generazioni, sostenendone il processo di
+                    crescita e incentivando le opportunità volte a favorire la partecipazione ad
+                    attività culturali, sportive e ricreative, anche con finalità formative, evitando
+                    pertanto di commercializzare nei confronti dei beneficiari beni e/o servizi<div class="page-break">
+                    </div>
+                    </div> non conformi a tale spirito, quali, a mero titolo
+                    esemplificativo, prodotti per
+                    fumatori, servizi di gioco o scommesse etc.></li>
+                <li> Con la sottoscrizione della presente convenzione l’Operatore accetta
+                    eventuali verifiche e controlli sulla regolare esecuzione della convenzione e
+                    sull’effettiva applicazione dei codici sconto in favore dei beneficiari della
+                    CGN. L’Operatore è tenuto a mettere a disposizione, nei termini fissati, le
+                    informazioni ed i documenti richiesti. Resta inteso che è comunque onere
+                    dell’Operatore: <ul class="dashed">
+                        <li>portare a conoscenza dei beneficiari termini e condizioni degli sconti
+                            applicabili, compilando e mantenendo aggiornata la documentazione
+                            trasmessa con la manifestazione d’interesse di cui all’Allegato 1, come di
+                            volta in volta modificata e pubblicata sui siti web dedicati all’iniziativa,
+                            rendendola sempre disponibile al momento dell’acquisto;</li>
+                        <li>dotarsi degli strumenti (compresi gli sviluppi tecnici) necessari per il
+                            riconoscimento dello sconto proposto, anche in base alle diverse condizioni
+                            eventualmente praticate;</li>
+                        <li>procedere alle opportune verifiche quanto alla sussistenza in capo ai
+                            beneficiari dei requisiti necessari per usufruire degli sconti, in conformità a
+                            termini e condizioni applicabili, astenendosi dal determinare condizioni
+                            manifestamente discriminatorie e/o ad agevolare condotte fraudolente da
+                            parte dei beneficiari, manlevando il Dipartimento e PagoPA S.p.A. da
+                            qualsiasi contestazione o pretesa da parte dei beneficiari o di terzi.</li>
+                    </ul>
+                </li>
+                <li>In caso di accertate irregolarità e/o violazione degli impegni e obblighi
+                    dell’Operatore, derivanti dalla presente convenzione, emersi a seguito delle
+                    verifiche e/o dei controlli di cui al precedente comma 4.8 il Dipartimento si
+                    riserva la facoltà di procedere alla rimozione dell’Operatore stesso
+                    dall’elenco pubblico degli esercenti aderenti alla CGN. Inoltre, il
+                    Dipartimento si riserva il diritto di sospendere l’operatività di eventuali
+                    nuove agevolazioni, proposte dall’Operatore nella vigenza della
+                    convenzione, qualora ritenute non conformi alla CGN.</li>
+                <li>L’Operatore deve comunque comunicare entro 30 giorni ogni atto o
+                    fatto che implichi la perdita dei requisiti o delle condizioni richieste per il
+                    convenzionamento, nonché ogni modifica aziendale o societaria rilevante ai
+                    fini della relativa attuazione e permanenza nell’elenco degli esercenti
+                    aderenti alla CGN.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Impegni del Dipartimento.</span>
+            <ol class="ol">
+                <li>Il dipartimento provvede a: <ol class="parentheses" type="a">
+                        <li>inserire l’Operatore nell’elenco pubblico degli esercenti aderenti alla
+                            CGN, consultabile dai beneficiari nella apposita sezione dell’APP IO e della
+                            piattaforma web, nei tempi tecnici necessari e fermo il rispetto da parte<div
+                                class="page-break"></div> dell’Operatore
+                            medesimo delle istruzioni di cui alla Documentazione
+                            Tecnica;</li>
+                        <li>effettuare, secondo le modalità che riterrà più opportune, eventuali
+                            verifiche sull’adempimento degli obblighi di cui alla presente convenzione;</li>
+                        <li>realizzare campagne informative in relazione alla CGN ed alle
+                            opportunità rese disponibili da tutti gli Operatori convenzionati;</li>
+                        <li>fornire all’Operatore la documentazione grafica e di brand dell’iniziativa
+                            CGN affinché l’Operatore possa comunicare al pubblico la sua adesione alla
+                            CGN.</li>
+                    </ol>
+                </li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Limitazione di responsabilità. </span>
+            <ol class="ol">
+                <li>L’Operatore riconosce sin d’ora che gli eventuali rapporti contrattuali
+                    che formalizzerà con i beneficiari della CGN, per mezzo della convenzione,
+                    saranno solo allo stesso riferibili e che, rispetto agli stessi beneficiari, il
+                    Dipartimento e tutti i soggetti che a vario titolo prestano supporto al
+                    medesimo nell’ambito del progetto CGN verranno tenuti indenni da
+                    qualsiasi responsabilità.</li>
+                <li>L’Operatore manleva il Dipartimento da ogni eventuale richiesta,
+                    contestazione, opposizione e/o reclamo di qualsiasi tipo avanzati dai
+                    beneficiari della CGN in relazione ai rapporti negoziali con gli stessi attivati
+                    dall’Operatore in attuazione della presente convenzione, nonché con
+                    riferimento alla documentazione informativa e contrattuale.</li>
+                <li>Il Dipartimento non può essere ritenuto responsabile per alcun danno
+                    provocato da malfunzionamenti, disservizi, o comunque interruzioni anche
+                    dovute ad interventi tecnici o di manutenzioni dell’APP IO o della
+                    piattaforma web dedicata al progetto CGN. Parimenti, il Dipartimento e la
+                    società PagoPA S.p.A. non potranno essere ritenuti in alcun modo
+                    responsabili per qualsiasi malfunzionamento, disservizio o interruzione dei
+                    servizi relativi all’App IO o alla piattaforma web, ovvero per qualsiasi
+                    danno subito dall’Operatore o da terzi derivante da caso fortuito, forza
+                    maggiore o condotta dell’Operatore non conforme alla convenzione, anche
+                    con particolare riferimento alle specifiche contenute nella Documentazione
+                    Tecnica, come di volta in volta aggiornata.</li>
+                <li>L’Operatore assume, nei confronti del Dipartimento e di PagoPA S.p.A.,
+                    la responsabilità per gli eventuali danni, anche di immagine, provocati
+                    nell’esecuzione della convenzione.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Durata della convenzione. </span>
+            <ol class="ol">
+                <li>La presente convenzione ha validità annuale con decorrenza dalla data
+                    di sottoscrizione e si intende automaticamente e tacitamente rinnovata di
+                    anno in anno, salvo che l’Operatore abbia comunicato la volontà di
+                    recedere dalla convenzione stessa con un preavviso di almeno 30 (trenta)
+                    giorni da notificarsi all’altra Parte tramite PEC.</li>
+                <div class="page-break"></div>
+                <li>L’eventuale interruzione e/o conclusione della presente convenzione,
+                    anche anticipata, non avrà effetto alcuno nei confronti dei codici sconto
+                    generati in favore dei beneficiari della CGN per mezzo della APP IO prima
+                    della interruzione e/o conclusione della convenzione; pertanto tali codici
+                    dovranno essere accettati ed applicati dall’Operatore in favore dei
+                    beneficiari della CGN anche dopo il venir meno della convenzione, purché
+                    utilizzati dai beneficiari nei termini specifici previsti a monte dalla
+                    agevolazione medesima (Allegato 1 e successive eventuali modifiche).</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Recesso e clausola risolutiva espressa. </span>
+            <ol class="ol">
+                <li>Il Dipartimento si riserva la facoltà di recedere dalla presente
+                    convenzione con effetto immediato e senza che possa essere preteso
+                    dall’Operatore alcun tipo di rimborso, risarcimento e/o indennizzo, a mezzo
+                    di comunicazione, da notificarsi tramite PEC, recante un preavviso di
+                    almeno 10 (dieci) giorni.</li>
+                <li>Ai sensi e per gli effetti di cui all’art. 1456 del codice civile, la presente
+                    convenzione potrà comunque essere risolta con effetto immediato dal
+                    Dipartimento senza che possa essere preteso dall’Operatore alcun tipo di
+                    rimborso, risarcimento e/o indennizzo in relazione ai seguenti casi: <ul class="dashed">
+                        <li>nel caso di mutamenti dovuti a leggi, regolamenti, atti amministrativi
+                            che rendano impossibile o difficoltosa la prosecuzione del rapporto
+                            in base alla insindacabile valutazione discrezionale del
+                            Dipartimento;</li>
+                        <li>nel caso in cui l’Operatore venga sottoposto a procedura
+                            fallimentare, concordato giudiziale, amministrazione controllata o
+                            straordinaria o ad altra procedura concorsuale, divenga insolvente o
+                            dismetta la propria attività;</li>
+                        <li>qualora nei confronti dell’Operatore o nei confronti dei suoi
+                            rappresentanti legali e dei componenti degli organi di
+                            amministrazione siano emessi, in applicazione della normativa in
+                            materia di antimafia, provvedimenti provvisori o definitivi;</li>
+                        <li>qualora l’Operatore perda la possibilità e/o capacità di contrarre con
+                            la Pubblica Amministrazione;</li>
+                        <li>qualora emerga che le dichiarazioni rese dall’Operatore nella
+                            presente convenzione e nei relativi Allegati non rispondano al vero;</li>
+                        <li>qualora l’Operatore non fornisca o non sia più in grado di fornire ai
+                            beneficiari della CGN le agevolazioni indicate nell’Allegato 1 o
+                            qualora queste ultime non siano vantaggiose rispetto a quelle
+                            comunemente praticate sul mercato;</li>
+                        <li>nel caso in cui l’Operatore venga meno, ad insindacabile giudizio del
+                            Dipartimento, agli impegni assunti nel precedente art.4 e nei
+                            successivi artt. 9, 11 e 12;</li>
+                        <div class="page-break"></div>
+                        <li>in caso di condotta dell’Operatore non conforme alla
+                            Documentazione Tecnica.</li>
+                    </ul>
+                </li>
+                <li>Nei casi di cui al precedente punto 8.2 la presente convenzione si
+                    intenderà risolta di diritto e il Dipartimento potrà far valere tale risoluzione
+                    mediante semplice invio di comunicazione indicante che la condizione
+                    risolutiva si è verificata.</li>
+                <li>L’interruzione della presente convenzione ai sensi dei precedenti punti
+                    non avrà effetto alcuno nei confronti dei codici sconto generati in favore dei
+                    beneficiari della CGN per mezzo della APP IO prima che l’interruzione e/o
+                    conclusione della convenzione abbia effetto.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Divieto di cessione. </span>
+            <ol class="ol">
+                <li>E’ fatto divieto all’Operatore di cedere il presente accordo</li>
+            </ol>
+        </li>
+        <li><span class="list-title">Modifica e/o aggiornamento della convenzione. </span>
+            <ol class="ol">
+                <li>Qualsiasi modifica della presente convenzione deve essere, a pena di
+                    invalidità ed inefficacia, approvata per iscritto da entrambe le Parti.</li>
+                <li>Il Dipartimento si riserva il diritto di aggiornare in via unilaterale la
+                    presente convenzione in relazione agli aspetti tecnici e/o procedurali di cui
+                    alla Documentazione Tecnica. L’Operatore accetta e riconosce sin d’ora che
+                    tali aggiornamenti entreranno in vigore a partire dalla loro pubblicazione,
+                    fermo restando il diritto di recesso dell’Operatore da esercitarsi a mezzo di
+                    comunicazione PEC con preavviso di 10 (dieci) giorni.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Privacy. </span>
+            <ol class="ol">
+                <li>Ciascuna Parte si impegna a trattare i dati personali acquisiti per effetto
+                    del presente accordo nel rispetto della vigente normativa in materia di
+                    protezione dei dati personali ed al fine di attuare la presente convenzione.
+                    Le Parti tratteranno i dati acquisiti quali autonomi titolari del trattamento.</li>
+                <li>Ciascuna Parte si impegna a trattare in maniera lecita e nel rispetto
+                    delle prescrizioni vigenti in materia di protezione dei dati personali i dati
+                    eventualmente forniti nel corso della attuazione della convenzione, nonché
+                    ad applicare le misure di sicurezza più idonee nel trattamento, nel rispetto di
+                    quanto previsto dal Regolamento UE 2016/679 (GDPR), al fine di inibire
+                    qualsiasi accesso non autorizzato e/o sottrazione di informazioni.</li>
+                <li>Ciascuna Parte si impegna, altresì, ad utilizzare sistemi e procedure, per
+                    le operazioni di trattamento dei dati, atte a garantire il rispetto delle
+                    disposizioni di cui al GDPR. In ogni caso, l’Operatore adotterà ogni misura,
+                    in linea con le disposizioni del GDPR, atta a: <ul class="dashed">
+                        <li>adeguarsi alla normativa vigente;</li>
+                        <li>istituire moduli e procedure organizzative coerenti con le disposizioni di
+                            legge;</li>
+                    </ul>
+                </li>
+                <div class="page-break"></div>
+                <li>In attuazione degli obblighi di cui al presente articolo, l’Operatore si
+                    impegna a trattare i dati dei Beneficiari nel rispetto della normativa vigente
+                    in materia di protezione dei dati personali, con particolare riguardo al
+                    divieto di creare banche dati che consentano un’associazione diretta fra il
+                    codice del buono validato e il nominativo o il codice fiscale del soggetto
+                    Beneficiario che lo ha utilizzato.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Proprietà intellettuale ed uso dei segni distintivi. </span>
+            <ol class="ol">
+                <li>La presente convenzione non conferisce all’Operatore alcuna licenza
+                    d’uso o di sfruttamento dell’immagine dei marchi o loghi o segni distintivi
+                    della CGN, del Dipartimento e di PagoPA S.p.A., né dei relativi diritti di
+                    proprietà intellettuale o industriale, salvi i casi ammessi dalla presente
+                    convenzione. L’Operatore potrà esporre anche online il logo e/o segno
+                    distintivo e la documentazione grafica relativa alla CGN (“<strong>Brand CGN</strong>”),
+                    all’App IO (“<strong>Brand IO</strong>”) e al circuito EYCA (“<strong>Brand EYCA</strong>”), secondo
+                    le
+                    istruzioni contenute nella Documentazione Tecnica, al solo fine di informare
+                    il pubblico di essere convenzionato con la CGN, di aderire al circuito
+                    EYCA, di poter richiedere la CGN tramite l’App IO e di applicare le
+                    agevolazioni di cui all’Allegato 1 e successive modificazioni.</li>
+                <li>Resta inteso che ogni ulteriore o diverso utilizzo del nome, del logo o
+                    del segno distintivo della CGN da parte dell’Operatore Economico dovrà
+                    essere preventivamente autorizzato dal Dipartimento, e con riferimento al
+                    Brand IO, da parte di PagoPA S.p.A..</li>
+                <li>L’Operatore autorizza espressamente l’iscrizione del suo nominativo,
+                    segno distintivo e/o marchio nell’elenco pubblico esercenti della CGN,
+                    disponibile anche sulla piattaforma web della CGN e sull’APP IO, così
+                    come pure delle agevolazioni e/o scontistiche da lui rese disponibili ai
+                    beneficiari della CGN come da Allegato 1 e successive modificazioni.</li>
+            </ol>
+        </li>
+        <li class="mt"><span class="list-title">Referenti. </span>
+            <ol class="ol">
+                <li>L’Operatore fornisce quale proprio referente tecnico e possibile
+                    interlocutore, anche in merito alle attività tecnico-operative inerenti
+                    l’attuazione della convenzione, un incaricato con i relativi estremi di
+                    contatto come già indicato nell’Allegato 1 .</li>
+                <li>Il Dipartimento indica i seguenti indirizzi di contatto per la gestione
+                    della convenzione: <mark><span th:text="${department_reference_email}"></span></mark>,</li>
+            </ol>
+        </li>
+        <div class="page-break"></div>
+        <li class="mt"><span class="list-title">Foro competente- </span>
+            <ol class="ol">
+                <li> Eventuali controversie tra le parti in relazione della validità,
+                    esecuzione, interpretazione o cessazione della presente convenzione saranno
+                    di esclusiva competenza del Foro di Roma.</li>
+            </ol>
+        </li>
+        <div class="mt sign">
+            <span>Il Dipartimento</span>
+            <span>L'operatore economico</span>
+        </div>
+        <li class="mt"><span class="list-title">Approvazione specifica. </span>
+            <ol class="ol">
+                <li> Si approvano specificamente ai sensi e per gli effetti di cui agli articoli
+                    1341, 1342 codice civile le seguenti clausole: 4. “Impegni ed obblighi
+                    dell’Operatore”; 6. “Limitazioni di responsabilità”; 7. “Durata della
+                    convenzione”; 8. “Recesso e clausola risolutiva espressa”; 9. “Divieto di
+                    cessione”, 10. “Modifica e/o aggiornamento della convenzione”.</li>
+            </ol>
+        </li>
+        <p>Roma <span th:text="${current_date}"></span></p>
+        <div class="sign">
+            <span>Il Dipartimento</span>
+            <span>L'operatore economico</span>
+        </div>
+    </ol>
+</body>
+
+</html>
