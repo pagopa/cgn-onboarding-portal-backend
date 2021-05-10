@@ -6,13 +6,13 @@ import com.azure.resourcemanager.apimanagement.models.*;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class AzureApimClient {
 
-    private ConfigProperties configProperties;
-    private ApiManagementManager manager;
+    private final ConfigProperties configProperties;
+    private final ApiManagementManager manager;
 
     @Autowired
     public AzureApimClient(ConfigProperties configProperties, ApiManagementManager manager) {

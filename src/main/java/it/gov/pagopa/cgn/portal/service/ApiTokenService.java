@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiTokenService {
 
-    private AzureApimClient azureApimClient;
+    private final AzureApimClient azureApimClient;
 
-    private ProfileService profileService;
+    private final ProfileService profileService;
 
     public ApiTokens getTokens(String agreementId) {
         String merchantTaxCode = extractMerchantTaxCode(agreementId);
