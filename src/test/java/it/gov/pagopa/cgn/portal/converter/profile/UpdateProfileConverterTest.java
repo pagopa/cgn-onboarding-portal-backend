@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -17,7 +18,7 @@ import java.util.stream.IntStream;
 public class UpdateProfileConverterTest {
 
 
-    private UpdateProfileConverter updateProfileConverter = new UpdateProfileConverter(new UpdateReferentConverter());
+    private final UpdateProfileConverter updateProfileConverter = new UpdateProfileConverter(new UpdateReferentConverter());
 
     @Test
     public void Convert_ConvertProfileEntityOfflineToDTO_ThrowUnsupportedException() {
@@ -33,12 +34,14 @@ public class UpdateProfileConverterTest {
         OnlineChannel onlineChannel = new OnlineChannel();
         onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        onlineChannel.setDiscountCodeType(DiscountCodeType.API);
         dto.setSalesChannel(onlineChannel);
         ProfileEntity profileEntity = updateProfileConverter.toEntity(dto);
 
         checkCommonsUpdateProfileAssertions(dto, profileEntity);
         Assert.assertEquals(SalesChannelEnum.ONLINE, profileEntity.getSalesChannel());
         Assert.assertEquals(onlineChannel.getWebsiteUrl(), profileEntity.getWebsiteUrl());
+        Assert.assertEquals(DiscountCodeTypeEnum.API, profileEntity.getDiscountCodeType());
     }
 
     @Test
@@ -75,6 +78,7 @@ public class UpdateProfileConverterTest {
         bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
+        bothChannels.setDiscountCodeType(DiscountCodeType.API);
         dto.setSalesChannel(bothChannels);
         ProfileEntity profileEntity = updateProfileConverter.toEntity(dto);
 
@@ -84,6 +88,7 @@ public class UpdateProfileConverterTest {
         Assert.assertNotNull(bothChannels.getAddresses());
         Assert.assertNotNull(profileEntity.getAddressList());
         Assert.assertEquals(bothChannels.getAddresses().size(), profileEntity.getAddressList().size());
+        Assert.assertEquals(DiscountCodeTypeEnum.API, profileEntity.getDiscountCodeType());
 
         IntStream.range(0, profileEntity.getAddressList().size()).forEach(idx -> {
             Address dtoAddress = bothChannels.getAddresses().get(idx);

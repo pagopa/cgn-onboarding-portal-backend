@@ -1,8 +1,6 @@
 package it.gov.pagopa.cgn.portal.converter;
 
-import it.gov.pagopa.cgnonboardingportal.model.Agreement;
-import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
-import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.junit.Assert;
@@ -28,7 +26,8 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertPendingAgreementDtoToEntity_Ok() {
-        Agreement dto = createSampleAgreementDtoWithCommonFields();
+        PendingAgreement dto = new PendingAgreement();
+        fillAgreementDtoWithCommonFields(dto);
         dto.setState(AgreementState.PENDINGAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -46,7 +45,8 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertDraftAgreementDtoToEntity_Ok() {
-        Agreement dto = createSampleAgreementDtoWithCommonFields();
+        DraftAgreement dto = new DraftAgreement();
+        fillAgreementDtoWithCommonFields(dto);
         dto.setState(AgreementState.DRAFTAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -64,7 +64,8 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertRejectedAgreementDtoToEntity_Ok() {
-        Agreement dto = createSampleAgreementDtoWithCommonFields();
+        RejectedAgreement dto = new RejectedAgreement();
+        fillAgreementDtoWithCommonFields(dto);
         dto.setState(AgreementState.REJECTEDAGREEMENT);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -122,10 +123,9 @@ public class AgreementConverterTest {
         return agreementEntity;
     }
 
-    private Agreement createSampleAgreementDtoWithCommonFields() {
-        Agreement dto = new Agreement();
-        dto.setId("agreement_dto_id");
-        dto.setImageUrl("image12345.png");
-        return dto;
+    private void fillAgreementDtoWithCommonFields(Agreement agreement) {
+        agreement.setId("agreement_dto_id");
+        agreement.setImageUrl("image12345.png");
     }
+
 }
