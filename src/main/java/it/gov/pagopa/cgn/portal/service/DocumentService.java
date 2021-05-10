@@ -10,13 +10,14 @@ import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,8 +31,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(Transactional.TxType.REQUIRED)
 @Slf4j
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DocumentService {
 
     private final DocumentRepository documentRepository;
@@ -47,18 +48,23 @@ public class DocumentService {
         return filterDocumentsByPriority(getAllDocuments(agreementId));
     }
 
+    @Transactional
     public List<DocumentEntity> getAllDocuments(String agreementId) {
         return documentRepository.findByAgreementId(agreementId);
     }
 
+    @Transactional(readOnly = true)
     public List<DocumentEntity> getAllDocuments(String agreementId, Predicate<DocumentEntity> documentFilter) {
         List<DocumentEntity> documents = getAllDocuments(agreementId);
         if (!CollectionUtils.isEmpty(documents)) {
-            return documents.stream().filter(documentFilter).collect(Collectors.toList());
+            documents = documents.stream().filter(documentFilter).collect(Collectors.toList());
+            documents.forEach(azureStorage::setSecureDocumentUrl);
+            return documents;
         }
         return Collections.emptyList();
     }
 
+    @Transactional
     public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
@@ -75,6 +81,7 @@ public class DocumentService {
         return documentRepository.save(document);
     }
 
+    @Transactional
     public long deleteDocument(String agreementId, DocumentTypeEnum documentType) {
         return documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
     }
@@ -103,7 +110,7 @@ public class DocumentService {
         return toReturn;
     }
 
-
+    @Transactional(readOnly = true)
     public ByteArrayOutputStream renderDocument(String agreementId, DocumentTypeEnum documentType) {
         switch (documentType) {
             case AGREEMENT:
