@@ -69,16 +69,21 @@
       <mj-section background-color="#ffffff">
         <mj-column>
           <mj-text padding-left="100px" color="#17324D" font-weight="bold" align="left" css-class="titolo">
-            <h1 style="font-size:32px; line-height:40px;">Nuova richiesta di supporto da {Ragione sociale operatore}</h1>
+            <h1 style="font-size:32px; line-height:40px;">Nuova richiesta di supporto da <span th:text="${merchant_legal_name}"></span></h1>
           </mj-text>
           <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>{Ragione sociale operatore} ha appena richiesto supporto in merito a {opzione categoria selezionata}, {argomento selezionato}.</p>
+            <p><span th:text="${merchant_legal_name}"></span> ha appena richiesto supporto in merito a <span th:text="${help_category_and_topic}"></span>.</p>
           </mj-text>
-          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
+          <mj-text padding-left="100px" font-size="18px" font-weight="bold" line-height="24px" color="#455B71" font-weight="400" align="left" css-class="intro">
             <p>Questa la richiesta:</p>
           </mj-text>
-          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
-            <p>{testo del messaggio}</p>
+        </mj-column>
+      </mj-section>
+      <!-- Notes -->
+      <mj-section background-color="#ffffff">
+        <mj-column background-color="#FAFAFC" width="640px">
+          <mj-text padding-top="16px" padding-bottom="16px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
+            <p><span th:text="${help_message}"></span></p>
           </mj-text>
         </mj-column>
       </mj-section>
@@ -88,7 +93,6 @@
           <mj-text padding-left="100px" color="#455B71" font-size="16px" line-height="24px">
             <p>Il team di Carta Giovani Nazionale</p>
           </mj-text>
-          <mj-button href="https://cgn.italia.it" padding-left="100px" align="left" background-color="#0073E6" font-weight="bold" padding="0">Vai al portale</mj-button>
           <mj-spacer height="24px" css-class="spaziatura" />
           <mj-text padding-left="100px" color="#455B71" font-size="14px" line-height="24px">
             <p>Ricevi questo messaggio a seguito della richiesta di convenzione all’iniziativa Carta Giovani Nazionale.</p>

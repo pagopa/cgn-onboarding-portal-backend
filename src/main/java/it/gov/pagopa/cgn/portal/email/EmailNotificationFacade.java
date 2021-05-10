@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import javax.mail.MessagingException;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class EmailNotificationFacade {
         }
     }
 
-    public void notifyMerchantAgreementRequestRejected(String referentEmail, String rejectionMessage) { // TODO wait template update -> recheck
+    public void notifyMerchantAgreementRequestRejected(String referentEmail, String rejectionMessage) {
         String subject = "[Carta Giovani Nazionale] Richiesta di convenzione rifiutata";
         Context context = new Context();
         context.setVariable("rejection_message", rejectionMessage);
@@ -58,6 +59,26 @@ public class EmailNotificationFacade {
         } catch (Exception e) {
             log.error("Failed to send Agreement Request Rejected notification to: " + referentEmail, e);
         }
+    }
+
+    public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) throws MessagingException {
+        String subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
+        Context context = new Context();
+
+        String categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank()).isPresent()
+                ? helpRequestParams.getHelpCategory() + ", " + helpRequestParams.getTopic().get()
+                : helpRequestParams.getHelpCategory();
+
+        context.setVariable("help_category_and_topic", categoryAndTopic);
+        context.setVariable("help_message", helpRequestParams.getMessage());
+
+        context.setVariable("merchant_legal_name", helpRequestParams.getMerchantLegalName());
+        context.setVariable("referent_first_name", helpRequestParams.getReferentFirstName());
+        context.setVariable("referent_last_name", helpRequestParams.getReferentLastName());
+
+        String body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
+        EmailParams emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body);
+        emailNotificationService.sendMessage(emailParams);
     }
 
     public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
