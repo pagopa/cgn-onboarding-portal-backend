@@ -11,10 +11,13 @@ import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringRunner.class)
 public class AzureApimClientTest {
 
     private static final String APIM_RESOURCE_GROUP = "a-resource-group";
