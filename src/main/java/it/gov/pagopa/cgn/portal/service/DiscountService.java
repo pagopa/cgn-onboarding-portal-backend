@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -26,6 +27,7 @@ public class DiscountService {
     private final DiscountRepository discountRepository;
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileService profileService;
+    private final EmailNotificationFacade emailNotificationFacade;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -104,16 +106,21 @@ public class DiscountService {
         }
         discount.setState(DiscountStateEnum.SUSPENDED);
         discount.setSuspendedReasonMessage(reasonMessage);
-        return discountRepository.save(discount);
-        //todo send notification
+        discount = discountRepository.save(discount);
+        //send notification
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity.getReferent().getEmailAddress(),
+                discount.getName(), reasonMessage);
+        return discount;
     }
 
     @Autowired
     public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
-                           ProfileService profileService) {
+                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
+        this.emailNotificationFacade = emailNotificationFacade;
     }
 
 
