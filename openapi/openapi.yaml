@@ -21,6 +21,8 @@ tags:
     description: Document template
   - name: document
     description: Document
+  - name: help
+    description: Help
 
 paths:
   /agreements:
@@ -344,6 +346,24 @@ paths:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+
+  /agreements/{agreementId}/help:
+    post:
+      tags:
+        - help
+      summary: Send an help request
+      operationId: sendHelpRequest
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - in: body
+          description: Help request
+          name: helpRequest
+          required: true
+          schema:
+            $ref: '#/definitions/HelpRequest'
+      responses:
+        204:
+          description: Request Received
 
 consumes:
   - application/json
@@ -899,6 +919,29 @@ definitions:
         type: string
       documentUrl:
         type: string
+
+  HelpRequest:
+    type: object
+    required:
+      - category
+      - message
+    properties:
+      category:
+        type: string
+        enum:
+          - Access
+          - DataFilling
+          - Discounts
+          - Documents
+          - TechnicalProblem
+          - CgnOwnerReporting
+          - Suggestions
+          - Other
+      topic:
+        type: string
+      message:
+        type: string
+        maxLength: 200
 
 responses:
   InvalidRequest:

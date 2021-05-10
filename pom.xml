@@ -272,6 +272,24 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>spring-server-public</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/openapi/public.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+
+                            <generatorName>spring</generatorName>
+                            <apiPackage>${project.groupId}.cgnonboardingportal.publicapi.api</apiPackage>
+                            <modelPackage>${project.groupId}.cgnonboardingportal.publicapi.model</modelPackage>
+                            <enablePostProcessFile>true</enablePostProcessFile>
+                            <configOptions>
+                                <serializableModel>true</serializableModel>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

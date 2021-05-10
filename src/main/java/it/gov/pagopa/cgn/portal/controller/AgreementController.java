@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.facade.AgreementFacade;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
+import it.gov.pagopa.cgn.portal.service.HelpService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
 import it.gov.pagopa.cgnonboardingportal.model.*;
@@ -14,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @RestController
 @PreAuthorize("hasRole('ROLE_MERCHANT')")
 public class AgreementController implements AgreementsApi {
@@ -22,6 +25,7 @@ public class AgreementController implements AgreementsApi {
     private final DiscountFacade discountFacade;
     private final DocumentFacade documentFacade;
     private final AgreementFacade agreementFacade;
+    private final HelpService helpService;
 
     @Override
     public ResponseEntity<Agreement> createAgreement() {
@@ -107,16 +111,23 @@ public class AgreementController implements AgreementsApi {
         return agreementFacade.uploadImage(agreementId, image);
     }
 
+    @Override
+    public ResponseEntity<Void> sendHelpRequest(String agreementId, HelpRequest helpRequest) {
+        helpService.sendHelpMessage(agreementId, helpRequest.getCategory(), Optional.ofNullable(helpRequest.getTopic()), helpRequest.getMessage());
+        return ResponseEntity.noContent().build();
+    }
 
     @Autowired
     public AgreementController(AgreementFacade agreementFacade,
                                DocumentFacade documentFacade,
                                ProfileFacade profileFacade,
-                               DiscountFacade discountFacade) {
+                               DiscountFacade discountFacade,
+                               HelpService helpService) {
         this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
         this.documentFacade = documentFacade;
+        this.helpService = helpService;
     }
 }
 
