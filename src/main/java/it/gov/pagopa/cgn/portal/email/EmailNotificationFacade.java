@@ -60,7 +60,6 @@ public class EmailNotificationFacade {
         }
     }
 
-    // TODO to be invoked by Discoun Suspension process
     public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
         String subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
         Context context = new Context();
