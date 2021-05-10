@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -36,9 +35,6 @@ class DocumentApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private AgreementService agreementService;
 
     @Autowired
     private DocumentService documentService;

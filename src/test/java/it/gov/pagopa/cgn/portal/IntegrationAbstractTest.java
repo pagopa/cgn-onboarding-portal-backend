@@ -1,11 +1,17 @@
 package it.gov.pagopa.cgn.portal;
 
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
@@ -19,9 +25,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
 public class IntegrationAbstractTest {
 
@@ -70,6 +78,14 @@ public class IntegrationAbstractTest {
         }
     }
 
+    @Getter
+    @Setter
+    protected class AgreementTestObject {
+        private AgreementEntity agreementEntity;
+        private List<DiscountEntity> discountEntityList;
+        private List<DocumentEntity> documentEntityList;
+        private ProfileEntity profileEntity;
+    }
 
     @Autowired
     protected DiscountRepository discountRepository;
@@ -86,6 +102,18 @@ public class IntegrationAbstractTest {
     @Autowired
     protected DocumentRepository documentRepository;
 
+    @Autowired
+    protected AgreementService agreementService;
+
+    @Autowired
+    protected ProfileService profileService;
+
+    @Autowired
+    protected DiscountService discountService;
+
+    @Autowired
+    protected BackofficeAgreementService backofficeAgreementService;
+
     @AfterEach
     protected void cleanAll() {
         documentRepository.deleteAll();
@@ -95,14 +123,46 @@ public class IntegrationAbstractTest {
         userRepository.deleteAll();
     }
 
-    protected void saveSampleDocuments(AgreementEntity agreementEntity) {
+    protected List<DocumentEntity> saveSampleDocuments(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
-        documentRepository.saveAll(documentList);
+        return documentRepository.saveAll(documentList);
     }
 
-    protected void saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
+    protected List<DocumentEntity> saveBackofficeSampleDocuments(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
-        documentRepository.saveAll(documentList);
+        return documentRepository.saveAll(documentList);
+    }
+
+    protected AgreementTestObject createPendingAgreement() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
+        agreementEntity= agreementService.requestApproval(agreementEntity.getId());
+        return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
+    }
+
+    protected AgreementTestObject createApprovedAgreement() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        List<DocumentEntity> documentEntityList = saveBackofficeSampleDocuments(agreementEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        documentEntityList.addAll(saveBackofficeSampleDocuments(agreementEntity));
+        agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
+        return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
     }
 
     protected void setOperatorAuth() {
@@ -116,5 +176,18 @@ public class IntegrationAbstractTest {
                 new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
         );
     }
+
+    private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity, ProfileEntity profileEntity,
+                                                          DiscountEntity discountEntity,
+                                                          List<DocumentEntity> documentEntityList) {
+        AgreementTestObject testObject = new AgreementTestObject();
+        testObject.setAgreementEntity(agreementEntity);
+        testObject.setProfileEntity(profileEntity);
+        testObject.setDiscountEntityList(Collections.singletonList(discountEntity));
+        testObject.setDocumentEntityList(documentEntityList);
+        return testObject;
+    }
+
+
 
 }

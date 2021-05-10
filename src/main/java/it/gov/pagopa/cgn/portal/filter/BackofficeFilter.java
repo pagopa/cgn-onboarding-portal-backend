@@ -19,12 +19,37 @@ public class BackofficeFilter implements Serializable {
 
     private AssigneeEnum assignee;
 
-    private LocalDate requestDateFrom;
+    private LocalDate dateFrom;
 
-    private LocalDate requestDateTo;
+    private LocalDate dateTo;
 
     private Integer pageSize;
 
     private Integer page;
+
+
+    public static BackofficeFilter getFilter(
+            String state, String profileFullName, String assignee, LocalDate startDateFrom, LocalDate startDateTo,
+            Integer pageSize, Integer page) {
+
+        return BackofficeFilter.builder()
+                .agreementState(state)
+                .profileFullName(profileFullName)
+                .assignee(AssigneeEnum.fromValue(assignee))
+                .dateFrom(startDateFrom)
+                .dateTo(startDateTo)
+                .page(page)
+                .pageSize(pageSize).build();
+    }
+
+    public static BackofficeFilter getFilter(
+            String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,Integer pageSize, Integer page) {
+        return BackofficeFilter.builder()
+                .profileFullName(profileFullName)
+                .dateFrom(requestDateFrom)
+                .dateTo(requestDateTo)
+                .page(page)
+                .pageSize(pageSize).build();
+    }
 
 }

@@ -1,15 +1,16 @@
 package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
-import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class BackofficeAgreementController implements AgreementRequestsApi {
 
     private final BackofficeAgreementFacade agreementFacade;
@@ -25,7 +27,8 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     public ResponseEntity<Agreements> getAgreements(String states, String assignee, String profileFullName,
                                                     LocalDate requestDateFrom, LocalDate requestDateTo,
                                                     Integer pageSize, Integer page) {
-        BackofficeFilter filter = getFilter(states, profileFullName, assignee, requestDateFrom, requestDateTo, pageSize, page);
+        BackofficeFilter filter = BackofficeFilter.getFilter(
+                states, profileFullName, assignee, requestDateFrom, requestDateTo, pageSize, page);
         return agreementFacade.getAgreements(filter);
     }
 
@@ -65,20 +68,14 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
         return agreementFacade.uploadDocument(agreementId, documentType, document);
     }
 
+    @Override
+    public ResponseEntity<Void> suspendDiscount(String agreementId, String discountId, SuspendDiscount suspension) {
+        return agreementFacade.suspendDiscount(agreementId, discountId, suspension);
+    }
+
     @Autowired
     public BackofficeAgreementController(BackofficeAgreementFacade agreementFacade) {
         this.agreementFacade = agreementFacade;
     }
 
-    private BackofficeFilter getFilter(String state, String profileFullName, String assignee, LocalDate startDateFrom,
-                                       LocalDate startDateTo, Integer pageSize, Integer page) {
-        return BackofficeFilter.builder()
-                .agreementState(state)
-                .profileFullName(profileFullName)
-                .assignee(AssigneeEnum.fromValue(assignee))
-                .requestDateFrom(startDateFrom)
-                .requestDateTo(startDateTo)
-                .page(page)
-                .pageSize(pageSize).build();
-    }
 }

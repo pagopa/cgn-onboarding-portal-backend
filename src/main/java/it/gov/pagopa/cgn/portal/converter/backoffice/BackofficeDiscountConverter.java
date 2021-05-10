@@ -1,25 +1,13 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice;
 
-import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Discount;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.DiscountState;
 import org.springframework.stereotype.Component;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class BackofficeDiscountConverter extends AbstractConverter<DiscountEntity, Discount> {
-
-    private static final Map<DiscountStateEnum, DiscountState> enumMap = new EnumMap<>(DiscountStateEnum.class);
-    static {
-        enumMap.put(DiscountStateEnum.DRAFT, DiscountState.DRAFT);
-        enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
-        enumMap.put(DiscountStateEnum.REJECTED, DiscountState.REJECTED);
-    }
+public class BackofficeDiscountConverter extends CommonBackofficeDiscountConverter<DiscountEntity, Discount> {
 
     @Override
     protected Function<DiscountEntity, Discount> toDtoFunction() {
@@ -37,7 +25,7 @@ public class BackofficeDiscountConverter extends AbstractConverter<DiscountEntit
                 dto.setId(String.valueOf(entity.getId()));
                 dto.setName(entity.getName());
                 dto.setAgreementId(entity.getAgreement().getId());
-                dto.setState(enumMap.get(entity.getState()));
+                dto.setState(discountStateEnum.get(entity.getState()));
                 return dto;
             };
 }
