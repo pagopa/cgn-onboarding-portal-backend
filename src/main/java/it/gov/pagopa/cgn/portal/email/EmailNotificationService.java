@@ -29,7 +29,7 @@ public class EmailNotificationService {
         helper.setTo(emailParams.getMailToList().toArray(new String[0]));
 
         if (emailParams.getReplyToOpt().isPresent()) {
-            helper.setReplyTo(emailParams.getReplyToOpt().get());
+            helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
         }
         helper.setSubject(emailParams.getSubject());
         helper.setText(emailParams.getBody(), true);
