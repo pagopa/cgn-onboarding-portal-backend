@@ -45,9 +45,9 @@ public class AzureApimClientTest {
     @Test
     public void Get_AlreadyExistingTokens_Ok() {
         when(subscriptions.listSecrets(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         )).thenReturn(TestUtils.createSubscriptionKeysContract());
 
         ApiTokens actual = azureApimClient.getTokens(TestUtils.FAKE_ID);
@@ -61,9 +61,9 @@ public class AzureApimClientTest {
     @Test
     public void Create_NewTokensIfNotExisting_Ok() {
         when(subscriptions.listSecrets(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         )).thenThrow(new ManagementException("subscription not found", TestUtils.createEmptyApimHttpResponse(404)));
 
         when(subscriptions.createOrUpdate(
@@ -85,34 +85,34 @@ public class AzureApimClientTest {
     @Test
     public void RegeneratePrimaryKey_Ok() {
         doNothing().when(subscriptions).regeneratePrimaryKey(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         );
 
         azureApimClient.regeneratePrimaryKey(TestUtils.FAKE_ID);
 
         verify(subscriptions).regeneratePrimaryKey(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         );
     }
 
     @Test
     public void RegenerateSecodaryKey_Ok() {
         doNothing().when(subscriptions).regenerateSecondaryKey(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         );
 
         azureApimClient.regenerateSecondaryKey(TestUtils.FAKE_ID);
 
         verify(subscriptions).regenerateSecondaryKey(
-                eq(APIM_RESOURCE_GROUP),
-                eq(APIM_RESOURCE),
-                eq(SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID)
+                APIM_RESOURCE_GROUP,
+                APIM_RESOURCE,
+                SUBSCRIPTION_KEY_PREFIX + "-" + TestUtils.FAKE_ID
         );
     }
 

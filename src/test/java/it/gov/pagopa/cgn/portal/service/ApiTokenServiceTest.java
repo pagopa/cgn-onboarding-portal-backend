@@ -41,14 +41,14 @@ public class ApiTokenServiceTest {
         ApiTokens expected = TestUtils.createSampleApiTokens();
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
-        when(azureApimClient.getTokens(eq(pe.getTaxCodeOrVat()))).thenReturn(expected);
+        when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
         ApiTokens actualTokens = apiTokenService.getTokens(TestUtils.FAKE_ID);
 
         Assert.assertEquals(expected, actualTokens);
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
-        verify(azureApimClient).getTokens(eq(pe.getTaxCodeOrVat()));
+        verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class ApiTokenServiceTest {
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
         doNothing().when(azureApimClient).regeneratePrimaryKey(eq(pe.getTaxCodeOrVat()));
-        when(azureApimClient.getTokens(eq(pe.getTaxCodeOrVat()))).thenReturn(expected);
+        when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
         ApiTokens actualTokens = apiTokenService.regenerateToken(TestUtils.FAKE_ID, "primary");
 
@@ -93,7 +93,7 @@ public class ApiTokenServiceTest {
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient).regeneratePrimaryKey(pe.getTaxCodeOrVat());
-        verify(azureApimClient).getTokens(eq(pe.getTaxCodeOrVat()));
+        verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
 
     @Test
@@ -105,8 +105,8 @@ public class ApiTokenServiceTest {
         ApiTokens expected = TestUtils.createSampleApiTokens();
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
-        doNothing().when(azureApimClient).regenerateSecondaryKey(eq(pe.getTaxCodeOrVat()));
-        when(azureApimClient.getTokens(eq(pe.getTaxCodeOrVat()))).thenReturn(expected);
+        doNothing().when(azureApimClient).regenerateSecondaryKey(pe.getTaxCodeOrVat());
+        when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
         ApiTokens actualTokens = apiTokenService.regenerateToken(TestUtils.FAKE_ID, "secondary");
 
@@ -114,14 +114,14 @@ public class ApiTokenServiceTest {
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient).regenerateSecondaryKey(pe.getTaxCodeOrVat());
-        verify(azureApimClient).getTokens(eq(pe.getTaxCodeOrVat()));
+        verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
 
     @Test
     public void Get_regenerateTokensWithoutProfile_ThrowsException() {
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.getCode()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.toString()));
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
@@ -135,7 +135,7 @@ public class ApiTokenServiceTest {
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.getCode()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.toString()));
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
