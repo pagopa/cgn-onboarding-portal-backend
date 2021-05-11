@@ -25,12 +25,12 @@ public class EmailNotificationFacade {
 
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
-        String subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
-        Context context = new Context();
+        var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
+        var context = new Context();
         context.setVariable("merchant_fullname", merchantFullName);
         try {
             String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
-            EmailParams emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body);
+            var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send New Agreement Request notification from " + merchantFullName + " to department", e);
@@ -38,12 +38,12 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantAgreementRequestApproved(String referentEmail, SalesChannelEnum salesChannel, Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
-        String subject = "[Carta Giovani Nazionale] Richiesta di convenzione approvata";
+        var subject = "[Carta Giovani Nazionale] Richiesta di convenzione approvata";
 
         try {
             TemplateEmail template = getApprovedAgreementTemplateBySalesChannel(salesChannel, discountCodeTypeOpt);
             String body = getTemplateHtml(template);
-            EmailParams emailParams = createEmailParams(referentEmail, subject, body);
+            var emailParams = createEmailParams(referentEmail, subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send Agreement Request Approved notification to: " + referentEmail, e);
@@ -76,13 +76,13 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantAgreementRequestRejected(String referentEmail, String rejectionMessage) {
-        String subject = "[Carta Giovani Nazionale] Richiesta di convenzione rifiutata";
-        Context context = new Context();
+        var subject = "[Carta Giovani Nazionale] Richiesta di convenzione rifiutata";
+        var context = new Context();
         context.setVariable("rejection_message", rejectionMessage);
 
         try {
-            String body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
-            EmailParams emailParams = createEmailParams(referentEmail, subject, body);
+            var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
+            var emailParams = createEmailParams(referentEmail, subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send Agreement Request Rejected notification to: " + referentEmail, e);
@@ -90,10 +90,10 @@ public class EmailNotificationFacade {
     }
 
     public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) throws MessagingException {
-        String subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
-        Context context = new Context();
+        var subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
+        var context = new Context();
 
-        String categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank())
+        var categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank())
                 .map(topic -> helpRequestParams.getHelpCategory() + ", " + topic)
                 .orElseGet(helpRequestParams::getHelpCategory);
 
@@ -104,20 +104,20 @@ public class EmailNotificationFacade {
         context.setVariable("referent_first_name", helpRequestParams.getReferentFirstName());
         context.setVariable("referent_last_name", helpRequestParams.getReferentLastName());
 
-        String body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
-        EmailParams emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body);
+        var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body);
         emailNotificationService.sendMessage(emailParams);
     }
 
     public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
-        String subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
-        Context context = new Context();
+        var subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
+        var context = new Context();
         context.setVariable("discount_name", discountName);
         context.setVariable("suspension_message", suspensionMessage);
 
         try {
-            String body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
-            EmailParams emailParams = createEmailParams(referentEmail, subject, body);
+            var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
+            var emailParams = createEmailParams(referentEmail, subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send Discount Suspended notification to: " + referentEmail, e);
@@ -126,13 +126,13 @@ public class EmailNotificationFacade {
 
     // TODO expiration checking process to be implemented
     public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
-        String subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
-        Context context = new Context();
+        var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
+        var context = new Context();
         context.setVariable("discount_name", discountName);
 
         try {
-            String body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            EmailParams emailParams = createEmailParams(referentEmail, subject, body);
+            var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
+            var emailParams = createEmailParams(referentEmail, subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send Discount Expiring notification to: " + referentEmail, e);
