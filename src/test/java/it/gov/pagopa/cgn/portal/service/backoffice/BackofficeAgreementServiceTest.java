@@ -3,7 +3,9 @@ package it.gov.pagopa.cgn.portal.service.backoffice;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -226,7 +228,42 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
+    }
 
+    @Test
+    void ApproveAgreement_ApproveAgreementSaleChannelOffline_Ok() {
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.OFFLINE, DiscountCodeTypeEnum.STATIC).getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        pendingAgreement = agreementRepository.save(pendingAgreement);
+        AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
+        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
+        Assertions.assertNull(approveAgreement.getRejectReasonMessage());
+    }
+
+    @Test
+    void ApproveAgreement_ApproveAgreementSaleChannelOnlineWithStaticCode_Ok() {
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC).getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        pendingAgreement = agreementRepository.save(pendingAgreement);
+        AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
+        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
+        Assertions.assertNull(approveAgreement.getRejectReasonMessage());
+    }
+
+    @Test
+    void ApproveAgreement_ApproveAgreementSaleChannelOnlineWithApiCode_Ok() {
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.API).getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        pendingAgreement = agreementRepository.save(pendingAgreement);
+        AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
+        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
+        Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
     @Test

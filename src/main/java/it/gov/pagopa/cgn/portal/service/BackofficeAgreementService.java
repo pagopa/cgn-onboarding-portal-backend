@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.repository.BackofficeApprovedAgreementSpecification;
@@ -21,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -91,8 +93,13 @@ public class BackofficeAgreementService {
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
-        emailNotificationFacade.notifyMerchantAgreementRequestApproved(referentEmail);
+        var profile = agreementEntity.getProfile();
+        String referentEmail = profile.getReferent().getEmailAddress();
+        emailNotificationFacade.notifyMerchantAgreementRequestApproved(
+                referentEmail,
+                profile.getSalesChannel(),
+                Optional.ofNullable(profile.getDiscountCodeType())
+        );
 
         return agreementEntity;
     }

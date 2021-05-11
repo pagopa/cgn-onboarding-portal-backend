@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.email;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,15 +37,41 @@ public class EmailNotificationFacade {
         }
     }
 
-    public void notifyMerchantAgreementRequestApproved(String referentEmail) {
+    public void notifyMerchantAgreementRequestApproved(String referentEmail, SalesChannelEnum salesChannel, Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
         String subject = "[Carta Giovani Nazionale] Richiesta di convenzione approvata";
 
         try {
-            String body = getTemplateHtml(TemplateEmail.APPROVED_AGREEMENT);
+            TemplateEmail template = getApprovedAgreementTemplateBySalesChannel(salesChannel, discountCodeTypeOpt);
+            String body = getTemplateHtml(template);
             EmailParams emailParams = createEmailParams(referentEmail, subject, body);
             emailNotificationService.sendMessage(emailParams);
         } catch (Exception e) {
             log.error("Failed to send Agreement Request Approved notification to: " + referentEmail, e);
+        }
+    }
+
+    private TemplateEmail getApprovedAgreementTemplateBySalesChannel(SalesChannelEnum salesChannel, Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
+        switch (salesChannel) {
+            case BOTH:
+                return TemplateEmail.APPROVED_AGREEMENT_BOTH;
+            case OFFLINE:
+                return TemplateEmail.APPROVED_AGREEMENT_OFFLINE;
+            case ONLINE:
+                return getApprovedAgreementTemplateByDiscountCodeType(discountCodeTypeOpt
+                        .orElseThrow(() -> new InvalidValueException("An online merchant must have a Discount Code validation type set")));
+            default:
+                throw new InvalidValueException(salesChannel + " is not a valid Sales Channel");
+        }
+    }
+
+    private TemplateEmail getApprovedAgreementTemplateByDiscountCodeType(DiscountCodeTypeEnum discountCodeType) {
+        switch (discountCodeType) {
+            case API:
+                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_API_CODE;
+            case STATIC:
+                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_STATIC_CODE;
+            default:
+                throw new InvalidValueException(discountCodeType + " is not a valid Discount Code Type");
         }
     }
 
@@ -142,5 +170,10 @@ public class EmailNotificationFacade {
         return htmlTemplateEngine.process(template.getTemplateName(), context);
     }
 
+    private static class InvalidValueException extends RuntimeException {
+        public InvalidValueException(String message) {
+            super(message);
+        }
+    }
 
 }

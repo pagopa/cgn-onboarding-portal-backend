@@ -23,9 +23,6 @@
           margin-top: 0px;
         }
 
-        .box-shadow {
-          border: 1px solid black;
-        }
       </style>
       <style type="text/css">
         @media (min-width:600px) {
@@ -53,7 +50,7 @@
       </style>
     </mj-raw>
   </mj-head>
-  <mj-body css-class="box-shadow" width="840px" padding="0">
+  <mj-body width="840px" padding="0">
     <mj-wrapper padding="0">
       <!-- Logo -->
       <mj-section background-color="#ffffff" border-top="solid 8px #94C0DD">
