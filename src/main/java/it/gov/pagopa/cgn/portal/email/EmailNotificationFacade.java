@@ -93,9 +93,9 @@ public class EmailNotificationFacade {
         String subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
         Context context = new Context();
 
-        String categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank()).isPresent()
-                ? helpRequestParams.getHelpCategory() + ", " + helpRequestParams.getTopic().get()
-                : helpRequestParams.getHelpCategory();
+        String categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank())
+                .map(topic -> helpRequestParams.getHelpCategory() + ", " + topic)
+                .orElseGet(helpRequestParams::getHelpCategory);
 
         context.setVariable("help_category_and_topic", categoryAndTopic);
         context.setVariable("help_message", helpRequestParams.getMessage());
