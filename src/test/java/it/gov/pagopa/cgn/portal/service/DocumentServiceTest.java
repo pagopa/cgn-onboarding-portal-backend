@@ -31,11 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
-/*
- * FIXME due to recent azure-sdk-for-java upgrade the compatibility with Azurite is broken
- *  https://github.com/Azure/azure-sdk-for-java/issues/19869
- */
-@Disabled
 @SpringBootTest
 @ActiveProfiles("dev")
 class DocumentServiceTest extends IntegrationAbstractTest {

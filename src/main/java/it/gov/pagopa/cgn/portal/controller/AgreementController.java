@@ -115,14 +115,12 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<ApiTokens> getTokens(String agreementId) {
-        ApiTokens tokens = apiTokenService.getTokens(agreementId);
-        return ResponseEntity.ok(tokens);
+        return ResponseEntity.ok(apiTokenService.getTokens(agreementId));
     }
 
     @Override
     public ResponseEntity<ApiTokens> regenerateToken(String agreementId, String tokenType) {
-        ApiTokens tokens = apiTokenService.regenerateToken(agreementId, tokenType);
-        return ResponseEntity.ok(tokens);
+        return ResponseEntity.ok(apiTokenService.regenerateToken(agreementId, tokenType));
     }
 
     @Override

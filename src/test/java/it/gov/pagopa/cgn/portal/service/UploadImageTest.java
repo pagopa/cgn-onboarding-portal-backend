@@ -20,11 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-/*
- * FIXME due to recent azure-sdk-for-java upgrade the compatibility with Azurite is broken
- *  https://github.com/Azure/azure-sdk-for-java/issues/19869
- */
-@Disabled
+
 @SpringBootTest
 @ActiveProfiles({"dev"})
 class UploadImageTest extends IntegrationAbstractTest {

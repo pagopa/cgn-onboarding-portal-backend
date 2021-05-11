@@ -24,11 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/*
- * FIXME due to recent azure-sdk-for-java upgrade the compatibility with Azurite is broken
- *  https://github.com/Azure/azure-sdk-for-java/issues/19869
- */
-@Disabled
+
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 class DocumentApiTest extends IntegrationAbstractTest {
