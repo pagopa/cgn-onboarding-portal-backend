@@ -66,6 +66,17 @@ public class ConfigProperties {
     @Value("classpath:images/cgn-logo.png")
     private Resource cgnLogo;
 
+    @Value("${cgn.apim.resourceGroup}")
+    private String apimResouceGroup;
+
+    @Value("${cgn.apim.resource}")
+    private String apimResouce;
+
+    @Value("${cgn.apim.productId}")
+    private String apimProductId;
+
+    @Value("${cgn.apim.subscriptionKeyPrefix}")
+    private String apimSubscriptionKeyPrefix;
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

@@ -21,6 +21,8 @@ tags:
     description: Document template
   - name: document
     description: Document
+  - name: api-token
+    description: API Token
   - name: help
     description: Help
 
@@ -346,6 +348,50 @@ paths:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+
+  /agreements/{agreementId}/api-tokens:
+    post:
+      tags:
+        - api-token
+      summary: Retrieve or Create API Tokens
+      operationId: getTokens
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+      responses:
+        200:
+          description: Api Token
+          schema:
+            $ref: '#/definitions/ApiTokens'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+
+  /agreements/{agreementId}/api-tokens/{tokenType}:
+    post:
+      tags:
+        - api-token
+      summary: Regenerate Api Token
+      operationId: regenerateToken
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - name: tokenType
+          in: path
+          description: Token type
+          required: true
+          type: string
+          enum:
+            - primary
+            - secondary
+      responses:
+        200:
+          description: New Api Tokens
+          schema:
+            $ref: '#/definitions/ApiTokens'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
 
   /agreements/{agreementId}/help:
     post:
@@ -918,6 +964,17 @@ definitions:
       documentType:
         type: string
       documentUrl:
+        type: string
+
+  ApiTokens:
+    type: object
+    required:
+      - primaryToken
+      - secondaryToken
+    properties:
+      primaryToken:
+        type: string
+      secondaryToken:
         type: string
 
   HelpRequest:

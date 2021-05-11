@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.facade.AgreementFacade;
 import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
+import it.gov.pagopa.cgn.portal.service.ApiTokenService;
 import it.gov.pagopa.cgn.portal.service.HelpService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
@@ -25,6 +26,7 @@ public class AgreementController implements AgreementsApi {
     private final DiscountFacade discountFacade;
     private final DocumentFacade documentFacade;
     private final AgreementFacade agreementFacade;
+    private final ApiTokenService apiTokenService;
     private final HelpService helpService;
 
     @Override
@@ -112,6 +114,16 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<ApiTokens> getTokens(String agreementId) {
+        return ResponseEntity.ok(apiTokenService.getTokens(agreementId));
+    }
+
+    @Override
+    public ResponseEntity<ApiTokens> regenerateToken(String agreementId, String tokenType) {
+        return ResponseEntity.ok(apiTokenService.regenerateToken(agreementId, tokenType));
+    }
+
+    @Override
     public ResponseEntity<Void> sendHelpRequest(String agreementId, HelpRequest helpRequest) {
         helpService.sendHelpMessage(agreementId, helpRequest.getCategory(), Optional.ofNullable(helpRequest.getTopic()), helpRequest.getMessage());
         return ResponseEntity.noContent().build();
@@ -122,11 +134,13 @@ public class AgreementController implements AgreementsApi {
                                DocumentFacade documentFacade,
                                ProfileFacade profileFacade,
                                DiscountFacade discountFacade,
+                               ApiTokenService apiTokenService,
                                HelpService helpService) {
         this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
         this.documentFacade = documentFacade;
+        this.apiTokenService = apiTokenService;
         this.helpService = helpService;
     }
 }
