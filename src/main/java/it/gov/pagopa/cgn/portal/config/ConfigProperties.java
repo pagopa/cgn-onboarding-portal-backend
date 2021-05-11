@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 @Getter
@@ -53,6 +54,29 @@ public class ConfigProperties {
     @Value("${cgn.image.minHeight}")
     private Integer minHeight;
 
+    @Value("${cgn.email.notification-sender}")
+    private String cgnNotificationSender;
+
+    @Value("${cgn.email.department-email}")
+    private String cgnDepartmentEmail;
+
+    @Value("${cgn.email.portal-base-url}")
+    private String cgnPortalBaseUrl;
+
+    @Value("classpath:images/cgn-logo.png")
+    private Resource cgnLogo;
+
+    @Value("${cgn.apim.resourceGroup}")
+    private String apimResouceGroup;
+
+    @Value("${cgn.apim.resource}")
+    private String apimResouce;
+
+    @Value("${cgn.apim.productId}")
+    private String apimProductId;
+
+    @Value("${cgn.apim.subscriptionKeyPrefix}")
+    private String apimSubscriptionKeyPrefix;
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

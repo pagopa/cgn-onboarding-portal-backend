@@ -1,16 +1,31 @@
 package it.gov.pagopa.cgn.portal;
 
+import com.azure.core.http.HttpHeaders;
+import com.azure.core.http.HttpResponse;
+import com.azure.resourcemanager.apimanagement.ApiManagementManager;
+import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionContractInner;
+import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionKeysContractInner;
+import com.azure.resourcemanager.apimanagement.implementation.SubscriptionKeysContractImpl;
+import com.azure.resourcemanager.apimanagement.models.SubscriptionContract;
+import com.azure.resourcemanager.apimanagement.models.SubscriptionKeysContract;
+import com.azure.resourcemanager.apimanagement.models.SubscriptionState;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgnonboardingportal.model.Address;
+import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.cgn.portal.model.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +39,8 @@ public class TestUtils {
     public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
 
     public static final String AGREEMENT_APPROVED_CONTROLLER_PATH = "/approved-agreements/";
+
+    public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
 
     public static final String FAKE_ID = "FAKE_ID";
 
@@ -48,6 +65,9 @@ public class TestUtils {
     }
     public static String getBackofficeDocumentPath(String agreementId) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
+    }
+    public static String getAuthenticatedHelpPath(String agreementId) {
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
 
 
@@ -129,6 +149,26 @@ public class TestUtils {
         return profileDto;
     }
 
+    public static it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest createSamplePublicApiHelpRequest() {
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
+        helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest.CategoryEnum.ACCESS);
+        helpRequest.setTopic("a topic");
+        helpRequest.setMessage("I need help");
+        helpRequest.setEmailAddress("myname.help@pagopa.it");
+        helpRequest.setLegalName("PagoPa");
+        helpRequest.setReferentFirstName("Me");
+        helpRequest.setReferentLastName("You");
+        return helpRequest;
+    }
+
+    public static it.gov.pagopa.cgnonboardingportal.model.HelpRequest createSampleAuthenticatedHelpRequest() {
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
+        helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.model.HelpRequest.CategoryEnum.ACCESS);
+        helpRequest.setTopic("a topic");
+        helpRequest.setMessage("I need help");
+        return helpRequest;
+    }
+
 
     public static DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
         DiscountEntity discountEntity = createSampleDiscountEntityWithoutProduct(agreement);
@@ -189,5 +229,77 @@ public class TestUtils {
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper.writeValueAsString(obj);
+    }
+
+    public static String API_TOKEN_PRIMARY_KEY = "primary-key-001";
+    public static String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
+
+    public static ApiTokens createSampleApiTokens() {
+        ApiTokens at = new ApiTokens();
+        at.setPrimaryToken(API_TOKEN_PRIMARY_KEY);
+        at.setSecondaryToken(API_TOKEN_SECONDARY_KEY);
+        return at;
+    }
+
+    public static SubscriptionKeysContract createSubscriptionKeysContract() {
+        return new SubscriptionKeysContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
+    }
+
+    public static SubscriptionContract createSubscriptionContract() {
+        return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
+    }
+
+    public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
+        private String primaryKey;
+        private String secondaryKey;
+
+        public SubscriptionKeysContractTestData(String primaryKey, String secondaryKey) {
+            this.primaryKey = primaryKey;
+            this.secondaryKey = secondaryKey;
+        }
+
+        @Override public String primaryKey() { return primaryKey; }
+        @Override public String secondaryKey() { return secondaryKey; }
+        @Override public SubscriptionKeysContractInner innerModel() { return null; }
+    }
+
+    public static class SubscriptionContractTestData implements SubscriptionContract {
+        private String primaryKey;
+        private String secondaryKey;
+
+        public SubscriptionContractTestData(String primaryKey, String secondaryKey) {
+            this.primaryKey = primaryKey;
+            this.secondaryKey = secondaryKey;
+        }
+
+        @Override public String id() { return null; }
+        @Override public String name() { return null; }
+        @Override public String type() { return null; }
+        @Override public String ownerId() { return null; }
+        @Override public String scope() { return null; }
+        @Override public String displayName() { return null; }
+        @Override public SubscriptionState state() { return null; }
+        @Override public OffsetDateTime createdDate() { return null; }
+        @Override public OffsetDateTime startDate() { return null; }
+        @Override public OffsetDateTime expirationDate() { return null; }
+        @Override public OffsetDateTime endDate() { return null; }
+        @Override public OffsetDateTime notificationDate() { return null; }
+        @Override public String primaryKey() { return primaryKey; }
+        @Override public String secondaryKey() { return secondaryKey; }
+        @Override public String stateComment() { return null; }
+        @Override public Boolean allowTracing() { return null; }
+        @Override public SubscriptionContractInner innerModel() { return null; }
+    }
+
+    public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
+        return new HttpResponse(null) {
+            @Override public int getStatusCode() { return statusCode; }
+            @Override public String getHeaderValue(String s) { return null; }
+            @Override public HttpHeaders getHeaders() { return null; }
+            @Override public Flux<ByteBuffer> getBody() { return null; }
+            @Override public Mono<byte[]> getBodyAsByteArray() { return null; }
+            @Override public Mono<String> getBodyAsString() { return null; }
+            @Override public Mono<String> getBodyAsString(Charset charset) { return null; }
+        };
     }
 }

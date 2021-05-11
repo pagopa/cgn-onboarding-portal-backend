@@ -27,7 +27,9 @@ public class DocumentFacade {
     private final AzureStorage azureStorage;
 
     public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
-        byte[] document = documentService.renderDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase())).toByteArray();
+        byte[] document = documentService.renderDocument(agreementId,
+                DocumentTypeEnum.fromValue(documentType.toUpperCase())
+        ).toByteArray();
 
         return ResponseEntity
                 .ok()

@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -31,6 +32,8 @@ public class BackofficeAgreementService {
     private final AgreementServiceLight agreementServiceLight;
 
     private final DocumentService documentService;
+
+    private final EmailNotificationFacade emailNotificationFacade;
 
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
@@ -86,8 +89,12 @@ public class BackofficeAgreementService {
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
-        //TODO SEND NOTIFICATION
-        return agreementRepository.save(agreementEntity);
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
+        emailNotificationFacade.notifyMerchantAgreementRequestApproved(referentEmail);
+
+        return agreementEntity;
     }
 
 
@@ -95,10 +102,16 @@ public class BackofficeAgreementService {
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
-        //TODO SEND NOTIFICATION
+
         agreementEntity.setRejectReasonMessage(reasonMessage);
         agreementEntity.setState(AgreementStateEnum.REJECTED);
-        return agreementRepository.save(agreementEntity);
+
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
+        emailNotificationFacade.notifyMerchantAgreementRequestRejected(referentEmail, reasonMessage);
+
+        return agreementEntity;
     }
 
     private void validateForUnassignment(AgreementEntity agreementEntity) {
@@ -136,9 +149,11 @@ public class BackofficeAgreementService {
 
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
-                                      AgreementServiceLight agreementServiceLight, DocumentService documentService) {
+                                      AgreementServiceLight agreementServiceLight, DocumentService documentService,
+                                      EmailNotificationFacade emailNotificationFacade) {
         this.agreementRepository = agreementRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
+        this.emailNotificationFacade = emailNotificationFacade;
     }
 }

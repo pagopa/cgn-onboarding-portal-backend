@@ -1,0 +1,95 @@
+<mjml lang="it" xmlns:th>
+  <mj-head>
+    <mj-title>Nuova richiesta di convenzione</mj-title>
+    <mj-font name="Titillium Web" href="https://fonts.googleapis.com/css?family=Titillium+Web:regular,bold" />
+    <mj-attributes>
+      <mj-all font-family="Titillium Web, Arial" />
+    </mj-attributes>
+    <mj-raw>
+      <style type="text/css">
+        h1 {
+          font-size: 32px;
+          line-height: 40px;
+          color: #17324D;
+          font-weight: 700;
+          text-align: left;
+        }
+
+        h4 {
+          margin-bottom: 0px;
+        }
+
+        p {
+          margin-top: 0px;
+        }
+      </style>
+      <style type="text/css">
+        @media (min-width:600px) {
+          body {
+            background-color: #E6E9F2;
+          }
+        }
+      </style>
+      <style type="text/css">
+        @media print {
+          body {
+            background-color: white !important;
+          }
+
+          .spaziatura,
+          .intro {
+            display: none;
+          }
+
+          h1 {
+            font-size: 24px !important;
+          }
+
+          .logocgn {
+            width: 24px !important;
+          }
+        }
+      </style>
+    </mj-raw>
+  </mj-head>
+  <mj-body width="840px" padding="0">
+    <mj-wrapper padding="0">
+      <!-- Logo -->
+      <mj-section background-color="#ffffff" border-top="solid 8px #94C0DD">
+        <mj-column>
+          <mj-spacer height="48px" css-class="spaziatura" />
+          <mj-text padding-left="100px">
+            <mj-raw>
+              <img src="cid:cgn-logo.png" alt="Logo CGN" class="logocgn" width="72" align="left" style="display:block;width:72px;" />
+            </mj-raw>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <!-- Title and body -->
+      <mj-section background-color="#ffffff">
+        <mj-column>
+          <mj-text padding-left="100px" color="#17324D" font-weight="bold" align="left" css-class="titolo">
+            <h1 style="font-size:32px; line-height:40px;">Nuova richiesta di convenzione da <span th:text="${merchant_fullname}"></span></h1>
+          </mj-text>
+          <mj-text padding-left="100px" font-size="16px" line-height="24px" color="#17324D" font-weight="400" align="left" css-class="intro">
+            <p><span th:text="${merchant_fullname}"></span> ha appena inviato la richiesta di convenzione.</p>
+          </mj-text>
+          <mj-text padding-left="100px" color="#455B71" font-size="16px" line-height="24px">
+            <p>Il team di Carta Giovani Nazionale</p>
+          </mj-text>
+          <mj-button href="https://cgn.italia.it" padding-left="100px" align="left" background-color="#0073E6" font-weight="bold" padding="0">Vai al portale</mj-button>
+          <mj-spacer height="24px" css-class="spaziatura" />
+          <mj-text padding-left="100px" color="#455B71" font-size="14px" line-height="24px">
+            <p>Ricevi questo messaggio a seguito della richiesta di convenzione all’iniziativa Carta Giovani Nazionale.</p>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <!-- Spacing -->
+      <mj-section>
+        <mj-column>
+          <mj-spacer height="24px" css-class="spaziatura" />
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>

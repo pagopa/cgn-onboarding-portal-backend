@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -10,6 +11,8 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +32,12 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private BackofficeAgreementService backofficeAgreementService;
+
+    @Autowired
+    private TestReferentRepository testReferentRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     private AgreementEntity agreementEntity;
 
@@ -51,6 +60,30 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(discountEntity.getProducts().get(0));
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+
+    }
+
+    @Test
+    void Create_CreateDiscountWithStaticCodeAndOperatorAPI_Ok() {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.API);
+        //to avoid LazyInitializationException
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+
+        //discountEntity have static code, but profile is API. Static code not saved.
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNull(discountEntity.getStaticCode());
 
     }
 

@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,6 +27,9 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private TestReferentRepository referentRepository;
 
     @Autowired
     private BackofficeAgreementService backofficeAgreementService;
@@ -179,7 +182,6 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    @Transactional
     void Update_UpdateApprovedAgreementUpdateLastModifyDate_Ok() {
         setAdminAuth();
         final String legalOffice = "new_legalOffice";
@@ -189,6 +191,11 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         agreement = backofficeAgreementService.approveAgreement(agreement.getId());
         ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
         profileEntity.setLegalOffice(legalOffice);
+        //added to avoid LazyInitializationException
+
+        profileEntity.setReferent(referentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+
         profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
         Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
         agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
@@ -197,7 +204,6 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    @Transactional
     void Update_UpdatePendingAgreementNotUpdateLastModifyDate_Ok() {
         final String legalOffice = "new_legalOffice";
         AgreementTestObject agreementTestObject = createPendingAgreement();
