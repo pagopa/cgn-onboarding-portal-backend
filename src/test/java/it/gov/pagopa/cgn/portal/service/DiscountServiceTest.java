@@ -329,17 +329,18 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Publish_PublishApprovedAgreement_UpdateLastModifyDate() {
-        //AgreementEntity agreement = createPendingAgreement();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        setAdminAuth();
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
 
-        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
-        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
-        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+        discountService.publishDiscount(this.agreementEntity.getId(), discountEntity.getId());
+        this.agreementEntity = agreementRepository.findById(this.agreementEntity.getId()).orElseThrow();
+        Assertions.assertEquals(LocalDate.now(), this.agreementEntity.getInformationLastUpdateDate());
 
     }
 
@@ -351,6 +352,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
 
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());

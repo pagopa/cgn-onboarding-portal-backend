@@ -221,6 +221,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());

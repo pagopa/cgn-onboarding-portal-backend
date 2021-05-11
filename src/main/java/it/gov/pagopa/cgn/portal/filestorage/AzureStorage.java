@@ -100,7 +100,7 @@ public class AzureStorage {
 
     public void setSecureDocumentUrl(List<DocumentEntity> documentList) {
         if (!CollectionUtils.isEmpty(documentList)) {
-            documentList.forEach(documentEntity -> setSecureDocumentUrl(documentEntity));
+            documentList.forEach(this::setSecureDocumentUrl);
         }
     }
 

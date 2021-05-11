@@ -30,7 +30,7 @@ public class CGNUtils {
         }
         boolean isValid = minWidth <= bufferedImage.getWidth() && minHeight <= bufferedImage.getHeight();
         if (!isValid) {
-            throw new InvalidRequestException("Image must be at least " + minHeight + "x" + minWidth);
+            throw new InvalidRequestException("Image must be at least " + minWidth  + "x" + minHeight);
         }
     }
 

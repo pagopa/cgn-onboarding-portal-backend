@@ -166,7 +166,7 @@ public class IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        List<DocumentEntity> documentEntityList = saveBackofficeSampleDocuments(agreementEntity);
+        List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);

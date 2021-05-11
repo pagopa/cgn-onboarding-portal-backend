@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -35,6 +36,8 @@ public class BackofficeAgreementService {
 
     private final EmailNotificationFacade emailNotificationFacade;
 
+    private final AzureStorage azureStorage;
+
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
@@ -46,6 +49,8 @@ public class BackofficeAgreementService {
         agreementEntityPage.getContent().forEach(agreementEntity -> {
             List<DocumentEntity> documents = agreementEntity.getDocumentList().stream()
                     .filter(d -> !d.getDocumentType().isBackoffice()).collect(Collectors.toList());
+            //setting SAS Url
+            azureStorage.setSecureDocumentUrl(documents);
             agreementEntity.setDocumentList(documents);
         });
         return agreementEntityPage;
@@ -81,7 +86,7 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
-        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.getNumberOfDocumentProfile()) {
+        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.values().length) {
             throw new InvalidRequestException("Not all documents are loaded");
         }
         agreementEntity.setRejectReasonMessage(null);
@@ -150,10 +155,11 @@ public class BackofficeAgreementService {
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
                                       AgreementServiceLight agreementServiceLight, DocumentService documentService,
-                                      EmailNotificationFacade emailNotificationFacade) {
+                                      EmailNotificationFacade emailNotificationFacade, AzureStorage azureStorage) {
         this.agreementRepository = agreementRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.azureStorage = azureStorage;
     }
 }

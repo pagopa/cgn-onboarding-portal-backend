@@ -188,6 +188,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreement = createPendingAgreement().getAgreementEntity();
         agreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementRepository.save(agreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
         agreement = backofficeAgreementService.approveAgreement(agreement.getId());
         ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
         profileEntity.setLegalOffice(legalOffice);
