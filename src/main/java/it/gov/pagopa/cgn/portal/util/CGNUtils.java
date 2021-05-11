@@ -1,8 +1,6 @@
 package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
@@ -25,6 +23,7 @@ public class CGNUtils {
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
         BufferedImage bufferedImage;
         try {
+            checkIfImageFile(image.getOriginalFilename());
             bufferedImage = ImageIO.read(image.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -41,8 +40,11 @@ public class CGNUtils {
         }
     }
 
-    public static void setSecureDocumentUrl(DocumentEntity documentEntity, AzureStorage azureStorage) {
-        documentEntity.setDocumentUrl(azureStorage.getDocumentSasFileUrl(documentEntity.getDocumentUrl()));
+    public static void checkIfImageFile(String fileName) {
+        if (fileName == null ||
+                !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
+            throw new InvalidRequestException("Invalid file extension. Upload a JPG or PNG image.");
+        }
     }
 
     public static String getJwtOperatorUserId() {
