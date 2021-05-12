@@ -4,12 +4,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class JwtTokenUtil {
 
     //merchant
     static final String CLAIM_KEY_MERCHANT_USER_TAX_CODE = "fiscal_number";
-    static final String CLAIM_KEY_MERCHANT_TAX_CODE =  "fiscal_number"; //TODO wait for SPID professional integration
+    static final String CLAIM_KEY_MERCHANT_COMPANY_CODE = "company";
+    static final String CLAIM_KEY_MERCHANT_TAX_CODE = "organization_fiscal_code";
     //admin
     static final String CLAIM_KEY_ADMIN_FAMILY_NAME = "family_name";
     static final String CLAIM_KEY_ADMIN_NAME = "given_name";
@@ -23,11 +26,9 @@ public class JwtTokenUtil {
         final Claims claims = getClaimsFromToken(token);
 
         if (cgnRole.equals(CgnUserRoleEnum.OPERATOR.getCode())) {
-
-            return new JwtOperatorUser(
-                    claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class),
-                    claims.get(CLAIM_KEY_MERCHANT_TAX_CODE, String.class)
-            );
+            Map<String, String> companyMap = claims.get(CLAIM_KEY_MERCHANT_COMPANY_CODE, Map.class);
+            final String taxCode = companyMap.get(CLAIM_KEY_MERCHANT_TAX_CODE);
+            return new JwtOperatorUser(claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class), taxCode);
         } else if (cgnRole.equals(CgnUserRoleEnum.ADMIN.getCode())) {
             return new JwtAdminUser(
                     claims.get(CLAIM_KEY_ADMIN_NAME, String.class) + " " +
