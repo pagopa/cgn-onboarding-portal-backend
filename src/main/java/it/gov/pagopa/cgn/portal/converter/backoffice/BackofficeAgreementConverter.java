@@ -86,6 +86,9 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
             entity -> {
                 Agreement dto = toDtoWithStatusFilled.apply(entity);
                 dto.setId(entity.getId());
+                if (entity.getRequestApprovalTime() != null) {
+                    dto.setRequestDate(entity.getRequestApprovalTime().toLocalDate());
+                }
                 dto.setDiscounts((List<Discount>) discountConverter.toDtoCollection(entity.getDiscountList()));
                 dto.setDocuments((List<Document>) documentConverter.toDtoCollection(entity.getDocumentList()));
                 dto.setProfile(profileConverter.toDto(entity.getProfile()));

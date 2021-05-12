@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtTokenUtil {
 
-    static final String CLAIM_KEY_USER_TAX_CODE = "fiscal_number";
-    static final String CLAIM_KEY_USER_FAMILY_NAME = "family_name";
-    static final String CLAIM_KEY_USER_NAME = "name";
-    static final String CLAIM_KEY_MERCHANT_TAX_CODE =  "fiscal_number"; //"merchant_tax_code"; TODO wait for SPID professional integration
-    static final String CLAIM_KEY_MERCHANT_LEGAL_NAME = "family_name"; //"merchant_legal_name"; TODO wait for SPID professional integration
-
+    //merchant
+    static final String CLAIM_KEY_MERCHANT_USER_TAX_CODE = "fiscal_number";
+    static final String CLAIM_KEY_MERCHANT_TAX_CODE =  "fiscal_number"; //TODO wait for SPID professional integration
+    //admin
+    static final String CLAIM_KEY_ADMIN_FAMILY_NAME = "family_name";
+    static final String CLAIM_KEY_ADMIN_NAME = "given_name";
 
     public JwtUser getUserDetails(String token, String cgnRole) {
 
@@ -25,14 +25,13 @@ public class JwtTokenUtil {
         if (cgnRole.equals(CgnUserRoleEnum.OPERATOR.getCode())) {
 
             return new JwtOperatorUser(
-                    claims.get(CLAIM_KEY_USER_TAX_CODE, String.class),
-                    claims.get(CLAIM_KEY_MERCHANT_TAX_CODE, String.class),
-                    claims.get(CLAIM_KEY_MERCHANT_LEGAL_NAME, String.class)
+                    claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class),
+                    claims.get(CLAIM_KEY_MERCHANT_TAX_CODE, String.class)
             );
         } else if (cgnRole.equals(CgnUserRoleEnum.ADMIN.getCode())) {
             return new JwtAdminUser(
-                    claims.get(CLAIM_KEY_USER_TAX_CODE, String.class),
-                    claims.get(CLAIM_KEY_USER_NAME, String.class) + " " + claims.get(CLAIM_KEY_USER_FAMILY_NAME, String.class)
+                    claims.get(CLAIM_KEY_ADMIN_NAME, String.class) + " " +
+                            claims.get(CLAIM_KEY_ADMIN_FAMILY_NAME, String.class)
             );
         } else {
             throw new SecurityException("Invalid role value: " + cgnRole);

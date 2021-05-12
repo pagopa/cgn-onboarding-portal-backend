@@ -9,16 +9,13 @@ public class JwtOperatorUser implements JwtUser {
 
     private final String userTaxCode;
     private final String merchantTaxCode;
-    private final String merchantLegalName;
 
     public JwtOperatorUser(
             String userTaxCode,
-            String merchantTaxCode,
-            String merchantLegalName
+            String merchantTaxCode
     ) {
         this.userTaxCode = userTaxCode;
         this.merchantTaxCode = merchantTaxCode;
-        this.merchantLegalName = merchantLegalName;
     }
 
     @Override

@@ -184,13 +184,13 @@ public class IntegrationAbstractTest {
 
     protected void setOperatorAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID))
         );
     }
 
     protected void setAdminAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID))
         );
     }
 
