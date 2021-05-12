@@ -119,39 +119,6 @@ public class BackofficeAgreementService {
         return agreementEntity;
     }
 
-    private void validateForUnassignment(AgreementEntity agreementEntity) {
-        checkPendingStatus(agreementEntity);
-        if (StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
-            throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " isn't assigned to anymore");
-        }
-        checkAgreementIsAssignedToCurrentUser(agreementEntity);
-    }
-
-    private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
-        if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-            throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " isn't assigned to current user");
-        }
-    }
-
-    private void validateForAssignment(AgreementEntity agreementEntity) {
-        checkPendingStatus(agreementEntity);
-        if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
-            if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-                throw new InvalidRequestException("Agreement " + agreementEntity.getId() + " is already assigned to current user");
-            }
-            log.info(String.format(
-                    "User %s is being assigned the agreement %s currently assigned to user %s",
-                    CGNUtils.getJwtAdminUserName(), agreementEntity.getId(), agreementEntity.getBackofficeAssignee()));
-        }
-    }
-
-    private void checkPendingStatus(AgreementEntity agreementEntity) {
-        if (!AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException("Agreement " + agreementEntity.getId() +
-                    " haven't the state expected. Status found: " + agreementEntity.getState());
-        }
-    }
-
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
                                       AgreementServiceLight agreementServiceLight, DocumentService documentService,
@@ -161,5 +128,42 @@ public class BackofficeAgreementService {
         this.documentService = documentService;
         this.emailNotificationFacade = emailNotificationFacade;
         this.azureStorage = azureStorage;
+    }
+
+    private void validateForUnassignment(AgreementEntity agreementEntity) {
+        checkPendingStatus(agreementEntity);
+        if (StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
+            throwInvalidException(agreementEntity.getId(), "isn't assigned to anymore");
+        }
+        checkAgreementIsAssignedToCurrentUser(agreementEntity);
+    }
+
+    private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
+        if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
+            throwInvalidException(agreementEntity.getId(), "isn't assigned to current user");
+        }
+    }
+
+    private void validateForAssignment(AgreementEntity agreementEntity) {
+        checkPendingStatus(agreementEntity);
+        if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
+            if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
+                throwInvalidException(agreementEntity.getId(), "is already assigned to current user");
+            }
+            log.info(String.format(
+                    "User %s is being assigned the agreement %s currently assigned to user %s",
+                    CGNUtils.getJwtAdminUserName(), agreementEntity.getId(), agreementEntity.getBackofficeAssignee()));
+        }
+    }
+
+    private void checkPendingStatus(AgreementEntity agreementEntity) {
+        if (!AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
+            throwInvalidException(agreementEntity.getId(), "haven't the state expected. Status found: " +
+                    agreementEntity.getState());
+        }
+    }
+
+    private void throwInvalidException(String agreementId, String errorMsg) {
+        throw new InvalidRequestException(String.format("Agreement %s %s", agreementId, errorMsg));
     }
 }

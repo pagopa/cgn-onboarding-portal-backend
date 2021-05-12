@@ -169,12 +169,14 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void AssignAgreement_AssignAgreementMultipleTimes_ThrowException() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
-        AgreementEntity agreementEntity = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
+        final String agreementId = pendingAgreement.getId();
+        AgreementEntity agreementEntity = backofficeAgreementService.assignAgreement(agreementId);
 
         Assertions.assertTrue(StringUtils.isNotBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
+
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.assignAgreement(pendingAgreement.getId()));
+                () ->backofficeAgreementService.assignAgreement(agreementId));
 
     }
 
@@ -182,17 +184,18 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     void AssignAgreement_AssignAgreementWithStatusDraft_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        final String agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileEntity = profileService.createProfile(profileEntity, agreementId);
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        discountService.createDiscount(agreementId, discountEntity);
         saveSampleDocuments(agreementEntity);
         //agreement state not PENDING
 
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.assignAgreement(agreementEntity.getId()));
+                () ->backofficeAgreementService.assignAgreement(agreementId));
     }
 
     @Test
@@ -208,9 +211,9 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void UnassignAgreement_UnassignAgreementWithoutAssignment_ThrowException() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
-
+        final String agreementId = pendingAgreement.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.unassignAgreement(pendingAgreement.getId()));
+                () ->backofficeAgreementService.unassignAgreement(agreementId));
         AgreementEntity agreementEntity = agreementService.findById(pendingAgreement.getId());
         Assertions.assertTrue(StringUtils.isBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
@@ -236,7 +239,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -272,7 +275,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -309,9 +312,11 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
         DiscountEntity discountEntity = testObject.getDiscountEntityList().get(0);
+        final String agreementId = agreementEntity.getId();
+        final Long discountId = discountEntity.getId();
         String reasonMsg = "reasonMessage";
         Assertions.assertThrows(InvalidRequestException.class, () -> discountService.suspendDiscount(
-                agreementEntity.getId(), discountEntity.getId(), reasonMsg));
+                agreementId, discountId, reasonMsg));
         Assertions.assertEquals(DiscountStateEnum.DRAFT, discountEntity.getState());
         Assertions.assertNull(discountEntity.getSuspendedReasonMessage());
     }
