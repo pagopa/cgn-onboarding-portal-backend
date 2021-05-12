@@ -8,6 +8,7 @@ import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.sas.SasProtocol;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -57,29 +58,20 @@ public class AzureStorage {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
             blobClient.upload(contentIs, size, true);
         } catch (IOException e) {
-           throw new RuntimeException(e);
+           throw new CGNException(e);
         }
         return configProperties.getDocumentsContainerName() + "/" + blobName;
     }
 
 
     public String storeImage(String agreementId, MultipartFile image) {
-        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-        try {
-            return storeImage(agreementId, extension, image.getInputStream(), image.getSize());
-        } catch (IOException e) {
-           throw new RuntimeException(e);
-        }
-    }
-
-    public String storeImage(String agreementId, String extension, InputStream content, long size){
-        String blobName = "image-" + agreementId + "." + extension;
+        String blobName = "image-" + agreementId + "." + FilenameUtils.getExtension(image.getOriginalFilename());
 
         BlobClient blobClient = imagesContainerClient.getBlobClient(blobName);
-        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
-            blobClient.upload(contentIs, size, true);
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(image.getInputStream()))) {
+            blobClient.upload(contentIs, image.getSize(), true);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CGNException(e);
         }
 
         return configProperties.getImagesContainerName() + "/" + blobName;
@@ -100,7 +92,7 @@ public class AzureStorage {
 
     public void setSecureDocumentUrl(List<DocumentEntity> documentList) {
         if (!CollectionUtils.isEmpty(documentList)) {
-            documentList.forEach(documentEntity -> setSecureDocumentUrl(documentEntity));
+            documentList.forEach(this::setSecureDocumentUrl);
         }
     }
 

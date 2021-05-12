@@ -76,8 +76,8 @@ public class DiscountEntity extends BaseEntity {
     @Size(min = 1)
     private List<DiscountProductEntity> products;
 
-    public void removeAllProduct() {
-        this.products.clear();
+    public void removeProduct(DiscountProductEntity productEntity) {
+        this.products.remove(productEntity);
     }
 
     public void addProductList(Collection<DiscountProductEntity> productList) {
