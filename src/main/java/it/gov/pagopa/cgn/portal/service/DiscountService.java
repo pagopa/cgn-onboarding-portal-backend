@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountService {
@@ -164,11 +165,16 @@ public class DiscountService {
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {
-        if (!CollectionUtils.isEmpty(discountEntity.getProducts())) {
-
-            discountEntity.removeAllProduct();
-        }
+        //add all products from DTO. If there are products already present will be skipped
         discountEntity.addProductList(productsToUpdate);
+
+        // search and remove (if there are) products deleted by user
+        List<DiscountProductEntity> toDeleteProduct = discountEntity.getProducts().stream()
+                .filter(prodEntity -> !productsToUpdate.contains(prodEntity)).collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(toDeleteProduct)) {
+            toDeleteProduct.forEach(discountEntity::removeProduct);
+        }
     };
 
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
