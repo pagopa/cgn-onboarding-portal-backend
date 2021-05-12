@@ -254,6 +254,16 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void ApproveAgreement_ApproveAgreementWithoutBackofficeDocuments_InvalidRequestException() {
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.BOTH, DiscountCodeTypeEnum.API).getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        pendingAgreement = agreementRepository.save(pendingAgreement);
+        final String agreementId = pendingAgreement.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () ->backofficeAgreementService.approveAgreement(agreementId));
+    }
+
+    @Test
     void ApproveAgreement_ApproveAgreementSaleChannelOffline_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.OFFLINE, DiscountCodeTypeEnum.STATIC).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());

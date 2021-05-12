@@ -65,20 +65,11 @@ public class AzureStorage {
 
 
     public String storeImage(String agreementId, MultipartFile image) {
-        String extension = FilenameUtils.getExtension(image.getOriginalFilename());
-        try {
-            return storeImage(agreementId, extension, image.getInputStream(), image.getSize());
-        } catch (IOException e) {
-           throw new CGNException(e);
-        }
-    }
-
-    public String storeImage(String agreementId, String extension, InputStream content, long size){
-        String blobName = "image-" + agreementId + "." + extension;
+        String blobName = "image-" + agreementId + "." + FilenameUtils.getExtension(image.getOriginalFilename());
 
         BlobClient blobClient = imagesContainerClient.getBlobClient(blobName);
-        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
-            blobClient.upload(contentIs, size, true);
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(image.getInputStream()))) {
+            blobClient.upload(contentIs, image.getSize(), true);
         } catch (IOException e) {
             throw new CGNException(e);
         }
