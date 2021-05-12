@@ -10,6 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,25 +32,30 @@ public class ProfileEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
+    @Size(max = 100)
     @Column(name = "full_name", length = 100)
     private String fullName;
 
+    @Size(max = 100)
     @Column(name = "name", length = 100)
     private String name;
 
     @NotNull
     @NotBlank
+    @Size(min = 11, max = 16)
     @Column(name = "tax_code_or_vat", length = 16)
     private String taxCodeOrVat;
 
     @NotNull
     @NotBlank
     @Email
-    @Column(name = "pec_address", length = 320)
+    @Size(min = 5, max = 100)
+    @Column(name = "pec_address", length = 100)
     private String pecAddress;
 
     @NotNull
     @NotBlank
+    @Size(max = 300)
     @Column(name = "description", length = 300)
     private String description;
 
@@ -58,26 +64,31 @@ public class ProfileEntity extends BaseEntity {
     @NotNull
     private SalesChannelEnum salesChannel;
 
+    @Size(max = 500)
     @Column(name = "website_url", length = 500)
     private String websiteUrl;
 
     @NotNull
     @NotBlank
-    @Column(name = "legal_office", length = 200)
+    @Size(max = 255)
+    @Column(name = "legal_office")
     private String legalOffice;
 
     @NotNull
     @NotBlank
+    @Size(min = 4, max = 15)
     @Column(name = "telephone_number", length = 15)
     private String telephoneNumber;
 
     @NotNull
     @NotBlank
+    @Size(max = 200)
     @Column(name = "legal_representative_full_name", length = 200)
     private String legalRepresentativeFullName;
 
     @NotNull
     @NotBlank
+    @Size(min = 16, max = 16)
     @Column(name = "legal_representative_tax_code", length = 16)
     private String legalRepresentativeTaxCode;
 

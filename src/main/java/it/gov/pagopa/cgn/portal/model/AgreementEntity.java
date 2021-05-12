@@ -11,6 +11,7 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -43,6 +44,7 @@ public class AgreementEntity extends BaseEntity {
     @Column(name = "first_discount_publishing_date")
     private LocalDate firstDiscountPublishingDate;
 
+    @Size(max = 500)
     @Column(name = "reject_reason_msg", length = 500)
     private String rejectReasonMessage;
 
@@ -64,6 +66,7 @@ public class AgreementEntity extends BaseEntity {
     @OneToMany(mappedBy = "agreement", fetch = FetchType.LAZY)
     private List<DocumentEntity> documentList;
 
+    @Size(max = 100)
     @Column(name = "assignee", length = 100)
     private String backofficeAssignee;
 

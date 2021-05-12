@@ -7,6 +7,7 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "address")
@@ -24,21 +25,25 @@ public class AddressEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Column(name = "street")
+    @Size(max = 100)
+    @Column(name = "street", length = 100)
     private String street;
 
     @NotNull
     @NotBlank
+    @Size(min = 5, max = 5)
     @Column(name = "zip_code", length = 5)
     private String zipCode;
 
     @NotNull
     @NotBlank
-    @Column(name = "city")
+    @Size(max = 100)
+    @Column(name = "city", length = 100)
     private String city;
 
     @NotNull
     @NotBlank
+    @Size(min = 2, max = 2)
     @Column(name = "district", length = 2)
     private String district;
 
