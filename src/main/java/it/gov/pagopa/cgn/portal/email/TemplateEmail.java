@@ -8,7 +8,10 @@ import lombok.Getter;
 public enum TemplateEmail {
 
     NEW_AGREEMENT("email/agreement-request-new.html"),
-    APPROVED_AGREEMENT("email/agreement-request-approved-both.html"),
+    APPROVED_AGREEMENT_BOTH("email/agreement-request-approved-both.html"),
+    APPROVED_AGREEMENT_OFFLINE("email/agreement-request-approved-offline.html"),
+    APPROVED_AGREEMENT_ONLINE_API_CODE("email/agreement-request-approved-online-api-code.html"),
+    APPROVED_AGREEMENT_ONLINE_STATIC_CODE("email/agreement-request-approved-online-static-code.html"),
     REJECTED_AGREEMENT("email/agreement-request-rejected.html"),
     SUSPENDED_DISCOUNT("email/discount-suspended.html"),
     EXPIRED_DISCOUNT("email/discount-expiring.html"),

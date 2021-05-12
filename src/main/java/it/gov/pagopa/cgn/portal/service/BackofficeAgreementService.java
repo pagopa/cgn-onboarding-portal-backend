@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +67,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity assignAgreement(String agreementId) {
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
         validateForAssignment(agreementEntity);
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         return agreementRepository.save(agreementEntity);
@@ -74,7 +75,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity unassignAgreement(String agreementId) {
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
         validateForUnassignment(agreementEntity);
         agreementEntity.setBackofficeAssignee(null);
         return agreementRepository.save(agreementEntity);
@@ -82,7 +83,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity approveAgreement(String agreementId) {
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
@@ -96,8 +97,13 @@ public class BackofficeAgreementService {
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
-        emailNotificationFacade.notifyMerchantAgreementRequestApproved(referentEmail);
+        var profile = agreementEntity.getProfile();
+        String referentEmail = profile.getReferent().getEmailAddress();
+        emailNotificationFacade.notifyMerchantAgreementRequestApproved(
+                referentEmail,
+                profile.getSalesChannel(),
+                Optional.ofNullable(profile.getDiscountCodeType())
+        );
 
         return agreementEntity;
     }
@@ -105,7 +111,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
 
         agreementEntity.setRejectReasonMessage(reasonMessage);
@@ -130,17 +136,19 @@ public class BackofficeAgreementService {
         this.azureStorage = azureStorage;
     }
 
+
+    private static final String AGREEMENT_LABEL = "Agreement ";
     private void validateForUnassignment(AgreementEntity agreementEntity) {
         checkPendingStatus(agreementEntity);
         if (StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
-            throwInvalidException(agreementEntity.getId(), "isn't assigned to anymore");
+            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " isn't assigned to anymore");
         }
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
     }
 
     private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
         if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-            throwInvalidException(agreementEntity.getId(), "isn't assigned to current user");
+            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " isn't assigned to current user");
         }
     }
 
@@ -148,7 +156,7 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
             if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-                throwInvalidException(agreementEntity.getId(), "is already assigned to current user");
+                throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " is already assigned to current user");
             }
             log.info(String.format(
                     "User %s is being assigned the agreement %s currently assigned to user %s",
@@ -158,12 +166,8 @@ public class BackofficeAgreementService {
 
     private void checkPendingStatus(AgreementEntity agreementEntity) {
         if (!AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
-            throwInvalidException(agreementEntity.getId(), "haven't the state expected. Status found: " +
-                    agreementEntity.getState());
+            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() +
+                    " haven't the state expected. Status found: " + agreementEntity.getState());
         }
-    }
-
-    private void throwInvalidException(String agreementId, String errorMsg) {
-        throw new InvalidRequestException(String.format("Agreement %s %s", agreementId, errorMsg));
     }
 }

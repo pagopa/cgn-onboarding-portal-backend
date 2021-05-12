@@ -228,6 +228,7 @@ public class DocumentService {
         public String name;
         public String validityPeriod;
         public String discountValue;
+        public String condition;
         public String staticCode;
         public String categories;
 
@@ -235,11 +236,12 @@ public class DocumentService {
             RenderableDiscount discount = new RenderableDiscount();
 
             String categories = entity.getProducts().stream()
-                    .map(p -> p.getProductCategory().name()).collect(Collectors.joining(",\n"));
+                    .map(p -> p.getProductCategory().getDescrition()).collect(Collectors.joining(",\n"));
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();
-            discount.discountValue = " " + entity.getDiscountValue() + "% ";
+            discount.discountValue = "" + entity.getDiscountValue() + "% ";
+            discount.condition = entity.getCondition();
             discount.staticCode = entity.getStaticCode();
             discount.categories = categories;
 

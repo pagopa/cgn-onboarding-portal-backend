@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal;
 
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -13,6 +15,7 @@ import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.SalesChannel;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.AfterEach;
@@ -144,10 +147,14 @@ public class IntegrationAbstractTest {
     }
 
     protected AgreementTestObject createPendingAgreement() {
+        return createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC);
+    }
+
+    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, salesChannel, discountCodeType);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);

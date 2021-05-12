@@ -1,878 +1,389 @@
 <!DOCTYPE html>
-<html xmlns:th>
+<html lang="en" xmlns:th>
 
 <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="content-type"></meta>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    </meta>
+    <title>MANIFESTAZIONE DI INTERESSE</title>
     <style type="text/css">
-        body {
-            background-color: #ffffff;
-        }
-
-        p {
-            margin: 0;
-            color: #000000;
-            font-size: 11pt;
-            font-family: 'Titillium Web'
-        }
-
-        table td,
-        table th {
-            padding: 0
-        }
-
         @page {
-            size: A4 portrait;
-            margin: 1.3in;
+            size: A4;
+            margin: 3cm;
 
             @bottom-right {
-                font-family: 'Titillium Web';
                 content: counter(page);
+            }
+
+            @bottom-left {
+                width: 80px;
+                background: url('data:image/png;base64,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');
+                background-repeat: no-repeat;
+                background-size: 70px;
             }
         }
 
-        .c1 {
-            border-right-style: solid;
-            padding: 5pt 5pt 5pt 5pt;
-            border-bottom-color: #000000;
-            border-top-width: 1pt;
-            border-right-width: 1pt;
-            border-left-color: #000000;
-            vertical-align: top;
-            border-right-color: #000000;
-            border-left-width: 1pt;
-            border-top-style: solid;
-            border-left-style: solid;
-            border-bottom-width: 1pt;
-            width: 63pt;
-            border-top-color: #000000;
-            border-bottom-style: solid
-        }
-
-        .c16 {
-            border-right-style: solid;
-            padding: 5pt 5pt 5pt 5pt;
-            border-bottom-color: #000000;
-            border-top-width: 1pt;
-            border-right-width: 1pt;
-            border-left-color: #000000;
-            vertical-align: top;
-            border-right-color: #000000;
-            border-left-width: 1pt;
-            border-top-style: solid;
-            border-left-style: solid;
-            border-bottom-width: 1pt;
-            width: 128pt;
-            border-top-color: #000000;
-            border-bottom-style: solid
-        }
-
-        .c10 {
-            border-right-style: solid;
-            padding: 5pt 5pt 5pt 5pt;
-            border-bottom-color: #000000;
-            border-top-width: 1pt;
-            border-right-width: 1pt;
-            border-left-color: #000000;
-            vertical-align: top;
-            border-right-color: #000000;
-            border-left-width: 1pt;
-            border-top-style: solid;
-            border-left-style: solid;
-            border-bottom-width: 1pt;
-            width: 64pt;
-            border-top-color: #000000;
-            border-bottom-style: solid
-        }
-
-        .c65 {
-            border-right-style: solid;
-            padding: 5pt 5pt 5pt 5pt;
-            border-bottom-color: #000000;
-            border-top-width: 1pt;
-            border-right-width: 1pt;
-            border-left-color: #000000;
-            vertical-align: top;
-            border-right-color: #000000;
-            border-left-width: 1pt;
-            border-top-style: solid;
-            border-left-style: solid;
-            border-bottom-width: 1pt;
-            width: 389pt;
-            border-top-color: #000000;
-            border-bottom-style: solid
-        }
-
-        .c52 {
-            margin-left: 36.8pt;
-            padding-top: 0.4pt;
-            text-indent: -17.7pt;
-            padding-bottom: 0pt;
-            line-height: 0.999593198299408;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c60 {
-            margin-left: 36.2pt;
-            padding-top: 0.4pt;
-            text-indent: -17.1pt;
-            padding-bottom: 0pt;
-            line-height: 0.999593198299408;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c38 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.7pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 0.4pt
-        }
-
-        .c58 {
-            margin-left: 36.4pt;
-            padding-top: 0.4pt;
-            text-indent: -17.3pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995921850204468;
-            text-align: justify;
-            margin-right: 0.8pt
-        }
-
-        .c4 {
+        body {
+            background-color: #ffffff;
             color: #000000;
-            font-weight: 700;
-            text-decoration: none;
-            vertical-align: baseline;
+            font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
-            font-family: 'Titillium Web';
-            font-style: normal
         }
 
-        .c55 {
-            margin-left: 0.6pt;
-            padding-top: 0.4pt;
-            text-indent: 0.5pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995989799499512;
-            text-align: justify;
-            margin-right: 0.2pt
+        .ol {
+            counter-reset: item
         }
 
-        .c39 {
-            margin-left: 0.5pt;
-            padding-top: 0.4pt;
-            text-indent: 0.6pt;
-            padding-bottom: 0pt;
-            line-height: 0.999603807926178;
-            text-align: justify;
-            margin-right: 0.2pt
+        .ol>li {
+            display: block
         }
 
-        .c69 {
-            margin-left: 36.3pt;
-            padding-top: 0.6pt;
-            text-indent: -18pt;
-            padding-bottom: 0pt;
-            line-height: 1.078735113143921;
-            text-align: justify;
-            margin-right: 0.3pt
+        .ol>li:before {
+            content: counters(item, ".") " ";
+            counter-increment: item;
+            font-weight: bold;
         }
 
-        .c99 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 1.6pt
+        ul.dashed {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .c57 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.5pt;
-            padding-bottom: 0pt;
-            line-height: 0.999593198299408;
-            text-align: left;
-            margin-right: 0.4pt
+        ul.dashed>li {
+            padding-left: 16px;
         }
 
-        .c76 {
-            margin-left: 36.2pt;
-            padding-top: 0.4pt;
-            text-indent: -17.2pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995974898338318;
-            text-align: justify;
-            margin-right: 0.3pt
+        ul.dashed>li::before {
+            content: "- ";
+            padding-right: 8px;
         }
 
-        .c95 {
-            margin-left: 36.1pt;
-            padding-top: 0.4pt;
-            text-indent: -17.7pt;
-            padding-bottom: 0pt;
-            line-height: 0.999610185623169;
-            text-align: left;
-            margin-right: 0.4pt
+        ol.parentheses {
+            counter-reset: list;
+            margin: 0;
         }
 
-        .c25 {
-            margin-left: 0.8pt;
-            padding-top: 0.4pt;
-            text-indent: 0.1pt;
-            padding-bottom: 0pt;
-            line-height: 0.999610185623169;
-            text-align: left;
-            margin-right: 2.1pt
+        ol.parentheses>li {
+            list-style: none;
+            position: relative;
         }
 
-        .c106 {
-            margin-left: 36.5pt;
-            padding-top: 0.6pt;
-            text-indent: -18.1pt;
-            padding-bottom: 0pt;
-            line-height: 1.078735589981079;
-            text-align: left;
-            margin-right: 0.2pt
+        ol.parentheses>li:before {
+            counter-increment: list;
+            content: counter(list, lower-alpha) ")";
+            position: absolute;
+            left: -1.4em;
         }
 
-        .c63 {
-            margin-left: 0.3pt;
-            padding-top: 0.4pt;
-            text-indent: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996000528335571;
-            text-align: justify;
-            margin-right: 0.5pt
-        }
-
-        .c81 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.1pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 0.8pt
-        }
-
-        .c29 {
-            margin-left: 36pt;
-            padding-top: 0pt;
-            text-indent: -17.8pt;
-            padding-bottom: 0pt;
-            line-height: 0.999593198299408;
-            text-align: left;
-            margin-right: 1.8pt
-        }
-
-        .c50 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.3pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996271729469299;
-            text-align: left;
-            margin-right: 0.2pt
-        }
-
-        .c101 {
-            margin-left: 36.4pt;
-            padding-top: 0.4pt;
-            text-indent: -17.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995988607406616;
-            text-align: justify;
-            margin-right: 0.4pt
-        }
-
-        .c20 {
-            margin-left: 0.4pt;
-            padding-top: 9.5pt;
-            text-indent: 0pt;
-            padding-bottom: 0pt;
-            line-height: 1.0787330865859985;
-            text-align: justify;
-            margin-right: 0.2pt
-        }
-
-        .c6 {
-            color: #000000;
-            font-weight: 400;
-            text-decoration: none;
-            vertical-align: baseline;
+        .title {
+            font-weight: bold;
             font-size: 12pt;
-            font-family: 'Titillium Web';
-            font-style: normal
         }
 
-        .c3 {
-            color: #000000;
-            font-weight: 400;
-            text-decoration: none;
-            vertical-align: baseline;
-            font-size: 10pt;
-            font-family: 'Titillium Web';
-            font-style: italic
+        .title-dash {
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 12pt;
+            display: block;
         }
 
-        .c40 {
-            margin-left: 0.4pt;
-            padding-top: 14.8pt;
-            text-indent: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995988607406616;
-            text-align: left;
-            margin-right: 1.6pt
+        .list-title {
+            font-weight: bold;
+            font-size: 12pt;
+            text-align: center;
         }
 
-        .c0 {
-            margin-left: 0.4pt;
-            padding-top: 0pt;
-            text-indent: 0.7pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 0.7pt
+        .text-center {
+            text-align: center;
         }
 
-        .c84 {
-            margin-left: 0.9pt;
-            padding-top: 0.4pt;
-            text-indent: 0pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996080994606018;
-            text-align: left;
-            margin-right: 98.3pt
+        .letter-list>li::before {
+            content: counters(item, ")") " "
         }
 
-        .c34 {
-            margin-left: 36.4pt;
-            padding-top: 0.4pt;
-            text-indent: -17.3pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995988607406616;
-            text-align: justify;
-            margin-right: 0.4pt
+        .page-break {
+            page-break-before: always;
         }
 
-        .c79 {
-            margin-left: 36.2pt;
-            padding-top: 0.4pt;
-            text-indent: -17.2pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995988607406616;
-            text-align: justify;
-            margin-right: 0.3pt
+        .sign {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
         }
 
-        .c48 {
-            margin-left: 0.4pt;
-            padding-top: 14.8pt;
-            text-indent: 0.1pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995942711830139;
-            text-align: left;
-            margin-right: 1.6pt
+        .mt {
+            margin-top: 1em;
         }
 
-        .c73 {
-            margin-left: 0.2pt;
-            padding-top: 9.5pt;
-            text-indent: 0.2pt;
-            padding-bottom: 0pt;
-            line-height: 1.078735589981079;
-            text-align: justify;
-            margin-right: 0.3pt
+        .text-uppercase {
+            text-transform: uppercase;
         }
 
-        .c49 {
-            margin-left: 0.5pt;
-            padding-top: 0.4pt;
-            text-indent: 0.3pt;
-            padding-bottom: 0pt;
-            line-height: 0.999593198299408;
-            text-align: left;
-            margin-right: 0.5pt
+        .box>span {
+            display: block;
+            padding: 1em;
+            border: 2px solid #000000;
         }
 
-        .c83 {
-            margin-left: 0.3pt;
-            padding-top: 0.4pt;
-            text-indent: 0.1pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995996356010437;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c12 {
-            margin-left: 0.4pt;
-            padding-top: 0pt;
-            text-indent: 0.5pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 0.5pt
-        }
-
-        .c31 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.7pt;
-            padding-bottom: 0pt;
-            line-height: 0.9995982646942139;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c103 {
-            margin-left: 0.1pt;
-            padding-top: 0.4pt;
-            text-indent: 1pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c17 {
-            margin-left: 36.2pt;
-            padding-top: 0.6pt;
-            text-indent: -17.8pt;
-            padding-bottom: 0pt;
-            line-height: 1.0787353515625;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c68 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: -0.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996054768562317;
-            text-align: justify;
-            margin-right: 0.6pt
-        }
-
-        .c7 {
-            margin-left: 7.1pt;
-            padding-top: 0pt;
-            text-indent: -0.6pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996000528335571;
-            text-align: left;
-            margin-right: 3.4pt
-        }
-
-        .c89 {
-            margin-left: 0.4pt;
-            padding-top: 0.4pt;
-            text-indent: 0.2pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996006488800049;
-            text-align: justify;
-            margin-right: 0.7pt
-        }
-
-        .c30 {
-            margin-left: 0.5pt;
-            padding-top: 23.9pt;
-            text-indent: 0.3pt;
-            padding-bottom: 0pt;
-            line-height: 1.078735589981079;
-            text-align: justify
-        }
-
-        .c66 {
-            margin-left: 0.4pt;
-            padding-top: 9.5pt;
-            padding-bottom: 0pt;
-            line-height: 1.078735113143921;
-            text-align: justify;
-            margin-right: 0.3pt
-        }
-
-        .c75 {
-            margin-left: 18.4pt;
-            padding-top: 8.6pt;
-            padding-bottom: 0pt;
-            line-height: 1.0787358283996582;
-            text-align: left;
-            margin-right: 0.3pt
-        }
-
-        .c96 {
-            margin-left: 18.4pt;
-            padding-top: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996017217636108;
-            text-align: left;
-            margin-right: 0.8pt
-        }
-
-        .c11 {
-            margin-left: 0.9pt;
-            padding-top: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c74 {
-            margin-left: 0.8pt;
-            padding-top: 29.2pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c44 {
-            margin-left: 0.3pt;
-            padding-top: 14.8pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c78 {
-            margin-left: 0.9pt;
-            padding-top: 29.2pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c94 {
-            margin-left: 0.6pt;
-            padding-top: 14.8pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c107 {
-            margin-left: 1.1pt;
-            padding-top: 14.8pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c18 {
-            padding-top: 0pt;
-            padding-bottom: 0pt;
-            line-height: 1.15;
-            text-align: left;
-            height: 11pt
-        }
-
-        .c70 {
-            margin-left: 0.8pt;
-            padding-top: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c62 {
-            margin-left: 0.9pt;
-            padding-top: 8.6pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c71 {
-            padding-top: 0pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: right;
-            margin-right: 13.6pt
-        }
-
-        .c87 {
-            margin-left: 18.9pt;
-            padding-top: 8.6pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c22 {
-            margin-left: 0.3pt;
-            padding-top: 29.2pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c23 {
-            margin-left: 0.9pt;
-            padding-top: 14.8pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c105 {
-            margin-left: 0.3pt;
-            padding-top: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c92 {
-            margin-left: 0.9pt;
-            padding-top: 43.6pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
-        }
-
-        .c93 {
-            padding-top: 29.2pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: right;
-            margin-right: 128.2pt
-        }
-
-        .c19 {
-            padding-top: 0.4pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: center
-        }
-
-        .c111 {
-            padding-top: 9.5pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: center
-        }
-
-        .c13 {
-            margin-left: 35.4pt;
-            border-spacing: 0;
+        .table,
+        .table td {
+            padding: 0.5em;
+            border: 1px solid #000000;
             border-collapse: collapse;
-            margin-right: auto
         }
 
-        .c35 {
-            padding-top: 0pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: left
+        mark {
+            background-color: #ffff00;
         }
 
-        .c108 {
-            padding-top: 8.6pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: center
+        .list-address {
+            padding: 1em;
+            border: 2px solid #000000;
         }
 
-        .c26 {
-            padding-top: 0pt;
-            padding-bottom: 0pt;
-            line-height: 0.9996000528335571;
-            text-align: left
-        }
-
-        .c53 {
-            padding-top: 0pt;
-            padding-bottom: 0pt;
-            line-height: 1.0;
-            text-align: center
-        }
-
-        .c54 {
-            margin-left: 6.3pt;
-            text-indent: -0.2pt;
-            margin-right: 6.5pt
-        }
-
-        .c46 {
-            margin-left: 6.8pt
-        }
-
-        .c72 {
-            background-color: #ffff00
-        }
-
-        .c56 {
-            height: 26pt
-        }
-
-        .c86 {
-            margin-left: 6.4pt
-        }
-
-        .c51 {
-            height: 25pt
-        }
-
-        .c36 {
-            margin-left: 18.5pt
-        }
-
-        .c42 {
-            margin-left: 18.3pt
-        }
-
-        .c112 {
-            margin-left: 0.8pt
+        .list-address ul {
+            list-style-type: none;
         }
     </style>
 </head>
 
 <body>
-    <p class="c35"><span class="c4">Allegato 1 </span></p>
-    <p class="c19"><span class="c4">MANIFESTAZIONE DI INTERESSE </span></p>
-    <p class="c19"><span class="c4">PER L&rsquo;ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE </span></p>
-    <p class="c30"><span class="c6" th:text="${legal_name}"></span><span class="c4">, </span><span class="c6">Codice fiscale o partita IVA <span th:text="${merchant_tax_code}"></span>, in persona di <span th:text="${legal_representative_fullname}"></span> Codice Fiscale <span th:text="${legal_representative_code}"></span> , con sede legale in <span th:text="${legal_office}"></span> Tel.<span th:text="${telephone_nr}"></span> PEC <span th:text="${pec_address}"></span> di seguito &ldquo;l&rsquo;Operatore&rdquo;, </span></p>
-    <p class="c108"><span class="c4">DICHIARA </span></p>
-    <p class="c73"><span class="c6">sotto la propria responsabilit&agrave; ai sensi degli artt. 46, 47, 70 e 71 del DPR n. 445/00 e consapevole delle sanzioni penali per le ipotesi di falsit&agrave; e dichiarazioni mendaci: </span></p>
-    <p class="c75"><span class="c6">- di essere dotato delle competenze e delle autorizzazioni necessarie per la commercializzazione dei beni e/o servizi di seguito indicati; - di non trovarsi nelle condizioni previste dalla Legge di incapacit&agrave; a contrattare con la Pubblica Amministrazione; </span></p>
-    <p class="c106"><span class="c6">- di essere in regola con gli obblighi contributivi e previdenziali, legislativi e contrattuali, su s&eacute; stesso incombenti; </span></p>
-    <p class="c17"><span class="c6">- di avere previamente esaminato lo schema di convenzione per l&rsquo;adesione al progetto Carta Giovani Nazionale (CGN), cui accede il presente documento quale &ldquo;Allegato 1&rdquo;, nonch&eacute; le specifiche condizioni ed istruzioni tecniche attuative della convenzione medesima, come pubblicate sui siti web ufficiali dedicati all&rsquo;iniziativa (&ldquo;Documentazione Tecnica&rdquo;), consultabili agli indirizzi io.italia.it/carta-giovani-nazionale e </span><span class="c6 c72">giovani2030.gov.it/carta-giovani-nazionale</span><span class="c6">, e di approvare ed accettare tutte le rispettive clausole e condizioni, nonch&eacute; di essere in possesso dei requisiti richiesti per l&rsquo;adesione alla CGN come Operatore; </span></p>
-    <p class="c69"><span class="c6">- di avere interesse ad aderire al progetto Carta Giovani Nazionale (CGN) istituito dal Ministro per le politiche giovanili e lo sport con decreto 27.2.2020, riconoscendo espressamente che il convenzionamento non implica alcun onere o corrispettivo a carico dell&rsquo;Amministrazione procedente; </span></p>
-    <p class="c62"><span class="c6">E pertanto </span></p>
-    <p class="c111"><span class="c4">CHIEDE </span></p>
-    <p class="c20"><span class="c6">al Dipartimento per le Politiche Giovanili e il Servizio Civile Universale della Presidenza del Consiglio dei Ministri (di seguito &ldquo;il Dipartimento&rdquo;) di aderire al progetto &ldquo;Carta Giovani Nazionale&rdquo; (CGN) e di poter essere iscritto al relativo elenco pubblico; </span></p>
-    <p class="c53"><span class="c4">E PROPONE </span></p>
-    <p class="c66"><span class="c6">di rendere disponibili in favore dei giovani beneficiari della CGN (e dei giovani iscritti alla youth card dei Paesi Europei associati all&rsquo;EYCA), secondo quanto previsto nel citato schema di Convenzione e nella Documentazione Tecnica ad essa allegata, le seguenti agevolazioni, sconti e/o condizioni di favore rispetto a quelle comunemente praticate al pubblico sui beni/servizi qui di seguito descritti: </span></p>
-    <p class="c87"><span class="c4">1. </span><span class="c6">NOME OPERATORE VISUALIZZATO </span></p>
-    <br></br>
-    <table class="c13">
-        <tbody>
-        <tr class="c51">
-            <td class="c65" colspan="1" rowspan="1">
-                <p class="c18"><span class="c6" th:text="${merchant_name}"></span></p>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br></br>
-    <p class="c35 c42"><span class="c4">2. </span><span class="c6">DESCRIZIONE OPERATORE/BENI SERVIZI OFFERTI </span></p>
-    <br></br>
-    <table class="c13">
-        <tbody>
-        <tr class="c51">
-            <td class="c65" colspan="1" rowspan="1">
-                <p class="c18"><span class="c6" th:text="${merchant_description}"></span></p>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br></br>
-    <p class="c35 c36"><span class="c4">3. </span><span class="c6">AGEVOLAZIONI PROPOSTE, TERMINI E CONDIZIONI D&rsquo;USO </span></p>
-    <br></br>
-    <table class="c13">
-        <tbody th:each="discount : ${discounts}">
-        <tr>
-            <td class="c1" colspan="1" rowspan="1">
-                <p class="c26 c54"><span class="c3" th:text="${discount.name}"></span></p>
-            </td>
-            <td class="c10" colspan="1" rowspan="1">
-                <p class="c7"><span class="c3" th:text="${discount.discountValue}"></span></p>
-            </td>
-            <td class="c16" colspan="1" rowspan="1">
-                <p class="c35 c46"><span class="c3" th:text="${discount.validityPeriod}"></span></p>
-            </td>
-            <td class="c1" colspan="1" rowspan="1">
-                <p class="c35 c86"><span class="c3" th:text="${discount.staticCode}"></span></p>
-            </td>
-            <td class="c10" colspan="1" rowspan="1" >
-                <p class="c35"><span th:text="${discount.categories}"></span></p>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br></br>
-    <p class="c29"><span class="c4">4. </span><span class="c6">INDIRIZZO FISICO DEI LOCALI DI VENDITA ED ORARI ORDINARI DI APERTURA (se previsto) </span></p>
-    <br></br>
-    <table class="c13">
-        <tbody>
-        <tr class="c56">
-            <td class="c65" colspan="1" rowspan="1">
+    <!-- First page -->
+    <div class="text-center">
+        <img src="data:image/jpeg;base64,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"
+            style="margin: auto" />
+    </div>
+    <p class="title">Allegato 1</p>
+    <p class="text-center">Dipartimento per le politiche giovanili e il Servizio civile universale</p>
+    <h1 class="title text-center text-uppercase">Domanda di<br />
+        adesione al progetto carta giovani nazionale</h1>
+
+    <p><mark><span th:text="${legal_name}"></span></mark>, Codice fiscale o partita
+        IVA <span th:text="${merchant_tax_code}"></span>, in persona di <mark><span
+                th:text="${legal_representative_fullname}"></span></mark> Codice Fiscale <span
+            th:text="${legal_representative_fiscal_code}"></span>, con sede legale in
+        <span th:text="${legal_office}"></span> PEC <span th:text="${pec_address}"></span> di seguito “l’Operatore”,</p>
+    <h1 class="title text-center text-uppercase">Dichiara</h1>
+    <p>
+        con decreto del Ministro per le politiche giovanili e lo sport del
+        27.2.2020 è stata istituita la Carta Giovani Nazionale (CGN) prevista
+        dall’art. 1 comma 413, della legge 27 dicembre 2019 n.160, finalizzata
+        a promuovere una migliore qualità della vita delle giovani generazioni,
+        sostenendone anche il processo di crescita e incentivando le opportunità
+        volte a favorire la formazione e la partecipazione ad attività culturali,
+        sportive e ricreative;
+        <ul class="dashed">
+            <li>di essere dotato delle competenze e delle autorizzazioni necessarie per la
+                commercializzazione dei beni e/o servizi di seguito indicati;</li>
+            <li>di non trovarsi nelle condizioni previste dalla Legge di incapacità a contrattare
+                con la Pubblica Amministrazione;</li>
+            <li>di essere in regola con gli obblighi contributivi e previdenziali, legislativi e
+                contrattuali, su sé stesso incombenti;</li>
+            <li>di avere previamente esaminato lo schema di convenzione per l’adesione al
+                progetto Carta Giovani Nazionale (CGN), cui accede il presente documento
+                quale “Allegato 1”, nonché le specifiche condizioni ed istruzioni tecniche
+                attuative della convenzione medesima, <mark>come pubblicate sui siti web ufficiali
+                    dedicati all’iniziativa (“Documentazione Tecnica”), consultabili agli indirizzi
+                    io.italia.it/carta-giovani-nazionale e giovani2030.gov.it</mark>, e di approvare ed
+                accettare tutte le rispettive clausole e condizioni, nonché di essere in possesso
+                dei requisiti richiesti per l’adesione alla CGN come Operatore;</li>
+            <div class="page-break"></div>
+            <!-- Second page -->
+            <li> di avere interesse ad aderire al progetto Carta Giovani Nazionale (CGN)
+                istituito dal Ministro per le politiche giovanili e lo sport con decreto 27.2.2020,
+                riconoscendo espressamente che il convenzionamento non implica alcun onere o
+                corrispettivo a carico dell’Amministrazione procedente;</li>
+        </ul>
+        <p>E pertanto</p>
+        <p class="title text-center text-uppercase">Chiede</p>
+        <p>al Dipartimento per le Politiche Giovanili e il Servizio Civile Universale della
+            Presidenza del Consiglio dei Ministri (di seguito “il Dipartimento”) di aderire al
+            progetto “Carta Giovani Nazionale” (CGN) e di poter essere iscritto al relativo elenco
+            pubblico;</p>
+        <p class="title text-center text-uppercase">E propone</p>
+        <p>di rendere disponibili in favore dei giovani beneficiari della CGN (e dei giovani iscritti
+            alla youth card dei Paesi Europei associati all’EYCA), secondo quanto previsto nel
+            citato schema di Convenzione e nella Documentazione Tecnica ad essa allegata, le
+            seguenti agevolazioni, sconti e/o condizioni di favore rispetto a quelle comunemente
+            praticate al pubblico sui beni/servizi qui di seguito descritti:</p>
+        <ol>
+            <li>NOME OPERATORE VISUALIZZATO</li>
+            <div class="mt box"><span th:text="${merchant_name}"></span></div>
+            <li class="mt">DESCRIZIONE OPERATORE/BENI SERVIZI OFFERTI</li>
+            <div class="mt box"><span th:text="${merchant_description}"></span></div>
+            <div class="page-break"></div>
+            <li>AGEVOLAZIONI PROPOSTE, TERMINI E CONDIZIONI D’USO</li>
+            <table class="table mt">
+                <tbody th:each="discount : ${discounts}">
+                    <tr>
+                        <td><span th:text="${discount.name}"></span></td>
+                        <td><span th:text="${discount.discountValue}"></span></td>
+                        <td><span th:text="${discount.validityPeriod}"></span></td>
+                        <td><span th:text="${discount.condition}"></span></td>
+                        <td><span th:text="${discount.staticCode}"></span></td>
+                        <td><span th:text="${discount.categories}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <li class="mt">INDIRIZZO FISICO DEI LOCALI DI VENDITA ED ORARI ORDINARI DI
+                APERTURA (se previsto)</li>
+            <div class="mt list-address">
                 <ul th:each="item : ${merchant_address_list}">
-                    <li ><span class="c6" th:text="${item}"></span></li>
+                    <li><span th:text="${item}"></span></li>
                 </ul>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br></br>
-    <p class="c71"><span class="c4">5. </span><span class="c6">SITO WEB DELL&rsquo;OPERATORE (compreso e-commerce se posseduto) </span></p>
-    <br></br>
-    <table class="c13">
-        <tbody>
-        <tr class="c56">
-            <td class="c65" colspan="1" rowspan="1">
-                <p class="c18"><span class="c6" th:text="${merchant_website}"></span></p>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <br></br>
-    <p class="c53"><span class="c4">INDICA </span></p>
-    <p class="c99"><span class="c6">inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento di convenzionamento e/o all&rsquo;attuazione della convenzione i seguenti indirizzi di contatto operativo: </span></p>
-    <p class="c84"><span class="c6">Nome e cognome del referente <span th:text="${referent_fullname}"></span> Ruolo all&rsquo;interno dell&rsquo;azienda <span th:text="${referent_role}"></span></span></p>
-    <p class="c11"><span class="c6">E-mail <span th:text="${referent_email_address}"></span></span></p>
-    <p class="c105"><span class="c6">Tel <span th:text="${referent_telephone_nr}"></span></span></p>
-    <p class="c74"><span class="c4">INFORMATIVA PRIVACY </span></p>
-    <p class="c103"><span class="c6">Il Dipartimento informa che, ai sensi degli artt. 13 e 14 del Regolamento europeo generale sulla protezione dei dati, n. 2016/679 (&ldquo;Regolamento&rdquo; o &ldquo;GDPR&rdquo;) e del D.lgs 196/03 e ss.m.i. (&ldquo;Codice Privacy&rdquo;), che i dati personali forniti dall&rsquo;Operatore con il presente documento verranno trattati in conformit&agrave; con le disposizioni del Codice della Privacy e del Regolamento. </span></p>
-    <p class="c44"><span class="c4">Titolare del Trattamento </span></p>
-    <p class="c55"><span class="c6">Il Titolare del trattamento &egrave; il Dipartimento per le Politiche Giovanili e il Servizio Civile Universale Via della Ferratella in Laterano, 51 &ndash; 00184 Roma &ndash; Italy in persona del Capo del Dipartimento pro-tempore domiciliato per la carica presso la predetta sede (dpo@serviziocivile.it). </span></p>
-    <p class="c40"><span class="c4">Data protection officer (DPO) o Responsabile Protezione Dati (RPD) </span><span class="c6">Il Dipartimento ha nominato un proprio Responsabile della Protezione dei dati, ai sensi dell&rsquo;art. 37 del Regolamento, che pu&ograve; essere contattato ai seguenti recapiti: </span></p>
-    <p class="c70"><span class="c6">nome e cognome: ________________; </span></p>
-    <p class="c70"><span class="c6">mail: ________________; </span></p>
-    <p class="c11"><span class="c6">PEC: ________________; </span></p>
-    <p class="c35 c112"><span class="c6">indirizzo: ________________. </span></p>
-    <p class="c94"><span class="c4">Categorie di dati trattati </span></p>
-    <p class="c25"><span class="c6">Nei limiti delle finalit&agrave; e delle modalit&agrave; descritte nella presente informativa, potranno essere trattate le seguenti categorie di dati: </span></p>
-    <p class="c95"><span class="c6">- dati identificativi comuni (nome, cognome, luogo e data di nascita, codice fiscale); </span></p>
-    <p class="c96"><span class="c6">- dati relativi all&rsquo;attivit&agrave; commerciale e/o alla posizione lavorativa svolta (denominazione della societ&agrave;/ditta individuale, indirizzo dei locali); - dati di contatto (numero di telefono, indirizzo e-mail, PEC, fax). </span></p>
-    <p class="c92"><span class="c4">Modalit&agrave; di trattamento </span></p>
-    <p class="c57"><span class="c6">Per trattamento si intende qualunque operazione applicata, con o senza l&rsquo;ausilio di processi automatizzati, ai dati personali. </span></p>
-    <p class="c31"><span class="c6">Il trattamento avverr&agrave; mediante strumenti elettronici in modo da garantire la sicurezza e la riservatezza dei dati stessi ed &egrave; finalizzato a consentire lo svolgimento dei rapporti tra le parti ed in particolare per l&rsquo;attuazione della Convenzione per le finalit&agrave; indicate di seguito. </span></p>
-    <p class="c23"><span class="c4">Finalit&agrave; e base giuridica del trattamento </span></p>
-    <p class="c34"><span class="c6">&#9679; Il trattamento &egrave; necessario ai fini della stipula e dell&rsquo;esecuzione di un contratto, ovvero ai fini dell&rsquo;esecuzione di misure precontrattuali adottate su richiesta dell&rsquo;interessato (art. 6, comma 1, lettera b) del Regolamento); </span></p>
-    <p class="c60"><span class="c6">&#9679; Il trattamento &egrave; basato sul consenso dell&rsquo;Operatore che richiede volontariamente di partecipare all&rsquo;iniziativa (art. 6, comma 1, lett. a) del Regolamento); </span></p>
-    <p class="c58"><span class="c6">&#9679; Il trattamento &egrave; necessario per adempiere obblighi giuridici a cui &egrave; soggetto il Titolare del trattamento, ad esempio adempimento di obblighi di legge (contabili, fiscali), regolamento e contratto, esecuzione di provvedimenti dell&rsquo;autorit&agrave; giudiziaria o amministrativa (art. 6, comma 1, lettera c) del Regolamento); </span></p>
-    <p class="c76"><span class="c6">&#9679; Il trattamento &egrave; necessario per lo svolgimento dei compiti istituzionali attribuiti al Titolare del trattamento sulla base dell&rsquo;art. 1, comma 413, legge 27 dicembre 2019, n. 160 (come attuato dal decreto del Ministro per le politiche giovanili e lo sport del 27 febbraio 2020), e dunque per l&rsquo;esecuzione di un compito di interesse pubblico, previsto dalla legge, o connesso all&rsquo;esercizio di pubblici poteri di cui &egrave; investito il Titolare del trattamento, in particolare con riferimento all&rsquo;attuazione dell&rsquo;iniziativa Carta Giovani Nazionale (art. 6, comma 1, lettera e) del Regolamento). </span></p>
-    <p class="c0"><span class="c6">I dati personali degli Interessati possono essere utilizzati dal Titolare in giudizio o nelle fasi propedeutiche alla sua eventuale instaurazione per la difesa da abusi perpetrati dagli Interessati. </span></p>
-    <p class="c50"><span class="c6">Gli Interessati possono ottenere chiarimenti sulla finalit&agrave; della raccolta dei dati o su quali dati siano effettivamente acquisiti, contattando il Titolare. </span></p>
-    <p class="c107"><span class="c6">Il trattamento &egrave; necessario per le seguenti finalit&agrave;: </span></p>
-    <p class="c81"><span class="c6">a) creazione del profilo Operatore nel portale dedicato ed inserimento dello stesso nell&rsquo;elenco pubblicato nell&rsquo;APP IO e sui siti web dedicati alla CGN e al circuito EYCA; </span></p>
-    <p class="c49"><span class="c6">b) esecuzione di ogni altro obbligo derivante dai contratti stipulati con il Dipartimento e/o con i suoi partner per l&rsquo;attuazione della CGN; c) adempimento di obblighi previsti dalla legge, da regolamenti o dalla normativa comunitaria vigente pro-tempore; </span></p>
-    <p class="c83"><span class="c6">d) svolgimento mediante sistemi anche automatizzati di comunicazione, delle seguenti attivit&agrave;: 1. indagini volte a rilevare il grado di soddisfazione sulla CGN; 2. informazione istituzionale, comunicazione di nuove iniziative del Dipartimento e di eventuali enti terzi nell&rsquo;ambito delle attivit&agrave; istituzionali del Dipartimento; 3. comunicazione dei dati personali ad altre Amministrazioni pubbliche ed eventuali Societ&agrave; terze al fine di consentire all&rsquo;Operatore di ricevere da queste, mediante l&rsquo;utilizzo dei medesimi sistemi di comunicazione, informazioni o richieste di partecipazione ad indagini statistiche relative ad attivit&agrave; svolte o da svolgere dal Dipartimento. </span></p>
-    <p class="c48"><span class="c4">Categorie di soggetti ai quali i dati personali possono essere comunicati </span><span class="c6">Il Titolare potr&agrave; comunicare, per il perseguimento delle finalit&agrave; sopra indicate, alcuni dati personali anche a: </span></p>
-    <p class="c101"><span class="c6">&#9679; ai soggetti cui la comunicazione dei dati debba essere effettuata in adempimento di un obbligo previsto dalla legge, da un regolamento o dalla normativa comunitaria, ovvero per adempiere ad un ordine dell&rsquo;Autorit&agrave; Giudiziaria; </span></p>
-    <p class="c52"><span class="c6">&#9679; ai soggetti designati dal Titolare, in qualit&agrave; di Responsabili, ovvero alle persone autorizzate al trattamento dei dati personali che operano sotto l&rsquo;autorit&agrave; diretta del titolare o del responsabile; </span></p>
-    <p class="c79"><span class="c6">&#9679; ad altri eventuali soggetti terzi, nei casi espressamente previsti dalla legge, ovvero ancora se la comunicazione si render&agrave; necessaria per la tutela dell&rsquo;Agenzia in sede giudiziaria, nel rispetto delle vigenti disposizioni in materia di protezione dei dati personali </span></p>
-    <p class="c22"><span class="c4">Trasferimento dati fuori dall&rsquo;UE </span></p>
-    <p class="c68"><span class="c6">Alcuni dei fornitori terzi che PagoPA S.p.A. utilizza per il progetto IO risiedono negli USA. PagoPA S.p.A. ha concluso con tali fornitori accordi di servizio ai sensi dell&rsquo;art. 28 del Regolamento. Tutti i fornitori sono conformi al Regolamento e, in assenza di altre misure di garanzia previste dal </span></p>
-    <p class="c12"><span class="c6">Regolamento, sono state concluse le Clausole Contrattuali Standard della Commissione Europea per garantire adeguati livelli di tutela. La lista dei fornitori coinvolti nel Progetto IO, comprensiva dei dati trattati e delle garanzie per gli eventuali trasferimenti all&rsquo;estero, e copia della documentazione contrattuale, &egrave; disponibile all&rsquo;indirizzo https://io.italia.it/app-content/fornitori. </span></p>
-    <p class="c44"><span class="c4">Tempi di conservazione dei dati </span></p>
-    <p class="c38"><span class="c6">I dati personali raccolti saranno trattati per la durata dell&rsquo;adesione da parte dell&rsquo;Operatore, e successivamente conservati per un periodo di tempo non superiore a 10 anni, al fine di consentire al Titolare o ai suoi aventi causa di difendersi da eventuali pretese o esercitare i propri diritti o per assolvere ad obblighi di legge. Per maggiori informazioni &egrave; possibile scrivere al Titolare. </span></p>
-    <p class="c78"><span class="c4">Diritti degli interessati </span></p>
-    <p class="c63"><span class="c6">Gli interessati hanno il diritto di ottenere dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale, nei casi previsti dal Regolamento, l&rsquo;accesso ai propri dati personali, la rettifica o la cancellazione degli stessi o la limitazione del trattamento che li riguarda, o di opporsi al trattamento, secondo quanto previsto dal Regolamento. Le relative istanze vanno presentate al Titolare del trattamento dei dati. </span></p>
-    <p class="c39"><span class="c6">Il Consenso al trattamento pu&ograve; essere revocato in ogni momento mediante comunicazione scritta o via email al Titolare. La revoca del consenso non pregiudica il trattamento effettuato prima della revoca, che resta valido e legittimo a tutti gli effetti. </span></p>
-    <p class="c23"><span class="c4">Diritti di reclamo </span></p>
-    <p class="c89"><span class="c6">Gli Interessati che ritengano che il trattamento dei dati personali a loro riferiti, effettuato dal Titolare del trattamento, avvenga in violazione di quanto previsto dal Regolamento, hanno il diritto di proporre reclamo al Garante, come previsto dall&rsquo;art. 77 del Regolamento stesso, o di adire le opportune sedi giudiziarie (art. 79 del Regolamento). </span></p>
-    <p class="c92"><span class="c0">Roma <span th:text="${current_date}"></span></span></p>
-    <p class="c93"><span class="c6">Firma digitale dell&rsquo;Operatore </span></p>
+            </div>
+            <li class="mt">SITO WEB DELL’OPERATORE (compreso e-commerce se posseduto)</li>
+            <div class="mt box"><span th:text="${merchant_website}"></span></div>
+        </ol>
+        <div class="page-break"></div>
+    </p>
+    <!-- Third page -->
+    <h1 class="title text-center text-uppercase">Indica</h1>
+    <p>inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento
+        di convenzionamento e/o all’attuazione della convenzione i seguenti indirizzi di
+        contatto operativo:<br />
+        Nome e cognome del referente: <span th:text="${referent_fullname}"></span><br />
+        Ruolo all’interno dell’azienda: <span th:text="${referent_role}"></span><br />
+        E-mail: <span th:text="${referent_email_address}"></span><br />
+        Tel: <span th:text="${referent_telephone_nr}"></span></p>
+    <h1 class="title text-uppercase">INFORMATIVA PRIVACY</h1>
+    <p>Il Dipartimento informa che, ai sensi degli artt. 13 e 14 del Regolamento europeo
+        generale sulla protezione dei dati, n. 2016/679 (“Regolamento” o “GDPR”) e del D.lgs
+        196/03 e ss.m.i. (“Codice Privacy”), che i dati personali forniti dall’Operatore con il
+        presente documento verranno trattati in conformità con le disposizioni del Codice della
+        Privacy e del Regolamento.</p>
+    <h1 class="title ">Titolare del Trattamento</h1>
+    <p>Il Dipartimento informa che, ai sensi degli artt. 13 e 14 del Regolamento europeo
+        generale sulla protezione dei dati, n. 2016/679 (“Regolamento” o “GDPR”) e del D.lgs
+        196/03 e ss.m.i. (“Codice Privacy”), che i dati personali forniti dall’Operatore con il
+        presente documento verranno trattati in conformità con le disposizioni del Codice della
+        Privacy e del Regolamento.</p>
+    <h1 class="title text-uppercase">Data protection officer (DPO) o Responsabile Protezione Dati (RPD)</h1>
+    <p>Il Dipartimento ha nominato un proprio Responsabile della Protezione dei dati, ai sensi
+        dell’art. 37 del Regolamento, che può essere contattato ai seguenti recapiti:
+        nome e cognome: ________________;<br />
+        mail: ________________;<br />
+        PEC: ________________;<br />
+        indirizzo: ________________.</p>
+    <h1 class="title text-uppercase">Categorie di dati trattati</h1>
+    <p>Nei limiti delle finalità e delle modalità descritte nella presente informativa, potranno
+        essere trattate le seguenti categorie di dati: <ul class="dashed">
+            <li>dati identificativi comuni (nome, cognome, luogo e data di nascita, codice
+                fiscale);</li>
+            <li>dati relativi all’attività commerciale e/o alla posizione lavorativa svolta
+                (denominazione della società/ditta individuale, indirizzo dei locali);</li>
+            <li>dati di contatto (numero di telefono, indirizzo e-mail, PEC, fax).</li>
+        </ul>
+    </p>
+    <h1 class="title">Modalità di trattamento</h1>
+    <div class="page-break"></div>
+    <!-- Fourth page -->
+    <p>Per trattamento si intende qualunque operazione applicata, con o senza l’ausilio di
+        processi automatizzati, ai dati personali.
+        Il trattamento avverrà mediante strumenti elettronici in modo da garantire la sicurezza e
+        la riservatezza dei dati stessi ed è finalizzato a consentire lo svolgimento dei rapporti tra
+        le parti ed in particolare per l’attuazione della Convenzione per le finalità indicate di
+        seguito.</p>
+    <h1 class="title">Finalità e base giuridica del trattamento</h1>
+    <ul>
+        <li>Il trattamento è necessario ai fini della stipula e dell’esecuzione di un contratto,
+            o dell’esecuzione di misure precontrattuali adottate su richiesta dell’interessato
+            (art. 6, comma 1, lettera b) del Regolamento e sul consenso dell’Operatore che
+            richiede volontariamente di partecipare all’iniziativa (art. 6, comma 1, lett. a) del
+            Regolamento);</li>
+        <li>Il trattamento è necessario per adempiere obblighi giuridici a cui è soggetto il
+            Titolare del trattamento, ad esempio adempimento di obblighi di legge
+            (contabili, fiscali), regolamento e contratto, esecuzione di provvedimenti
+            dell’autorità giudiziaria o amministrativa (art. 6, comma 1, lettera c) del
+            Regolamento);</li>
+        <li>Il trattamento è necessario per adempiere obblighi giuridici a cui è soggetto il
+            Titolare del trattamento, ad esempio adempimento di obblighi di legge
+            (contabili, fiscali), regolamento e contratto, esecuzione di provvedimenti
+            dell’autorità giudiziaria o amministrativa (art. 6, comma 1, lettera c) del
+            Regolamento);</li>
+    </ul>
+    <p>I dati personali degli Interessati possono essere utilizzati dal Titolare in giudizio o nelle
+        fasi propedeutiche alla sua eventuale instaurazione per la difesa da abusi perpetrati dagli
+        Interessati.
+        Gli Interessati possono ottenere chiarimenti sulla finalità della raccolta dei dati o su
+        quali dati siano effettivamente acquisiti, contattando il Titolare.</p>
+    <p>Il trattamento è necessario per le seguenti finalità: <ol class="parentheses" type="a">
+            <li>creazione del profilo Operatore nel portale dedicato ed inserimento dello stesso
+                nell’elenco pubblicato nell’APP IO e sui siti web dedicati alla CGN e al circuito EYCA;</li>
+            <li>esecuzione di ogni altro obbligo derivante dai contratti stipulati con il Dipartimento
+                e/o con i suoi partner per l’attuazione della CGN;</li>
+            <li>adempimento di obblighi previsti dalla legge, da regolamenti o dalla normativa
+                comunitaria vigente pro-tempore;</li>
+            <li>svolgimento mediante sistemi anche automatizzati di comunicazione, delle seguenti
+                attività: 1. indagini volte a rilevare il grado di soddisfazione sulla CGN; 2. informazione
+                istituzionale, comunicazione di nuove iniziative del Dipartimento e di eventuali enti
+                terzi nell’ambito delle attività istituzionali del Dipartimento; 3. comunicazione dei dati<div
+                    class="page-break"></div>
+                <!-- Sixth page -->personali ad altre Amministrazioni pubbliche ed eventuali Società terze al
+                fine di
+                consentire all’Operatore di ricevere da queste, mediante l’utilizzo dei medesimi sistemi
+                di comunicazione, informazioni o richieste di partecipazione ad indagini statistiche
+                relative ad attività svolte o da svolgere dal Dipartimento.</li>
+        </ol>
+    </p>
+    <h1 class="title">Categorie di soggetti ai quali i dati personali possono essere comunicati</h1>
+    <p>Il Titolare potrà comunicare, per il perseguimento delle finalità sopra indicate, alcuni
+        dati personali anche a:</p>
+    <ul>
+        <li>ai soggetti cui la comunicazione dei dati debba essere effettuata in adempimento
+            di un obbligo previsto dalla legge, da un regolamento o dalla normativa
+            comunitaria, ovvero per adempiere ad un ordine dell’Autorità Giudiziaria;</li>
+        <li>ai soggetti designati dal Titolare, in qualità di Responsabili, ovvero alle persone
+            autorizzate al trattamento dei dati personali che operano sotto l’autorità diretta
+            del titolare o del responsabile;</li>
+        <li>ad altri eventuali soggetti terzi, nei casi espressamente previsti dalla legge,
+            ovvero ancora se la comunicazione si renderà necessaria per la tutela
+            dell’Agenzia in sede giudiziaria, nel rispetto delle vigenti disposizioni in materia
+            di protezione dei dati personali</li>
+    </ul>
+    <h1 class="title">Trasferimento dati fuori dall’UE</h1>
+    <p>
+        Alcuni dei fornitori terzi che PagoPA S.p.A. utilizza per il progetto IO risiedono negli
+        USA. PagoPA S.p.A. ha concluso con tali fornitori accordi di servizio ai sensi dell’art.
+        28 del Regolamento. Tutti i fornitori sono conformi al Regolamento e, in assenza di
+        altre misure di garanzia previste dal Regolamento, sono state concluse le Clausole
+        Contrattuali Standard della Commissione Europea per garantire adeguati livelli di tutela.
+        La lista dei fornitori coinvolti nel Progetto IO, comprensiva dei dati trattati e delle
+        garanzie per gli eventuali trasferimenti all’estero, e copia della documentazione
+        contrattuale, è disponibile all’indirizzo https://io.italia.it/app-content/fornitori.
+    </p>
+    <h1 class="title">Tempi di conservazione dei dati</h1>
+    <p>
+        I dati personali raccolti saranno trattati per la durata dell’adesione da parte
+        dell’Operatore, e successivamente conservati per un periodo di tempo non superiore a
+        10 anni, al fine di consentire al Titolare o ai suoi aventi causa di difendersi da eventuali
+        pretese o esercitare i propri diritti o per assolvere ad obblighi di legge. Per maggiori
+        informazioni è possibile scrivere al Titolare.
+    </p>
+    <h1 class="title">Diritti degli interessati</h1>
+    <p>
+        Gli interessati hanno il diritto di ottenere dal Dipartimento per le Politiche Giovanili e il
+        Servizio Civile Universale, nei casi previsti dal Regolamento, l’accesso ai propri dati
+        personali, la rettifica o la cancellazione degli stessi o la limitazione del trattamento che
+        li riguarda, o di opporsi al trattamento, secondo quanto previsto dal Regolamento. Le
+        relative istanze vanno presentate al Titolare del trattamento dei dati.
+    </p>
+    <div class="page-break"></div>
+    <!-- Seventh page -->
+    <p>Il Consenso al trattamento può essere revocato in ogni momento mediante
+        comunicazione scritta o via email al Titolare. La revoca del consenso non pregiudica il
+        trattamento effettuato prima della revoca, che resta valido e legittimo a tutti gli effetti.</p>
+    <h1 class="title">Diritti di reclamo</h1>
+    <p>Gli Interessati che ritengano che il trattamento dei dati personali a loro riferiti, effettuato
+        dal Titolare del trattamento, avvenga in violazione di quanto previsto dal Regolamento,
+        hanno il diritto di proporre reclamo al Garante, come previsto dall’art. 77 del
+        Regolamento stesso, o di adire le opportune sedi giudiziarie (art. 79 del Regolamento).</p>
+    <p>Luogo ................ data <span th:text="${current_date}"></span></p>
+    <div class="mt text-center">
+        <p>Firma digitale dell’Operatore</p>
+        <p>.......................................................................</p>
+    </div>
+
 </body>
 
 </html>
