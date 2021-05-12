@@ -82,7 +82,12 @@ public class TestUtils {
         return referentEntity;
     }
 
+
     public static ProfileEntity createSampleProfileWithCommonFields() {
+        return createSampleProfileWithCommonFields(DiscountCodeTypeEnum.STATIC);
+    }
+
+    public static ProfileEntity createSampleProfileWithCommonFields(DiscountCodeTypeEnum discountCodeType) {
         ProfileEntity profileEntity = new ProfileEntity();
         profileEntity.setFullName("FULL_NAME");
         profileEntity.setName("NAME");
@@ -93,7 +98,7 @@ public class TestUtils {
         profileEntity.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         profileEntity.setLegalRepresentativeFullName("full name");
         profileEntity.setLegalOffice("legal office");
-        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
+        profileEntity.setDiscountCodeType(discountCodeType);
         profileEntity.setTelephoneNumber("12345678");
         return profileEntity;
     }
@@ -122,9 +127,13 @@ public class TestUtils {
     }
 
     public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity) {
-        ProfileEntity profileEntity = createSampleProfileWithCommonFields();
+        return createSampleProfileEntity(agreementEntity, SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC);
+    }
+
+    public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity, SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
+        ProfileEntity profileEntity = createSampleProfileWithCommonFields(discountCodeType);
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
-        profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
+        profileEntity.setSalesChannel(salesChannel);
         profileEntity.setAgreement(agreementEntity);
         return profileEntity;
     }
