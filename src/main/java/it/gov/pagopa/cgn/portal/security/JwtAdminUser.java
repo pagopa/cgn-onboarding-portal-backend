@@ -7,14 +7,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @Getter
 public class JwtAdminUser implements JwtUser {
 
-    private final String userTaxCode;
     private final String userFullName;
 
-    public JwtAdminUser(
-            String userTaxCode,
-            String userFullName
-    ) {
-        this.userTaxCode = userTaxCode;
+    public JwtAdminUser(String userFullName) {
         this.userFullName = userFullName;
     }
 

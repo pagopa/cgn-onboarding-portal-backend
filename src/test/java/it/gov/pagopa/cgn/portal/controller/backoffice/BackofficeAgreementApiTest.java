@@ -65,6 +65,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].id").value(pendingAgreement.getId()))
                 .andExpect(jsonPath("$.items[0].state").value(AgreementState.PENDINGAGREEMENT.getValue()))
+                .andExpect(jsonPath("$.items[0].requestDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.items[0].profile").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].profile.id").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].profile.agreementId").value(pendingAgreement.getId()))

@@ -319,13 +319,13 @@ public class TestUtils {
 
     public static void setOperatorAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID))
         );
     }
 
     public static void setAdminAuth() {
         SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID))
         );
     }
 }

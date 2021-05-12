@@ -352,11 +352,15 @@ definitions:
     required:
       - id
       - state
+      - requestDate
     properties:
       id:
         type: string
       state:
         $ref: '#/definitions/AgreementState'
+      requestDate:
+        type: string
+        format: date
       profile:
         $ref: '#/definitions/Profile'
       discounts:
