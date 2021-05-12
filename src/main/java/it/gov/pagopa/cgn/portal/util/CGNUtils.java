@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.util;
 
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
@@ -26,11 +27,11 @@ public class CGNUtils {
             checkIfImageFile(image.getOriginalFilename());
             bufferedImage = ImageIO.read(image.getInputStream());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CGNException(e);
         }
         boolean isValid = minWidth <= bufferedImage.getWidth() && minHeight <= bufferedImage.getHeight();
         if (!isValid) {
-            throw new InvalidRequestException("Image must be at least " + minHeight + "x" + minWidth);
+            throw new InvalidRequestException("Image must be at least " + minWidth  + "x" + minHeight);
         }
     }
 
@@ -60,7 +61,7 @@ public class CGNUtils {
         if (token.getPrincipal() instanceof JwtOperatorUser) {
             return (JwtOperatorUser) token.getPrincipal();
         }
-       throw new RuntimeException("Expected an operator token, but was of type " + token.getPrincipal());
+       throw new CGNException("Expected an operator token, but was of type " + token.getPrincipal());
     }
 
     public static JwtAdminUser getJwtAdminUser() {
@@ -68,7 +69,7 @@ public class CGNUtils {
         if (token.getPrincipal() instanceof JwtAdminUser) {
             return (JwtAdminUser) token.getPrincipal();
         }
-        throw new RuntimeException("Expected an admin token, but was of type " + token.getPrincipal());
+        throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
 
 }

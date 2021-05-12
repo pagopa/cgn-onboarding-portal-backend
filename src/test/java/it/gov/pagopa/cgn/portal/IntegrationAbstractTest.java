@@ -7,15 +7,11 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
-import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
-import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
-import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.SalesChannel;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.AfterEach;
@@ -24,7 +20,6 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -173,7 +168,7 @@ public class IntegrationAbstractTest {
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        List<DocumentEntity> documentEntityList = saveBackofficeSampleDocuments(agreementEntity);
+        List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -183,15 +178,11 @@ public class IntegrationAbstractTest {
     }
 
     protected void setOperatorAuth() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
-        );
+        TestUtils.setOperatorAuth();
     }
 
     protected void setAdminAuth() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
-        );
+        TestUtils.setAdminAuth();
     }
 
     private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity, ProfileEntity profileEntity,

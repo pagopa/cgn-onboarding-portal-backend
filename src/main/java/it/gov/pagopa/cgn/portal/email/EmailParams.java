@@ -20,4 +20,13 @@ public class EmailParams {
     private final String body;
     private final Resource logo;
     private final String logoName;
+
+    public String toLightString() {
+        return "EmailParams{" +
+                "mailFrom='" + mailFrom + '\'' +
+                ", mailToList=" + mailToList +
+                ", subject='" + subject + '\'' +
+                '}';
+    }
+
 }

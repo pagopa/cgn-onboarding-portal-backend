@@ -14,11 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.enums.*;
+import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
+import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
+import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.model.Address;
 import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.cgn.portal.model.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -310,5 +314,18 @@ public class TestUtils {
             @Override public Mono<String> getBodyAsString() { return null; }
             @Override public Mono<String> getBodyAsString(Charset charset) { return null; }
         };
+    }
+
+
+    public static void setOperatorAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID, "merchant_name"))
+        );
+    }
+
+    public static void setAdminAuth() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID, "admin_name"))
+        );
     }
 }

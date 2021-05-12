@@ -232,6 +232,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
@@ -244,6 +245,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.BOTH, DiscountCodeTypeEnum.API).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
@@ -252,10 +254,21 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void ApproveAgreement_ApproveAgreementWithoutBackofficeDocuments_InvalidRequestException() {
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.BOTH, DiscountCodeTypeEnum.API).getAgreementEntity();
+        pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        pendingAgreement = agreementRepository.save(pendingAgreement);
+        final String agreementId = pendingAgreement.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () ->backofficeAgreementService.approveAgreement(agreementId));
+    }
+
+    @Test
     void ApproveAgreement_ApproveAgreementSaleChannelOffline_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.OFFLINE, DiscountCodeTypeEnum.STATIC).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
@@ -268,6 +281,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
@@ -280,6 +294,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.API).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
@@ -299,7 +314,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, null).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
-
+        documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         var agreementId = pendingAgreement.getId();
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(agreementId);
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
@@ -317,7 +332,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -353,7 +368,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);

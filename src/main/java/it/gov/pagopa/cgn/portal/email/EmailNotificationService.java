@@ -35,7 +35,7 @@ public class EmailNotificationService {
         helper.setText(emailParams.getBody(), true);
         helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
 
-        log.info("Sending email '{}'", emailParams.toString());
+        log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
         javaMailSender.send(mimeMessage);
     }
 
