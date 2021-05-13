@@ -31,8 +31,6 @@ public class AgreementInterceptor implements HandlerInterceptor {
             return true;
         }
         throw new SecurityException("Current user is trying to use different agreementId");
-
-
     }
 
     private String getCurrentUserId() {
