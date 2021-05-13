@@ -27,8 +27,8 @@ public class JwtTokenUtil {
 
         if (cgnRole.equals(CgnUserRoleEnum.OPERATOR.getCode())) {
             Map<String, String> companyMap = claims.get(CLAIM_KEY_MERCHANT_COMPANY_CODE, Map.class);
-            final String taxCode = companyMap.get(CLAIM_KEY_COMPANY_MERCHANT_TAX_CODE);
-            return new JwtOperatorUser(claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class), taxCode);
+            final String companyTaxCode = companyMap.get(CLAIM_KEY_COMPANY_MERCHANT_TAX_CODE);
+            return new JwtOperatorUser(claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class), companyTaxCode);
         } else if (cgnRole.equals(CgnUserRoleEnum.ADMIN.getCode())) {
             return new JwtAdminUser(
                     claims.get(CLAIM_KEY_ADMIN_NAME, String.class) + " " +

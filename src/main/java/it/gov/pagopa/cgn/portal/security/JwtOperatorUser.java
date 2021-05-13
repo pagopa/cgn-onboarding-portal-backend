@@ -8,14 +8,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class JwtOperatorUser implements JwtUser {
 
     private final String userTaxCode;
-    private final String merchantTaxCode;
+    private final String companyTaxCode;
 
     public JwtOperatorUser(
             String userTaxCode,
-            String merchantTaxCode
+            String companyTaxCode
     ) {
         this.userTaxCode = userTaxCode;
-        this.merchantTaxCode = merchantTaxCode;
+        this.companyTaxCode = companyTaxCode;
     }
 
     @Override

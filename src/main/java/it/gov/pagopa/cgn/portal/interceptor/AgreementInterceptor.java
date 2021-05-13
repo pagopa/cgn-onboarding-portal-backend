@@ -38,7 +38,7 @@ public class AgreementInterceptor implements HandlerInterceptor {
     private String getCurrentUserId() {
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         JwtOperatorUser user = (JwtOperatorUser) authentication.getPrincipal();
-        return user.getUserTaxCode();
+        return user.getCompanyTaxCode();
     }
 
     private String getAgreementIdFromParams(HttpServletRequest request) {
