@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.service.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -13,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
@@ -84,7 +87,30 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetApprovedAgreementDetail_GetApprovedAgreementDetailWithoutPublicDiscount_AgreementDetailFound() {
+    void GetApprovedAgreementDetail_GetApprovedAgreementDetailWithPublishedAndSuspendedDiscounts_AgreementDetailFound() {
+        AgreementTestObject agreementTestObject = createApprovedAgreement();
+        AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
+        DiscountEntity discountEntity = agreementTestObject.getDiscountEntityList().get(0);
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+
+        DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity2 = discountService.createDiscount(agreementEntity.getId(), discountEntity2);
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity2.getId());
+        discountService.suspendDiscount(agreementEntity.getId(), discountEntity2.getId(), "Bad discount");
+
+        AgreementEntity approvedAgreement = agreementService.getApprovedAgreement(agreementEntity.getId());
+        Assertions.assertNotNull(approvedAgreement);
+        Assertions.assertEquals(agreementEntity.getId(), approvedAgreement.getId());
+        Assertions.assertEquals(2, approvedAgreement.getDiscountList().size());
+        Assertions.assertFalse(CollectionUtils.isEmpty(
+                approvedAgreement.getDiscountList().stream().filter(d -> d.getState() == DiscountStateEnum.PUBLISHED).collect(Collectors.toList())));
+        Assertions.assertFalse(CollectionUtils.isEmpty(
+                approvedAgreement.getDiscountList().stream().filter(d -> d.getState() == DiscountStateEnum.SUSPENDED).collect(Collectors.toList())));
+
+    }
+
+    @Test
+    void GetApprovedAgreementDetail_GetApprovedAgreementDetailWithoutPublishedDiscount_AgreementDetailFound() {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
         AgreementEntity approvedAgreement = agreementService.getApprovedAgreement(agreementEntity.getId());
         Assertions.assertNotNull(approvedAgreement);
