@@ -22,6 +22,7 @@ public class ProfileService {
 
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileRepository profileRepository;
+    private final DocumentService documentService;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -46,14 +47,20 @@ public class ProfileService {
         if (AgreementStateEnum.APPROVED.equals(profileEntity.getAgreement().getState())) {
             agreementServiceLight.setInformationLastUpdateDate(profileEntity.getAgreement());
         }
+
+        if (AgreementStateEnum.DRAFT.equals(profileEntity.getAgreement().getState())) {
+            documentService.resetMerchantDocuments(agreementId);
+        }
+
         return profileRepository.save(profileEntity);
     }
 
 
     @Autowired
-    public ProfileService(ProfileRepository profileRepository, AgreementServiceLight agreementServiceLight) {
+    public ProfileService(ProfileRepository profileRepository, AgreementServiceLight agreementServiceLight, DocumentService documentService) {
         this.profileRepository = profileRepository;
         this.agreementServiceLight = agreementServiceLight;
+        this.documentService = documentService;
     }
 
     private ProfileEntity getProfileFromAgreementId(String agreementId) {

@@ -31,6 +31,7 @@ public class DiscountService {
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileService profileService;
     private final EmailNotificationFacade emailNotificationFacade;
+    private final DocumentService documentService;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -60,7 +61,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
@@ -70,6 +71,11 @@ public class DiscountService {
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         }
+
+        if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
+            documentService.resetMerchantDocuments(agreementId);
+        }
+
        return discountRepository.save(dbEntity);
     }
 
@@ -118,11 +124,13 @@ public class DiscountService {
 
     @Autowired
     public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
-                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade) {
+                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
+                           DocumentService documentService) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.documentService = documentService;
     }
 
 
