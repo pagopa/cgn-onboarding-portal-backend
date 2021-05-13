@@ -159,8 +159,8 @@ public class DiscountService {
             throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
         }
 
-        if (!isContainsToday(discount.getStartDate(), discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish a discount because the discount doesn't include today's date");
+        if (LocalDate.now().isAfter(discount.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish an expired discount");
         }
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
         long publishedDiscount = discountRepository.countByAgreementIdAndState(
