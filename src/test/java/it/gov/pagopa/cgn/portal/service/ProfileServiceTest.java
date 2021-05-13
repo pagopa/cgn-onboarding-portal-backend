@@ -2,10 +2,12 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
@@ -218,5 +220,24 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
     }
 
-}
+    @Test
+    void Update_UpdateProfileWithDocumentUploadedWillDeleteDocuments_Ok() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        String agreementId = agreementEntity.getId();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementId);
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementId, discountEntity);
+        saveSampleDocuments(agreementEntity);
+        Assertions.assertEquals(2, documentRepository.findByAgreementId(agreementId).size());
 
+        ProfileEntity updatedProfile = TestUtils.createSampleProfileEntity(agreementEntity);
+        updatedProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        profileService.updateProfile(agreementId, updatedProfile);
+
+        Assertions.assertEquals(0, documentRepository.findByAgreementId(agreementId).size());
+    }
+}

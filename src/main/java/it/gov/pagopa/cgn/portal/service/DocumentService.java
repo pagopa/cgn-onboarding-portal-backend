@@ -86,6 +86,12 @@ public class DocumentService {
         return documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
     }
 
+    @Transactional
+    public void resetMerchantDocuments(String agreementId) {
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.AGREEMENT);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.MANIFESTATION_OF_INTEREST);
+    }
+
     // if there are documents created by profile and backoffice user, the document made by backoffice user will be returned
     private List<DocumentEntity> filterDocumentsByPriority(List<DocumentEntity> documentEntityList) {
         if (CollectionUtils.isEmpty(documentEntityList)) {
