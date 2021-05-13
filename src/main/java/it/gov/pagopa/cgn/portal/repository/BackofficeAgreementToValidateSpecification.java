@@ -9,6 +9,7 @@ import org.hibernate.query.criteria.internal.OrderImpl;
 
 import javax.persistence.criteria.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,23 +23,24 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
     @Override
     protected void addFiltersDatePredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
         if (!Objects.isNull(filter.getDateFrom())) {
-            predicateList.add(cb.greaterThanOrEqualTo(root.get("requestApprovalTime"),
+            predicateList.add(cb.greaterThanOrEqualTo(getRequestApprovalTimePath(root),
                     getOffsetDateTimeFromLocalDate(filter.getDateFrom())));
         }
         if (!Objects.isNull(filter.getDateTo())) {
-            predicateList.add(cb.lessThanOrEqualTo(root.get("requestApprovalTime"),
+            predicateList.add(cb.lessThanOrEqualTo(getRequestApprovalTimePath(root),
                     getOffsetDateTimeFromLocalDate(filter.getDateTo())));
         }
     }
 
     @Override
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+        root.fetch("profile");
         predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
     }
 
     @Override
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
-        Expression<String> dateExpression = root.get("requestApprovalTime");
+        Path<OffsetDateTime> dateExpression = getRequestApprovalTimePath(root);
         // order by requestApprovalTime desc
         if (StringUtils.isBlank(currentUser)) {
             return new OrderImpl(dateExpression, direction.isAscending());
@@ -50,6 +52,10 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
                 .when(cb.isNotNull(root.get("backofficeAssignee")), LocalDate.now().plusYears(10))
                 // after agreements assigned to current user, the agreements not assigned
                 .otherwise(dateExpression), direction.isAscending());
+    }
+
+    private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
+        return root.get("requestApprovalTime");
     }
 
 }

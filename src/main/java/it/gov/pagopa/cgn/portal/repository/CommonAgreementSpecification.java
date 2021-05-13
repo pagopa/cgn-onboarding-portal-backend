@@ -51,7 +51,7 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
 
     @Override
     public Predicate toPredicate(Root<AgreementEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        root.fetch("profile");
+
         List<Predicate> predicateList = addFiltersPredicate(root, cb);
         addStaticFiltersPredicate(root, cb, predicateList);
         query.where(predicateList.toArray(new Predicate[predicateList.size()]));
