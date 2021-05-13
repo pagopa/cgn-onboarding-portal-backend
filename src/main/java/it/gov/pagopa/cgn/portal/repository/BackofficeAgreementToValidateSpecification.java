@@ -33,6 +33,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
 
     @Override
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+        root.fetch("profile");
         predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
     }
 
