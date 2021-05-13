@@ -1,9 +1,6 @@
 package it.gov.pagopa.cgn.portal.repository;
 
 
-import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -61,19 +58,6 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
 
     protected List<Predicate> addFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb) {
         List<Predicate> predicateList = new ArrayList<>();
-        if (StringUtils.isNotEmpty(filter.getAgreementState())) {
-            AgreementStateEnum agreementStateEnum;
-            agreementStateEnum = BackofficeAgreementConverter.getAgreementStateEnumFromDtoCode(filter.getAgreementState());
-            predicateList.add(cb.equal(root.get("state").as(String.class), agreementStateEnum.getCode()));
-        }
-        if (filter.getAssignee() != null) {
-            Path<String> backofficeAssigneePath = root.get("backofficeAssignee");
-            if (AssigneeEnum.ME.equals(filter.getAssignee())) {
-                predicateList.add(cb.equal(backofficeAssigneePath, currentUser));
-            } else {
-                predicateList.add(cb.notEqual(backofficeAssigneePath, currentUser));
-            }
-        }
         if (StringUtils.isNotEmpty(filter.getProfileFullName())) {
             predicateList.add(cb.like(cb.upper(root.get("profile").get("fullName")),
                     toFullLikeUpperCaseString(filter.getProfileFullName())));
