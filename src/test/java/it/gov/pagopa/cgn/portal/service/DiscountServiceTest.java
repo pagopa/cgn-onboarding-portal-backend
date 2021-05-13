@@ -2,10 +2,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
+import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -523,6 +520,20 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
 
+    }
+
+    @Test
+    void Update_UpdateDiscountWithDocumentUploadedWillDeleteDocuments_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveSampleDocuments(agreementEntity);
+        Assertions.assertEquals(2, documentRepository.findByAgreementId(agreementEntity.getId()).size());
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
+        updatedDiscount.setName("updated_name");
+        discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId() ,updatedDiscount);
+
+        Assertions.assertEquals(0, documentRepository.findByAgreementId(agreementEntity.getId()).size());
     }
 
     private void approveAgreement() {
