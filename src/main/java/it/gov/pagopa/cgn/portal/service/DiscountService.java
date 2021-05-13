@@ -165,7 +165,7 @@ public class DiscountService {
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
         long publishedDiscount = discountRepository.countByAgreementIdAndState(
                 agreementEntity.getId(), DiscountStateEnum.PUBLISHED);
-        if (publishedDiscount == MAX_NUMBER_PUBLISHED_DISCOUNT) {
+        if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
             throw new InvalidRequestException(
                     "Cannot publish the discount because there are already " + MAX_NUMBER_PUBLISHED_DISCOUNT +
                             " public ones");

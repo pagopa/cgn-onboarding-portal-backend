@@ -447,7 +447,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Publish_PublishSixthDiscount_Ok() {
+    void Publish_PublishMoreThanFiveDiscounts_Ok() {
         String agreementId = agreementEntity.getId();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
@@ -458,16 +458,18 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         //publish discount
         discountService.publishDiscount(agreementId, dbDiscount.getId());
         //the first discount was already published. Starting with second
-        IntStream.range(2, 6).forEach(idx -> {
+        IntStream.range(2, 7).forEach(idx -> {
             DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
             DiscountEntity dbDiscountN = discountService.createDiscount(agreementId, discount);
             long discountId = dbDiscountN.getId();
-            dbDiscountN = discountService.publishDiscount(agreementId, discountId);
-            Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscountN.getState());
-            long numPublished = discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED);
-            Assertions.assertEquals(idx, numPublished);
-            //sixth discount. Cannot publish more than 5 discount
-            if (idx == 6) {
+
+            if (idx < 6) {
+                dbDiscountN = discountService.publishDiscount(agreementId, discountId);
+                Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscountN.getState());
+                long numPublished = discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED);
+                Assertions.assertEquals(idx, numPublished);
+            } else {
+                //sixth discount. Cannot publish more than 5 discount
                 Assertions.assertThrows(InvalidRequestException.class,
                         () -> discountService.publishDiscount(agreementId, discountId));
             }
