@@ -293,6 +293,27 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Publish_PublishDiscountWithMultiplePublishedDiscounts_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        //publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+
+        DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount2 = discountService.createDiscount(agreementEntity.getId(), discountEntity2);
+        discountService.publishDiscount(agreementEntity.getId(), dbDiscount2.getId());
+
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+    }
+
+    @Test
     void Publish_PublishDiscountWithStartDateAfterToday_Ok() {
         final String agreementId = agreementEntity.getId();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -353,6 +374,26 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
     }
+
+    @Test
+    void Publish_UpdateDiscountNotRelatedToAgreement_ThrowException() {
+        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement");
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        //publish discount
+        String agreementId = agreementEntity2.getId();
+        Long discountId = dbDiscount.getId();
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.suspendDiscount(agreementId, discountId, "whatever"));
+    }
+
 
     @Test
     void Publish_FirstDiscountPublishDateNotUpdatedIfDiscountWasPublished_Ok() {
