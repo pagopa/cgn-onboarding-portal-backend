@@ -139,6 +139,22 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void GetById_GetDiscountByIdNotFound_ThrowInvalidRequestException() {
+        final String agreementId = agreementEntity.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.getDiscountById(agreementId, 100L));
+    }
+
+    @Test
+    void GetById_GetDiscountByIdWithInvalidAgreementId_ThrowInvalidRequestException() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Long discountEntityId = discountEntity.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.getDiscountById("invalid", discountEntityId));
+    }
+
+    @Test
     void Update_UpdateDiscountWithValidData_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -173,6 +189,17 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
 
+    }
+
+    @Test
+    void Update_UpdateDiscountWithInvalidAgreementId_ThrowInvalidRequestException() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
+        updatedDiscount.setName("updated_name");
+        Long discountId = discountEntity.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.updateDiscount("invalidAgreementId", discountId, updatedDiscount));
     }
 
     @Test

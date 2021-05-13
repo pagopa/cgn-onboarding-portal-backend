@@ -102,9 +102,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
         DiscountEntity discount = findById(discountId);
-        if (!discount.getAgreement().getId().equals(agreementId)) {
-            throw new InvalidRequestException("Discount not correspond with agreement id provided");
-        }
+        checkDiscountRelatedSameAgreement(discount, agreementId);
         if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
             throw new InvalidRequestException("Cannot suspend a discount not Public");
         }
