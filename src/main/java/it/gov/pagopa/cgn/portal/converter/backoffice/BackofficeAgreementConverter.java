@@ -56,6 +56,11 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
         return agreements;
     }
 
+    public static boolean isAgreementStateIsAssigned(String statusDtoCode) {
+        AgreementStateEnum agreementStateEnum = getAgreementStateEnumFromDtoCode(statusDtoCode);
+        return agreementStateEnum.equals(AgreementStateEnum.PENDING) &&
+                AgreementState.ASSIGNEDAGREEMENT.getValue().equals(statusDtoCode);
+    }
 
     public static AgreementStateEnum getAgreementStateEnumFromDtoCode(String statusDtoCode) {
         return Optional.ofNullable(enumMap.get(statusDtoCode))

@@ -1,7 +1,9 @@
 package it.gov.pagopa.cgn.portal.repository;
 
 
+import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +24,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
 
     @Override
     protected void addFiltersDatePredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+        addStatusFilter(root, cb, predicateList);
         if (!Objects.isNull(filter.getDateFrom())) {
             predicateList.add(cb.greaterThanOrEqualTo(getRequestApprovalTimePath(root),
                     getOffsetDateTimeFromLocalDate(filter.getDateFrom())));
@@ -34,7 +37,6 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
 
     @Override
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
-        root.fetch("profile");
         predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
     }
 
@@ -47,15 +49,44 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
         }
         return new OrderImpl(cb.selectCase()
                 // first the agreements assigned to current user
-                .when(cb.equal(root.get("backofficeAssignee"), currentUser), LocalDate.now().minusYears(10))
+                .when(cb.equal(getBackofficeAssigneePath(root), currentUser), LocalDate.now().minusYears(10))
                 // last the agreements assigned to others user
-                .when(cb.isNotNull(root.get("backofficeAssignee")), LocalDate.now().plusYears(10))
+                .when(cb.isNotNull(getBackofficeAssigneePath(root)), LocalDate.now().plusYears(10))
                 // after agreements assigned to current user, the agreements not assigned
                 .otherwise(dateExpression), direction.isAscending());
     }
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
         return root.get("requestApprovalTime");
+    }
+
+    private void addStatusFilter(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+        if (StringUtils.isNotEmpty(filter.getAgreementState())) {
+            //if assigned, database status is Pending but assignee should be used (if present or else not null)
+            if (BackofficeAgreementConverter.isAgreementStateIsAssigned(filter.getAgreementState())) {
+                if (filter.getAssignee() != null) {
+                    addAssigneeFilter(root, cb, predicateList);
+                } else {
+                    predicateList.add(cb.isNotNull(getBackofficeAssigneePath(root)));
+                }
+            } else {
+                // pending filter
+                predicateList.add(cb.isNull(getBackofficeAssigneePath(root)));
+            }
+        }
+    }
+
+    private void addAssigneeFilter(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+        Path<String> backofficeAssigneePath = getBackofficeAssigneePath(root);
+        if (AssigneeEnum.ME.equals(filter.getAssignee())) {
+            predicateList.add(cb.equal(backofficeAssigneePath, currentUser));
+        } else {
+            predicateList.add(cb.notEqual(backofficeAssigneePath, currentUser));
+        }
+    }
+
+    private Path<String> getBackofficeAssigneePath(Root<AgreementEntity> root) {
+        return root.get("backofficeAssignee");
     }
 
 }
