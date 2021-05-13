@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountService {
 
+    private static final int MAX_NUMBER_PUBLISHED_DISCOUNT = 5;
+
     private final DiscountRepository discountRepository;
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileService profileService;
@@ -88,7 +90,8 @@ public class DiscountService {
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         // check if exists almost one discount already published
         if (agreementEntity.getFirstDiscountPublishingDate() == null) {
-            long numPublishedDiscount = discountRepository.countPublishedDiscountByAgreementId(agreementId);
+            long numPublishedDiscount = discountRepository.countByAgreementIdAndState(
+                    agreementId, DiscountStateEnum.PUBLISHED);
             if (numPublishedDiscount == 1) {    //1 -> discount just created
                 agreementServiceLight.setFirstDiscountPublishingDate(agreementEntity);
             }
@@ -162,6 +165,13 @@ public class DiscountService {
             throw new InvalidRequestException("Cannot publish a discount because the discount doesn't include today's date");
         }
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
+        long publishedDiscount = discountRepository.countByAgreementIdAndState(
+                agreementEntity.getId(), DiscountStateEnum.PUBLISHED);
+        if (publishedDiscount == MAX_NUMBER_PUBLISHED_DISCOUNT) {
+            throw new InvalidRequestException(
+                    "Cannot publish the discount because there are already " + MAX_NUMBER_PUBLISHED_DISCOUNT +
+                            " public ones");
+        }
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {

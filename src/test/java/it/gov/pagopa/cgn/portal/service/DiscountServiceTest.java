@@ -379,6 +379,36 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Publish_PublishSixthDiscount_Ok() {
+        String agreementId = agreementEntity.getId();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementId);
+        approveAgreement();  //simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        //publish discount
+        discountService.publishDiscount(agreementId, dbDiscount.getId());
+        //the first discount was already published. Starting with second
+        IntStream.range(2, 6).forEach(idx -> {
+            DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
+            DiscountEntity dbDiscountN = discountService.createDiscount(agreementId, discount);
+            long discountId = dbDiscountN.getId();
+            dbDiscountN = discountService.publishDiscount(agreementId, discountId);
+            Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscountN.getState());
+            long numPublished = discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED);
+            Assertions.assertEquals(idx, numPublished);
+            //sixth discount. Cannot publish more than 5 discount
+            if (idx == 6) {
+                Assertions.assertThrows(InvalidRequestException.class,
+                        () -> discountService.publishDiscount(agreementId, discountId));
+            }
+        });
+        Assertions.assertEquals(5,
+                discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED));
+    }
+
+    @Test
     void Publish_PublishApprovedAgreement_UpdateLastModifyDate() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
@@ -426,9 +456,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
 
     }
-
-
-
 
     private void approveAgreement() {
         agreementEntity.setState(AgreementStateEnum.APPROVED);
