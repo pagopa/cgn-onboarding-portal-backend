@@ -322,19 +322,17 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
         //publish discount
         final Long dbDiscountId = dbDiscount.getId();
-        Assertions.assertThrows(InvalidRequestException.class,
-                () -> discountService.publishDiscount(agreementId, dbDiscountId));
+        dbDiscount = discountService.publishDiscount(agreementId, dbDiscountId);
         agreementEntity = agreementService.findById(agreementId);
-        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
-        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertNotNull(agreementEntity.getFirstDiscountPublishingDate());
 
     }
 
     @Test
-    void Publish_PublishDiscountWithEndDateBeforeToday_Ok() {
+    void Publish_PublishDiscountWithEndAfterToday_ThrowInvalidRequestException() {
         final String agreementId = agreementEntity.getId();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity.setStartDate(LocalDate.now().minusDays(20));
         discountEntity.setEndDate(LocalDate.now().minusDays(2));
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
         agreementEntity = agreementService.requestApproval(agreementId);
