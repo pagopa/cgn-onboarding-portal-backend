@@ -98,7 +98,7 @@ public class AgreementService extends AgreementServiceLight {
         List<DiscountEntity> discounts = agreementEntity.getDiscountList();
         if (!CollectionUtils.isEmpty(discounts)) {
             discounts = discounts.stream()
-                    .filter(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()))
+                    .filter(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()) || DiscountStateEnum.SUSPENDED.equals(d.getState()))
                     .collect(Collectors.toList());
             agreementEntity.setDiscountList(discounts);
         }
