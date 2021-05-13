@@ -43,6 +43,6 @@ public class JwtTokenUtil {
         String[] splitToken = token.split("\\.");
         String unsignedToken = splitToken[0] + "." + splitToken[1] + ".";
 
-        return (Claims) Jwts.parser().parse(unsignedToken).getBody();
+        return (Claims) Jwts.parserBuilder().build().parse(unsignedToken).getBody();
     }
 }
