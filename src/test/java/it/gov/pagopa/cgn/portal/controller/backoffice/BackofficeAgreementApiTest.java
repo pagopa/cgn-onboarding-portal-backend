@@ -6,8 +6,6 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.service.DiscountService;
-import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -32,16 +31,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ProfileService profileService;
-
-    @Autowired
-    private DiscountService discountService;
-
-    private AgreementEntity pendingAgreement;
-
-    private DiscountEntity discountEntity;
 
     @BeforeEach
     void beforeEach() {
@@ -73,6 +62,53 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items[0].documents").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].documents", hasSize(2)));
 
+    }
+
+    @Test
+    void GetAgreements_GetAssignedToMeAgreements_Ok() throws Exception {
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
+        backofficeAgreementService.assignAgreement(agreementEntity.getId());
+        this.mockMvc.perform(
+                get(TestUtils.getAgreementRequestsWithStatusFilterPath("AssignedAgreement", Optional.of("Me"))))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.total").value(1));
+
+    }
+
+    @Test
+    void GetAgreements_GetAssignedToOtherAgreements_NotFound() throws Exception {
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
+        backofficeAgreementService.assignAgreement(agreementEntity.getId());
+        this.mockMvc.perform(
+                get(TestUtils.getAgreementRequestsWithStatusFilterPath("AssignedAgreement", Optional.of("Others"))))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.total").value(0));
+    }
+
+    @Test
+    void GetAgreements_GetPendingAgreement_NotFound() throws Exception {
+        AgreementTestObject agreementTestObject = createPendingAgreement();
+        AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
+        backofficeAgreementService.assignAgreement(agreementEntity.getId());
+        this.mockMvc.perform(
+                get(TestUtils.getAgreementRequestsWithStatusFilterPath("PendingAgreement", Optional.empty())))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isEmpty())
+                .andExpect(jsonPath("$.total").value(0));
     }
 
     @Test

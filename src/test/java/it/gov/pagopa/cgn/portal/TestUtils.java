@@ -33,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class TestUtils {
 
@@ -73,6 +74,14 @@ public class TestUtils {
     public static String getAuthenticatedHelpPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
+
+    public static String getAgreementRequestsWithStatusFilterPath(String state, Optional<String> assigneeOpt) {
+        StringBuilder path = new StringBuilder(AGREEMENT_REQUESTS_CONTROLLER_PATH);
+        path.append("?states=").append(state);
+        assigneeOpt.ifPresent(assignee -> path.append("&assignee=").append(assignee));
+        return path.toString();
+    }
+
 
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
