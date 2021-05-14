@@ -960,11 +960,15 @@ definitions:
     required:
       - documentType
       - documentUrl
+      - documentTimestamp
     properties:
       documentType:
         type: string
       documentUrl:
         type: string
+      documentTimestamp:
+        type: string
+        format: date-time
 
   ApiTokens:
     type: object
