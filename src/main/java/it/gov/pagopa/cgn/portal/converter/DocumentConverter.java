@@ -31,7 +31,7 @@ public class DocumentConverter extends AbstractConverter<DocumentEntity, Documen
                 Document dto = new Document();
                 dto.setDocumentType(entity.getDocumentType().getCode().toLowerCase());
                 dto.setDocumentUrl(entity.getDocumentUrl());
-                dto.setDocumentTimestamp(entity.getInsertTime());
+                dto.setDocumentTimestamp(entity.getInsertedDateTime());
                 return dto;
             };
 

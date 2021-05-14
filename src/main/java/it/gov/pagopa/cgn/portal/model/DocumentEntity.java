@@ -31,7 +31,7 @@ public class DocumentEntity extends BaseEntity {
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false)
     private AgreementEntity agreement;
 
-    public OffsetDateTime getInsertTime() {
+    public OffsetDateTime getInsertedDateTime() {
         return insertTime;
     }
 }

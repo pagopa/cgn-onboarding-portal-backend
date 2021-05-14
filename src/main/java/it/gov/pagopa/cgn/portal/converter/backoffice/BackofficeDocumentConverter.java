@@ -50,7 +50,7 @@ public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntit
     protected Function<DocumentEntity, Document> toDto =
             entity -> {
                 Document dto = new Document();
-                dto.setCreationDate(entity.getInsertTime().toLocalDate());
+                dto.setCreationDate(entity.getInsertedDateTime().toLocalDate());
                 dto.setDocumentType(
                         Optional.ofNullable(enumMap.get(entity.getDocumentType()))
                                 .orElseThrow(() -> getInvalidEnumMapping(entity.getDocumentType().getCode())));

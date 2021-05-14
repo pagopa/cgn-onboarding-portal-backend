@@ -69,6 +69,6 @@ class DocumentApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].documentType").value("agreement"))
                 .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].documentTimestamp").value(documentEntity.getInsertTime().toString()));;
+                .andExpect(jsonPath("$.items[0].documentTimestamp").value(documentEntity.getInsertedDateTime().toString()));;
     }
 }
