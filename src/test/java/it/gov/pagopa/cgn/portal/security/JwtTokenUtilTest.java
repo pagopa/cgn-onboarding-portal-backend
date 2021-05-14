@@ -58,7 +58,7 @@ public class JwtTokenUtilTest {
         Assert.assertTrue(jwtUser instanceof JwtOperatorUser);
         JwtOperatorUser operator = (JwtOperatorUser) jwtUser;
         Assert.assertEquals(CLAIM_KEY_MERCHANT_USER_TAX_CODE_EXAMPLE, operator.getUserTaxCode());
-        Assert.assertEquals(CLAIM_KEY_COMPANY_MERCHANT_TAX_CODE_EXAMPLE, operator.getMerchantTaxCode());
+        Assert.assertEquals(CLAIM_KEY_COMPANY_MERCHANT_TAX_CODE_EXAMPLE, operator.getCompanyTaxCode());
     }
 
     @Test
