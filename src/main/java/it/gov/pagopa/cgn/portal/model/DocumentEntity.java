@@ -8,7 +8,7 @@ import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "document")
@@ -31,7 +31,7 @@ public class DocumentEntity extends BaseEntity {
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false)
     private AgreementEntity agreement;
 
-    public LocalDate getInsertDate() {
-        return insertTime.toLocalDate();
+    public OffsetDateTime getInsertTime() {
+        return insertTime;
     }
 }

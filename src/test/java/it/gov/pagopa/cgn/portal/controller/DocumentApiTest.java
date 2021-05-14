@@ -7,9 +7,9 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,7 +59,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
     void GetDocuments_GetDocuments_Ok() throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
-        documentService.storeDocument(agreementEntity.getId(),
+        DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(),
                 DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
 
         this.mockMvc.perform(
@@ -68,6 +68,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].documentType").value("agreement"))
-                .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty());
+                .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].documentTimestamp").value(documentEntity.getInsertTime().toString()));;
     }
 }
