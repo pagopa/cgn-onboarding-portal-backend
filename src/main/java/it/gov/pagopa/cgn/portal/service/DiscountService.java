@@ -71,6 +71,10 @@ public class DiscountService {
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         }
+        // updating suspended discount: move to draft status
+        if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
+            dbEntity.setState(DiscountStateEnum.DRAFT);
+        }
 
         if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
             documentService.resetMerchantDocuments(agreementId);
@@ -162,6 +166,9 @@ public class DiscountService {
     private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
+        }
+        if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot publish a suspended discount");
         }
         if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
             throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
