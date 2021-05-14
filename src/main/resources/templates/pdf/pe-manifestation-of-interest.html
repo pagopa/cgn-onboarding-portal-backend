@@ -8,7 +8,7 @@
     <style type="text/css">
         @page {
             size: A4;
-            margin: 3cm;
+            margin: 2cm;
 
             @bottom-right {
                 content: counter(page);
@@ -132,6 +132,10 @@
             border-collapse: collapse;
         }
 
+        .table thead td {
+            font-style: italic;
+        }
+
         mark {
             background-color: #ffff00;
         }
@@ -214,6 +218,42 @@
             <div class="page-break"></div>
             <li>AGEVOLAZIONI PROPOSTE, TERMINI E CONDIZIONI D’USO</li>
             <table class="table mt">
+                <thead>
+                    <tr>
+                        <td>beni/servizi
+                            oggetto
+                            dell’agevola
+                            zione</td>
+                        <td>percentuale
+                            di sconto</td>
+                        <td>durata
+                            dell’agevola
+                            zione (se lo
+                            sconto è
+                            permanente,
+                            lasciare in
+                            bianco)</td>
+                        <td>condizioni
+                            aggiuntive</td>
+                        <td>codice
+                            sconto
+                            statico (per
+                            Operatori
+                            aderenti al
+                            Modello
+                            codice
+                            sconto
+                            statico di cui
+                            alla
+                            Documentazi
+                            one Tecnica)</td>
+                        <td>categoria
+                            merceologic
+                            a del/i bene/i
+                            oggetto di
+                            agevolazione</td>
+                    </tr>
+                </thead>
                 <tbody th:each="discount : ${discounts}">
                     <tr>
                         <td><span th:text="${discount.name}"></span></td>
