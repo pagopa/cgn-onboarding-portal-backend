@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
@@ -30,6 +31,17 @@ public class AgreementServiceLight {
     public void setInformationLastUpdateDate(AgreementEntity agreementEntity) {
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());
         agreementRepository.save(agreementEntity);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void setDraftAgreementFromRejected(AgreementEntity agreement) {
+        agreement.setState(AgreementStateEnum.DRAFT);
+        agreement.setRequestApprovalTime(null);
+        agreement.setStartDate(null);
+        agreement.setEndDate(null);
+        agreement.setRejectReasonMessage(null);
+        agreement.setBackofficeAssignee(null);
+        agreementRepository.save(agreement);
     }
 
     @Autowired

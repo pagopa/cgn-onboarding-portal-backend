@@ -4,10 +4,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
@@ -17,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -572,6 +570,34 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
         Assertions.assertEquals(80, dbDiscount.getDiscountValue());
 
+    }
+
+    @Test
+    void Update_UpdateDiscountOfRejectedAgreement_StateAgreementUpdateToDraft() {
+        String agreementId = agreementEntity.getId();
+        setAdminAuth();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementId, discountEntity);
+        agreementEntity = agreementService.requestApproval(agreementId);
+        agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
+        agreementEntity = backofficeAgreementService.rejectAgreement(agreementId, "rejected reason message");
+
+        DiscountEntity UpdatingDiscountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        UpdatingDiscountEntity.setDiscountValue(55);
+        discountEntity = discountService.updateDiscount(agreementId, discountEntity.getId(), UpdatingDiscountEntity);
+
+        Assertions.assertEquals(UpdatingDiscountEntity.getDiscountValue(), discountEntity.getDiscountValue());
+        agreementEntity = agreementService.findById(agreementId);
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
+        Assertions.assertNull(agreementEntity.getStartDate());
+        Assertions.assertNull(agreementEntity.getEndDate());
+        Assertions.assertNull(agreementEntity.getRejectReasonMessage());
+        Assertions.assertNull(agreementEntity.getRequestApprovalTime());
+        Assertions.assertNull(agreementEntity.getBackofficeAssignee());
+        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreementId);
+        Assertions.assertTrue(CollectionUtils.isEmpty(documents));
     }
 
     private void approveAgreement() {

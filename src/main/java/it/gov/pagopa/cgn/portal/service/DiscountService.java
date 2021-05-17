@@ -79,6 +79,10 @@ public class DiscountService {
         if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
             documentService.resetMerchantDocuments(agreementId);
         }
+        if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
+            agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
+            documentService.resetAllDocuments(agreementId);
+        }
 
        return discountRepository.save(dbEntity);
     }
