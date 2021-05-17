@@ -55,8 +55,9 @@ public class IntegrationAbstractTest {
 
         public static GenericContainer<?> greenMailContainer =
                 new GenericContainer<>(DockerImageName.parse("greenmail/standalone:1.6.3"))
-                        .withExposedPorts(3025);
-
+                        .withExposedPorts(3025)
+                        //override timeout to 5 seconds
+                        .withEnv("GREENMAIL_OPTS", "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
 
         private static void startContainers() {
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
