@@ -88,6 +88,10 @@ public class AgreementService extends AgreementServiceLight {
         if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             setInformationLastUpdateDate(agreementEntity);
         }
+        if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
+            setDraftAgreementFromRejected(agreementEntity);
+            documentService.resetAllDocuments(agreementEntity.getId());
+        }
         agreementRepository.save(agreementEntity);
         return imageUrl;
     }
