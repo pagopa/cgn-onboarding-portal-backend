@@ -44,12 +44,18 @@ public class ProfileService {
     public ProfileEntity updateProfile(String agreementId, ProfileEntity newUpdateProfile) {
         ProfileEntity profileEntity = getProfileFromAgreementId(agreementId);
         updateConsumer.accept(newUpdateProfile, profileEntity);
-        if (AgreementStateEnum.APPROVED.equals(profileEntity.getAgreement().getState())) {
+        AgreementEntity agreementEntity = profileEntity.getAgreement();
+        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(profileEntity.getAgreement());
         }
 
         if (AgreementStateEnum.DRAFT.equals(profileEntity.getAgreement().getState())) {
             documentService.resetMerchantDocuments(agreementId);
+        }
+
+        if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
+            agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
+            documentService.resetAllDocuments(agreementId);
         }
 
         return profileRepository.save(profileEntity);
