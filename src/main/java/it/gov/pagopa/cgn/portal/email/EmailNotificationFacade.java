@@ -124,7 +124,6 @@ public class EmailNotificationFacade {
         }
     }
 
-    // TODO expiration checking process to be implemented
     public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();
