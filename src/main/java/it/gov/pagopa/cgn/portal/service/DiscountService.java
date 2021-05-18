@@ -71,6 +71,7 @@ public class DiscountService {
         // if state is Published, last modify must be updated because public information was modified
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
+            dbEntity.setExpirationWarningSentDateTime(null);
         }
         // updating suspended discount: move to draft status
         if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
