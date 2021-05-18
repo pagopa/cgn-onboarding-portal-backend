@@ -67,8 +67,8 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "suspended_reason_message", length = 250)
     private String suspendedReasonMessage;
 
-    @Column(name = "expiration_15_days_warning")
-    private OffsetDateTime expiration15DaysWarning;
+    @Column(name = "expiration_warning_sent")
+    private OffsetDateTime expirationWarningSentDateTime;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)

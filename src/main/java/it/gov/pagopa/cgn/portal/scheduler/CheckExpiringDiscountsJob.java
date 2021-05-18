@@ -1,46 +1,57 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.time.OffsetDateTime;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
 
 @Component
 @Slf4j
 public class CheckExpiringDiscountsJob implements Job {
 
-    private final EmailNotificationFacade emailNotificationFacade;
-    private final DiscountRepository discountRepository;
+    private static final String JOB_LOG_NAME = "Expiring Discounts Notification Job ";
 
+    private final DiscountService discountService;
+    private final DiscountRepository discountRepository;
+    private final ConfigProperties configProperties;
 
     @Autowired
-    public CheckExpiringDiscountsJob(EmailNotificationFacade emailNotificationFacade, DiscountRepository discountRepository) {
-        this.emailNotificationFacade = emailNotificationFacade;
+    public CheckExpiringDiscountsJob(DiscountService discountService, DiscountRepository discountRepository,
+                                     ConfigProperties configProperties) {
+        this.discountService = discountService;
         this.discountRepository = discountRepository;
+        this.configProperties = configProperties;
     }
 
+    @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public void execute(JobExecutionContext context) {
-        log.info("Expiring Discounts Notification Job: started");
 
-        discountRepository.findUnnotifiedExpiringDiscounts().forEach(this::processDiscount);
+        log.info(JOB_LOG_NAME + "started");
+        Instant start = Instant.now();
+        List<DiscountEntity> discountList =
+                discountRepository.findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
+                        DiscountStateEnum.PUBLISHED,
+                        LocalDate.now().plusDays(configProperties.getExpiringDiscountsJobDays()));
 
-        log.info("Expiring Discounts Notification Job: ended");
+        if (!CollectionUtils.isEmpty(discountList)) {
+            log.info("Found " + discountList.size() + " discounts to notify");
+            discountList.forEach(discountService::sendNotificationDiscountExpiring);
+        }
+        Instant end = Instant.now();
+        log.info(JOB_LOG_NAME + "ended in " + Duration.between(start, end).getSeconds() + " seconds");
     }
 
-    @Transactional
-    protected void processDiscount(DiscountEntity discount) {
-        String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
-
-        emailNotificationFacade.notifyMerchantDiscountExpiring(referentEmailAddress, discount.getName());
-
-        discount.setExpiration15DaysWarning(OffsetDateTime.now());
-        discountRepository.save(discount);
-    }
 }

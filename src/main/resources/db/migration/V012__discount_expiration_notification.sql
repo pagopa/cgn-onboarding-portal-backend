@@ -1,2 +1,2 @@
 ALTER TABLE discount
-    ADD COLUMN expiration_15_days_warning TIMESTAMPTZ;
+    ADD COLUMN expiration_warning_sent TIMESTAMPTZ;
