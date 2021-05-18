@@ -78,6 +78,12 @@ public class ConfigProperties {
     @Value("${cgn.apim.subscriptionKeyPrefix}")
     private String apimSubscriptionKeyPrefix;
 
+    @Value("${check.expiring.discounts.job.cron}")
+    private String expiringDiscountsJobCronExpression;
+
+    @Value("${check.expiring.discounts.job.days}")
+    private int expiringDiscountsJobDays;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }
