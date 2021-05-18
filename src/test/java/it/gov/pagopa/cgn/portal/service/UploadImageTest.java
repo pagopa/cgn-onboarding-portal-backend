@@ -5,20 +5,23 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @SpringBootTest
@@ -70,5 +73,26 @@ class UploadImageTest extends IntegrationAbstractTest {
                 () ->agreementService.uploadImage("invalidAgreementId", multipartFile));
         agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertNull(agreementEntity.getImageUrl());
+    }
+
+    @Test
+    void UploadImage_UploadImageOfRejectedAgreement_StateAgreementUpdateToDraft() {
+        AgreementTestObject testObject = createPendingAgreement();
+        AgreementEntity agreementEntity = testObject.getAgreementEntity();
+        agreementEntity = backofficeAgreementService.rejectAgreement(agreementEntity.getId(), "reason");
+
+        String imageUrl = agreementService.uploadImage(agreementEntity.getId(), multipartFile);
+        Assertions.assertNotNull(imageUrl);
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
+        Assertions.assertNull(agreementEntity.getStartDate());
+        Assertions.assertNull(agreementEntity.getEndDate());
+        Assertions.assertNull(agreementEntity.getRejectReasonMessage());
+        Assertions.assertNull(agreementEntity.getRequestApprovalTime());
+        Assertions.assertNull(agreementEntity.getBackofficeAssignee());
+        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreementEntity.getId());
+        Assertions.assertTrue(CollectionUtils.isEmpty(documents));
+
     }
 }
