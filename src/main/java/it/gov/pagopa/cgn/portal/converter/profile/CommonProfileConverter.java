@@ -8,8 +8,10 @@ import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
+import java.math.BigDecimal;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -34,22 +36,33 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     .map(Map.Entry::getKey)
                     .findFirst().orElseThrow();
 
+    protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity)-> {
+        if (coordinates == null) {
+            throw new InvalidRequestException("Coordinates must be valid");
+        }
+        addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
+        addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
+    };
+
+    protected Function<AddressEntity, Coordinates> getCoordinatesFromEntity = addressEntity -> {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setLatitude(BigDecimal.valueOf(addressEntity.getLatitude()));
+        coordinates.setLongitude(BigDecimal.valueOf(addressEntity.getLongitude()));
+        return coordinates;
+    };
+
     protected BiFunction<Address, ProfileEntity, AddressEntity> addressToEntity = (addressDto, profileEntity) -> {
         AddressEntity entity = new AddressEntity();
-        entity.setStreet(addressDto.getStreet());
-        entity.setCity(addressDto.getCity());
-        entity.setDistrict(addressDto.getDistrict());
-        entity.setZipCode(addressDto.getZipCode());
+        entity.setFullAddress(addressDto.getFullAddress());
         entity.setProfile(profileEntity);
+        setCoordinatesFromDto.accept(addressDto.getCoordinates(), entity);
         return entity;
     };
 
     protected Function<AddressEntity, Address> addressToDto = entity -> {
         Address dto = new Address();
-        dto.setCity(entity.getCity());
-        dto.setStreet(entity.getStreet());
-        dto.setDistrict(entity.getDistrict());
-        dto.setZipCode(entity.getZipCode());
+        dto.setFullAddress(entity.getFullAddress());
+        dto.setCoordinates(getCoordinatesFromEntity.apply(entity));
         return dto;
     };
 

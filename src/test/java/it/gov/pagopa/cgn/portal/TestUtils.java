@@ -17,15 +17,13 @@ import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-import it.gov.pagopa.cgnonboardingportal.model.Address;
-import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -119,10 +117,7 @@ public class TestUtils {
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
         addressEntity.setProfile(profileEntity);
-        addressEntity.setStreet("GARIBALDI 1");
-        addressEntity.setCity("ROME");
-        addressEntity.setDistrict("RM");
-        addressEntity.setZipCode("00100");
+        addressEntity.setFullAddress("GARIBALDI 1 00100 Rome RM");
         addressEntity.setLatitude(42.92439);
         addressEntity.setLongitude(12.50181);
         List<AddressEntity> list = new ArrayList<>(1);
@@ -132,10 +127,11 @@ public class TestUtils {
 
     public static List<Address> createSampleAddressDto() {
         Address address = new Address();
-        address.setStreet("GARIBALDI 1");
-        address.setCity("ROME");
-        address.setDistrict("RM");
-        address.setZipCode("00100");
+        address.setFullAddress("GARIBALDI 1 00100 Rome RM");
+        Coordinates coordinates = new Coordinates();
+        coordinates.setLongitude(BigDecimal.valueOf(9.1890953));
+        coordinates.setLatitude(BigDecimal.valueOf(45.489751));
+        address.setCoordinates(coordinates);
         return Collections.singletonList(address);
     }
 
