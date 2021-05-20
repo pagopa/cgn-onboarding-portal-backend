@@ -908,7 +908,7 @@ definitions:
         format: date
       suspendedReasonMessage:
         type: string
-        maxLength: 5
+        maxLength: 250
   DiscountState:
     type: string
     enum:
