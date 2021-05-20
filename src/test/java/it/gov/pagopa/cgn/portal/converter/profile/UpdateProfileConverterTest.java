@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
+import java.math.BigDecimal;
 import java.util.stream.IntStream;
 @RunWith(SpringRunner.class)
 public class UpdateProfileConverterTest {
@@ -64,10 +66,10 @@ public class UpdateProfileConverterTest {
         IntStream.range(0, profileEntity.getAddressList().size()).forEach(idx -> {
             Address dtoAddress = offlineChannel.getAddresses().get(idx);
             AddressEntity entityAddress = profileEntity.getAddressList().get(idx);
-            Assert.assertEquals(dtoAddress.getCity(), entityAddress.getCity());
-            Assert.assertEquals(dtoAddress.getStreet(), entityAddress.getStreet());
-            Assert.assertEquals(dtoAddress.getDistrict(), entityAddress.getDistrict());
-            Assert.assertEquals(dtoAddress.getZipCode(), entityAddress.getZipCode());
+            Assert.assertEquals(dtoAddress.getFullAddress(), entityAddress.getFullAddress());
+            Assert.assertNotNull(dtoAddress.getCoordinates());
+            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(), BigDecimal.valueOf(entityAddress.getLatitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(), BigDecimal.valueOf(entityAddress.getLongitude()));
         });
     }
 
@@ -93,13 +95,26 @@ public class UpdateProfileConverterTest {
         IntStream.range(0, profileEntity.getAddressList().size()).forEach(idx -> {
             Address dtoAddress = bothChannels.getAddresses().get(idx);
             AddressEntity entityAddress = profileEntity.getAddressList().get(idx);
-            Assert.assertEquals(dtoAddress.getCity(), entityAddress.getCity());
-            Assert.assertEquals(dtoAddress.getStreet(), entityAddress.getStreet());
-            Assert.assertEquals(dtoAddress.getDistrict(), entityAddress.getDistrict());
-            Assert.assertEquals(dtoAddress.getZipCode(), entityAddress.getZipCode());
+            Assert.assertEquals(dtoAddress.getFullAddress(), entityAddress.getFullAddress());
+            Assert.assertNotNull(dtoAddress.getCoordinates());
+            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(), BigDecimal.valueOf(entityAddress.getLatitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(), BigDecimal.valueOf(entityAddress.getLongitude()));
         });
     }
 
+    @Test
+    public void Convert_ConvertUpdateProfileWithoutCoordinatesBothDTOToEntity_Ok() {
+        UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
+        BothChannels bothChannels = new BothChannels();
+        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
+        bothChannels.setAddresses(TestUtils.createSampleAddressDto());
+        bothChannels.getAddresses().forEach(a -> a.setCoordinates(null));
+        bothChannels.setDiscountCodeType(DiscountCodeType.API);
+        dto.setSalesChannel(bothChannels);
+        Assert.assertThrows(InvalidRequestException.class, () ->updateProfileConverter.toEntity(dto));
+
+    }
 
     private void checkCommonsUpdateProfileAssertions(UpdateProfile dto, ProfileEntity profileEntity) {
         Assert.assertEquals(dto.getName(), profileEntity.getName());

@@ -156,7 +156,7 @@ public class DocumentService {
     private ByteArrayOutputStream renderManifestationOfInterestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId).orElseThrow(() -> new RuntimeException("no profile"));
 
-        List<String> addressList = profileEntity.getAddressList().stream().map(address -> address.getStreet() + ", " + address.getZipCode() + ", " + address.getCity() + " (" + address.getDistrict() + ")").collect(Collectors.toList());
+        List<String> addressList = profileEntity.getAddressList().stream().map(AddressEntity::getFullAddress).collect(Collectors.toList());
 
         List<DiscountEntity> discounts = discountRepository.findByAgreementId(agreementId);
         List<RenderableDiscount> renderableDiscounts = discounts.stream().map(RenderableDiscount::fromEntity).collect(Collectors.toList());
