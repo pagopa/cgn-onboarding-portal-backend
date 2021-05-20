@@ -906,6 +906,9 @@ definitions:
       creationDate:
         type: string
         format: date
+      suspendedReasonMessage:
+        type: string
+        maxLength: 5
   DiscountState:
     type: string
     enum:
