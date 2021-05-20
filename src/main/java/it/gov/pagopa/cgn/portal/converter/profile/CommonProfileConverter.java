@@ -9,10 +9,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
 import java.math.BigDecimal;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -79,14 +76,18 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
                 physicalStoreChannel.setAddresses(
-                            entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                            entity.getAddressList().stream()
+                                    .sorted(getAddressComparator())
+                                    .map(addressToDto).collect(Collectors.toList()));
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
                 bothChannels.setAddresses(
-                            entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                            entity.getAddressList().stream()
+                                    .sorted(getAddressComparator())
+                                    .map(addressToDto).collect(Collectors.toList()));
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 return bothChannels;
             default:
@@ -139,6 +140,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 break;
         }
     };
+
+    private Comparator<AddressEntity> getAddressComparator() {
+        return Comparator.comparing(AddressEntity::getId);
+    }
 
     private void throwInvalidSalesChannel() {
         throw new InvalidRequestException("SalesChannel is invalid");
