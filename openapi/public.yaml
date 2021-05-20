@@ -45,6 +45,7 @@ definitions:
       - emailAddress
       - category
       - message
+      - recaptchaToken
     properties:
       legalName:
         type: string
@@ -71,6 +72,8 @@ definitions:
       message:
         type: string
         maxLength: 200
+      recaptchaToken:
+        type: string
 
 
 responses:
