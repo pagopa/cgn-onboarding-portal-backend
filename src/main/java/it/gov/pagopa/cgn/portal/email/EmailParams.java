@@ -20,6 +20,7 @@ public class EmailParams {
     private final String body;
     private final Resource logo;
     private final String logoName;
+    private final String failureMessage;
 
     public String toLightString() {
         return "EmailParams{" +

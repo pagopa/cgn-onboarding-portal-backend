@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -20,7 +21,18 @@ public class EmailNotificationService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendMessage(EmailParams emailParams) throws MessagingException {
+    public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams) {
+        return CompletableFuture.supplyAsync( () -> {
+            try {
+                sendSyncMessage(emailParams);
+            } catch (MessagingException e) {
+                log.error(emailParams.getFailureMessage(), e);
+            }
+            return null;
+        });
+    }
+
+    public void sendSyncMessage(EmailParams emailParams) throws MessagingException {
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
