@@ -78,6 +78,12 @@ public class ConfigProperties {
     @Value("${cgn.apim.subscriptionKeyPrefix}")
     private String apimSubscriptionKeyPrefix;
 
+    @Value("${cgn.recaptcha.secret-key}")
+    private String recaptchaSecretKey;
+
+    @Value("${cgn.recaptcha.google-host}")
+    private String recaptchaGoogleHost;
+
     @Value("${check.expiring.discounts.job.cron}")
     private String expiringDiscountsJobCronExpression;
 
