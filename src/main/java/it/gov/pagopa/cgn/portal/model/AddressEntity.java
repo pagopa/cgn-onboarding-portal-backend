@@ -24,27 +24,14 @@ public class AddressEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Column(name = "street")
-    private String street;
+    @Column(name = "full_address")
+    private String fullAddress;
 
     @NotNull
-    @NotBlank
-    @Column(name = "zip_code", length = 5)
-    private String zipCode;
-
-    @NotNull
-    @NotBlank
-    @Column(name = "city")
-    private String city;
-
-    @NotNull
-    @NotBlank
-    @Column(name = "district", length = 2)
-    private String district;
-
     @Column(name = "latitude")
     private Double latitude;
 
+    @NotNull
     @Column(name = "longitude")
     private Double longitude;
 

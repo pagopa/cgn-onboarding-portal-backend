@@ -8,9 +8,8 @@ import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -34,22 +33,33 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     .map(Map.Entry::getKey)
                     .findFirst().orElseThrow();
 
+    protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity)-> {
+        if (coordinates == null) {
+            throw new InvalidRequestException("Coordinates must be valid");
+        }
+        addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
+        addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
+    };
+
+    protected Function<AddressEntity, Coordinates> getCoordinatesFromEntity = addressEntity -> {
+        Coordinates coordinates = new Coordinates();
+        coordinates.setLatitude(BigDecimal.valueOf(addressEntity.getLatitude()));
+        coordinates.setLongitude(BigDecimal.valueOf(addressEntity.getLongitude()));
+        return coordinates;
+    };
+
     protected BiFunction<Address, ProfileEntity, AddressEntity> addressToEntity = (addressDto, profileEntity) -> {
         AddressEntity entity = new AddressEntity();
-        entity.setStreet(addressDto.getStreet());
-        entity.setCity(addressDto.getCity());
-        entity.setDistrict(addressDto.getDistrict());
-        entity.setZipCode(addressDto.getZipCode());
+        entity.setFullAddress(addressDto.getFullAddress());
         entity.setProfile(profileEntity);
+        setCoordinatesFromDto.accept(addressDto.getCoordinates(), entity);
         return entity;
     };
 
     protected Function<AddressEntity, Address> addressToDto = entity -> {
         Address dto = new Address();
-        dto.setCity(entity.getCity());
-        dto.setStreet(entity.getStreet());
-        dto.setDistrict(entity.getDistrict());
-        dto.setZipCode(entity.getZipCode());
+        dto.setFullAddress(entity.getFullAddress());
+        dto.setCoordinates(getCoordinatesFromEntity.apply(entity));
         return dto;
     };
 
@@ -66,14 +76,18 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
                 physicalStoreChannel.setAddresses(
-                            entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                            entity.getAddressList().stream()
+                                    .sorted(getAddressComparator())
+                                    .map(addressToDto).collect(Collectors.toList()));
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
                 bothChannels.setAddresses(
-                            entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                            entity.getAddressList().stream()
+                                    .sorted(getAddressComparator())
+                                    .map(addressToDto).collect(Collectors.toList()));
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 return bothChannels;
             default:
@@ -126,6 +140,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 break;
         }
     };
+
+    private Comparator<AddressEntity> getAddressComparator() {
+        return Comparator.comparing(AddressEntity::getId);
+    }
 
     private void throwInvalidSalesChannel() {
         throw new InvalidRequestException("SalesChannel is invalid");

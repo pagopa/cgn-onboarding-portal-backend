@@ -26,21 +26,21 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         return entity;
     };
     protected Function<ProfileEntity, Profile> toDto = entity -> {
-        Profile dto = new Profile();
-        dto.setId(String.valueOf(entity.getId()));
-        dto.setTaxCodeOrVat(entity.getTaxCodeOrVat());
-        dto.setFullName(entity.getFullName());
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
-        dto.setPecAddress(entity.getPecAddress());
-        dto.setReferent(this.referentConverter.toDto(entity.getReferent()));
-        dto.setSalesChannel(this.salesChannelToDto.apply(entity));
-        dto.setAgreementId(entity.getAgreement().getId());
-        dto.setTelephoneNumber(entity.getTelephoneNumber());
-        dto.setLegalRepresentativeFullName(entity.getLegalRepresentativeFullName());
-        dto.setLegalOffice(entity.getLegalOffice());
-        dto.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
-        return dto;
+        Profile profile = new Profile();
+        profile.setId(String.valueOf(entity.getId()));
+        profile.setTaxCodeOrVat(entity.getTaxCodeOrVat());
+        profile.setFullName(entity.getFullName());
+        profile.setName(entity.getName());
+        profile.setDescription(entity.getDescription());
+        profile.setPecAddress(entity.getPecAddress());
+        profile.setReferent(this.referentConverter.toDto(entity.getReferent()));
+        profile.setSalesChannel(this.salesChannelToDto.apply(entity));
+        profile.setAgreementId(entity.getAgreement().getId());
+        profile.setTelephoneNumber(entity.getTelephoneNumber());
+        profile.setLegalRepresentativeFullName(entity.getLegalRepresentativeFullName());
+        profile.setLegalOffice(entity.getLegalOffice());
+        profile.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
+        return profile;
     };
 
     @Autowired
