@@ -59,7 +59,7 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
     protected List<Predicate> addFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotEmpty(filter.getProfileFullName())) {
-            predicateList.add(cb.like(cb.upper(root.get("profile").get("fullName")),
+            predicateList.add(cb.like(cb.upper(getProfileFullNamePath(root)),
                     toFullLikeUpperCaseString(filter.getProfileFullName())));
         }
         addFiltersDatePredicate(root, cb, predicateList);
@@ -76,5 +76,9 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
 
     protected String toFullLikeUpperCaseString(String value) {
         return toFullLikeString(value).toUpperCase();
+    }
+
+    protected Path<String> getProfileFullNamePath(Root<AgreementEntity> root) {
+        return root.get("profile").get("fullName");
     }
 }

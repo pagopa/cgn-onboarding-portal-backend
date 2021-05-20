@@ -2,10 +2,8 @@ package it.gov.pagopa.cgn.portal;
 
 import com.azure.core.http.HttpHeaders;
 import com.azure.core.http.HttpResponse;
-import com.azure.resourcemanager.apimanagement.ApiManagementManager;
 import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionContractInner;
 import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionKeysContractInner;
-import com.azure.resourcemanager.apimanagement.implementation.SubscriptionKeysContractImpl;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionContract;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionKeysContract;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionState;
@@ -19,6 +17,7 @@ import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -80,7 +79,10 @@ public class TestUtils {
         return path.toString();
     }
 
-
+    public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum, Sort.Direction direction) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() +
+                "&sortDirection=" + direction.name();
+    }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
@@ -238,7 +240,7 @@ public class TestUtils {
     public static DocumentEntity createDocument(AgreementEntity agreementEntity, DocumentTypeEnum documentTypeEnum) {
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setDocumentType(documentTypeEnum);
-        documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode());
+        documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode() + agreementEntity.getId());
         documentEntity.setAgreement(agreementEntity);
         return documentEntity;
     }
