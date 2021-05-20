@@ -932,6 +932,7 @@ definitions:
     properties:
       fullAddress:
         type: string
+        minLength: 10
       coordinates:
         $ref: '#/definitions/Coordinates'
 

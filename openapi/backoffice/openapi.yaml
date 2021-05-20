@@ -670,6 +670,7 @@ definitions:
             minItems: 1
             items:
               type: string
+              minLength: 10
 
   BothChannels:
     allOf:
@@ -686,6 +687,7 @@ definitions:
             minItems: 1
             items:
               type: string
+              minLength: 10
 
   SalesChannelType:
     type: string
