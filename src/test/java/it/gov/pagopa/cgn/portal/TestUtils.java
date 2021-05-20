@@ -176,6 +176,7 @@ public class TestUtils {
         helpRequest.setLegalName("PagoPa");
         helpRequest.setReferentFirstName("Me");
         helpRequest.setReferentLastName("You");
+        helpRequest.setRecaptchaToken("token");
         return helpRequest;
     }
 
