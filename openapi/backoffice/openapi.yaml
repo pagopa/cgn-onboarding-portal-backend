@@ -58,6 +58,8 @@ paths:
           format: date
         - $ref: '#/parameters/PageSize'
         - $ref: '#/parameters/PageNumber'
+        - $ref: '#/parameters/RequestColumnSort'
+        - $ref: '#/parameters/SortDirection'
       responses:
         200:
           description: List of agreements
@@ -320,7 +322,27 @@ parameters:
     enum:
       - Agreement
       - ManifestationOfInterest
-
+  RequestColumnSort:
+    name: sortColumn
+    in: query
+    description: Sort by column
+    required: false
+    type: string
+    enum:
+      - Operator
+      - RequestDate
+      - State
+      - Assignee
+  SortDirection:
+    name: sortDirection
+    in: query
+    description: Sort Direction
+    required: false
+    type: string
+    default: ASC
+    enum:
+      - ASC
+      - DESC
 definitions:
   Agreements:
     type: object

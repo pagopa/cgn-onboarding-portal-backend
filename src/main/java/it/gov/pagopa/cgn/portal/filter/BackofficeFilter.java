@@ -1,9 +1,11 @@
 package it.gov.pagopa.cgn.portal.filter;
 
 import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
+import it.gov.pagopa.cgn.portal.enums.BackofficeRequestSortColumnEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -27,10 +29,14 @@ public class BackofficeFilter implements Serializable {
 
     private Integer page;
 
+    private BackofficeRequestSortColumnEnum sortColumn;
+
+    private Sort.Direction sortDirection;
+
 
     public static BackofficeFilter getFilter(
             String state, String profileFullName, String assignee, LocalDate startDateFrom, LocalDate startDateTo,
-            Integer pageSize, Integer page) {
+            Integer pageSize, Integer page, String sortColumn, String sortDirection) {
 
         return BackofficeFilter.builder()
                 .agreementState(state)
@@ -39,7 +45,10 @@ public class BackofficeFilter implements Serializable {
                 .dateFrom(startDateFrom)
                 .dateTo(startDateTo)
                 .page(page)
-                .pageSize(pageSize).build();
+                .pageSize(pageSize)
+                .sortColumn(BackofficeRequestSortColumnEnum.fromValue(sortColumn))
+                .sortDirection(Sort.Direction.valueOf(sortDirection))
+                .build();
     }
 
     public static BackofficeFilter getFilter(

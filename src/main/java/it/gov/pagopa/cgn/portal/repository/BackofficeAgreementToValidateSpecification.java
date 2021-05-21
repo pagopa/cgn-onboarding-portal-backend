@@ -4,10 +4,12 @@ package it.gov.pagopa.cgn.portal.repository;
 import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.criteria.internal.OrderImpl;
+import org.springframework.data.domain.Sort;
 
 import javax.persistence.criteria.*;
 import java.time.LocalDate;
@@ -43,6 +45,10 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
     @Override
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
         Path<OffsetDateTime> dateExpression = getRequestApprovalTimePath(root);
+
+        if (filter.getSortColumn() != null) {
+            return getOrderByFilter(root, cb);
+        }
         // order by requestApprovalTime desc
         if (StringUtils.isBlank(currentUser)) {
             return new OrderImpl(dateExpression, direction.isAscending());
@@ -54,6 +60,29 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
                 .when(cb.isNotNull(getBackofficeAssigneePath(root)), LocalDate.now().plusYears(10))
                 // after agreements assigned to current user, the agreements not assigned
                 .otherwise(dateExpression), direction.isAscending());
+    }
+
+    private Order getOrderByFilter(Root<AgreementEntity> root, CriteriaBuilder cb) {
+        switch (filter.getSortColumn()) {
+            case ASSIGNEE:
+                return new OrderImpl(getBackofficeAssigneePath(root), isSortAscending());
+            case STATE:
+                        /* if order direction is ASC --> first rows with assignee null and then other,
+                            otherwise first rows with assignee not null and then others
+                         */
+                return new OrderImpl(
+                        cb.selectCase().when(cb.isNull(getBackofficeAssigneePath(root)), 1)
+                                .otherwise(2), isSortAscending());
+            case OPERATOR:
+                return new OrderImpl(getProfileFullNamePath(root), isSortAscending());
+            case REQUEST_DATE:
+                return new OrderImpl(getRequestApprovalTimePath(root), isSortAscending());
+        }
+        throw new InvalidRequestException("Invalid sort column");
+    }
+
+    private boolean isSortAscending() {
+        return Sort.Direction.ASC.equals(filter.getSortDirection());
     }
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
