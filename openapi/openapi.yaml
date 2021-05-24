@@ -938,6 +938,9 @@ definitions:
       creationDate:
         type: string
         format: date
+      suspendedReasonMessage:
+        type: string
+        maxLength: 250
   DiscountState:
     type: string
     enum:
@@ -959,25 +962,26 @@ definitions:
   Address:
     type: object
     required:
-      - street
-      - zipCode
-      - city
-      - district
+      - fullAddress
+      - coordinates
     properties:
-      street:
+      fullAddress:
         type: string
-        maxLength: 100
-      zipCode:
-        type: string
-        minLength: 5
-        maxLength: 5
-      city:
-        type: string
-        maxLength: 100
-      district:
-        type: string
-        minLength: 2
-        maxLength: 2
+        minLength: 10
+        maxLength: 500
+      coordinates:
+        $ref: '#/definitions/Coordinates'
+
+  Coordinates:
+    type: object
+    required:
+      - latitude
+      - longitude
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
 
   Documents:
     type: object
@@ -994,11 +998,15 @@ definitions:
     required:
       - documentType
       - documentUrl
+      - documentTimestamp
     properties:
       documentType:
         type: string
       documentUrl:
         type: string
+      documentTimestamp:
+        type: string
+        format: date-time
 
   ApiTokens:
     type: object

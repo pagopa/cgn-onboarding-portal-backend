@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -25,10 +26,13 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountService {
 
+    private static final int MAX_NUMBER_PUBLISHED_DISCOUNT = 5;
+
     private final DiscountRepository discountRepository;
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileService profileService;
     private final EmailNotificationFacade emailNotificationFacade;
+    private final DocumentService documentService;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -58,7 +62,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
@@ -67,7 +71,21 @@ public class DiscountService {
         // if state is Published, last modify must be updated because public information was modified
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
+            dbEntity.setExpirationWarningSentDateTime(null);
         }
+        // updating suspended discount: move to draft status
+        if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
+            dbEntity.setState(DiscountStateEnum.DRAFT);
+        }
+
+        if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
+            documentService.resetMerchantDocuments(agreementId);
+        }
+        if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
+            agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
+            documentService.resetAllDocuments(agreementId);
+        }
+
        return discountRepository.save(dbEntity);
     }
 
@@ -88,7 +106,8 @@ public class DiscountService {
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         // check if exists almost one discount already published
         if (agreementEntity.getFirstDiscountPublishingDate() == null) {
-            long numPublishedDiscount = discountRepository.countPublishedDiscountByAgreementId(agreementId);
+            long numPublishedDiscount = discountRepository.countByAgreementIdAndState(
+                    agreementId, DiscountStateEnum.PUBLISHED);
             if (numPublishedDiscount == 1) {    //1 -> discount just created
                 agreementServiceLight.setFirstDiscountPublishingDate(agreementEntity);
             }
@@ -99,9 +118,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
         DiscountEntity discount = findById(discountId);
-        if (!discount.getAgreement().getId().equals(agreementId)) {
-            throw new InvalidRequestException("Discount not correspond with agreement id provided");
-        }
+        checkDiscountRelatedSameAgreement(discount, agreementId);
         if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
             throw new InvalidRequestException("Cannot suspend a discount not Public");
         }
@@ -115,13 +132,24 @@ public class DiscountService {
         return discount;
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void sendNotificationDiscountExpiring(DiscountEntity discount) {
+        String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
+
+        emailNotificationFacade.notifyMerchantDiscountExpiring(referentEmailAddress, discount.getName());
+        discount.setExpirationWarningSentDateTime(OffsetDateTime.now());
+        discountRepository.save(discount);
+    }
+
     @Autowired
     public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
-                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade) {
+                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
+                           DocumentService documentService) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.documentService = documentService;
     }
 
 
@@ -154,14 +182,24 @@ public class DiscountService {
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
         }
+        if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot publish a suspended discount");
+        }
         if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
             throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
         }
 
-        if (!isContainsToday(discount.getStartDate(), discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish a discount because the discount doesn't include today's date");
+        if (LocalDate.now().isAfter(discount.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish an expired discount");
         }
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
+        long publishedDiscount = discountRepository.countByAgreementIdAndState(
+                agreementEntity.getId(), DiscountStateEnum.PUBLISHED);
+        if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
+            throw new InvalidRequestException(
+                    "Cannot publish the discount because there are already " + MAX_NUMBER_PUBLISHED_DISCOUNT +
+                            " public ones");
+        }
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {

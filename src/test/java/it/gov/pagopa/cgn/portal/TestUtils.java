@@ -2,10 +2,8 @@ package it.gov.pagopa.cgn.portal;
 
 import com.azure.core.http.HttpHeaders;
 import com.azure.core.http.HttpResponse;
-import com.azure.resourcemanager.apimanagement.ApiManagementManager;
 import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionContractInner;
 import com.azure.resourcemanager.apimanagement.fluent.models.SubscriptionKeysContractInner;
-import com.azure.resourcemanager.apimanagement.implementation.SubscriptionKeysContractImpl;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionContract;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionKeysContract;
 import com.azure.resourcemanager.apimanagement.models.SubscriptionState;
@@ -17,15 +15,14 @@ import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-import it.gov.pagopa.cgnonboardingportal.model.Address;
-import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.model.*;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -33,6 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class TestUtils {
 
@@ -74,6 +72,17 @@ public class TestUtils {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
 
+    public static String getAgreementRequestsWithStatusFilterPath(String state, Optional<String> assigneeOpt) {
+        StringBuilder path = new StringBuilder(AGREEMENT_REQUESTS_CONTROLLER_PATH);
+        path.append("?states=").append(state);
+        assigneeOpt.ifPresent(assignee -> path.append("&assignee=").append(assignee));
+        return path.toString();
+    }
+
+    public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum, Sort.Direction direction) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() +
+                "&sortDirection=" + direction.name();
+    }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
@@ -110,10 +119,7 @@ public class TestUtils {
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
         addressEntity.setProfile(profileEntity);
-        addressEntity.setStreet("GARIBALDI 1");
-        addressEntity.setCity("ROME");
-        addressEntity.setDistrict("RM");
-        addressEntity.setZipCode("00100");
+        addressEntity.setFullAddress("GARIBALDI 1 00100 Rome RM");
         addressEntity.setLatitude(42.92439);
         addressEntity.setLongitude(12.50181);
         List<AddressEntity> list = new ArrayList<>(1);
@@ -123,10 +129,11 @@ public class TestUtils {
 
     public static List<Address> createSampleAddressDto() {
         Address address = new Address();
-        address.setStreet("GARIBALDI 1");
-        address.setCity("ROME");
-        address.setDistrict("RM");
-        address.setZipCode("00100");
+        address.setFullAddress("GARIBALDI 1 00100 Rome RM");
+        Coordinates coordinates = new Coordinates();
+        coordinates.setLongitude(BigDecimal.valueOf(9.1890953));
+        coordinates.setLatitude(BigDecimal.valueOf(45.489751));
+        address.setCoordinates(coordinates);
         return Collections.singletonList(address);
     }
 
@@ -171,6 +178,7 @@ public class TestUtils {
         helpRequest.setLegalName("PagoPa");
         helpRequest.setReferentFirstName("Me");
         helpRequest.setReferentLastName("You");
+        helpRequest.setRecaptchaToken("token");
         return helpRequest;
     }
 
@@ -232,7 +240,7 @@ public class TestUtils {
     public static DocumentEntity createDocument(AgreementEntity agreementEntity, DocumentTypeEnum documentTypeEnum) {
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setDocumentType(documentTypeEnum);
-        documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode());
+        documentEntity.setDocumentUrl("file_" + documentTypeEnum.getCode() + agreementEntity.getId());
         documentEntity.setAgreement(agreementEntity);
         return documentEntity;
     }

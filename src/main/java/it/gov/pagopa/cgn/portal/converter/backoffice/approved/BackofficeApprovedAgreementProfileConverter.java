@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,14 +36,8 @@ public class BackofficeApprovedAgreementProfileConverter extends AbstractConvert
         return dto;
     };
 
-    protected Function<AddressEntity, Address> addressToDto = entity -> {
-        Address dto = new Address();
-        dto.setCity(entity.getCity());
-        dto.setStreet(entity.getStreet());
-        dto.setDistrict(entity.getDistrict());
-        dto.setZipCode(entity.getZipCode());
-        return dto;
-    };
+    protected Function<List<AddressEntity>, List<String>> addressToDto = entityList ->
+            entityList.stream().map(AddressEntity::getFullAddress).collect(Collectors.toList());
 
     protected Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
         switch (entity.getSalesChannel()) {
@@ -55,15 +50,13 @@ public class BackofficeApprovedAgreementProfileConverter extends AbstractConvert
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
-                physicalStoreChannel.setAddresses(
-                        entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                physicalStoreChannel.setAddresses(addressToDto.apply(entity.getAddressList()));
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
-                bothChannels.setAddresses(
-                        entity.getAddressList().stream().map(addressToDto).collect(Collectors.toList()));
+                bothChannels.setAddresses(addressToDto.apply(entity.getAddressList()));
                 return bothChannels;
             default:
                 throw new IllegalArgumentException("Sales Channel not mapped");

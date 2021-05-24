@@ -139,6 +139,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void GetAgreement_GetAgreementWithAssignedStatus_AgreementFound() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
+        pendingAgreement = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
         BackofficeFilter filter = BackofficeFilter.builder()
                 .agreementState(AgreementState.ASSIGNEDAGREEMENT.getValue())
                 .build();
@@ -151,18 +152,6 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
     }
 
-    @Test
-    void GetAgreement_GetAgreementWithApprovedStatus_AgreementNotFound() {
-        createPendingAgreement();
-        BackofficeFilter filter = BackofficeFilter.builder()
-                .agreementState(AgreementState.APPROVEDAGREEMENT.getValue())
-                .build();
-        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
-        Assertions.assertEquals(0L, page.getTotalElements());
-        Assertions.assertEquals(0, page.getTotalPages());
-        Assertions.assertTrue(CollectionUtils.isEmpty(page.getContent()));
-
-    }
 
     @Test
     void AssignAgreement_AssignAgreement_Ok() {

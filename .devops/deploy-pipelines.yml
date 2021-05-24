@@ -97,4 +97,4 @@ steps:
       WebAppName: '$(webAppName)'
       DockerNamespace: '$(dockerNamespace)'
       DockerRepository: '$(imageRepository)'
-      DockerImageTag: '$(getpomversion.outputpomversion)'
+      DockerImageTag: '$(Build.BuildId)'

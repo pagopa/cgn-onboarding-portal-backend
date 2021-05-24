@@ -2,11 +2,10 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AddressEntity;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
@@ -188,7 +187,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreement = createPendingAgreement().getAgreementEntity();
         agreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementRepository.save(agreement);
-        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreement));
         agreement = backofficeAgreementService.approveAgreement(agreement.getId());
         ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
         profileEntity.setLegalOffice(legalOffice);
@@ -218,5 +217,52 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
     }
 
-}
+    @Test
+    void Update_UpdateProfileOfRejectedAgreement_StateAgreementUpdateToDraft() {
+        setAdminAuth();
+        final String legalOffice = "new_legalOffice";
+        AgreementEntity agreement = createPendingAgreement().getAgreementEntity();
+        agreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+        agreementRepository.save(agreement);
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
+        agreement = backofficeAgreementService.rejectAgreement(agreement.getId(), "a reason message");
 
+        ProfileEntity profileEntity = profileService.getProfile(agreement.getId()).orElseThrow();
+        profileEntity.setLegalOffice(legalOffice);
+        //added to avoid LazyInitializationException
+        profileEntity.setReferent(referentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
+        Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, agreement.getState());
+        Assertions.assertNull(agreement.getStartDate());
+        Assertions.assertNull(agreement.getEndDate());
+        Assertions.assertNull(agreement.getRejectReasonMessage());
+        Assertions.assertNull(agreement.getRequestApprovalTime());
+        Assertions.assertNull(agreement.getBackofficeAssignee());
+        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreement.getId());
+        Assertions.assertTrue(CollectionUtils.isEmpty(documents));
+    }
+
+    @Test
+    void Update_UpdateProfileWithDocumentUploadedWillDeleteDocuments_Ok() {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        String agreementId = agreementEntity.getId();
+        //creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementId);
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementId, discountEntity);
+        saveSampleDocuments(agreementEntity);
+        Assertions.assertEquals(2, documentRepository.findByAgreementId(agreementId).size());
+
+        ProfileEntity updatedProfile = TestUtils.createSampleProfileEntity(agreementEntity);
+        updatedProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        profileService.updateProfile(agreementId, updatedProfile);
+
+        Assertions.assertEquals(0, documentRepository.findByAgreementId(agreementId).size());
+    }
+}

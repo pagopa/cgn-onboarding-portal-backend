@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
@@ -41,8 +42,6 @@ public class DocumentService {
     private final AgreementServiceLight agreementServiceLight;
     private final AzureStorage azureStorage;
     private final TemplateEngine templateEngine;
-
-    private final ITextRenderer renderer = new ITextRenderer();
 
     public List<DocumentEntity> getPrioritizedDocuments(String agreementId) {
         return filterDocumentsByPriority(getAllDocuments(agreementId));
@@ -84,6 +83,19 @@ public class DocumentService {
     @Transactional
     public long deleteDocument(String agreementId, DocumentTypeEnum documentType) {
         return documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
+    }
+
+    @Transactional
+    public void resetMerchantDocuments(String agreementId) {
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.AGREEMENT);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.MANIFESTATION_OF_INTEREST);
+    }
+
+    @Transactional
+    public void resetAllDocuments(String agreementId) {
+        resetMerchantDocuments(agreementId);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_AGREEMENT);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
     }
 
     // if there are documents created by profile and backoffice user, the document made by backoffice user will be returned
@@ -144,7 +156,7 @@ public class DocumentService {
     private ByteArrayOutputStream renderManifestationOfInterestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId).orElseThrow(() -> new RuntimeException("no profile"));
 
-        List<String> addressList = profileEntity.getAddressList().stream().map(address -> address.getStreet() + ", " + address.getZipCode() + ", " + address.getCity() + " (" + address.getDistrict() + ")").collect(Collectors.toList());
+        List<String> addressList = profileEntity.getAddressList().stream().map(AddressEntity::getFullAddress).collect(Collectors.toList());
 
         List<DiscountEntity> discounts = discountRepository.findByAgreementId(agreementId);
         List<RenderableDiscount> renderableDiscounts = discounts.stream().map(RenderableDiscount::fromEntity).collect(Collectors.toList());
@@ -177,16 +189,30 @@ public class DocumentService {
     }
 
     private ByteArrayOutputStream generatePdfFromHtml(String renderedContent) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        renderer.setDocumentFromString(renderedContent);
-        renderer.layout();
+        var outputStream = new ByteArrayOutputStream();
 
         try {
+            var renderer = new ITextRenderer();
+
+            ITextFontResolver fontResolver = renderer.getFontResolver();
+            fontResolver.addFont("fonts/TitilliumWeb-Black.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-Bold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-BoldItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-ExtraLight.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-ExtraLightItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-Italic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-Light.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-LightItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-SemiBold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            fontResolver.addFont("fonts/TitilliumWeb-SemiBoldItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+
+            renderer.setDocumentFromString(renderedContent);
+            renderer.layout();
+
             renderer.createPDF(outputStream);
-        } catch (DocumentException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error in document rendering", e);
+        } catch (DocumentException | IOException e) {
+            throw new CGNException("Error in document rendering", e);
         }
 
         return outputStream;
@@ -202,29 +228,10 @@ public class DocumentService {
         this.azureStorage = azureStorage;
         this.templateEngine = templateEngine;
         this.agreementServiceLight = agreementServiceLight;
-
-        try {
-            ITextFontResolver fontResolver = renderer.getFontResolver();
-
-            fontResolver.addFont("fonts/TitilliumWeb-Black.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-Bold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-BoldItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-ExtraLight.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-ExtraLightItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-Italic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-Light.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-LightItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-Regular.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-SemiBold.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            fontResolver.addFont("fonts/TitilliumWeb-SemiBoldItalic.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-
-        } catch (IOException exc) {
-            throw new RuntimeException("Failed to load fonts", exc);
-        }
     }
 
 
-    static private class RenderableDiscount {
+    private static class RenderableDiscount {
         public String name;
         public String validityPeriod;
         public String discountValue;

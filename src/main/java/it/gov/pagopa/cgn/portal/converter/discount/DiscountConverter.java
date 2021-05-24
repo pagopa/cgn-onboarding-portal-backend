@@ -53,6 +53,7 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
                 dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
                 dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
                 dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
+                dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
                 return dto;
             };
 

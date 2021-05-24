@@ -49,7 +49,7 @@ public class CGNUtils {
     }
 
     public static String getJwtOperatorUserId() {
-        return getJwtOperatorUser().getUserTaxCode();
+        return getJwtOperatorUser().getCompanyTaxCode();
     }
 
     public static String getJwtAdminUserName() {

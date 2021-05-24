@@ -31,14 +31,12 @@ public class AgreementInterceptor implements HandlerInterceptor {
             return true;
         }
         throw new SecurityException("Current user is trying to use different agreementId");
-
-
     }
 
     private String getCurrentUserId() {
         JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         JwtOperatorUser user = (JwtOperatorUser) authentication.getPrincipal();
-        return user.getUserTaxCode();
+        return user.getCompanyTaxCode();
     }
 
     private String getAgreementIdFromParams(HttpServletRequest request) {

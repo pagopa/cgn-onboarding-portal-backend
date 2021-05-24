@@ -26,9 +26,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
@@ -55,8 +57,9 @@ public class IntegrationAbstractTest {
 
         public static GenericContainer<?> greenMailContainer =
                 new GenericContainer<>(DockerImageName.parse("greenmail/standalone:1.6.3"))
-                        .withExposedPorts(3025);
-
+                        .withExposedPorts(3025)
+                        //override timeout to 5 seconds
+                        .withEnv("GREENMAIL_OPTS", "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
 
         private static void startContainers() {
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
@@ -145,14 +148,28 @@ public class IntegrationAbstractTest {
         return createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC);
     }
 
+    protected List<AgreementTestObject> createMultiplePendingAgreement(int numberToCreate) {
+        List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
+        IntStream.range(0, numberToCreate).forEach(idx ->
+                testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, idx)));
+
+        return testObjectList;
+    }
+
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
+        return createPendingAgreement(salesChannel, discountCodeType, 1);
+    }
+
+    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType, int idx) {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, salesChannel, discountCodeType);
+        profileEntity.setFullName(profileEntity.getFullName() + idx);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity= agreementService.requestApproval(agreementEntity.getId());
