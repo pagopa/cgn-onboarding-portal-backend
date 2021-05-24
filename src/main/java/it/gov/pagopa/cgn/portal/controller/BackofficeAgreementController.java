@@ -24,11 +24,12 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     private final BackofficeAgreementFacade agreementFacade;
 
     @Override
-    public ResponseEntity<Agreements> getAgreements(String states, String assignee, String profileFullName,
-                                                    LocalDate requestDateFrom, LocalDate requestDateTo,
-                                                    Integer pageSize, Integer page) {
-        BackofficeFilter filter = BackofficeFilter.getFilter(
-                states, profileFullName, assignee, requestDateFrom, requestDateTo, pageSize, page);
+    public ResponseEntity<Agreements> getAgreements(
+            String states,  String assignee, String profileFullName, LocalDate requestDateFrom,  LocalDate requestDateTo,
+            Integer pageSize, Integer page, String sortColumn, String sortDirection) {
+
+        var filter = BackofficeFilter.getFilter(states, profileFullName, assignee, requestDateFrom,
+                requestDateTo, pageSize, page, sortColumn, sortDirection);
         return agreementFacade.getAgreements(filter);
     }
 

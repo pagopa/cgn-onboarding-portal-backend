@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -77,7 +78,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.productCategories").isNotEmpty())
                 .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()));
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -114,6 +116,27 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items", hasSize(1)))
                 .andExpect(jsonPath("$.items[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
+    }
+
+    @Test
+    void Get_GetSuspendedDiscount_Found() throws Exception {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
+        discountEntity.setState(DiscountStateEnum.SUSPENDED);
+        discountEntity.setSuspendedReasonMessage("A reason");
+        discountEntity = discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(
+                get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(1)))
+                .andExpect(jsonPath("$.items[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)))
+                .andExpect(jsonPath("$.items[0].state").value(DiscountState.SUSPENDED.getValue()))
+                .andExpect(jsonPath("$.items[0].suspendedReasonMessage").value(discountEntity.getSuspendedReasonMessage()));
     }
 
     @Test

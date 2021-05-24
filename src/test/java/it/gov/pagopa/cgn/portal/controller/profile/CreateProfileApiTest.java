@@ -80,10 +80,10 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
                 .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
                 .andExpect(jsonPath("$.salesChannel.addresses").isArray())
-                .andExpect(jsonPath("$.salesChannel.addresses[0].street").value(firstAddress.getStreet()))
-                .andExpect(jsonPath("$.salesChannel.addresses[0].city").value(firstAddress.getCity()))
-                .andExpect(jsonPath("$.salesChannel.addresses[0].zipCode").value(firstAddress.getZipCode()))
-                .andExpect(jsonPath("$.salesChannel.addresses[0].district").value(firstAddress.getDistrict()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].fullAddress").value(firstAddress.getFullAddress()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates").isNotEmpty())
+                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.latitude").value(firstAddress.getCoordinates().getLatitude()))
+                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.longitude").value(firstAddress.getCoordinates().getLongitude()))
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
                 .andExpect(jsonPath("$.name").value(createProfile.getName()))
@@ -174,9 +174,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     private CreateProfile createSampleCreateOffline() {
         CreateProfile profile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
         OfflineChannel offlineChannel = (OfflineChannel) profile.getSalesChannel();
-        List<Address> addressList = new ArrayList<>();
-        addressList.add(createSampleAddressDto());
-        offlineChannel.setAddresses(addressList);
+        offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         profile.setSalesChannel(offlineChannel);
         return profile;
     }
@@ -214,15 +212,5 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createReferent.setRole("CEO");
         return createReferent;
     }
-
-    private Address createSampleAddressDto() {
-        Address address = new Address();
-        address.setStreet("Street address");
-        address.setCity("City");
-        address.setDistrict("ME");
-        address.setZipCode("98981");
-        return address;
-    }
-
 }
 
