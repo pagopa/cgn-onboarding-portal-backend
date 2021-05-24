@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.controller;
 
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class GeolocationTokenApiTest {
+class GeolocationTokenApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
