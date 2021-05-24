@@ -25,8 +25,24 @@ tags:
     description: API Token
   - name: help
     description: Help
+  - name: geolocation-token
+    description: API Geolocation Token
 
 paths:
+  /geolocation-token:
+    get:
+      tags:
+        - geolocation-token
+      summary: Get token for geolocation
+      operationId: getGeolocationToken
+      responses:
+        200:
+          description: Token for geolocation
+          schema:
+            $ref: '#/definitions/GeolocationToken'
+        403:
+          $ref: '#/responses/Forbidden'
+
   /agreements:
     post:
       tags:
@@ -1008,6 +1024,13 @@ definitions:
       message:
         type: string
         maxLength: 200
+  GeolocationToken:
+    type: object
+    required:
+      - token
+    properties:
+      token:
+        type: string
 
 responses:
   InvalidRequest:
