@@ -74,7 +74,8 @@ SELECT m.agreement_k                 AS id,
        bool_or(m.health)             AS health,
        bool_or(m.sports)             AS sports,
        bool_or(m.transportation)     AS transportation,
-       bool_or(m.travels)            AS travels
+       bool_or(m.travels)            AS travels,
+	   now()						 AS last_update
 FROM merchant_with_categories m
 GROUP BY 1, 2, 3;
 

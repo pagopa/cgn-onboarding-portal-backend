@@ -91,7 +91,8 @@ WITH merchant AS (
             a.full_address,
             a.latitude,
             a.longitude,
-            a.address_k AS address_id
+            a.address_k AS address_id,
+            now()		AS last_update
      FROM merchant_without_address m
      JOIN profile p on m.id = p.agreement_fk
      JOIN address a ON p.profile_k = a.profile_fk;
