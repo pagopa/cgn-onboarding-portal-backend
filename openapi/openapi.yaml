@@ -1031,6 +1031,7 @@ definitions:
     properties:
       token:
         type: string
+        minLength: 1
 
 responses:
   InvalidRequest:
