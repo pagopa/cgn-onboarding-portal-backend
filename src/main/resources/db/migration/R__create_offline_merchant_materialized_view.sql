@@ -1,16 +1,15 @@
-DROP MATERIALIZED VIEW IF EXISTS online_merchant;
+DROP MATERIALIZED VIEW IF EXISTS offline_merchant;
 
-CREATE MATERIALIZED VIEW online_merchant AS
+CREATE MATERIALIZED VIEW offline_merchant AS
 WITH merchant AS (
     SELECT a.agreement_k,
-           p.name,
-           p.website_url
+           p.name
     FROM agreement a
              JOIN profile p ON (p.agreement_fk = a.agreement_k)
     WHERE a.state = 'APPROVED'
       AND a.start_date <= CURRENT_TIMESTAMP
       AND CURRENT_TIMESTAMP <= a.end_date
-      AND p.sales_channel IN ('ONLINE', 'BOTH')
+      AND p.sales_channel IN ('OFFLINE', 'BOTH')
 ),
      product_categories AS (
          SELECT DISTINCT d.agreement_fk,
@@ -25,7 +24,6 @@ WITH merchant AS (
      merchant_with_categories AS (
          SELECT m.agreement_k,
                 m.name,
-                m.website_url,
                 pc.product_category,
                 CASE
                     WHEN pc.product_category = 'ARTS' THEN TRUE
@@ -61,22 +59,42 @@ WITH merchant AS (
                     END AS travels
          FROM merchant m
                   JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk)
+     ),
+     merchant_without_address AS (
+        SELECT m.agreement_k                 AS id,
+               m.name,
+               array_agg(m.product_category) AS product_categories,
+               lower(m.name)                 AS searchable_name,
+               bool_or(m.arts)               AS arts,
+               bool_or(m.books)              AS books,
+               bool_or(m.connectivity)       AS connectivity,
+               bool_or(m.entertainments)     AS entertainments,
+               bool_or(m.health)             AS health,
+               bool_or(m.sports)             AS sports,
+               bool_or(m.transportation)     AS transportation,
+               bool_or(m.travels)            AS travels
+        FROM merchant_with_categories m
+        GROUP BY 1, 2
      )
-SELECT m.agreement_k                 AS id,
-       m.name,
-       m.website_url,
-       array_agg(m.product_category) AS product_categories,
-       lower(m.name)                 AS searchable_name,
-       bool_or(m.arts)               AS arts,
-       bool_or(m.books)              AS books,
-       bool_or(m.connectivity)       AS connectivity,
-       bool_or(m.entertainments)     AS entertainments,
-       bool_or(m.health)             AS health,
-       bool_or(m.sports)             AS sports,
-       bool_or(m.transportation)     AS transportation,
-       bool_or(m.travels)            AS travels,
-	   now()						 AS last_update
-FROM merchant_with_categories m
-GROUP BY 1, 2, 3;
+     SELECT m.id,
+            m.name,
+            m.product_categories,
+            m.searchable_name,
+            m.arts,
+            m.books,
+            m.connectivity,
+            m.entertainments,
+            m.health,
+            m.sports,
+            m.transportation,
+            m.travels,
+            a.full_address,
+            a.latitude,
+            a.longitude,
+            a.address_k AS address_id,
+            now()		AS last_update
+     FROM merchant_without_address m
+     JOIN profile p on m.id = p.agreement_fk
+     JOIN address a ON p.profile_k = a.profile_fk;
 
-CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
+CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
