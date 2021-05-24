@@ -90,6 +90,10 @@ public class ConfigProperties {
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
 
+
+    @Value("${cgn.geolocation.secret-token}")
+    private String geolocationToken;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }

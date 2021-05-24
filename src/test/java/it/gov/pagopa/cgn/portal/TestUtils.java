@@ -44,6 +44,8 @@ public class TestUtils {
 
     public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
 
+    public static final String GEOLOCATION_PATH = "/geolocation-token";
+
     public static final String FAKE_ID = "FAKE_ID";
 
     public static String getProfilePath(String agreementId) {

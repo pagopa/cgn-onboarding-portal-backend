@@ -17,6 +17,7 @@ public class WebMvConfig implements WebMvcConfigurer {
         registry.addInterceptor(interceptor).addPathPatterns("/agreements/**")
                 .excludePathPatterns("/agreements") //create agreements API doesn't have parameter
                 .excludePathPatterns("/agreement-requests/**")
-                .excludePathPatterns("/approved-agreements**");
+                .excludePathPatterns("/approved-agreements**")
+                .excludePathPatterns("/geolocation-token/");
     }
 }
