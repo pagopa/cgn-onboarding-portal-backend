@@ -454,6 +454,7 @@ definitions:
     properties:
       reasonMessage:
         type: string
+        maxLength: 500
 
   Assignee:
     type: object
@@ -518,15 +519,21 @@ definitions:
       pecAddress:
         type: string
         format: email
+        minLength: 5
+        maxLength: 100
       legalOffice:
         type: string
+        maxLength: 255
       telephoneNumber:
         type: string
+        minLength: 4
         maxLength: 15
       legalRepresentativeFullName:
         type: string
       legalRepresentativeTaxCode:
         type: string
+        maxLength: 16
+        minLength: 16
       referent:
         $ref: '#/definitions/ApprovedAgreementReferent'
 
@@ -540,12 +547,17 @@ definitions:
     properties:
       firstName:
         type: string
+        maxLength: 100
       lastName:
         type: string
+        maxLength: 100
       emailAddress:
         type: string
+        minLength: 5
+        maxLength: 100
       telephoneNumber:
         type: string
+        minLength: 4
         maxLength: 15
 
   ApprovedAgreementReferent:
@@ -564,11 +576,15 @@ definitions:
       emailAddress:
         type: string
         format: email
+        minLength: 5
+        maxLength: 100
       telephoneNumber:
         type: string
+        minLength: 4
         maxLength: 15
       role:
         type: string
+        maxLength: 100
 
   Discounts:
     type: array
@@ -596,6 +612,7 @@ definitions:
         $ref: '#/definitions/DiscountState'
       name:
         type: string
+        maxLength: 100
 
   ApprovedAgreementDiscount:
     type: object
@@ -615,6 +632,7 @@ definitions:
         type: string
       name:
         type: string
+        maxLength: 100
       description:
         type: string
       startDate:
@@ -626,6 +644,8 @@ definitions:
       discount:
         type: integer
         format: int32
+        minimum: 5
+        maximum: 99
       productCategories:
         type: array
         items:
@@ -693,6 +713,7 @@ definitions:
             items:
               type: string
               minLength: 10
+              maxLength: 500
 
   BothChannels:
     allOf:
@@ -710,6 +731,7 @@ definitions:
             items:
               type: string
               minLength: 10
+              maxLength: 500
 
   SalesChannelType:
     type: string
@@ -751,6 +773,7 @@ definitions:
     properties:
       reasonMessage:
         type: string
+        maxLength: 500
 
 responses:
   InvalidRequest:

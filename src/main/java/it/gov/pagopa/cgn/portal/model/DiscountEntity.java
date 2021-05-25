@@ -38,9 +38,11 @@ public class DiscountEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
+    @Size(max = 100)
     @Column(name = "name", length = 100)
     private String name;
 
+    @Size(max = 250)
     @Column(name = "description", length = 250)
     private String description;
 
@@ -53,18 +55,21 @@ public class DiscountEntity extends BaseEntity {
     private LocalDate endDate;
 
     @NotNull
-    @Min(value = 0)
-    @Max(value = 100)
+    @Min(value = 5)
+    @Max(value = 99)
     @Column(name = "discount_value")
     private Integer discountValue;
 
+    @Size(max = 200)
     @Column(name = "condition", length = 200)
     private String condition;
 
+    @Size(max = 100)
     @Column(name = "static_code", length = 100)
     private String staticCode;
 
-    @Column(name = "suspended_reason_message", length = 250)
+    @Size(max = 500)
+    @Column(name = "suspended_reason_message", length = 500)
     private String suspendedReasonMessage;
 
     @Column(name = "expiration_warning_sent")

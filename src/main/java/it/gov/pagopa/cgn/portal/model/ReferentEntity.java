@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "referent")
@@ -25,27 +26,32 @@ public class ReferentEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Column(name = "first_name", length = 50)
+    @Size(max = 100)
+    @Column(name = "first_name", length = 100)
     private String firstName;
 
     @NotNull
     @NotBlank
-    @Column(name = "last_name", length = 50)
+    @Size(max = 100)
+    @Column(name = "last_name", length = 100)
     private String lastName;
 
     @NotNull
     @NotBlank
     @Email
-    @Column(name = "email_address", length = 320)
+    @Size(min = 5, max = 100)
+    @Column(name = "email_address", length = 100)
     private String emailAddress;
 
     @NotNull
     @NotBlank
+    @Size(min = 4, max = 15)
     @Column(name = "telephone_number", length = 15)
     private String telephoneNumber;
 
     @NotNull
     @NotBlank
+    @Size(max = 100)
     @Column(name = "role", length = 100)
     private String role;
 
