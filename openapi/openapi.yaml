@@ -1071,8 +1071,8 @@ definitions:
   ImageErrorCode:
     type: string
     enum:
-      - INVALID_IMAGE
-      - INVALID_FORMAT
+      - INVALID_IMAGE_TYPE
+      - INVALID_DIMENSION
       - GENERIC
       - IMAGE_SIZE_EXCEEDED
 

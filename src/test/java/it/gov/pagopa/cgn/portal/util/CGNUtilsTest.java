@@ -26,6 +26,14 @@ public class CGNUtilsTest {
     }
 
     @Test
+    public void ValidateImage_ValidateImageWithoutFileName_InvalidRequestException() throws IOException {
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", null, "image/png", image);
+        Assert.assertThrows(ImageException.class,
+                () -> CGNUtils.validateImage(multipartFile,800, 600));
+    }
+
+    @Test
     public void ValidateImage_ValidateImageWithTooBigResolutionParams_InvalidRequestException() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
         MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);

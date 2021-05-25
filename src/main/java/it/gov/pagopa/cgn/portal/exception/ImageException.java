@@ -11,10 +11,10 @@ public class ImageException extends RuntimeException {
     @AllArgsConstructor
     @Getter
     public enum ImageErrorCodeEnum {
-        INVALID_IMAGE("INVALID_IMAGE", "Invalid file extension. Upload a JPG or PNG image."),
-        INVALID_FORMAT("INVALID_FORMAT", "Invalid image format."),
-        GENERIC("GENERIC", "Unexpected error");
-        private final String code;
+        INVALID_IMAGE_TYPE("Invalid file extension. Upload a JPG or PNG image."),
+        INVALID_DIMENSION("Invalid image format."),
+        GENERIC( "Unexpected error");
+
         private final String defaultErrorMsg;
     }
 
@@ -33,10 +33,10 @@ public class ImageException extends RuntimeException {
 
     public String getImageErrorCodeDto() {
         switch (imageErrorCodeEnum) {
-            case INVALID_IMAGE:
-                return ImageErrorCode.INVALID_IMAGE.getValue();
-            case INVALID_FORMAT:
-                return ImageErrorCode.INVALID_FORMAT.getValue();
+            case INVALID_IMAGE_TYPE:
+                return ImageErrorCode.INVALID_IMAGE_TYPE.getValue();
+            case INVALID_DIMENSION:
+                return ImageErrorCode.INVALID_DIMENSION.getValue();
             case GENERIC:
                 return ImageErrorCode.GENERIC.getValue();
             default:

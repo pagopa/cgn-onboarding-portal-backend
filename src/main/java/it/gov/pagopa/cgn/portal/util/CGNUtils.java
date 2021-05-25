@@ -32,7 +32,7 @@ public class CGNUtils {
         }
         boolean isValid = minWidth <= bufferedImage.getWidth() && minHeight <= bufferedImage.getHeight();
         if (!isValid) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_FORMAT,
+            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION,
                     "Image must be at least " + minWidth  + "x" + minHeight);
         }
     }
@@ -46,7 +46,7 @@ public class CGNUtils {
     public static void checkIfImageFile(String fileName) {
         if (fileName == null ||
                 !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_IMAGE);
+            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_IMAGE_TYPE);
         }
     }
 

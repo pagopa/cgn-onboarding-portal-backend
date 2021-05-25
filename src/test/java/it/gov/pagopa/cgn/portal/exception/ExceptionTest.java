@@ -33,9 +33,9 @@ public class ExceptionTest {
 
     @Test
     public void ImageExceptionConstructor_ConstructorWithImageErrorCodeEnum_Ok() {
-        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.INVALID_FORMAT);
-        Assertions.assertEquals(ImageErrorCode.INVALID_FORMAT.getValue(), imageException.getImageErrorCodeDto());
-        Assertions.assertEquals(ImageException.ImageErrorCodeEnum.INVALID_FORMAT.getDefaultErrorMsg(), imageException.getMessage());
+        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION);
+        Assertions.assertEquals(ImageErrorCode.INVALID_DIMENSION.getValue(), imageException.getImageErrorCodeDto());
+        Assertions.assertEquals(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION.getDefaultErrorMsg(), imageException.getMessage());
     }
 
     @Test
@@ -44,6 +44,15 @@ public class ExceptionTest {
         ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, customMsg);
         Assertions.assertEquals(ImageErrorCode.GENERIC.getValue(), imageException.getImageErrorCodeDto());
         Assertions.assertEquals(customMsg, imageException.getMessage());
+    }
+
+    @Test
+    public void ImageException_ImageExceptionToStringContainsCodeAndMessage_Ok() {
+        String customMsg = "an error";
+        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, customMsg);
+        Assertions.assertTrue(imageException.toString().contains(ImageErrorCode.GENERIC.getValue()));
+        Assertions.assertTrue(imageException.toString().contains(customMsg));
+
     }
 
 }

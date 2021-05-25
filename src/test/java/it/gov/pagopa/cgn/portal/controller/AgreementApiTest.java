@@ -234,13 +234,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
         MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.png", "image/png", image);
-        BlobContainerClient imageContainer = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getImagesContainerName())
-                .buildClient();
-        if (!imageContainer.exists()) {
-            imageContainer.create();
-        }
+        createBlobImage();
         this.mockMvc.perform(
                 multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
                 .andDo(log())
@@ -252,7 +246,17 @@ class AgreementApiTest extends IntegrationAbstractTest {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+
         MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.pdf", "image/png", image);
+        createBlobImage();
+        this.mockMvc.perform(
+                multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
+                .andDo(log())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(ImageErrorCode.INVALID_IMAGE_TYPE.getValue()));
+    }
+
+    private void createBlobImage() {
         BlobContainerClient imageContainer = new BlobContainerClientBuilder()
                 .connectionString(getAzureConnectionString())
                 .containerName(configProperties.getImagesContainerName())
@@ -260,11 +264,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
         if (!imageContainer.exists()) {
             imageContainer.create();
         }
-        this.mockMvc.perform(
-                multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log())
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(ImageErrorCode.INVALID_IMAGE.getValue()));
     }
 
 }
