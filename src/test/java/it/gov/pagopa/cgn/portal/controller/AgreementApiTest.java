@@ -1,7 +1,10 @@
 package it.gov.pagopa.cgn.portal.controller;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -13,19 +16,22 @@ import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
+import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,6 +50,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private DiscountService discountService;
+
+    @Autowired
+    private ConfigProperties configProperties;
 
     @BeforeEach
     void beforeEach() {
@@ -217,6 +226,45 @@ class AgreementApiTest extends IntegrationAbstractTest {
                 post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void UploadImage_UploadValidPngImage_Ok() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.png", "image/png", image);
+        BlobContainerClient imageContainer = new BlobContainerClientBuilder()
+                .connectionString(getAzureConnectionString())
+                .containerName(configProperties.getImagesContainerName())
+                .buildClient();
+        if (!imageContainer.exists()) {
+            imageContainer.create();
+        }
+        this.mockMvc.perform(
+                multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
+                .andDo(log())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void UploadImage_UploadInValidImage_GetInvalidImageErrorCode() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.pdf", "image/png", image);
+        BlobContainerClient imageContainer = new BlobContainerClientBuilder()
+                .connectionString(getAzureConnectionString())
+                .containerName(configProperties.getImagesContainerName())
+                .buildClient();
+        if (!imageContainer.exists()) {
+            imageContainer.create();
+        }
+        this.mockMvc.perform(
+                multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
+                .andDo(log())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(ImageErrorCode.INVALID_IMAGE.getValue()));
     }
 
 }

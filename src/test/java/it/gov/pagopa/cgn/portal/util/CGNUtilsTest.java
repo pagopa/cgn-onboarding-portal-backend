@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -20,7 +21,7 @@ public class CGNUtilsTest {
     @Test
     public void ValidateImage_ValidateInvalidImage_InvalidRequestException() {
         MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", new byte[10]);
-        Assert.assertThrows(InvalidRequestException.class,
+        Assert.assertThrows(ImageException.class,
                 () -> CGNUtils.validateImage(multipartFile,800, 600));
     }
 
@@ -28,16 +29,16 @@ public class CGNUtilsTest {
     public void ValidateImage_ValidateImageWithTooBigResolutionParams_InvalidRequestException() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
         MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
-        Assert.assertThrows(InvalidRequestException.class,
+        Assert.assertThrows(ImageException.class,
                 () -> CGNUtils.validateImage(multipartFile,2000, 2000));
 
     }
 
     @Test
     public void ValidateImageFile_ValidateImageFileWithInvalidParams_InvalidRequestException()  {
-        Assert.assertThrows(InvalidRequestException.class,
+        Assert.assertThrows(ImageException.class,
                 () -> CGNUtils.checkIfImageFile("filename.pdf"));
-        Assert.assertThrows(InvalidRequestException.class,
+        Assert.assertThrows(ImageException.class,
                 () -> CGNUtils.checkIfImageFile("filename"));
     }
 

@@ -9,6 +9,7 @@ import com.azure.storage.common.sas.SasProtocol;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -71,7 +72,7 @@ public class AzureStorage {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(image.getInputStream()))) {
             blobClient.upload(contentIs, image.getSize(), true);
         } catch (IOException e) {
-            throw new CGNException(e);
+            throw new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, e.getMessage());
         }
 
         return configProperties.getImagesContainerName() + "/" + blobName;
