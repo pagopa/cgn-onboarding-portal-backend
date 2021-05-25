@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.email;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,25 +29,25 @@ public class EmailNotificationFacade {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("merchant_fullname", merchantFullName);
-        try {
-            String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
-            var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body);
-            emailNotificationService.sendMessage(emailParams);
-        } catch (Exception e) {
-            log.error("Failed to send New Agreement Request notification from " + merchantFullName + " to department", e);
-        }
+        final String errorMessage = "Failed to send New Agreement Request notification from " + merchantFullName +
+                " to department";
+        String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
+        var emailParams = createEmailParams(
+                configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyMerchantAgreementRequestApproved(String referentEmail, SalesChannelEnum salesChannel, Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
+    public void notifyMerchantAgreementRequestApproved(String referentEmail, SalesChannelEnum salesChannel,
+                                                       Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
         var subject = "[Carta Giovani Nazionale] Richiesta di convenzione approvata";
-
+        final String errorMessage = "Failed to send Agreement Request Approved notification to: " + referentEmail;
         try {
             TemplateEmail template = getApprovedAgreementTemplateBySalesChannel(salesChannel, discountCodeTypeOpt);
             String body = getTemplateHtml(template);
-            var emailParams = createEmailParams(referentEmail, subject, body);
-            emailNotificationService.sendMessage(emailParams);
+            var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+            emailNotificationService.sendAsyncMessage(emailParams);
         } catch (Exception e) {
-            log.error("Failed to send Agreement Request Approved notification to: " + referentEmail, e);
+            log.error(errorMessage, e);
         }
     }
 
@@ -79,14 +80,10 @@ public class EmailNotificationFacade {
         var subject = "[Carta Giovani Nazionale] Richiesta di convenzione rifiutata";
         var context = new Context();
         context.setVariable("rejection_message", rejectionMessage);
-
-        try {
-            var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
-            var emailParams = createEmailParams(referentEmail, subject, body);
-            emailNotificationService.sendMessage(emailParams);
-        } catch (Exception e) {
-            log.error("Failed to send Agreement Request Rejected notification to: " + referentEmail, e);
-        }
+        final String errorMessage = "Failed to send Agreement Request Rejected notification to: " + referentEmail;
+        var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
     }
 
     public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) throws MessagingException {
@@ -105,8 +102,9 @@ public class EmailNotificationFacade {
         context.setVariable("referent_last_name", helpRequestParams.getReferentLastName());
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body);
-        emailNotificationService.sendMessage(emailParams);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(),
+                Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body, null);
+        emailNotificationService.sendSyncMessage(emailParams);
     }
 
     public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
@@ -114,14 +112,11 @@ public class EmailNotificationFacade {
         var context = new Context();
         context.setVariable("discount_name", discountName);
         context.setVariable("suspension_message", suspensionMessage);
+        final String errorMessage = "Failed to send Discount Suspended notification to: " + referentEmail;
 
-        try {
-            var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail, subject, body);
-            emailNotificationService.sendMessage(emailParams);
-        } catch (Exception e) {
-            log.error("Failed to send Discount Suspended notification to: " + referentEmail, e);
-        }
+        var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
     }
 
     public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
@@ -131,10 +126,11 @@ public class EmailNotificationFacade {
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail, subject, body);
-            emailNotificationService.sendMessage(emailParams);
+            var emailParams = createEmailParams(referentEmail, subject, body, null);
+            emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
-            log.error("Failed to send Discount Expiring notification to: " + referentEmail, e);
+            // in this case exception will be propagated
+            throw new CGNException(e);
         }
     }
 
@@ -146,11 +142,11 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
-    private EmailParams createEmailParams(String mailTo, String subject, String body) {
-        return createEmailParams(mailTo, Optional.empty(), subject, body);
+    private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
+        return createEmailParams(mailTo, Optional.empty(), subject, body, failureMessage);
     }
 
-    private EmailParams createEmailParams(String mailTo, Optional<String> replyToOpt, String subject, String body) {
+    private EmailParams createEmailParams(String mailTo, Optional<String> replyToOpt, String subject, String body, String failureMessage) {
         return EmailParams.builder()
                 .mailFrom(configProperties.getCgnNotificationSender())
                 .logoName("cgn-logo.png")
@@ -158,7 +154,9 @@ public class EmailNotificationFacade {
                 .mailToList(Collections.singletonList(mailTo))
                 .replyToOpt(replyToOpt)
                 .subject(subject)
-                .body(body).build();
+                .body(body)
+                .failureMessage(failureMessage)
+                .build();
     }
 
     private String getTemplateHtml(TemplateEmail template) {
