@@ -29,11 +29,13 @@ public class AppExceptionHandler {
     @ExceptionHandler(value = {ImageException.class, MaxUploadSizeExceededException.class})
     public ResponseEntity<Object> handleImageError(Exception ex) {
         log.error("ImageException", ex);
-        String codeError = "";
+        String codeError;
         if (ex instanceof ImageException) {
             codeError = ((ImageException) ex).getImageErrorCodeDto();
         } else if (ex instanceof MaxUploadSizeExceededException) {
             codeError = ImageErrorCode.IMAGE_SIZE_EXCEEDED.getValue();
+        } else {
+            codeError = ImageErrorCode.GENERIC.getValue();
         }
         return new ResponseEntity<>(codeError, HttpStatus.BAD_REQUEST);
     }
