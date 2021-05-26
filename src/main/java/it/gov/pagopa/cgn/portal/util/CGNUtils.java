@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
@@ -27,11 +28,12 @@ public class CGNUtils {
             checkIfImageFile(image.getOriginalFilename());
             bufferedImage = ImageIO.read(image.getInputStream());
         } catch (IOException e) {
-            throw new CGNException(e);
+            throw new ImageException(ImageException.ImageErrorCodeEnum.GENERIC);
         }
         boolean isValid = minWidth <= bufferedImage.getWidth() && minHeight <= bufferedImage.getHeight();
         if (!isValid) {
-            throw new InvalidRequestException("Image must be at least " + minWidth  + "x" + minHeight);
+            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION,
+                    "Image must be at least " + minWidth  + "x" + minHeight);
         }
     }
 
@@ -44,7 +46,7 @@ public class CGNUtils {
     public static void checkIfImageFile(String fileName) {
         if (fileName == null ||
                 !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
-            throw new InvalidRequestException("Invalid file extension. Upload a JPG or PNG image.");
+            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_IMAGE_TYPE);
         }
     }
 

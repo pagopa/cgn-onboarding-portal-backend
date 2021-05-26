@@ -76,6 +76,8 @@ paths:
           description: Image uploaded
           schema:
             $ref: '#/definitions/UploadedImage'
+        400:
+          $ref: '#/definitions/ImageErrorCode'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -1065,6 +1067,14 @@ definitions:
       token:
         type: string
         minLength: 1
+
+  ImageErrorCode:
+    type: string
+    enum:
+      - INVALID_IMAGE_TYPE
+      - INVALID_DIMENSION
+      - GENERIC
+      - IMAGE_SIZE_EXCEEDED
 
 responses:
   InvalidRequest:

@@ -67,6 +67,11 @@ public class TestUtils {
     public static String getAgreementApprovalPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/approval";
     }
+
+    public static String getUploadImagePath(String agreementId) {
+        return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/images";
+    }
+
     public static String getBackofficeDocumentPath(String agreementId) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
