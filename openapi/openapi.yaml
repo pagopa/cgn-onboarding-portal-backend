@@ -284,6 +284,8 @@ paths:
       responses:
         204:
           description: Discount published
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -303,6 +305,8 @@ paths:
           description: Document template
           schema:
             type: file
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -346,6 +350,8 @@ paths:
           description: Document uploaded
           schema:
             $ref: '#/definitions/Document'
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -362,6 +368,8 @@ paths:
       responses:
         204:
           description: Document deleted
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:

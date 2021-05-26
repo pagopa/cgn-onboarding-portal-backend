@@ -51,7 +51,7 @@ public class DocumentFacade {
         DocumentEntity documentEntity;
         try {
             documentEntity = documentService.storeDocument(
-                    agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), document.getInputStream(),
+                    agreementId, DocumentTypeEnum.fromValue(documentType), document.getInputStream(),
                     document.getSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -61,7 +61,7 @@ public class DocumentFacade {
     }
 
     public long deleteDocument(String agreementId, String documentType) {
-        return documentService.deleteDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()));
+        return documentService.deleteDocument(agreementId, DocumentTypeEnum.fromValue(documentType));
     }
 
     @Autowired
