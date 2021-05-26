@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.BackofficeApprovedSortColumnEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -10,10 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,6 +55,81 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                         .value(agreementTestObject.getProfileEntity().getFullName()))
                 .andExpect(jsonPath("$.items[0].agreementStartDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.items[0].agreementLastUpdateDate").value(LocalDate.now().toString()));
+
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsApprovedSortedByOperator_Ok() throws Exception {
+        final int numRows = 3;
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
+        List<AgreementEntity> sortedByOperatorAgreementList = testObjectList.stream()
+                .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
+                .map(AgreementTestObject::getAgreementEntity)
+                .collect(Collectors.toList());
+        this.mockMvc.perform(
+                get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(numRows)))
+                .andExpect(jsonPath("$.total").value(numRows))
+                .andExpect(jsonPath("$.items[0].agreementId").value(sortedByOperatorAgreementList.get(0).getId()))
+                .andExpect(jsonPath("$.items[1].agreementId").value(sortedByOperatorAgreementList.get(1).getId()))
+                .andExpect(jsonPath("$.items[2].agreementId").value(sortedByOperatorAgreementList.get(2).getId()));
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsApprovedSortedByLastModifyDate_Ok() throws Exception {
+        final int numRows = 3;
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
+
+        AgreementEntity updatedAgreement = testObjectList.get(2).getAgreementEntity();
+        updatedAgreement.setInformationLastUpdateDate(LocalDate.now().plusDays(3));
+        agreementRepository.save(updatedAgreement);
+        List<AgreementEntity> sortedByLastModifyDateAgreementList = testObjectList.stream()
+                .sorted(Comparator.comparing(a -> a.getAgreementEntity().getInformationLastUpdateDate()))
+                .map(AgreementTestObject::getAgreementEntity)
+                .collect(Collectors.toList());
+        this.mockMvc.perform(
+                get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(numRows)))
+                .andExpect(jsonPath("$.total").value(numRows))
+                .andExpect(jsonPath("$.items[0].agreementId").value(sortedByLastModifyDateAgreementList.get(0).getId()))
+                .andExpect(jsonPath("$.items[1].agreementId").value(sortedByLastModifyDateAgreementList.get(1).getId()))
+                .andExpect(jsonPath("$.items[2].agreementId").value(sortedByLastModifyDateAgreementList.get(2).getId()));
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsApprovedSortedByAgreementDate_Ok() throws Exception {
+        final int numRows = 3;
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
+
+        AgreementEntity updatedAgreement = testObjectList.get(2).getAgreementEntity();
+        updatedAgreement.setStartDate(LocalDate.now().plusDays(2));
+        agreementRepository.save(updatedAgreement);
+        List<AgreementEntity> sortedByAgreementDateAgreementList = testObjectList.stream()
+                .sorted(Comparator.comparing(a -> a.getAgreementEntity().getStartDate()))
+                .map(AgreementTestObject::getAgreementEntity)
+                .collect(Collectors.toList());
+        this.mockMvc.perform(
+                get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(numRows)))
+                .andExpect(jsonPath("$.total").value(numRows))
+                .andExpect(jsonPath("$.items[0].agreementId").value(sortedByAgreementDateAgreementList.get(0).getId()))
+                .andExpect(jsonPath("$.items[1].agreementId").value(sortedByAgreementDateAgreementList.get(1).getId()))
+                .andExpect(jsonPath("$.items[2].agreementId").value(sortedByAgreementDateAgreementList.get(2).getId()));
 
     }
 

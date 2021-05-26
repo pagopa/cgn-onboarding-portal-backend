@@ -91,6 +91,11 @@ public class TestUtils {
                 "&sortDirection=" + direction.name();
     }
 
+    public static String getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum columnEnum, Sort.Direction direction) {
+        return AGREEMENT_APPROVED_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() +
+                "&sortDirection=" + direction.name();
+    }
+
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
         ReferentEntity referentEntity = new ReferentEntity();
         referentEntity.setFirstName("FIRST_NAME");
