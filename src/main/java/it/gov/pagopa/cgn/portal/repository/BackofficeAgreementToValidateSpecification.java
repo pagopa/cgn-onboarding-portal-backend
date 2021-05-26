@@ -46,7 +46,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
         Path<OffsetDateTime> dateExpression = getRequestApprovalTimePath(root);
 
-        if (filter.getSortColumn() != null) {
+        if (filter.getRequestSortColumnEnum() != null) {
             return getOrderByFilter(root, cb);
         }
         // order by requestApprovalTime desc
@@ -63,7 +63,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
     }
 
     private Order getOrderByFilter(Root<AgreementEntity> root, CriteriaBuilder cb) {
-        switch (filter.getSortColumn()) {
+        switch (filter.getRequestSortColumnEnum()) {
             case ASSIGNEE:
                 return new OrderImpl(getBackofficeAssigneePath(root), isSortAscending());
             case STATE:
@@ -81,9 +81,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
         throw new InvalidRequestException("Invalid sort column");
     }
 
-    private boolean isSortAscending() {
-        return Sort.Direction.ASC.equals(filter.getSortDirection());
-    }
+
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
         return root.get("requestApprovalTime");

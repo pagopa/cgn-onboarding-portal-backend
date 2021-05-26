@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.repository;
 
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.hibernate.query.criteria.internal.OrderImpl;
@@ -35,7 +36,23 @@ public class BackofficeApprovedAgreementSpecification extends CommonAgreementSpe
 
     @Override
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
+        if (filter.getApprovedSortColumnEnum() != null) {
+            return getOrderByFilter(root);
+        }
         return new OrderImpl(getLastUpdateDatePath(root), false);
+    }
+
+    private Order getOrderByFilter(Root<AgreementEntity> root) {
+        switch (filter.getApprovedSortColumnEnum()) {
+            case OPERATOR:
+                return new OrderImpl(getProfileFullNamePath(root), isSortAscending());
+            case AGREEMENT_DATE:
+                return new OrderImpl(root.get("startDate"), isSortAscending());
+            case LAST_MODIFY_DATE:
+                return new OrderImpl(getLastUpdateDatePath(root), isSortAscending());
+            default:
+                throw new InvalidRequestException("Invalid sort column");
+        }
     }
 
     private Path<LocalDate> getLastUpdateDatePath(Root<AgreementEntity> root) {

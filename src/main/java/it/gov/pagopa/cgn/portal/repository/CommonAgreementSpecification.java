@@ -81,4 +81,8 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
     protected Path<String> getProfileFullNamePath(Root<AgreementEntity> root) {
         return root.get("profile").get("fullName");
     }
+
+    protected boolean isSortAscending() {
+        return Sort.Direction.ASC.equals(filter.getSortDirection());
+    }
 }

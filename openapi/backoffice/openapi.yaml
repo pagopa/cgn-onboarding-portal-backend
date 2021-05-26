@@ -256,6 +256,8 @@ paths:
           format: date
         - $ref: '#/parameters/PageSize'
         - $ref: '#/parameters/PageNumber'
+        - $ref: '#/parameters/ApprovedColumnSort'
+        - $ref: '#/parameters/SortDirection'
       responses:
         200:
           description: List of approved agreements
@@ -333,6 +335,18 @@ parameters:
       - RequestDate
       - State
       - Assignee
+
+  ApprovedColumnSort:
+    name: sortColumn
+    in: query
+    description: Sort by column
+    required: false
+    type: string
+    enum:
+      - Operator
+      - AgreementDate
+      - LastModifyDate
+
   SortDirection:
     name: sortDirection
     in: query

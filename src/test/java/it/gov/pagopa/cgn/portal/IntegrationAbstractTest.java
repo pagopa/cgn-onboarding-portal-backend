@@ -176,14 +176,27 @@ public class IntegrationAbstractTest {
         return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
     }
 
+    protected List<AgreementTestObject> createMultipleApprovedAgreement(int numberToCreate) {
+        List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
+        IntStream.range(0, numberToCreate).forEach(idx ->
+                testObjectList.add(createApprovedAgreement(idx)));
+
+        return testObjectList;
+    }
     protected AgreementTestObject createApprovedAgreement() {
+        return createApprovedAgreement(1);
+    }
+
+    protected AgreementTestObject createApprovedAgreement(int idx) {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity.setFullName(profileEntity.getFullName() + idx);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());

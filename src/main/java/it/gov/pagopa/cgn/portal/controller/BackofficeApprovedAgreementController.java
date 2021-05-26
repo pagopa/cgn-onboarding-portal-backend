@@ -25,10 +25,11 @@ public class BackofficeApprovedAgreementController implements ApprovedAgreements
 
     @Override
     public ResponseEntity<ApprovedAgreements> getApprovedAgreements(
-            String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,Integer pageSize, Integer page) {
+            String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,Integer pageSize, Integer page,
+            String sortColumn, String sortDirection) {
 
-        BackofficeFilter filter = BackofficeFilter.getFilter(
-                profileFullName, requestDateFrom, requestDateTo, pageSize, page);
+        BackofficeFilter filter = BackofficeFilter.getApprovedFilter(
+                profileFullName, requestDateFrom, requestDateTo, pageSize, page, sortColumn, sortDirection);
         return backofficeAgreementFacade.getApprovedAgreements(filter);
     }
 
