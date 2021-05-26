@@ -13,7 +13,7 @@ public class ImageException extends RuntimeException {
     public enum ImageErrorCodeEnum {
         INVALID_IMAGE_TYPE("Invalid file extension. Upload a JPG or PNG image."),
         INVALID_DIMENSION("Invalid image format."),
-        GENERIC( "Unexpected error");
+        GENERIC("Unexpected error");
 
         private final String defaultErrorMsg;
     }
@@ -37,10 +37,8 @@ public class ImageException extends RuntimeException {
                 return ImageErrorCode.INVALID_IMAGE_TYPE.getValue();
             case INVALID_DIMENSION:
                 return ImageErrorCode.INVALID_DIMENSION.getValue();
-            case GENERIC:
-                return ImageErrorCode.GENERIC.getValue();
             default:
-                return "Image Error";
+                return ImageErrorCode.GENERIC.getValue();
         }
     }
 

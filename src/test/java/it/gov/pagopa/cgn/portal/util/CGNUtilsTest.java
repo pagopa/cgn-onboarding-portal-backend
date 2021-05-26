@@ -34,11 +34,29 @@ public class CGNUtilsTest {
     }
 
     @Test
-    public void ValidateImage_ValidateImageWithTooBigResolutionParams_InvalidRequestException() throws IOException {
+    public void ValidateImage_ValidateImageWithTooSmallResolutionParams_InvalidRequestException() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
         MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
         Assert.assertThrows(ImageException.class,
                 () -> CGNUtils.validateImage(multipartFile,2000, 2000));
+
+    }
+
+    @Test
+    public void ValidateImage_ValidateImageWithTheHeightTooSmallResolutionParams_InvalidRequestException() throws IOException {
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
+        Assert.assertThrows(ImageException.class,
+                () -> CGNUtils.validateImage(multipartFile,50, 2000));
+
+    }
+
+    @Test
+    public void ValidateImage_ValidateImageWithTheWidthTooSmallResolutionParams_InvalidRequestException() throws IOException {
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
+        Assert.assertThrows(ImageException.class,
+                () -> CGNUtils.validateImage(multipartFile,2000, 50));
 
     }
 
