@@ -15,9 +15,11 @@ services:
       - azurite
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=5MB
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - CGN_PE_STORAGE_AZURE_BLOB_ENDPOINT=http://azurite:10000/devstoreaccount1
       - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication
 
   db:
