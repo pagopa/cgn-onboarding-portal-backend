@@ -99,7 +99,9 @@ public class SampleDataGenerate implements CommandLineRunner {
             if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE)) {
                 createSampleAddress(profileEntity);
             }
-            profileEntity.setFullName(getRandomProfileName() + "_" + idx);
+            String profileName= getRandomProfileName() + "_" + idx;
+            profileEntity.setName(profileName);
+            profileEntity.setFullName(profileName);
             profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
 
             //creating discount
