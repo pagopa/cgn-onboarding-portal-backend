@@ -62,10 +62,8 @@ public class CGNUtils {
               }
             }
           }
-          throw new IllegalArgumentException("Can't find decoder for this image");
-        } else {
-          throw new IllegalArgumentException("Can't open stream for this image");
         }
+        throw new IllegalArgumentException("Can't get dimensions for this image");
       }
     }
 
