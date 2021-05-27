@@ -22,7 +22,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
@@ -46,8 +47,8 @@ public class IntegrationAbstractTest {
     protected static class Initializer
             implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-        static PostgreSQLContainer<?> postgres = new PostgreSQLContainer("postgres:11-alpine")
-                .withDatabaseName("integration-tests-db")
+        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider()
+                .newInstance("11-3.1").withDatabaseName("integration-tests-db")
                 .withUsername("admin")
                 .withPassword("admin");
 
