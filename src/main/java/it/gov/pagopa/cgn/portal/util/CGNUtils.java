@@ -10,9 +10,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
+import javax.imageio.ImageReader;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageReaderSpi;
+import javax.imageio.stream.ImageInputStream;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Iterator;
 
 public class CGNUtils {
 
@@ -23,18 +28,43 @@ public class CGNUtils {
     }
 
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
-        BufferedImage bufferedImage;
+        Dimension dimension;
         try {
             checkIfImageFile(image.getOriginalFilename());
-            bufferedImage = ImageIO.read(image.getInputStream());
+            dimension = getImageDimensions(image.getInputStream());
         } catch (IOException e) {
             throw new ImageException(ImageException.ImageErrorCodeEnum.GENERIC);
         }
-        boolean isValid = minWidth <= bufferedImage.getWidth() && minHeight <= bufferedImage.getHeight();
+        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight();
         if (!isValid) {
             throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION,
                     "Image must be at least " + minWidth  + "x" + minHeight);
         }
+    }
+
+    private static Dimension getImageDimensions(Object input) throws IOException {
+
+      try (ImageInputStream stream = ImageIO.createImageInputStream(input)) { // accepts File, InputStream, RandomAccessFile
+        if (stream != null) {
+          IIORegistry iioRegistry = IIORegistry.getDefaultInstance();
+          Iterator<ImageReaderSpi> iter = iioRegistry.getServiceProviders(ImageReaderSpi.class, true);
+          while (iter.hasNext()) {
+            ImageReaderSpi readerSpi = iter.next();
+            if (readerSpi.canDecodeInput(stream)) {
+              ImageReader reader = readerSpi.createReaderInstance();
+              try {
+                reader.setInput(stream);
+                int width = reader.getWidth(reader.getMinIndex());
+                int height = reader.getHeight(reader.getMinIndex());
+                return new Dimension(width, height);
+              } finally {
+                reader.dispose();
+              }
+            }
+          }
+        }
+        throw new IllegalArgumentException("Can't get dimensions for this image");
+      }
     }
 
     public static void checkIfPdfFile(String fileName) {
