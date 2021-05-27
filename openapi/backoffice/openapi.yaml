@@ -96,6 +96,8 @@ paths:
       responses:
         204:
           description: Agreement unassigned to the user
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -114,6 +116,8 @@ paths:
       responses:
         204:
           description: Agreement approved
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -138,6 +142,8 @@ paths:
       responses:
         204:
           description: Agreement rejected
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -183,6 +189,8 @@ paths:
           description: Document uploaded
           schema:
             $ref: '#/definitions/Document'
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -201,6 +209,8 @@ paths:
       responses:
         204:
           description: Document deleted
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -224,6 +234,8 @@ paths:
       responses:
         204:
           description: Discount suspended
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:
