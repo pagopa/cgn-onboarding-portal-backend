@@ -3,7 +3,7 @@ DROP MATERIALIZED VIEW IF EXISTS online_merchant;
 CREATE MATERIALIZED VIEW online_merchant AS
 WITH merchant AS (
     SELECT a.agreement_k,
-           p.name,
+           COALESCE( NULLIF(p.name, ''), p.full_name) AS name,
            p.website_url
     FROM agreement a
              JOIN profile p ON (p.agreement_fk = a.agreement_k)

@@ -3,7 +3,7 @@ DROP MATERIALIZED VIEW IF EXISTS offline_merchant;
 CREATE MATERIALIZED VIEW offline_merchant AS
 WITH merchant AS (
     SELECT a.agreement_k,
-           p.name
+       COALESCE( NULLIF(p.name, ''), p.full_name) AS name
     FROM agreement a
              JOIN profile p ON (p.agreement_fk = a.agreement_k)
     WHERE a.state = 'APPROVED'
