@@ -23,7 +23,7 @@ services:
       - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication
 
   db:
-    image: 'postgres:11-alpine'
+    image: 'postgis/postgis:11-2.5'
     container_name: db
     ports:
       - 5432:5432
