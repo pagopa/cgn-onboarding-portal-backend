@@ -32,7 +32,7 @@ public enum DocumentTypeEnum {
 
     public static DocumentTypeEnum fromValue(String value) {
         return Arrays.stream(DocumentTypeEnum.values())
-                .filter(typeEnum -> typeEnum.getCode().equals(value)).findFirst()
+                .filter(typeEnum -> typeEnum.getCode().equalsIgnoreCase(value)).findFirst()
                 .orElseThrow(()-> new InvalidRequestException("DocumentTypeEnum value not valid"));
     }
 

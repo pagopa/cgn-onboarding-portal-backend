@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.DocumentConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
@@ -51,17 +52,17 @@ public class DocumentFacade {
         DocumentEntity documentEntity;
         try {
             documentEntity = documentService.storeDocument(
-                    agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()), document.getInputStream(),
+                    agreementId, DocumentTypeEnum.fromValue(documentType), document.getInputStream(),
                     document.getSize());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CGNException(e);
         }
         azureStorage.setSecureDocumentUrl(documentEntity);
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
     }
 
     public long deleteDocument(String agreementId, String documentType) {
-        return documentService.deleteDocument(agreementId, DocumentTypeEnum.valueOf(documentType.toUpperCase()));
+        return documentService.deleteDocument(agreementId, DocumentTypeEnum.fromValue(documentType));
     }
 
     @Autowired
