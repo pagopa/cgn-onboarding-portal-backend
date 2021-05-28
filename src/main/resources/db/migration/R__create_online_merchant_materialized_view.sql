@@ -80,3 +80,5 @@ FROM merchant_with_categories m
 GROUP BY 1, 2, 3;
 
 CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
+
+CREATE INDEX IF NOT EXISTS idx_online_merchant_search_name ON online_merchant USING gin (searchable_name gin_trgm_ops);
