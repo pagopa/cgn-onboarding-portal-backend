@@ -13,11 +13,12 @@ import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Profile;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ import java.util.stream.IntStream;
 
 @Slf4j
 @SpringBootApplication
+@Disabled
+@Profile("load-test")
 public class SampleDataGenerate implements CommandLineRunner {
-
-    private static ConfigurableApplicationContext applicationContext;
 
     private static final List<String> profileNameList = Arrays.asList(
             "ferrari", "feltrinelli", "esselunga", "alitalia", "carrefour", "eni", "lamborghini");
@@ -64,7 +65,7 @@ public class SampleDataGenerate implements CommandLineRunner {
 
 
     public static void main(String[] args) {
-        applicationContext = SpringApplication.run(CGNOnboardingPortal.class, args);
+        SpringApplication.run(CGNOnboardingPortal.class, args);
     }
 
     @Override
@@ -90,6 +91,7 @@ public class SampleDataGenerate implements CommandLineRunner {
 
 
     protected void createApprovedAgreementStressTest(int numberToCreate) {
+        log.warn("Creating " + numberToCreate + " agreements...");
         TestUtils.setAdminAuth();
         IntStream.range(0, numberToCreate).forEach(idx -> {
             AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(Instant.now().getEpochSecond() + "" + idx);

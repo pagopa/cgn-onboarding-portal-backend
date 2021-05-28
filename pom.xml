@@ -363,6 +363,15 @@
             </properties>
         </profile>
         <profile>
+            <id>load-test</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>load-test</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
             <id>prod</id>
             <properties>
                 <spring.profiles.active>prod</spring.profiles.active>
