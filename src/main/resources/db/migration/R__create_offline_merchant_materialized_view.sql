@@ -98,3 +98,6 @@ WITH merchant AS (
      JOIN address a ON p.profile_k = a.profile_fk;
 
 CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
+
+CREATE INDEX IF NOT EXISTS idx_offline_merchant_search_name ON offline_merchant USING gin (searchable_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_offline_merchant_lat_lon on offline_merchant (latitude, longitude);
