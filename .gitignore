@@ -135,3 +135,9 @@ buildNumber.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/java,maven,java-web,intellij+all
 */node_modules
+/.settings/org.eclipse.core.resources.prefs
+/.classpath
+/.factorypath
+/.project
+/.settings/org.eclipse.jdt.apt.core.prefs
+/.settings/org.eclipse.jdt.core.prefs
