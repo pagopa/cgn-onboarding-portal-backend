@@ -70,6 +70,17 @@ services:
     networks:
       - pe-net
 
+  fixtures:
+    build: 
+      context: ./docker/fixtures
+      dockerfile: Dockerfile
+    env_file: 
+      - docker/fixtures/fixtures.env
+    depends_on: 
+      - azurite
+    networks:
+      - pe-net
+
   spid-testenv2:
     container_name: spid-testenv2
     image: italia/spid-testenv2:latest
