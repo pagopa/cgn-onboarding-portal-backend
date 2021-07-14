@@ -1,10 +1,11 @@
 package it.gov.pagopa.cgn.portal.controller.profile;
 
-import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgnonboardingportal.model.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +14,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgnonboardingportal.model.Address;
+import it.gov.pagopa.cgnonboardingportal.model.BothChannels;
+import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
+import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
+import it.gov.pagopa.cgnonboardingportal.model.OfflineChannel;
+import it.gov.pagopa.cgnonboardingportal.model.OnlineChannel;
+import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
