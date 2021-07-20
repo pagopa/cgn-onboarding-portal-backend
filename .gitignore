@@ -141,3 +141,5 @@ buildNumber.properties
 /.project
 /.settings/org.eclipse.jdt.apt.core.prefs
 /.settings/org.eclipse.jdt.core.prefs
+
+docker-compose.override.yml
