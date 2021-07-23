@@ -102,6 +102,7 @@ public class ProfileService {
       dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
       dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
       dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+      dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
       updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
       updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
       dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
