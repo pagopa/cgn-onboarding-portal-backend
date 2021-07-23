@@ -174,6 +174,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         OfflineChannel offlineChannel = new OfflineChannel();
         offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        offlineChannel.setAllNationalAddresses(true);
         createProfile.setSalesChannel(offlineChannel);
         return createProfile;
     }
