@@ -736,9 +736,11 @@ definitions:
             type: string
           addresses:
             type: array
-            minItems: 1
             items:
               $ref: '#/definitions/Address'
+          allNationalAddresses:
+            type: boolean
+            default: false
 
   BothChannels:
     allOf:
@@ -752,9 +754,11 @@ definitions:
             type: string
           addresses:
             type: array
-            minItems: 1
             items:
               $ref: '#/definitions/Address'
+          allNationalAddresses:
+            type: boolean
+            default: false
           discountCodeType:
             $ref: '#/definitions/DiscountCodeType'
 

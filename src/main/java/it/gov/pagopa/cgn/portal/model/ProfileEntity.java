@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import it.gov.pagopa.cgn.portal.annotation.CheckAddresses;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "profile")
 @Data
+@CheckAddresses
 public class ProfileEntity extends BaseEntity {
 
     @Id
@@ -108,6 +110,9 @@ public class ProfileEntity extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addressList;
+
+    @Column(name = "all_national_addresses")
+    private Boolean allNationalAddresses = false;
 
     public void removeAllAddress() {
         this.addressList.clear();

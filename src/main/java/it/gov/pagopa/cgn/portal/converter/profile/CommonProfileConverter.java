@@ -79,6 +79,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                             entity.getAddressList().stream()
                                     .sorted(getAddressComparator())
                                     .map(addressToDto).collect(Collectors.toList()));
+                physicalStoreChannel.setAllNationalAddresses(entity.getAllNationalAddresses());                    
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
@@ -89,6 +90,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                                     .sorted(getAddressComparator())
                                     .map(addressToDto).collect(Collectors.toList()));
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
+                bothChannels.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return bothChannels;
             default:
                 throw new IllegalArgumentException("Sales Channel not mapped");
@@ -120,6 +122,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                             physicalStoreChannel.getAddresses().stream()
                                     .map(address -> addressToEntity.apply(address, entity))
                                     .collect(Collectors.toList()));
+                    entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());                
                 } else {
                     throwInvalidSalesChannel();
                 }
@@ -134,6 +137,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                                     .map(address -> addressToEntity.apply(address, entity))
                                     .collect(Collectors.toList()));
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
+                    entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
                 } else {
                     throwInvalidSalesChannel();
                 }
