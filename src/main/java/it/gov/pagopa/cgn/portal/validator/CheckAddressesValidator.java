@@ -13,7 +13,7 @@ public class CheckAddressesValidator implements ConstraintValidator<CheckAddress
 
     public boolean isValid(ProfileEntity profileEntity, ConstraintValidatorContext context) {
         return profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE)
-                || ((CollectionUtils.isEmpty(profileEntity.getAddressList()) && profileEntity.getAllNationalAddresses()
+                || ((profileEntity.getAllNationalAddresses()
                         || !CollectionUtils.isEmpty(profileEntity.getAddressList())
                                 && !profileEntity.getAllNationalAddresses())
                         && !profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE));
