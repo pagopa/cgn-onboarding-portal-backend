@@ -54,7 +54,6 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @NotNull
     @Min(value = 5)
     @Max(value = 99)
     @Column(name = "discount_value")
