@@ -696,14 +696,15 @@ definitions:
   ProductCategory:
     type: string
     enum:
-      - Entertainments
-      - Travels
-      - Transportation
-      - Connectivity
-      - Books
-      - Arts
+      - Entertainment
+      - Travelling
+      - FoodDrink
+      - Services
+      - Learning
+      - Hotels
       - Sports
       - Health
+      - Shopping
 
   SalesChannel:
     type: object

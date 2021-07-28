@@ -161,7 +161,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.ARTS);
+        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
@@ -220,7 +220,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
         updatedDiscount.setName("updated_name");
         DiscountProductEntity newProduct = new DiscountProductEntity();
-        newProduct.setProductCategory(ProductCategoryEnum.BOOKS);
+        newProduct.setProductCategory(ProductCategoryEnum.LEARNING);
         newProduct.setDiscount(updatedDiscount);
         updatedDiscount.getProducts().add(newProduct);
 
@@ -527,7 +527,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity toUpdateDiscountEntity = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setDiscount(toUpdateDiscountEntity);
-        productEntity.setProductCategory(ProductCategoryEnum.ARTS);
+        productEntity.setProductCategory(ProductCategoryEnum.LEARNING);
         toUpdateDiscountEntity.setProducts(Collections.singletonList(productEntity));
         toUpdateDiscountEntity.setDiscountValue(70);
         discountEntity = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), toUpdateDiscountEntity);

@@ -183,7 +183,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setStaticCode("create_discount_static_code");
-        createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELS, ProductCategory.SPORTS));
+        createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
         return createDiscount;
     }
 }
