@@ -14,6 +14,7 @@ import it.gov.pagopa.cgn.portal.annotation.DateBefore;
     private String target;
     private String compareTo;
 
+    @Override
     public void initialize(DateBefore constraintAnnotation){
         this.target = constraintAnnotation.target();
         this.compareTo = constraintAnnotation.compareTo();
