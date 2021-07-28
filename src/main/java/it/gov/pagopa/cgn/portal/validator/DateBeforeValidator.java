@@ -25,6 +25,10 @@ import it.gov.pagopa.cgn.portal.annotation.DateBefore;
           .getPropertyValue(target);
         LocalDate compareToFieldValue = (LocalDate) new BeanWrapperImpl(entity)
           .getPropertyValue(compareTo);
+        
+        if (targetFieldValue == null || compareToFieldValue == null){
+          return false;
+        }
         return targetFieldValue.compareTo(compareToFieldValue) <= 0;
      }
  } 
