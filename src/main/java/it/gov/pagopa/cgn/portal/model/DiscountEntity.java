@@ -21,7 +21,7 @@ import java.util.List;
 @Table(name = "discount")
 @Data
 @TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
-@DateBefore(target = "startDate", compareTo = "endDate")
+@DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
 public class DiscountEntity extends BaseEntity {
 
     @Id
