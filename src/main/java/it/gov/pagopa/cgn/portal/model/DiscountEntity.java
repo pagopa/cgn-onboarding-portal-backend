@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.model;
 
-import it.gov.pagopa.cgn.portal.annotation.DateAfter;
 import it.gov.pagopa.cgn.portal.annotation.DateBefore;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
@@ -23,7 +22,6 @@ import java.util.List;
 @Data
 @TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 @DateBefore(target = "startDate", compareTo = "endDate")
-@DateAfter(target = "endDate", compareTo = "startDate")
 public class DiscountEntity extends BaseEntity {
 
     @Id

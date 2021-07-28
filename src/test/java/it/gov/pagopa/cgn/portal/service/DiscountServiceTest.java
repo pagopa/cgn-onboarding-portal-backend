@@ -118,6 +118,15 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithEndAfterToday_ThrowInvalidRequestException() {
+        final String agreementId = agreementEntity.getId();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setEndDate(LocalDate.now().minusDays(2));
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.createDiscount(agreementId, discountEntity));
+    }
+
+    @Test
     void Get_GetDiscountListNotFound_Ok() {
         List<DiscountEntity> discounts = discountService.getDiscounts(agreementEntity.getId());
         Assertions.assertNotNull(discounts);
@@ -342,26 +351,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.findById(agreementId);
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertNotNull(agreementEntity.getFirstDiscountPublishingDate());
-
-    }
-
-    @Test
-    void Publish_PublishDiscountWithEndAfterToday_ThrowInvalidRequestException() {
-        final String agreementId = agreementEntity.getId();
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity.setEndDate(LocalDate.now().minusDays(2));
-        DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
-        agreementEntity = agreementService.requestApproval(agreementId);
-        approveAgreement();  //simulation of approved
-        agreementEntity = agreementRepository.save(agreementEntity);
-        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
-        final Long dbDiscountId = dbDiscount.getId();
-        Assertions.assertThrows(InvalidRequestException.class,
-                () -> discountService.publishDiscount(agreementId, dbDiscountId));
-        agreementEntity = agreementService.findById(agreementId);
-        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
-        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
     }
 
