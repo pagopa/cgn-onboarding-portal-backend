@@ -129,7 +129,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
         Assertions.assertTrue(actual.contains("A Description"));
         Assertions.assertTrue(actual.contains("15%"));
-        Assertions.assertTrue(actual.contains(ProductCategoryEnum.TRAVELLING.getDescrition()));
+        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription()));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));
         Assertions.assertTrue(actual.contains("Tel: +390123456789"));

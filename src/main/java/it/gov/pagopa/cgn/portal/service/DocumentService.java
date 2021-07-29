@@ -243,7 +243,7 @@ public class DocumentService {
             RenderableDiscount discount = new RenderableDiscount();
 
             String categories = entity.getProducts().stream()
-                    .map(p -> p.getProductCategory().getDescrition()).collect(Collectors.joining(",\n"));
+                    .map(p -> p.getProductCategory().getDescription()).collect(Collectors.joining(",\n"));
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();

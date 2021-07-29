@@ -17,5 +17,5 @@ public enum ProductCategoryEnum {
     HEALTH("Salute e benessere"),
     SHOPPING("Shopping");
 
-    private final String descrition;
+    private final String description;
 }
