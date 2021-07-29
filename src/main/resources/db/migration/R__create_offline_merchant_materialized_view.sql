@@ -26,37 +26,41 @@ WITH merchant AS (
                 m.name,
                 pc.product_category,
                 CASE
-                    WHEN pc.product_category = 'ARTS' THEN TRUE
+                    WHEN pc.product_category = 'ENTERTAINMENT' THEN TRUE
                     ELSE FALSE
-                    END AS arts,
+                    END AS entertainment,
                 CASE
-                    WHEN pc.product_category = 'BOOKS' THEN TRUE
+                    WHEN pc.product_category = 'TRAVELLING' THEN TRUE
                     ELSE FALSE
-                    END AS books,
+                    END AS travelling,
                 CASE
-                    WHEN pc.product_category = 'CONNECTIVITY' THEN TRUE
+                    WHEN pc.product_category = 'FOOD_DRINK' THEN TRUE
                     ELSE FALSE
-                    END AS connectivity,
+                    END AS food_drink,
                 CASE
-                    WHEN pc.product_category = 'ENTERTAINMENTS' THEN TRUE
+                    WHEN pc.product_category = 'SERVICES' THEN TRUE
                     ELSE FALSE
-                    END AS entertainments,
+                    END AS services,
                 CASE
-                    WHEN pc.product_category = 'HEALTH' THEN TRUE
+                    WHEN pc.product_category = 'LEARNING' THEN TRUE
                     ELSE FALSE
-                    END AS health,
+                    END AS learning,
+                CASE
+                    WHEN pc.product_category = 'HOTELS' THEN TRUE
+                    ELSE FALSE
+                    END AS hotels,
                 CASE
                     WHEN pc.product_category = 'SPORTS' THEN TRUE
                     ELSE FALSE
                     END AS sports,
                 CASE
-                    WHEN pc.product_category = 'TRANSPORTATION' THEN TRUE
+                    WHEN pc.product_category = 'HEALTH' THEN TRUE
                     ELSE FALSE
-                    END AS transportation,
+                    END AS health,
                 CASE
-                    WHEN pc.product_category = 'TRAVELS' THEN TRUE
+                    WHEN pc.product_category = 'SHOPPING' THEN TRUE
                     ELSE FALSE
-                    END AS travels
+                    END AS shopping
          FROM merchant m
                   JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk)
      ),
@@ -65,14 +69,15 @@ WITH merchant AS (
                m.name,
                array_agg(m.product_category) AS product_categories,
                lower(m.name)                 AS searchable_name,
-               bool_or(m.arts)               AS arts,
-               bool_or(m.books)              AS books,
-               bool_or(m.connectivity)       AS connectivity,
-               bool_or(m.entertainments)     AS entertainments,
-               bool_or(m.health)             AS health,
+               bool_or(m.entertainment)      AS entertainment,
+               bool_or(m.travelling)         AS travelling,
+               bool_or(m.food_drink)         AS food_drink,
+               bool_or(m.services)           AS services,
+               bool_or(m.learning)           AS learning,
+               bool_or(m.hotels)             AS hotels,
                bool_or(m.sports)             AS sports,
-               bool_or(m.transportation)     AS transportation,
-               bool_or(m.travels)            AS travels
+               bool_or(m.health)             AS health,
+               bool_or(m.shopping)           AS shopping
         FROM merchant_with_categories m
         GROUP BY 1, 2
      )
@@ -80,14 +85,15 @@ WITH merchant AS (
             m.name,
             m.product_categories,
             m.searchable_name,
-            m.arts,
-            m.books,
-            m.connectivity,
-            m.entertainments,
-            m.health,
+            m.entertainment,
+            m.travelling,
+            m.food_drink,
+            m.services,
+            m.learning,
+            m.hotels,
             m.sports,
-            m.transportation,
-            m.travels,
+            m.health,
+            m.shopping,
             a.full_address,
             a.latitude,
             a.longitude,
