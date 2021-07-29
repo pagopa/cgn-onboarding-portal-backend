@@ -74,10 +74,10 @@ WITH merchant AS (
                bool_or(m.food_drink)         AS food_drink,
                bool_or(m.services)           AS services,
                bool_or(m.learning)           AS learning,
-               bool_or(m.hotels)             AS hotels
+               bool_or(m.hotels)             AS hotels,
                bool_or(m.sports)             AS sports,
                bool_or(m.health)             AS health,
-               bool_or(m.shopping)           AS shopping,
+               bool_or(m.shopping)           AS shopping
         FROM merchant_with_categories m
         GROUP BY 1, 2
      )
