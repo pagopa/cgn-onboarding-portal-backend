@@ -143,3 +143,4 @@ buildNumber.properties
 /.settings/org.eclipse.jdt.core.prefs
 
 docker-compose.override.yml
+.vscode/settings.json

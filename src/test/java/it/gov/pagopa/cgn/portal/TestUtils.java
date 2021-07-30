@@ -226,7 +226,7 @@ public class TestUtils {
     public static List<DiscountProductEntity> getProductEntityList(DiscountEntity discountEntity) {
         List<DiscountProductEntity> productEntityList = new ArrayList<>();
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.TRAVELS);
+        productEntity.setProductCategory(ProductCategoryEnum.TRAVELLING);
         productEntityList.add(productEntity);
         productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.SPORTS);

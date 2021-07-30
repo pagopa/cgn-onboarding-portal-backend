@@ -27,14 +27,15 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
         enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
         enumMap.put(DiscountStateEnum.SUSPENDED, DiscountState.SUSPENDED);
 
-        productEnumMaps.put(ProductCategoryEnum.ARTS, ProductCategory.ARTS);
-        productEnumMaps.put(ProductCategoryEnum.BOOKS, ProductCategory.BOOKS);
-        productEnumMaps.put(ProductCategoryEnum.CONNECTIVITY, ProductCategory.CONNECTIVITY);
-        productEnumMaps.put(ProductCategoryEnum.ENTERTAINMENTS, ProductCategory.ENTERTAINMENTS);
-        productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
+        productEnumMaps.put(ProductCategoryEnum.ENTERTAINMENT, ProductCategory.ENTERTAINMENT);
+        productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
+        productEnumMaps.put(ProductCategoryEnum.FOOD_DRINK, ProductCategory.FOODDRINK);
+        productEnumMaps.put(ProductCategoryEnum.SERVICES, ProductCategory.SERVICES);
+        productEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
+        productEnumMaps.put(ProductCategoryEnum.HOTELS, ProductCategory.HOTELS);
         productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
-        productEnumMaps.put(ProductCategoryEnum.TRANSPORTATION, ProductCategory.TRANSPORTATION);
-        productEnumMaps.put(ProductCategoryEnum.TRAVELS, ProductCategory.TRAVELS);
+        productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
+        productEnumMaps.put(ProductCategoryEnum.SHOPPING, ProductCategory.SHOPPING);
     }
 
 
