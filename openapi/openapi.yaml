@@ -833,7 +833,6 @@ definitions:
       - name
       - startDate
       - endDate
-      - discount
       - productCategories
     properties:
       name:
@@ -872,7 +871,6 @@ definitions:
       - description
       - startDate
       - endDate
-      - discount
       - productCategories
       - condition
     properties:
@@ -925,7 +923,6 @@ definitions:
       - description
       - startDate
       - endDate
-      - discount
       - productCategories
       - condition
     properties:
