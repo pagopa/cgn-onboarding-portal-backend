@@ -266,7 +266,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDiscountValue(null);
         DiscountProductEntity newProduct = new DiscountProductEntity();
-        newProduct.setProductCategory(ProductCategoryEnum.BOOKS);
+        newProduct.setProductCategory(ProductCategoryEnum.LEARNING);
         newProduct.setDiscount(updatedDiscount);
         updatedDiscount.getProducts().add(newProduct);
 
