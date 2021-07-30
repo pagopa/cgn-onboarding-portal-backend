@@ -669,7 +669,7 @@ definitions:
       discount:
         type: integer
         format: int32
-        minimum: 5
+        minimum: 1
         maximum: 99
       productCategories:
         type: array
