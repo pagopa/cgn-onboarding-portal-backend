@@ -247,7 +247,7 @@ public class DocumentService {
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();
-            discount.discountValue = "" + entity.getDiscountValue() + "% ";
+            discount.discountValue = entity.getDiscountValue() != null ? "" + entity.getDiscountValue() + "% " : "";
             discount.condition = entity.getCondition();
             discount.staticCode = entity.getStaticCode();
             discount.categories = categories;
