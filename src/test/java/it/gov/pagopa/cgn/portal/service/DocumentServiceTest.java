@@ -129,7 +129,33 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
         Assertions.assertTrue(actual.contains("A Description"));
         Assertions.assertTrue(actual.contains("15%"));
-        Assertions.assertTrue(actual.contains(ProductCategoryEnum.TRAVELS.getDescrition()));
+        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription()));
+        Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
+        Assertions.assertTrue(actual.contains("CEO"));
+        Assertions.assertTrue(actual.contains("Tel: +390123456789"));
+        Assertions.assertTrue(actual.contains("referent.registry@pagopa.it"));
+
+    }
+
+    @Test
+    void Get_GenerateManifestationOfInterestWithEmptyDiscountValuesDocument_Ok() throws IOException {
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setDiscountValue(null);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.MANIFESTATION_OF_INTEREST).toByteArray());
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String actual = stripper.getText(document);
+
+        Assertions.assertTrue(actual.contains("Allegato 1"));
+        Assertions.assertTrue(actual.contains("DOMANDA DI"));
+        Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
+        Assertions.assertTrue(actual.contains("FULL_NAME"));
+        Assertions.assertTrue(actual.contains("address@pagopa.it"));
+        Assertions.assertTrue(actual.contains("A Description"));
+        Assertions.assertTrue(actual.contains(""));
+        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription()));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));
         Assertions.assertTrue(actual.contains("Tel: +390123456789"));

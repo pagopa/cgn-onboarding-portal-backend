@@ -10,12 +10,16 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.util.ValidationUtils;
+
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import javax.validation.ValidatorFactory;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -33,6 +37,7 @@ public class DiscountService {
     private final ProfileService profileService;
     private final EmailNotificationFacade emailNotificationFacade;
     private final DocumentService documentService;
+    private final ValidatorFactory factory;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -144,12 +149,13 @@ public class DiscountService {
     @Autowired
     public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
                            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-                           DocumentService documentService) {
+                           DocumentService documentService, ValidatorFactory factory) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
         this.emailNotificationFacade = emailNotificationFacade;
         this.documentService = documentService;
+        this.factory = factory;
     }
 
 
@@ -176,6 +182,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
         }
+        ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
     }
 
     private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {

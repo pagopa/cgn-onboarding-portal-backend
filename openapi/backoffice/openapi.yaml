@@ -648,7 +648,6 @@ definitions:
       - description
       - startDate
       - endDate
-      - discount
       - productCategories
       - condition
       - lastUpateDate
@@ -670,7 +669,7 @@ definitions:
       discount:
         type: integer
         format: int32
-        minimum: 5
+        minimum: 1
         maximum: 99
       productCategories:
         type: array
@@ -696,14 +695,15 @@ definitions:
   ProductCategory:
     type: string
     enum:
-      - Entertainments
-      - Travels
-      - Transportation
-      - Connectivity
-      - Books
-      - Arts
+      - Entertainment
+      - Travelling
+      - FoodDrink
+      - Services
+      - Learning
+      - Hotels
       - Sports
       - Health
+      - Shopping
 
   SalesChannel:
     type: object
