@@ -991,7 +991,6 @@ definitions:
     type: object
     required:
       - fullAddress
-      - coordinates
     properties:
       fullAddress:
         type: string

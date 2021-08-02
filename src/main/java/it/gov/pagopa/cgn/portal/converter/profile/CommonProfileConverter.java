@@ -34,9 +34,6 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     .findFirst().orElseThrow();
 
     protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity)-> {
-        if (coordinates == null) {
-            throw new InvalidRequestException("Coordinates must be valid");
-        }
         addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
         addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
     };

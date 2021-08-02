@@ -29,11 +29,9 @@ public class AddressEntity extends BaseEntity {
     @Column(name = "full_address")
     private String fullAddress;
 
-    @NotNull
     @Column(name = "latitude")
     private Double latitude;
 
-    @NotNull
     @Column(name = "longitude")
     private Double longitude;
 
