@@ -94,14 +94,18 @@ WITH merchant AS (
             m.sports,
             m.health,
             m.shopping,
-            a.full_address,
+            CASE 
+                WHEN a.full_address IS NULL AND p.all_national_addresses 
+                    THEN 'Tutti i punti vendita sul territorio nazionale' 
+                    ELSE a.full_address
+                END as full_address,
             a.latitude,
             a.longitude,
             a.address_k AS address_id,
             now()		AS last_update
      FROM merchant_without_address m
      JOIN profile p on m.id = p.agreement_fk
-     JOIN address a ON p.profile_k = a.profile_fk;
+     LEFT JOIN address a ON p.profile_k = a.profile_fk;
 
 CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
 
