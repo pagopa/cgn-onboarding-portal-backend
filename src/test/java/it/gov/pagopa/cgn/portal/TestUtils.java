@@ -125,6 +125,7 @@ public class TestUtils {
         profileEntity.setLegalOffice("legal office");
         profileEntity.setDiscountCodeType(discountCodeType);
         profileEntity.setTelephoneNumber("12345678");
+        profileEntity.setAllNationalAddresses(true);
         return profileEntity;
     }
 

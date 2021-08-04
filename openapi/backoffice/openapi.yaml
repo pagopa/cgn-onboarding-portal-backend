@@ -735,12 +735,13 @@ definitions:
             type: string
           addresses:
             type: array
-            minItems: 1
             items:
               type: string
               minLength: 10
               maxLength: 500
-
+          allNationalAddresses:
+            type: boolean
+            default: false
   BothChannels:
     allOf:
       - $ref: '#/definitions/SalesChannel'
@@ -753,11 +754,13 @@ definitions:
             type: string
           addresses:
             type: array
-            minItems: 1
             items:
               type: string
               minLength: 10
               maxLength: 500
+          allNationalAddresses:
+            type: boolean
+            default: false
 
   SalesChannelType:
     type: string

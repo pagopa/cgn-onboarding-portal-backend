@@ -85,6 +85,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.salesChannel.allNationalAddresses").value(false))
                 .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
                 .andExpect(jsonPath("$.salesChannel.addresses").isArray())
                 .andExpect(jsonPath("$.salesChannel.addresses[0].fullAddress").value(firstAddress.getFullAddress()))
@@ -105,17 +106,6 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
                 .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
                 .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
-
-    }
-
-    @Test
-    void Create_CreateIncompleteOfflineProfile_BadRequest() throws Exception {
-        CreateProfile createProfile = createSampleCreateOfflineWithoutRequiredAddressesProfile();
-
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
 
     }
 
@@ -174,6 +164,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         OfflineChannel offlineChannel = new OfflineChannel();
         offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        offlineChannel.setAllNationalAddresses(false);
         createProfile.setSalesChannel(offlineChannel);
         return createProfile;
     }

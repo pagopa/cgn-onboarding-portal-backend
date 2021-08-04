@@ -17,34 +17,34 @@ import java.util.stream.Collectors;
 
 public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, D> {
 
-    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(DiscountCodeTypeEnum.class);
+    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
+            DiscountCodeTypeEnum.class);
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
     }
 
-    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum ->
-            Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
-                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
+    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum -> Optional
+            .ofNullable(discountCodeTypeMap.get(entityEnum))
+            .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
-    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType ->
-            discountCodeTypeMap.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(discountCodeType))
-                    .map(Map.Entry::getKey)
-                    .findFirst().orElseThrow();
+    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType -> discountCodeTypeMap
+            .entrySet().stream().filter(entry -> entry.getValue().equals(discountCodeType)).map(Map.Entry::getKey)
+            .findFirst().orElseThrow();
 
-    protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity)-> {
-        if (coordinates == null) {
-            throw new InvalidRequestException("Coordinates must be valid");
+    protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity) -> {
+        if (coordinates != null && coordinates.getLongitude() != null && coordinates.getLatitude() != null) {
+            addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
+            addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
         }
-        addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
-        addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
     };
 
     protected Function<AddressEntity, Coordinates> getCoordinatesFromEntity = addressEntity -> {
         Coordinates coordinates = new Coordinates();
-        coordinates.setLatitude(BigDecimal.valueOf(addressEntity.getLatitude()));
-        coordinates.setLongitude(BigDecimal.valueOf(addressEntity.getLongitude()));
+        if (addressEntity.getLongitude() != null && addressEntity.getLatitude() != null) {
+            coordinates.setLatitude(BigDecimal.valueOf(addressEntity.getLatitude()));
+            coordinates.setLongitude(BigDecimal.valueOf(addressEntity.getLongitude()));
+        }
         return coordinates;
     };
 
@@ -75,27 +75,24 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
-                physicalStoreChannel.setAddresses(
-                            entity.getAddressList().stream()
-                                    .sorted(getAddressComparator())
-                                    .map(addressToDto).collect(Collectors.toList()));
+                physicalStoreChannel.setAddresses(entity.getAddressList().stream().sorted(getAddressComparator())
+                        .map(addressToDto).collect(Collectors.toList()));
+                physicalStoreChannel.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
-                bothChannels.setAddresses(
-                            entity.getAddressList().stream()
-                                    .sorted(getAddressComparator())
-                                    .map(addressToDto).collect(Collectors.toList()));
+                bothChannels.setAddresses(entity.getAddressList().stream().sorted(getAddressComparator())
+                        .map(addressToDto).collect(Collectors.toList()));
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
+                bothChannels.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return bothChannels;
             default:
                 throw new IllegalArgumentException("Sales Channel not mapped");
         }
 
     };
-
 
     protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
         SalesChannelType channelType = salesChannelDto.getChannelType();
@@ -115,11 +112,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
                     entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
-                    //addressList must be not empty
-                    entity.setAddressList(
-                            physicalStoreChannel.getAddresses().stream()
-                                    .map(address -> addressToEntity.apply(address, entity))
-                                    .collect(Collectors.toList()));
+                    // addressList must be not empty
+                    entity.setAddressList(physicalStoreChannel.getAddresses().stream()
+                            .map(address -> addressToEntity.apply(address, entity)).collect(Collectors.toList()));
+                    entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
                 } else {
                     throwInvalidSalesChannel();
                 }
@@ -129,11 +125,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     BothChannels bothChannels = (BothChannels) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.BOTH);
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
-                    entity.setAddressList(
-                            bothChannels.getAddresses().stream()
-                                    .map(address -> addressToEntity.apply(address, entity))
-                                    .collect(Collectors.toList()));
+                    entity.setAddressList(bothChannels.getAddresses().stream()
+                            .map(address -> addressToEntity.apply(address, entity)).collect(Collectors.toList()));
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
+                    entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
                 } else {
                     throwInvalidSalesChannel();
                 }
@@ -149,4 +144,3 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         throw new InvalidRequestException("SalesChannel is invalid");
     }
 }
-

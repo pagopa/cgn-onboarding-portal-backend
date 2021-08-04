@@ -61,6 +61,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Test
     void Create_CreateProfilePhysicalWithValidData_Ok() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
+        profileEntity.setAllNationalAddresses(false);
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
         ProfileEntity profileDB = profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -141,12 +142,14 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Test
     void Update_UpdateOfflineProfileWithSameSalesChannel_Ok() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
+        profileEntity.setAllNationalAddresses(false);
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
         toUpdateProfile.setName("updated_name");
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setAllNationalAddresses(false);
         toUpdateProfile.setAddressList(TestUtils.createSampleAddress(profileEntity));
         toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
         ProfileEntity profileDB = profileService.updateProfile(agreementEntity.getId(), toUpdateProfile);
@@ -168,6 +171,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
         toUpdateProfile.setName("updated_name");
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setAllNationalAddresses(false);
         toUpdateProfile.setAddressList(TestUtils.createSampleAddress(profileEntity));
         toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
         ProfileEntity profileDB = profileService.updateProfile(agreementEntity.getId(), toUpdateProfile);
