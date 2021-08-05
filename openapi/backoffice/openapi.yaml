@@ -335,7 +335,7 @@ parameters:
     type: string
     enum:
       - Agreement
-      - ManifestationOfInterest
+      - AdhesionRequest
   RequestColumnSort:
     name: sortColumn
     in: query
@@ -793,7 +793,7 @@ definitions:
     type: string
     enum:
       - Agreement
-      - ManifestationOfInterest
+      - AdhesionRequest
 
   SuspendDiscount:
     type: object

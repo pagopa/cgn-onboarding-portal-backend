@@ -88,14 +88,14 @@ public class DocumentService {
     @Transactional
     public void resetMerchantDocuments(String agreementId) {
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.AGREEMENT);
-        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.MANIFESTATION_OF_INTEREST);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.ADHESION_REQUEST);
     }
 
     @Transactional
     public void resetAllDocuments(String agreementId) {
         resetMerchantDocuments(agreementId);
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_AGREEMENT);
-        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
     }
 
     // if there are documents created by profile and backoffice user, the document made by backoffice user will be returned
@@ -127,8 +127,8 @@ public class DocumentService {
         switch (documentType) {
             case AGREEMENT:
                 return renderAgreementDocument(agreementId);
-            case MANIFESTATION_OF_INTEREST:
-                return renderManifestationOfInterestDocument(agreementId);
+            case ADHESION_REQUEST:
+                return renderAdhesionRequestDocument(agreementId);
             default:
                 throw new RuntimeException("Invalid document type: "  + documentType);
         }
@@ -153,7 +153,7 @@ public class DocumentService {
     }
 
 
-    private ByteArrayOutputStream renderManifestationOfInterestDocument(String agreementId) {
+    private ByteArrayOutputStream renderAdhesionRequestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId).orElseThrow(() -> new RuntimeException("no profile"));
 
         List<String> addressList = profileEntity.getAddressList().stream().map(AddressEntity::getFullAddress).collect(Collectors.toList());
@@ -184,7 +184,7 @@ public class DocumentService {
         context.setVariable("referent_email_address", referent.getEmailAddress());
         context.setVariable("referent_telephone_nr", referent.getTelephoneNumber());
 
-        String renderedContent = templateEngine.process("pdf/pe-manifestation-of-interest.html", context);
+        String renderedContent = templateEngine.process("pdf/pe-adhesion-request.html", context);
         return generatePdfFromHtml(renderedContent);
     }
 

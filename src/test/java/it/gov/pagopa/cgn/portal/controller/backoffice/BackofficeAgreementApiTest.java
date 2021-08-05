@@ -226,10 +226,10 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void DeleteDocument_DeleteDocument_Ok() throws Exception {
-        String documentTypeDto = "ManifestationOfInterest";
+        String documentTypeDto = "AdhesionRequest";
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         DocumentEntity document = TestUtils.createDocument(
-                pendingAgreement, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST);
+                pendingAgreement, DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
         documentRepository.save(document);
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
@@ -240,7 +240,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void DeleteDocument_DeleteDocumentNotFound_BadRequest() throws Exception {
-        String documentTypeDto = "ManifestationOfInterest";
+        String documentTypeDto = "AdhesionRequest";
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         this.mockMvc.perform(
                 delete(TestUtils.getBackofficeDocumentPath(pendingAgreement.getId()) + "/" + documentTypeDto))
