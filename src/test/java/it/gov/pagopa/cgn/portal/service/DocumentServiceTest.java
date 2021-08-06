@@ -115,9 +115,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void Get_GenerateManifestationOfInterestDocument_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestDocument_Ok() throws IOException {
 
-        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.MANIFESTATION_OF_INTEREST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -138,12 +138,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateManifestationOfInterestWithEmptyDiscountValuesDocument_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Ok() throws IOException {
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.MANIFESTATION_OF_INTEREST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);

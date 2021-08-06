@@ -239,14 +239,14 @@ public class TestUtils {
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
-        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.MANIFESTATION_OF_INTEREST));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.ADHESION_REQUEST));
         return documentList;
     }
 
     public static List<DocumentEntity> createSampleBackofficeDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_AGREEMENT));
-        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_MANIFESTATION_OF_INTEREST));
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST));
         return documentList;
     }
 

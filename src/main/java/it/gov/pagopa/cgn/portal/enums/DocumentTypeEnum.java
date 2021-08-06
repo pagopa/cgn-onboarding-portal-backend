@@ -12,9 +12,9 @@ public enum DocumentTypeEnum {
 
 
     AGREEMENT("AGREEMENT", Type.AGREEMENT,false),
-    MANIFESTATION_OF_INTEREST("MANIFESTATION_OF_INTEREST", Type.MANIFESTATION_OF_INTEREST, false),
+    ADHESION_REQUEST("ADHESION_REQUEST", Type.ADHESION_REQUEST, false),
     BACKOFFICE_AGREEMENT("BACKOFFICE_AGREEMENT", Type.AGREEMENT, true),
-    BACKOFFICE_MANIFESTATION_OF_INTEREST("BACKOFFICE_MANIFESTATION_OF_INTEREST", Type.MANIFESTATION_OF_INTEREST,
+    BACKOFFICE_ADHESION_REQUEST("BACKOFFICE_ADHESION_REQUEST", Type.ADHESION_REQUEST,
             true);
 
     private final String code;
@@ -22,7 +22,7 @@ public enum DocumentTypeEnum {
     private final boolean backoffice;
 
     public enum Type {
-        AGREEMENT, MANIFESTATION_OF_INTEREST
+        AGREEMENT, ADHESION_REQUEST
     }
 
     public static int getNumberOfDocumentProfile() {
