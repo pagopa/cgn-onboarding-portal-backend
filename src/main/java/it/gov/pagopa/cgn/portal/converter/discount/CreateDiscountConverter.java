@@ -39,8 +39,8 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
                 entity.setLandingPageUrl(dto.getLandingPageUrl());
                 entity.setLandingPageReferrer(dto.getLandingPageReferrer());
                 entity.setCondition(dto.getCondition());
-                entity.setState(DiscountStateEnum.DRAFT); //default state
                 entity.setProducts(toEntityDiscountProduct.apply(dto.getProductCategories(), entity));
+                entity.setState(DiscountStateEnum.DRAFT); //default state
                 return entity;
             };
 
