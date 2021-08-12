@@ -48,7 +48,7 @@ public class UpdateProfileConverterTest {
         checkCommonsUpdateProfileAssertions(dto, profileEntity);
         Assert.assertEquals(SalesChannelEnum.ONLINE, profileEntity.getSalesChannel());
         Assert.assertEquals(onlineChannel.getWebsiteUrl(), profileEntity.getWebsiteUrl());
-        Assert.assertEquals(DiscountCodeTypeEnum.API, profileEntity.getDiscountCodeType());
+        Assert.assertEquals(DiscountCodeTypeEnum.STATIC, profileEntity.getDiscountCodeType());
     }
 
     @Test
