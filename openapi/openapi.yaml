@@ -774,6 +774,7 @@ definitions:
     enum:
       - Static
       - API
+      - LandingPage
 
   CreateReferent:
     type: object
