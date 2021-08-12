@@ -28,18 +28,18 @@ public class UpdateDiscountConverter extends CommonDiscountConverter<DiscountEnt
 
 
     protected Function<UpdateDiscount, DiscountEntity> toEntity =
-            dto -> {
+            updateDiscountDTO -> {
                 DiscountEntity entity = new DiscountEntity();
-                entity.setDescription(dto.getDescription());
-                entity.setName(dto.getName());
-                entity.setStartDate(dto.getStartDate());
-                entity.setEndDate(dto.getEndDate());
-                entity.setDiscountValue(dto.getDiscount());
-                entity.setStaticCode(dto.getStaticCode());
-                entity.setLandingPageUrl(dto.getLandingPageUrl());
-                entity.setLandingPageReferrer(dto.getLandingPageReferrer());
-                entity.setCondition(dto.getCondition());
-                entity.setProducts(toEntityDiscountProduct.apply(dto.getProductCategories(), entity));
+                entity.setDescription(updateDiscountDTO.getDescription());
+                entity.setName(updateDiscountDTO.getName());
+                entity.setStartDate(updateDiscountDTO.getStartDate());
+                entity.setEndDate(updateDiscountDTO.getEndDate());
+                entity.setDiscountValue(updateDiscountDTO.getDiscount());
+                entity.setStaticCode(updateDiscountDTO.getStaticCode());
+                entity.setLandingPageUrl(updateDiscountDTO.getLandingPageUrl());
+                entity.setLandingPageReferrer(updateDiscountDTO.getLandingPageReferrer());
+                entity.setCondition(updateDiscountDTO.getCondition());
+                entity.setProducts(toEntityDiscountProduct.apply(updateDiscountDTO.getProductCategories(), entity));
                 return entity;
             };
 

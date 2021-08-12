@@ -28,18 +28,18 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
             };
 
     protected Function<CreateDiscount, DiscountEntity> toEntity =
-            dto -> {
+            createDiscountDTO -> {
                 DiscountEntity entity = new DiscountEntity();
-                entity.setDescription(dto.getDescription());
-                entity.setName(dto.getName());
-                entity.setStartDate(dto.getStartDate());
-                entity.setEndDate(dto.getEndDate());
-                entity.setDiscountValue(dto.getDiscount());
-                entity.setStaticCode(dto.getStaticCode());
-                entity.setLandingPageUrl(dto.getLandingPageUrl());
-                entity.setLandingPageReferrer(dto.getLandingPageReferrer());
-                entity.setCondition(dto.getCondition());
-                entity.setProducts(toEntityDiscountProduct.apply(dto.getProductCategories(), entity));
+                entity.setDescription(createDiscountDTO.getDescription());
+                entity.setName(createDiscountDTO.getName());
+                entity.setStartDate(createDiscountDTO.getStartDate());
+                entity.setEndDate(createDiscountDTO.getEndDate());
+                entity.setDiscountValue(createDiscountDTO.getDiscount());
+                entity.setStaticCode(createDiscountDTO.getStaticCode());
+                entity.setLandingPageUrl(createDiscountDTO.getLandingPageUrl());
+                entity.setLandingPageReferrer(createDiscountDTO.getLandingPageReferrer());
+                entity.setCondition(createDiscountDTO.getCondition());
+                entity.setProducts(toEntityDiscountProduct.apply(createDiscountDTO.getProductCategories(), entity));
                 entity.setState(DiscountStateEnum.DRAFT); //default state
                 return entity;
             };

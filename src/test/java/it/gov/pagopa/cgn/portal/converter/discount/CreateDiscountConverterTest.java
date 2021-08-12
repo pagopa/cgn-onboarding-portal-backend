@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -87,6 +88,7 @@ public class CreateDiscountConverterTest {
         Assert.assertEquals(dto.getStartDate(), discountEntity.getStartDate());
         Assert.assertEquals(dto.getEndDate(), discountEntity.getEndDate());
         Assert.assertEquals(dto.getDiscount(), discountEntity.getDiscountValue());
+        Assert.assertEquals(DiscountStateEnum.DRAFT, discountEntity.getState());
     }
 
 }
