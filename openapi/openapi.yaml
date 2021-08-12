@@ -868,6 +868,12 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
+        type: string
+        maxLength: 100
 
   UpdateDiscount:
     type: object
@@ -905,6 +911,12 @@ definitions:
         type: string
         maxLength: 200
       staticCode:
+        type: string
+        maxLength: 100
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
         type: string
         maxLength: 100
 

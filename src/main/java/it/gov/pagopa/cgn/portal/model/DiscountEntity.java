@@ -77,6 +77,14 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "expiration_warning_sent")
     private OffsetDateTime expirationWarningSentDateTime;
 
+    @Size(max = 500)
+    @Column(name = "landing_page_url", length = 500)
+    private String landingPageUrl;
+
+    @Size(max = 100)
+    @Column(name = "landing_page_referrer", length = 100)
+    private String landingPageReferrer;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
