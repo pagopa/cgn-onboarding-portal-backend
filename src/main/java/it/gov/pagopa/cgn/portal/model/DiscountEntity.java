@@ -26,16 +26,16 @@ public class DiscountEntity extends BaseEntity {
 
     @Id
     @Column(name = "discount_k")
-    @SequenceGenerator(name="discount_discount_k_seq",
-            sequenceName="discount_discount_k_seq",
-            allocationSize=1)
+    @SequenceGenerator(name = "discount_discount_k_seq",
+            sequenceName = "discount_discount_k_seq",
+            allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="discount_discount_k_seq")
+            generator = "discount_discount_k_seq")
     private Long id;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Type( type = "discount_state_enum" )
+    @Type(type = "discount_state_enum")
     @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
@@ -103,7 +103,7 @@ public class DiscountEntity extends BaseEntity {
             if (this.products == null) {
                 this.products = new ArrayList<>();
             }
-            productList.forEach(p-> {
+            productList.forEach(p -> {
                 if (!products.contains(p)) {
                     this.products.add(p);
                     p.setDiscount(this);

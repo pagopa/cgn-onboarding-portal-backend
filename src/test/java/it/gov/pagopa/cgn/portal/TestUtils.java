@@ -150,6 +150,13 @@ public class TestUtils {
         return Collections.singletonList(address);
     }
 
+    public static AgreementEntity createSampleAgreementEntityWithCommonFields() {
+        AgreementEntity agreementEntity = new AgreementEntity();
+        agreementEntity.setId("agreement_id");
+        agreementEntity.setImageUrl("image12345.png");
+        return agreementEntity;
+    }
+
     public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity) {
         return createSampleProfileEntity(agreementEntity, SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC);
     }
