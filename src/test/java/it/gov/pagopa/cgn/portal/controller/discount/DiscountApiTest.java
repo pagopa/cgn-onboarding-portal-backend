@@ -2,7 +2,9 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -49,10 +51,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
     private String discountPath;
     private AgreementEntity agreement;
 
-    @BeforeEach
-    void init() {
+    void initTest(DiscountCodeTypeEnum discountCodeType) {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE, discountCodeType);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
         setOperatorAuth();
@@ -60,9 +61,10 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateDiscount_Ok() throws Exception {
-        CreateDiscount discount = createSampleCreateDiscount();
+        initTest(DiscountCodeTypeEnum.STATIC);
+        CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
         this.mockMvc.perform(
-                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
+                        post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -77,6 +79,35 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.productCategories").isArray())
                 .andExpect(jsonPath("$.productCategories").isNotEmpty())
                 .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Create_CreateDiscountWithLandingPage_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
+        this.mockMvc.perform(
+                        post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andExpect(jsonPath("$.name").value(discount.getName()))
+                .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
@@ -84,31 +115,34 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateDiscountWithoutStartDate_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStartDate(null);
         this.mockMvc.perform(
-                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
+                        post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void Create_CreateDiscountWithoutStaticCode_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStaticCode(null);
         this.mockMvc.perform(
-                post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
+                        post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void Get_GetDiscount_Found() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
 
         this.mockMvc.perform(
-                get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -120,6 +154,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Get_GetSuspendedDiscount_Found() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
         discountEntity.setState(DiscountStateEnum.SUSPENDED);
@@ -127,7 +162,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         discountEntity = discountRepository.save(discountEntity);
 
         this.mockMvc.perform(
-                get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -141,8 +176,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Get_GetDiscount_NotFound() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         this.mockMvc.perform(
-                get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -152,10 +188,11 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Delete_DeleteDiscount_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
         this.mockMvc.perform(
-                delete(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))
+                        delete(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNoContent());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
@@ -165,13 +202,27 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Test
     void Delete_DeleteDiscount_NotFound() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
         this.mockMvc.perform(
-                delete(discountPath + "/" + 1).contentType(MediaType.APPLICATION_JSON))
+                        delete(discountPath + "/" + 1).contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(status().isNotFound());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());
+    }
+
+    private CreateDiscount createSampleCreateDiscountWithStaticCode() {
+        CreateDiscount discount = createSampleCreateDiscount();
+        discount.setStaticCode("create_discount_static_code");
+        return discount;
+    }
+
+    private CreateDiscount createSampleCreateDiscountWithLandingPage() {
+        CreateDiscount discount = createSampleCreateDiscount();
+        discount.setLandingPageUrl("landingpage.com");
+        discount.setLandingPageReferrer("referrer");
+        return discount;
     }
 
     private CreateDiscount createSampleCreateDiscount() {
@@ -182,7 +233,6 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setCondition("create_discount_condition");
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
-        createDiscount.setStaticCode("create_discount_static_code");
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
         return createDiscount;
     }

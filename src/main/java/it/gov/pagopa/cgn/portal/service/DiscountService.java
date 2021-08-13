@@ -91,7 +91,7 @@ public class DiscountService {
             documentService.resetAllDocuments(agreementId);
         }
 
-       return discountRepository.save(dbEntity);
+        return discountRepository.save(dbEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -173,15 +173,24 @@ public class DiscountService {
     private void validateDiscount(String agreementId, DiscountEntity discountEntity) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
+
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
                     "Discount cannot have empty static code for a profile with discount code type static");
         }
+
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
+                (StringUtils.isBlank(discountEntity.getLandingPageUrl()) || StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
+            throw new InvalidRequestException(
+                    "Discount cannot have empty landing page values for a profile with discount code type landingpage");
+        }
+
         // If profile use API, static code will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
         }
+
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
     }
 
