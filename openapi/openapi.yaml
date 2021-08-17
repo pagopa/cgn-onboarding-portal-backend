@@ -774,6 +774,7 @@ definitions:
     enum:
       - Static
       - API
+      - LandingPage
 
   CreateReferent:
     type: object
@@ -867,6 +868,12 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
+        type: string
+        maxLength: 100
 
   UpdateDiscount:
     type: object
@@ -904,6 +911,12 @@ definitions:
         type: string
         maxLength: 200
       staticCode:
+        type: string
+        maxLength: 100
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
         type: string
         maxLength: 100
 
@@ -968,6 +981,13 @@ definitions:
       suspendedReasonMessage:
         type: string
         maxLength: 250
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
+        type: string
+        maxLength: 100
+
   DiscountState:
     type: string
     enum:
@@ -975,6 +995,7 @@ definitions:
       - published
       - suspended
       - expired
+
   ProductCategory:
     type: string
     enum:
@@ -987,6 +1008,7 @@ definitions:
       - Sports
       - Health
       - Shopping
+
   Address:
     type: object
     required:

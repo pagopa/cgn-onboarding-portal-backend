@@ -144,3 +144,6 @@ buildNumber.properties
 
 docker-compose.override.yml
 .vscode/settings.json
+
+# Ignore bin folder
+bin/

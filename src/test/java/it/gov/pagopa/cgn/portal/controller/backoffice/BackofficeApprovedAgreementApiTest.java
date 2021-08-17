@@ -42,7 +42,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
         AgreementTestObject agreementTestObject = createApprovedAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         this.mockMvc.perform(
-                get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
+                        get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -67,7 +67,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                 .map(AgreementTestObject::getAgreementEntity)
                 .collect(Collectors.toList());
         this.mockMvc.perform(
-                get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
+                        get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -88,12 +88,14 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity updatedAgreement = testObjectList.get(2).getAgreementEntity();
         updatedAgreement.setInformationLastUpdateDate(LocalDate.now().plusDays(3));
         agreementRepository.save(updatedAgreement);
+
         List<AgreementEntity> sortedByLastModifyDateAgreementList = testObjectList.stream()
                 .sorted(Comparator.comparing(a -> a.getAgreementEntity().getInformationLastUpdateDate()))
                 .map(AgreementTestObject::getAgreementEntity)
                 .collect(Collectors.toList());
+
         this.mockMvc.perform(
-                get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
+                        get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR, Sort.Direction.ASC)))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -111,15 +113,19 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
 
-        AgreementEntity updatedAgreement = testObjectList.get(2).getAgreementEntity();
-        updatedAgreement.setStartDate(LocalDate.now().plusDays(2));
-        agreementRepository.save(updatedAgreement);
+        testObjectList.forEach(obj -> {
+            AgreementEntity agreement = obj.getAgreementEntity();
+            agreement.setStartDate(LocalDate.now().plusDays(testObjectList.indexOf(obj)));
+            agreementRepository.save(agreement);
+        });
+
         List<AgreementEntity> sortedByAgreementDateAgreementList = testObjectList.stream()
                 .sorted(Comparator.comparing(a -> a.getAgreementEntity().getStartDate()))
                 .map(AgreementTestObject::getAgreementEntity)
                 .collect(Collectors.toList());
+
         this.mockMvc.perform(
-                get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
+                        get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -142,7 +148,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = agreementTestObject.getDiscountEntityList().get(0);
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
         this.mockMvc.perform(
-                get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
+                        get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

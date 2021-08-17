@@ -47,11 +47,65 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateOnlineProfile_Ok() throws Exception {
-        CreateProfile createProfile = createSampleCreateOnlineProfile();
+    void Create_CreateOnlineProfileWithApiDiscountType_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
         this.mockMvc.perform(
                 post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+
+    }
+
+    @Test
+    void Create_CreateOnlineProfileWithStaticDiscountType_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.STATIC);
+
+        this.mockMvc.perform(
+                        post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
+                .andDo(log())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
+                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+
+    }
+
+    @Test
+    void Create_CreateOnlineProfileWithLandingPageDiscountType_Ok() throws Exception {
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.LANDINGPAGE);
+
+        this.mockMvc.perform(
+                        post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
                 .andDo(log())
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -111,7 +165,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateIncompleteOnlineProfile_BadRequest() throws Exception {
-        CreateProfile createProfile = createSampleCreateOnlineProfile();
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
         // set to null required field websiteUrl
         OnlineChannel onlineChannel = (OnlineChannel) createProfile.getSalesChannel();
         onlineChannel.setWebsiteUrl(null);
@@ -136,7 +190,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateProfileMultipleTimes_BadRequest() throws Exception {
-        CreateProfile createProfile = createSampleCreateOnlineProfile();
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
         this.mockMvc.perform(
                 post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
@@ -149,12 +203,12 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     }
 
-    private CreateProfile createSampleCreateOnlineProfile() {
+    private CreateProfile createSampleCreateOnlineProfile(DiscountCodeType discountCodeType) {
         CreateProfile createProfile = createSampleCreateProfile();
         OnlineChannel onlineChannel = new OnlineChannel();
         onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
-        onlineChannel.setDiscountCodeType(DiscountCodeType.API);
+        onlineChannel.setDiscountCodeType(discountCodeType);
         createProfile.setSalesChannel(onlineChannel);
         return createProfile;
     }

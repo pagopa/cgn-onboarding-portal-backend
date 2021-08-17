@@ -26,16 +26,16 @@ public class DiscountEntity extends BaseEntity {
 
     @Id
     @Column(name = "discount_k")
-    @SequenceGenerator(name="discount_discount_k_seq",
-            sequenceName="discount_discount_k_seq",
-            allocationSize=1)
+    @SequenceGenerator(name = "discount_discount_k_seq",
+            sequenceName = "discount_discount_k_seq",
+            allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="discount_discount_k_seq")
+            generator = "discount_discount_k_seq")
     private Long id;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Type( type = "discount_state_enum" )
+    @Type(type = "discount_state_enum")
     @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
@@ -77,6 +77,14 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "expiration_warning_sent")
     private OffsetDateTime expirationWarningSentDateTime;
 
+    @Size(max = 500)
+    @Column(name = "landing_page_url", length = 500)
+    private String landingPageUrl;
+
+    @Size(max = 100)
+    @Column(name = "landing_page_referrer", length = 100)
+    private String landingPageReferrer;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
@@ -95,7 +103,7 @@ public class DiscountEntity extends BaseEntity {
             if (this.products == null) {
                 this.products = new ArrayList<>();
             }
-            productList.forEach(p-> {
+            productList.forEach(p -> {
                 if (!products.contains(p)) {
                     this.products.add(p);
                     p.setDiscount(this);

@@ -6,8 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
-import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 
 import java.time.LocalDate;
 import java.util.EnumMap;

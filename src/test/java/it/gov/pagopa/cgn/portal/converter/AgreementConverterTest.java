@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.converter;
 
+import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -17,7 +18,7 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertPendingAgreementEntityToDTO_Ok() {
-        AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.PENDING);
         Agreement pendingDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, pendingDto);
@@ -36,7 +37,7 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertDraftAgreementEntityToDTO_Ok() {
-        AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.DRAFT);
         Agreement draftDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, draftDto);
@@ -55,7 +56,7 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertRejectedAgreementEntityToDTO_Ok() {
-        AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.REJECTED);
         Agreement rejectedDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, rejectedDto);
@@ -74,7 +75,7 @@ public class AgreementConverterTest {
 
     @Test
     public void Convert_ConvertApprovedAgreementEntityToDTO_Ok() {
-        AgreementEntity agreementEntity = createSampleAgreementEntityWithCommonFields();
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setEndDate(LocalDate.of(2021, 12, 31));
         agreementEntity.setStartDate(LocalDate.now());
@@ -114,13 +115,6 @@ public class AgreementConverterTest {
         Assert.assertEquals(dto.getId(), entity.getId());
         Assert.assertNotNull(entity.getState());
         Assert.assertEquals(dto.getImageUrl(), entity.getImageUrl());
-    }
-
-    private AgreementEntity createSampleAgreementEntityWithCommonFields() {
-        AgreementEntity agreementEntity = new AgreementEntity();
-        agreementEntity.setId("agreement_id");
-        agreementEntity.setImageUrl("image12345.png");
-        return agreementEntity;
     }
 
     private void fillAgreementDtoWithCommonFields(Agreement agreement) {

@@ -73,11 +73,13 @@ public class DiscountService {
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity);
+
         // if state is Published, last modify must be updated because public information was modified
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
             dbEntity.setExpirationWarningSentDateTime(null);
         }
+
         // updating suspended discount: move to draft status
         if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
@@ -86,12 +88,13 @@ public class DiscountService {
         if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
             documentService.resetMerchantDocuments(agreementId);
         }
+
         if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
         }
 
-       return discountRepository.save(dbEntity);
+        return discountRepository.save(dbEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -173,15 +176,37 @@ public class DiscountService {
     private void validateDiscount(String agreementId, DiscountEntity discountEntity) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
+
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
                     "Discount cannot have empty static code for a profile with discount code type static");
         }
-        // If profile use API, static code will not used
+
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
+                (StringUtils.isBlank(discountEntity.getLandingPageUrl()) || StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
+            throw new InvalidRequestException(
+                    "Discount cannot have empty landing page values for a profile with discount code type landingpage");
+        }
+
+        // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
+            discountEntity.setLandingPageUrl(null);
+            discountEntity.setLandingPageReferrer(null);
         }
+
+        // If profile use STATIC, landing page will not used
+        if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
+            discountEntity.setLandingPageUrl(null);
+            discountEntity.setLandingPageReferrer(null);
+        }
+
+        // If profile use LANDINGPAGE, static code will not used
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
+            discountEntity.setStaticCode(null);
+        }
+
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
     }
 
@@ -231,6 +256,8 @@ public class DiscountService {
         updateProducts.accept(dbEntity, toUpdateEntity.getProducts());
         dbEntity.setCondition(toUpdateEntity.getCondition());
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
+        dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
+        dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {

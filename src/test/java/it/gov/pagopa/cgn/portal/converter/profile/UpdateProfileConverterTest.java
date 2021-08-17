@@ -36,7 +36,23 @@ public class UpdateProfileConverterTest {
     }
 
     @Test
-    public void Convert_ConvertUpdateProfileOnlineDTOToEntity_Ok() {
+    public void Convert_ConvertUpdateProfileOnlineWithStaticDiscountTypeDTOToEntity_Ok() {
+        UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
+        OnlineChannel onlineChannel = new OnlineChannel();
+        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        onlineChannel.setDiscountCodeType(DiscountCodeType.STATIC);
+        dto.setSalesChannel(onlineChannel);
+        ProfileEntity profileEntity = updateProfileConverter.toEntity(dto);
+
+        checkCommonsUpdateProfileAssertions(dto, profileEntity);
+        Assert.assertEquals(SalesChannelEnum.ONLINE, profileEntity.getSalesChannel());
+        Assert.assertEquals(onlineChannel.getWebsiteUrl(), profileEntity.getWebsiteUrl());
+        Assert.assertEquals(DiscountCodeTypeEnum.STATIC, profileEntity.getDiscountCodeType());
+    }
+
+    @Test
+    public void Convert_ConvertUpdateProfileOnlineWithApiDiscountTypeDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         OnlineChannel onlineChannel = new OnlineChannel();
         onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
@@ -49,6 +65,22 @@ public class UpdateProfileConverterTest {
         Assert.assertEquals(SalesChannelEnum.ONLINE, profileEntity.getSalesChannel());
         Assert.assertEquals(onlineChannel.getWebsiteUrl(), profileEntity.getWebsiteUrl());
         Assert.assertEquals(DiscountCodeTypeEnum.API, profileEntity.getDiscountCodeType());
+    }
+
+    @Test
+    public void Convert_ConvertUpdateProfileOnlineWithLandingPageDiscountTypeDTOToEntity_Ok() {
+        UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
+        OnlineChannel onlineChannel = new OnlineChannel();
+        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
+        onlineChannel.setDiscountCodeType(DiscountCodeType.LANDINGPAGE);
+        dto.setSalesChannel(onlineChannel);
+        ProfileEntity profileEntity = updateProfileConverter.toEntity(dto);
+
+        checkCommonsUpdateProfileAssertions(dto, profileEntity);
+        Assert.assertEquals(SalesChannelEnum.ONLINE, profileEntity.getSalesChannel());
+        Assert.assertEquals(onlineChannel.getWebsiteUrl(), profileEntity.getWebsiteUrl());
+        Assert.assertEquals(DiscountCodeTypeEnum.LANDINGPAGE, profileEntity.getDiscountCodeType());
     }
 
     @Test

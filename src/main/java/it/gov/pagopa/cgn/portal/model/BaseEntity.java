@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 public abstract class BaseEntity implements Serializable {
 
     @Column(name = "insert_time", nullable = false, updatable = false)
-    protected OffsetDateTime insertTime;
+    protected OffsetDateTime insertTime = OffsetDateTime.now(); // this default is useful to test converters
 
     @Column(name = "update_time")
     protected OffsetDateTime updateTime;
