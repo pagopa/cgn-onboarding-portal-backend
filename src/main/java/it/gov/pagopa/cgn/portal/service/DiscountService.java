@@ -73,6 +73,7 @@ public class DiscountService {
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity);
+
         // if state is Published, last modify must be updated because public information was modified
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
@@ -189,6 +190,8 @@ public class DiscountService {
         // If profile use API, static code will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
+            discountEntity.setLandingPageUrl(null);
+            discountEntity.setLandingPageReferrer(null);
         }
 
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
@@ -240,6 +243,8 @@ public class DiscountService {
         updateProducts.accept(dbEntity, toUpdateEntity.getProducts());
         dbEntity.setCondition(toUpdateEntity.getCondition());
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
+        dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
+        dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
