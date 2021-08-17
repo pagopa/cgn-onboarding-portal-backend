@@ -75,6 +75,7 @@ public class TestUtils {
     public static String getBackofficeDocumentPath(String agreementId) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
+
     public static String getAuthenticatedHelpPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
@@ -210,6 +211,21 @@ public class TestUtils {
         return helpRequest;
     }
 
+    public static DiscountEntity createSampleDiscountEntityWithStaticCode(AgreementEntity agreement, String staticCode) {
+        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        discountEntity.setStaticCode(staticCode);
+        discountEntity.setLandingPageUrl(null);
+        discountEntity.setLandingPageReferrer(null);
+        return discountEntity;
+    }
+
+    public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement, String url, String referrer) {
+        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        discountEntity.setStaticCode(null);
+        discountEntity.setLandingPageUrl(url);
+        discountEntity.setLandingPageReferrer(referrer);
+        return discountEntity;
+    }
 
     public static DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
         DiscountEntity discountEntity = createSampleDiscountEntityWithoutProduct(agreement);
@@ -226,8 +242,8 @@ public class TestUtils {
         discountEntity.setCondition("discount_condition");
         discountEntity.setStartDate(LocalDate.now());
         discountEntity.setEndDate(LocalDate.now().plusMonths(6));
-        discountEntity.setStaticCode("discount_static_code");
         discountEntity.setAgreement(agreement);
+        discountEntity.setStaticCode("static_code");
         return discountEntity;
     }
 
@@ -299,9 +315,20 @@ public class TestUtils {
             this.secondaryKey = secondaryKey;
         }
 
-        @Override public String primaryKey() { return primaryKey; }
-        @Override public String secondaryKey() { return secondaryKey; }
-        @Override public SubscriptionKeysContractInner innerModel() { return null; }
+        @Override
+        public String primaryKey() {
+            return primaryKey;
+        }
+
+        @Override
+        public String secondaryKey() {
+            return secondaryKey;
+        }
+
+        @Override
+        public SubscriptionKeysContractInner innerModel() {
+            return null;
+        }
     }
 
     public static class SubscriptionContractTestData implements SubscriptionContract {
@@ -313,34 +340,128 @@ public class TestUtils {
             this.secondaryKey = secondaryKey;
         }
 
-        @Override public String id() { return null; }
-        @Override public String name() { return null; }
-        @Override public String type() { return null; }
-        @Override public String ownerId() { return null; }
-        @Override public String scope() { return null; }
-        @Override public String displayName() { return null; }
-        @Override public SubscriptionState state() { return null; }
-        @Override public OffsetDateTime createdDate() { return null; }
-        @Override public OffsetDateTime startDate() { return null; }
-        @Override public OffsetDateTime expirationDate() { return null; }
-        @Override public OffsetDateTime endDate() { return null; }
-        @Override public OffsetDateTime notificationDate() { return null; }
-        @Override public String primaryKey() { return primaryKey; }
-        @Override public String secondaryKey() { return secondaryKey; }
-        @Override public String stateComment() { return null; }
-        @Override public Boolean allowTracing() { return null; }
-        @Override public SubscriptionContractInner innerModel() { return null; }
+        @Override
+        public String id() {
+            return null;
+        }
+
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public String type() {
+            return null;
+        }
+
+        @Override
+        public String ownerId() {
+            return null;
+        }
+
+        @Override
+        public String scope() {
+            return null;
+        }
+
+        @Override
+        public String displayName() {
+            return null;
+        }
+
+        @Override
+        public SubscriptionState state() {
+            return null;
+        }
+
+        @Override
+        public OffsetDateTime createdDate() {
+            return null;
+        }
+
+        @Override
+        public OffsetDateTime startDate() {
+            return null;
+        }
+
+        @Override
+        public OffsetDateTime expirationDate() {
+            return null;
+        }
+
+        @Override
+        public OffsetDateTime endDate() {
+            return null;
+        }
+
+        @Override
+        public OffsetDateTime notificationDate() {
+            return null;
+        }
+
+        @Override
+        public String primaryKey() {
+            return primaryKey;
+        }
+
+        @Override
+        public String secondaryKey() {
+            return secondaryKey;
+        }
+
+        @Override
+        public String stateComment() {
+            return null;
+        }
+
+        @Override
+        public Boolean allowTracing() {
+            return null;
+        }
+
+        @Override
+        public SubscriptionContractInner innerModel() {
+            return null;
+        }
     }
 
     public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
         return new HttpResponse(null) {
-            @Override public int getStatusCode() { return statusCode; }
-            @Override public String getHeaderValue(String s) { return null; }
-            @Override public HttpHeaders getHeaders() { return null; }
-            @Override public Flux<ByteBuffer> getBody() { return null; }
-            @Override public Mono<byte[]> getBodyAsByteArray() { return null; }
-            @Override public Mono<String> getBodyAsString() { return null; }
-            @Override public Mono<String> getBodyAsString(Charset charset) { return null; }
+            @Override
+            public int getStatusCode() {
+                return statusCode;
+            }
+
+            @Override
+            public String getHeaderValue(String s) {
+                return null;
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return null;
+            }
+
+            @Override
+            public Flux<ByteBuffer> getBody() {
+                return null;
+            }
+
+            @Override
+            public Mono<byte[]> getBodyAsByteArray() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString(Charset charset) {
+                return null;
+            }
         };
     }
 

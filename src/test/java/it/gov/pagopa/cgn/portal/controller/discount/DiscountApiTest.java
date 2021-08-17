@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -11,11 +12,8 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
-import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
-import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
-import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +48,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     private String discountPath;
     private AgreementEntity agreement;
+    private final DiscountConverter discountConverter = new DiscountConverter();
 
     void initTest(DiscountCodeTypeEnum discountCodeType) {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
@@ -133,6 +132,76 @@ class DiscountApiTest extends IntegrationAbstractTest {
                         post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
                 .andDo(log())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void Update_CreateAndUpdateDiscount_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount);
+
+        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discount);
+        updateDiscount.setName("new_name");
+        updateDiscount.setStaticCode("new_static_code");
+        this.mockMvc.perform(
+                        put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").value(updateDiscount.getStaticCode()))
+                .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
+                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Update_CreateAndUpdateDiscountWithLandingPage_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url", "referrer");
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
+
+        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
+        updateDiscount.setName("new_name");
+        updateDiscount.setLandingPageUrl("new_url");
+        updateDiscount.setLandingPageReferrer("new_referrer");
+        this.mockMvc.perform(
+                        put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").isEmpty())
+                .andExpect(jsonPath("$.landingPageUrl").isNotEmpty())
+                .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
+                .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
+                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -235,5 +304,20 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
         return createDiscount;
+    }
+
+    private UpdateDiscount updatableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
+        Discount discount = discountConverter.toDto(discountEntity);
+        UpdateDiscount updateDiscount = new UpdateDiscount();
+        updateDiscount.setName(discount.getName());
+        updateDiscount.setDescription(discount.getDescription());
+        updateDiscount.setCondition(discount.getCondition());
+        updateDiscount.setStartDate(discount.getStartDate());
+        updateDiscount.setEndDate(discount.getEndDate());
+        updateDiscount.setStaticCode(discount.getStaticCode());
+        updateDiscount.setLandingPageUrl(discount.getLandingPageUrl());
+        updateDiscount.setLandingPageReferrer(discount.getLandingPageReferrer());
+        updateDiscount.setProductCategories(discount.getProductCategories());
+        return updateDiscount;
     }
 }

@@ -79,6 +79,7 @@ public class DiscountService {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
             dbEntity.setExpirationWarningSentDateTime(null);
         }
+
         // updating suspended discount: move to draft status
         if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
@@ -87,6 +88,7 @@ public class DiscountService {
         if (AgreementStateEnum.DRAFT.equals(agreementEntity.getState())) {
             documentService.resetMerchantDocuments(agreementId);
         }
+
         if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);

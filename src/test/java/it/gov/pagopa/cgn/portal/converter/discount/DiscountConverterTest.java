@@ -17,7 +17,6 @@ import java.util.ArrayList;
 @RunWith(SpringRunner.class)
 public class DiscountConverterTest {
 
-
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
     private static final String REFERRER = "referrer";
@@ -33,7 +32,8 @@ public class DiscountConverterTest {
 
     @Test
     public void Convert_ConvertDiscountEntityWithStaticDiscountTypeToDTO_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntityWithStaticCode(STATIC_CODE);
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity, STATIC_CODE);
         Discount dto = discountConverter.toDto(discountEntity);
 
         checkCommonDiscountEntityToDTOAssertions(discountEntity, dto);
@@ -44,42 +44,14 @@ public class DiscountConverterTest {
 
     @Test
     public void Convert_ConvertDiscountEntityWithLandingPageDiscountTypeToDTO_Ok() {
-        DiscountEntity discountEntity = createSampleDiscountEntityWithLandingPage(URL, REFERRER);
+        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
         Discount dto = discountConverter.toDto(discountEntity);
 
         checkCommonDiscountEntityToDTOAssertions(discountEntity, dto);
         Assert.assertNull(dto.getStaticCode());
         Assert.assertEquals(URL, dto.getLandingPageUrl());
         Assert.assertEquals(REFERRER, dto.getLandingPageReferrer());
-    }
-
-    private DiscountEntity createSampleDiscountEntityWithStaticCode(String staticCode) {
-        DiscountEntity discountEntity = createSampleCommonDiscountEntity();
-        discountEntity.setStaticCode(staticCode);
-        return discountEntity;
-    }
-
-    private DiscountEntity createSampleDiscountEntityWithLandingPage(String url, String referrer) {
-        DiscountEntity discountEntity = createSampleCommonDiscountEntity();
-        discountEntity.setLandingPageUrl(url);
-        discountEntity.setLandingPageReferrer(referrer);
-        return discountEntity;
-    }
-
-    private DiscountEntity createSampleCommonDiscountEntity() {
-        DiscountEntity discountEntity = new DiscountEntity();
-        discountEntity.setName("Discount");
-        discountEntity.setStartDate(LocalDate.now());
-        discountEntity.setEndDate(LocalDate.now());
-        discountEntity.setDiscountValue(50);
-        discountEntity.setDescription("A discount");
-        discountEntity.setState(DiscountStateEnum.DRAFT);
-        AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
-        discountEntity.setAgreement(agreementEntity);
-        ArrayList<DiscountProductEntity> products = new ArrayList<DiscountProductEntity>();
-        discountEntity.setProducts(products);
-        discountEntity.setSuspendedReasonMessage("A reason");
-        return discountEntity;
     }
 
 
