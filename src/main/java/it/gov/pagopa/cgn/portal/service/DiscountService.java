@@ -189,11 +189,22 @@ public class DiscountService {
                     "Discount cannot have empty landing page values for a profile with discount code type landingpage");
         }
 
-        // If profile use API, static code will not used
+        // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
+        }
+
+        // If profile use STATIC, landing page will not used
+        if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
+            discountEntity.setLandingPageUrl(null);
+            discountEntity.setLandingPageReferrer(null);
+        }
+
+        // If profile use LANDINGPAGE, static code will not used
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
+            discountEntity.setStaticCode(null);
         }
 
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
