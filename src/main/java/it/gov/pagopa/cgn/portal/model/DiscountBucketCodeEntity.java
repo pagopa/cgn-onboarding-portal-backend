@@ -23,7 +23,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "discount_bucket_code")
 @Data
-public class DiscountBucketCode implements Serializable {
+public class DiscountBucketCodeEntity implements Serializable {
 
     @Id
     @Column(name = "bucket_code_k")

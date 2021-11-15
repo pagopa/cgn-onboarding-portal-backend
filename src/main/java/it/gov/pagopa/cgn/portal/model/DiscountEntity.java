@@ -92,7 +92,7 @@ public class DiscountEntity extends BaseEntity {
     private List<DiscountProductEntity> products;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "discount", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DiscountBucketCode> bucketCodes = new ArrayList<DiscountBucketCode>();
+    private List<DiscountBucketCodeEntity> bucketCodes = new ArrayList<DiscountBucketCodeEntity>();
 
     public void removeProduct(DiscountProductEntity productEntity) {
         this.products.remove(productEntity);
@@ -113,15 +113,12 @@ public class DiscountEntity extends BaseEntity {
         }
     }
 
-    public void removeBucketCode(DiscountBucketCode discountBucketCode) {
+    public void removeBucketCode(DiscountBucketCodeEntity discountBucketCode) {
         this.bucketCodes.remove(discountBucketCode);
     }
 
-    public void addDiscountBucketCodeList(Collection<DiscountBucketCode> bucketCodeList) {
+    public void addDiscountBucketCodeList(Collection<DiscountBucketCodeEntity> bucketCodeList) {
         if (!CollectionUtils.isEmpty(bucketCodes)) {
-            if (this.bucketCodes == null) {
-                this.bucketCodes = new ArrayList<>();
-            }
             bucketCodes.forEach(c -> {
                 if (!bucketCodes.contains(c)) {
                     this.bucketCodes.add(c);
