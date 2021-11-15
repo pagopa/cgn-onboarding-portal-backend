@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum DiscountCodeTypeEnum {
 
-    STATIC("STATIC"), API("API"), LANDINGPAGE("LANDINGPAGE");
+    STATIC("STATIC"), API("API"), LANDINGPAGE("LANDINGPAGE"), BUCKET("BUCKET");
 
     private final String code;
 
