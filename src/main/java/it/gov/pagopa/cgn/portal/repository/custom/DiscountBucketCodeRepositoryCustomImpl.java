@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCode;
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
 
 @Repository
 @Transactional
@@ -21,13 +21,13 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
     private JdbcTemplate template;
 
     @Override
-    public void bulkPersist(List<DiscountBucketCode> entities) {
+    public void bulkPersist(List<DiscountBucketCodeEntity> entities) {
         template.batchUpdate("insert into discount_bucket_code (code, used, discount_fk) values (?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
-                        DiscountBucketCode toInsert = entities.get(i);
+                        DiscountBucketCodeEntity toInsert = entities.get(i);
                         ps.setLong(1, toInsert.getId());
                         ps.setBoolean(2, toInsert.getIsUsed());
                         ps.setLong(3, toInsert.getDiscount().getId());

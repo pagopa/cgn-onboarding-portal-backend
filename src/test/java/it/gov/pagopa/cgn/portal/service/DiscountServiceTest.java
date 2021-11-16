@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.junit.jupiter.api.Assertions;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -38,6 +40,9 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     @Autowired
     private AddressRepository addressRepository;
 
+    @Autowired
+    private DiscountBucketCodeRepository discountBucketCodeRepository;
+
     private AgreementEntity agreementEntity;
 
     @BeforeEach
@@ -51,7 +56,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
         ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
         profileEntity.setDiscountCodeType(discountType);
-        //to avoid LazyInitializationException
+        // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
@@ -78,7 +83,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithStaticCode_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity, STATIC_CODE);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                STATIC_CODE);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -97,7 +103,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithLandingPage_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL,
+                REFERRER);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -114,10 +121,30 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithBucketCodes_Ok() {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNull(discountEntity.getStaticCode());
+        Assertions.assertNull(discountEntity.getLandingPageUrl());
+        Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        long bucketCodesSize = discountBucketCodeRepository.countByDiscountAndIsUsed(discountEntity, false);
+        Assertions.assertFalse(bucketCodesSize == 0);
+    }
+
+    @Test
     void Create_CreateDiscountWithStaticCodeAndOperatorAPI_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.API);
 
-        //discountEntity have static code, but profile is API. Static code not saved.
+        // discountEntity have static code, but profile is API. Static code not saved.
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
@@ -137,7 +164,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.API);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        //discountEntity have landing page, but profile is API. Static code not saved.
+        // discountEntity have landing page, but profile is API. Static code not saved.
         discountEntity.setLandingPageUrl("xxxx");
         discountEntity.setLandingPageReferrer("xxxx");
         discountEntity.setStaticCode(null);
@@ -156,12 +183,38 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithBucketCodesAPI_Ok() {
+        setProfileDiscountType(DiscountCodeTypeEnum.API);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        // discountEntity have landing page, but profile is API. Static code not saved.
+        discountEntity.setLandingPageUrl(null);
+        discountEntity.setLandingPageReferrer(null);
+        discountEntity.setStaticCode(null);
+        discountEntity.addDiscountBucketCodeList(TestUtils.getDiscountBucketCodeEntityList(discountEntity));
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNull(discountEntity.getStaticCode());
+        Assertions.assertNull(discountEntity.getLandingPageUrl());
+        Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertTrue(discountEntity.getBucketCodes().isEmpty());
+
+    }
+
+    @Test
     void Create_CreateDiscountWithoutProducts_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setProducts(null);
-        Assertions.assertThrows(Exception.class, () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
+        Assertions.assertThrows(Exception.class,
+                () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
     }
 
     @Test
@@ -205,9 +258,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertNotNull(discountDB.getProducts());
         Assertions.assertEquals(discountEntity.getProducts().size(), discountDB.getProducts().size());
-        IntStream.range(0, discountEntity.getProducts().size()).forEach(idx ->
-                Assertions.assertEquals(
-                        discountEntity.getProducts().get(idx).getProductCategory(),
+        IntStream.range(0, discountEntity.getProducts().size())
+                .forEach(idx -> Assertions.assertEquals(discountEntity.getProducts().get(idx).getProductCategory(),
                         discountDB.getProducts().get(idx).getProductCategory()));
     }
 
@@ -260,7 +312,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Update_UpdateDiscountWithStaticCodeWithValidData_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity, STATIC_CODE);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                STATIC_CODE);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
 
@@ -275,7 +328,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
         updatedDiscount.setStaticCode("update_static_code");
-
 
         DiscountEntity dbDiscount;
         dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
@@ -299,10 +351,12 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Update_UpdateDiscountWithLandingPageWithValidData_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL,
+                REFERRER);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
 
-        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, "updated_" + URL, "updated_" + REFERRER);
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                "updated_" + URL, "updated_" + REFERRER);
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDescription("updated_description");
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
@@ -314,7 +368,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
 
-        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(),
+                updatedDiscount);
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertEquals(updatedDiscount.getDescription(), dbDiscount.getDescription());
         Assertions.assertEquals(updatedDiscount.getStartDate(), dbDiscount.getStartDate());
@@ -331,6 +386,47 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(updatedDiscount.getStaticCode());
         Assertions.assertEquals(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
         Assertions.assertEquals(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
+    }
+
+    @Test
+    void Update_UpdateDiscountWithBucketCodesWithValidData_Ok() {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        updatedDiscount.setName("updated_name");
+        updatedDiscount.setDescription("updated_description");
+        updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
+        updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
+        updatedDiscount.setDiscountValue(40);
+        DiscountProductEntity productEntity = new DiscountProductEntity();
+        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setDiscount(updatedDiscount);
+        updatedDiscount.addProductList(Collections.singletonList(productEntity));
+        updatedDiscount.setCondition("update_condition");
+
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(),
+                updatedDiscount);
+        Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
+        Assertions.assertEquals(updatedDiscount.getDescription(), dbDiscount.getDescription());
+        Assertions.assertEquals(updatedDiscount.getStartDate(), dbDiscount.getStartDate());
+        Assertions.assertEquals(updatedDiscount.getEndDate(), dbDiscount.getEndDate());
+        Assertions.assertEquals(updatedDiscount.getDiscountValue(), dbDiscount.getDiscountValue());
+        Assertions.assertNotNull(dbDiscount.getProducts());
+        Assertions.assertFalse(dbDiscount.getProducts().isEmpty());
+        Assertions.assertNotNull(updatedDiscount.getProducts());
+        Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
+        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
+        Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
+        Assertions.assertNull(updatedDiscount.getStaticCode());
+        Assertions.assertNull(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
+        Assertions.assertNull(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
+        long dbCodesSize = discountBucketCodeRepository.countByDiscount(dbDiscount);
+        Assertions.assertTrue(dbCodesSize == 2);
     }
 
     @Test
@@ -359,8 +455,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         dbDiscount = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        IntStream.range(0, updatedDiscount.getProducts().size()).forEach(index ->
-                Assertions.assertEquals(updatedDiscount.getProducts().get(index), dbDiscount.getProducts().get(index)));
+        IntStream.range(0, updatedDiscount.getProducts().size()).forEach(index -> Assertions
+                .assertEquals(updatedDiscount.getProducts().get(index), dbDiscount.getProducts().get(index)));
 
     }
 
@@ -382,8 +478,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
         Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3).forEach(index ->
-                Assertions.assertEquals(updatedDiscount.getProducts().get(index), dbDiscount.getProducts().get(index)));
+        IntStream.range(0, 3).forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
+                dbDiscount.getProducts().get(index)));
 
     }
 
@@ -406,12 +502,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
         Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3).forEach(index ->
-                Assertions.assertEquals(updatedDiscount.getProducts().get(index), dbDiscount.getProducts().get(index)));
+        IntStream.range(0, 3).forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
+                dbDiscount.getProducts().get(index)));
         Assertions.assertNull(dbDiscount.getDiscountValue());
 
     }
-
 
     @Test
     void Update_UpdateDiscountWithRequiredFieldToNull_ThrowException() {
@@ -423,8 +518,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         discountEntity.setDescription(null);
         DiscountEntity finalDiscountEntity = discountEntity;
-        Assertions.assertThrows(Exception.class, () ->
-                discountService.updateDiscount(agreementId, discountEntityId, finalDiscountEntity));
+        Assertions.assertThrows(Exception.class,
+                () -> discountService.updateDiscount(agreementId, discountEntityId, finalDiscountEntity));
     }
 
     @Test
@@ -459,10 +554,10 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
@@ -478,13 +573,13 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
-        //update state to suspended
+        // update state to suspended
         dbDiscount.setState(DiscountStateEnum.SUSPENDED);
         dbDiscount = discountRepository.save(dbDiscount);
         Long discountId = dbDiscount.getId();
-        //publish discount
+        // publish discount
         Assertions.assertThrows(InvalidRequestException.class,
                 () -> discountService.publishDiscount(agreementId, discountId));
 
@@ -497,11 +592,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
-        //publish discount
+        // publish discount
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -522,10 +617,10 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         discountEntity.setStartDate(LocalDate.now().plusDays(2));
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
         agreementEntity = agreementService.requestApproval(agreementId);
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         final Long dbDiscountId = dbDiscount.getId();
         dbDiscount = discountService.publishDiscount(agreementId, dbDiscountId);
         agreementEntity = agreementService.findById(agreementId);
@@ -543,11 +638,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity.setStartDate(LocalDate.now().plusDays(2));
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
         agreementEntity = agreementService.requestApproval(agreementId);
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity.setStartDate(LocalDate.now().plusDays(1));
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         final Long dbDiscountId = dbDiscount.getId();
         Assertions.assertThrows(InvalidRequestException.class,
                 () -> discountService.publishDiscount(agreementId, dbDiscountId));
@@ -566,18 +661,17 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
-        //publish discount
+        // publish discount
         String agreementId = agreementEntity2.getId();
         Long discountId = dbDiscount.getId();
 
         Assertions.assertThrows(InvalidRequestException.class,
                 () -> discountService.suspendDiscount(agreementId, discountId, "whatever"));
     }
-
 
     @Test
     void Publish_FirstDiscountPublishDateNotUpdatedIfDiscountWasPublished_Ok() {
@@ -586,11 +680,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
@@ -600,12 +694,12 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity.setFirstDiscountPublishingDate(LocalDate.now().minusDays(2));
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        //creating the second discount
+        // creating the second discount
         discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
 
-        //first publication date wasn't updated
+        // first publication date wasn't updated
         agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertEquals(LocalDate.now().minusDays(2), agreementEntity.getFirstDiscountPublishingDate());
@@ -621,7 +715,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
         agreementEntity = agreementService.requestApproval(agreementId);
 
-        //publish discount
+        // publish discount
         final Long dbDiscountId = dbDiscount.getId();
         Assertions.assertThrows(InvalidRequestException.class,
                 () -> discountService.publishDiscount(agreementId, dbDiscountId));
@@ -642,12 +736,12 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity);
         agreementEntity = agreementService.requestApproval(agreementId);
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         discountService.publishDiscount(agreementId, dbDiscount.getId());
-        //the first discount was already published. Starting with second
+        // the first discount was already published. Starting with second
         IntStream.range(2, 7).forEach(idx -> {
             DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
             DiscountEntity dbDiscountN = discountService.createDiscount(agreementId, discount);
@@ -656,10 +750,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
             if (idx < 6) {
                 dbDiscountN = discountService.publishDiscount(agreementId, discountId);
                 Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscountN.getState());
-                long numPublished = discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED);
+                long numPublished = discountRepository.countByAgreementIdAndState(agreementId,
+                        DiscountStateEnum.PUBLISHED);
                 Assertions.assertEquals(idx, numPublished);
             } else {
-                //sixth discount. Cannot publish more than 5 discount
+                // sixth discount. Cannot publish more than 5 discount
                 Assertions.assertThrows(InvalidRequestException.class,
                         () -> discountService.publishDiscount(agreementId, discountId));
             }
@@ -706,14 +801,15 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(3));
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertEquals(LocalDate.now().minusDays(3), agreementEntity.getInformationLastUpdateDate());
-        //update discount should be update informationLastModifyDate to today
+        // update discount should be update informationLastModifyDate to today
         DiscountEntity toUpdateDiscountEntity = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setDiscount(toUpdateDiscountEntity);
         productEntity.setProductCategory(ProductCategoryEnum.LEARNING);
         toUpdateDiscountEntity.setProducts(Collections.singletonList(productEntity));
         toUpdateDiscountEntity.setDiscountValue(70);
-        discountEntity = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), toUpdateDiscountEntity);
+        discountEntity = discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(),
+                toUpdateDiscountEntity);
 
         Assertions.assertEquals(70, discountEntity.getDiscountValue());
         agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
@@ -744,10 +840,10 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        approveAgreement();  //simulation of approved
+        approveAgreement(); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
-        //publish discount
+        // publish discount
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
         dbDiscount = discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "suspendedReason");
         discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -795,4 +891,3 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
     }
 }
-

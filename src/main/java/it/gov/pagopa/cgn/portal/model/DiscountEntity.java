@@ -118,13 +118,10 @@ public class DiscountEntity extends BaseEntity {
     }
 
     public void addDiscountBucketCodeList(Collection<DiscountBucketCodeEntity> bucketCodeList) {
-        if (!CollectionUtils.isEmpty(bucketCodes)) {
-            bucketCodes.forEach(c -> {
-                if (!bucketCodes.contains(c)) {
-                    this.bucketCodes.add(c);
-                    c.setDiscount(this);
-                }
-
+        if (!CollectionUtils.isEmpty(bucketCodeList)) {
+            bucketCodeList.forEach(c -> {
+                this.bucketCodes.add(c);
+                c.setDiscount(this);
             });
         }
     }
