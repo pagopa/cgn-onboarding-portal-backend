@@ -196,20 +196,20 @@ public class DiscountService {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.setBucketCodes(Collections.emptyList());
+            discountEntity.removeAllBucketCodes();
         }
 
         // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.setBucketCodes(Collections.emptyList());
+            discountEntity.removeAllBucketCodes();
         }
 
         // If profile use LANDINGPAGE, static code will not used
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
-            discountEntity.setBucketCodes(Collections.emptyList());
+            discountEntity.removeAllBucketCodes();
         }
 
         // If profile use BUCKET, others will not used
@@ -262,7 +262,6 @@ public class DiscountService {
 
     private final BiConsumer<DiscountEntity, List<DiscountBucketCodeEntity>> updateBucketCodes = (discountEntity,
             discountBucketCodes) -> {
-
         discountEntity.addDiscountBucketCodeList(discountBucketCodes);
     };
 

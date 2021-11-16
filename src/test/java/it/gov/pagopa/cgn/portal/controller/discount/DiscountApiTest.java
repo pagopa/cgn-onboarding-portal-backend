@@ -52,7 +52,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     void initTest(DiscountCodeTypeEnum discountCodeType) {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE, discountCodeType);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE,
+                discountCodeType);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
         setOperatorAuth();
@@ -62,14 +63,12 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscount_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
-        this.mockMvc.perform(
+        this.mockMvc
+                .perform(
                         post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andDo(log()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
                 .andExpect(jsonPath("$.name").value(discount.getName()))
                 .andExpect(jsonPath("$.description").value(discount.getDescription()))
                 .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
@@ -89,14 +88,12 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithLandingPage_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
         CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
-        this.mockMvc.perform(
+        this.mockMvc
+                .perform(
                         post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andDo(log()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
                 .andExpect(jsonPath("$.name").value(discount.getName()))
                 .andExpect(jsonPath("$.description").value(discount.getDescription()))
                 .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
@@ -117,10 +114,10 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStartDate(null);
-        this.mockMvc.perform(
+        this.mockMvc
+                .perform(
                         post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+                .andDo(log()).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -128,10 +125,10 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStaticCode(null);
-        this.mockMvc.perform(
+        this.mockMvc
+                .perform(
                         post(discountPath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(discount)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+                .andDo(log()).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -144,14 +141,12 @@ class DiscountApiTest extends IntegrationAbstractTest {
         UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discount);
         updateDiscount.setName("new_name");
         updateDiscount.setStaticCode("new_static_code");
-        this.mockMvc.perform(
-                        put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+        this.mockMvc
+                .perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.getJson(updateDiscount)))
+                .andDo(log()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
                 .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
                 .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
                 .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
@@ -171,30 +166,28 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Update_CreateAndUpdateDiscountWithLandingPage_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url", "referrer");
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url",
+                "referrer");
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
 
         UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLandingPageUrl("new_url");
         updateDiscount.setLandingPageReferrer("new_referrer");
-        this.mockMvc.perform(
-                        put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+        this.mockMvc
+                .perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.getJson(updateDiscount)))
+                .andDo(log()).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.id").value(discountEntity.getId()))
                 .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue()))   //default state
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
                 .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
                 .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
                 .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
                 .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
                 .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
                 .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").isEmpty())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty()).andExpect(jsonPath("$.staticCode").isEmpty())
                 .andExpect(jsonPath("$.landingPageUrl").isNotEmpty())
                 .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
                 .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
@@ -210,13 +203,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
 
-        this.mockMvc.perform(
-                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isNotEmpty())
-                .andExpect(jsonPath("$.items", hasSize(1)))
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isNotEmpty()).andExpect(jsonPath("$.items", hasSize(1)))
                 .andExpect(jsonPath("$.items[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
     }
@@ -230,29 +219,22 @@ class DiscountApiTest extends IntegrationAbstractTest {
         discountEntity.setSuspendedReasonMessage("A reason");
         discountEntity = discountRepository.save(discountEntity);
 
-        this.mockMvc.perform(
-                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isNotEmpty())
-                .andExpect(jsonPath("$.items", hasSize(1)))
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isNotEmpty()).andExpect(jsonPath("$.items", hasSize(1)))
                 .andExpect(jsonPath("$.items[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)))
                 .andExpect(jsonPath("$.items[0].state").value(DiscountState.SUSPENDED.getValue()))
-                .andExpect(jsonPath("$.items[0].suspendedReasonMessage").value(discountEntity.getSuspendedReasonMessage()));
+                .andExpect(jsonPath("$.items[0].suspendedReasonMessage")
+                        .value(discountEntity.getSuspendedReasonMessage()));
     }
 
     @Test
     void Get_GetDiscount_NotFound() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
-        this.mockMvc.perform(
-                        get(discountPath).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items").isEmpty());
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items").isEmpty());
     }
 
     @Test
@@ -260,10 +242,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.STATIC);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
-        this.mockMvc.perform(
-                        delete(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isNoContent());
+        this.mockMvc
+                .perform(delete(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(log()).andExpect(status().isNoContent());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());
@@ -272,9 +253,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     @Test
     void Delete_DeleteDiscount_NotFound() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
-        this.mockMvc.perform(
-                        delete(discountPath + "/" + 1).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
+        this.mockMvc.perform(delete(discountPath + "/" + 1).contentType(MediaType.APPLICATION_JSON)).andDo(log())
                 .andExpect(status().isNotFound());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
