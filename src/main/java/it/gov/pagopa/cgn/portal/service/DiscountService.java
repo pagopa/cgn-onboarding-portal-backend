@@ -23,7 +23,6 @@ import javax.validation.ValidatorFactory;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -261,9 +260,7 @@ public class DiscountService {
     };
 
     private final BiConsumer<DiscountEntity, List<DiscountBucketCodeEntity>> updateBucketCodes = (discountEntity,
-            discountBucketCodes) -> {
-        discountEntity.addDiscountBucketCodeList(discountBucketCodes);
-    };
+            discountBucketCodes) -> discountEntity.addDiscountBucketCodeList(discountBucketCodes);
 
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
