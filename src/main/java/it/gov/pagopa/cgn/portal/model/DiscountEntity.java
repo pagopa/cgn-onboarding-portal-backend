@@ -113,10 +113,6 @@ public class DiscountEntity extends BaseEntity {
         }
     }
 
-    public void removeBucketCode(DiscountBucketCodeEntity discountBucketCode) {
-        this.bucketCodes.remove(discountBucketCode);
-    }
-
     public void addDiscountBucketCodeList(Collection<DiscountBucketCodeEntity> bucketCodeList) {
         if (!CollectionUtils.isEmpty(bucketCodeList)) {
             if (this.bucketCodes == null) {
