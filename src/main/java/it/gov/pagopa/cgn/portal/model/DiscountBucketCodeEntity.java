@@ -19,6 +19,7 @@ import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.EqualsAndHashCode.Exclude;
 
 @Entity
 @Table(name = "discount_bucket_code")
@@ -29,6 +30,8 @@ public class DiscountBucketCodeEntity implements Serializable {
     @Column(name = "bucket_code_k")
     @SequenceGenerator(name = "discount_bucket_code_k_seq", sequenceName = "discount_bucket_code_k_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_bucket_code_k_seq")
+    @Exclude
+    @ToString.Exclude
     private Long id;
 
     @NotNull
