@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -168,6 +167,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(dbBucketCodeList.get(0).getIsUsed(), bucketCodeList.get(0).getIsUsed());
         Assertions.assertEquals(dbBucketCodeList.get(0).getDiscount().getId(),
                 bucketCodeList.get(0).getDiscount().getId());
+        Assertions.assertEquals(dbBucketCodeList.get(0).hashCode(), bucketCodeList.get(0).hashCode());
+        Assertions.assertEquals(dbBucketCodeList.get(0).toString(), bucketCodeList.get(0).toString());
     }
 
     @Test
