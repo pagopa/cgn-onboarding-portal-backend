@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
@@ -12,4 +14,6 @@ public interface DiscountBucketCodeRepository
         long countByDiscountAndIsUsed(DiscountEntity discount, Boolean isUsed);
 
         long countByDiscount(DiscountEntity discount);
+
+        List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
 }

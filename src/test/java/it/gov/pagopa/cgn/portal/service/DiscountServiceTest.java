@@ -156,9 +156,18 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        discountBucketCodeRepository.bulkPersist(TestUtils.getDiscountBucketCodeEntityList(discountEntity));
+        List<DiscountBucketCodeEntity> bucketCodeList = TestUtils.getDiscountBucketCodeEntityList(discountEntity);
+        discountBucketCodeRepository.bulkPersist(bucketCodeList);
+
+        List<DiscountBucketCodeEntity> dbBucketCodeList = discountBucketCodeRepository
+                .findAllByDiscount(discountEntity);
         long bucketCodesSize = discountBucketCodeRepository.countByDiscountAndIsUsed(discountEntity, false);
         Assertions.assertFalse(bucketCodesSize == 0);
+        Assertions.assertNotNull(dbBucketCodeList.get(0).getId());
+        Assertions.assertEquals(dbBucketCodeList.get(0).getCode(), bucketCodeList.get(0).getCode());
+        Assertions.assertEquals(dbBucketCodeList.get(0).getIsUsed(), bucketCodeList.get(0).getIsUsed());
+        Assertions.assertEquals(dbBucketCodeList.get(0).getDiscount().getId(),
+                bucketCodeList.get(0).getDiscount().getId());
     }
 
     @Test
