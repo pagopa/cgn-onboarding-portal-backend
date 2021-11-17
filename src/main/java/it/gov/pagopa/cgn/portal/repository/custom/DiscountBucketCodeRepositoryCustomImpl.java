@@ -28,7 +28,7 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         DiscountBucketCodeEntity toInsert = entities.get(i);
-                        ps.setLong(1, toInsert.getId());
+                        ps.setString(1, toInsert.getCode());
                         ps.setBoolean(2, toInsert.getIsUsed());
                         ps.setLong(3, toInsert.getDiscount().getId());
                     }

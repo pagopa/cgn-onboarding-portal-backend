@@ -141,6 +141,27 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithBulkBucketCodes_Ok() {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNull(discountEntity.getStaticCode());
+        Assertions.assertNull(discountEntity.getLandingPageUrl());
+        Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        discountBucketCodeRepository.bulkPersist(TestUtils.getDiscountBucketCodeEntityList(discountEntity));
+        long bucketCodesSize = discountBucketCodeRepository.countByDiscountAndIsUsed(discountEntity, false);
+        Assertions.assertFalse(bucketCodesSize == 0);
+    }
+
+    @Test
     void Create_CreateDiscountWithStaticCodeAndOperatorAPI_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.API);
 
