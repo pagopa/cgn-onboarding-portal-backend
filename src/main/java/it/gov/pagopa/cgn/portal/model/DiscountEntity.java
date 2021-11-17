@@ -20,17 +20,14 @@ import java.util.List;
 @Entity
 @Table(name = "discount")
 @Data
-@TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
+@TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class) // postgress enum type
 @DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
 public class DiscountEntity extends BaseEntity {
 
     @Id
     @Column(name = "discount_k")
-    @SequenceGenerator(name = "discount_discount_k_seq",
-            sequenceName = "discount_discount_k_seq",
-            allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator = "discount_discount_k_seq")
+    @SequenceGenerator(name = "discount_discount_k_seq", sequenceName = "discount_discount_k_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_discount_k_seq")
     private Long id;
 
     @NotNull
@@ -94,6 +91,9 @@ public class DiscountEntity extends BaseEntity {
     @Size(min = 1)
     private List<DiscountProductEntity> products;
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "discount", cascade = CascadeType.ALL)
+    private List<DiscountBucketCodeEntity> bucketCodes;
+
     public void removeProduct(DiscountProductEntity productEntity) {
         this.products.remove(productEntity);
     }
@@ -110,6 +110,24 @@ public class DiscountEntity extends BaseEntity {
                 }
 
             });
+        }
+    }
+
+    public void addDiscountBucketCodeList(Collection<DiscountBucketCodeEntity> bucketCodeList) {
+        if (!CollectionUtils.isEmpty(bucketCodeList)) {
+            if (this.bucketCodes == null) {
+                this.bucketCodes = new ArrayList<>();
+            }
+            bucketCodeList.forEach(c -> {
+                this.bucketCodes.add(c);
+                c.setDiscount(this);
+            });
+        }
+    }
+
+    public void removeAllBucketCodes() {
+        if (this.bucketCodes != null) {
+            this.bucketCodes.clear();
         }
     }
 
