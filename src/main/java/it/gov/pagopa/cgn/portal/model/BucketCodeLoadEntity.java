@@ -38,8 +38,4 @@ public class BucketCodeLoadEntity extends BaseEntity {
     @Column(name = "number_of_codes")
     private Long numberOfCodes;
 
-    @NotNull
-    @NotBlank
-    @Column(name = "original_file_name")
-    private String originalFileName;
 }

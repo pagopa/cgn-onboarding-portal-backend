@@ -9,7 +9,6 @@ CREATE TABLE bucket_code_load
     status                VARCHAR(50)  NOT NULL,
     uid                   VARCHAR(255) NOT NULL,
     number_of_codes       BIGINT       NOT NULL,
-    original_file_name    VARCHAR(255) NOT NULL,
     insert_time             TIMESTAMPTZ          NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time             TIMESTAMPTZ,
 

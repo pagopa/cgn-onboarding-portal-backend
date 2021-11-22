@@ -45,6 +45,8 @@ public class BucketService {
         bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
+        // TODO: retrieve real number of codes
+        bucketCodeLoadEntity.setNumberOfCodes(100L);
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
 
