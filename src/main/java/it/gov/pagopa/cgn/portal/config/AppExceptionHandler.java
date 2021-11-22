@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.config;
 
+import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.ImageException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +22,25 @@ public class AppExceptionHandler {
     @Autowired
     private ConfigProperties configProperties;
 
-    @ExceptionHandler(value = {InvalidRequestException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler(value = { InvalidRequestException.class, MethodArgumentNotValidException.class })
     public ResponseEntity<Object> handleInvalidRequestException(Exception ex) {
         log.error("InvalidRequestException", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {ImageException.class, MaxUploadSizeExceededException.class})
+    @ExceptionHandler(value = { InternalErrorException.class })
+    public ResponseEntity<Object> handleInternalErrorException(Exception ex) {
+        log.error("InternalErrorException", ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = { ConflictErrorException.class })
+    public ResponseEntity<Object> handleConflictErrorException(Exception ex) {
+        log.error("ConflictErrorException", ex);
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = { ImageException.class, MaxUploadSizeExceededException.class })
     public ResponseEntity<Object> handleImageError(Exception ex) {
         log.error("ImageException", ex);
         String codeError;
@@ -40,13 +54,13 @@ public class AppExceptionHandler {
         return new ResponseEntity<>(codeError, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {EmptyResultDataAccessException.class})
+    @ExceptionHandler(value = { EmptyResultDataAccessException.class })
     public ResponseEntity<Object> handleDataNotFound(Exception ex) {
         log.error("DataNotFound", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = {SecurityException.class})
+    @ExceptionHandler(value = { SecurityException.class })
     public ResponseEntity<Object> handleForbidden(Exception ex) {
         log.warn("Permission Denied", ex);
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -54,8 +68,8 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
-        String errorMsg = configProperties.isActiveProfileDev() ?
-                ex.getMessage(): configProperties.getExceptionGenericMessage();
+        String errorMsg = configProperties.isActiveProfileDev() ? ex.getMessage()
+                : configProperties.getExceptionGenericMessage();
         log.error("Uncaught Exception", ex);
         return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
     }

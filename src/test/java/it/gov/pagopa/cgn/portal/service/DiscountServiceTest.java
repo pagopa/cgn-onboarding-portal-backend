@@ -1,14 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.enums.*;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.repository.AddressRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
-import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +13,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.IntStream;
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
+import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -38,9 +46,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private AddressRepository addressRepository;
-
-    @Autowired
-    private DiscountBucketCodeRepository discountBucketCodeRepository;
 
     private AgreementEntity agreementEntity;
 
@@ -75,7 +80,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(discountEntity.getProducts().get(0));
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
-
     }
 
     @Test
@@ -135,15 +139,14 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        long bucketCodesSize = discountBucketCodeRepository.countByDiscountAndIsUsed(discountEntity, false);
-        Assertions.assertNotEquals(0, bucketCodesSize);
+        Assertions.assertNotNull(discountEntity.getLastBucketCodeFileUid());
     }
 
     @Test
     void Create_CreateDiscountWithBulkBucketCodes_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -155,20 +158,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        List<DiscountBucketCodeEntity> bucketCodeList = TestUtils.getDiscountBucketCodeEntityList(discountEntity);
-        discountBucketCodeRepository.bulkPersist(bucketCodeList);
-
-        List<DiscountBucketCodeEntity> dbBucketCodeList = discountBucketCodeRepository
-                .findAllByDiscount(discountEntity);
-        long bucketCodesSize = discountBucketCodeRepository.countByDiscountAndIsUsed(discountEntity, false);
-        Assertions.assertNotEquals(0, bucketCodesSize);
-        Assertions.assertNotNull(dbBucketCodeList.get(0).getId());
-        Assertions.assertNotNull(dbBucketCodeList.get(0).getCode());
-        Assertions.assertNotNull(dbBucketCodeList.get(0).getIsUsed());
-        Assertions.assertNotNull(dbBucketCodeList.get(0).getDiscount());
-        Assertions.assertEquals(dbBucketCodeList.get(0).hashCode(), bucketCodeList.get(0).hashCode());
-        Assertions.assertEquals(dbBucketCodeList.get(0).toString(), bucketCodeList.get(0).toString());
-        Assertions.assertEquals(dbBucketCodeList.get(0), bucketCodeList.get(0));
+        Assertions.assertNotNull(discountEntity.getLastBucketCodeFileUid());
     }
 
     @Test
@@ -218,11 +208,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.API);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        // discountEntity have landing page, but profile is API. Static code not saved.
+        // discountEntity have bucket, but profile is API. Static code not saved.
         discountEntity.setLandingPageUrl(null);
         discountEntity.setLandingPageReferrer(null);
         discountEntity.setStaticCode(null);
-        discountEntity.addDiscountBucketCodeList(TestUtils.getDiscountBucketCodeEntityList(discountEntity));
+        discountEntity.setLastBucketCodeFileUid(TestUtils.generateDiscountBucketCodeUid());
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -234,7 +224,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        Assertions.assertTrue(discountEntity.getBucketCodes().isEmpty());
+        Assertions.assertNull(discountEntity.getLastBucketCodeFileUid());
 
     }
 
@@ -420,7 +410,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_UpdateDiscountWithBucketCodesWithValidData_Ok() {
+    void Update_UpdateDiscountWithBucketCodesWithValidDataWithoutNewBucketLoad_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
@@ -456,8 +446,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(updatedDiscount.getStaticCode());
         Assertions.assertNull(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
         Assertions.assertNull(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
-        long dbCodesSize = discountBucketCodeRepository.countByDiscount(dbDiscount);
-        Assertions.assertEquals(2, dbCodesSize);
+        Assertions.assertEquals(updatedDiscount.getLastBucketCodeFileUid(), dbDiscount.getLastBucketCodeFileUid());
     }
 
     @Test

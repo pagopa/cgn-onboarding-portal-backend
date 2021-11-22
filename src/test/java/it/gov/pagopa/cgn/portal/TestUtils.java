@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class TestUtils {
 
@@ -234,7 +235,7 @@ public class TestUtils {
     public static DiscountEntity createSampleDiscountEntityWithBucketCodes(AgreementEntity agreement) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
-        discountEntity.addDiscountBucketCodeList(getDiscountBucketCodeEntityList(discountEntity));
+        discountEntity.setLastBucketCodeFileUid(generateDiscountBucketCodeUid());
         return discountEntity;
     }
 
@@ -270,13 +271,8 @@ public class TestUtils {
         return productEntityList;
     }
 
-    public static List<DiscountBucketCodeEntity> getDiscountBucketCodeEntityList(DiscountEntity discountEntity) {
-        List<DiscountBucketCodeEntity> bucketCodeEntityList = new ArrayList<>();
-        DiscountBucketCodeEntity discountBucketCodeEntity = new DiscountBucketCodeEntity();
-        discountBucketCodeEntity.setCode("AAAAAA");
-        discountBucketCodeEntity.setDiscount(discountEntity);
-        bucketCodeEntityList.add(discountBucketCodeEntity);
-        return bucketCodeEntityList;
+    public static String generateDiscountBucketCodeUid() {
+        return UUID.randomUUID().toString();
     }
 
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
