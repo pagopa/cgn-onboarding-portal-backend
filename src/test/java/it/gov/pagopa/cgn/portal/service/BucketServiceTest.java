@@ -176,7 +176,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void BucketCodeLoadData_Ok() throws IOException {
+    void BucketCodeLoadData_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
@@ -191,5 +191,6 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
+        Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
     }
 }
