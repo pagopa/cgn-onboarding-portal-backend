@@ -34,7 +34,6 @@ public class BucketCodeLoadEntity extends BaseEntity {
     @Column(name = "uid")
     private String uid = UUID.randomUUID().toString();
 
-    @NotNull
     @Column(name = "number_of_codes")
     private Long numberOfCodes;
 
