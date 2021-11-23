@@ -180,10 +180,13 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        bucketService.createPendingBucketLoad(discountEntity);
+        BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
+        bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
+        bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
+        bucketCodeLoadEntity.setNumberOfCodes(100L);
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
 
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
