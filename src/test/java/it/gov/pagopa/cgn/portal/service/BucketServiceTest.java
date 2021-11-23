@@ -120,7 +120,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.setRunningBucketLoad(discountEntity.getId());
 
         bucketService.performBucketLoad(discountEntity.getId());
-        Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid()));
+        Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid() + ".csv"));
 
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
                 .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
@@ -163,7 +163,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
                 multipartFile.getSize());
 
-        Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid()));
+        Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 

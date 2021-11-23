@@ -85,7 +85,7 @@ public class AzureStorage {
     }
 
     public void uploadCsv(InputStream content, String blobName, long size) {
-        BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
             blobClient.upload(contentIs, size, true);
         } catch (IOException e) {
@@ -94,7 +94,7 @@ public class AzureStorage {
     }
 
     public Stream<CSVRecord> readCsvDocument(String blobName) throws IOException {
-        BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
         InputStream contentStream = blobClient.downloadContent().toStream();
         Reader in = new InputStreamReader(contentStream);
         return StreamSupport.stream(CSVFormat.EXCEL.parse(in).spliterator(), true);
