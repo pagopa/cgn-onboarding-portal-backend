@@ -7,7 +7,6 @@ import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
@@ -45,19 +44,24 @@ public class BucketService {
         bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
-        // TODO: retrieve real number of codes
-        bucketCodeLoadEntity.setNumberOfCodes(100L);
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
 
-    @Async("threadPoolTaskExecutor")
-    @Transactional(Transactional.TxType.REQUIRED)
-    public void storeCodesBucket(Long discountId) {
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findByDiscountIdAndUid(discountId,
                 discountEntity.getLastBucketCodeFileUid());
 
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
+        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void performBucketLoad(Long discountId) {
+        DiscountEntity discountEntity = discountRepository.getOne(discountId);
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findByDiscountIdAndUid(discountId,
+                discountEntity.getLastBucketCodeFileUid());
         List<DiscountBucketCodeEntity> bucketCodeList = new ArrayList<>();
         try {
             StreamSupport.stream(azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid()).spliterator(), true)
@@ -68,6 +72,8 @@ public class BucketService {
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FINISHED);
         } catch (Exception e) {
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FAILED);
+        } finally {
+            bucketCodeLoadRepository.save(bucketCodeLoadEntity);
         }
     }
 
