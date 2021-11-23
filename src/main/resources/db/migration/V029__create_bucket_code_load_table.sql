@@ -16,3 +16,5 @@ CREATE TABLE bucket_code_load
 );
 
 ALTER TABLE discount ADD COLUMN last_bucket_code_file_uid VARCHAR(255);
+
+ALTER TABLE discount_bucket_code ADD COLUMN bucket_code_load_id BIGINT NOT NULL;

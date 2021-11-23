@@ -22,7 +22,8 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
 
     @Override
     public void bulkPersist(List<DiscountBucketCodeEntity> entities) {
-        template.batchUpdate("insert into discount_bucket_code (code, used, discount_fk) values (?, ?, ?)",
+        template.batchUpdate(
+                "insert into discount_bucket_code (code, used, discount_fk, bucket_code_load_id) values (?, ?, ?, ?)",
                 new BatchPreparedStatementSetter() {
 
                     @Override
@@ -31,6 +32,7 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
                         ps.setString(1, toInsert.getCode());
                         ps.setBoolean(2, toInsert.getIsUsed());
                         ps.setLong(3, toInsert.getDiscount().getId());
+                        ps.setLong(4, toInsert.getBucketCodeLoadId());
                     }
 
                     @Override

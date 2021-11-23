@@ -64,9 +64,8 @@ public class BucketService {
                 discountEntity.getLastBucketCodeFileUid());
         List<DiscountBucketCodeEntity> bucketCodeList = new ArrayList<>();
         try {
-            StreamSupport.stream(azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid()).spliterator(), true)
-                    .collect(Collectors.toList()).stream()
-                    .map(record -> new DiscountBucketCodeEntity(record.get(0), discountEntity))
+            azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid()).collect(Collectors.toList()).stream().map(
+                    record -> new DiscountBucketCodeEntity(record.get(0), discountEntity, bucketCodeLoadEntity.getId()))
                     .forEach(bucketCodeList::add);
             discountBucketCodeRepository.bulkPersist(bucketCodeList);
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FINISHED);

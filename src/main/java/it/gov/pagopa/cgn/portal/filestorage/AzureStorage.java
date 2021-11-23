@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 
@@ -82,11 +84,20 @@ public class AzureStorage {
         return configProperties.getImagesContainerName() + "/" + blobName;
     }
 
-    public Iterable<CSVRecord> readCsvDocument(String blobName) throws IOException {
+    public void uploadCsv(InputStream content, String blobName, long size) {
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
+            blobClient.upload(contentIs, size, true);
+        } catch (IOException e) {
+            throw new CGNException(e);
+        }
+    }
+
+    public Stream<CSVRecord> readCsvDocument(String blobName) throws IOException {
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
         InputStream contentStream = blobClient.downloadContent().toStream();
         Reader in = new InputStreamReader(contentStream);
-        return CSVFormat.EXCEL.parse(in);
+        return StreamSupport.stream(CSVFormat.EXCEL.parse(in).spliterator(), true);
     }
 
     public boolean existsDocument(String blobName) {
