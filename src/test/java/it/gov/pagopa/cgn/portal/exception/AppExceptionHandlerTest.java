@@ -28,14 +28,14 @@ public class AppExceptionHandlerTest {
     @Test
     public void TestConflictError_ThrowGenericException() {
         AppExceptionHandler handler = new AppExceptionHandler();
-        Exception ex = new NullPointerException("Test null");
+        Exception ex = new ConflictErrorException("Test null");
         Assert.assertEquals(ex.getMessage(), handler.handleConflictErrorException(ex).getBody());
     }
 
     @Test
     public void TestInternalError_ThrowGenericException() {
         AppExceptionHandler handler = new AppExceptionHandler();
-        Exception ex = new NullPointerException("Test null internal");
+        Exception ex = new InternalErrorException("Test internal");
         Assert.assertEquals(ex.getMessage(), handler.handleInternalErrorException(ex).getBody());
     }
 }
