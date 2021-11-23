@@ -106,6 +106,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING, bucketCodeLoadEntity.getStatus());
+        Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
     }
 
@@ -124,6 +125,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED, bucketCodeLoadEntity.getStatus());
+        Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
     }
 
