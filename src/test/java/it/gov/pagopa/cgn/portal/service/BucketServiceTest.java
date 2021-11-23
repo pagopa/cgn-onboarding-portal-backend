@@ -89,6 +89,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(BucketCodeLoadStatusEnum.PENDING, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
         Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
+        Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
+        Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
 
     }
 
