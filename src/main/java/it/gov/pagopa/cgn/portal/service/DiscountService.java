@@ -24,7 +24,6 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 
