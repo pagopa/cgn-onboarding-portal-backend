@@ -44,12 +44,23 @@ public class AppExceptionHandlerTest extends IntegrationAbstractTest {
     }
 
     @Test
-    public void TestGenericInternalError_ThrowGenericException() {
+    public void TestGenericInternalError_ThrowSpecificException() {
         AppExceptionHandler handler = new AppExceptionHandler();
         ConfigProperties configProperties = new ConfigProperties();
         ReflectionTestUtils.setField(configProperties, "activeProfile", "dev");
         Exception ex = new InternalErrorException("Test generic internal");
         ReflectionTestUtils.setField(handler, "configProperties", configProperties);
         Assert.assertEquals(ex.getMessage(), handler.handleException(ex).getBody());
+    }
+
+    @Test
+    public void TestGenericInternalError_ThrowGenericException() {
+        AppExceptionHandler handler = new AppExceptionHandler();
+        ConfigProperties configProperties = new ConfigProperties();
+        ReflectionTestUtils.setField(configProperties, "activeProfile", "nodev");
+        ReflectionTestUtils.setField(configProperties, "exceptionGenericMessage", "generic message");
+        Exception ex = new InternalErrorException("Test generic internal");
+        ReflectionTestUtils.setField(handler, "configProperties", configProperties);
+        Assert.assertEquals("generic message", handler.handleException(ex).getBody());
     }
 }
