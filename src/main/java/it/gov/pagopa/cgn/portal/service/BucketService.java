@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
@@ -64,8 +63,9 @@ public class BucketService {
                 discountEntity.getLastBucketCodeFileUid());
         List<DiscountBucketCodeEntity> bucketCodeList = new ArrayList<>();
         try {
-            azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid()).collect(Collectors.toList()).stream().map(
-                    record -> new DiscountBucketCodeEntity(record.get(0), discountEntity, bucketCodeLoadEntity.getId()))
+            azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid()).collect(Collectors.toList()).stream()
+                    .map(csvRecord -> new DiscountBucketCodeEntity(csvRecord.get(0), discountEntity,
+                            bucketCodeLoadEntity.getId()))
                     .forEach(bucketCodeList::add);
             discountBucketCodeRepository.bulkPersist(bucketCodeList);
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FINISHED);
