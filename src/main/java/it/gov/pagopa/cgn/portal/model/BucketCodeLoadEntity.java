@@ -8,6 +8,8 @@ import javax.validation.constraints.NotNull;
 
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import lombok.Data;
+import lombok.ToString;
+import lombok.EqualsAndHashCode.Exclude;
 
 @Entity
 @Table(name = "bucket_code_load", uniqueConstraints = @UniqueConstraint(columnNames = { "uid" }))
@@ -18,6 +20,8 @@ public class BucketCodeLoadEntity extends BaseEntity {
     @Column(name = "bucket_code_load_k")
     @SequenceGenerator(name = "bucket_code_load_k_seq", sequenceName = "bucket_code_load_k_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bucket_code_load_k_seq")
+    @Exclude
+    @ToString.Exclude
     private Long id;
 
     @NotNull
@@ -34,6 +38,8 @@ public class BucketCodeLoadEntity extends BaseEntity {
     @Column(name = "uid")
     private String uid = UUID.randomUUID().toString();
 
+    @Exclude
+    @ToString.Exclude
     @Column(name = "number_of_codes")
     private Long numberOfCodes;
 

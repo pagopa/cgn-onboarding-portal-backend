@@ -1,28 +1,18 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.model.AddressEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgnonboardingportal.model.*;
+import java.time.LocalDate;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.IntStream;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 
 @RunWith(SpringRunner.class)
 public class CreateDiscountConverterTest {
-
 
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
@@ -34,7 +24,7 @@ public class CreateDiscountConverterTest {
         DiscountEntity discountEntity = new DiscountEntity();
         discountEntity.setName("Discount");
 
-        //Not implemented yet
+        // Not implemented yet
         Assert.assertThrows(UnsupportedOperationException.class, () -> createDiscountConverter.toDto(discountEntity));
     }
 
@@ -49,7 +39,7 @@ public class CreateDiscountConverterTest {
 
     @Test
     public void Convert_ConvertDiscountWithLandingPageDiscountTypeDTOToEntity_Ok() {
-        CreateDiscount dto = createSampleDiscountWithLandingPage(URL,REFERRER);
+        CreateDiscount dto = createSampleDiscountWithLandingPage(URL, REFERRER);
         DiscountEntity discountEntity = createDiscountConverter.toEntity(dto);
 
         checkCommonCreateDiscountAssertions(dto, discountEntity);
@@ -57,20 +47,20 @@ public class CreateDiscountConverterTest {
         Assert.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
     }
 
-    private CreateDiscount createSampleDiscountWithStaticCode(String staticCode){
+    private CreateDiscount createSampleDiscountWithStaticCode(String staticCode) {
         CreateDiscount dto = createSampleCommonDiscount();
         dto.setStaticCode(staticCode);
         return dto;
     }
 
-    private CreateDiscount createSampleDiscountWithLandingPage(String url, String referrer){
+    private CreateDiscount createSampleDiscountWithLandingPage(String url, String referrer) {
         CreateDiscount dto = createSampleCommonDiscount();
         dto.setLandingPageUrl(url);
         dto.setLandingPageReferrer(referrer);
         return dto;
     }
 
-    private CreateDiscount createSampleCommonDiscount(){
+    private CreateDiscount createSampleCommonDiscount() {
         CreateDiscount dto = new CreateDiscount();
         dto.setName("Discount");
         dto.setStartDate(LocalDate.now());
@@ -79,8 +69,6 @@ public class CreateDiscountConverterTest {
         dto.setDescription("A discount");
         return dto;
     }
-
-
 
     private void checkCommonCreateDiscountAssertions(CreateDiscount dto, DiscountEntity discountEntity) {
         Assert.assertEquals(dto.getName(), discountEntity.getName());
