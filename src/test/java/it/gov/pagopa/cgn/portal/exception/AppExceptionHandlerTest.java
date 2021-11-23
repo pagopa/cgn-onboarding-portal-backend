@@ -12,16 +12,30 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 public class AppExceptionHandlerTest {
 
     @Test
-    public void TestMaxUploadSizeExceededException_ThrowMaxUploadSizeExceededException () {
+    public void TestMaxUploadSizeExceededException_ThrowMaxUploadSizeExceededException() {
         AppExceptionHandler handler = new AppExceptionHandler();
         Assert.assertEquals(ImageErrorCode.IMAGE_SIZE_EXCEEDED.getValue(),
                 handler.handleImageError(new MaxUploadSizeExceededException(1024 * 1024 * 5)).getBody());
     }
 
     @Test
-    public void TestGenericError_ThrowGenericException () {
+    public void TestGenericError_ThrowGenericException() {
         AppExceptionHandler handler = new AppExceptionHandler();
         Assert.assertEquals(ImageErrorCode.GENERIC.getValue(),
                 handler.handleImageError(new NullPointerException()).getBody());
+    }
+
+    @Test
+    public void TestConflictError_ThrowGenericException() {
+        AppExceptionHandler handler = new AppExceptionHandler();
+        Exception ex = new NullPointerException("Test null");
+        Assert.assertEquals(ex.getMessage(), handler.handleConflictErrorException(ex).getBody());
+    }
+
+    @Test
+    public void TestInternalError_ThrowGenericException() {
+        AppExceptionHandler handler = new AppExceptionHandler();
+        Exception ex = new NullPointerException("Test null internal");
+        Assert.assertEquals(ex.getMessage(), handler.handleInternalErrorException(ex).getBody());
     }
 }
