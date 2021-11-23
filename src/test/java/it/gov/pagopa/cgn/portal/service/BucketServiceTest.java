@@ -186,7 +186,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setNumberOfCodes(100L);
 
-        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+        BucketCodeLoadEntity inserted = bucketCodeLoadRepository.save(bucketCodeLoadEntity);
 
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
@@ -194,6 +194,6 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
-        Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
+        Assertions.assertEquals(bucketCodeLoadEntity.getNumberOfCodes(), inserted.getNumberOfCodes());
     }
 }
