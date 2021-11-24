@@ -175,6 +175,16 @@ class DiscountApiTest extends IntegrationAbstractTest {
         }
 
         @Test
+        void Create_CreateDiscountWithBucketWithNotExistingBucketLoadFile_Ko() throws Exception {
+                initTest(DiscountCodeTypeEnum.BUCKET);
+                CreateDiscount discount = createSampleCreateDiscountWithBucket();
+                azureStorage.uploadCsv(multipartFile.getInputStream(), UUID.randomUUID().toString(),
+                                multipartFile.getSize());
+                this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
+        }
+
+        @Test
         void Create_CreateDiscountWithoutStartDate_Ok() throws Exception {
                 initTest(DiscountCodeTypeEnum.STATIC);
                 CreateDiscount discount = createSampleCreateDiscount();
