@@ -96,6 +96,9 @@ public class IntegrationAbstractTest {
     protected DiscountBucketCodeRepository discountBucketCodeRepository;
 
     @Autowired
+    protected BucketCodeLoadRepository bucketCodeLoadRepository;
+
+    @Autowired
     protected AgreementRepository agreementRepository;
 
     @Autowired
@@ -122,6 +125,7 @@ public class IntegrationAbstractTest {
     @AfterEach
     protected void cleanAll() {
         documentRepository.deleteAll();
+        bucketCodeLoadRepository.deleteAll();
         discountBucketCodeRepository.deleteAll();
         discountRepository.deleteAll();
         profileRepository.deleteAll();

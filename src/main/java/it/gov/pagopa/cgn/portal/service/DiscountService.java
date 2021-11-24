@@ -25,6 +25,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 
 @Service
@@ -39,6 +40,7 @@ public class DiscountService {
     private final DocumentService documentService;
     private final ValidatorFactory factory;
     private final BucketService bucketService;
+    private final BucketLoadUtils bucketLoadUtils;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -49,6 +51,7 @@ public class DiscountService {
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             bucketService.createPendingBucketLoad(toReturn);
+            bucketLoadUtils.storeCodesBucket(toReturn.getId());
         }
         return toReturn;
     }
@@ -157,7 +160,8 @@ public class DiscountService {
     @Autowired
     public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
             ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-            DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
+            DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
+            BucketLoadUtils bucketLoadUtils) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -165,6 +169,7 @@ public class DiscountService {
         this.documentService = documentService;
         this.factory = factory;
         this.bucketService = bucketService;
+        this.bucketLoadUtils = bucketLoadUtils;
     }
 
     private DiscountEntity findById(Long discountId) {

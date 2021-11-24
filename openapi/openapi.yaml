@@ -27,6 +27,8 @@ tags:
     description: Help
   - name: geolocation-token
     description: API Geolocation Token
+  - name: bucket
+    description: Bucket Load
 
 paths:
   /geolocation-token:
@@ -211,6 +213,33 @@ paths:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+  
+  /agreements/{agreementId}/discounts/bucket:
+
+    post:
+      tags:
+        - bucket
+      summary: uploadBucket
+      operationId: uploadBucket
+      consumes:
+        - multipart/form-data
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - in: formData
+          name: document
+          type: file
+          required: true
+      responses:
+        200:
+          description: Bucket uploaded
+          schema:
+            $ref: '#/definitions/BucketLoad'
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        409:
+          $ref: '#/responses/Conflict'
 
   /agreements/{agreementId}/discounts/{discountId}:
     get:
@@ -1066,7 +1095,16 @@ definitions:
       documentTimestamp:
         type: string
         format: date-time
-
+  
+  BucketLoad:
+    type: object
+    required:
+      - uid
+    properties:
+      uid:
+        type: string
+        minLength: 1
+        maxLength: 255
   ApiTokens:
     type: object
     required:
@@ -1127,6 +1165,8 @@ responses:
   NotFound:
     description: Not found
     #content: {} #TODO
+  Conflict:
+    description: Conflict
 
 securityDefinitions:
   Bearer:
