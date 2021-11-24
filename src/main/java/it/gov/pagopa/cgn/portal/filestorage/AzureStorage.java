@@ -1,16 +1,26 @@
 package it.gov.pagopa.cgn.portal.filestorage;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import javax.annotation.PostConstruct;
+
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.sas.SasProtocol;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.ImageException;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +28,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.util.List;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.ImageException;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 
 @Component
 public class AzureStorage {
@@ -39,17 +48,15 @@ public class AzureStorage {
     }
 
     @PostConstruct
-    protected void init(){
+    protected void init() {
 
         documentContainerClient = new BlobContainerClientBuilder()
                 .connectionString(configProperties.getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName())
-                .buildClient();
+                .containerName(configProperties.getDocumentsContainerName()).buildClient();
 
         imagesContainerClient = new BlobContainerClientBuilder()
                 .connectionString(configProperties.getAzureConnectionString())
-                .containerName(configProperties.getImagesContainerName())
-                .buildClient();
+                .containerName(configProperties.getImagesContainerName()).buildClient();
     }
 
     public String storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) {
@@ -59,11 +66,10 @@ public class AzureStorage {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
             blobClient.upload(contentIs, size, true);
         } catch (IOException e) {
-           throw new CGNException(e);
+            throw new CGNException(e);
         }
         return configProperties.getDocumentsContainerName() + "/" + blobName;
     }
-
 
     public String storeImage(String agreementId, MultipartFile image) {
         String blobName = "image-" + agreementId + "." + FilenameUtils.getExtension(image.getOriginalFilename());
@@ -76,6 +82,27 @@ public class AzureStorage {
         }
 
         return configProperties.getImagesContainerName() + "/" + blobName;
+    }
+
+    public void uploadCsv(InputStream content, String blobName, long size) {
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
+            blobClient.upload(contentIs, size, true);
+        } catch (IOException e) {
+            throw new CGNException(e);
+        }
+    }
+
+    public Stream<CSVRecord> readCsvDocument(String blobName) throws IOException {
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
+        InputStream contentStream = blobClient.downloadContent().toStream();
+        Reader in = new InputStreamReader(contentStream);
+        return StreamSupport.stream(CSVFormat.EXCEL.parse(in).spliterator(), true);
+    }
+
+    public boolean existsDocument(String blobName) {
+        BlobClient blobClient = documentContainerClient.getBlobClient(blobName);
+        return blobClient.exists();
     }
 
     public String getDocumentSasFileUrl(String documentUrl) {
@@ -99,7 +126,7 @@ public class AzureStorage {
 
     private String getBlobName(String documentUrl) {
         if (documentUrl.contains("/")) {
-            return documentUrl.substring(documentUrl.indexOf("/")+1);
+            return documentUrl.substring(documentUrl.indexOf("/") + 1);
         }
         return documentUrl;
     }

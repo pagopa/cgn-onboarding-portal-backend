@@ -50,4 +50,18 @@ public class DiscountBucketCodeEntity implements Serializable {
     @JoinColumn(name = "discount_fk", nullable = false)
     private DiscountEntity discount;
 
+    @NotNull
+    @Column(name = "bucket_code_load_id")
+    private Long bucketCodeLoadId;
+
+    public DiscountBucketCodeEntity() {
+    }
+
+    public DiscountBucketCodeEntity(@NotNull @NotBlank @Size(max = 20) String code, DiscountEntity discount,
+            Long bucketCodeLoadId) {
+        this.code = code;
+        this.discount = discount;
+        this.bucketCodeLoadId = bucketCodeLoadId;
+    }
+
 }

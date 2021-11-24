@@ -1,18 +1,17 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
+import java.time.LocalDate;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 
 @RunWith(SpringRunner.class)
 public class UpdateDiscountConverterTest {
-
 
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
@@ -30,7 +29,7 @@ public class UpdateDiscountConverterTest {
 
     @Test
     public void Convert_ConvertDiscountWithLandingPageDiscountTypeDTOToEntity_Ok() {
-        UpdateDiscount dto = createSampleDiscountWithLandingPage(URL,REFERRER);
+        UpdateDiscount dto = createSampleDiscountWithLandingPage(URL, REFERRER);
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(dto);
 
         checkCommonCreateDiscountAssertions(dto, discountEntity);
@@ -38,20 +37,20 @@ public class UpdateDiscountConverterTest {
         Assert.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
     }
 
-    private UpdateDiscount createSampleDiscountWithStaticCode(String staticCode){
+    private UpdateDiscount createSampleDiscountWithStaticCode(String staticCode) {
         UpdateDiscount dto = createSampleCommonDiscount();
         dto.setStaticCode(staticCode);
         return dto;
     }
 
-    private UpdateDiscount createSampleDiscountWithLandingPage(String url, String referrer){
+    private UpdateDiscount createSampleDiscountWithLandingPage(String url, String referrer) {
         UpdateDiscount dto = createSampleCommonDiscount();
         dto.setLandingPageUrl(url);
         dto.setLandingPageReferrer(referrer);
         return dto;
     }
 
-    private UpdateDiscount createSampleCommonDiscount(){
+    private UpdateDiscount createSampleCommonDiscount() {
         UpdateDiscount dto = new UpdateDiscount();
         dto.setName("Discount");
         dto.setStartDate(LocalDate.now());
@@ -60,8 +59,6 @@ public class UpdateDiscountConverterTest {
         dto.setDescription("A discount");
         return dto;
     }
-
-
 
     private void checkCommonCreateDiscountAssertions(UpdateDiscount dto, DiscountEntity discountEntity) {
         Assert.assertEquals(dto.getName(), discountEntity.getName());

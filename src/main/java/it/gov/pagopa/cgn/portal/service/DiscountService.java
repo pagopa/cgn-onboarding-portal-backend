@@ -1,32 +1,31 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
-import it.gov.pagopa.cgn.portal.util.ValidationUtils;
-
-import org.codehaus.plexus.util.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import javax.transaction.Transactional;
-import javax.validation.ValidatorFactory;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+import javax.validation.ValidatorFactory;
+
+import org.codehaus.plexus.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 
 @Service
 public class DiscountService {
@@ -39,14 +38,19 @@ public class DiscountService {
     private final EmailNotificationFacade emailNotificationFacade;
     private final DocumentService documentService;
     private final ValidatorFactory factory;
+    private final BucketService bucketService;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
-        validateDiscount(agreementId, discountEntity);
-        return discountRepository.save(discountEntity);
+        ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity);
+        DiscountEntity toReturn = discountRepository.save(discountEntity);
+        if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
+            bucketService.createPendingBucketLoad(toReturn);
+        }
+        return toReturn;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -151,15 +155,16 @@ public class DiscountService {
     }
 
     @Autowired
-    public DiscountService(AgreementServiceLight agreementServiceLight, DiscountRepository discountRepository,
+    public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
             ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-            DocumentService documentService, ValidatorFactory factory) {
+            DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
         this.emailNotificationFacade = emailNotificationFacade;
         this.documentService = documentService;
         this.factory = factory;
+        this.bucketService = bucketService;
     }
 
     private DiscountEntity findById(Long discountId) {
@@ -173,7 +178,7 @@ public class DiscountService {
         }
     }
 
-    private void validateDiscount(String agreementId, DiscountEntity discountEntity) {
+    private ProfileEntity validateDiscount(String agreementId, DiscountEntity discountEntity) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
 
@@ -190,25 +195,34 @@ public class DiscountService {
                     "Discount cannot have empty landing page values for a profile with discount code type landingpage");
         }
 
+        // if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
+        // &&
+        // (!bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid())
+        // || StringUtils.isBlank(discountEntity.getLastBucketCodeFileUid()))) {
+        // throw new InvalidRequestException(
+        // "Discount cannot reference to empty or not existing bucket file for a profile
+        // with discount code type bucket");
+        // }
+
         // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.removeAllBucketCodes();
+            discountEntity.setLastBucketCodeFileUid(null);
         }
 
         // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.removeAllBucketCodes();
+            discountEntity.setLastBucketCodeFileUid(null);
         }
 
         // If profile use LANDINGPAGE, static code will not used
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
-            discountEntity.removeAllBucketCodes();
+            discountEntity.setLastBucketCodeFileUid(null);
         }
 
         // If profile use BUCKET, others will not used
@@ -219,6 +233,7 @@ public class DiscountService {
         }
 
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
+        return profileEntity;
     }
 
     private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
@@ -259,9 +274,6 @@ public class DiscountService {
         }
     };
 
-    private final BiConsumer<DiscountEntity, List<DiscountBucketCodeEntity>> updateBucketCodes = (discountEntity,
-            discountBucketCodes) -> discountEntity.addDiscountBucketCodeList(discountBucketCodes);
-
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
         dbEntity.setDescription(toUpdateEntity.getDescription());
@@ -273,7 +285,7 @@ public class DiscountService {
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
-        updateBucketCodes.accept(dbEntity, toUpdateEntity.getBucketCodes());
+        dbEntity.setLastBucketCodeFileUid(toUpdateEntity.getLastBucketCodeFileUid());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
