@@ -195,14 +195,12 @@ public class DiscountService {
                     "Discount cannot have empty landing page values for a profile with discount code type landingpage");
         }
 
-        // if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
-        // &&
-        // (!bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid())
-        // || StringUtils.isBlank(discountEntity.getLastBucketCodeFileUid()))) {
-        // throw new InvalidRequestException(
-        // "Discount cannot reference to empty or not existing bucket file for a profile
-        // with discount code type bucket");
-        // }
+        if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
+                && (StringUtils.isBlank(discountEntity.getLastBucketCodeFileUid())
+                        || !bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid()))) {
+            throw new InvalidRequestException(
+                    "Discount cannot reference to empty or not existing bucket file for a profile with discount code type bucket");
+        }
 
         // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {

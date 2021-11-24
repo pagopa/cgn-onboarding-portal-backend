@@ -1,32 +1,39 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 
@@ -47,14 +54,31 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     @Autowired
     private AddressRepository addressRepository;
 
+    @Autowired
+    private ConfigProperties configProperties;
+
+    @Autowired
+    private AzureStorage azureStorage;
+
     private AgreementEntity agreementEntity;
 
+    private MockMultipartFile multipartFile;
+
     @BeforeEach
-    void init() {
+    void init() throws IOException {
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
+        multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
+
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()
+                .connectionString(getAzureConnectionString())
+                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+        if (!documentContainerClient.exists()) {
+            documentContainerClient.create();
+        }
     }
 
     void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
@@ -124,10 +148,12 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateDiscountWithBucketCodes_Ok() {
+    void Create_CreateDiscountWithBucketCodes_Ok() throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -143,11 +169,14 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateDiscountWithBulkBucketCodes_Ok() {
+    void Create_CreateDiscountWithBulkBucketCodes_Ok() throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
@@ -410,18 +439,21 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_UpdateDiscountWithBucketCodesWithValidDataWithoutNewBucketLoad_Ok() {
+    void Update_UpdateDiscountWithBucketCodesWithValidDataWithoutNewBucketLoad_Ok() throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
-
-        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDescription("updated_description");
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
+        updatedDiscount.setLastBucketCodeFileUid(discountEntity.getLastBucketCodeFileUid());
+        updatedDiscount.setStaticCode(null);
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);

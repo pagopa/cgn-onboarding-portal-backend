@@ -5,6 +5,7 @@ import java.util.UUID;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import lombok.Data;
@@ -36,6 +37,7 @@ public class BucketCodeLoadEntity extends BaseEntity {
     @NotNull
     @NotBlank
     @Column(name = "uid")
+    @Size(max = 255)
     private String uid = UUID.randomUUID().toString();
 
     @Exclude
