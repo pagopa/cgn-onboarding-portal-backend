@@ -1,18 +1,22 @@
 package it.gov.pagopa.cgn.portal.service;
 
-
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -21,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
@@ -28,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -40,21 +44,29 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     @Autowired
     private ConfigProperties configProperties;
 
+    @Autowired
+    private AddressRepository addressRepository;
+
+    @Autowired
+    private TestReferentRepository testReferentRepository;
+
     private BlobContainerClient documentContainerClient;
 
     private AgreementEntity agreementEntity;
 
-    @BeforeEach
-    void init() {
+    private MockMultipartFile multipartFile;
 
-        documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName())
-                .buildClient();
+    @BeforeEach
+    void init() throws IOException {
+
+        documentContainerClient = new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
+                .containerName(configProperties.getDocumentsContainerName()).buildClient();
 
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
+        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
+        multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
@@ -64,27 +76,72 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
     }
 
+    private void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setDiscountCodeType(discountType);
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+    }
 
     @Test
     void Upload_UploadDocumentWithValidData_Ok() throws IOException {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
-        DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
+        DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(),
+                DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
 
         Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
         Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
 
-        BlobClient client = documentContainerClient.getBlobClient(agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
+        BlobClient client = documentContainerClient.getBlobClient(
+                agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
 
         Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
+    }
+
+    @Test
+    void Upload_UploadBucketWithValidData_Ok() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        byte[] content = multipartFile.getInputStream().readAllBytes();
+        String bucketUID = documentService.storeBucket(agreementEntity.getId(), multipartFile.getInputStream(),
+                multipartFile.getSize());
+
+        Assertions.assertNotNull(bucketUID);
+
+        BlobClient client = documentContainerClient.getBlobClient(bucketUID + ".csv");
+
+        Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
+    }
+
+    @Test
+    void Upload_UploadBucketWithInvalidData_Ko() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        byte[] content = "".getBytes(StandardCharsets.UTF_8);
+        Assertions.assertThrows(InvalidRequestException.class, () -> documentService
+                .storeBucket(agreementEntity.getId(), new ByteArrayInputStream(content), content.length));
+
+    }
+
+    @Test
+    void Upload_UploadBucketWithInvalidCodesData_Ko() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        byte[] content = "A".repeat(50).getBytes(StandardCharsets.UTF_8);
+        Assertions.assertThrows(InvalidRequestException.class, () -> documentService
+                .storeBucket(agreementEntity.getId(), new ByteArrayInputStream(content), content.length));
+
     }
 
     @Test
     void Delete_DeleteDocument_Ok() {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
-        documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
+        documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT,
+                new ByteArrayInputStream(content), content.length);
         long deleteDocument = documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
         Assertions.assertEquals(1, deleteDocument);
         List<DocumentEntity> documents = documentService.getPrioritizedDocuments(agreementEntity.getId());
@@ -94,14 +151,14 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Delete_DeleteDocumentNotFound_Return0DocumentDeleted() {
-        Assertions.assertEquals(0, documentService.deleteDocument(
-                agreementEntity.getId(), DocumentTypeEnum.AGREEMENT));
+        Assertions.assertEquals(0, documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT));
 
     }
 
     @Test
     void Get_GenerateAgreementDocument_Ok() throws Exception {
-        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT).toByteArray());
+        PDDocument document = PDDocument.load(
+                documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -113,11 +170,11 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
     }
 
-
     @Test
     void Get_GenerateAdhesionRequestDocument_Ok() throws IOException {
 
-        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -143,7 +200,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);

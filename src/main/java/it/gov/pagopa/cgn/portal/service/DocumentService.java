@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,10 +13,13 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,13 +106,27 @@ public class DocumentService {
             throw new InvalidRequestException("Cannot load bucket for Discount Code type not equals to BUCKET");
         }
         try {
-            if (CsvUtils.getCsvRecordStream(inputStream)
-                    .anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_SIZE)) {
-                throw new InvalidRequestException("Cannot load bucket because one or more codes do not respect "
-                        + MAX_ALLOWED_BUCKET_CODE_SIZE + " code size");
+            byte[] content = inputStream.readAllBytes();
+            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+                if (content.length == 0
+                        || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_SIZE
+                                || StringUtils.isBlank(line.get(0)))) {
+                    throw new InvalidRequestException(
+                            "Cannot load bucket because of empty file or one or more codes do not respect "
+                                    + MAX_ALLOWED_BUCKET_CODE_SIZE + " code size");
+                }
+            } catch (IOException e) {
+                throw new CGNException(e.getMessage());
             }
+
             String bucketLoadUID = UUID.randomUUID().toString();
-            azureStorage.uploadCsv(inputStream, bucketLoadUID, size);
+            try (ByteArrayInputStream in = new ByteArrayInputStream(content)) {
+                azureStorage.uploadCsv(in, bucketLoadUID, size);
+            } catch (IOException e) {
+                throw new CGNException(e.getMessage());
+            }
+
             return bucketLoadUID;
         } catch (IOException e) {
             throw new CGNException(e.getMessage());
