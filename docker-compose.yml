@@ -4,26 +4,28 @@ services:
   app:
     image: 'cgn-onboarding-portal-backend:latest'
     cpus: 1.0
-    mem_limit: "1g"
+    mem_limit: "3g"
     build:
       context: .
     container_name: app
     ports:
-    - 9090:9090
+      - 9090:9090
     depends_on:
       - db
       - azurite
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=5MB
+      - SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE=200MB
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
       - CGN_PE_STORAGE_AZURE_BLOB_ENDPOINT=http://azurite:10000/devstoreaccount1
-      - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication
+      - JAVA_OPTS=-XX:+UseG1GC -XX:MaxGCPauseMillis=100
+        -XX:+UseStringDeduplication
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host(`app.localhost`) || PathPrefix(`/app`)"
+      - "traefik.http.routers.app.rule=Host(`app.localhost`) ||
+        PathPrefix(`/app`)"
       - "traefik.http.routers.app.entrypoints=web"
       # apply middleware to route
       - "traefik.http.routers.app.middlewares=testHeader,app-stripprefix"
@@ -31,7 +33,7 @@ services:
       - "traefik.http.services.app.loadbalancer.server.port=9090"
     networks:
       - pe-net
-  
+
   traefik:
     image: traefik:v2.0
     command: |-
@@ -46,7 +48,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-cgn-user-role=ROLE_MERCHANT"
+      - "traefik.http.middlewares.testHeader.headers.customrequestheaders.x-cgn\
+        -user-role=ROLE_MERCHANT"
       - "traefik.http.middlewares.app-stripprefix.stripprefix.prefixes=/app"
 
   db:
@@ -71,12 +74,12 @@ services:
       - pe-net
 
   fixtures:
-    build: 
+    build:
       context: ./docker/fixtures
       dockerfile: Dockerfile
-    env_file: 
+    env_file:
       - docker/fixtures/fixtures.env
-    depends_on: 
+    depends_on:
       - azurite
     networks:
       - pe-net

@@ -18,6 +18,6 @@ public class CsvUtils {
     }
 
     public static Stream<CSVRecord> getCsvRecordStream(InputStream content) throws IOException {
-        return CSVFormat.EXCEL.parse(new InputStreamReader(content)).getRecords().parallelStream();
+        return CSVFormat.EXCEL.parse(new InputStreamReader(content)).stream();
     }
 }
