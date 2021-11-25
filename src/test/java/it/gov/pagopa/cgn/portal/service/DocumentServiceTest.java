@@ -122,8 +122,10 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         byte[] content = "".getBytes(StandardCharsets.UTF_8);
-        Assertions.assertThrows(InvalidRequestException.class, () -> documentService
-                .storeBucket(agreementEntity.getId(), new ByteArrayInputStream(content), content.length));
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> documentService.storeBucket(agreementId, in, content.length));
 
     }
 
@@ -133,8 +135,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         byte[] content = "A".repeat(50).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementEntity.getId(), in, content.length));
+                () -> documentService.storeBucket(agreementId, in, content.length));
 
     }
 
