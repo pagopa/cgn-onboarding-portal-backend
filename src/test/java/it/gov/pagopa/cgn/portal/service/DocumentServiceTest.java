@@ -31,6 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -131,8 +132,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         byte[] content = "A".repeat(50).getBytes(StandardCharsets.UTF_8);
-        Assertions.assertThrows(InvalidRequestException.class, () -> documentService
-                .storeBucket(agreementEntity.getId(), new ByteArrayInputStream(content), content.length));
+        InputStream in = new ByteArrayInputStream(content);
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> documentService.storeBucket(agreementEntity.getId(), in, content.length));
 
     }
 

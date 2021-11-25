@@ -10,6 +10,9 @@ import org.apache.commons.csv.CSVRecord;
 
 public class CsvUtils {
 
+    private CsvUtils() {
+    }
+
     public static long countCsvLines(InputStream content) throws IOException {
         return CSVFormat.EXCEL.parse(new InputStreamReader(content)).getRecordNumber();
     }

@@ -58,7 +58,7 @@ public class DocumentService {
     private final AzureStorage azureStorage;
     private final TemplateEngine templateEngine;
 
-    private static final int maxAllowedBucketCodeSize = 20;
+    private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
 
     public List<DocumentEntity> getPrioritizedDocuments(String agreementId) {
         return filterDocumentsByPriority(getAllDocuments(agreementId));
@@ -109,11 +109,12 @@ public class DocumentService {
             byte[] content = inputStream.readAllBytes();
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-                if (content.length == 0 || csvRecordStream.anyMatch(
-                        line -> line.get(0).length() > maxAllowedBucketCodeSize || StringUtils.isBlank(line.get(0)))) {
+                if (content.length == 0
+                        || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH
+                                || StringUtils.isBlank(line.get(0)))) {
                     throw new InvalidRequestException(
                             "Cannot load bucket because of empty file or one or more codes do not respect "
-                                    + maxAllowedBucketCodeSize + " code size");
+                                    + MAX_ALLOWED_BUCKET_CODE_LENGTH + " code size");
                 }
             } catch (IOException e) {
                 throw new CGNException(e.getMessage());
