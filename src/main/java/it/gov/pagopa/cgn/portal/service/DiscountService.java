@@ -44,7 +44,7 @@ public class DiscountService {
     private final BucketLoadUtils bucketLoadUtils;
 
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
-        CreateDiscountWrapper wrapper = this.performCreateDiscount(agreementId, discountEntity);
+        CreateDiscountWrapper wrapper = performCreateDiscount(agreementId, discountEntity);
         DiscountEntity toReturn = wrapper.getDiscountEntity();
         if (DiscountCodeTypeEnum.BUCKET.equals(wrapper.getProfileDiscountCodeType())) {
             bucketLoadUtils.storeCodesBucket(toReturn.getId());
