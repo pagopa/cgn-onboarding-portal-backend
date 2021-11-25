@@ -25,9 +25,8 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
-import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
-import it.gov.pagopa.cgn.portal.wrapper.CreateDiscountWrapper;
+import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 
 @Service
 public class DiscountService {
@@ -41,19 +40,9 @@ public class DiscountService {
     private final DocumentService documentService;
     private final ValidatorFactory factory;
     private final BucketService bucketService;
-    private final BucketLoadUtils bucketLoadUtils;
-
-    public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
-        CreateDiscountWrapper wrapper = performCreateDiscount(agreementId, discountEntity);
-        DiscountEntity toReturn = wrapper.getDiscountEntity();
-        if (DiscountCodeTypeEnum.BUCKET.equals(wrapper.getProfileDiscountCodeType())) {
-            bucketLoadUtils.storeCodesBucket(toReturn.getId());
-        }
-        return toReturn;
-    }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public CreateDiscountWrapper performCreateDiscount(String agreementId, DiscountEntity discountEntity) {
+    public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
@@ -62,7 +51,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             bucketService.createPendingBucketLoad(toReturn);
         }
-        return new CreateDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
+        return new CrudDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -81,12 +70,24 @@ public class DiscountService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public DiscountEntity updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
+    public CrudDiscountWrapper updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
         var agreementEntity = agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
+        DiscountCodeTypeEnum profileDiscountType = profileService.getProfile(agreementId)
+                .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"))
+                .getDiscountCodeType();
+
+        boolean isChangedBucketLoad = profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
+                && dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid());
+        if (profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
+                && !dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid())
+                && bucketService.isLastBucketLoadTerminated(discountId, dbEntity.getLastBucketCodeFileUid())) {
+            throw new InvalidRequestException(
+                    "Cannot update discount bucket while another bucket processing is running");
+        }
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity);
 
@@ -111,7 +112,7 @@ public class DiscountService {
             documentService.resetAllDocuments(agreementId);
         }
 
-        return discountRepository.save(dbEntity);
+        return new CrudDiscountWrapper(discountRepository.save(dbEntity), profileDiscountType, isChangedBucketLoad);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -169,8 +170,7 @@ public class DiscountService {
     @Autowired
     public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
             ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-            DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
-            BucketLoadUtils bucketLoadUtils) {
+            DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -178,7 +178,6 @@ public class DiscountService {
         this.documentService = documentService;
         this.factory = factory;
         this.bucketService = bucketService;
-        this.bucketLoadUtils = bucketLoadUtils;
     }
 
     private DiscountEntity findById(Long discountId) {

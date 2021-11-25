@@ -48,6 +48,11 @@ public class BucketService {
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
 
+    public boolean isLastBucketLoadTerminated(Long discountId, String bucketLoadUid) {
+        return List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED)
+                .contains(bucketCodeLoadRepository.findByDiscountIdAndUid(discountId, bucketLoadUid).getStatus());
+    }
+
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
