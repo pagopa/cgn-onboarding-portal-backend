@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal.util;
 
+import javax.transaction.Transactional;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 

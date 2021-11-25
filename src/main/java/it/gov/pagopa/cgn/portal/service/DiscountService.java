@@ -27,6 +27,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
+import it.gov.pagopa.cgn.portal.wrapper.CreateDiscountWrapper;
 
 @Service
 public class DiscountService {
@@ -42,8 +43,17 @@ public class DiscountService {
     private final BucketService bucketService;
     private final BucketLoadUtils bucketLoadUtils;
 
-    @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity createDiscount(String agreementId, DiscountEntity discountEntity) {
+        CreateDiscountWrapper wrapper = this.performCreateDiscount(agreementId, discountEntity);
+        DiscountEntity toReturn = wrapper.getDiscountEntity();
+        if (DiscountCodeTypeEnum.BUCKET.equals(wrapper.getProfileDiscountCodeType())) {
+            bucketLoadUtils.storeCodesBucket(toReturn.getId());
+        }
+        return toReturn;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public CreateDiscountWrapper performCreateDiscount(String agreementId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
@@ -51,9 +61,8 @@ public class DiscountService {
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             bucketService.createPendingBucketLoad(toReturn);
-            bucketLoadUtils.storeCodesBucket(toReturn.getId());
         }
-        return toReturn;
+        return new CreateDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
