@@ -214,6 +214,19 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void UploadBucket_UploadInvalidBucket_Ko() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        byte[] csv = "sample".getBytes();
+
+        MockMultipartFile multipartFile = new MockMultipartFile("document", "test-codes.pdf", "multipart/form-data",
+                csv);
+        createBlobDocument();
+        this.mockMvc.perform(multipart(TestUtils.getUploadBucketPath(agreementEntity.getId())).file(multipartFile))
+                .andDo(log()).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void UploadBucket_UploadValidBucket_Ok() throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, SalesChannelEnum.ONLINE,
