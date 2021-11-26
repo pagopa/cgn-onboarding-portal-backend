@@ -172,7 +172,6 @@ class BucketServiceTest extends IntegrationAbstractTest {
                 .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
-        Assertions.assertEquals(BucketCodeLoadStatusEnum.PENDING, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
     }
 

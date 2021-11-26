@@ -24,15 +24,23 @@ public class DocumentFacadeTest {
     private MultipartFile multipartFile;
 
     @Test
-    public void UploadDocument_UploadDocumentThrowCGNExceptionIfIOExceptionWasThrown_ThrowCGNException() throws IOException {
+    public void UploadDocument_UploadDocumentThrowCGNExceptionIfIOExceptionWasThrown_ThrowCGNException()
+            throws IOException {
         when(multipartFile.getInputStream()).thenThrow(new IOException());
         DocumentFacade documentFacade = new DocumentFacade(documentService, null, null);
         String documentTypeCode = DocumentTypeEnum.AGREEMENT.getCode();
-        Assert.assertThrows(CGNException.class, ()
-                -> documentFacade.uploadDocument("fake_agreement", documentTypeCode, multipartFile));
+        Assert.assertThrows(CGNException.class,
+                () -> documentFacade.uploadDocument("fake_agreement", documentTypeCode, multipartFile));
 
     }
 
+    @Test
+    public void UploadBucket_UploadBucketThrowCGNExceptionIfIOExceptionWasThrown_ThrowCGNException()
+            throws IOException {
+        when(multipartFile.getInputStream()).thenThrow(new IOException());
+        DocumentFacade documentFacade = new DocumentFacade(documentService, null, null);
+        Assert.assertThrows(CGNException.class, () -> documentFacade.uploadBucket("fake_agreement", multipartFile));
 
+    }
 
 }

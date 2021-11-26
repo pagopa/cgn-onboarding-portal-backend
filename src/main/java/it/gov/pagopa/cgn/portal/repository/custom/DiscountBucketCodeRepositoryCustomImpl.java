@@ -21,6 +21,7 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
     private JdbcTemplate template;
 
     @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void bulkPersist(List<DiscountBucketCodeEntity> entities) {
         template.batchUpdate(
                 "insert into discount_bucket_code (code, used, discount_fk, bucket_code_load_id) values (?, ?, ?, ?)",
