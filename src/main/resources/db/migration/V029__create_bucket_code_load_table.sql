@@ -7,7 +7,7 @@ CREATE TABLE bucket_code_load
     bucket_code_load_k    BIGSERIAL    NOT NULL,
     discount_id           BIGINT       NOT NULL,
     status                VARCHAR(50)  NOT NULL,
-    uid                   VARCHAR(255) NOT NULL,
+    uid                   VARCHAR(255) NOT NULL UNIQUE,
     number_of_codes       BIGINT               ,
     insert_time             TIMESTAMPTZ          NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time             TIMESTAMPTZ,

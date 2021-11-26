@@ -3,12 +3,9 @@ package it.gov.pagopa.cgn.portal.filestorage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 
@@ -19,7 +16,6 @@ import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.sas.SasProtocol;
 
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -33,6 +29,7 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
 
 @Component
 public class AzureStorage {
@@ -86,7 +83,7 @@ public class AzureStorage {
 
     public void uploadCsv(InputStream content, String blobName, long size) {
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
-        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(content))) {
+        try (InputStream contentIs = content) {
             blobClient.upload(contentIs, size, true);
         } catch (IOException e) {
             throw new CGNException(e);
@@ -95,9 +92,7 @@ public class AzureStorage {
 
     public Stream<CSVRecord> readCsvDocument(String blobName) throws IOException {
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
-        InputStream contentStream = blobClient.downloadContent().toStream();
-        Reader in = new InputStreamReader(contentStream);
-        return StreamSupport.stream(CSVFormat.EXCEL.parse(in).spliterator(), true);
+        return CsvUtils.getCsvRecordStream(blobClient.openInputStream());
     }
 
     public boolean existsDocument(String blobName) {
