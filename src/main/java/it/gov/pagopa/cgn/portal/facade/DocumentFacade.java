@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
+import it.gov.pagopa.cgnonboardingportal.model.BucketLoad;
 import it.gov.pagopa.cgnonboardingportal.model.Document;
 import it.gov.pagopa.cgnonboardingportal.model.Documents;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +29,11 @@ public class DocumentFacade {
     private final AzureStorage azureStorage;
 
     public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
-        byte[] document = documentService.renderDocument(agreementId,
-                DocumentTypeEnum.fromValue(documentType.toUpperCase())
-        ).toByteArray();
+        byte[] document = documentService
+                .renderDocument(agreementId, DocumentTypeEnum.fromValue(documentType.toUpperCase())).toByteArray();
 
-        return ResponseEntity
-                .ok()
-                .contentLength(document.length)
-                .contentType(MediaType.APPLICATION_PDF)
-                .cacheControl(CacheControl.noCache().mustRevalidate())
-                .body(new ByteArrayResource(document));
+        return ResponseEntity.ok().contentLength(document.length).contentType(MediaType.APPLICATION_PDF)
+                .cacheControl(CacheControl.noCache().mustRevalidate()).body(new ByteArrayResource(document));
     }
 
     public ResponseEntity<Documents> getDocuments(String agreementId) {
@@ -47,18 +43,28 @@ public class DocumentFacade {
         return ResponseEntity.ok(documents);
     }
 
-
-    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document){
+    public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
         DocumentEntity documentEntity;
         try {
-            documentEntity = documentService.storeDocument(
-                    agreementId, DocumentTypeEnum.fromValue(documentType), document.getInputStream(),
-                    document.getSize());
+            documentEntity = documentService.storeDocument(agreementId, DocumentTypeEnum.fromValue(documentType),
+                    document.getInputStream(), document.getSize());
         } catch (IOException e) {
             throw new CGNException(e);
         }
         azureStorage.setSecureDocumentUrl(documentEntity);
         return ResponseEntity.ok(documentConverter.toDto(documentEntity));
+    }
+
+    public ResponseEntity<BucketLoad> uploadBucket(String agreementId, MultipartFile document) {
+        String bucketLoadUID;
+        try {
+            bucketLoadUID = documentService.storeBucket(agreementId, document.getInputStream(), document.getSize());
+        } catch (IOException e) {
+            throw new CGNException(e);
+        }
+        BucketLoad bucketLoad = new BucketLoad();
+        bucketLoad.setUid(bucketLoadUID);
+        return ResponseEntity.ok(bucketLoad);
     }
 
     public long deleteDocument(String agreementId, String documentType) {
@@ -67,14 +73,10 @@ public class DocumentFacade {
 
     @Autowired
     public DocumentFacade(DocumentService documentService, DocumentConverter documentConverter,
-                          AzureStorage azureStorage) {
+            AzureStorage azureStorage) {
         this.documentService = documentService;
         this.documentConverter = documentConverter;
         this.azureStorage = azureStorage;
     }
-
-
-
-
 
 }

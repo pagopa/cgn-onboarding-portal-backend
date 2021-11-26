@@ -21,7 +21,8 @@ import java.util.Iterator;
 
 public class CGNUtils {
 
-    private CGNUtils() {}
+    private CGNUtils() {
+    }
 
     public static LocalDate getDefaultAgreementEndDate() {
         return LocalDate.now().plusYears(1);
@@ -38,33 +39,34 @@ public class CGNUtils {
         boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight();
         if (!isValid) {
             throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION,
-                    "Image must be at least " + minWidth  + "x" + minHeight);
+                    "Image must be at least " + minWidth + "x" + minHeight);
         }
     }
 
     private static Dimension getImageDimensions(Object input) throws IOException {
 
-      try (ImageInputStream stream = ImageIO.createImageInputStream(input)) { // accepts File, InputStream, RandomAccessFile
-        if (stream != null) {
-          IIORegistry iioRegistry = IIORegistry.getDefaultInstance();
-          Iterator<ImageReaderSpi> iter = iioRegistry.getServiceProviders(ImageReaderSpi.class, true);
-          while (iter.hasNext()) {
-            ImageReaderSpi readerSpi = iter.next();
-            if (readerSpi.canDecodeInput(stream)) {
-              ImageReader reader = readerSpi.createReaderInstance();
-              try {
-                reader.setInput(stream);
-                int width = reader.getWidth(reader.getMinIndex());
-                int height = reader.getHeight(reader.getMinIndex());
-                return new Dimension(width, height);
-              } finally {
-                reader.dispose();
-              }
+        try (ImageInputStream stream = ImageIO.createImageInputStream(input)) { // accepts File, InputStream,
+                                                                                // RandomAccessFile
+            if (stream != null) {
+                IIORegistry iioRegistry = IIORegistry.getDefaultInstance();
+                Iterator<ImageReaderSpi> iter = iioRegistry.getServiceProviders(ImageReaderSpi.class, true);
+                while (iter.hasNext()) {
+                    ImageReaderSpi readerSpi = iter.next();
+                    if (readerSpi.canDecodeInput(stream)) {
+                        ImageReader reader = readerSpi.createReaderInstance();
+                        try {
+                            reader.setInput(stream);
+                            int width = reader.getWidth(reader.getMinIndex());
+                            int height = reader.getHeight(reader.getMinIndex());
+                            return new Dimension(width, height);
+                        } finally {
+                            reader.dispose();
+                        }
+                    }
+                }
             }
-          }
+            throw new IllegalArgumentException("Can't get dimensions for this image");
         }
-        throw new IllegalArgumentException("Can't get dimensions for this image");
-      }
     }
 
     public static void checkIfPdfFile(String fileName) {
@@ -73,9 +75,14 @@ public class CGNUtils {
         }
     }
 
+    public static void checkIfCsvFile(String fileName) {
+        if (fileName == null || !fileName.toLowerCase().endsWith("csv")) {
+            throw new InvalidRequestException("Invalid file extension. Upload a CSV document.");
+        }
+    }
+
     public static void checkIfImageFile(String fileName) {
-        if (fileName == null ||
-                !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
+        if (fileName == null || !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
             throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_IMAGE_TYPE);
         }
     }
@@ -93,7 +100,7 @@ public class CGNUtils {
         if (token.getPrincipal() instanceof JwtOperatorUser) {
             return (JwtOperatorUser) token.getPrincipal();
         }
-       throw new CGNException("Expected an operator token, but was of type " + token.getPrincipal());
+        throw new CGNException("Expected an operator token, but was of type " + token.getPrincipal());
     }
 
     public static JwtAdminUser getJwtAdminUser() {

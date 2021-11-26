@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Discount;
 import it.gov.pagopa.cgnonboardingportal.model.Discounts;
@@ -31,38 +30,37 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
     }
 
     protected Function<List<DiscountEntity>, Discounts> toDiscountsDto = discountEntities -> {
-        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities) ?
-                Collections.emptyList() : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
+        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities) ? Collections.emptyList()
+                : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
         Discounts discounts = new Discounts();
         discounts.setItems(discountList);
         return discounts;
     };
 
-    protected Function<DiscountEntity, Discount> toDto =
-            entity -> {
-                Discount dto = new Discount();
-                dto.setId(String.valueOf(entity.getId()));
-                dto.setName(entity.getName());
-                dto.setDescription(entity.getDescription());
-                dto.setDiscount(entity.getDiscountValue());
-                dto.setAgreementId(entity.getAgreement().getId());
-                dto.setCondition(entity.getCondition());
-                dto.setStartDate(entity.getStartDate());
-                dto.setEndDate(entity.getEndDate());
-                dto.setStaticCode(entity.getStaticCode());
-                dto.setVisibleOnEyca(entity.getVisibleOnEyca());
-                dto.setLandingPageUrl(entity.getLandingPageUrl());
-                dto.setLandingPageReferrer(entity.getLandingPageReferrer());
-                dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
-                dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
-                dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
-                dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
-                return dto;
-            };
+    protected Function<DiscountEntity, Discount> toDto = entity -> {
+        Discount dto = new Discount();
+        dto.setId(String.valueOf(entity.getId()));
+        dto.setName(entity.getName());
+        dto.setDescription(entity.getDescription());
+        dto.setDiscount(entity.getDiscountValue());
+        dto.setAgreementId(entity.getAgreement().getId());
+        dto.setCondition(entity.getCondition());
+        dto.setStartDate(entity.getStartDate());
+        dto.setEndDate(entity.getEndDate());
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setVisibleOnEyca(entity.getVisibleOnEyca());
+        dto.setLandingPageUrl(entity.getLandingPageUrl());
+        dto.setLandingPageReferrer(entity.getLandingPageReferrer());
+        dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
+        dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
+        dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
+        dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
+        dto.setLastBucketCodeFileUid(entity.getLastBucketCodeFileUid());
+        return dto;
+    };
 
-    protected Function<Discount, DiscountEntity> toEntity =
-            dto -> {
-                throw new UnsupportedOperationException("Not implemented yet");
-            };
+    protected Function<Discount, DiscountEntity> toEntity = dto -> {
+        throw new UnsupportedOperationException("Not implemented yet");
+    };
 
 }
