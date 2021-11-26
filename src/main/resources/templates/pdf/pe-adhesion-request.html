@@ -221,26 +221,21 @@
         <tr>
             <td>Beni/servizi
                 oggetto
-                dell’agevola
-                zione
+                dell’agevolazione
             </td>
             <td>Entità
                 sconto (%)
             </td>
             <td>Durata
-                dell’agevola
-                zione
+                dell’agevolazione
             </td>
             <td>Condizioni
                 aggiuntive
             </td>
-            <td>Codice
-                sconto
-                statico
+            <td><span th:text="${discount_mode}"></span>
             </td>
             <td>Categoria
-                merceologic
-                a
+                merceologica
             </td>
         </tr>
         </thead>
@@ -250,7 +245,7 @@
             <td><span th:text="${discount.discountValue}"></span></td>
             <td><span th:text="${discount.validityPeriod}"></span></td>
             <td><span th:text="${discount.condition}"></span></td>
-            <td><span th:text="${discount.staticCode}"></span></td>
+            <td><span th:text="${discount.modeValue}"></span></td>
             <td><span th:text="${discount.categories}"></span></td>
         </tr>
         </tbody>
