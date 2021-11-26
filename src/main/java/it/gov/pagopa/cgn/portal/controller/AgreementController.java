@@ -97,6 +97,12 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<BucketLoad> uploadBucket(String agreementId, MultipartFile document) {
+        CGNUtils.checkIfCsvFile(document.getOriginalFilename());
+        return documentFacade.uploadBucket(agreementId, document);
+    }
+
+    @Override
     public ResponseEntity<Void> deleteDocument(String agreementId, String documentType) {
         documentFacade.deleteDocument(agreementId, documentType);
         return ResponseEntity.noContent().build();
@@ -125,17 +131,15 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<Void> sendHelpRequest(String agreementId, HelpRequest helpRequest) {
-        helpService.sendHelpMessage(agreementId, helpRequest.getCategory(), Optional.ofNullable(helpRequest.getTopic()), helpRequest.getMessage());
+        helpService.sendHelpMessage(agreementId, helpRequest.getCategory(), Optional.ofNullable(helpRequest.getTopic()),
+                helpRequest.getMessage());
         return ResponseEntity.noContent().build();
     }
 
     @Autowired
-    public AgreementController(AgreementFacade agreementFacade,
-                               DocumentFacade documentFacade,
-                               ProfileFacade profileFacade,
-                               DiscountFacade discountFacade,
-                               ApiTokenService apiTokenService,
-                               HelpService helpService) {
+    public AgreementController(AgreementFacade agreementFacade, DocumentFacade documentFacade,
+            ProfileFacade profileFacade, DiscountFacade discountFacade, ApiTokenService apiTokenService,
+            HelpService helpService) {
         this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
@@ -144,4 +148,3 @@ public class AgreementController implements AgreementsApi {
         this.helpService = helpService;
     }
 }
-

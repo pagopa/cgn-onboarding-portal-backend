@@ -18,7 +18,7 @@ public class ConfigProperties {
     @Value("${spring_cors_origin}")
     private String CORSOrigin;
 
-    //storage configs
+    // storage configs
     @Value("${cgn.pe.storage.azure.default-endpoints-protocol}")
     private String defaultEndpointsProtocol;
 
@@ -41,10 +41,8 @@ public class ConfigProperties {
     private Integer sasExpiryTimeHours;
 
     public String getAzureConnectionString() {
-        return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol +
-                ";AccountName=" + accountName +
-                ";AccountKey=" + accountKey +
-                ";BlobEndpoint=" + blobEndpoint + ";";
+        return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol + ";AccountName=" + accountName + ";AccountKey="
+                + accountKey + ";BlobEndpoint=" + blobEndpoint + ";";
 
     }
 
@@ -53,6 +51,9 @@ public class ConfigProperties {
 
     @Value("${cgn.image.minHeight}")
     private Integer minHeight;
+
+    @Value("${cgn.pe.discount.bucket.minCsvRows}")
+    private Integer bucketMinCsvRows;
 
     @Value("${cgn.email.notification-sender}")
     private String cgnNotificationSender;
@@ -89,7 +90,6 @@ public class ConfigProperties {
 
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
-
 
     @Value("${cgn.geolocation.secret-token}")
     private String geolocationToken;

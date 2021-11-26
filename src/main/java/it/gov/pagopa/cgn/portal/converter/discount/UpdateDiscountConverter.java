@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-
 import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import org.springframework.stereotype.Component;
@@ -20,27 +19,24 @@ public class UpdateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         return toEntity;
     }
 
+    protected Function<DiscountEntity, UpdateDiscount> toDto = entity -> {
+        throw new UnsupportedOperationException("Not implemented yet");
+    };
 
-    protected Function<DiscountEntity, UpdateDiscount> toDto =
-            entity -> {
-               throw new UnsupportedOperationException("Not implemented yet");
-            };
-
-
-    protected Function<UpdateDiscount, DiscountEntity> toEntity =
-            updateDiscountDTO -> {
-                DiscountEntity entity = new DiscountEntity();
-                entity.setDescription(updateDiscountDTO.getDescription());
-                entity.setName(updateDiscountDTO.getName());
-                entity.setStartDate(updateDiscountDTO.getStartDate());
-                entity.setEndDate(updateDiscountDTO.getEndDate());
-                entity.setDiscountValue(updateDiscountDTO.getDiscount());
-                entity.setStaticCode(updateDiscountDTO.getStaticCode());
-                entity.setLandingPageUrl(updateDiscountDTO.getLandingPageUrl());
-                entity.setLandingPageReferrer(updateDiscountDTO.getLandingPageReferrer());
-                entity.setCondition(updateDiscountDTO.getCondition());
-                entity.setProducts(toEntityDiscountProduct.apply(updateDiscountDTO.getProductCategories(), entity));
-                return entity;
-            };
+    protected Function<UpdateDiscount, DiscountEntity> toEntity = updateDiscountDTO -> {
+        DiscountEntity entity = new DiscountEntity();
+        entity.setDescription(updateDiscountDTO.getDescription());
+        entity.setName(updateDiscountDTO.getName());
+        entity.setStartDate(updateDiscountDTO.getStartDate());
+        entity.setEndDate(updateDiscountDTO.getEndDate());
+        entity.setDiscountValue(updateDiscountDTO.getDiscount());
+        entity.setStaticCode(updateDiscountDTO.getStaticCode());
+        entity.setLandingPageUrl(updateDiscountDTO.getLandingPageUrl());
+        entity.setLandingPageReferrer(updateDiscountDTO.getLandingPageReferrer());
+        entity.setCondition(updateDiscountDTO.getCondition());
+        entity.setProducts(toEntityDiscountProduct.apply(updateDiscountDTO.getProductCategories(), entity));
+        entity.setLastBucketCodeFileUid(updateDiscountDTO.getLastBucketCodeFileUid());
+        return entity;
+    };
 
 }
