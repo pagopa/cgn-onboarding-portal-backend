@@ -9,7 +9,9 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -52,6 +54,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     @Autowired
     private TestReferentRepository testReferentRepository;
 
+    @Autowired
+    private AzureStorage azureStorage;
+
     private BlobContainerClient documentContainerClient;
 
     private AgreementEntity agreementEntity;
@@ -77,6 +82,16 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 0);
+    }
+
+    void setProfileSalesChannel(SalesChannelEnum salesChannel) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setSalesChannel(salesChannel);
+        // to avoid LazyInitializationException
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
 
     private void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
@@ -185,24 +200,13 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
-
-        Assertions.assertTrue(actual.contains("Allegato 1"));
-        Assertions.assertTrue(actual.contains("DOMANDA DI"));
-        Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
-        Assertions.assertTrue(actual.contains("FULL_NAME"));
-        Assertions.assertTrue(actual.contains("address@pagopa.it"));
-        Assertions.assertTrue(actual.contains("A Description"));
-        Assertions.assertTrue(actual.contains("15%"));
-        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription()));
-        Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
-        Assertions.assertTrue(actual.contains("CEO"));
-        Assertions.assertTrue(actual.contains("Tel: +390123456789"));
-        Assertions.assertTrue(actual.contains("referent.registry@pagopa.it"));
+        GenerateAdhesionRequestAssertions(actual);
 
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Offline_Ok() throws IOException {
+        setProfileSalesChannel(SalesChannelEnum.OFFLINE);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
@@ -212,7 +216,78 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
+        GenerateAdhesionRequestAssertions(actual);
 
+    }
+
+    @Test
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_StaticCode_Ok() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setDiscountValue(null);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String actual = stripper.getText(document);
+        GenerateAdhesionRequestAssertions(actual);
+
+    }
+
+    @Test
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_API_Ok() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.API);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setDiscountValue(null);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String actual = stripper.getText(document);
+        GenerateAdhesionRequestAssertions(actual);
+
+    }
+
+    @Test
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_LandingPage_Ok() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, "anurl.com", "areferrer");
+        discountEntity.setDiscountValue(null);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String actual = stripper.getText(document);
+        GenerateAdhesionRequestAssertions(actual);
+
+    }
+
+    @Test
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Bucket_Ok() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
+
+        discountEntity.setDiscountValue(null);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        PDDocument document = PDDocument.load(documentService
+                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+
+        PDFTextStripper stripper = new PDFTextStripper();
+        String actual = stripper.getText(document);
+        GenerateAdhesionRequestAssertions(actual);
+
+    }
+
+    private void GenerateAdhesionRequestAssertions(String actual) {
         Assertions.assertTrue(actual.contains("Allegato 1"));
         Assertions.assertTrue(actual.contains("DOMANDA DI"));
         Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
@@ -225,6 +300,5 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("CEO"));
         Assertions.assertTrue(actual.contains("Tel: +390123456789"));
         Assertions.assertTrue(actual.contains("referent.registry@pagopa.it"));
-
     }
 }
