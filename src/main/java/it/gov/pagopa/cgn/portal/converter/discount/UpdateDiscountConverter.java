@@ -36,6 +36,7 @@ public class UpdateDiscountConverter extends CommonDiscountConverter<DiscountEnt
                 entity.setEndDate(updateDiscountDTO.getEndDate());
                 entity.setDiscountValue(updateDiscountDTO.getDiscount());
                 entity.setStaticCode(updateDiscountDTO.getStaticCode());
+                entity.setVisibleOnEyca(updateDiscountDTO.getVisibleOnEyca());
                 entity.setLandingPageUrl(updateDiscountDTO.getLandingPageUrl());
                 entity.setLandingPageReferrer(updateDiscountDTO.getLandingPageReferrer());
                 entity.setCondition(updateDiscountDTO.getCondition());
