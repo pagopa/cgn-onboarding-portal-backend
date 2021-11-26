@@ -82,6 +82,7 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "landing_page_referrer", length = 100)
     private String landingPageReferrer;
 
+    @NotNull
     @Column(name = "visible_on_eyca")
     private Boolean visibleOnEyca = false;
 
