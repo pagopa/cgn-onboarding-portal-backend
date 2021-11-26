@@ -217,7 +217,8 @@ public class DocumentService {
         context.setVariable("legal_office", profileEntity.getLegalOffice());
         context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
         context.setVariable("pec_address", profileEntity.getPecAddress());
-        context.setVariable("department_reference_email", "......"); // TODO add department reference email
+        context.setVariable("department_reference_email", "cartagiovaninazionale@governo.it");
+        context.setVariable("department_pec_address", "giovanieserviziocivile@pec.governo.it");
         context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         String renderedContent = templateEngine.process("pdf/pe-agreement.html", context);
