@@ -900,6 +900,9 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      visibleOnEyca:
+        type: boolean
+        default: false
       landingPageUrl:
         type: string
         maxLength: 500
@@ -948,6 +951,9 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      visibleOnEyca:
+        type: boolean
+        default: false
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1013,6 +1019,9 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      visibleOnEyca:
+        type: boolean
+        default: false
       creationDate:
         type: string
         format: date

@@ -32,6 +32,7 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setEndDate(createDiscountDTO.getEndDate());
         entity.setDiscountValue(createDiscountDTO.getDiscount());
         entity.setStaticCode(createDiscountDTO.getStaticCode());
+        entity.setVisibleOnEyca(createDiscountDTO.getVisibleOnEyca());
         entity.setLandingPageUrl(createDiscountDTO.getLandingPageUrl());
         entity.setLandingPageReferrer(createDiscountDTO.getLandingPageReferrer());
         entity.setCondition(createDiscountDTO.getCondition());

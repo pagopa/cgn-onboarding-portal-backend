@@ -82,6 +82,10 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "landing_page_referrer", length = 100)
     private String landingPageReferrer;
 
+    @NotNull
+    @Column(name = "visible_on_eyca")
+    private Boolean visibleOnEyca = false;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "agreement_fk", updatable = false, nullable = false, unique = true)
     private AgreementEntity agreement;
