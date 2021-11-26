@@ -109,12 +109,15 @@ public class DocumentService {
         }
         try {
             byte[] content = inputStream.readAllBytes();
+            if (countCsvRecord(content) < configProperties.getBucketMinCsvRows()) {
+                throw new InvalidRequestException(
+                        "Cannot load bucket because number of rows does not respect minimum bound");
+            }
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
                 if (content.length == 0
                         || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH
-                                || StringUtils.isBlank(line.get(0)))
-                        || csvRecordStream.count() < configProperties.getBucketMinCsvRows()) {
+                                || StringUtils.isBlank(line.get(0)))) {
                     throw new InvalidRequestException(
                             "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect "
                                     + MAX_ALLOWED_BUCKET_CODE_LENGTH + " code size");
@@ -134,6 +137,16 @@ public class DocumentService {
         } catch (IOException e) {
             throw new CGNException(e.getMessage());
         }
+    }
+
+    private long countCsvRecord(byte[] content) {
+        long recordCount = 0;
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            recordCount = CsvUtils.countCsvLines(contentIs);
+        } catch (IOException e) {
+            throw new CGNException(e.getMessage());
+        }
+        return recordCount;
     }
 
     @Transactional

@@ -27,6 +27,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -59,6 +60,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @BeforeEach
     void beforeEach() {
         setOperatorAuth();
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 0);
     }
 
     @Test

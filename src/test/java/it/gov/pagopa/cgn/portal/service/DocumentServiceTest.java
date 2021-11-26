@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.ByteArrayInputStream;
@@ -75,6 +76,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 0);
     }
 
     private void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
