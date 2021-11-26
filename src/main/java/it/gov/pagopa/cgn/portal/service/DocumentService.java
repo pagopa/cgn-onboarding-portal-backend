@@ -258,7 +258,7 @@ public class DocumentService {
         } else {
             switch (profileEntity.getDiscountCodeType()) {
                 case STATIC:
-                    discountMode = "Codice code statico";
+                    discountMode = "Codice sconto statico";
                     break;
                 case API:
                     discountMode = "API";
