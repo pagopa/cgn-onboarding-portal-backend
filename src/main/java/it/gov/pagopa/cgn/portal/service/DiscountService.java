@@ -19,6 +19,7 @@ import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -85,7 +86,7 @@ public class DiscountService {
         if (profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
                 && !dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid())
                 && !bucketService.isLastBucketLoadTerminated(discountId, dbEntity.getLastBucketCodeFileUid())) {
-            throw new InvalidRequestException(
+            throw new ConflictErrorException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
         updateConsumer.accept(discountEntity, dbEntity);
@@ -248,6 +249,13 @@ public class DiscountService {
     }
 
     private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
+                .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
+
+        if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
+                && !bucketService.isLastBucketLoadTerminated(discount.getId(), discount.getLastBucketCodeFileUid())) {
+            throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
+        }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
         }

@@ -284,6 +284,8 @@ paths:
           $ref: '#/responses/Forbidden'
         404:
           $ref: '#/responses/NotFound'
+        409:
+          $ref: '#/responses/Conflict'
 
     delete:
       tags:

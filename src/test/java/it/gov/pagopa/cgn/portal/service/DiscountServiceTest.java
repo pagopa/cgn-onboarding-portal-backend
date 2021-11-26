@@ -23,12 +23,15 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
+import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -483,6 +486,36 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Update_UpdateDiscountWithBucketCodesWithNewBucketLoadInProcessing_Ko() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        updatedDiscount.setName("updated_name");
+        updatedDiscount.setDescription("updated_description");
+        updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
+        updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
+        updatedDiscount.setDiscountValue(40);
+        updatedDiscount.setStaticCode(null);
+        DiscountProductEntity productEntity = new DiscountProductEntity();
+        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setDiscount(updatedDiscount);
+        updatedDiscount.addProductList(Collections.singletonList(productEntity));
+        updatedDiscount.setCondition("update_condition");
+        String agreementId = agreementEntity.getId();
+        Long discountId = discountEntity.getId();
+        BucketCodeLoadEntity bucketCodeLoad = bucketCodeLoadRepository.findByDiscountIdAndUid(discountId,
+                discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoad.setStatus(BucketCodeLoadStatusEnum.PENDING);
+        bucketCodeLoadRepository.saveAndFlush(bucketCodeLoad);
+        Assertions.assertThrows(ConflictErrorException.class,
+                () -> discountService.updateDiscount(agreementId, discountId, updatedDiscount));
+    }
+
+    @Test
     void Update_UpdateDiscountWithInvalidAgreementId_ThrowInvalidRequestException() {
         setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
@@ -686,6 +719,31 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.findById(agreementId);
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertNotNull(agreementEntity.getFirstDiscountPublishingDate());
+
+    }
+
+    @Test
+    void Publish_PublishDiscountWithBucketInProcessing_Ko() throws IOException {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        final String agreementId = agreementEntity.getId();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        discountEntity.setStartDate(LocalDate.now().plusDays(2));
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+                multipartFile.getSize());
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementId);
+        approveAgreement(); // simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+        // publish discount
+        final Long dbDiscountId = dbDiscount.getId();
+        BucketCodeLoadEntity bucketCodeLoad = bucketCodeLoadRepository.findByDiscountIdAndUid(dbDiscountId,
+                discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoad.setStatus(BucketCodeLoadStatusEnum.PENDING);
+        bucketCodeLoadRepository.saveAndFlush(bucketCodeLoad);
+        Assertions.assertThrows(ConflictErrorException.class,
+                () -> discountService.publishDiscount(agreementId, dbDiscountId));
 
     }
 
