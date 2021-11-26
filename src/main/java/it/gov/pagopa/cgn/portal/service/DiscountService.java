@@ -84,7 +84,7 @@ public class DiscountService {
                 && dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid());
         if (profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
                 && !dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid())
-                && bucketService.isLastBucketLoadTerminated(discountId, dbEntity.getLastBucketCodeFileUid())) {
+                && !bucketService.isLastBucketLoadTerminated(discountId, dbEntity.getLastBucketCodeFileUid())) {
             throw new InvalidRequestException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
