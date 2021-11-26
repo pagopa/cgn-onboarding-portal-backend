@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import javax.validation.ValidatorFactory;
 
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -230,6 +231,11 @@ public class DiscountService {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
+        }
+
+        // If profile sales channel is OFFLINE, any discount is visible on eyca
+        if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
+            discountEntity.setVisibleOnEyca(true);
         }
 
         ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);

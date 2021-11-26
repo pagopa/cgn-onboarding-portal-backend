@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import it.gov.pagopa.cgn.portal.enums.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,6 @@ import org.springframework.util.CollectionUtils;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -56,6 +53,15 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
+
+    void setProfileSalesChannel(SalesChannelEnum salesChannel){
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setSalesChannel(salesChannel);
+        // to avoid LazyInitializationException
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));    }
 
     void setProfileDiscountType(DiscountCodeTypeEnum discountType) {
         ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
@@ -111,6 +117,29 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                 STATIC_CODE);
         discountEntity.setVisibleOnEyca(true);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getStaticCode());
+        Assertions.assertEquals(STATIC_CODE, discountEntity.getStaticCode());
+        Assertions.assertNull(discountEntity.getLandingPageUrl());
+        Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertTrue(discountEntity.getVisibleOnEyca());
+    }
+
+    @Test
+    void Create_CreateDiscountWithStaticCode_OfflineSalesChannel_VisibleOnEyca_Ok() {
+        setProfileSalesChannel(SalesChannelEnum.OFFLINE);
+        setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                STATIC_CODE);
+        discountEntity.setVisibleOnEyca(false); // we set it to false, but validation will fix it to true
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
