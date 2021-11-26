@@ -45,6 +45,7 @@ import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import lombok.extern.slf4j.Slf4j;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 
 @Service
 @Slf4j
@@ -57,6 +58,7 @@ public class DocumentService {
     private final AgreementServiceLight agreementServiceLight;
     private final AzureStorage azureStorage;
     private final TemplateEngine templateEngine;
+    private final ConfigProperties configProperties;
 
     private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
 
@@ -111,9 +113,10 @@ public class DocumentService {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
                 if (content.length == 0
                         || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH
-                                || StringUtils.isBlank(line.get(0)))) {
+                                || StringUtils.isBlank(line.get(0)))
+                        || csvRecordStream.count() < configProperties.getBucketMinCsvRows()) {
                     throw new InvalidRequestException(
-                            "Cannot load bucket because of empty file or one or more codes do not respect "
+                            "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect "
                                     + MAX_ALLOWED_BUCKET_CODE_LENGTH + " code size");
                 }
             } catch (IOException e) {
@@ -277,14 +280,15 @@ public class DocumentService {
     }
 
     public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository,
-            DiscountRepository discountRepository, AzureStorage azureStorage, TemplateEngine templateEngine,
-            AgreementServiceLight agreementServiceLight) {
+            DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
+            AzureStorage azureStorage, TemplateEngine templateEngine, ConfigProperties configProperties) {
         this.documentRepository = documentRepository;
         this.profileRepository = profileRepository;
         this.discountRepository = discountRepository;
+        this.agreementServiceLight = agreementServiceLight;
         this.azureStorage = azureStorage;
         this.templateEngine = templateEngine;
-        this.agreementServiceLight = agreementServiceLight;
+        this.configProperties = configProperties;
     }
 
     private static class RenderableDiscount {
