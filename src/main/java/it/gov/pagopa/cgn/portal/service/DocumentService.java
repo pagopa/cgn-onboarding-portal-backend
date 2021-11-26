@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -84,7 +85,7 @@ public class DocumentService {
 
     @Transactional
     public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content,
-            long size) {
+                                        long size) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
         // Delete old document if exists
@@ -117,7 +118,7 @@ public class DocumentService {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
                 if (content.length == 0
                         || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH
-                                || StringUtils.isBlank(line.get(0)))) {
+                        || StringUtils.isBlank(line.get(0)))) {
                     throw new InvalidRequestException(
                             "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect "
                                     + MAX_ALLOWED_BUCKET_CODE_LENGTH + " code size");
@@ -180,7 +181,7 @@ public class DocumentService {
     }
 
     private DocumentEntity filterDocumentsByPriorityAndType(DocumentTypeEnum.Type typeEnum,
-            List<DocumentEntity> documentEntityList) {
+                                                            List<DocumentEntity> documentEntityList) {
         DocumentEntity toReturn = null;
         for (DocumentEntity documentEntity : documentEntityList) {
             if (typeEnum.equals(documentEntity.getDocumentType().getType())) {
@@ -196,12 +197,12 @@ public class DocumentService {
     @Transactional(readOnly = true)
     public ByteArrayOutputStream renderDocument(String agreementId, DocumentTypeEnum documentType) {
         switch (documentType) {
-        case AGREEMENT:
-            return renderAgreementDocument(agreementId);
-        case ADHESION_REQUEST:
-            return renderAdhesionRequestDocument(agreementId);
-        default:
-            throw new RuntimeException("Invalid document type: " + documentType);
+            case AGREEMENT:
+                return renderAgreementDocument(agreementId);
+            case ADHESION_REQUEST:
+                return renderAdhesionRequestDocument(agreementId);
+            default:
+                throw new RuntimeException("Invalid document type: " + documentType);
         }
     }
 
@@ -252,6 +253,27 @@ public class DocumentService {
         context.setVariable("merchant_website", profileEntity.getWebsiteUrl());
         context.setVariable("discounts", renderableDiscounts);
 
+        String discountMode = null;
+        if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
+            discountMode = "Negozio fisico";
+        } else {
+            switch (profileEntity.getDiscountCodeType()) {
+                case STATIC:
+                    discountMode = "Codice sconto statico";
+                    break;
+                case API:
+                    discountMode = "API";
+                    break;
+                case LANDINGPAGE:
+                    discountMode = "Landing page";
+                    break;
+                case BUCKET:
+                    discountMode = "Lista di codici sconto";
+                    break;
+            }
+        }
+        context.setVariable("discount_mode", discountMode);
+
         ReferentEntity referent = profileEntity.getReferent();
 
         context.setVariable("referent_fullname", referent.getFirstName() + " " + referent.getLastName());
@@ -294,8 +316,8 @@ public class DocumentService {
     }
 
     public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository,
-            DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
-            AzureStorage azureStorage, TemplateEngine templateEngine, ConfigProperties configProperties) {
+                           DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
+                           AzureStorage azureStorage, TemplateEngine templateEngine, ConfigProperties configProperties) {
         this.documentRepository = documentRepository;
         this.profileRepository = profileRepository;
         this.discountRepository = discountRepository;
@@ -310,7 +332,7 @@ public class DocumentService {
         public String validityPeriod;
         public String discountValue;
         public String condition;
-        public String staticCode;
+        public String modeValue;
         public String categories;
 
         public static RenderableDiscount fromEntity(DiscountEntity entity) {
@@ -323,7 +345,7 @@ public class DocumentService {
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();
             discount.discountValue = entity.getDiscountValue() != null ? "" + entity.getDiscountValue() + "% " : "";
             discount.condition = entity.getCondition();
-            discount.staticCode = entity.getStaticCode();
+            discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl()).filter(Objects::nonNull).findFirst().orElse("-");
             discount.categories = categories;
 
             return discount;
