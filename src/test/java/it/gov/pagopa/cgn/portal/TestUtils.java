@@ -260,6 +260,7 @@ public class TestUtils {
         discountEntity.setEndDate(LocalDate.now().plusMonths(6));
         discountEntity.setAgreement(agreement);
         discountEntity.setStaticCode("static_code");
+        discountEntity.setVisibleOnEyca(false);
         return discountEntity;
     }
 
