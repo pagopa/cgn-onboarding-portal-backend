@@ -207,7 +207,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 initTest(DiscountCodeTypeEnum.STATIC);
 
                 DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
-                discount = discountService.createDiscount(agreement.getId(), discount);
+                discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
 
                 UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discount);
                 updateDiscount.setName("new_name");
@@ -240,7 +240,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
                 DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url",
                                 "referrer");
-                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
+                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
                 UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
                 updateDiscount.setName("new_name");
@@ -279,7 +279,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
                 azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
                                 multipartFile.getSize());
-                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
+                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
                 UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
                 updateDiscount.setName("new_name");
@@ -326,7 +326,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         void Get_GetSuspendedDiscount_Found() throws Exception {
                 initTest(DiscountCodeTypeEnum.STATIC);
                 DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
-                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity);
+                discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
                 discountEntity.setState(DiscountStateEnum.SUSPENDED);
                 discountEntity.setSuspendedReasonMessage("A reason");
                 discountEntity = discountRepository.save(discountEntity);

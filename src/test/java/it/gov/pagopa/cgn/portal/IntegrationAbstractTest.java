@@ -172,7 +172,7 @@ public class IntegrationAbstractTest {
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setName(discountEntity.getName() + idx);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
@@ -199,7 +199,7 @@ public class IntegrationAbstractTest {
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setName(discountEntity.getName() + idx);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());

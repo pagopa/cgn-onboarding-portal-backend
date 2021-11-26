@@ -171,7 +171,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         profileService.createProfile(profileEntity, agreementEntity.getId());
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
@@ -192,7 +192,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         profileService.createProfile(profileEntity, agreementEntity.getId());
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
 
