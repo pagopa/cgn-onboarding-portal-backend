@@ -10,7 +10,7 @@
 
     <groupId>it.gov.pagopa</groupId>
     <artifactId>cgn-onboarding-portal-backend</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
 
     <properties>
         <java.version>11</java.version>
