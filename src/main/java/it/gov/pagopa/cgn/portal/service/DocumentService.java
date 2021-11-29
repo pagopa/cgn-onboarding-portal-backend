@@ -113,7 +113,7 @@ public class DocumentService {
             long csvRecordCount = countCsvRecord(content);
             if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
                 throw new InvalidRequestException(
-                        "Cannot load bucket because number of rows ("+csvRecordCount+") does not respect minimum bound ("+configProperties.getBucketMinCsvRows()+")");
+                        "Cannot load bucket because number of rows ("+csvRecordCount+") does not respect minimum bound ("+configProperties.getBucketMinCsvRows()+") on loaded content of length ("+content.length+")");
             }
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
