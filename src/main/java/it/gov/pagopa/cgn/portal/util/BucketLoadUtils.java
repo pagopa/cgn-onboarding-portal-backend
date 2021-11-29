@@ -6,7 +6,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import it.gov.pagopa.cgn.portal.service.BucketService;
-import org.springframework.util.backoff.BackOff;
 
 @Component
 public class BucketLoadUtils {
