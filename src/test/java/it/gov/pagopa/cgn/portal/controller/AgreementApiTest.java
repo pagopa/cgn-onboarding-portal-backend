@@ -2,23 +2,23 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.converter.discount.CreateDiscountConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
-import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
-import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
-import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
+import it.gov.pagopa.cgnonboardingportal.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,9 +27,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,6 +43,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 class AgreementApiTest extends IntegrationAbstractTest {
@@ -56,6 +62,15 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private ConfigProperties configProperties;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private CreateDiscountConverter createDiscountConverter;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @BeforeEach
     void beforeEach() {
@@ -162,6 +177,47 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
         this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId()))).andDo(log())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Transactional
+    @Test
+    void CreateDiscount_BucketLoading_WithRetry_Ok() throws Exception {
+        // create an agreement
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        // create a profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, SalesChannelEnum.ONLINE,
+                DiscountCodeTypeEnum.BUCKET);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        // upload a csv
+        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
+        MockMultipartFile multipartFile = new MockMultipartFile("document", "test-codes.csv", "multipart/form-data",
+                csv);
+        createBlobDocument();
+
+        // call api to upload csv
+        MvcResult result = this.mockMvc.perform(multipart(TestUtils.getUploadBucketPath(agreementEntity.getId())).file(multipartFile))
+                .andDo(log()).andExpect(status().isOk()).andReturn();
+
+        // get blob uid
+        BucketLoad bucketLoad = objectMapper.readValue(result.getResponse().getContentAsString(), BucketLoad.class);
+        var blobUid = bucketLoad.getUid();
+
+        // create a discount with bucket of codes
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setLastBucketCodeFileUid(blobUid);
+        CreateDiscount createDiscountDto = createDiscountConverter.toDto(discountEntity);
+
+        // call api to create a discount
+        this.mockMvc.perform(
+                        post(TestUtils.getDiscountPath(agreementEntity.getId()))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createDiscountDto)))
+                .andDo(log()).andExpect(status().isOk());
+
+        // we have to wait for all retries to complete
+        Thread.sleep(2000);
     }
 
     @Test
