@@ -55,13 +55,13 @@ public class BucketService {
 
     public boolean isLastBucketLoadTerminated(Long bucketLoadId) {
         return List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED)
-                .contains(bucketCodeLoadRepository.findById(bucketLoadId).get().getStatus());
+                .contains(bucketCodeLoadRepository.findById(bucketLoadId).orElseThrow().getStatus());
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
@@ -69,7 +69,7 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
             Spliterator<DiscountBucketCodeEntity> split = csvStream
