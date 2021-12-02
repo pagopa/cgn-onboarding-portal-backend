@@ -1,9 +1,7 @@
 package it.gov.pagopa.cgn.portal.util;
 
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
 import it.gov.pagopa.cgn.portal.service.BucketService;
 
 @Component

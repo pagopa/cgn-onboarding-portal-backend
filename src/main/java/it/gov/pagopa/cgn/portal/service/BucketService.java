@@ -81,9 +81,8 @@ public class BucketService {
 
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();
-                for (int i = 0; i < chunkSize && split.tryAdvance(bucketCodeListChunk::add); i++) {
-                }
-                ;
+                int i = 0;
+                while (i < chunkSize && split.tryAdvance(bucketCodeListChunk::add)) i++;
                 if (bucketCodeListChunk.isEmpty())
                     break;
                 discountBucketCodeRepository.bulkPersist(bucketCodeListChunk);

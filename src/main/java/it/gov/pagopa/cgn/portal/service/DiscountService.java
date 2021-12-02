@@ -196,7 +196,7 @@ public class DiscountService {
         }
     }
 
-    private ProfileEntity validateDiscount(String agreementId, DiscountEntity discountEntity, Boolean isBucketFileChanged) {
+    private ProfileEntity validateDiscount(String agreementId, DiscountEntity discountEntity, boolean isBucketFileChanged) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
 
