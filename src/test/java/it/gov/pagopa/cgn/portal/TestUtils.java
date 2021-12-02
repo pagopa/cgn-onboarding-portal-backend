@@ -240,6 +240,7 @@ public class TestUtils {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
         discountEntity.setLastBucketCodeFileUid(generateDiscountBucketCodeUid());
+        discountEntity.setLastBucketCodeFileName("filename.csv");
         return discountEntity;
     }
 

@@ -158,8 +158,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                                 .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                                 .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
                                 .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                                .andExpect(jsonPath("$.lastBucketCodeFileUid")
-                                                .value(discount.getLastBucketCodeFileUid()))
+                                .andExpect(jsonPath("$.lastBucketCodeFileUid").value(discount.getLastBucketCodeFileUid()))
+                                .andExpect(jsonPath("$.lastBucketCodeFileName").value(discount.getLastBucketCodeFileName()))
                                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
@@ -388,6 +388,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         private CreateDiscount createSampleCreateDiscountWithBucket() {
                 CreateDiscount discount = createSampleCreateDiscount();
                 discount.setLastBucketCodeFileUid(UUID.randomUUID().toString());
+                discount.setLastBucketCodeFileName("filename.csv");
                 return discount;
         }
 

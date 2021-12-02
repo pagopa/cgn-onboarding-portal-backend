@@ -99,6 +99,10 @@ public class DiscountEntity extends BaseEntity {
     @Size(max = 255)
     private String lastBucketCodeFileUid;
 
+    @Column(name = "last_bucket_code_file_name")
+    @Size(max = 255)
+    private String lastBucketCodeFileName;
+
     public void removeProduct(DiscountProductEntity productEntity) {
         this.products.remove(productEntity);
     }

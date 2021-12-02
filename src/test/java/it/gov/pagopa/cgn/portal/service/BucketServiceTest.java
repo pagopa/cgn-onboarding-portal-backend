@@ -91,6 +91,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
 
     }
 
@@ -110,6 +112,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
     }
 
     @Test
@@ -130,6 +134,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
+
     }
 
     @Test
@@ -151,6 +158,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
         Assertions.assertFalse(codes.isEmpty());
@@ -173,6 +182,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
+
     }
 
     @Test
@@ -183,6 +195,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
         bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
         bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoadEntity.setFileName(discountEntity.getLastBucketCodeFileName());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setNumberOfCodes(100L);
 
@@ -195,5 +208,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
         Assertions.assertEquals(bucketCodeLoadEntity.getNumberOfCodes(), inserted.getNumberOfCodes());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeFileName(), bucketCodeLoadEntity.getFileName());
+
     }
 }

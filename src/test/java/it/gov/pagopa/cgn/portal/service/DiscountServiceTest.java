@@ -230,6 +230,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNotNull(discountEntity.getLastBucketCodeFileUid());
+        Assertions.assertNotNull(discountEntity.getLastBucketCodeFileName());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -253,6 +254,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNotNull(discountEntity.getLastBucketCodeFileUid());
+        Assertions.assertNotNull(discountEntity.getLastBucketCodeFileName());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -524,6 +526,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
         updatedDiscount.setLastBucketCodeFileUid(discountEntity.getLastBucketCodeFileUid());
+        updatedDiscount.setLastBucketCodeFileName(discountEntity.getLastBucketCodeFileName());
         updatedDiscount.setStaticCode(null);
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
@@ -550,6 +553,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNull(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
         Assertions.assertNull(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
         Assertions.assertEquals(updatedDiscount.getLastBucketCodeFileUid(), dbDiscount.getLastBucketCodeFileUid());
+        Assertions.assertEquals(updatedDiscount.getLastBucketCodeFileName(), dbDiscount.getLastBucketCodeFileName());
     }
 
     @Test

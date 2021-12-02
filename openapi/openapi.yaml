@@ -912,6 +912,9 @@ definitions:
       lastBucketCodeFileUid:
         type: string
         maxLength: 255
+      lastBucketCodeFileName:
+        type: string
+        maxLength: 255
 
   UpdateDiscount:
     type: object
@@ -961,6 +964,9 @@ definitions:
         type: string
         maxLength: 100
       lastBucketCodeFileUid:
+        type: string
+        maxLength: 255
+      lastBucketCodeFileName:
         type: string
         maxLength: 255
 
@@ -1035,6 +1041,9 @@ definitions:
         type: string
         maxLength: 100
       lastBucketCodeFileUid:
+        type: string
+        maxLength: 255
+      lastBucketCodeFileName:
         type: string
         maxLength: 255
 

@@ -45,6 +45,7 @@ public class BucketService {
         bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoadEntity.setFileName(discountEntity.getLastBucketCodeFileName());
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
 
@@ -76,6 +77,7 @@ public class BucketService {
                             bucketCodeLoadEntity.getId()))
                     .spliterator();
             int chunkSize = 100000;
+            bucketCodeLoadEntity.setNumberOfCodes(split.getExactSizeIfKnown());
 
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();

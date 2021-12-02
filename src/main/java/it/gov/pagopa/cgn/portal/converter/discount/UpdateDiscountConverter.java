@@ -37,6 +37,7 @@ public class UpdateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setCondition(updateDiscountDTO.getCondition());
         entity.setProducts(toEntityDiscountProduct.apply(updateDiscountDTO.getProductCategories(), entity));
         entity.setLastBucketCodeFileUid(updateDiscountDTO.getLastBucketCodeFileUid());
+        entity.setLastBucketCodeFileName(updateDiscountDTO.getLastBucketCodeFileName());
         return entity;
     };
 

@@ -56,6 +56,7 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
         dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
         dto.setLastBucketCodeFileUid(entity.getLastBucketCodeFileUid());
+        dto.setLastBucketCodeFileName(entity.getLastBucketCodeFileName());
         return dto;
     };
 

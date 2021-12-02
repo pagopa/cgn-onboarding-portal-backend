@@ -39,6 +39,7 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setProducts(toEntityDiscountProduct.apply(createDiscountDTO.getProductCategories(), entity));
         entity.setState(DiscountStateEnum.DRAFT); // default state
         entity.setLastBucketCodeFileUid(createDiscountDTO.getLastBucketCodeFileUid());
+        entity.setLastBucketCodeFileName(createDiscountDTO.getLastBucketCodeFileName());
         return entity;
     };
 
