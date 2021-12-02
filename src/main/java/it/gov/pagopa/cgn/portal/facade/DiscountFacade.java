@@ -50,7 +50,7 @@ public class DiscountFacade {
     }
 
     public ResponseEntity<Discount> updateDiscount(String agreementId, String discountId,
-            UpdateDiscount updateDiscountDto) {
+                                                   UpdateDiscount updateDiscountDto) {
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(updateDiscountDto);
         CrudDiscountWrapper wrapper = discountService.updateDiscount(agreementId, Long.valueOf(discountId),
                 discountEntity);
@@ -71,8 +71,8 @@ public class DiscountFacade {
 
     @Autowired
     public DiscountFacade(DiscountService discountService, CreateDiscountConverter createDiscountConverter,
-            DiscountConverter discountConverter, UpdateDiscountConverter updateDiscountConverter,
-            BucketLoadUtils bucketLoadUtils) {
+                          DiscountConverter discountConverter, UpdateDiscountConverter updateDiscountConverter,
+                          BucketLoadUtils bucketLoadUtils) {
         this.discountService = discountService;
         this.createDiscountConverter = createDiscountConverter;
         this.discountConverter = discountConverter;

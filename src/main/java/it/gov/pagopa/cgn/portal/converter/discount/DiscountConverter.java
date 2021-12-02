@@ -55,8 +55,10 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
         dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
         dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
-        dto.setLastBucketCodeFileUid(entity.getLastBucketCodeFileUid());
-        dto.setLastBucketCodeFileName(entity.getLastBucketCodeFileName());
+        if (entity.getLastBucketCodeLoad() != null) {
+            dto.setLastBucketCodeFileUid(entity.getLastBucketCodeLoad().getUid());
+            dto.setLastBucketCodeFileName(entity.getLastBucketCodeLoad().getFileName());
+        }
         return dto;
     };
 

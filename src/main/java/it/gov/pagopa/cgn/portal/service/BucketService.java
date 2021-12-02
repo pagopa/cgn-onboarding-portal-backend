@@ -27,8 +27,8 @@ public class BucketService {
     private final AzureStorage azureStorage;
 
     public BucketService(DiscountBucketCodeRepository discountBucketCodeRepository,
-            BucketCodeLoadRepository bucketCodeLoadRepository, DiscountRepository discountRepository,
-            AzureStorage azureStorage) {
+                         BucketCodeLoadRepository bucketCodeLoadRepository, DiscountRepository discountRepository,
+                         AzureStorage azureStorage) {
         this.discountBucketCodeRepository = discountBucketCodeRepository;
         this.bucketCodeLoadRepository = bucketCodeLoadRepository;
         this.discountRepository = discountRepository;
@@ -40,26 +40,28 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void createPendingBucketLoad(DiscountEntity discountEntity) {
+    public DiscountEntity createPendingBucketLoad(DiscountEntity discount) {
         BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
-        bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
+        bucketCodeLoadEntity.setDiscountId(discount.getId());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
-        bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
-        bucketCodeLoadEntity.setFileName(discountEntity.getLastBucketCodeFileName());
+        bucketCodeLoadEntity.setUid(discount.getLastBucketCodeLoadUid());
+        bucketCodeLoadEntity.setFileName(discount.getLastBucketCodeLoadFileName());
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+        // attach BucketCodeLoad to Discount
+        discount.setLastBucketCodeLoad(bucketCodeLoadEntity);
+        discountRepository.save(discount);
+        return discount;
     }
 
-    public boolean isLastBucketLoadTerminated(Long discountId, String bucketLoadUid) {
+    public boolean isLastBucketLoadTerminated(Long bucketLoadId) {
         return List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED)
-                .contains(bucketCodeLoadRepository.findByDiscountIdAndUid(discountId, bucketLoadUid).getStatus());
+                .contains(bucketCodeLoadRepository.findById(bucketLoadId).get().getStatus());
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findByDiscountIdAndUid(discountId,
-                discountEntity.getLastBucketCodeFileUid());
-
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
         bucketCodeLoadRepository.save(bucketCodeLoadEntity);
     }
@@ -67,9 +69,7 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findByDiscountIdAndUid(discountId,
-                discountEntity.getLastBucketCodeFileUid());
-
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
             Spliterator<DiscountBucketCodeEntity> split = csvStream

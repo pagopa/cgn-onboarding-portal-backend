@@ -93,13 +93,13 @@ public class TestUtils {
     }
 
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
-            Sort.Direction direction) {
+                                                              Sort.Direction direction) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection="
                 + direction.name();
     }
 
     public static String getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum columnEnum,
-            Sort.Direction direction) {
+                                                              Sort.Direction direction) {
         return AGREEMENT_APPROVED_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection="
                 + direction.name();
     }
@@ -169,7 +169,7 @@ public class TestUtils {
     }
 
     public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity,
-            SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
+                                                          SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields(discountCodeType);
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(salesChannel);
@@ -219,7 +219,7 @@ public class TestUtils {
     }
 
     public static DiscountEntity createSampleDiscountEntityWithStaticCode(AgreementEntity agreement,
-            String staticCode) {
+                                                                          String staticCode) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(staticCode);
         discountEntity.setLandingPageUrl(null);
@@ -228,7 +228,7 @@ public class TestUtils {
     }
 
     public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement, String url,
-            String referrer) {
+                                                                           String referrer) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
         discountEntity.setLandingPageUrl(url);
@@ -239,9 +239,20 @@ public class TestUtils {
     public static DiscountEntity createSampleDiscountEntityWithBucketCodes(AgreementEntity agreement) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
-        discountEntity.setLastBucketCodeFileUid(generateDiscountBucketCodeUid());
-        discountEntity.setLastBucketCodeFileName("filename.csv");
+        discountEntity.setLastBucketCodeLoadUid(generateDiscountBucketCodeUid());
+        discountEntity.setLastBucketCodeLoadFileName("codes.csv");
         return discountEntity;
+    }
+
+    public static BucketCodeLoadEntity createDummyBucketLoadEntity(Long discountId) {
+        BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
+        bucketCodeLoadEntity.setId(1L);
+        bucketCodeLoadEntity.setUid(generateDiscountBucketCodeUid());
+        bucketCodeLoadEntity.setFileName("codes.txt");
+        bucketCodeLoadEntity.setDiscountId(discountId);
+        bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
+        bucketCodeLoadEntity.setNumberOfCodes(100L);
+        return bucketCodeLoadEntity;
     }
 
     public static DiscountEntity createSampleDiscountEntity(AgreementEntity agreement) {
