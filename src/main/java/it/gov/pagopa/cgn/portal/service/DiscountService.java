@@ -48,7 +48,7 @@ public class DiscountService {
         // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
-        ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity);
+        ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity, true);
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             bucketService.createPendingBucketLoad(toReturn);
@@ -83,15 +83,19 @@ public class DiscountService {
                 .getDiscountCodeType();
 
         boolean isChangedBucketLoad = profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
-                && dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid());
-        if (profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
-                && !dbEntity.getLastBucketCodeFileUid().equals(discountEntity.getLastBucketCodeFileUid())
-                && !bucketService.isLastBucketLoadTerminated(discountId, dbEntity.getLastBucketCodeFileUid())) {
+                && !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid());
+
+        if (isChangedBucketLoad && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
+
         updateConsumer.accept(discountEntity, dbEntity);
-        validateDiscount(agreementId, dbEntity);
+        validateDiscount(agreementId, dbEntity, isChangedBucketLoad);
+
+        if (isChangedBucketLoad) {
+            dbEntity = bucketService.createPendingBucketLoad(dbEntity);
+        }
 
         // if state is Published, last modify must be updated because public information
         // was modified
@@ -114,7 +118,8 @@ public class DiscountService {
             documentService.resetAllDocuments(agreementId);
         }
 
-        return new CrudDiscountWrapper(discountRepository.save(dbEntity), profileDiscountType, isChangedBucketLoad);
+        discountRepository.save(dbEntity);
+        return new CrudDiscountWrapper(dbEntity, profileDiscountType, isChangedBucketLoad);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -171,8 +176,8 @@ public class DiscountService {
 
     @Autowired
     public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
-            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-            DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
+                           ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
+                           DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -193,7 +198,7 @@ public class DiscountService {
         }
     }
 
-    private ProfileEntity validateDiscount(String agreementId, DiscountEntity discountEntity) {
+    private ProfileEntity validateDiscount(String agreementId, DiscountEntity discountEntity, boolean isBucketFileChanged) {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
 
@@ -205,14 +210,15 @@ public class DiscountService {
 
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())
                 && (StringUtils.isBlank(discountEntity.getLandingPageUrl())
-                        || StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
+                || StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
             throw new InvalidRequestException(
                     "Discount cannot have empty landing page values for a profile with discount code type landingpage");
         }
 
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
-                && (StringUtils.isBlank(discountEntity.getLastBucketCodeFileUid())
-                        || !bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid()))) {
+                && isBucketFileChanged
+                && (discountEntity.getLastBucketCodeLoadUid() == null
+                || !bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()))) {
             throw new InvalidRequestException(
                     "Discount cannot reference to empty or not existing bucket file for a profile with discount code type bucket");
         }
@@ -222,20 +228,20 @@ public class DiscountService {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.setLastBucketCodeFileUid(null);
+            discountEntity.setLastBucketCodeLoadUid(null);
         }
 
         // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            discountEntity.setLastBucketCodeFileUid(null);
+            discountEntity.setLastBucketCodeLoadUid(null);
         }
 
         // If profile use LANDINGPAGE, static code will not used
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
-            discountEntity.setLastBucketCodeFileUid(null);
+            discountEntity.setLastBucketCodeLoadUid(null);
         }
 
         // If profile use BUCKET, others will not used
@@ -259,7 +265,7 @@ public class DiscountService {
                 .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
 
         if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
-                && !bucketService.isLastBucketLoadTerminated(discount.getId(), discount.getLastBucketCodeFileUid())) {
+                && !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
@@ -285,7 +291,7 @@ public class DiscountService {
     }
 
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity,
-            productsToUpdate) -> {
+                                                                                            productsToUpdate) -> {
         // add all products from DTO. If there are products already present will be
         // skipped
         discountEntity.addProductList(productsToUpdate);
@@ -311,7 +317,8 @@ public class DiscountService {
         dbEntity.setVisibleOnEyca(toUpdateEntity.getVisibleOnEyca());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
-        dbEntity.setLastBucketCodeFileUid(toUpdateEntity.getLastBucketCodeFileUid());
+        dbEntity.setLastBucketCodeLoadUid(toUpdateEntity.getLastBucketCodeLoadUid());
+        dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {

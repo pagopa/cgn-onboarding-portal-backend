@@ -95,9 +95,15 @@ public class DiscountEntity extends BaseEntity {
     @Size(min = 1)
     private List<DiscountProductEntity> products;
 
-    @Column(name = "last_bucket_code_file_uid")
-    @Size(max = 255)
-    private String lastBucketCodeFileUid;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "last_bucket_code_load_id", referencedColumnName = "bucket_code_load_k")
+    private BucketCodeLoadEntity lastBucketCodeLoad;
+
+    @Transient
+    private String lastBucketCodeLoadUid;
+
+    @Transient
+    private String lastBucketCodeLoadFileName;
 
     public void removeProduct(DiscountProductEntity productEntity) {
         this.products.remove(productEntity);

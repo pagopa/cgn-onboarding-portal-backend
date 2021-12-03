@@ -82,34 +82,41 @@ class BucketServiceTest extends IntegrationAbstractTest {
         discountEntity.setId(1L);
 
         bucketService.createPendingBucketLoad(discountEntity);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.PENDING, bucketCodeLoadEntity.getStatus());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
         Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
 
     }
 
     @Test
-    void Create_SetRunningBucketCodeLoad_Ok() {
+    void Create_SetRunningBucketCodeLoad_Ok() throws IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(),
+                multipartFile.getSize());
+
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
-        Assertions.assertFalse(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid()));
+
+        Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
+
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+                .findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
+
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
-        Assertions.assertNull(bucketCodeLoadEntity.getNumberOfCodes());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes()); // mocked files has 2 codes
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
+        Assertions.assertEquals(bucketCodeLoadEntity.getFileName(), bucketCodeLoadEntity.getFileName());
     }
 
     @Test
@@ -121,15 +128,16 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.setRunningBucketLoad(discountEntity.getId());
 
         bucketService.performBucketLoad(discountEntity.getId());
-        Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid() + ".csv"));
+        Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoad().getUid() + ".csv"));
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED.getCode(), bucketCodeLoadEntity.getStatus().getCode());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+
     }
 
     @Test
@@ -137,20 +145,20 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
-        Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeFileUid()));
-        bucketService.createPendingBucketLoad(discountEntity);
+        Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
+        discountEntity = bucketService.createPendingBucketLoad(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
         Assertions.assertFalse(codes.isEmpty());
@@ -161,18 +169,19 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeFileUid(),
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
-        Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeFileUid() + ".csv"));
+        Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findByDiscountIdAndUid(discountEntity.getId(), discountEntity.getLastBucketCodeFileUid());
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+
     }
 
     @Test
@@ -182,7 +191,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
         bucketCodeLoadEntity.setDiscountId(discountEntity.getId());
-        bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeFileUid());
+        bucketCodeLoadEntity.setUid(discountEntity.getLastBucketCodeLoadUid());
+        bucketCodeLoadEntity.setFileName(discountEntity.getLastBucketCodeLoadFileName());
         bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadEntity.setNumberOfCodes(100L);
 
@@ -191,9 +201,11 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.PENDING, bucketCodeLoadEntity.getStatus());
-        Assertions.assertEquals(discountEntity.getLastBucketCodeFileUid(), bucketCodeLoadEntity.getUid());
+        Assertions.assertEquals(discountEntity.getLastBucketCodeLoadUid(), bucketCodeLoadEntity.getUid());
         Assertions.assertEquals(bucketCodeLoadEntity.hashCode(), bucketCodeLoadEntity.hashCode());
         Assertions.assertEquals(bucketCodeLoadEntity.toString(), bucketCodeLoadEntity.toString());
         Assertions.assertEquals(bucketCodeLoadEntity.getNumberOfCodes(), inserted.getNumberOfCodes());
+        Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+
     }
 }
