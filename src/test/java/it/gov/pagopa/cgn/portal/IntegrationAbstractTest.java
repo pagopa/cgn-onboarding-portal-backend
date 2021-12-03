@@ -127,25 +127,18 @@ public class IntegrationAbstractTest {
     protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();
         documentRepository.flush();
-        Thread.sleep(10);
         discountBucketCodeRepository.deleteAll();
         discountBucketCodeRepository.flush();
-        Thread.sleep(10);
         bucketCodeLoadRepository.deleteAll();
         bucketCodeLoadRepository.flush();
-        Thread.sleep(10);
         discountRepository.deleteAll();
         discountRepository.flush();
-        Thread.sleep(10);
         profileRepository.deleteAll();
         profileRepository.flush();
-        Thread.sleep(10);
         agreementRepository.deleteAll();
         agreementRepository.flush();
-        Thread.sleep(10);
         userRepository.deleteAll();
         userRepository.flush();
-        Thread.sleep(10);
     }
 
     protected List<DocumentEntity> saveSampleDocuments(AgreementEntity agreementEntity) {
