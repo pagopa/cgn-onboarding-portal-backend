@@ -1,9 +1,6 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
-import it.gov.pagopa.cgnonboardingportal.model.Discount;
-import it.gov.pagopa.cgnonboardingportal.model.Discounts;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.discount.CreateDiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.UpdateDiscountConverter;
@@ -69,6 +66,10 @@ public class DiscountFacade {
         discountService.publishDiscount(agreementId, Long.valueOf(discountId));
     }
 
+    public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {
+        return discountService.getDiscountBucketCodeLoadingProgess(agreementId, Long.valueOf(discountId));
+    }
+
     @Autowired
     public DiscountFacade(DiscountService discountService, CreateDiscountConverter createDiscountConverter,
                           DiscountConverter discountConverter, UpdateDiscountConverter updateDiscountConverter,
@@ -79,5 +80,6 @@ public class DiscountFacade {
         this.updateDiscountConverter = updateDiscountConverter;
         this.bucketLoadUtils = bucketLoadUtils;
     }
+
 
 }

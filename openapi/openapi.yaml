@@ -827,7 +827,7 @@ definitions:
     properties:
       loaded:
         type: integer
-        format: int32
+        format: int64
       percent:
         type: number
         format: float

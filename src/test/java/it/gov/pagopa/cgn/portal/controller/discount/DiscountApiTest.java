@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.service.BucketService;
 import org.awaitility.Awaitility;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -68,6 +69,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private BucketLoadUtils bucketLoadUtils;
+
+    @Autowired
+    private BucketService bucketService;
 
     private String discountPath;
     private AgreementEntity agreement;
@@ -357,6 +361,37 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Get_GetDiscountBucketCodeLoadingProgess_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
+
+        // load codes
+        bucketService.setRunningBucketLoad(discountEntity.getId());
+
+        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.loaded").value(0))
+                .andExpect(jsonPath("$.percent").value(0));
+
+        bucketService.performBucketLoad(discountEntity.getId());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+
+        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.loaded").value(2))
+                .andExpect(jsonPath("$.percent").value(100));
     }
 
     @Test

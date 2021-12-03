@@ -11,6 +11,7 @@ import javax.transaction.Transactional;
 import javax.validation.ValidatorFactory;
 
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -326,4 +327,13 @@ public class DiscountService {
         return (!now.isBefore(startDate)) && (now.isBefore(endDate));
     }
 
+    public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, Long discountId) {
+        DiscountEntity discountEntity = getDiscountById(agreementId, discountId);
+        var loadedCodes = bucketService.countLoadedCodes(discountEntity);
+        var percent = loadedCodes == 0 ? 0.0F : Float.valueOf(discountEntity.getLastBucketCodeLoad().getNumberOfCodes()) / loadedCodes * 100;
+        var progress = new DiscountBucketCodeLoadingProgess();
+        progress.setLoaded(loadedCodes);
+        progress.setPercent(percent);
+        return progress;
+    }
 }
