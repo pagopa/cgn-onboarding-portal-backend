@@ -85,15 +85,17 @@ public class DiscountService {
         boolean isChangedBucketLoad = profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
                 && !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid());
 
-        if (profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
-                && isChangedBucketLoad
-                && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
+        if (isChangedBucketLoad && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
         validateDiscount(agreementId, dbEntity, isChangedBucketLoad);
+
+        if (isChangedBucketLoad) {
+            dbEntity = bucketService.createPendingBucketLoad(dbEntity);
+        }
 
         // if state is Published, last modify must be updated because public information
         // was modified
@@ -216,7 +218,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
                 && isBucketFileChanged
                 && (discountEntity.getLastBucketCodeLoadUid() == null
-                || !bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()))){
+                || !bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()))) {
             throw new InvalidRequestException(
                     "Discount cannot reference to empty or not existing bucket file for a profile with discount code type bucket");
         }
@@ -315,6 +317,8 @@ public class DiscountService {
         dbEntity.setVisibleOnEyca(toUpdateEntity.getVisibleOnEyca());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
+        dbEntity.setLastBucketCodeLoadUid(toUpdateEntity.getLastBucketCodeLoadUid());
+        dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {

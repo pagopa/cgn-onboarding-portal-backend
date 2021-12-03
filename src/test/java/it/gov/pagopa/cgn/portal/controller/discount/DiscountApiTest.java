@@ -279,7 +279,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_CreateAndUpdateDiscountWithBucket_Ok() throws Exception {
+    void Update_CreateAndUpdateDiscountWithBucket_NoBucketChange_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
@@ -309,6 +309,49 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
                 .andExpect(jsonPath("$.lastBucketCodeLoadUid")
                         .value(updateDiscount.getLastBucketCodeLoadUid()))
+                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Update_CreateAndUpdateDiscountWithBucket_WithBucketChange_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.BUCKET);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
+
+        // load codes
+        bucketLoadUtils.storeCodesBucket(discountEntity.getId());
+        Thread.sleep(2000);
+
+        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
+        updateDiscount.setName("new_name");
+        updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
+        updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
+        azureStorage.uploadCsv(multipartFile.getInputStream(), updateDiscount.getLastBucketCodeLoadUid(), multipartFile.getSize());
+
+        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId())
+                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
+                .andDo(log()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").isEmpty())
+                .andExpect(jsonPath("$.landingPageUrl").isEmpty())
+                .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
+                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(updateDiscount.getLastBucketCodeLoadFileName()))
                 .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
