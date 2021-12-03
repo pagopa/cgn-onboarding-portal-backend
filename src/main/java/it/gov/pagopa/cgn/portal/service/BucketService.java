@@ -76,7 +76,7 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.getOne(discountEntity.getLastBucketCodeLoad().getId());
         if (bucketCodeLoadEntity.getStatus().equals(BucketCodeLoadStatusEnum.FAILED))
             return;
 
