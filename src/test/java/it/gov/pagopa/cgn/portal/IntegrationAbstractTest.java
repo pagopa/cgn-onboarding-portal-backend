@@ -27,6 +27,7 @@ import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -123,21 +124,28 @@ public class IntegrationAbstractTest {
     protected BackofficeAgreementService backofficeAgreementService;
 
     @AfterEach
-    protected void cleanAll() {
+    protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();
         documentRepository.flush();
+        Thread.sleep(10);
         discountBucketCodeRepository.deleteAll();
         discountBucketCodeRepository.flush();
+        Thread.sleep(10);
         bucketCodeLoadRepository.deleteAll();
         bucketCodeLoadRepository.flush();
+        Thread.sleep(10);
         discountRepository.deleteAll();
         discountRepository.flush();
+        Thread.sleep(10);
         profileRepository.deleteAll();
         profileRepository.flush();
+        Thread.sleep(10);
         agreementRepository.deleteAll();
         agreementRepository.flush();
+        Thread.sleep(10);
         userRepository.deleteAll();
         userRepository.flush();
+        Thread.sleep(10);
     }
 
     protected List<DocumentEntity> saveSampleDocuments(AgreementEntity agreementEntity) {
