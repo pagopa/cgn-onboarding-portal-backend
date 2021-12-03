@@ -78,6 +78,7 @@ public class BucketService {
                     .spliterator();
             int chunkSize = 100000;
             bucketCodeLoadEntity.setNumberOfCodes(split.getExactSizeIfKnown());
+            bucketCodeLoadRepository.save(bucketCodeLoadEntity);
 
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();
