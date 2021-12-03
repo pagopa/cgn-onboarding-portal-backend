@@ -28,10 +28,10 @@ public class ProfileService {
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity createProfile(ProfileEntity profileEntity, String agreementId) {
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
-        profileEntity.setAgreement(agreement);
         if (profileRepository.existsProfileEntityByAgreementId(agreementId)) {
             throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
         }
+        profileEntity.setAgreement(agreement);
         return profileRepository.save(profileEntity);
     }
 
