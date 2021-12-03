@@ -125,12 +125,19 @@ public class IntegrationAbstractTest {
     @AfterEach
     protected void cleanAll() {
         documentRepository.deleteAll();
+        documentRepository.flush();
         discountBucketCodeRepository.deleteAll();
+        discountBucketCodeRepository.flush();
         bucketCodeLoadRepository.deleteAll();
+        bucketCodeLoadRepository.flush();
         discountRepository.deleteAll();
+        discountRepository.flush();
         profileRepository.deleteAll();
+        profileRepository.flush();
         agreementRepository.deleteAll();
+        agreementRepository.flush();
         userRepository.deleteAll();
+        userRepository.flush();
     }
 
     protected List<DocumentEntity> saveSampleDocuments(AgreementEntity agreementEntity) {
