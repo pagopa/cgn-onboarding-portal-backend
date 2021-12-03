@@ -1,13 +1,8 @@
 package it.gov.pagopa.cgn.portal.util;
 
-import lombok.SneakyThrows;
-import org.apache.commons.csv.CSVRecord;
+import it.gov.pagopa.cgn.portal.service.BucketService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import it.gov.pagopa.cgn.portal.service.BucketService;
-
-import java.io.IOException;
-import java.util.stream.Stream;
 
 @Component
 public class BucketLoadUtils {

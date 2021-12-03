@@ -108,15 +108,15 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository
-                .findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+                .findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
 
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
-        Assertions.assertEquals(bucketCodeLoadEntity.getNumberOfCodes(),2); // mocked files has 2 codes
+        Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes()); // mocked files has 2 codes
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
-        Assertions.assertEquals(bucketCodeLoadEntity.getFileName(),bucketCodeLoadEntity.getFileName());
+        Assertions.assertEquals(bucketCodeLoadEntity.getFileName(), bucketCodeLoadEntity.getFileName());
     }
 
     @Test
