@@ -165,6 +165,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                 .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
                 .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());

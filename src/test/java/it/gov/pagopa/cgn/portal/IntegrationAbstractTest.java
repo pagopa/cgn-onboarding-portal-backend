@@ -125,8 +125,8 @@ public class IntegrationAbstractTest {
     @AfterEach
     protected void cleanAll() {
         documentRepository.deleteAll();
-        bucketCodeLoadRepository.deleteAll();
         discountBucketCodeRepository.deleteAll();
+        bucketCodeLoadRepository.deleteAll();
         discountRepository.deleteAll();
         profileRepository.deleteAll();
         agreementRepository.deleteAll();

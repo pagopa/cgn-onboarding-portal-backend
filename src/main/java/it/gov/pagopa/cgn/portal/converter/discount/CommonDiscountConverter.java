@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -21,6 +22,8 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
 
     private static final Map<DiscountStateEnum, DiscountState> enumMap = new EnumMap<>(DiscountStateEnum.class);
     private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
+    private static final Map<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> bucketLoadStatusEnumMap = new EnumMap<>(BucketCodeLoadStatusEnum.class);
+
     static {
         enumMap.put(DiscountStateEnum.DRAFT, DiscountState.DRAFT);
         enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
@@ -35,6 +38,11 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
         productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
         productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
         productEnumMaps.put(ProductCategoryEnum.SHOPPING, ProductCategory.SHOPPING);
+
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.PENDING,BucketCodeLoadStatus.PENDING);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.RUNNING,BucketCodeLoadStatus.RUNNING);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FAILED,BucketCodeLoadStatus.FAILED);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FINISHED,BucketCodeLoadStatus.FINISHED);
     }
 
 
@@ -52,6 +60,10 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
             discountProductsEntity.stream()
                     .map(discountProductEntity -> toProductDtoEnum.apply(discountProductEntity.getProductCategory()))
                     .collect(Collectors.toList());
+
+    protected Function<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> toBucketCodeLoadStatusDtoEnum = bucketCodeLoadStatusEnum ->
+            Optional.ofNullable(bucketLoadStatusEnumMap.get(bucketCodeLoadStatusEnum))
+                    .orElseThrow(() -> getInvalidEnumMapping(bucketCodeLoadStatusEnum.name()));
 
     protected BiFunction<DiscountStateEnum, LocalDate, DiscountState> toDtoEnum = (entityEnum, endDate) -> {
         if (LocalDate.now().isAfter(endDate)) {

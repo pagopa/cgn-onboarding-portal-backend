@@ -61,15 +61,25 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
-        bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
-        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.getOne(discountEntity.getLastBucketCodeLoad().getId());
+        try {
+            Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
+            bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
+            bucketCodeLoadEntity.setNumberOfCodes(csvStream.count());
+        } catch (Exception ex) {
+            bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FAILED);
+        } finally {
+            bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+        }
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
+        if (bucketCodeLoadEntity.getStatus().equals(BucketCodeLoadStatusEnum.FAILED))
+            return;
+
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
             Spliterator<DiscountBucketCodeEntity> split = csvStream
@@ -77,8 +87,6 @@ public class BucketService {
                             bucketCodeLoadEntity.getId()))
                     .spliterator();
             int chunkSize = 100000;
-            bucketCodeLoadEntity.setNumberOfCodes(split.getExactSizeIfKnown());
-            bucketCodeLoadRepository.save(bucketCodeLoadEntity);
 
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();

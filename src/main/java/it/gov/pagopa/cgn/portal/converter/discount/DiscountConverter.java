@@ -58,6 +58,7 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         if (entity.getLastBucketCodeLoad() != null) {
             dto.setLastBucketCodeLoadUid(entity.getLastBucketCodeLoad().getUid());
             dto.setLastBucketCodeLoadFileName(entity.getLastBucketCodeLoad().getFileName());
+            dto.setLastBucketCodeLoadStatus(toBucketCodeLoadStatusDtoEnum.apply(entity.getLastBucketCodeLoad().getStatus()));
         }
         return dto;
     };

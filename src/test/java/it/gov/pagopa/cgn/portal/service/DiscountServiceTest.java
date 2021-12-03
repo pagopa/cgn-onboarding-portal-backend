@@ -578,7 +578,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setCondition("update_condition");
         String agreementId = agreementEntity.getId();
         Long discountId = discountEntity.getId();
-        BucketCodeLoadEntity bucketCodeLoad = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoad = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
         bucketCodeLoad.setStatus(BucketCodeLoadStatusEnum.PENDING);
         bucketCodeLoadRepository.saveAndFlush(bucketCodeLoad);
         Assertions.assertThrows(ConflictErrorException.class,
