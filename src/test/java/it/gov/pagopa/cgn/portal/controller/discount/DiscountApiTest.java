@@ -145,7 +145,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithBucket_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeFileUid(),
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
                         .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
@@ -163,8 +163,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                 .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
                 .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.lastBucketCodeFileUid").value(discount.getLastBucketCodeFileUid()))
-                .andExpect(jsonPath("$.lastBucketCodeFileName").value(discount.getLastBucketCodeFileName()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
@@ -174,8 +174,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithBucket_Ko() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
-        discount.setLastBucketCodeFileUid(null);
-        discount.setLastBucketCodeFileName(null);
+        discount.setLastBucketCodeLoadUid(null);
+        discount.setLastBucketCodeLoadFileName(null);
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
     }
@@ -305,9 +305,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.staticCode").isEmpty())
                 .andExpect(jsonPath("$.landingPageUrl").isEmpty())
                 .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
-                .andExpect(jsonPath("$.lastBucketCodeFileUid").isNotEmpty())
-                .andExpect(jsonPath("$.lastBucketCodeFileUid")
-                        .value(updateDiscount.getLastBucketCodeFileUid()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
+                .andExpect(jsonPath("$.lastBucketCodeLoadUid")
+                        .value(updateDiscount.getLastBucketCodeLoadUid()))
                 .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
@@ -391,8 +391,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     private CreateDiscount createSampleCreateDiscountWithBucket() {
         CreateDiscount discount = createSampleCreateDiscount();
-        discount.setLastBucketCodeFileUid(UUID.randomUUID().toString());
-        discount.setLastBucketCodeFileName("filename.csv");
+        discount.setLastBucketCodeLoadUid(UUID.randomUUID().toString());
+        discount.setLastBucketCodeLoadFileName("filename.csv");
         return discount;
     }
 
@@ -420,8 +420,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
         updateDiscount.setLandingPageUrl(discount.getLandingPageUrl());
         updateDiscount.setLandingPageReferrer(discount.getLandingPageReferrer());
         updateDiscount.setProductCategories(discount.getProductCategories());
-        updateDiscount.setLastBucketCodeFileUid(discount.getLastBucketCodeFileUid());
-        updateDiscount.setLastBucketCodeFileName(discount.getLastBucketCodeFileName());
+        updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
+        updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
         return updateDiscount;
     }
 }

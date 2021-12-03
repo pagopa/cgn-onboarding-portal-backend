@@ -909,10 +909,10 @@ definitions:
       landingPageReferrer:
         type: string
         maxLength: 100
-      lastBucketCodeFileUid:
+      lastBucketCodeLoadUid:
         type: string
         maxLength: 255
-      lastBucketCodeFileName:
+      lastBucketCodeLoadFileName:
         type: string
         maxLength: 255
 
@@ -963,10 +963,10 @@ definitions:
       landingPageReferrer:
         type: string
         maxLength: 100
-      lastBucketCodeFileUid:
+      lastBucketCodeLoadUid:
         type: string
         maxLength: 255
-      lastBucketCodeFileName:
+      lastBucketCodeLoadFileName:
         type: string
         maxLength: 255
 
@@ -1040,12 +1040,22 @@ definitions:
       landingPageReferrer:
         type: string
         maxLength: 100
-      lastBucketCodeFileUid:
+      lastBucketCodeLoadUid:
         type: string
         maxLength: 255
-      lastBucketCodeFileName:
+      lastBucketCodeLoadFileName:
         type: string
         maxLength: 255
+      lastBucketCodeLoadStatus:
+        $ref: '#/definitions/BucketCodeLoadStatus'
+
+  BucketCodeLoadStatus:
+    type: string
+    enum:
+      - pending
+      - running
+      - finished
+      - failed
 
   DiscountState:
     type: string
