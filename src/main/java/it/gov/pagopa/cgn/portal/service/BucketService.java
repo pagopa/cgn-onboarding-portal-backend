@@ -7,9 +7,7 @@ import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
-import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;

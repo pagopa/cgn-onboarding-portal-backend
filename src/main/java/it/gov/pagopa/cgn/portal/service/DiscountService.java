@@ -188,6 +188,17 @@ public class DiscountService {
         this.bucketService = bucketService;
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, Long discountId) {
+        DiscountEntity discountEntity = getDiscountById(agreementId, discountId);
+        var loadedCodes = bucketService.countLoadedCodes(discountEntity);
+        var percent = loadedCodes == 0 ? 0.0F : Float.valueOf(discountEntity.getLastBucketCodeLoad().getNumberOfCodes()) / loadedCodes * 100;
+        var progress = new DiscountBucketCodeLoadingProgess();
+        progress.setLoaded(loadedCodes);
+        progress.setPercent(percent);
+        return progress;
+    }
+
     private DiscountEntity findById(Long discountId) {
         return discountRepository.findById(discountId)
                 .orElseThrow(() -> new InvalidRequestException("Discount not found"));
@@ -325,15 +336,5 @@ public class DiscountService {
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
         LocalDate now = LocalDate.now();
         return (!now.isBefore(startDate)) && (now.isBefore(endDate));
-    }
-
-    public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, Long discountId) {
-        DiscountEntity discountEntity = getDiscountById(agreementId, discountId);
-        var loadedCodes = bucketService.countLoadedCodes(discountEntity);
-        var percent = loadedCodes == 0 ? 0.0F : Float.valueOf(discountEntity.getLastBucketCodeLoad().getNumberOfCodes()) / loadedCodes * 100;
-        var progress = new DiscountBucketCodeLoadingProgess();
-        progress.setLoaded(loadedCodes);
-        progress.setPercent(percent);
-        return progress;
     }
 }
