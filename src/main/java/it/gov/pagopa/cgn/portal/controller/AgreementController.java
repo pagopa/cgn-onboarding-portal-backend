@@ -5,7 +5,6 @@ import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.facade.DocumentFacade;
 import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.service.ApiTokenService;
-import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.HelpService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.api.AgreementsApi;
@@ -29,7 +28,6 @@ public class AgreementController implements AgreementsApi {
     private final AgreementFacade agreementFacade;
     private final ApiTokenService apiTokenService;
     private final HelpService helpService;
-    private final BucketService bucketService;
 
     @Override
     public ResponseEntity<Agreement> createAgreement() {
@@ -146,13 +144,12 @@ public class AgreementController implements AgreementsApi {
     @Autowired
     public AgreementController(AgreementFacade agreementFacade, DocumentFacade documentFacade,
                                ProfileFacade profileFacade, DiscountFacade discountFacade, ApiTokenService apiTokenService,
-                               HelpService helpService, BucketService bucketService) {
+                               HelpService helpService) {
         this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
         this.discountFacade = discountFacade;
         this.documentFacade = documentFacade;
         this.apiTokenService = apiTokenService;
         this.helpService = helpService;
-        this.bucketService = bucketService;
     }
 }
