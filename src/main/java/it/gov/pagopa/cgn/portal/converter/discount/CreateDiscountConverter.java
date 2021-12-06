@@ -23,20 +23,7 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
     }
 
     protected Function<DiscountEntity, CreateDiscount> toDto = entity -> {
-        CreateDiscount dto = new CreateDiscount();
-        dto.setName(entity.getName());
-        dto.setDescription(entity.getDescription());
-        dto.setDiscount(entity.getDiscountValue());
-        dto.setCondition(entity.getCondition());
-        dto.setStartDate(entity.getStartDate());
-        dto.setEndDate(entity.getEndDate());
-        dto.setStaticCode(entity.getStaticCode());
-        dto.setVisibleOnEyca(entity.getVisibleOnEyca());
-        dto.setLandingPageUrl(entity.getLandingPageUrl());
-        dto.setLandingPageReferrer(entity.getLandingPageReferrer());
-        dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
-        dto.setLastBucketCodeFileUid(entity.getLastBucketCodeFileUid());
-        return dto;
+        throw new UnsupportedOperationException("Not implemented yet");
     };
 
     protected Function<CreateDiscount, DiscountEntity> toEntity = createDiscountDTO -> {
@@ -53,7 +40,8 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setCondition(createDiscountDTO.getCondition());
         entity.setProducts(toEntityDiscountProduct.apply(createDiscountDTO.getProductCategories(), entity));
         entity.setState(DiscountStateEnum.DRAFT); // default state
-        entity.setLastBucketCodeFileUid(createDiscountDTO.getLastBucketCodeFileUid());
+        entity.setLastBucketCodeLoadUid(createDiscountDTO.getLastBucketCodeLoadUid());
+        entity.setLastBucketCodeLoadFileName(createDiscountDTO.getLastBucketCodeLoadFileName());
         return entity;
     };
 

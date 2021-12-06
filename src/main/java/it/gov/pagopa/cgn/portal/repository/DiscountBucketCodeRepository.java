@@ -9,11 +9,13 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.custom.DiscountBucketCodeRepositoryCustom;
 
 public interface DiscountBucketCodeRepository
-                extends JpaRepository<DiscountBucketCodeEntity, Long>, DiscountBucketCodeRepositoryCustom {
+        extends JpaRepository<DiscountBucketCodeEntity, Long>, DiscountBucketCodeRepositoryCustom {
 
-        long countByDiscountAndIsUsed(DiscountEntity discount, Boolean isUsed);
+    long countByDiscountAndIsUsed(DiscountEntity discount, Boolean isUsed);
 
-        long countByDiscount(DiscountEntity discount);
+    long countByDiscount(DiscountEntity discount);
 
-        List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
+    long countByDiscountAndBucketCodeLoadId(DiscountEntity discount, Long bucketCodeLoadId);
+
+    List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
 }
