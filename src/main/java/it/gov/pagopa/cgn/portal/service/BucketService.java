@@ -105,4 +105,7 @@ public class BucketService {
         }
     }
 
+    public Long countLoadedCodes(DiscountEntity discountEntity) {
+        return discountBucketCodeRepository.countByDiscountAndBucketCodeLoadId(discountEntity, discountEntity.getLastBucketCodeLoad().getId());
+    }
 }
