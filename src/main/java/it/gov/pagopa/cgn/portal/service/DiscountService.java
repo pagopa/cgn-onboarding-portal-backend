@@ -192,7 +192,7 @@ public class DiscountService {
     public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, Long discountId) {
         DiscountEntity discountEntity = getDiscountById(agreementId, discountId);
         var loadedCodes = bucketService.countLoadedCodes(discountEntity);
-        var percent = loadedCodes == 0 ? 0.0F : Float.valueOf(discountEntity.getLastBucketCodeLoad().getNumberOfCodes()) / loadedCodes * 100;
+        var percent = Float.valueOf(loadedCodes) / Float.valueOf(discountEntity.getLastBucketCodeLoad().getNumberOfCodes()) * 100;
         var progress = new DiscountBucketCodeLoadingProgess();
         progress.setLoaded(loadedCodes);
         progress.setPercent(percent);

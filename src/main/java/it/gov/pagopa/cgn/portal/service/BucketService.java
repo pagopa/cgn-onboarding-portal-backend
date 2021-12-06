@@ -86,7 +86,7 @@ public class BucketService {
                     .map(csvRecord -> new DiscountBucketCodeEntity(csvRecord.get(0), discountEntity,
                             bucketCodeLoadEntity.getId()))
                     .spliterator();
-            int chunkSize = 100000;
+            int chunkSize = 25000;
 
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();
