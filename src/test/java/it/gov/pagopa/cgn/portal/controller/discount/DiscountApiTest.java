@@ -34,9 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -220,7 +218,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     protected void dropAndRecoverBucketCodeLoadEntity() {
         CompletableFuture.runAsync(() -> {
-            log.trace("#TESTING ANOMALY: Waiting for BucketCodeLoadEntity creation.");
+            log.info("#TESTING ANOMALY: Waiting for BucketCodeLoadEntity creation.");
             Awaitility
                     .with()
                     .pollDelay(1, TimeUnit.MILLISECONDS)
@@ -229,7 +227,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .await()
                     .atMost(1, TimeUnit.SECONDS)
                     .until(() -> bucketCodeLoadRepository.count() == 1);
-            log.trace("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
+
+            log.info("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
             var bucketCodeLoad = bucketCodeLoadRepository.findById(1L).orElseThrow();
             var recoverBucketCodeLoad = new BucketCodeLoadEntity();
             recoverBucketCodeLoad.setDiscountId(bucketCodeLoad.getDiscountId());
@@ -237,18 +236,24 @@ class DiscountApiTest extends IntegrationAbstractTest {
             recoverBucketCodeLoad.setStatus(bucketCodeLoad.getStatus());
             recoverBucketCodeLoad.setUid(bucketCodeLoad.getUid());
             recoverBucketCodeLoad.setFileName(bucketCodeLoad.getFileName());
+
+            log.info("#TESTING ANOMALY: Deleting all BucketCodeLoadEntity to introduce failure.");
             bucketCodeLoadRepository.deleteAll();
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            log.trace("#TESTING ANOMALY: Recovering BucketCodeLoadEntity and DiscountEntity after delete.");
-            bucketCodeLoadRepository.save(recoverBucketCodeLoad);
-            var discountEntity = discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
-            discountEntity.setLastBucketCodeLoad(recoverBucketCodeLoad);
-            discountRepository.save(discountEntity);
-            log.trace("#TESTING ANOMALY: FINISHED.");
+
+            log.info("#TESTING ANOMALY: Starting timer to do a recovery.");
+            TimerTask task = new TimerTask() {
+                public void run() {
+                    log.info("#TESTING ANOMALY: Recovering BucketCodeLoadEntity and DiscountEntity after delete.");
+                    bucketCodeLoadRepository.save(recoverBucketCodeLoad);
+                    var discountEntity = discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
+                    discountEntity.setLastBucketCodeLoad(recoverBucketCodeLoad);
+                    discountRepository.save(discountEntity);
+                    log.info("#TESTING ANOMALY: Recovery finished.");
+                }
+            };
+            Timer timer = new Timer("Recover");
+            long delay = 5000L;
+            timer.schedule(task, delay);
         });
     }
 

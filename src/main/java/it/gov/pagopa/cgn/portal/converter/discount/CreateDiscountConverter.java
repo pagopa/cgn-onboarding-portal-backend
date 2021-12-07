@@ -1,12 +1,10 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgnonboardingportal.model.Discount;
+import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.function.Function;
 
 @Component
