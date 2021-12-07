@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal.controller.discount;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
@@ -9,17 +11,18 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.service.BucketService;
-import org.awaitility.Awaitility;
+import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgnonboardingportal.model.*;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +37,15 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 class DiscountApiTest extends IntegrationAbstractTest {
@@ -185,7 +187,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
-        bucketLoadUtils.TestAsyncDatabaseLock();
+        // introduce an anomaly to test retry
+        dropAndRecoverBucketCodeLoadEntity();
 
         // call api to create a discount
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
@@ -212,7 +215,41 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
 
         // we have to wait for all retries to complete
-        Awaitility.await().atMost(3, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 3);
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+    }
+
+    protected void dropAndRecoverBucketCodeLoadEntity() {
+        CompletableFuture.runAsync(() -> {
+            log.trace("#TESTING ANOMALY: Waiting for BucketCodeLoadEntity creation.");
+            Awaitility
+                    .with()
+                    .pollDelay(1, TimeUnit.MILLISECONDS)
+                    .and()
+                    .pollInterval(1, TimeUnit.MILLISECONDS)
+                    .await()
+                    .atMost(1, TimeUnit.SECONDS)
+                    .until(() -> bucketCodeLoadRepository.count() == 1);
+            log.trace("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
+            var bucketCodeLoad = bucketCodeLoadRepository.findById(1L).orElseThrow();
+            var recoverBucketCodeLoad = new BucketCodeLoadEntity();
+            recoverBucketCodeLoad.setDiscountId(bucketCodeLoad.getDiscountId());
+            recoverBucketCodeLoad.setNumberOfCodes(bucketCodeLoad.getNumberOfCodes());
+            recoverBucketCodeLoad.setStatus(bucketCodeLoad.getStatus());
+            recoverBucketCodeLoad.setUid(bucketCodeLoad.getUid());
+            recoverBucketCodeLoad.setFileName(bucketCodeLoad.getFileName());
+            bucketCodeLoadRepository.deleteAll();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            log.trace("#TESTING ANOMALY: Recovering BucketCodeLoadEntity and DiscountEntity after delete.");
+            bucketCodeLoadRepository.save(recoverBucketCodeLoad);
+            var discountEntity = discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
+            discountEntity.setLastBucketCodeLoad(recoverBucketCodeLoad);
+            discountRepository.save(discountEntity);
+            log.trace("#TESTING ANOMALY: FINISHED.");
+        });
     }
 
     @Test
