@@ -34,14 +34,14 @@ public class AgreementServiceLight {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void setDraftAgreementFromRejected(AgreementEntity agreement) {
+    public AgreementEntity setDraftAgreementFromRejected(AgreementEntity agreement) {
         agreement.setState(AgreementStateEnum.DRAFT);
         agreement.setRequestApprovalTime(null);
         agreement.setStartDate(null);
         agreement.setEndDate(null);
         agreement.setRejectReasonMessage(null);
         agreement.setBackofficeAssignee(null);
-        agreementRepository.save(agreement);
+        return agreementRepository.save(agreement);
     }
 
     @Autowired
