@@ -119,10 +119,11 @@ public class DiscountService {
         }
 
         if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
-            agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
+            agreementEntity = agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
         }
 
+        discountEntity.setAgreement(agreementEntity);
         discountRepository.save(dbEntity);
         return new CrudDiscountWrapper(dbEntity, profileDiscountType, isChangedBucketLoad);
     }
