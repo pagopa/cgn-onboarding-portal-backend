@@ -79,7 +79,7 @@ public class DiscountService {
 
         DiscountEntity dbEntity = findById(discountId);
         var agreementEntity = dbEntity.getAgreement();
-        if(!agreementId.equals(agreementEntity.getId()))
+        if (!agreementId.equals(agreementEntity.getId()))
             throw new InvalidRequestException("Agreement not found");
 
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
@@ -87,8 +87,11 @@ public class DiscountService {
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"))
                 .getDiscountCodeType();
 
-        boolean isChangedBucketLoad = profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
-                && !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid());
+        boolean isChangedBucketLoad =
+                profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET) && (
+                        (dbEntity.getLastBucketCodeLoad() == null && discountEntity.getLastBucketCodeLoadUid() != null) ||
+                                !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid())
+                );
 
         if (isChangedBucketLoad && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException(
