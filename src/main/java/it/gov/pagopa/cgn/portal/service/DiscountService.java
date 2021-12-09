@@ -285,7 +285,7 @@ public class DiscountService {
                 .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
 
         if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
-                && discount.getLastBucketCodeLoad() != null && !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId())) {
+                && (discount.getLastBucketCodeLoad() == null || !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId()))) {
             throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
