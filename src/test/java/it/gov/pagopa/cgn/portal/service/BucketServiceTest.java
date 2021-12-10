@@ -179,13 +179,14 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.createPendingBucketLoad(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
-
     }
 
     @Test
