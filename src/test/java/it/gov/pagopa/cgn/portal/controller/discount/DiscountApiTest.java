@@ -234,7 +234,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .until(() -> bucketCodeLoadRepository.count() == 1);
 
             log.info("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
-            var bucketCodeLoad = bucketCodeLoadRepository.getOne(1L);
+            var bucketCodeLoad = bucketCodeLoadRepository.findAll().get(0);
+
             var recoverBucketCodeLoad = new BucketCodeLoadEntity();
             recoverBucketCodeLoad.setDiscountId(bucketCodeLoad.getDiscountId());
             recoverBucketCodeLoad.setNumberOfCodes(bucketCodeLoad.getNumberOfCodes());
@@ -256,6 +257,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     log.info("#TESTING ANOMALY: Recovery finished.");
                 }
             };
+
             Timer timer = new Timer("Recover");
             long delay = 5000L;
             timer.schedule(task, delay);
