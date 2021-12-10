@@ -75,18 +75,25 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
-        var agreementEntity = agreementServiceLight.findById(agreementId);
+        // var agreementEntity = agreementServiceLight.findById(agreementId);
 
         DiscountEntity dbEntity = findById(discountId);
+        var agreementEntity = dbEntity.getAgreement();
+        if (!agreementId.equals(agreementEntity.getId()))
+            throw new InvalidRequestException("Agreement not found");
+
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
         DiscountCodeTypeEnum profileDiscountType = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"))
                 .getDiscountCodeType();
 
-        boolean isChangedBucketLoad = profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET)
-                && !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid());
+        boolean isChangedBucketLoad =
+                profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET) && (
+                        (dbEntity.getLastBucketCodeLoad() == null && discountEntity.getLastBucketCodeLoadUid() != null) ||
+                                !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid())
+                );
 
-        if (isChangedBucketLoad && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
+        if (isChangedBucketLoad && dbEntity.getLastBucketCodeLoad() != null && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
@@ -278,7 +285,7 @@ public class DiscountService {
                 .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
 
         if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
-                && !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId())) {
+                && (discount.getLastBucketCodeLoad() == null || !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId()))) {
             throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
