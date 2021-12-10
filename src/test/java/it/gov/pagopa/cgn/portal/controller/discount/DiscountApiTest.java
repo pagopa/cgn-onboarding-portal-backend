@@ -218,7 +218,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
 
         // we have to wait for all retries to complete
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
     }
 
     protected void dropAndRecoverBucketCodeLoadEntity() {
@@ -569,7 +569,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         String contentAsString = result.getResponse().getContentAsString();
         Discount discountResponse = objectMapper.readValue(contentAsString, Discount.class);
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
 
         this.mockMvc.perform(delete(discountPath + "/" + discountResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON)).andDo(log())
@@ -579,7 +579,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 0);
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 0);
     }
 
     @Test
