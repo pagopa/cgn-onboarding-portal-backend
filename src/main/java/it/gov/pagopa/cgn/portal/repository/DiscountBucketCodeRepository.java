@@ -18,4 +18,6 @@ public interface DiscountBucketCodeRepository
     long countByDiscountAndBucketCodeLoadId(DiscountEntity discount, Long bucketCodeLoadId);
 
     List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
+
+    void deleteByDiscount(DiscountEntity discount);
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import it.gov.pagopa.cgn.portal.enums.*;
@@ -12,7 +11,6 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 
 import org.apache.commons.io.IOUtils;
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1100,7 +1098,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(0, progress.getPercent());
 
         bucketService.performBucketLoad(discountEntity.getId());
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
 
         progress = discountService.getDiscountBucketCodeLoadingProgess(discountEntity.getAgreement().getId(), discountEntity.getId());
 

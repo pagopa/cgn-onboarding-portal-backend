@@ -105,6 +105,12 @@ public class BucketService {
         }
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void deleteBucketCodes(Long discountId) {
+        DiscountEntity discountEntity = discountRepository.getOne(discountId);
+        discountBucketCodeRepository.deleteByDiscount(discountEntity);
+    }
+
     public Long countLoadedCodes(DiscountEntity discountEntity) {
         return discountBucketCodeRepository.countByDiscountAndBucketCodeLoadId(discountEntity, discountEntity.getLastBucketCodeLoad().getId());
     }

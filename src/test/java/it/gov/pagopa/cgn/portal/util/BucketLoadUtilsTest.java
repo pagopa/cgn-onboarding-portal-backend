@@ -27,4 +27,11 @@ public class BucketLoadUtilsTest {
         verify(bucketService, times(1)).performBucketLoad(anyLong());
     }
 
+    @Test
+    public void DeleteBucketCodes_Ok() {
+        BucketLoadUtils bucketLoadUtils = new BucketLoadUtils(bucketService);
+        bucketLoadUtils.deleteBucketCodes(1L);
+        verify(bucketService, times(1)).deleteBucketCodes(anyLong());
+    }
+
 }
