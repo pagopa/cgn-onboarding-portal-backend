@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import it.gov.pagopa.cgn.portal.service.BucketService;
 
+
 @RunWith(SpringRunner.class)
 public class BucketLoadUtilsTest {
 

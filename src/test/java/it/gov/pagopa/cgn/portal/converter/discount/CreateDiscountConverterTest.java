@@ -2,6 +2,8 @@ package it.gov.pagopa.cgn.portal.converter.discount;
 
 import java.time.LocalDate;
 
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
