@@ -234,7 +234,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .until(() -> bucketCodeLoadRepository.count() == 1);
 
             log.info("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
-            var bucketCodeLoad = bucketCodeLoadRepository.findById(1L).orElseThrow();
+            var bucketCodeLoad = bucketCodeLoadRepository.getOne(1L);
             var recoverBucketCodeLoad = new BucketCodeLoadEntity();
             recoverBucketCodeLoad.setDiscountId(bucketCodeLoad.getDiscountId());
             recoverBucketCodeLoad.setNumberOfCodes(bucketCodeLoad.getNumberOfCodes());
