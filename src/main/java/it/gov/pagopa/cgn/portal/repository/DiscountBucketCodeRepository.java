@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.custom.DiscountBucketCodeRepositoryCustom;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface DiscountBucketCodeRepository
         extends JpaRepository<DiscountBucketCodeEntity, Long>, DiscountBucketCodeRepositoryCustom {
@@ -19,5 +22,7 @@ public interface DiscountBucketCodeRepository
 
     List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
 
-    void deleteByDiscount(DiscountEntity discount);
+    @Modifying
+    @Query(value = "delete from discount_bucket_code where discount_fk=:discount_id", nativeQuery = true)
+    void deleteByDiscountId(@Param("discount_id") Long discountId);
 }
