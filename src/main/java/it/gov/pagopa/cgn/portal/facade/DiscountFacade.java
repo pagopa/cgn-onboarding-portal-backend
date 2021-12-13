@@ -60,6 +60,7 @@ public class DiscountFacade {
 
     public void deleteDiscount(String agreementId, String discountId) {
         discountService.deleteDiscount(agreementId, Long.valueOf(discountId));
+        bucketLoadUtils.deleteBucketCodes(Long.valueOf(discountId));
     }
 
     public void publishDiscount(String agreementId, String discountId) {

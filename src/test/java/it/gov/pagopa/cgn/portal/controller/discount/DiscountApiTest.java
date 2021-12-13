@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
@@ -10,10 +11,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -31,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -71,6 +70,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private BucketService bucketService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private String discountPath;
     private AgreementEntity agreement;
@@ -213,7 +215,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
 
         // we have to wait for all retries to complete
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
     }
 
     protected void dropAndRecoverBucketCodeLoadEntity() {
@@ -229,7 +231,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .until(() -> bucketCodeLoadRepository.count() == 1);
 
             log.info("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
-            var bucketCodeLoad = bucketCodeLoadRepository.findById(1L).orElseThrow();
+            var bucketCodeLoad = bucketCodeLoadRepository.findAll().get(0);
+
             var recoverBucketCodeLoad = new BucketCodeLoadEntity();
             recoverBucketCodeLoad.setDiscountId(bucketCodeLoad.getDiscountId());
             recoverBucketCodeLoad.setNumberOfCodes(bucketCodeLoad.getNumberOfCodes());
@@ -251,6 +254,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     log.info("#TESTING ANOMALY: Recovery finished.");
                 }
             };
+
             Timer timer = new Timer("Recover");
             long delay = 5000L;
             timer.schedule(task, delay);
@@ -525,6 +529,56 @@ class DiscountApiTest extends IntegrationAbstractTest {
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());
+    }
+
+    @Test
+    void Delete_DeleteDiscountWithBucket_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.BUCKET);
+        CreateDiscount discount = createSampleCreateDiscountWithBucket();
+
+        // upload a csv
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeLoadUid(),
+                multipartFile.getSize());
+
+        // call api to create a discount
+        var resultActions = this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                .andExpect(jsonPath("$.name").value(discount.getName()))
+                .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
+                .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
+                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+
+        MvcResult result = resultActions.andReturn();
+        String contentAsString = result.getResponse().getContentAsString();
+        Discount discountResponse = objectMapper.readValue(contentAsString, Discount.class);
+
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+
+        this.mockMvc.perform(delete(discountPath + "/" + discountResponse.getId())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(log())
+                .andExpect(status().isNoContent());
+
+        List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
+        Assertions.assertNotNull(discounts);
+        Assertions.assertEquals(0, discounts.size());
+
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 0);
     }
 
     @Test

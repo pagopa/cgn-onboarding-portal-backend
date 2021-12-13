@@ -24,4 +24,11 @@ public class BucketLoadUtils {
         bucketService.setRunningBucketLoad(discountId);
         bucketService.performBucketLoad(discountId);
     }
+
+    @Async("threadPoolTaskExecutor")
+    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 1.5))
+    public void deleteBucketCodes(Long discountId) {
+        log.trace("Starting asynchronous bucket codes delete.");
+        bucketService.deleteBucketCodes(discountId);
+    }
 }

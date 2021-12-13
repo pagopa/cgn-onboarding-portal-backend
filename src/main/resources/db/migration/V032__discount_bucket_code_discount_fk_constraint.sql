@@ -1,0 +1,1 @@
+ALTER TABLE discount_bucket_code DROP CONSTRAINT discount_bucket_code_fk;
