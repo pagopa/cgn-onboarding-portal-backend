@@ -611,7 +611,7 @@ definitions:
         type: string
       taxCodeOrVat:
         type: string
-        minLength: 11
+        minLength: 8
         maxLength: 16
       pecAddress:
         type: string
