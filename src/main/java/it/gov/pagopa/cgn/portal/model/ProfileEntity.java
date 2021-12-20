@@ -44,7 +44,7 @@ public class ProfileEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Size(min = 11, max = 16)
+    @Size(min = 8, max = 16)
     @Column(name = "tax_code_or_vat", length = 16)
     private String taxCodeOrVat;
 
