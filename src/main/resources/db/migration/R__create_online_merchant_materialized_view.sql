@@ -4,7 +4,8 @@ CREATE MATERIALIZED VIEW online_merchant AS
 WITH merchant AS (
     SELECT a.agreement_k,
            COALESCE( NULLIF(p.name, ''), p.full_name) AS name,
-           p.website_url
+           p.website_url,
+           p.discount_code_type
     FROM agreement a
              JOIN profile p ON (p.agreement_fk = a.agreement_k)
     WHERE a.state = 'APPROVED'
@@ -26,6 +27,7 @@ WITH merchant AS (
          SELECT m.agreement_k,
                 m.name,
                 m.website_url,
+                m.discount_code_type,
                 pc.product_category,
                 CASE
                     WHEN pc.product_category = 'ENTERTAINMENT' THEN TRUE
@@ -69,6 +71,7 @@ WITH merchant AS (
 SELECT  m.agreement_k                 AS id,
         m.name,
         m.website_url,
+        m.discount_code_type,
         array_agg(m.product_category) AS product_categories,
         lower(m.name)                 AS searchable_name,
         bool_or(m.entertainment)      AS entertainment,
@@ -82,7 +85,7 @@ SELECT  m.agreement_k                 AS id,
         bool_or(m.shopping)           AS shopping,
 	    now()						  AS last_update
 FROM merchant_with_categories m
-GROUP BY 1, 2, 3;
+GROUP BY 1, 2, 3, 4;
 
 CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
 
