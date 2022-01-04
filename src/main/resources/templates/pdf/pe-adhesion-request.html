@@ -27,6 +27,7 @@
             color: #000000;
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
+            line-height: 18pt;
         }
 
         .ol {
@@ -122,7 +123,6 @@
         .box > span {
             display: block;
             padding: 1em;
-            border: 2px solid #000000;
         }
 
         .table,
@@ -142,7 +142,6 @@
 
         .list-address {
             padding: 1em;
-            border: 2px solid #000000;
         }
 
         .list-address ul {
@@ -163,14 +162,11 @@
     adesione al progetto carta giovani nazionale</h1>
 
 <p>
-    <mark><span th:text="${legal_name}"></span></mark>
-    , Codice fiscale o partita
-    IVA <span th:text="${merchant_tax_code}"></span>, in persona di
-    <mark><span
-            th:text="${legal_representative_fullname}"></span></mark>
-    Codice Fiscale <span
+    <span th:text="${legal_name}"></span>, Codice fiscale o partita
+    IVA <span th:text="${merchant_tax_code}"></span>, in persona di <span
+        th:text="${legal_representative_fullname}"></span>, Codice Fiscale <span
         th:text="${legal_representative_fiscal_code}"></span>, con sede legale in
-    <span th:text="${legal_office}"></span> PEC <span th:text="${pec_address}"></span> di seguito “l’Operatore”,
+    <span th:text="${legal_office}"></span>, PEC <span th:text="${pec_address}"></span>, di seguito “l’Operatore”,
 </p>
 <h1 class="title text-center text-uppercase">Dichiara</h1>
 <p>
@@ -210,55 +206,50 @@
     nella Documentazione Tecnica ad essa allegata, le seguenti agevolazioni, sconti e/o condizioni di favore rispetto a
     quelle comunemente praticate al pubblico sui beni/servizi qui di seguito descritti:</p>
 <ol>
-    <li>NOME OPERATORE VISUALIZZATO</li>
+    <li>NOME OPERATORE VISUALIZZATO: </li>
     <div class="mt box"><span th:text="${merchant_name}"></span></div>
-    <li class="mt">DESCRIZIONE OPERATORE/BENI SERVIZI OFFERTI</li>
+    <li class="mt">DESCRIZIONE DELL'OPERATORE: </li>
     <div class="mt box"><span th:text="${merchant_description}"></span></div>
+    <li class="mt">MODALITÀ DI RICONOSCIMENTO DELLE AGEVOLAZIONI: </li>
+    <div class="mt box"><span th:text="${discount_mode}"></span></div>
     <div class="page-break"></div>
-    <li>AGEVOLAZIONI PROPOSTE, TERMINI E CONDIZIONI D’USO</li>
-    <table class="table mt">
-        <thead>
-        <tr>
-            <td>Beni/servizi
-                oggetto
-                dell’agevolazione
-            </td>
-            <td>Entità
-                sconto (%)
-            </td>
-            <td>Durata
-                dell’agevolazione
-            </td>
-            <td>Condizioni
-                aggiuntive
-            </td>
-            <td><span th:text="${discount_mode}"></span>
-            </td>
-            <td>Categoria
-                merceologica
-            </td>
-        </tr>
-        </thead>
-        <tbody th:each="discount : ${discounts}">
-        <tr>
-            <td><span th:text="${discount.name}"></span></td>
-            <td><span th:text="${discount.discountValue}"></span></td>
-            <td><span th:text="${discount.validityPeriod}"></span></td>
-            <td><span th:text="${discount.condition}"></span></td>
-            <td><span th:text="${discount.modeValue}"></span></td>
-            <td><span th:text="${discount.categories}"></span></td>
-        </tr>
-        </tbody>
-    </table>
-    <li class="mt">INDIRIZZO FISICO DEI LOCALI DI VENDITA ED ORARI ORDINARI DI
-        APERTURA (se previsto)
+    <li class="mt">AGEVOLAZIONI PROPOSTE: </li>
+    <ol>
+        <li class="mt" th:each="discount : ${discounts}">
+            <div>
+                <b>Beni/servizi
+                    oggetto
+                    dell’agevolazione:</b> <span th:text="${discount.name}"></span>
+            </div>
+            <div>
+                <b>Entità
+                    sconto (%):</b> <span th:text="${discount.discountValue}"></span>
+            </div>
+            <div>
+                <b>Durata
+                    dell’agevolazione:</b> <span th:text="${discount.validityPeriod}"></span>
+            </div>
+            <div>
+                <b>Condizioni
+                    aggiuntive:</b> <span th:text="${discount.condition}"></span>
+            </div>
+            <div>
+                <b>Dettaglio modalità di riconoscimento:</b> <span th:text="${discount.modeValue}"></span>
+            </div>
+            <div>
+                <b>Categoria
+                    merceologica:</b> <span th:text="${discount.categories}"></span>
+            </div>
+        </li>
+    </ol>
+    <li class="mt">INDIRIZZO FISICO DEI PUNTI VENDITA:
     </li>
-    <div class="mt list-address">
+    <div class="list-address">
         <ul th:each="item : ${merchant_address_list}">
             <li><span th:text="${item}"></span></li>
         </ul>
     </div>
-    <li class="mt">SITO WEB DELL’OPERATORE (compreso e-commerce se posseduto)</li>
+    <li class="mt">SITO WEB: </li>
     <div class="mt box"><span th:text="${merchant_website}"></span></div>
 </ol>
 <div class="page-break"></div>
@@ -266,8 +257,7 @@
 <!-- Third page -->
 <h1 class="title text-center text-uppercase">Indica</h1>
 <p>inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento di convenzionamento e/o
-    all’attuazione della Convenzione il seguente referente quale contatto operativo (confermare quello già pre-indicato
-    in sede di manifestazione di interesse):<br/>
+    all’attuazione della Convenzione il seguente referente quale contatto operativo:<br/>
     Nome e cognome del referente: <span th:text="${referent_fullname}"></span><br/>
     Ruolo all’interno dell’azienda: <span th:text="${referent_role}"></span><br/>
     E-mail: <span th:text="${referent_email_address}"></span><br/>
