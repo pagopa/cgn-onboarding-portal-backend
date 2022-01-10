@@ -88,7 +88,7 @@ public class DiscountService {
                 .getDiscountCodeType();
 
         boolean isChangedBucketLoad =
-                profileDiscountType.equals(DiscountCodeTypeEnum.BUCKET) && (
+                DiscountCodeTypeEnum.BUCKET.equals(profileDiscountType) && (
                         (dbEntity.getLastBucketCodeLoad() == null && discountEntity.getLastBucketCodeLoadUid() != null) ||
                                 !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid())
                 );
