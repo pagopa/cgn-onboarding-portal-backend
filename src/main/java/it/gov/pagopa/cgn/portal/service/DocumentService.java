@@ -259,6 +259,10 @@ public class DocumentService {
             }
         }
 
+        String merchantName =
+                profileEntity.getName() == null || profileEntity.getName().isEmpty() || profileEntity.getName().isBlank()
+                        ? profileEntity.getFullName() : profileEntity.getName();
+
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
         context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
@@ -269,7 +273,7 @@ public class DocumentService {
         context.setVariable("pec_address", profileEntity.getPecAddress());
         context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-        context.setVariable("merchant_name", profileEntity.getName() != null ? profileEntity.getName() : profileEntity.getFullName());
+        context.setVariable("merchant_name", merchantName);
         context.setVariable("merchant_description", profileEntity.getDescription());
         context.setVariable("merchant_address_list", addressList);
         context.setVariable("merchant_website", profileEntity.getWebsiteUrl());
