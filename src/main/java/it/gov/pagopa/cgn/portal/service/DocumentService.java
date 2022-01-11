@@ -269,7 +269,7 @@ public class DocumentService {
         context.setVariable("pec_address", profileEntity.getPecAddress());
         context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-        context.setVariable("merchant_name", ObjectUtils.firstNonNull(Stream.of(profileEntity.getName(), profileEntity.getFullName())));
+        context.setVariable("merchant_name", ObjectUtils.firstNonNull(Stream.of(profileEntity.getName(), profileEntity.getFullName())).findFirst().orElse(null));
         context.setVariable("merchant_description", profileEntity.getDescription());
         context.setVariable("merchant_address_list", addressList);
         context.setVariable("merchant_website", profileEntity.getWebsiteUrl());
