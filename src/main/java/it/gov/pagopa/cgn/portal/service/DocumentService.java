@@ -340,6 +340,7 @@ public class DocumentService {
         public String condition;
         public String modeValue;
         public String categories;
+        public String description;
 
         public static RenderableDiscount fromEntity(DiscountEntity entity) {
             RenderableDiscount discount = new RenderableDiscount();
@@ -353,6 +354,7 @@ public class DocumentService {
             discount.condition = entity.getCondition();
             discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl()).filter(Objects::nonNull).findFirst().orElse("-");
             discount.categories = categories;
+            discount.description = entity.getDescription();
 
             return discount;
         }

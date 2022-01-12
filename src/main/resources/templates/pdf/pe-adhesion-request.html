@@ -206,20 +206,24 @@
     nella Documentazione Tecnica ad essa allegata, le seguenti agevolazioni, sconti e/o condizioni di favore rispetto a
     quelle comunemente praticate al pubblico sui beni/servizi qui di seguito descritti:</p>
 <ol>
-    <li>NOME OPERATORE VISUALIZZATO: </li>
+    <li>NOME OPERATORE VISUALIZZATO:</li>
     <div class="mt box"><span th:text="${merchant_name}"></span></div>
-    <li class="mt">DESCRIZIONE DELL'OPERATORE: </li>
+    <li class="mt">DESCRIZIONE DELL'OPERATORE:</li>
     <div class="mt box"><span th:text="${merchant_description}"></span></div>
-    <li class="mt">MODALITÀ DI RICONOSCIMENTO DELLE AGEVOLAZIONI: </li>
+    <li class="mt">MODALITÀ DI RICONOSCIMENTO DELLE AGEVOLAZIONI:</li>
     <div class="mt box"><span th:text="${discount_mode}"></span></div>
     <div class="page-break"></div>
-    <li class="mt">AGEVOLAZIONI PROPOSTE: </li>
+    <li class="mt">AGEVOLAZIONI PROPOSTE:</li>
     <ol>
         <li class="mt" th:each="discount : ${discounts}">
             <div>
                 <b>Beni/servizi
                     oggetto
                     dell’agevolazione:</b> <span th:text="${discount.name}"></span>
+            </div>
+            <div>
+                <b>Descrizione
+                    dell’agevolazione:</b> <span th:text="${discount.description}"></span>
             </div>
             <div>
                 <b>Entità
@@ -249,7 +253,7 @@
             <li><span th:text="${item}"></span></li>
         </ul>
     </div>
-    <li class="mt">SITO WEB: </li>
+    <li class="mt">SITO WEB:</li>
     <div class="mt box"><span th:text="${merchant_website}"></span></div>
 </ol>
 <div class="page-break"></div>
