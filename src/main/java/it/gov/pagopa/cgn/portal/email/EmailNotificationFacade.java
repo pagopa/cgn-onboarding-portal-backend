@@ -1,9 +1,11 @@
 package it.gov.pagopa.cgn.portal.email;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -96,7 +98,6 @@ public class EmailNotificationFacade {
 
         context.setVariable("help_category_and_topic", categoryAndTopic);
         context.setVariable("help_message", helpRequestParams.getMessage());
-
         context.setVariable("merchant_legal_name", helpRequestParams.getMerchantLegalName());
         context.setVariable("referent_first_name", helpRequestParams.getReferentFirstName());
         context.setVariable("referent_last_name", helpRequestParams.getReferentLastName());
@@ -132,6 +133,31 @@ public class EmailNotificationFacade {
             // in this case exception will be propagated
             throw new CGNException(e);
         }
+    }
+
+    public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail, DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold, Long remainingCodes) {
+        var subject = "[Carta Giovani Nazionale] I tuoi codici sconto stanno per esaurirsi ( < " + threshold.getValue() + "% )";
+        var context = new Context();
+        context.setVariable("discount_name", discount.getName());
+        context.setVariable("missing_codes", remainingCodes);
+        final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
+        final String trackingKey = threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
+
+        var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+    }
+
+    public void notifyMerchantDiscountBucketCodesExpired(String referentEmail, DiscountEntity discount) {
+        var subject = "[Carta Giovani Nazionale] I tuoi codici sconto sono stati esauriti";
+        var context = new Context();
+        context.setVariable("discount_name", discount.getName());
+        final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
+        final String trackingKey = "EXPIRED::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
+
+        var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
 
     @Autowired

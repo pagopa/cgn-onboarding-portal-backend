@@ -1,5 +1,7 @@
 package it.gov.pagopa.cgn.portal.email;
 
+import it.gov.pagopa.cgn.portal.model.NotificationEntity;
+import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,16 +17,22 @@ import java.util.concurrent.CompletableFuture;
 public class EmailNotificationService {
 
     private final JavaMailSender javaMailSender;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public EmailNotificationService(JavaMailSender javaMailSender) {
+    public EmailNotificationService(JavaMailSender javaMailSender, NotificationRepository notificationRepository) {
         this.javaMailSender = javaMailSender;
+        this.notificationRepository = notificationRepository;
     }
 
     public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams) {
-        return CompletableFuture.supplyAsync( () -> {
+        return sendAsyncMessage(emailParams, null);
+    }
+
+    public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams, String trackingKey) {
+        return CompletableFuture.supplyAsync(() -> {
             try {
-                sendSyncMessage(emailParams);
+                sendSyncMessage(emailParams, null);
             } catch (MessagingException e) {
                 log.error(emailParams.getFailureMessage(), e);
             }
@@ -33,22 +41,54 @@ public class EmailNotificationService {
     }
 
     public void sendSyncMessage(EmailParams emailParams) throws MessagingException {
+        sendSyncMessage(emailParams, null);
+    }
+
+    public void sendSyncMessage(EmailParams emailParams, String trackingKey) throws MessagingException {
+
+        if (notificationAlreadySent(trackingKey))
+            return;
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setFrom(emailParams.getMailFrom());
+            helper.setTo(emailParams.getMailToList().toArray(new String[0]));
 
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-        helper.setFrom(emailParams.getMailFrom());
-        helper.setTo(emailParams.getMailToList().toArray(new String[0]));
+            if (emailParams.getReplyToOpt().isPresent()) {
+                helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
+            }
+            helper.setSubject(emailParams.getSubject());
+            helper.setText(emailParams.getBody(), true);
+            helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
 
-        if (emailParams.getReplyToOpt().isPresent()) {
-            helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
+            log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
+            javaMailSender.send(mimeMessage);
+            trackNewNotification(trackingKey);
+        } catch (MessagingException e) {
+            trackNewNotification(trackingKey, e.getMessage());
+            throw e;
         }
-        helper.setSubject(emailParams.getSubject());
-        helper.setText(emailParams.getBody(), true);
-        helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
+    }
 
-        log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
-        javaMailSender.send(mimeMessage);
+    private void trackNewNotification(String trackingKey) {
+        trackNewNotification(trackingKey, null);
+    }
+
+    private void trackNewNotification(String trackingKey, String errorMessage) {
+        if (trackingKey != null) {
+            // track a new Notification
+            NotificationEntity notification = new NotificationEntity(trackingKey);
+            notification.setErrorMessage(errorMessage);
+            notificationRepository.save(notification);
+        }
+    }
+
+    private boolean notificationAlreadySent(String trackingKey) {
+        if (trackingKey != null) {
+            return notificationRepository.findByKey(trackingKey) != null;
+        }
+        return false;
     }
 
 

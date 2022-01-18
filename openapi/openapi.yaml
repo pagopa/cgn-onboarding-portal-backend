@@ -920,7 +920,7 @@ definitions:
         type: integer
         format: int32
         minimum: 1
-        maximum: 99
+        maximum: 100
       productCategories:
         type: array
         items:
@@ -974,7 +974,7 @@ definitions:
         type: integer
         format: int32
         minimum: 1
-        maximum: 99
+        maximum: 100
       productCategories:
         type: array
         items:
@@ -1046,7 +1046,7 @@ definitions:
         type: integer
         format: int32
         minimum: 1
-        maximum: 99
+        maximum: 100
       productCategories:
         type: array
         items:

@@ -15,6 +15,8 @@ public enum TemplateEmail {
     REJECTED_AGREEMENT("email/agreement-request-rejected.html"),
     SUSPENDED_DISCOUNT("email/discount-suspended.html"),
     EXPIRED_DISCOUNT("email/discount-expiring.html"),
+    EXPIRING_BUCKET_CODES("email/bucket-codes-expiring.html"),
+    EXPIRED_BUCKET_CODES("email/bucket-codes-expired.html"),
     HELP_REQUEST("email/help-request.html");
 
     private final String templateName;

@@ -14,13 +14,12 @@ import org.springframework.data.repository.query.Param;
 public interface DiscountBucketCodeRepository
         extends JpaRepository<DiscountBucketCodeEntity, Long>, DiscountBucketCodeRepositoryCustom {
 
-    long countByDiscountAndIsUsed(DiscountEntity discount, Boolean isUsed);
-
-    long countByDiscount(DiscountEntity discount);
-
     long countByDiscountAndBucketCodeLoadId(DiscountEntity discount, Long bucketCodeLoadId);
 
     List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
+
+    @Query(value = "SELECT COUNT(*) FROM discount_bucket_code WHERE discount_fk=:discount_id AND used=false", nativeQuery = true)
+    long countNotUsedByDiscountId(@Param("discount_id") Long discountId);
 
     @Modifying
     @Query(value = "delete from discount_bucket_code where discount_fk=:discount_id", nativeQuery = true)

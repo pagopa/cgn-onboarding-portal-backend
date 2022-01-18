@@ -52,6 +52,7 @@ public class DiscountService {
         ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity, true);
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
+            bucketService.createEmptyDiscountBucketCodeSummary(toReturn);
             bucketService.createPendingBucketLoad(toReturn);
         }
         return new CrudDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
@@ -93,7 +94,7 @@ public class DiscountService {
                                 !dbEntity.getLastBucketCodeLoad().getUid().equals(discountEntity.getLastBucketCodeLoadUid())
                 );
 
-        if (isChangedBucketLoad && dbEntity.getLastBucketCodeLoad() != null && !bucketService.isLastBucketLoadTerminated(dbEntity.getLastBucketCodeLoad().getId())) {
+        if (isChangedBucketLoad && dbEntity.getLastBucketCodeLoad() != null && bucketService.isLastBucketLoadStillLoading(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new ConflictErrorException(
                     "Cannot update discount bucket while another bucket processing is running");
         }
@@ -285,7 +286,7 @@ public class DiscountService {
                 .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
 
         if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
-                && (discount.getLastBucketCodeLoad() == null || !bucketService.isLastBucketLoadTerminated(discount.getLastBucketCodeLoad().getId()))) {
+                && (discount.getLastBucketCodeLoad() == null || bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
             throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {

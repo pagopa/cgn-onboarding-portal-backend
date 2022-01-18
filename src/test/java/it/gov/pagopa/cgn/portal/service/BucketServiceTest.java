@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
@@ -22,11 +24,6 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
@@ -53,6 +50,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
     @Autowired
     private DiscountBucketCodeRepository discountBucketCodeRepository;
+
+    @Autowired
+    private DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
 
     @Autowired
     private BucketLoadUtils bucketLoadUtils;
@@ -152,6 +152,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
+        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
@@ -162,6 +163,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
+
+        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        Assertions.assertEquals(2, discountBucketCodeSummaryEntity.getAvailableCodes());
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
         Assertions.assertFalse(codes.isEmpty());
@@ -224,6 +228,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
+        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
