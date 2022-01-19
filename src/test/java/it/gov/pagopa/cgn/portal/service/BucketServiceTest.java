@@ -318,7 +318,14 @@ class BucketServiceTest extends IntegrationAbstractTest {
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
     }
 
-    private void testNotification(BucketCodeExpiringThresholdEnum threshold) throws IOException {
+    @Test
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent0NotificationSent() throws IOException {
+        var discount = testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
+        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discount);
+        Assertions.assertNotNull(discountBucketCodeSummaryEntity.getExpiredAt());
+    }
+
+    private DiscountEntity testNotification(BucketCodeExpiringThresholdEnum threshold) throws IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
         bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
@@ -356,5 +363,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         var notification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, threshold));
         Assertions.assertNotNull(notification);
+
+        return discountEntity;
     }
 }
