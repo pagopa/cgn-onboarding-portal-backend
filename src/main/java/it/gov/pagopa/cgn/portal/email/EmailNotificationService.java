@@ -64,21 +64,28 @@ public class EmailNotificationService {
 
             log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
             javaMailSender.send(mimeMessage);
-            trackNewNotification(trackingKey);
+            trackNotification(trackingKey);
         } catch (MessagingException e) {
-            trackNewNotification(trackingKey, e.getMessage());
+            trackNotification(trackingKey, e.getMessage());
             throw e;
         }
     }
 
-    private void trackNewNotification(String trackingKey) {
-        trackNewNotification(trackingKey, null);
+    private NotificationEntity findNotification(String trackingKey) {
+        return notificationRepository.findByKey(trackingKey);
     }
 
-    private void trackNewNotification(String trackingKey, String errorMessage) {
+    private void trackNotification(String trackingKey) {
+        trackNotification(trackingKey, null);
+    }
+
+    private void trackNotification(String trackingKey, String errorMessage) {
         if (trackingKey != null) {
-            // track a new Notification
-            NotificationEntity notification = new NotificationEntity(trackingKey);
+            var notification = findNotification(trackingKey);
+            if (notification == null) {
+                // create a new Notification
+                notification = new NotificationEntity(trackingKey);
+            }
             notification.setErrorMessage(errorMessage);
             notificationRepository.save(notification);
         }
@@ -86,7 +93,8 @@ public class EmailNotificationService {
 
     private boolean notificationAlreadySent(String trackingKey) {
         if (trackingKey != null) {
-            return notificationRepository.findByKey(trackingKey) != null;
+            var notification = findNotification(trackingKey);
+            return notification != null && notification.getErrorMessage() == null;
         }
         return false;
     }

@@ -76,8 +76,6 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
         // check if agreement exits. If not the method throw an exception
-        // var agreementEntity = agreementServiceLight.findById(agreementId);
-
         DiscountEntity dbEntity = findById(discountId);
         var agreementEntity = dbEntity.getAgreement();
         if (!agreementId.equals(agreementEntity.getId()))

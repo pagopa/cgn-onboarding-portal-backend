@@ -26,6 +26,8 @@ public class EmailNotificationFacade {
 
     private final ConfigProperties configProperties;
 
+    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
+
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
@@ -111,7 +113,7 @@ public class EmailNotificationFacade {
     public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
         var subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
         var context = new Context();
-        context.setVariable("discount_name", discountName);
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable("suspension_message", suspensionMessage);
         final String errorMessage = "Failed to send Discount Suspended notification to: " + referentEmail;
 
@@ -123,7 +125,7 @@ public class EmailNotificationFacade {
     public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();
-        context.setVariable("discount_name", discountName);
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
@@ -138,7 +140,7 @@ public class EmailNotificationFacade {
     public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail, DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold, Long remainingCodes) {
         var subject = "[Carta Giovani Nazionale] I tuoi codici sconto stanno per esaurirsi ( < " + threshold.getValue() + "% )";
         var context = new Context();
-        context.setVariable("discount_name", discount.getName());
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
         final String trackingKey = threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
@@ -151,7 +153,7 @@ public class EmailNotificationFacade {
     public void notifyMerchantDiscountBucketCodesExpired(String referentEmail, DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] I tuoi codici sconto sono stati esauriti";
         var context = new Context();
-        context.setVariable("discount_name", discount.getName());
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
         final String trackingKey = "EXPIRED::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
 

@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "notification")
@@ -16,18 +17,15 @@ import java.io.Serializable;
 public class NotificationEntity implements Serializable {
 
     @Id
-    @Column(name = "notification_k")
-    @SequenceGenerator(name = "notification_k_seq", sequenceName = "notification_k_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_k_seq")
-    @Exclude
-    @ToString.Exclude
-    private Long id;
-
     @NotNull
     @NotBlank
     @Size(max = 255)
-    @Column(name = "key", length = 255)
+    @Column(name = "notification_k", length = 255)
     private String key;
+
+    @NotNull
+    @Column(name = "sent_at")
+    private OffsetDateTime sentAt;
 
     @Size(max = 255)
     @Column(name = "error_message", length = 255)
@@ -38,6 +36,7 @@ public class NotificationEntity implements Serializable {
 
     public NotificationEntity(@NotNull @NotBlank @Size(max = 128) String key) {
         this.key = key;
+        this.sentAt = OffsetDateTime.now();
     }
 
 }
