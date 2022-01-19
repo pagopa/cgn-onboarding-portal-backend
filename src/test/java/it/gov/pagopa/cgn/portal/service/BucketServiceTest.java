@@ -1,17 +1,17 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
-
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
-import lombok.extern.slf4j.Slf4j;
+import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
@@ -22,16 +22,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
-import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@Slf4j
 class BucketServiceTest extends IntegrationAbstractTest {
 
     @Autowired
@@ -349,13 +345,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
 
-        // use 100% - threshold codes
-        int codeToUse = 10 - (int) Math.floor((float) 10 * threshold.getValue() / 100);
-        log.info("Will use " + codeToUse + " codes.");
-        discountBucketCodeRepository.findAllByDiscount(discountEntity).stream().limit(codeToUse).forEach(c -> {
-            c.setIsUsed(true);
-            discountBucketCodeRepository.save(c);
-        });
+        burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 
         bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
 

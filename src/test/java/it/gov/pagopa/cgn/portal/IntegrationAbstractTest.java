@@ -1,19 +1,19 @@
 package it.gov.pagopa.cgn.portal;
 
+import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
-import it.gov.pagopa.cgn.portal.service.DiscountService;
-import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
+@Slf4j
 public class IntegrationAbstractTest {
 
     protected String getAzureConnectionString() {
@@ -54,9 +55,9 @@ public class IntegrationAbstractTest {
 
         public static GenericContainer<?> greenMailContainer = new GenericContainer<>(
                 DockerImageName.parse("greenmail/standalone:1.6.3")).withExposedPorts(3025)
-                        // override timeout to 5 seconds
-                        .withEnv("GREENMAIL_OPTS",
-                                "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
+                // override timeout to 5 seconds
+                .withEnv("GREENMAIL_OPTS",
+                        "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
 
         private static void startContainers() {
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
@@ -121,6 +122,12 @@ public class IntegrationAbstractTest {
     protected DiscountService discountService;
 
     @Autowired
+    protected BucketService bucketService;
+
+    @Autowired
+    protected NotificationRepository notificationRepository;
+
+    @Autowired
     protected BackofficeAgreementService backofficeAgreementService;
 
     @AfterEach
@@ -164,12 +171,12 @@ public class IntegrationAbstractTest {
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
-            DiscountCodeTypeEnum discountCodeType) {
+                                                         DiscountCodeTypeEnum discountCodeType) {
         return createPendingAgreement(salesChannel, discountCodeType, 1);
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
-            DiscountCodeTypeEnum discountCodeType, int idx) {
+                                                         DiscountCodeTypeEnum discountCodeType, int idx) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         // creating profile
@@ -225,8 +232,18 @@ public class IntegrationAbstractTest {
         TestUtils.setAdminAuth();
     }
 
+    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold, DiscountEntity discountEntity){
+        // use 100% - threshold codes
+        int codeToUse = 10 - (int) Math.floor((float) 10 * threshold.getValue() / 100);
+        log.info("Will use " + codeToUse + " codes.");
+        discountBucketCodeRepository.findAllByDiscount(discountEntity).stream().limit(codeToUse).forEach(c -> {
+            c.setIsUsed(true);
+            discountBucketCodeRepository.save(c);
+        });
+    }
+
     private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity, ProfileEntity profileEntity,
-            DiscountEntity discountEntity, List<DocumentEntity> documentEntityList) {
+                                                          DiscountEntity discountEntity, List<DocumentEntity> documentEntityList) {
         AgreementTestObject testObject = new AgreementTestObject();
         testObject.setAgreementEntity(agreementEntity);
         testObject.setProfileEntity(profileEntity);

@@ -52,7 +52,7 @@ public class EnumTest {
                 .map(ApiTokenTypeEnum::getCode)
                 .toArray(String[]::new);
         Assertions.assertEquals(2, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"Primary", "Secondary"}, sortedValues);
+        Assertions.assertArrayEquals(new String[]{"primary", "secondary"}, sortedValues);
     }
 
     @Test
