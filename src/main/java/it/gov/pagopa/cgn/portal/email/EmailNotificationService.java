@@ -32,7 +32,7 @@ public class EmailNotificationService {
     public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams, String trackingKey) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                sendSyncMessage(emailParams, null);
+                sendSyncMessage(emailParams, trackingKey);
             } catch (MessagingException e) {
                 log.error(emailParams.getFailureMessage(), e);
             }
