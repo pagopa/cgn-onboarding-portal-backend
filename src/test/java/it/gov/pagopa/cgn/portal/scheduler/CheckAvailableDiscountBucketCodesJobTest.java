@@ -86,14 +86,6 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Execute_ExecuteJob_DoNotSendNotification() throws IOException {
-        job.execute(null);
-
-        var notifications = notificationRepository.findAll();
-        Assertions.assertTrue(notifications.isEmpty());
-    }
-
-    @Test
     void Execute_ExecuteJob_SendPercent50Notification() {
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
     }

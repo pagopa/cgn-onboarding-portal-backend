@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -27,7 +26,6 @@ import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

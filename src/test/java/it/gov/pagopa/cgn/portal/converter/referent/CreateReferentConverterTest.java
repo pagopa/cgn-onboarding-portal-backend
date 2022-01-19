@@ -1,12 +1,11 @@
 package it.gov.pagopa.cgn.portal.converter.referent;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
+import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
