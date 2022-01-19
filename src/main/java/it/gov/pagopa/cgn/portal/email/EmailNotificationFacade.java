@@ -13,6 +13,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
+import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -137,13 +138,17 @@ public class EmailNotificationFacade {
         }
     }
 
+    public static String createTrackingKeyForExiprationNotification(DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold) {
+        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
+    }
+
     public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail, DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold, Long remainingCodes) {
         var subject = "[Carta Giovani Nazionale] I tuoi codici sconto stanno per esaurirsi ( < " + threshold.getValue() + "% )";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
-        final String trackingKey = threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
+        final String trackingKey = createTrackingKeyForExiprationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
@@ -155,7 +160,7 @@ public class EmailNotificationFacade {
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
-        final String trackingKey = "EXPIRED::" + discount.getId() + "::" + discount.getLastBucketCodeLoadUid();
+        final String trackingKey = createTrackingKeyForExiprationNotification(discount, BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);

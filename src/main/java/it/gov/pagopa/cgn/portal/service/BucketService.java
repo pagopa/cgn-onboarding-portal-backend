@@ -55,31 +55,18 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public DiscountEntity createPendingBucketLoad(DiscountEntity discount) {
-        BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
-        bucketCodeLoadEntity.setDiscountId(discount.getId());
-        bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
-        bucketCodeLoadEntity.setUid(discount.getLastBucketCodeLoadUid());
-        bucketCodeLoadEntity.setFileName(discount.getLastBucketCodeLoadFileName());
-        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
-        // attach BucketCodeLoad to Discount
-        discount.setLastBucketCodeLoad(bucketCodeLoadEntity);
-        discountRepository.save(discount);
-        return discount;
-    }
-
-    @Transactional(Transactional.TxType.REQUIRED)
     public void createEmptyDiscountBucketCodeSummary(DiscountEntity discount) {
         DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = new DiscountBucketCodeSummaryEntity(discount, 0L);
         discountBucketCodeSummaryRepository.save(bucketCodeSummaryEntity);
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
-    public void checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void checkDiscountBucketCodeSummaryExpirationAndSendNotification(Long discountBucketCodeSummaryEntityId) {
+        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntityId);
         DiscountEntity discount = discountBucketCodeSummaryEntity.getDiscount();
         String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
-        var remainingPercent = Math.floor((float) remainingCodes / Float.valueOf(discountBucketCodeSummaryEntity.getAvailableCodes()) * 100);
+        var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummaryEntity.getAvailableCodes()) * 100);
         Arrays.stream(BucketCodeExpiringThresholdEnum.values())
                 .sorted()
                 .filter(t -> remainingPercent <= t.getValue())
@@ -100,12 +87,26 @@ public class BucketService {
                 });
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity createPendingBucketLoad(DiscountEntity discount) {
+        BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
+        bucketCodeLoadEntity.setDiscountId(discount.getId());
+        bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.PENDING);
+        bucketCodeLoadEntity.setUid(discount.getLastBucketCodeLoadUid());
+        bucketCodeLoadEntity.setFileName(discount.getLastBucketCodeLoadFileName());
+        bucketCodeLoadRepository.save(bucketCodeLoadEntity);
+        // attach BucketCodeLoad to Discount
+        discount.setLastBucketCodeLoad(bucketCodeLoadEntity);
+        discountRepository.save(discount);
+        return discount;
+    }
+
     public boolean isLastBucketLoadStillLoading(Long bucketLoadId) {
         return !List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED)
                 .contains(bucketCodeLoadRepository.findById(bucketLoadId).orElseThrow().getStatus());
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRED)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.getOne(discountEntity.getLastBucketCodeLoad().getId());
@@ -120,7 +121,7 @@ public class BucketService {
         }
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRED)
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
         DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
@@ -160,7 +161,7 @@ public class BucketService {
         }
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRED)
     public void deleteBucketCodes(Long discountId) {
         discountBucketCodeRepository.deleteByDiscountId(discountId);
     }
