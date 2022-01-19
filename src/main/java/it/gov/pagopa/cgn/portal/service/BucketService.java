@@ -61,17 +61,17 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void checkDiscountBucketCodeSummaryExpirationAndSendNotification(Long discountBucketCodeSummaryEntityId) {
+    public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(Long discountBucketCodeSummaryEntityId) {
         DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntityId);
         DiscountEntity discount = discountBucketCodeSummaryEntity.getDiscount();
         String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
         var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummaryEntity.getAvailableCodes()) * 100);
-        Arrays.stream(BucketCodeExpiringThresholdEnum.values())
+        var notificationSent = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
                 .sorted()
                 .filter(t -> remainingPercent <= t.getValue())
                 .findFirst()
-                .ifPresent(t -> {
+                .map(t -> {
                     switch (t) {
                         case PERCENT_0:
                             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(referentEmailAddress, discount);
@@ -84,7 +84,9 @@ public class BucketService {
                             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(referentEmailAddress, discount, t, remainingCodes);
                             break;
                     }
+                    return true;
                 });
+        return notificationSent.orElse(false);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)

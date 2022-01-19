@@ -182,13 +182,16 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
+        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get().getStatus() == BucketCodeLoadStatusEnum.FINISHED);
 
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
+        Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
@@ -261,13 +264,16 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
+        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get().getStatus() == BucketCodeLoadStatusEnum.FINISHED);
 
         BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
+        Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
         Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
 
@@ -292,11 +298,10 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        var notificationSent = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
 
         // no notification should be sent because all codes are available
-        var notifications = notificationRepository.findAll();
-        Assertions.assertTrue(notifications.isEmpty());
+        Assertions.assertFalse(notificationSent);
     }
 
     @Test
@@ -347,7 +352,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 
-        bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        var notificationSent = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        Assertions.assertTrue(notificationSent);
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
 
