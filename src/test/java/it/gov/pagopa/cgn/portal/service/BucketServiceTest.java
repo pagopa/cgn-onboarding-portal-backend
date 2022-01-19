@@ -352,7 +352,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
 
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> notificationRepository.count() == 1);
+        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
 
         var notification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, threshold));
         Assertions.assertNotNull(notification);

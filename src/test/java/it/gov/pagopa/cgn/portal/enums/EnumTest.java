@@ -22,6 +22,13 @@ public class EnumTest {
     }
 
     @Test
+    public void BucketCodeExpiringThresholdEnum_Ko() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            BucketCodeExpiringThresholdEnum.valueOf("NOT_AVAILABLE");
+        });
+    }
+
+    @Test
     public void AgreementStateEnum_Ok() {
         var sortedValues = Arrays.stream(AgreementStateEnum.values())
                 .sorted(Comparator.comparing(AgreementStateEnum::getCode))
@@ -30,6 +37,15 @@ public class EnumTest {
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"APPROVED", "DRAFT", "PENDING", "REJECTED"}, sortedValues);
     }
+
+    @Test
+    public void AgreementStateEnum_Ko() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            AgreementStateEnum.valueOf("NOT_AVAILABLE");
+        });
+    }
+
+
 
 
 }
