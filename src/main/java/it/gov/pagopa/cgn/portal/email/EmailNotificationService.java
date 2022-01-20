@@ -66,7 +66,7 @@ public class EmailNotificationService {
             log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
             javaMailSender.send(mimeMessage);
             trackNotification(trackingKey);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             trackNotification(trackingKey, e.getMessage());
             throw e;
         }
@@ -83,7 +83,8 @@ public class EmailNotificationService {
     /**
      * Saves a new Notification, or updates the existing one if already existent,
      * for a given key.
-     * @param trackingKey a key that uniquely identify this notification
+     *
+     * @param trackingKey  a key that uniquely identify this notification
      * @param errorMessage a message that indicates any error occurred
      */
     private void trackNotification(String trackingKey, String errorMessage) {
@@ -104,6 +105,7 @@ public class EmailNotificationService {
     /**
      * Returns a boolean indicating whether a given notification exists
      * for a given key and was sent without errors.
+     *
      * @param trackingKey the tracking key of the notification if any
      * @return boolean
      */
