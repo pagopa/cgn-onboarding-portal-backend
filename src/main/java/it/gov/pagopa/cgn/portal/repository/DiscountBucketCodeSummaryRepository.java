@@ -11,5 +11,5 @@ public interface DiscountBucketCodeSummaryRepository
 
     DiscountBucketCodeSummaryEntity findByDiscount(DiscountEntity discount);
 
-    List<DiscountBucketCodeSummaryEntity> findByExpiredAtIsNull();
+    List<DiscountBucketCodeSummaryEntity> findAllByExpiredAtIsNull();
 }

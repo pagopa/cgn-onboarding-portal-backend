@@ -16,18 +16,8 @@ import java.time.OffsetDateTime;
 public class DiscountBucketCodeSummaryEntity implements Serializable {
 
     @Id
-    @Column(name = "discount_bucket_code_summary_k")
-    @SequenceGenerator(name = "discount_bucket_code_summary_k_seq", sequenceName = "discount_bucket_code_summary_k_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_bucket_code_summary_k_seq")
-    @Exclude
-    @ToString.Exclude
+    @Column(name = "discount_fk")
     private Long id;
-
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "discount_fk", nullable = false)
-    private DiscountEntity discount;
 
     @NotNull
     @Column(name = "available_codes")
@@ -36,13 +26,18 @@ public class DiscountBucketCodeSummaryEntity implements Serializable {
     @Column(name = "expired_at")
     private OffsetDateTime expiredAt;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "discount_fk")
+    private DiscountEntity discount;
+
     public DiscountBucketCodeSummaryEntity() {
     }
 
-    public DiscountBucketCodeSummaryEntity(DiscountEntity discount,
-                                           Long availableCodes) {
-        this.discount = discount;
-        this.availableCodes = availableCodes;
+    public DiscountBucketCodeSummaryEntity(DiscountEntity discount) {
+        this.id = discount.getId();
+        this.availableCodes = 0L;
     }
 
 }

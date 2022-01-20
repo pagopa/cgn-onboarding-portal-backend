@@ -35,9 +35,8 @@ public class NotificationEntity implements Serializable {
     public NotificationEntity() {
     }
 
-    public NotificationEntity(@NotNull @NotBlank @Size(max = 128) String key) {
+    public NotificationEntity(@NotNull @NotBlank @Size(max = 255) String key) {
         this.key = key;
-        this.sentAt = OffsetDateTime.now();
     }
 
 }

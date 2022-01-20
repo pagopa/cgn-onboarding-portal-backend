@@ -1,18 +1,13 @@
 DROP INDEX discount_bucket_code_used_idx;
 CREATE INDEX discount_bucket_code_used_idx ON discount_bucket_code USING btree (discount_fk ASC, used ASC) WHERE used = false;
 
-CREATE SEQUENCE "discount_bucket_code_summary_k_seq"
-    INCREMENT BY 1 MINVALUE 1 NO MAXVALUE
-    START WITH 1 NO CYCLE;
-
 CREATE TABLE discount_bucket_code_summary
 (
-    discount_bucket_code_summary_k BIGSERIAL NOT NULL,
     discount_fk                    BIGINT    NOT NULL,
     available_codes                BIGINT    NOT NULL,
     expired_at                     TIMESTAMPTZ,
 
-    CONSTRAINT discount_bucket_code_summary_pk PRIMARY KEY (discount_bucket_code_summary_k),
+    CONSTRAINT discount_bucket_code_summary_pk PRIMARY KEY (discount_fk),
     CONSTRAINT discount_bucket_code_summary_fk FOREIGN KEY (discount_fk)
         REFERENCES discount (discount_k)
         ON UPDATE CASCADE

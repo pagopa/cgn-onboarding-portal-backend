@@ -37,7 +37,7 @@ public class CheckAvailableDiscountBucketCodesJob implements Job {
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
         List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList =
-                discountBucketCodeSummaryRepository.findByExpiredAtIsNull();
+                discountBucketCodeSummaryRepository.findAllByExpiredAtIsNull();
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() + " not expired discount bucket code summaries to check");

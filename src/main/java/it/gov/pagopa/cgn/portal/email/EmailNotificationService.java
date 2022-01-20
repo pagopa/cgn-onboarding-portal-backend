@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -79,20 +80,36 @@ public class EmailNotificationService {
         trackNotification(trackingKey, null);
     }
 
+    /**
+     * Saves a new Notification, or updates the existing one if already existent,
+     * for a given key.
+     * @param trackingKey a key that uniquely identify this notification
+     * @param errorMessage a message that indicates any error occurred
+     */
     private void trackNotification(String trackingKey, String errorMessage) {
         if (trackingKey != null) {
+            // if a key has been given we check if a notification exists
+            // this is useful to update a notification that had an error
             var notification = findNotification(trackingKey);
             if (notification == null) {
-                // create a new Notification
+                // if no notification is found create a new Notification
                 notification = new NotificationEntity(trackingKey);
             }
+            notification.setSentAt(OffsetDateTime.now());
             notification.setErrorMessage(errorMessage);
             notificationRepository.save(notification);
         }
     }
 
+    /**
+     * Returns a boolean indicating whether a given notification exists
+     * for a given key and was sent without errors.
+     * @param trackingKey the tracking key of the notification if any
+     * @return boolean
+     */
     private boolean notificationAlreadySent(String trackingKey) {
         if (trackingKey != null) {
+            // if a key has been given we check if a notification exist
             var notification = findNotification(trackingKey);
             return notification != null && notification.getErrorMessage() == null;
         }
