@@ -13,7 +13,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
-import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -143,7 +142,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail, DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold, Long remainingCodes) {
-        var subject = "[Carta Giovani Nazionale] I tuoi codici sconto stanno per esaurirsi ( < " + threshold.getValue() + "% )";
+        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
@@ -156,7 +155,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(String referentEmail, DiscountEntity discount) {
-        var subject = "[Carta Giovani Nazionale] I tuoi codici sconto sono stati esauriti";
+        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione è esaurita";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;

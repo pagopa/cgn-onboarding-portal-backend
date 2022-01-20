@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.EqualsAndHashCode.Exclude;
 import lombok.ToString;
 
 import javax.persistence.*;
