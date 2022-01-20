@@ -70,7 +70,7 @@ public class BucketService {
         String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
         var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummaryEntity.getAvailableCodes()) * 100);
-        var notificationSent = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
+        var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
                 .sorted()
                 .filter(t -> remainingPercent <= t.getValue())
                 .findFirst()
@@ -89,7 +89,7 @@ public class BucketService {
                     }
                     return true;
                 });
-        return notificationSent.orElse(false);
+        return notificationRequired.orElse(false);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
