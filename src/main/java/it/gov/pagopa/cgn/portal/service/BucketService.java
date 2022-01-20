@@ -1,30 +1,28 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
+import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVRecord;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Stream;
-
-import javax.transaction.Transactional;
-
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
-import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.csv.CSVRecord;
-import org.springframework.stereotype.Service;
-
-import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 
 @Slf4j
 @Service
@@ -116,7 +114,7 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.getOne(discountEntity.getLastBucketCodeLoad().getId());
+        BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.RUNNING);
@@ -132,7 +130,7 @@ public class BucketService {
     public void performBucketLoad(Long discountId) {
         DiscountEntity discountEntity = discountRepository.getOne(discountId);
         DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.getOne(discountEntity.getLastBucketCodeLoad().getId());
+        BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         if (bucketCodeLoadEntity.getStatus().equals(BucketCodeLoadStatusEnum.FAILED))
             return;
 
