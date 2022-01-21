@@ -44,7 +44,7 @@ public class ProfileEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Size(min = 11, max = 16)
+    @Size(min = 8, max = 16)
     @Column(name = "tax_code_or_vat", length = 16)
     private String taxCodeOrVat;
 
@@ -90,8 +90,8 @@ public class ProfileEntity extends BaseEntity {
 
     @NotNull
     @NotBlank
-    @Size(min = 16, max = 16)
-    @Column(name = "legal_representative_tax_code", length = 16)
+    @Size(min = 4, max = 20)
+    @Column(name = "legal_representative_tax_code", length = 20)
     private String legalRepresentativeTaxCode;
 
     @Enumerated(EnumType.STRING)
