@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class EmailNotificationServiceTest extends IntegrationAbstractTest {
+class EmailNotificationServiceTest extends IntegrationAbstractTest {
 
     private final NotificationRepository notificationRepositoryMock;
 
