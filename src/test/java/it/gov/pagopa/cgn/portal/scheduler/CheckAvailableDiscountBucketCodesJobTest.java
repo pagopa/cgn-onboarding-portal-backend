@@ -13,9 +13,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -33,12 +31,6 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
     private CheckAvailableDiscountBucketCodesJob job;
 
     @Autowired
-    private Scheduler quartzScheduler;
-
-    @Autowired
-    private JobScheduler jobScheduler;
-
-    @Autowired
     private AzureStorage azureStorage;
 
     @Autowired
@@ -46,8 +38,36 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
 
     private DiscountEntity discountEntity;
 
-    @BeforeEach
-    void init() throws IOException {
+    @Test
+    void Execute_ExecuteJob_NoBucketCodeSummaries() {
+        job.execute(null);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent50Notification() throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent25Notification() throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent10Notification() throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent0Notification() throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
+    }
+
+    private void init() throws IOException {
         setAdminAuth();
 
         AgreementTestObject testObject = createApprovedAgreement();
@@ -83,26 +103,6 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
             bucketService.setRunningBucketLoad(discountEntity.getId());
             bucketService.performBucketLoad(discountEntity.getId());
         }
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent50Notification() {
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent25Notification() {
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent10Notification() {
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent0Notification() {
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
     }
 
     private void testNotification(BucketCodeExpiringThresholdEnum threshold) {

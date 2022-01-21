@@ -275,6 +275,27 @@ class BucketServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_BucketNotLoaded_NoNotifications() throws IOException {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        discountRepository.save(discountEntity);
+
+        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+
+        bucketService.createPendingBucketLoad(discountEntity);
+        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.setRunningBucketLoad(discountEntity.getId());
+        // we do not run loading => bucket code summary available codes are 0
+        // => job should skip the check and not require a notification
+
+        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getAvailableCodes());
+
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        // no notification should be sent because bucket has not been loaded yet
+        Assertions.assertFalse(notificationRequired);
+    }
+
+    @Test
     void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_NotificationNotSent() throws IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
