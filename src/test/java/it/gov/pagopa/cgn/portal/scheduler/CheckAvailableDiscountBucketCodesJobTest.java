@@ -40,7 +40,7 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
 
     @Test
     void Execute_ExecuteJob_NoBucketCodeSummaries() {
-        job.execute(null);
+        Assertions.assertDoesNotThrow(() -> job.execute(null));
     }
 
     @Test
