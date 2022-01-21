@@ -108,37 +108,6 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.items[2].agreementId").value(sortedByLastModifyDateAgreementList.get(2).getId()));
     }
 
-    @Test
-    void GetAgreements_GetAgreementsApprovedSortedByAgreementDate_Ok() throws Exception {
-        final int numRows = 3;
-        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
-
-        testObjectList.forEach(obj -> {
-            AgreementEntity agreement = obj.getAgreementEntity();
-            agreement.setStartDate(LocalDate.now().plusDays(testObjectList.indexOf(obj)));
-            agreementRepository.save(agreement);
-        });
-
-        List<AgreementEntity> sortedByAgreementDateAgreementList = testObjectList.stream()
-                .sorted(Comparator.comparing(a -> a.getAgreementEntity().getStartDate()))
-                .map(AgreementTestObject::getAgreementEntity)
-                .collect(Collectors.toList());
-
-        this.mockMvc.perform(
-                        get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isArray())
-                .andExpect(jsonPath("$.items").isNotEmpty())
-                .andExpect(jsonPath("$.items", hasSize(numRows)))
-                .andExpect(jsonPath("$.total").value(numRows))
-                .andExpect(jsonPath("$.items[0].agreementId").value(sortedByAgreementDateAgreementList.get(0).getId()))
-                .andExpect(jsonPath("$.items[1].agreementId").value(sortedByAgreementDateAgreementList.get(1).getId()))
-                .andExpect(jsonPath("$.items[2].agreementId").value(sortedByAgreementDateAgreementList.get(2).getId()));
-
-    }
-
 
     @Test
     void GetAgreements_GetAgreementsApprovedDetails_Ok() throws Exception {

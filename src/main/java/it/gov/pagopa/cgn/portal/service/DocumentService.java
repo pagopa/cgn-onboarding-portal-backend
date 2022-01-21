@@ -20,6 +20,7 @@ import com.lowagie.text.pdf.BaseFont;
 
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -113,7 +114,7 @@ public class DocumentService {
             long csvRecordCount = countCsvRecord(content);
             if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
                 throw new InvalidRequestException(
-                        "Cannot load bucket because number of rows ("+csvRecordCount+") does not respect minimum bound ("+configProperties.getBucketMinCsvRows()+") on loaded content of length ("+content.length+")");
+                        "Cannot load bucket because number of rows (" + csvRecordCount + ") does not respect minimum bound (" + configProperties.getBucketMinCsvRows() + ") on loaded content of length (" + content.length + ")");
             }
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
@@ -238,22 +239,6 @@ public class DocumentService {
         List<RenderableDiscount> renderableDiscounts = discounts.stream().map(RenderableDiscount::fromEntity)
                 .collect(Collectors.toList());
 
-        Context context = new Context();
-        context.setVariable("legal_name", profileEntity.getFullName());
-        context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
-        context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
-        context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
-        context.setVariable("legal_office", profileEntity.getLegalOffice());
-        context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
-        context.setVariable("pec_address", profileEntity.getPecAddress());
-        context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-
-        context.setVariable("merchant_name", profileEntity.getName());
-        context.setVariable("merchant_description", profileEntity.getDescription());
-        context.setVariable("merchant_address_list", addressList);
-        context.setVariable("merchant_website", profileEntity.getWebsiteUrl());
-        context.setVariable("discounts", renderableDiscounts);
-
         String discountMode = null;
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             discountMode = "Negozio fisico";
@@ -273,6 +258,26 @@ public class DocumentService {
                     break;
             }
         }
+
+        String merchantName =
+                profileEntity.getName() == null || profileEntity.getName().isEmpty() || profileEntity.getName().isBlank()
+                        ? profileEntity.getFullName() : profileEntity.getName();
+
+        Context context = new Context();
+        context.setVariable("legal_name", profileEntity.getFullName());
+        context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
+        context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
+        context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
+        context.setVariable("legal_office", profileEntity.getLegalOffice());
+        context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
+        context.setVariable("pec_address", profileEntity.getPecAddress());
+        context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+        context.setVariable("merchant_name", merchantName);
+        context.setVariable("merchant_description", profileEntity.getDescription());
+        context.setVariable("merchant_address_list", addressList);
+        context.setVariable("merchant_website", profileEntity.getWebsiteUrl());
+        context.setVariable("discounts", renderableDiscounts);
         context.setVariable("discount_mode", discountMode);
 
         ReferentEntity referent = profileEntity.getReferent();
@@ -335,6 +340,7 @@ public class DocumentService {
         public String condition;
         public String modeValue;
         public String categories;
+        public String description;
 
         public static RenderableDiscount fromEntity(DiscountEntity entity) {
             RenderableDiscount discount = new RenderableDiscount();
@@ -348,6 +354,7 @@ public class DocumentService {
             discount.condition = entity.getCondition();
             discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl()).filter(Objects::nonNull).findFirst().orElse("-");
             discount.categories = categories;
+            discount.description = entity.getDescription();
 
             return discount;
         }
