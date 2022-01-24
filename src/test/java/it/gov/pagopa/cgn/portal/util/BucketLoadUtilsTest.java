@@ -1,16 +1,15 @@
 package it.gov.pagopa.cgn.portal.util;
 
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
+import it.gov.pagopa.cgn.portal.service.BucketService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import it.gov.pagopa.cgn.portal.service.BucketService;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 @RunWith(SpringRunner.class)
