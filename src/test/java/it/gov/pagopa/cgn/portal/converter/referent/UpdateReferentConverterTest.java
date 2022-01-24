@@ -1,8 +1,8 @@
 package it.gov.pagopa.cgn.portal.converter.referent;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

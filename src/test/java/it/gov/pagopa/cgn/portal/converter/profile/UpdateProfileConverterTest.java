@@ -1,26 +1,19 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
-import java.math.BigDecimal;
-import java.util.stream.IntStream;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgnonboardingportal.model.Address;
-import it.gov.pagopa.cgnonboardingportal.model.BothChannels;
-import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
-import it.gov.pagopa.cgnonboardingportal.model.OfflineChannel;
-import it.gov.pagopa.cgnonboardingportal.model.OnlineChannel;
-import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
+import it.gov.pagopa.cgnonboardingportal.model.*;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.math.BigDecimal;
+import java.util.stream.IntStream;
 @RunWith(SpringRunner.class)
 public class UpdateProfileConverterTest {
 

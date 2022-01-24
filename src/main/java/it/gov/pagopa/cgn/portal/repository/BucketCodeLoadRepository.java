@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BucketCodeLoadRepository extends JpaRepository<BucketCodeLoadEntity, Long> {
 
-    BucketCodeLoadEntity findByDiscountIdAndUid(Long discountId, String uid);
 }
