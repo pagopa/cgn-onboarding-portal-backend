@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreement;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AssignedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.PendingAgreement;
 import org.junit.Assert;
@@ -13,8 +14,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 
 @RunWith(SpringRunner.class)
 public class BackofficeAgreementConverterTest {
