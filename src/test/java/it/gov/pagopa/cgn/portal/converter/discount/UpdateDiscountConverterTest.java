@@ -1,14 +1,13 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-import java.time.LocalDate;
-
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
+import java.time.LocalDate;
 
 @RunWith(SpringRunner.class)
 public class UpdateDiscountConverterTest {

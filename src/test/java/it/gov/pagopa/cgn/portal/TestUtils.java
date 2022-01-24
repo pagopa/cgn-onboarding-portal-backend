@@ -11,12 +11,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.enums.*;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.model.*;
-import it.gov.pagopa.cgn.portal.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
@@ -27,11 +28,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class TestUtils {
 
@@ -290,6 +287,24 @@ public class TestUtils {
 
     public static String generateDiscountBucketCodeUid() {
         return UUID.randomUUID().toString();
+    }
+
+    public static UpdateDiscount updatableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
+        DiscountConverter discountConverter = new DiscountConverter();
+        Discount discount = discountConverter.toDto(discountEntity);
+        UpdateDiscount updateDiscount = new UpdateDiscount();
+        updateDiscount.setName(discount.getName());
+        updateDiscount.setDescription(discount.getDescription());
+        updateDiscount.setCondition(discount.getCondition());
+        updateDiscount.setStartDate(discount.getStartDate());
+        updateDiscount.setEndDate(discount.getEndDate());
+        updateDiscount.setStaticCode(discount.getStaticCode());
+        updateDiscount.setLandingPageUrl(discount.getLandingPageUrl());
+        updateDiscount.setLandingPageReferrer(discount.getLandingPageReferrer());
+        updateDiscount.setProductCategories(discount.getProductCategories());
+        updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
+        updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
+        return updateDiscount;
     }
 
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {

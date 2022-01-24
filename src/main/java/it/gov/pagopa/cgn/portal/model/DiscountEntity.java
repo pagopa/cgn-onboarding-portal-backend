@@ -55,7 +55,7 @@ public class DiscountEntity extends BaseEntity {
     private LocalDate endDate;
 
     @Min(value = 1)
-    @Max(value = 99)
+    @Max(value = 100)
     @Column(name = "discount_value")
     private Integer discountValue;
 

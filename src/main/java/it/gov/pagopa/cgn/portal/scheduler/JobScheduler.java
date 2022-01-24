@@ -37,4 +37,25 @@ public class JobScheduler {
 
         scheduler.scheduleJob(job, trigger);
     }
+
+    public void scheduleCheckAvailableDiscountBucketCodesJob() throws SchedulerException {
+
+        JobKey jobKey = JobKey.jobKey("check-available-codes", "discounts");
+
+        for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
+            scheduler.unscheduleJob(trigger.getKey());
+        }
+
+        JobDetail job = JobBuilder
+                .newJob(CheckAvailableDiscountBucketCodesJob.class)
+                .withIdentity(jobKey)
+                .build();
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .withSchedule(CronScheduleBuilder.cronSchedule(configProperties.getAvailableDiscountBucketCodesJobCronExpression())
+                        .inTimeZone(TimeZone.getTimeZone("Europe/Rome")))
+                .build();
+
+        scheduler.scheduleJob(job, trigger);
+    }
 }

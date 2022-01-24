@@ -88,6 +88,9 @@ public class ConfigProperties {
     @Value("${check.expiring.discounts.job.cron}")
     private String expiringDiscountsJobCronExpression;
 
+    @Value("${check.available.discounts.bucket.codes.job.cron}")
+    private String availableDiscountBucketCodesJobCronExpression;
+
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
 

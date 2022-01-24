@@ -2,22 +2,26 @@ package it.gov.pagopa.cgn.portal.controller.discount;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
-import it.gov.pagopa.cgnonboardingportal.model.*;
+import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
+import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
@@ -29,7 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -71,12 +74,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
     @Autowired
     private BucketService bucketService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     private String discountPath;
     private AgreementEntity agreement;
-    private final DiscountConverter discountConverter = new DiscountConverter();
 
     private MockMultipartFile multipartFile;
 
@@ -305,7 +304,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
 
-        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discount);
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discount);
         updateDiscount.setName("new_name");
         updateDiscount.setStaticCode("new_static_code");
         this.mockMvc.perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
@@ -338,7 +337,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 "referrer");
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
-        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLandingPageUrl("new_url");
         updateDiscount.setLandingPageReferrer("new_referrer");
@@ -376,7 +375,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
-        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId())
                         .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
@@ -416,7 +415,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
 
-        UpdateDiscount updateDiscount = updatableDiscountFromDiscountEntity(discountEntity);
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
         updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
@@ -571,22 +570,5 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
         return createDiscount;
-    }
-
-    private UpdateDiscount updatableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
-        Discount discount = discountConverter.toDto(discountEntity);
-        UpdateDiscount updateDiscount = new UpdateDiscount();
-        updateDiscount.setName(discount.getName());
-        updateDiscount.setDescription(discount.getDescription());
-        updateDiscount.setCondition(discount.getCondition());
-        updateDiscount.setStartDate(discount.getStartDate());
-        updateDiscount.setEndDate(discount.getEndDate());
-        updateDiscount.setStaticCode(discount.getStaticCode());
-        updateDiscount.setLandingPageUrl(discount.getLandingPageUrl());
-        updateDiscount.setLandingPageReferrer(discount.getLandingPageReferrer());
-        updateDiscount.setProductCategories(discount.getProductCategories());
-        updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
-        updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
-        return updateDiscount;
     }
 }

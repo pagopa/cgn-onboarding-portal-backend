@@ -1,9 +1,9 @@
 package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;

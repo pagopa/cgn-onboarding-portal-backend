@@ -73,12 +73,13 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     void RequestApproval_RequestApprovalWithoutDiscount_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
 
         saveSampleDocuments(agreementEntity);
-        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
@@ -92,12 +93,14 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     void RequestApproval_RequestApprovalWithoutProfile_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        var agreementId = agreementEntity.getId();
+
         saveSampleDocuments(agreementEntity);
 
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
-        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> discountService.createDiscount(agreementId, discountEntity));
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
@@ -111,13 +114,14 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     void RequestApproval_RequestApprovalWithoutDocuments_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
@@ -130,6 +134,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
     void RequestApproval_RequestApprovalWithoutOneDocument_ThrowException() {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -138,7 +143,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         DocumentEntity documentEntity = TestUtils.createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT);
         documentRepository.save(documentEntity);
-        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
         AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
