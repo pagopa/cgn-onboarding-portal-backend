@@ -3,9 +3,9 @@ CREATE INDEX discount_bucket_code_used_idx ON discount_bucket_code USING btree (
 
 CREATE TABLE discount_bucket_code_summary
 (
-    discount_fk                    BIGINT    NOT NULL,
-    available_codes                BIGINT    NOT NULL,
-    expired_at                     TIMESTAMPTZ,
+    discount_fk     BIGINT NOT NULL,
+    available_codes BIGINT NOT NULL,
+    expired_at      TIMESTAMPTZ,
 
     CONSTRAINT discount_bucket_code_summary_pk PRIMARY KEY (discount_fk),
     CONSTRAINT discount_bucket_code_summary_fk FOREIGN KEY (discount_fk)
@@ -15,10 +15,10 @@ CREATE TABLE discount_bucket_code_summary
 );
 
 INSERT INTO discount_bucket_code_summary
-SELECT discount_id as discount_fk, COALESCE(SUM(number_of_codes), 0) as available_codes
-FROM bucket_code_load
-WHERE discount_id IN (SELECT DISTINCT discount_k FROM discount)
-GROUP BY discount_id;
+SELECT discount_fk, COUNT(1) as available_codes
+FROM discount_bucket_code
+WHERE NOT used
+GROUP BY discount_fk;
 
 CREATE TABLE notification
 (
