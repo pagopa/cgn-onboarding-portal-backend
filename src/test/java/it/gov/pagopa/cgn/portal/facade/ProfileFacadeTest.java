@@ -52,7 +52,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    public void UpdateProfile_ChangeDiscountCodeType_UnpublishDiscounts() {
+    void UpdateProfile_ChangeDiscountCodeType_UnpublishDiscounts() {
         var agreementId = agreementEntity.getId();
 
         // set profile for landing page
@@ -108,7 +108,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
     }
 
-    protected void adminApproveAgreement() {
+    void adminApproveAgreement() {
         TestUtils.setAdminAuth();
         backofficeAgreementService.assignAgreement(agreementEntity.getId());
         saveBackofficeSampleDocuments(agreementEntity);

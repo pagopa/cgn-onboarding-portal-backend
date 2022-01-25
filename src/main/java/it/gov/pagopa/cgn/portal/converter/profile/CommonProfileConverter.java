@@ -69,7 +69,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         return dto;
     };
 
-    public Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
+    protected Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
         switch (entity.getSalesChannel()) {
             case ONLINE:
                 OnlineChannel onlineChannel = new OnlineChannel();

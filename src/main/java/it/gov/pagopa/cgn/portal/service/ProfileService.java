@@ -67,6 +67,7 @@ public class ProfileService {
         this.documentService = documentService;
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity getProfileFromAgreementId(String agreementId) {
         return getOptProfileFromAgreementId(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Updating profile was not found for agreement " + agreementId));
