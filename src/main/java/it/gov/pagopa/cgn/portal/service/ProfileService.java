@@ -24,7 +24,6 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final DocumentService documentService;
 
-
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity createProfile(ProfileEntity profileEntity, String agreementId) {
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
@@ -57,7 +56,6 @@ public class ProfileService {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
         }
-
         return profileRepository.save(profileEntity);
     }
 
@@ -69,7 +67,7 @@ public class ProfileService {
         this.documentService = documentService;
     }
 
-    private ProfileEntity getProfileFromAgreementId(String agreementId) {
+    public ProfileEntity getProfileFromAgreementId(String agreementId) {
         return getOptProfileFromAgreementId(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Updating profile was not found for agreement " + agreementId));
     }
@@ -77,6 +75,7 @@ public class ProfileService {
     private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
         return profileRepository.findByAgreementId(agreementId);
     }
+
     private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {
         dbEntity.setFirstName(toUpdateEntity.getFirstName());
         dbEntity.setLastName(toUpdateEntity.getLastName());
@@ -93,19 +92,19 @@ public class ProfileService {
     };
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
-      dbEntity.setName(toUpdateEntity.getName());
-      dbEntity.setDescription(toUpdateEntity.getDescription());
-      dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
-      dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
-      dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());
-      dbEntity.setLegalRepresentativeTaxCode(toUpdateEntity.getLegalRepresentativeTaxCode());
-      dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
-      dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
-      dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
-      dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
-      updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
-      updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
-      dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
+        dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setDescription(toUpdateEntity.getDescription());
+        dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
+        dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
+        dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());
+        dbEntity.setLegalRepresentativeTaxCode(toUpdateEntity.getLegalRepresentativeTaxCode());
+        dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
+        dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
+        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+        dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
+        updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
+        updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
+        dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
     };
 
 }
