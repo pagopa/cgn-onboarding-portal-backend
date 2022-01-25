@@ -133,6 +133,32 @@ public class TestUtils {
         return profileEntity;
     }
 
+    public static UpdateProfile updatableOnlineProfileFromProfileEntity(ProfileEntity profileEntity, DiscountCodeType discountCodeType) {
+        OnlineChannel salesChannel = new OnlineChannel();
+        salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setDiscountCodeType(discountCodeType);
+
+        UpdateReferent referent = new UpdateReferent();
+        referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
+        referent.setFirstName(profileEntity.getReferent().getFirstName());
+        referent.setTelephoneNumber(profileEntity.getReferent().getTelephoneNumber());
+        referent.setLastName(profileEntity.getReferent().getLastName());
+        referent.setRole(profileEntity.getReferent().getRole());
+
+        UpdateProfile updateProfile = new UpdateProfile();
+        updateProfile.setDescription(profileEntity.getDescription());
+        updateProfile.setSalesChannel(salesChannel);
+        updateProfile.setName(profileEntity.getName());
+        updateProfile.setLegalOffice(profileEntity.getLegalOffice());
+        updateProfile.setReferent(referent);
+        updateProfile.setPecAddress(profileEntity.getPecAddress());
+        updateProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
+        updateProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
+        updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
+        return updateProfile;
+    }
+
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
         addressEntity.setProfile(profileEntity);

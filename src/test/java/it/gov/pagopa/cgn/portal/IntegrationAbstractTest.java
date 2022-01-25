@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.service.*;
+import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -128,6 +129,12 @@ public class IntegrationAbstractTest {
     @Autowired
     protected BackofficeAgreementService backofficeAgreementService;
 
+    @Autowired
+    private TestReferentRepository testReferentRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
     @AfterEach
     protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();
@@ -230,7 +237,27 @@ public class IntegrationAbstractTest {
         TestUtils.setAdminAuth();
     }
 
-    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold, DiscountEntity discountEntity){
+    protected void setProfileSalesChannel(AgreementEntity agreementEntity, SalesChannelEnum salesChannel) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setSalesChannel(salesChannel);
+        // to avoid LazyInitializationException
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+    }
+
+    protected void setProfileDiscountType(AgreementEntity agreementEntity, DiscountCodeTypeEnum discountType) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId()).orElseThrow();
+        profileEntity.setDiscountCodeType(discountType);
+        // to avoid LazyInitializationException
+        profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileService.updateProfile(agreementEntity.getId(), profileEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+    }
+
+    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold, DiscountEntity discountEntity) {
         // use 100% - threshold codes
         int codeToUse = 10 - (int) Math.floor((float) 10 * threshold.getValue() / 100);
         log.info("Will use " + codeToUse + " codes.");
