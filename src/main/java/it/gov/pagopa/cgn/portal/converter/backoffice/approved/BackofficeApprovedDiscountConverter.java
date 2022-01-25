@@ -22,17 +22,20 @@ public class BackofficeApprovedDiscountConverter extends CommonBackofficeDiscoun
 
 
     private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
+
     static {
-        productEnumMaps.put(ProductCategoryEnum.ENTERTAINMENT, ProductCategory.ENTERTAINMENT);
-        productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
-        productEnumMaps.put(ProductCategoryEnum.FOOD_DRINK, ProductCategory.FOODDRINK);
-        productEnumMaps.put(ProductCategoryEnum.SERVICES, ProductCategory.SERVICES);
-        productEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
-        productEnumMaps.put(ProductCategoryEnum.HOTELS, ProductCategory.HOTELS);
-        productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
+        productEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
+        productEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT, ProductCategory.CULTUREANDENTERTAINMENT);
         productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
-        productEnumMaps.put(ProductCategoryEnum.SHOPPING, ProductCategory.SHOPPING);
+        productEnumMaps.put(ProductCategoryEnum.HOME, ProductCategory.HOME);
+        productEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOBOFFERS);
+        productEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
+        productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
+        productEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLEMOBILITY);
+        productEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONYANDINTERNET);
+        productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
     }
+
     @Override
     protected Function<DiscountEntity, ApprovedAgreementDiscount> toDtoFunction() {
         return toDto;

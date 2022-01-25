@@ -1,26 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-import javax.validation.ValidatorFactory;
-
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
-import org.codehaus.plexus.util.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -30,6 +14,20 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
+import org.codehaus.plexus.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import javax.transaction.Transactional;
+import javax.validation.ValidatorFactory;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscountService {
@@ -221,6 +219,47 @@ public class DiscountService {
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Cannot create discount without a profile"));
 
+        commonDiscountValidation(profileEntity, discountEntity, isBucketFileChanged);
+
+        ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
+        return profileEntity;
+    }
+
+    private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
+                .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
+
+        // perform common discount validation to keep entities coherent
+        commonDiscountValidation(profileEntity, discount, false);
+
+        //perform publishing specific validation
+        if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
+                && (discount.getLastBucketCodeLoad() == null || bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
+            throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
+        }
+        if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
+            throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
+        }
+        if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot publish a suspended discount");
+        }
+        if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
+        }
+
+        if (LocalDate.now().isAfter(discount.getEndDate())) {
+            throw new InvalidRequestException("Cannot publish an expired discount");
+        }
+        checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
+        long publishedDiscount = discountRepository.countByAgreementIdAndState(agreementEntity.getId(),
+                DiscountStateEnum.PUBLISHED);
+        if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
+            throw new InvalidRequestException("Cannot publish the discount because there are already "
+                    + MAX_NUMBER_PUBLISHED_DISCOUNT + " public ones");
+        }
+    }
+
+    private void commonDiscountValidation(ProfileEntity profileEntity, DiscountEntity discountEntity, boolean isBucketFileChanged) {
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())
                 && StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
@@ -248,6 +287,9 @@ public class DiscountService {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
+            discountEntity.setLastBucketCodeLoadFileName(null);
+            discountEntity.setLastBucketCodeLoad(null);
+            bucketService.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use STATIC, landing page will not used
@@ -255,12 +297,18 @@ public class DiscountService {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
+            discountEntity.setLastBucketCodeLoadFileName(null);
+            discountEntity.setLastBucketCodeLoad(null);
+            bucketService.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use LANDINGPAGE, static code will not used
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLastBucketCodeLoadUid(null);
+            discountEntity.setLastBucketCodeLoadFileName(null);
+            discountEntity.setLastBucketCodeLoad(null);
+            bucketService.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use BUCKET, others will not used
@@ -271,41 +319,16 @@ public class DiscountService {
         }
 
         // If profile sales channel is OFFLINE, any discount is visible on eyca
+        // and all online stuff should be cleaned
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             discountEntity.setVisibleOnEyca(true);
-        }
-
-        ValidationUtils.performConstraintValidation(factory.getValidator(), discountEntity);
-        return profileEntity;
-    }
-
-    private void validatePublishingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
-        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
-                .orElseThrow(() -> new InvalidRequestException("Cannot get discount's profile"));
-
-        if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
-                && (discount.getLastBucketCodeLoad() == null || bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
-            throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
-        }
-        if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
-        }
-        if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot publish a suspended discount");
-        }
-        if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
-        }
-
-        if (LocalDate.now().isAfter(discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish an expired discount");
-        }
-        checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
-        long publishedDiscount = discountRepository.countByAgreementIdAndState(agreementEntity.getId(),
-                DiscountStateEnum.PUBLISHED);
-        if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
-            throw new InvalidRequestException("Cannot publish the discount because there are already "
-                    + MAX_NUMBER_PUBLISHED_DISCOUNT + " public ones");
+            discountEntity.setStaticCode(null);
+            discountEntity.setLandingPageUrl(null);
+            discountEntity.setLandingPageReferrer(null);
+            discountEntity.setLastBucketCodeLoadUid(null);
+            discountEntity.setLastBucketCodeLoadFileName(null);
+            discountEntity.setLastBucketCodeLoad(null);
+            bucketService.deleteBucketCodes(discountEntity.getId());
         }
     }
 

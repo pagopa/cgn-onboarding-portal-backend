@@ -7,15 +7,16 @@ import lombok.Getter;
 @Getter
 public enum ProductCategoryEnum {
 
-    ENTERTAINMENT("Tempo libero"),
-    TRAVELLING("Viaggi Trasporti e Mobilità"),
-    FOOD_DRINK("Ristoranti e cucina"),
-    SERVICES("Servizi"),
-    LEARNING("Istruzione e formazione"),
-    HOTELS("Hotel"),
-    SPORTS("Sport"),
+    BANKING_SERVICES("Servizi bancari"),
+    CULTURE_AND_ENTERTAINMENT("Cultura e tempo libero"),
     HEALTH("Salute e benessere"),
-    SHOPPING("Shopping");
+    HOME("Casa"),
+    JOB_OFFERS("Lavoro e tirocini"),
+    LEARNING("Istruzione e formazione"),
+    SPORTS("Sport"),
+    SUSTAINABLE_MOBILITY("Mobilità sostenibile"),
+    TELEPHONY_AND_INTERNET("Telefonia e internet"),
+    TRAVELLING("Viaggi e trasporti");
 
     private final String description;
 }

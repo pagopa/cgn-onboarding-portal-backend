@@ -187,16 +187,19 @@ public class EnumTest {
                 .sorted(Comparator.comparing(ProductCategoryEnum::getDescription))
                 .map(ProductCategoryEnum::getDescription)
                 .toArray(String[]::new);
-        Assertions.assertEquals(9, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"Hotel",
+        Assertions.assertEquals(10, sortedValues.length);
+        Assertions.assertArrayEquals(new String[]{
+                "Casa",
+                "Cultura e tempo libero",
                 "Istruzione e formazione",
-                "Ristoranti e cucina",
+                "Lavoro e tirocini",
+                "Mobilità sostenibile",
                 "Salute e benessere",
-                "Servizi",
-                "Shopping",
+                "Servizi bancari",
                 "Sport",
-                "Tempo libero",
-                "Viaggi Trasporti e Mobilità"}, sortedValues);
+                "Telefonia e internet",
+                "Viaggi e trasporti"
+        }, sortedValues);
     }
 
     @Test

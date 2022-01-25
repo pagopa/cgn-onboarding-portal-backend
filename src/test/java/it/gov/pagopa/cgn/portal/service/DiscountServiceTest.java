@@ -158,11 +158,13 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     @Test
     void Create_CreateDiscountWithStaticCode_OfflineSalesChannel_VisibleOnEyca_Ok() {
         setProfileSalesChannel(SalesChannelEnum.OFFLINE);
-        setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
+        // we create a STATIC_CODE discount not visible_on_eyca
+        // we expect validation to fix it by setting static_code to null
+        // and visible_on_eyca to true
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                 STATIC_CODE);
-        discountEntity.setVisibleOnEyca(false); // we set it to false, but validation will fix it to true
+        discountEntity.setVisibleOnEyca(false);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -171,8 +173,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(discountEntity.getProducts().get(0));
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
         Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
-        Assertions.assertNotNull(discountEntity.getStaticCode());
-        Assertions.assertEquals(STATIC_CODE, discountEntity.getStaticCode());
+        Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertTrue(discountEntity.getVisibleOnEyca());
@@ -431,7 +432,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
@@ -472,7 +473,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
@@ -517,7 +518,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setDiscountValue(40);
         updatedDiscount.setStaticCode(null);
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
@@ -563,7 +564,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setDiscountValue(40);
         updatedDiscount.setStaticCode(null);
         DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.ENTERTAINMENT);
+        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
