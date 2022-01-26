@@ -695,15 +695,16 @@ definitions:
   ProductCategory:
     type: string
     enum:
-      - Entertainment
-      - Travelling
-      - FoodDrink
-      - Services
-      - Learning
-      - Hotels
-      - Sports
+      - BankingServices
+      - CultureAndEntertainment
       - Health
-      - Shopping
+      - Home
+      - JobOffers
+      - Learning
+      - Sports
+      - SustainableMobility
+      - TelephonyAndInternet
+      - Travelling
 
   SalesChannel:
     type: object

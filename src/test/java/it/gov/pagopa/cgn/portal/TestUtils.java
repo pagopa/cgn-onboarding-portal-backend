@@ -29,6 +29,8 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestUtils {
 
@@ -131,6 +133,48 @@ public class TestUtils {
         profileEntity.setTelephoneNumber("12345678");
         profileEntity.setAllNationalAddresses(true);
         return profileEntity;
+    }
+
+    public static UpdateProfile updatableOnlineProfileFromProfileEntity(ProfileEntity profileEntity, DiscountCodeType discountCodeType) {
+        OnlineChannel salesChannel = new OnlineChannel();
+        salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setDiscountCodeType(discountCodeType);
+        return updatableProfileFromProfileEntity(profileEntity, salesChannel);
+    }
+
+    public static UpdateProfile updatableOfflineProfileFromProfileEntity(ProfileEntity profileEntity) {
+        Address address = new Address();
+        address.setFullAddress("Via unavia, n.1, 30000, Veneto");
+
+        OfflineChannel salesChannel = new OfflineChannel();
+        salesChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setAddresses(Stream.of(address).collect(Collectors.toList()));
+        salesChannel.setAllNationalAddresses(true);
+        return updatableProfileFromProfileEntity(profileEntity, salesChannel);
+    }
+
+    public static UpdateProfile updatableProfileFromProfileEntity(ProfileEntity profileEntity, SalesChannel salesChannel) {
+        UpdateReferent referent = new UpdateReferent();
+        referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
+        referent.setFirstName(profileEntity.getReferent().getFirstName());
+        referent.setTelephoneNumber(profileEntity.getReferent().getTelephoneNumber());
+        referent.setLastName(profileEntity.getReferent().getLastName());
+        referent.setRole(profileEntity.getReferent().getRole());
+
+        UpdateProfile updateProfile = new UpdateProfile();
+        updateProfile.setDescription(profileEntity.getDescription());
+        updateProfile.setSalesChannel(salesChannel);
+        updateProfile.setName(profileEntity.getName());
+        updateProfile.setLegalOffice(profileEntity.getLegalOffice());
+        updateProfile.setReferent(referent);
+        updateProfile.setPecAddress(profileEntity.getPecAddress());
+        updateProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
+        updateProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
+        updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
+
+        return updateProfile;
     }
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {

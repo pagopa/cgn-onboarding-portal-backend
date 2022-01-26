@@ -168,7 +168,8 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteBucketCodes(Long discountId) {
-        discountBucketCodeRepository.deleteByDiscountId(discountId);
+        if (discountId != null)
+            discountBucketCodeRepository.deleteByDiscountId(discountId);
     }
 
     public Long countLoadedCodes(DiscountEntity discountEntity) {

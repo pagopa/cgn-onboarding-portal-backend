@@ -7,7 +7,9 @@ import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgnonboardingportal.model.*;
+import it.gov.pagopa.cgnonboardingportal.model.BucketCodeLoadStatus;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
+import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
 
 import java.time.LocalDate;
 import java.util.EnumMap;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E, D> {
 
     private static final Map<DiscountStateEnum, DiscountState> enumMap = new EnumMap<>(DiscountStateEnum.class);
-    private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
+    private static final Map<ProductCategoryEnum, ProductCategory> productCategoryEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
     private static final Map<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> bucketLoadStatusEnumMap = new EnumMap<>(BucketCodeLoadStatusEnum.class);
 
     static {
@@ -29,29 +31,29 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
         enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
         enumMap.put(DiscountStateEnum.SUSPENDED, DiscountState.SUSPENDED);
 
-        productEnumMaps.put(ProductCategoryEnum.ENTERTAINMENT, ProductCategory.ENTERTAINMENT);
-        productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
-        productEnumMaps.put(ProductCategoryEnum.FOOD_DRINK, ProductCategory.FOODDRINK);
-        productEnumMaps.put(ProductCategoryEnum.SERVICES, ProductCategory.SERVICES);
-        productEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
-        productEnumMaps.put(ProductCategoryEnum.HOTELS, ProductCategory.HOTELS);
-        productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
-        productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
-        productEnumMaps.put(ProductCategoryEnum.SHOPPING, ProductCategory.SHOPPING);
+        productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
+        productCategoryEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT, ProductCategory.CULTUREANDENTERTAINMENT);
+        productCategoryEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
+        productCategoryEnumMaps.put(ProductCategoryEnum.HOME, ProductCategory.HOME);
+        productCategoryEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOBOFFERS);
+        productCategoryEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
+        productCategoryEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
+        productCategoryEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLEMOBILITY);
+        productCategoryEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONYANDINTERNET);
+        productCategoryEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
 
-        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.PENDING,BucketCodeLoadStatus.PENDING);
-        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.RUNNING,BucketCodeLoadStatus.RUNNING);
-        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FAILED,BucketCodeLoadStatus.FAILED);
-        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FINISHED,BucketCodeLoadStatus.FINISHED);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.PENDING, BucketCodeLoadStatus.PENDING);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.RUNNING, BucketCodeLoadStatus.RUNNING);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatus.FAILED);
+        bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.FINISHED, BucketCodeLoadStatus.FINISHED);
     }
 
-
     protected Function<ProductCategoryEnum, ProductCategory> toProductDtoEnum = productCategoryEnum ->
-            Optional.ofNullable(productEnumMaps.get(productCategoryEnum))
+            Optional.ofNullable(productCategoryEnumMaps.get(productCategoryEnum))
                     .orElseThrow(() -> getInvalidEnumMapping(productCategoryEnum.name()));
 
     protected Function<ProductCategory, ProductCategoryEnum> toProductEntityEnum = productDto ->
-            productEnumMaps.entrySet().stream()
+            productCategoryEnumMaps.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(productDto))
                     .map(Map.Entry::getKey)
                     .findFirst().orElseThrow();
