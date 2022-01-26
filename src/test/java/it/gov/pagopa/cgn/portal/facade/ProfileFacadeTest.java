@@ -108,6 +108,59 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
     }
 
+    @Test
+    void UpdateProfile_ChangeSalesChannel_UnpublishDiscounts() {
+        var agreementId = agreementEntity.getId();
+
+        // set profile for landing page
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        // create a discount and request agreement approval
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
+        discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+        agreementService.requestApproval(agreementId);
+        var discountId = discountEntity.getId();
+
+        // admin approve agreement
+        adminApproveAgreement();
+
+        // operator publish the discount
+        discountService.publishDiscount(agreementId, discountId);
+        discountService.getDiscounts(agreementId).forEach(d -> {
+            Assertions.assertEquals(DiscountStateEnum.PUBLISHED, d.getState());
+            Assertions.assertNotNull(d.getLandingPageUrl());
+            Assertions.assertNotNull(d.getLandingPageReferrer());
+        });
+
+        // operator change his profile to stati code
+        UpdateProfile updateProfile = TestUtils.updatableOfflineProfileFromProfileEntity(profileEntity);
+        profileFacade.updateProfile(agreementId, updateProfile);
+
+        // discount should be landing page related and suspended
+        discountService.getDiscounts(agreementId).forEach(d -> {
+            Assertions.assertEquals(DiscountStateEnum.SUSPENDED, d.getState());
+            Assertions.assertNotNull(d.getLandingPageUrl());
+            Assertions.assertNotNull(d.getLandingPageReferrer());
+        });
+
+        // any try to publish the discount without its update should cause an exception
+        Assertions.assertThrows(InvalidRequestException.class, () -> {
+            discountService.publishDiscount(agreementId, discountId);
+        });
+
+        // just update the discount to validate it
+        discountService.updateDiscount(agreementId, discountId, discountEntity);
+
+        // now we can publish the discount
+        discountService.publishDiscount(agreementId, discountId);
+
+        // discount should be static code related and published again
+        discountService.getDiscounts(agreementId).forEach(d -> {
+            Assertions.assertEquals(DiscountStateEnum.PUBLISHED, d.getState());
+        });
+
+    }
+
     void adminApproveAgreement() {
         TestUtils.setAdminAuth();
         backofficeAgreementService.assignAgreement(agreementEntity.getId());

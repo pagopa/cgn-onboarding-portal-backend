@@ -233,7 +233,7 @@ public class DiscountService {
         commonDiscountValidation(profileEntity, discount, false);
 
         //perform publishing specific validation
-        if (profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)
+        if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())
                 && (discount.getLastBucketCodeLoad() == null || bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
             throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
         }
