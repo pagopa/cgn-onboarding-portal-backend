@@ -15,6 +15,4 @@ public interface DiscountBucketCodeSummaryRepository
     List<DiscountBucketCodeSummaryEntity> findAllByExpiredAtIsNullAndAvailableCodesGreaterThan(Long thresholdCodes);
 
     List<DiscountBucketCodeSummaryEntity> findAllByExpiredAtLessThanEqualAndAvailableCodesGreaterThan(OffsetDateTime thresholdDatetime, Long thresholdCodes);
-
-    List<DiscountBucketCodeSummaryEntity> findAllByExpiredAtLessThanEqual(OffsetDateTime thresholdDatetime);
 }

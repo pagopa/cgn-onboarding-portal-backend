@@ -43,10 +43,11 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob implements Job {
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
         List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList =
-                discountBucketCodeSummaryRepository.findAllByExpiredAtLessThanEqual(
+                discountBucketCodeSummaryRepository.findAllByExpiredAtLessThanEqualAndAvailableCodesGreaterThan(
                         OffsetDateTime.now().minusDays(
                                 configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()
-                        )
+                        ),
+                        0L
                 );
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
