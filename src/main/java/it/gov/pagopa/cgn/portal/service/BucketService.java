@@ -61,11 +61,6 @@ public class BucketService {
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
-        if (discountBucketCodeSummary.getAvailableCodes() <= 0) {
-            // if available codes is 0 we should not do the check
-            // because discount has just been created
-            return false;
-        }
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
@@ -168,8 +163,10 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteBucketCodes(Long discountId) {
-        if (discountId != null)
+        if (discountId != null) {
             discountBucketCodeRepository.deleteByDiscountId(discountId);
+            bucketCodeLoadRepository.deleteByDiscountId(discountId);
+        }
     }
 
     public Long countLoadedCodes(DiscountEntity discountEntity) {

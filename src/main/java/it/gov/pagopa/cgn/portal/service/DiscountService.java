@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
@@ -42,6 +43,7 @@ public class DiscountService {
     private final BucketService bucketService;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final ConfigProperties configProperties;
+    private final BucketLoadUtils bucketLoadUtils;
 
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -187,7 +189,7 @@ public class DiscountService {
                            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
                            DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
                            DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
-                           ConfigProperties configProperties) {
+                           ConfigProperties configProperties, BucketLoadUtils bucketLoadUtils) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -197,6 +199,7 @@ public class DiscountService {
         this.bucketService = bucketService;
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.configProperties = configProperties;
+        this.bucketLoadUtils = bucketLoadUtils;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -295,7 +298,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use STATIC, landing page will not used
@@ -305,7 +308,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use LANDINGPAGE, static code will not used
@@ -314,7 +317,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use BUCKET, others will not used
@@ -334,7 +337,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
     }
 
@@ -377,13 +380,6 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
-        if (discountBucketCodeSummary.getAvailableCodes() <= 0 ||
-                OffsetDateTime.now().minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()).isBefore(discountBucketCodeSummary.getExpiredAt())) {
-            // we should not suspend discount if:
-            // * discount as just been created
-            // * codes are expired less than given days ago
-            return false;
-        }
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         suspendDiscount(discount.getAgreement().getId(), discount.getId(), "La lista di codici è esaurita da più di " + configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() + " giorni");
         return true;
