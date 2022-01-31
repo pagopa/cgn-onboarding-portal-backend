@@ -25,8 +25,7 @@ public class CheckAvailableDiscountBucketCodesJob implements Job {
     private final BucketService bucketService;
 
     @Autowired
-    public CheckAvailableDiscountBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
-                                                BucketService bucketService) {
+    public CheckAvailableDiscountBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository, BucketService bucketService) {
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.bucketService = bucketService;
     }
@@ -36,12 +35,11 @@ public class CheckAvailableDiscountBucketCodesJob implements Job {
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList =
-                discountBucketCodeSummaryRepository.findAllByExpiredAtIsNull();
+        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllByExpiredAtIsNullAndAvailableCodesGreaterThan(0L);
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() + " not expired discount bucket code summaries to check");
-            discountBucketCodeSummaryList.forEach(s -> bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(s.getId()));
+            discountBucketCodeSummaryList.forEach(bucketService::checkDiscountBucketCodeSummaryExpirationAndSendNotification);
         }
 
         Instant end = Instant.now();

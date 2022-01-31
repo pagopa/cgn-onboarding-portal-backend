@@ -290,7 +290,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getAvailableCodes());
 
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
         // no notification should be sent because bucket has not been loaded yet
         Assertions.assertFalse(notificationRequired);
     }
@@ -310,7 +310,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
 
         // no notification should be sent because all codes are available
         Assertions.assertFalse(notificationRequired);
@@ -393,7 +393,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity.getId());
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
 

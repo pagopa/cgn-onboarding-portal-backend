@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
@@ -7,11 +8,10 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
@@ -41,6 +41,10 @@ public class DiscountService {
     private final DocumentService documentService;
     private final ValidatorFactory factory;
     private final BucketService bucketService;
+    private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
+    private final ConfigProperties configProperties;
+    private final BucketLoadUtils bucketLoadUtils;
+
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -183,7 +187,9 @@ public class DiscountService {
     @Autowired
     public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
                            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-                           DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
+                           DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
+                           DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
+                           ConfigProperties configProperties, BucketLoadUtils bucketLoadUtils) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -191,6 +197,9 @@ public class DiscountService {
         this.documentService = documentService;
         this.factory = factory;
         this.bucketService = bucketService;
+        this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
+        this.configProperties = configProperties;
+        this.bucketLoadUtils = bucketLoadUtils;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -289,7 +298,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use STATIC, landing page will not used
@@ -299,7 +308,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use LANDINGPAGE, static code will not used
@@ -308,7 +317,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
         // If profile use BUCKET, others will not used
@@ -328,7 +337,7 @@ public class DiscountService {
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
             discountEntity.setLastBucketCodeLoad(null);
-            bucketService.deleteBucketCodes(discountEntity.getId());
+            bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
     }
 
@@ -366,5 +375,13 @@ public class DiscountService {
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
         LocalDate now = LocalDate.now();
         return (!now.isBefore(startDate)) && (now.isBefore(endDate));
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public boolean suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
+        DiscountEntity discount = discountBucketCodeSummary.getDiscount();
+        suspendDiscount(discount.getAgreement().getId(), discount.getId(), "La lista di codici è esaurita da più di " + configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() + " giorni");
+        return true;
     }
 }
