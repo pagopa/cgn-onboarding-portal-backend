@@ -27,7 +27,7 @@ public class DiscountBucketCodeSummaryEntity implements Serializable {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "discount_fk")
     private DiscountEntity discount;
 
