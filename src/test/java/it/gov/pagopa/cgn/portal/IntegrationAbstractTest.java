@@ -130,10 +130,13 @@ public class IntegrationAbstractTest {
     protected BackofficeAgreementService backofficeAgreementService;
 
     @Autowired
-    private TestReferentRepository testReferentRepository;
+    protected TestReferentRepository testReferentRepository;
 
     @Autowired
-    private AddressRepository addressRepository;
+    protected AddressRepository addressRepository;
+
+    @Autowired
+    protected DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
 
     @AfterEach
     protected void cleanAll() throws InterruptedException {

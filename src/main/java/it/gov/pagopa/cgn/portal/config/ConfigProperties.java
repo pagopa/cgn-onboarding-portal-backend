@@ -91,6 +91,12 @@ public class ConfigProperties {
     @Value("${check.available.discounts.bucket.codes.job.cron}")
     private String availableDiscountBucketCodesJobCronExpression;
 
+    @Value("${suspend.discounts.without.available.bucket.codes.job.cron}")
+    private String suspendDiscountsWithoutAvailableBucketCodesJobCronExpression;
+
+    @Value("${suspend.discounts.without.available.bucket.codes.after.days}")
+    private int suspendDiscountsWithoutAvailableBucketCodesAfterDays;
+
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
 

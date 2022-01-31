@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
@@ -7,10 +8,8 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
@@ -41,6 +40,9 @@ public class DiscountService {
     private final DocumentService documentService;
     private final ValidatorFactory factory;
     private final BucketService bucketService;
+    private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
+    private final ConfigProperties configProperties;
+
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -183,7 +185,9 @@ public class DiscountService {
     @Autowired
     public DiscountService(DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
                            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
-                           DocumentService documentService, ValidatorFactory factory, BucketService bucketService) {
+                           DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
+                           DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
+                           ConfigProperties configProperties) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -191,6 +195,8 @@ public class DiscountService {
         this.documentService = documentService;
         this.factory = factory;
         this.bucketService = bucketService;
+        this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
+        this.configProperties = configProperties;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -366,5 +372,20 @@ public class DiscountService {
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
         LocalDate now = LocalDate.now();
         return (!now.isBefore(startDate)) && (now.isBefore(endDate));
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public boolean suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
+        if (discountBucketCodeSummary.getAvailableCodes() <= 0 ||
+                OffsetDateTime.now().minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()).isBefore(discountBucketCodeSummary.getExpiredAt())) {
+            // we should not suspend discount if:
+            // * discount as just been created
+            // * codes are expired less than given days ago
+            return false;
+        }
+        DiscountEntity discount = discountBucketCodeSummary.getDiscount();
+        suspendDiscount(discount.getAgreement().getId(), discount.getId(), "La lista di codici è esaurita da più di " + configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() + " giorni");
+        return true;
     }
 }
