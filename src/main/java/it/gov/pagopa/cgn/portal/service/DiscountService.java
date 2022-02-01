@@ -11,6 +11,8 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.repository.OfflineMerchantRepository;
+import it.gov.pagopa.cgn.portal.repository.OnlineMerchantRepository;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
@@ -44,7 +46,8 @@ public class DiscountService {
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final ConfigProperties configProperties;
     private final BucketLoadUtils bucketLoadUtils;
-
+    private final OfflineMerchantRepository offlineMerchantRepository;
+    private final OnlineMerchantRepository onlineMerchantRepository;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -158,7 +161,7 @@ public class DiscountService {
         return discount;
     }
 
-    @Transactional(Transactional.TxType.REQUIRED)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
         DiscountEntity discount = findById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
@@ -172,7 +175,30 @@ public class DiscountService {
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
         emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity.getReferent().getEmailAddress(),
                 discount.getName(), reasonMessage);
+
+        // refresh materialized views
+        refreshMaterializedViews(agreementId, profileEntity);
+
         return discount;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void refreshMaterializedViews(String agreementId, ProfileEntity profileEntity) {
+        if (discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED) <= 0) {
+            // refresh materialized views only if there are no more published discounts
+            switch (profileEntity.getSalesChannel()) {
+                case ONLINE:
+                    onlineMerchantRepository.refreshView();
+                    break;
+                case OFFLINE:
+                    offlineMerchantRepository.refreshView();
+                    break;
+                case BOTH:
+                    onlineMerchantRepository.refreshView();
+                    offlineMerchantRepository.refreshView();
+                    break;
+            }
+        }
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -189,7 +215,8 @@ public class DiscountService {
                            ProfileService profileService, EmailNotificationFacade emailNotificationFacade,
                            DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
                            DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
-                           ConfigProperties configProperties, BucketLoadUtils bucketLoadUtils) {
+                           ConfigProperties configProperties, BucketLoadUtils bucketLoadUtils,
+                           OfflineMerchantRepository offlineMerchantRepository, OnlineMerchantRepository onlineMerchantRepository) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -200,6 +227,8 @@ public class DiscountService {
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.configProperties = configProperties;
         this.bucketLoadUtils = bucketLoadUtils;
+        this.offlineMerchantRepository = offlineMerchantRepository;
+        this.onlineMerchantRepository = onlineMerchantRepository;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -378,10 +407,9 @@ public class DiscountService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    public void suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         suspendDiscount(discount.getAgreement().getId(), discount.getId(), "La lista di codici è esaurita da più di " + configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() + " giorni");
-        return true;
     }
 }

@@ -138,6 +138,12 @@ public class IntegrationAbstractTest {
     @Autowired
     protected DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
 
+    @Autowired
+    protected OfflineMerchantRepository offlineMerchantRepository;
+
+    @Autowired
+    protected OnlineMerchantRepository onlineMerchantRepository;
+
     @AfterEach
     protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();

@@ -12,6 +12,7 @@ import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import org.apache.commons.io.IOUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -932,6 +936,215 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         this.agreementEntity = agreementRepository.findById(this.agreementEntity.getId()).orElseThrow();
         Assertions.assertEquals(LocalDate.now(), this.agreementEntity.getInformationLastUpdateDate());
 
+    }
+
+    @Test
+    void SuspendingLastRemainingOnlineDiscount_ShouldRefreshOnlineMerchantView() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement(); // simulation of approved
+
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // refresh materialized views
+        onlineMerchantRepository.refreshView();
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+
+        // assert the merchant is in the view
+        var onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, onlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+
+        // unpublish discount
+        discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() <= 0);
+
+        // assert the merchant is not in the view anymore
+        onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(0, onlineMerchantEntities.size());
+    }
+
+    @Test
+    void SuspendingLastRemainingOfflineDiscount_ShouldRefreshOfflineMerchantView() {
+        setProfileSalesChannel(agreementEntity, SalesChannelEnum.OFFLINE);
+        setProfileDiscountType(agreementEntity, null); // offline merchant don't have discount type
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement(); // simulation of approved
+
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // refresh materialized views
+        offlineMerchantRepository.refreshView();
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+
+        // assert the merchant is in the view
+        var offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, offlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+
+        // unpublish discount
+        discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() <= 0);
+
+        // assert the merchant is not in the view anymore
+        offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(0, offlineMerchantEntities.size());
+    }
+
+    @Test
+    void SuspendingLastRemainingBothDiscount_ShouldRefreshBothOnlineAndOfflineMerchantView() {
+        setProfileSalesChannel(agreementEntity, SalesChannelEnum.BOTH);
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC); // offline merchant don't have discount type
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement(); // simulation of approved
+
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // refresh materialized views
+        onlineMerchantRepository.refreshView();
+        offlineMerchantRepository.refreshView();
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+
+        // assert the merchant is in the view
+        var onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, onlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+
+        var offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, offlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+
+        // unpublish discount
+        discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() <= 0);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() <= 0);
+
+        // assert the merchant is not in the view anymore
+        onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(0, onlineMerchantEntities.size());
+
+        offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(0, offlineMerchantEntities.size());
+    }
+
+    @Test
+    void SuspendingAOneOfManyBothDiscount_ShouldNotRefreshBothOnlineAndOfflineMerchantView() {
+        setProfileSalesChannel(agreementEntity, SalesChannelEnum.BOTH);
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC); // offline merchant don't have discount type
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement(); // simulation of approved
+
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish first discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // create and publish the second discount
+        discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+
+        // assert that published discounts are 2
+        Assertions.assertEquals(2, discountRepository.countByAgreementIdAndState(agreementEntity.getId(), DiscountStateEnum.PUBLISHED));
+
+        // refresh materialized views
+        onlineMerchantRepository.refreshView();
+        offlineMerchantRepository.refreshView();
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+
+        // assert the merchant is in the view
+        var onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, onlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+
+        var offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, offlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+
+        // unpublish discount
+        discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
+
+        // await until there is only one published discount
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountRepository.countByAgreementIdAndState(agreementEntity.getId(), DiscountStateEnum.PUBLISHED) <= 1);
+
+        TimerTask task = new TimerTask() {
+            public void run() {
+                // assert the merchant is still in the view because there is another published discount
+                var onlineMerchantEntities = onlineMerchantRepository.findAll();
+                Assertions.assertEquals(1, onlineMerchantEntities.size());
+                Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+
+                var offlineMerchantEntities = offlineMerchantRepository.findAll();
+                Assertions.assertEquals(1, offlineMerchantEntities.size());
+                Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+            }
+        };
+
+        Timer timer = new Timer("Assert");
+        long delay = 2000L;
+        // check that merchant is still in both view after a couple of seconds
+        timer.schedule(task, delay);
     }
 
     @Test
