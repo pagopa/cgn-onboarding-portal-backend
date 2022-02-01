@@ -20,17 +20,17 @@ public class ProductCategoryArrayType implements UserType {
 
     @Override
     public Class returnedClass() {
-        return ProductCategoryEnum[].class;
+        throw new NotImplementedException();
     }
 
     @Override
     public boolean equals(Object o, Object o1) throws HibernateException {
-        return o.equals(o1);
+        throw new NotImplementedException();
     }
 
     @Override
     public int hashCode(Object o) throws HibernateException {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ProductCategoryArrayType implements UserType {
 
     @Override
     public Object deepCopy(Object o) throws HibernateException {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -58,17 +58,17 @@ public class ProductCategoryArrayType implements UserType {
 
     @Override
     public Serializable disassemble(Object o) throws HibernateException {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public Object assemble(Serializable serializable, Object o) throws HibernateException {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public Object replace(Object o, Object o1, Object o2) throws HibernateException {
-        return null;
+        throw new NotImplementedException();
     }
 
 }

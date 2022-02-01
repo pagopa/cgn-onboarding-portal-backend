@@ -161,7 +161,7 @@ public class DiscountService {
         return discount;
     }
 
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
         DiscountEntity discount = findById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
