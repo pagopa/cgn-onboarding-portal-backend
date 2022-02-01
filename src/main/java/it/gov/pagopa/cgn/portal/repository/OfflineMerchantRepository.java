@@ -1,13 +1,13 @@
 package it.gov.pagopa.cgn.portal.repository;
 
-import it.gov.pagopa.cgn.portal.model.OfflineMerchantEntity;
+import it.gov.pagopa.cgn.portal.model.OfflineMerchantViewEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 
-public interface OfflineMerchantRepository extends JpaRepository<OfflineMerchantEntity, Long> {
+public interface OfflineMerchantRepository extends JpaRepository<OfflineMerchantViewEntity, Long> {
 
     @Modifying
     @Transactional

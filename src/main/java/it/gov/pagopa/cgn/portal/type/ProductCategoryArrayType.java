@@ -34,17 +34,15 @@ public class ProductCategoryArrayType implements UserType {
     }
 
     @Override
-    public ProductCategoryEnum[] nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
-            throws HibernateException, SQLException {
+    public ProductCategoryEnum[] nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
         Array productCategoriesResultSet = rs.getArray(names[0]);
-        if (productCategoriesResultSet == null) return null;
+        if (productCategoriesResultSet == null) return new ProductCategoryEnum[]{};
         String[] productCategories = (String[]) productCategoriesResultSet.getArray();
         return Stream.of(productCategories).map(ProductCategoryEnum::valueOf).toArray(ProductCategoryEnum[]::new);
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
-            throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
         throw new NotImplementedException();
     }
 

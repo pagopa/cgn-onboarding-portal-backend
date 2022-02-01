@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -1128,23 +1126,14 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         // await until there is only one published discount
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountRepository.countByAgreementIdAndState(agreementEntity.getId(), DiscountStateEnum.PUBLISHED) <= 1);
 
-        TimerTask task = new TimerTask() {
-            public void run() {
-                // assert the merchant is still in the view because there is another published discount
-                var onlineMerchantEntities = onlineMerchantRepository.findAll();
-                Assertions.assertEquals(1, onlineMerchantEntities.size());
-                Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        // assert the merchant is still in the view because there is another published discount
+        onlineMerchantEntities = onlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, onlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
 
-                var offlineMerchantEntities = offlineMerchantRepository.findAll();
-                Assertions.assertEquals(1, offlineMerchantEntities.size());
-                Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
-            }
-        };
-
-        Timer timer = new Timer("Assert");
-        long delay = 2000L;
-        // check that merchant is still in both view after a couple of seconds
-        timer.schedule(task, delay);
+        offlineMerchantEntities = offlineMerchantRepository.findAll();
+        Assertions.assertEquals(1, offlineMerchantEntities.size());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
     }
 
     @Test

@@ -1,19 +1,19 @@
 package it.gov.pagopa.cgn.portal.model;
 
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.time.OffsetDateTime;
 
-@Entity
-@Immutable
-@Table(name = "online_merchant")
 @Data
-public class OnlineMerchantEntity {
+@Immutable
+@MappedSuperclass
+public class BaseMerchantViewEntity {
 
     @Id
     @Column(name = "id")
@@ -21,14 +21,6 @@ public class OnlineMerchantEntity {
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "website_url")
-    private String websiteUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "discount_code_type")
-    private DiscountCodeTypeEnum discountCodeType;
-
 
     @Column(name = "product_categories", columnDefinition = "text[]")
     @Type(type = "it.gov.pagopa.cgn.portal.type.ProductCategoryArrayType")
