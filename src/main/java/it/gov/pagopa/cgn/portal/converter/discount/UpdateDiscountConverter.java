@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.discount;
 
-import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
@@ -38,6 +38,7 @@ public class UpdateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setProducts(toEntityDiscountProduct.apply(updateDiscountDTO.getProductCategories(), entity));
         entity.setLastBucketCodeLoadUid(updateDiscountDTO.getLastBucketCodeLoadUid());
         entity.setLastBucketCodeLoadFileName(updateDiscountDTO.getLastBucketCodeLoadFileName());
+        entity.setDiscountUrl(updateDiscountDTO.getDiscountUrl());
         return entity;
     };
 

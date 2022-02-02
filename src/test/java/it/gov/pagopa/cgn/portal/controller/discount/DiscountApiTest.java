@@ -118,6 +118,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
                 .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                 .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
@@ -307,6 +308,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discount);
         updateDiscount.setName("new_name");
         updateDiscount.setStaticCode("new_static_code");
+        updateDiscount.setDiscountUrl("https://anotherurl.com");
         this.mockMvc.perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
                         .content(TestUtils.getJson(updateDiscount))).andDo(log()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -326,6 +328,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                         .value(updateDiscount.getLandingPageReferrer()))
                 .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
                 .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.discountUrl").value(updateDiscount.getDiscountUrl()))
                 .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
@@ -569,6 +572,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
+        createDiscount.setDiscountUrl("https://anurl.com");
         return createDiscount;
     }
 }
