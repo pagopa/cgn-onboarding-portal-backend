@@ -64,7 +64,7 @@ paths:
         200:
           description: List of agreements
           schema:
-            $ref: '#/definitions/Agreements'
+            $ref: '#/definitions/BackofficeAgreements'
         403:
           $ref: '#/responses/Forbidden'
 
@@ -382,6 +382,18 @@ definitions:
       total:
         type: integer
 
+  BackofficeAgreements:
+    type: object
+    required:
+      - items
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/BackofficeAgreement'
+      total:
+        type: integer
+
   ApprovedAgreements:
     type: object
     required:
@@ -416,14 +428,25 @@ definitions:
       documents:
         $ref: '#/definitions/Documents'
 
-  PendingAgreement:
+  BackofficeAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
+      - type: object
+        required:
+          - publishedDiscounts
+        properties:
+          publishedDiscounts:
+            type: integer
+            format: int32
+
+  PendingAgreement:
+    allOf:
+      - $ref: '#/definitions/BackofficeAgreement'
       - type: object
 
   AssignedAgreement:
     allOf:
-      - $ref: '#/definitions/Agreement'
+      - $ref: '#/definitions/BackofficeAgreement'
       - type: object
         required:
           - assignee

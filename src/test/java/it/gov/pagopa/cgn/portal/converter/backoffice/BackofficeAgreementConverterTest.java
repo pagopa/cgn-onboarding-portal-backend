@@ -2,7 +2,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AssignedAgreement;
@@ -23,11 +23,11 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_AssignedAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity agreementEntity = createSampleAgreementEntity();
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setBackofficeAssignee("user");
+        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
+        backofficeAgreementEntity.setBackofficeAssignee("user");
 
-        Agreement agreementDto = converter.toDto.apply(agreementEntity);
+        Agreement agreementDto = converter.toDto.apply(backofficeAgreementEntity);
         Assert.assertTrue(agreementDto instanceof AssignedAgreement);
         Assert.assertEquals(AgreementState.ASSIGNEDAGREEMENT, agreementDto.getState());
 
@@ -37,10 +37,10 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_PendingAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity agreementEntity = createSampleAgreementEntity();
-        agreementEntity.setState(AgreementStateEnum.PENDING);
+        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
 
-        Agreement agreementDto = converter.toDto.apply(agreementEntity);
+        Agreement agreementDto = converter.toDto.apply(backofficeAgreementEntity);
         Assert.assertTrue(agreementDto instanceof PendingAgreement);
         Assert.assertEquals(AgreementState.PENDINGAGREEMENT, agreementDto.getState());
 
@@ -50,9 +50,9 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_RejectedAgreementToDto_ThrowCGNException() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity agreementEntity = createSampleAgreementEntity();
-        agreementEntity.setState(AgreementStateEnum.REJECTED);
-        Assert.assertThrows(CGNException.class, () ->converter.toDto.apply(agreementEntity));
+        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        backofficeAgreementEntity.setState(AgreementStateEnum.REJECTED);
+        Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(backofficeAgreementEntity));
 
     }
 
@@ -65,17 +65,18 @@ public class BackofficeAgreementConverterTest {
     }
 
 
-    private AgreementEntity createSampleAgreementEntity() {
-        AgreementEntity agreementEntity = new AgreementEntity();
-        agreementEntity.setId("agreement_id");
-        agreementEntity.setImageUrl("image12345.png");
+    private BackofficeAgreementEntity createSampleBackofficeAgreementEntity() {
+        BackofficeAgreementEntity backofficeAgreementEntity = new BackofficeAgreementEntity();
+        backofficeAgreementEntity.setId("agreement_id");
+        backofficeAgreementEntity.setImageUrl("image12345.png");
 
-        agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        backofficeAgreementEntity.setStartDate(LocalDate.now());
+        backofficeAgreementEntity.setEndDate(LocalDate.now().plusYears(1));
 
-        agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
-        agreementEntity.setInformationLastUpdateDate(LocalDate.now());
-        return agreementEntity;
+        backofficeAgreementEntity.setRequestApprovalTime(OffsetDateTime.now());
+        backofficeAgreementEntity.setInformationLastUpdateDate(LocalDate.now());
+        backofficeAgreementEntity.setPublishedDiscounts(5L);
+        return backofficeAgreementEntity;
     }
 
 }
