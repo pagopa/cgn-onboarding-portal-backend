@@ -104,6 +104,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(STATIC_CODE, discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertNotNull(discountEntity.getDiscountUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -405,6 +406,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         updatedDiscount.setStartDate(LocalDate.now().plusDays(1));
         updatedDiscount.setEndDate(LocalDate.now().plusMonths(3));
         updatedDiscount.setDiscountValue(40);
+        var newDiscountUrl = "https://anotherurl.com";
+        updatedDiscount.setDiscountUrl(newDiscountUrl);
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity.setDiscount(updatedDiscount);
@@ -427,6 +430,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
+        Assertions.assertEquals(updatedDiscount.getDiscountUrl(), dbDiscount.getDiscountUrl());
         Assertions.assertTrue(updatedDiscount.getVisibleOnEyca());
         Assertions.assertTrue(dbDiscount.getVisibleOnEyca());
     }

@@ -399,6 +399,7 @@ public class DiscountService {
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
         dbEntity.setLastBucketCodeLoadUid(toUpdateEntity.getLastBucketCodeLoadUid());
         dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
+        dbEntity.setDiscountUrl(toUpdateEntity.getDiscountUrl());
     };
 
     private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
