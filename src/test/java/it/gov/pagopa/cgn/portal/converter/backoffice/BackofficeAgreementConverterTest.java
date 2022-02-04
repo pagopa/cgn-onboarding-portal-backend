@@ -2,7 +2,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AssignedAgreement;
@@ -23,7 +23,7 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_AssignedAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
         backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
         backofficeAgreementEntity.setBackofficeAssignee("user");
 
@@ -37,7 +37,7 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_PendingAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
         backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
 
         Agreement agreementDto = converter.toDto.apply(backofficeAgreementEntity);
@@ -50,7 +50,7 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_RejectedAgreementToDto_ThrowCGNException() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        BackofficeAgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
+        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
         backofficeAgreementEntity.setState(AgreementStateEnum.REJECTED);
         Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(backofficeAgreementEntity));
 
@@ -65,8 +65,8 @@ public class BackofficeAgreementConverterTest {
     }
 
 
-    private BackofficeAgreementEntity createSampleBackofficeAgreementEntity() {
-        BackofficeAgreementEntity backofficeAgreementEntity = new BackofficeAgreementEntity();
+    private AgreementEntity createSampleBackofficeAgreementEntity() {
+        AgreementEntity backofficeAgreementEntity = new AgreementEntity();
         backofficeAgreementEntity.setId("agreement_id");
         backofficeAgreementEntity.setImageUrl("image12345.png");
 
@@ -75,7 +75,6 @@ public class BackofficeAgreementConverterTest {
 
         backofficeAgreementEntity.setRequestApprovalTime(OffsetDateTime.now());
         backofficeAgreementEntity.setInformationLastUpdateDate(LocalDate.now());
-        backofficeAgreementEntity.setPublishedDiscounts(5L);
         return backofficeAgreementEntity;
     }
 

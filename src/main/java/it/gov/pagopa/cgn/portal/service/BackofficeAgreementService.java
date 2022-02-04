@@ -7,10 +7,8 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
-import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.repository.BackofficeApprovedAgreementSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
@@ -33,8 +31,6 @@ public class BackofficeAgreementService {
 
     private final AgreementRepository agreementRepository;
 
-    private final BackofficeAgreementRepository backofficeAgreementRepository;
-
     private final AgreementServiceLight agreementServiceLight;
 
     private final DocumentService documentService;
@@ -44,11 +40,11 @@ public class BackofficeAgreementService {
     private final AzureStorage azureStorage;
 
     @Transactional(readOnly = true)
-    public Page<BackofficeAgreementEntity> getAgreements(BackofficeFilter filter) {
+    public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
         BackofficeAgreementToValidateSpecification spec;
         spec = new BackofficeAgreementToValidateSpecification(filter, CGNUtils.getJwtAdminUserName());
-        Page<BackofficeAgreementEntity> agreementEntityPage = backofficeAgreementRepository.findAll(spec, spec.getPage());
+        Page<AgreementEntity> agreementEntityPage = agreementRepository.findAll(spec, spec.getPage());
 
         // exclude backoffice documents
         agreementEntityPage.getContent().forEach(agreementEntity -> {
@@ -132,14 +128,12 @@ public class BackofficeAgreementService {
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
                                       AgreementServiceLight agreementServiceLight, DocumentService documentService,
-                                      EmailNotificationFacade emailNotificationFacade, AzureStorage azureStorage,
-                                      BackofficeAgreementRepository backofficeAgreementRepository) {
+                                      EmailNotificationFacade emailNotificationFacade, AzureStorage azureStorage) {
         this.agreementRepository = agreementRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
         this.emailNotificationFacade = emailNotificationFacade;
         this.azureStorage = azureStorage;
-        this.backofficeAgreementRepository = backofficeAgreementRepository;
     }
 
 

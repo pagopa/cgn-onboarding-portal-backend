@@ -3,7 +3,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.function.Function;
 
 @Component
-public class BackofficeAgreementConverter extends AbstractConverter<BackofficeAgreementEntity, BackofficeAgreement> {
+public class BackofficeAgreementConverter extends AbstractConverter<AgreementEntity, Agreement> {
 
     private static final Map<String, AgreementStateEnum> enumMap = new HashMap<>(4);
 
@@ -40,18 +40,18 @@ public class BackofficeAgreementConverter extends AbstractConverter<BackofficeAg
     }
 
     @Override
-    protected Function<BackofficeAgreementEntity, BackofficeAgreement> toDtoFunction() {
+    protected Function<AgreementEntity, Agreement> toDtoFunction() {
         return toDto;
     }
 
     @Override
-    protected Function<BackofficeAgreement, BackofficeAgreementEntity> toEntityFunction() {
+    protected Function<Agreement, AgreementEntity> toEntityFunction() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    public BackofficeAgreements getAgreementFromPage(Page<BackofficeAgreementEntity> agreementEntityPage) {
-        Collection<BackofficeAgreement> dtoCollection = toDtoCollection(agreementEntityPage.getContent());
-        BackofficeAgreements agreements = new BackofficeAgreements();
+    public Agreements getAgreementFromPage(Page<AgreementEntity> agreementEntityPage) {
+        Collection<Agreement> dtoCollection = toDtoCollection(agreementEntityPage.getContent());
+        Agreements agreements = new Agreements();
         agreements.setItems(new ArrayList<>(dtoCollection));
         agreements.setTotal((int) agreementEntityPage.getTotalElements());
         return agreements;
@@ -69,8 +69,8 @@ public class BackofficeAgreementConverter extends AbstractConverter<BackofficeAg
 
     }
 
-    private final Function<BackofficeAgreementEntity, BackofficeAgreement> toDtoWithStatusFilled = entity -> {
-        BackofficeAgreement dto;
+    private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
+        Agreement dto;
         if (entity.getState() == AgreementStateEnum.PENDING) {
             if (StringUtils.isBlank(entity.getBackofficeAssignee())) {
                 dto = new PendingAgreement();
@@ -89,9 +89,9 @@ public class BackofficeAgreementConverter extends AbstractConverter<BackofficeAg
         return dto;
     };
 
-    protected Function<BackofficeAgreementEntity, BackofficeAgreement> toDto =
+    protected Function<AgreementEntity, Agreement> toDto =
             entity -> {
-                BackofficeAgreement dto = toDtoWithStatusFilled.apply(entity);
+                Agreement dto = toDtoWithStatusFilled.apply(entity);
                 dto.setId(entity.getId());
                 if (entity.getRequestApprovalTime() != null) {
                     dto.setRequestDate(entity.getRequestApprovalTime().toLocalDate());

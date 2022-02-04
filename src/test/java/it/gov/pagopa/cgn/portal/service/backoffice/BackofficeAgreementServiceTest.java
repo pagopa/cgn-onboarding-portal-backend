@@ -13,7 +13,6 @@ import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
@@ -48,7 +47,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     void GetAgreement_GetAgreementWithoutFilter_AgreementFound() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder().build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
@@ -61,7 +60,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .profileFullName(pendingAgreement.getProfile().getFullName()).build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
@@ -74,7 +73,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .profileFullName(pendingAgreement.getProfile().getFullName().toLowerCase()).build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
@@ -87,7 +86,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .dateFrom(LocalDate.now().minusDays(2)).build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
@@ -100,7 +99,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()
                 .dateTo(LocalDate.now().plusMonths(1)).build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
@@ -115,12 +114,12 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
                 .dateFrom(LocalDate.now().minusDays(2))
                 .dateTo(LocalDate.now().plusMonths(1))
                 .build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
     }
 
     @Test
@@ -130,7 +129,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
                 .dateFrom(LocalDate.now().plusDays(2))
                 .dateTo(LocalDate.now().plusMonths(1))
                 .build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(0L, page.getTotalElements());
         Assertions.assertEquals(0, page.getTotalPages());
         Assertions.assertTrue(CollectionUtils.isEmpty(page.getContent()));
@@ -144,7 +143,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         BackofficeFilter filter = BackofficeFilter.builder()
                 .agreementState(AgreementState.ASSIGNEDAGREEMENT.getValue())
                 .build();
-        Page<BackofficeAgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());

@@ -64,7 +64,7 @@ paths:
         200:
           description: List of agreements
           schema:
-            $ref: '#/definitions/BackofficeAgreements'
+            $ref: '#/definitions/Agreements'
         403:
           $ref: '#/responses/Forbidden'
 
@@ -242,6 +242,7 @@ paths:
           $ref: '#/responses/NotFound'
         409:
           $ref: '#/responses/Conflict'
+
   /approved-agreements:
     get:
       tags:

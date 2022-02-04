@@ -4,7 +4,7 @@ import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.BackofficeAgreements;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
@@ -24,7 +24,7 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     private final BackofficeAgreementFacade agreementFacade;
 
     @Override
-    public ResponseEntity<BackofficeAgreements> getAgreements(
+    public ResponseEntity<Agreements> getAgreements(
             String states, String assignee, String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,
             Integer pageSize, Integer page, String sortColumn, String sortDirection) {
 

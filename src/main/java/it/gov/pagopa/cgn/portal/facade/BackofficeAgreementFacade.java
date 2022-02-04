@@ -9,7 +9,6 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.BackofficeAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
@@ -53,8 +52,8 @@ public class BackofficeAgreementFacade {
 
 
     @Transactional(readOnly = true)  // for converter
-    public ResponseEntity<BackofficeAgreements> getAgreements(BackofficeFilter filter) {
-        Page<BackofficeAgreementEntity> agreements = backofficeAgreementService.getAgreements(filter);
+    public ResponseEntity<Agreements> getAgreements(BackofficeFilter filter) {
+        Page<AgreementEntity> agreements = backofficeAgreementService.getAgreements(filter);
         return ResponseEntity.ok(agreementConverter.getAgreementFromPage(agreements));
     }
 
