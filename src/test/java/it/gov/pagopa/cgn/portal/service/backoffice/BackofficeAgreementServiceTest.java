@@ -52,7 +52,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
     }
 
     @Test

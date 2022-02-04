@@ -23,11 +23,11 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_AssignedAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
-        backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
-        backofficeAgreementEntity.setBackofficeAssignee("user");
+        AgreementEntity agreementEntity = createSampleAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.PENDING);
+        agreementEntity.setBackofficeAssignee("user");
 
-        Agreement agreementDto = converter.toDto.apply(backofficeAgreementEntity);
+        Agreement agreementDto = converter.toDto.apply(agreementEntity);
         Assert.assertTrue(agreementDto instanceof AssignedAgreement);
         Assert.assertEquals(AgreementState.ASSIGNEDAGREEMENT, agreementDto.getState());
 
@@ -37,10 +37,10 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_PendingAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
-        backofficeAgreementEntity.setState(AgreementStateEnum.PENDING);
+        AgreementEntity agreementEntity = createSampleAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.PENDING);
 
-        Agreement agreementDto = converter.toDto.apply(backofficeAgreementEntity);
+        Agreement agreementDto = converter.toDto.apply(agreementEntity);
         Assert.assertTrue(agreementDto instanceof PendingAgreement);
         Assert.assertEquals(AgreementState.PENDINGAGREEMENT, agreementDto.getState());
 
@@ -50,9 +50,9 @@ public class BackofficeAgreementConverterTest {
     public void ToDto_RejectedAgreementToDto_ThrowCGNException() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
-        AgreementEntity backofficeAgreementEntity = createSampleBackofficeAgreementEntity();
-        backofficeAgreementEntity.setState(AgreementStateEnum.REJECTED);
-        Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(backofficeAgreementEntity));
+        AgreementEntity agreementEntity = createSampleAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.REJECTED);
+        Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(agreementEntity));
 
     }
 
@@ -65,17 +65,17 @@ public class BackofficeAgreementConverterTest {
     }
 
 
-    private AgreementEntity createSampleBackofficeAgreementEntity() {
-        AgreementEntity backofficeAgreementEntity = new AgreementEntity();
-        backofficeAgreementEntity.setId("agreement_id");
-        backofficeAgreementEntity.setImageUrl("image12345.png");
+    private AgreementEntity createSampleAgreementEntity() {
+        AgreementEntity agreementEntity = new AgreementEntity();
+        agreementEntity.setId("agreement_id");
+        agreementEntity.setImageUrl("image12345.png");
 
-        backofficeAgreementEntity.setStartDate(LocalDate.now());
-        backofficeAgreementEntity.setEndDate(LocalDate.now().plusYears(1));
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
 
-        backofficeAgreementEntity.setRequestApprovalTime(OffsetDateTime.now());
-        backofficeAgreementEntity.setInformationLastUpdateDate(LocalDate.now());
-        return backofficeAgreementEntity;
+        agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now());
+        return agreementEntity;
     }
 
 }
