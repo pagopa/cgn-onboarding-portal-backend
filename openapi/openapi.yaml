@@ -947,6 +947,9 @@ definitions:
       lastBucketCodeLoadFileName:
         type: string
         maxLength: 255
+      discountUrl:
+        type: string
+        maxLength: 500
 
   UpdateDiscount:
     type: object
@@ -1001,6 +1004,9 @@ definitions:
       lastBucketCodeLoadFileName:
         type: string
         maxLength: 255
+      discountUrl:
+        type: string
+        maxLength: 500
 
   Discounts:
     type: object
@@ -1080,6 +1086,9 @@ definitions:
         maxLength: 255
       lastBucketCodeLoadStatus:
         $ref: '#/definitions/BucketCodeLoadStatus'
+      discountUrl:
+        type: string
+        maxLength: 500
 
   BucketCodeLoadStatus:
     type: string

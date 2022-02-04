@@ -265,6 +265,7 @@ public class TestUtils {
         discountEntity.setStaticCode(staticCode);
         discountEntity.setLandingPageUrl(null);
         discountEntity.setLandingPageReferrer(null);
+        discountEntity.setDiscountUrl("https://anurl.com");
         return discountEntity;
     }
 

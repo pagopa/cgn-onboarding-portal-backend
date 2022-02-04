@@ -4,7 +4,6 @@ import it.gov.pagopa.cgn.portal.annotation.DateBefore;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
 import lombok.Data;
-
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.util.CollectionUtils;
@@ -98,6 +97,10 @@ public class DiscountEntity extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "last_bucket_code_load_id", referencedColumnName = "bucket_code_load_k")
     private BucketCodeLoadEntity lastBucketCodeLoad;
+
+    @Size(max = 500)
+    @Column(name = "discount_url", length = 500)
+    private String discountUrl;
 
     @Transient
     private String lastBucketCodeLoadUid;
