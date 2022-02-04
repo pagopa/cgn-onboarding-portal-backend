@@ -2,6 +2,8 @@ package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
@@ -9,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Data
 @Entity
@@ -36,8 +39,19 @@ public class ApprovedAgreementEntity {
     @Type(type = "agreement_state_enum")
     private AgreementStateEnum state;
 
+    @Column(name = "assignee")
+    private String backofficeAssignee;
+
+    @Column(name = "request_approval_time")
+    private OffsetDateTime requestApprovalTime;
+
     @Column(name = "published_discounts")
     private Long publishedDiscounts;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)
+    private ProfileEntity profile;
 
 }
 
