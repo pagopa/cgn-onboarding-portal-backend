@@ -10,7 +10,6 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
-import it.gov.pagopa.cgn.portal.repository.BackofficeApprovedAgreementSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,14 +54,6 @@ public class BackofficeAgreementService {
             agreementEntity.setDocumentList(documents);
         });
         return agreementEntityPage;
-    }
-
-    @Transactional(readOnly = true)
-    public Page<AgreementEntity> getApprovedAgreements(BackofficeFilter filter) {
-
-        BackofficeApprovedAgreementSpecification spec;
-        spec = new BackofficeApprovedAgreementSpecification(filter, CGNUtils.getJwtAdminUserName());
-        return agreementRepository.findAll(spec, spec.getPage());
     }
 
     @Transactional

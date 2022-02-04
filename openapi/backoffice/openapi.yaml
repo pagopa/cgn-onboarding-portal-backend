@@ -383,18 +383,6 @@ definitions:
       total:
         type: integer
 
-  BackofficeAgreements:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: array
-        items:
-          $ref: '#/definitions/BackofficeAgreement'
-      total:
-        type: integer
-
   ApprovedAgreements:
     type: object
     required:
@@ -429,25 +417,14 @@ definitions:
       documents:
         $ref: '#/definitions/Documents'
 
-  BackofficeAgreement:
-    allOf:
-      - $ref: '#/definitions/Agreement'
-      - type: object
-        required:
-          - publishedDiscounts
-        properties:
-          publishedDiscounts:
-            type: integer
-            format: int32
-
   PendingAgreement:
     allOf:
-      - $ref: '#/definitions/BackofficeAgreement'
+      - $ref: '#/definitions/Agreement'
       - type: object
 
   AssignedAgreement:
     allOf:
-      - $ref: '#/definitions/BackofficeAgreement'
+      - $ref: '#/definitions/Agreement'
       - type: object
         required:
           - assignee
@@ -462,6 +439,7 @@ definitions:
       - fullName
       - agreementStartDate
       - agreementLastUpdateDate
+      - publishedDiscounts
     properties:
       agreementId:
         type: string
@@ -473,6 +451,9 @@ definitions:
       agreementLastUpdateDate:
         type: string
         format: date
+      publishedDiscounts:
+        type: integer
+        format: int64
 
   ApprovedAgreementDetail:
     type: object

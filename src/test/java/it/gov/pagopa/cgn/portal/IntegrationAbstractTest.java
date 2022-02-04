@@ -130,6 +130,9 @@ public class IntegrationAbstractTest {
     protected BackofficeAgreementService backofficeAgreementService;
 
     @Autowired
+    protected ApprovedAgreementService approvedAgreementService;
+
+    @Autowired
     protected TestReferentRepository testReferentRepository;
 
     @Autowired
