@@ -17,6 +17,7 @@ import java.util.function.Function;
 public class BackofficeAgreementConverter extends AbstractConverter<AgreementEntity, Agreement> {
 
     private static final Map<String, AgreementStateEnum> enumMap = new HashMap<>(4);
+
     static {
         enumMap.put(AgreementState.APPROVEDAGREEMENT.getValue(), AgreementStateEnum.APPROVED);
         enumMap.put(AgreementState.PENDINGAGREEMENT.getValue(), AgreementStateEnum.PENDING);

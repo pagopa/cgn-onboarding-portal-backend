@@ -65,7 +65,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
+        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
     }
 
     @Test
@@ -78,7 +78,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
+        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
     }
 
     @Test
@@ -91,7 +91,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
+        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
     }
 
     @Test
@@ -104,7 +104,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
+        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
     }
 
     @Test
@@ -148,7 +148,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement, page.getContent().get(0));
+        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
 
     }
 
@@ -172,7 +172,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(StringUtils.isNotBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.assignAgreement(agreementId));
+                () -> backofficeAgreementService.assignAgreement(agreementId));
 
     }
 
@@ -191,7 +191,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         //agreement state not PENDING
 
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.assignAgreement(agreementId));
+                () -> backofficeAgreementService.assignAgreement(agreementId));
     }
 
     @Test
@@ -210,7 +210,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         var agreementId = pendingAgreement.getId();
 
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.unassignAgreement(agreementId));
+                () -> backofficeAgreementService.unassignAgreement(agreementId));
         AgreementEntity agreementEntity = agreementService.findById(agreementId);
         Assertions.assertTrue(StringUtils.isBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
@@ -249,7 +249,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         final String agreementId = pendingAgreement.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->backofficeAgreementService.approveAgreement(agreementId));
+                () -> backofficeAgreementService.approveAgreement(agreementId));
     }
 
     @Test
@@ -329,7 +329,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         //agreement state not PENDING
         final String agreementId = agreementEntity.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                ()-> backofficeAgreementService.approveAgreement(agreementId));
+                () -> backofficeAgreementService.approveAgreement(agreementId));
         agreementEntity = agreementService.findById(agreementEntity.getId());
 
         Assertions.assertNotEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
@@ -366,7 +366,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         final String agreementId = agreementEntity.getId();
         String reasonMsg = "Reason";
         Assertions.assertThrows(InvalidRequestException.class,
-                ()-> backofficeAgreementService.rejectAgreement(agreementId, reasonMsg));
+                () -> backofficeAgreementService.rejectAgreement(agreementId, reasonMsg));
         agreementEntity = agreementService.findById(agreementId);
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());

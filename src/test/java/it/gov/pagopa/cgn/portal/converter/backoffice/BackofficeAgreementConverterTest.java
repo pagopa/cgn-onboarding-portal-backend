@@ -52,7 +52,7 @@ public class BackofficeAgreementConverterTest {
 
         AgreementEntity agreementEntity = createSampleAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.REJECTED);
-        Assert.assertThrows(CGNException.class, () ->converter.toDto.apply(agreementEntity));
+        Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(agreementEntity));
 
     }
 

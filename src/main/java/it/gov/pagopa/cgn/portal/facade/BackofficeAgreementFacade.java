@@ -9,11 +9,9 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
-import it.gov.pagopa.cgn.portal.service.DiscountService;
-import it.gov.pagopa.cgn.portal.service.DocumentService;
+import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,6 +31,8 @@ import java.util.List;
 public class BackofficeAgreementFacade {
 
     private final BackofficeAgreementService backofficeAgreementService;
+
+    private final ApprovedAgreementService approvedAgreementService;
 
     private final AgreementService agreementService;
 
@@ -58,7 +58,7 @@ public class BackofficeAgreementFacade {
     }
 
     public ResponseEntity<ApprovedAgreements> getApprovedAgreements(BackofficeFilter filter) {
-        Page<AgreementEntity> agreements = backofficeAgreementService.getApprovedAgreements(filter);
+        Page<ApprovedAgreementEntity> agreements = approvedAgreementService.getApprovedAgreements(filter);
         return ResponseEntity.ok(approvedAgreementConverter.getApprovedAgreementsFromPage(agreements));
     }
 
@@ -129,7 +129,7 @@ public class BackofficeAgreementFacade {
                                      AgreementService agreementService, DiscountService discountService,
                                      BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
                                      BackofficeApprovedAgreementConverter approvedAgreementConverter,
-                                     AzureStorage azureStorage) {
+                                     AzureStorage azureStorage, ApprovedAgreementService approvedAgreementService) {
         this.backofficeAgreementService = backofficeAgreementService;
         this.agreementService = agreementService;
         this.discountService = discountService;
@@ -139,5 +139,6 @@ public class BackofficeAgreementFacade {
         this.approvedAgreementConverter = approvedAgreementConverter;
         this.documentService = documentService;
         this.azureStorage = azureStorage;
+        this.approvedAgreementService = approvedAgreementService;
     }
 }

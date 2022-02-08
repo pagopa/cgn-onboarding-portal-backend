@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 @SpringBootTest
-@ActiveProfiles({ "dev" })
+@ActiveProfiles({"dev"})
 class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
@@ -31,15 +32,20 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
 
         BackofficeFilter filter = BackofficeFilter.builder().build();
-        Page<AgreementEntity> page = backofficeAgreementService.getApprovedAgreements(filter);
+        Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        AgreementEntity responseAgreement = page.getContent().get(0);
+        ApprovedAgreementEntity responseAgreement = page.getContent().get(0);
         Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
         Assertions.assertNotNull(agreementEntity.getInformationLastUpdateDate());
         Assertions.assertNotNull(agreementEntity.getStartDate());
+        Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
+        Assertions.assertEquals(agreementEntity.getStartDate(), responseAgreement.getStartDate());
+        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(), responseAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(agreementEntity.getProfile().getFullName(), responseAgreement.getFullName());
+        Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
     }
 
     @Test
@@ -47,15 +53,20 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder().dateFrom(LocalDate.now().minusDays(10))
                 .dateTo(LocalDate.now().plusDays(10)).build();
-        Page<AgreementEntity> page = backofficeAgreementService.getApprovedAgreements(filter);
+        Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        AgreementEntity responseAgreement = page.getContent().get(0);
+        ApprovedAgreementEntity responseAgreement = page.getContent().get(0);
         Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
         Assertions.assertNotNull(agreementEntity.getInformationLastUpdateDate());
         Assertions.assertNotNull(agreementEntity.getStartDate());
+        Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
+        Assertions.assertEquals(agreementEntity.getStartDate(), responseAgreement.getStartDate());
+        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(), responseAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(agreementEntity.getProfile().getFullName(), responseAgreement.getFullName());
+        Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
     }
 
     @Test
@@ -63,7 +74,7 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         createApprovedAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder().dateFrom(LocalDate.now().plusDays(2))
                 .dateTo(LocalDate.now().plusDays(10)).build();
-        Page<AgreementEntity> page = backofficeAgreementService.getApprovedAgreements(filter);
+        Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
         Assertions.assertEquals(0L, page.getTotalElements());
         Assertions.assertEquals(0, page.getTotalPages());
     }

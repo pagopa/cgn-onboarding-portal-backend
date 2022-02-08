@@ -242,6 +242,7 @@ paths:
           $ref: '#/responses/NotFound'
         409:
           $ref: '#/responses/Conflict'
+
   /approved-agreements:
     get:
       tags:
@@ -438,6 +439,7 @@ definitions:
       - fullName
       - agreementStartDate
       - agreementLastUpdateDate
+      - publishedDiscounts
     properties:
       agreementId:
         type: string
@@ -449,6 +451,9 @@ definitions:
       agreementLastUpdateDate:
         type: string
         format: date
+      publishedDiscounts:
+        type: integer
+        format: int64
 
   ApprovedAgreementDetail:
     type: object
