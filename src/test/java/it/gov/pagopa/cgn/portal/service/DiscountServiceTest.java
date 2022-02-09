@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -693,6 +694,16 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+
+        // check that materialized view should contain this discount categories
+        var discountProductCategories = dbDiscount.getProducts().stream().map(DiscountProductEntity::getProductCategory).collect(Collectors.toList());
+        var publishedProductCategories = publishedProductCategoryRepository.findAll();
+        Assertions.assertEquals(discountProductCategories.size(), publishedProductCategories.size());
+        publishedProductCategories.forEach(c -> {
+            Assertions.assertTrue(discountProductCategories.contains(c.getProductCategory()));
+        });
     }
 
     @Test
@@ -960,9 +971,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
-        // refresh materialized views
-        onlineMerchantRepository.refreshView();
-
         // await for view to be refreshed
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
 
@@ -1003,9 +1011,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
-        // refresh materialized views
-        offlineMerchantRepository.refreshView();
-
         // await for view to be refreshed
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
 
@@ -1045,10 +1050,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
-
-        // refresh materialized views
-        onlineMerchantRepository.refreshView();
-        offlineMerchantRepository.refreshView();
 
         // await for view to be refreshed
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
@@ -1107,10 +1108,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         // assert that published discounts are 2
         Assertions.assertEquals(2, discountRepository.countByAgreementIdAndState(agreementEntity.getId(), DiscountStateEnum.PUBLISHED));
 
-        // refresh materialized views
-        onlineMerchantRepository.refreshView();
-        offlineMerchantRepository.refreshView();
-
         // await for view to be refreshed
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
@@ -1138,6 +1135,42 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         offlineMerchantEntities = offlineMerchantRepository.findAll();
         Assertions.assertEquals(1, offlineMerchantEntities.size());
         Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+    }
+
+    @Test
+    void SuspendingOneDiscount_ShouldRefreshPublishedProductCategoryView() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        approveAgreement(); // simulation of approved
+
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish discount
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+
+        // unpublish discount
+        discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
+
+        // await for view to be refreshed
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> publishedProductCategoryRepository.findAll().size() <= 0);
+
+        // check that materialized view should NOT contain this discount categories
+        // specifically just one unpublished discount should leave an empty view
+        var discountProductCategories = dbDiscount.getProducts().stream().map(DiscountProductEntity::getProductCategory).collect(Collectors.toList());
+        var publishedProductCategories = publishedProductCategoryRepository.findAll();
+        Assertions.assertEquals(0, publishedProductCategories.size());
     }
 
     @Test

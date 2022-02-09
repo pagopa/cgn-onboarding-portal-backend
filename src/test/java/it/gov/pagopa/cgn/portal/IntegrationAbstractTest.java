@@ -147,6 +147,9 @@ public class IntegrationAbstractTest {
     @Autowired
     protected OnlineMerchantRepository onlineMerchantRepository;
 
+    @Autowired
+    protected PublishedProductCategoryRepository publishedProductCategoryRepository;
+
     @AfterEach
     protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();
