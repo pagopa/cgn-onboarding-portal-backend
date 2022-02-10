@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 
-public interface OfflineMerchantRepository extends JpaRepository<OfflineMerchantViewEntity, Long> {
+public interface OfflineMerchantRepository extends JpaRepository<OfflineMerchantViewEntity, String> {
 
     @Modifying
     @Transactional

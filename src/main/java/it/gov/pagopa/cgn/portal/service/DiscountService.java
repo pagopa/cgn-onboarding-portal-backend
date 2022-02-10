@@ -9,10 +9,7 @@ import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
-import it.gov.pagopa.cgn.portal.repository.OfflineMerchantRepository;
-import it.gov.pagopa.cgn.portal.repository.OnlineMerchantRepository;
+import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
@@ -48,6 +45,7 @@ public class DiscountService {
     private final BucketLoadUtils bucketLoadUtils;
     private final OfflineMerchantRepository offlineMerchantRepository;
     private final OnlineMerchantRepository onlineMerchantRepository;
+    private final PublishedProductCategoryRepository publishedProductCategoryRepository;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -139,12 +137,18 @@ public class DiscountService {
     public void deleteDiscount(String agreementId, Long discountId) {
         // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findById(agreementId);
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+
         discountRepository.deleteById(discountId);
+
+        // refresh materialized views
+        refreshMaterializedViews(profileEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity publishDiscount(String agreementId, Long discountId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
         DiscountEntity discount = findById(discountId);
         validatePublishingDiscount(agreementEntity, discount);
         discount.setState(DiscountStateEnum.PUBLISHED);
@@ -158,6 +162,10 @@ public class DiscountService {
                 agreementServiceLight.setFirstDiscountPublishingDate(agreementEntity);
             }
         }
+
+        // refresh materialized views
+        refreshMaterializedViews(profileEntity);
+
         return discount;
     }
 
@@ -177,27 +185,25 @@ public class DiscountService {
                 discount.getName(), reasonMessage);
 
         // refresh materialized views
-        refreshMaterializedViews(agreementId, profileEntity);
+        refreshMaterializedViews(profileEntity);
 
         return discount;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void refreshMaterializedViews(String agreementId, ProfileEntity profileEntity) {
-        if (discountRepository.countByAgreementIdAndState(agreementId, DiscountStateEnum.PUBLISHED) <= 0) {
-            // refresh materialized views only if there are no more published discounts
-            switch (profileEntity.getSalesChannel()) {
-                case ONLINE:
-                    onlineMerchantRepository.refreshView();
-                    break;
-                case OFFLINE:
-                    offlineMerchantRepository.refreshView();
-                    break;
-                case BOTH:
-                    onlineMerchantRepository.refreshView();
-                    offlineMerchantRepository.refreshView();
-                    break;
-            }
+    public void refreshMaterializedViews(ProfileEntity profileEntity) {
+        publishedProductCategoryRepository.refreshView();
+        switch (profileEntity.getSalesChannel()) {
+            case ONLINE:
+                onlineMerchantRepository.refreshView();
+                break;
+            case OFFLINE:
+                offlineMerchantRepository.refreshView();
+                break;
+            case BOTH:
+                onlineMerchantRepository.refreshView();
+                offlineMerchantRepository.refreshView();
+                break;
         }
     }
 
@@ -216,7 +222,8 @@ public class DiscountService {
                            DocumentService documentService, ValidatorFactory factory, BucketService bucketService,
                            DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
                            ConfigProperties configProperties, BucketLoadUtils bucketLoadUtils,
-                           OfflineMerchantRepository offlineMerchantRepository, OnlineMerchantRepository onlineMerchantRepository) {
+                           OfflineMerchantRepository offlineMerchantRepository, OnlineMerchantRepository onlineMerchantRepository,
+                           PublishedProductCategoryRepository publishedProductCategoryRepository) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -229,6 +236,7 @@ public class DiscountService {
         this.bucketLoadUtils = bucketLoadUtils;
         this.offlineMerchantRepository = offlineMerchantRepository;
         this.onlineMerchantRepository = onlineMerchantRepository;
+        this.publishedProductCategoryRepository = publishedProductCategoryRepository;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
