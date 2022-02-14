@@ -688,6 +688,9 @@ definitions:
         format: date
       state:
         $ref: '#/definitions/DiscountState'
+      discountUrl:
+        type: string
+        maxLength: 500
 
   DiscountState:
     type: string

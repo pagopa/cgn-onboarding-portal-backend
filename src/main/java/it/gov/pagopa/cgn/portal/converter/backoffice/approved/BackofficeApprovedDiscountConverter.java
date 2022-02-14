@@ -65,6 +65,7 @@ public class BackofficeApprovedDiscountConverter extends CommonBackofficeDiscoun
                 dto.setDescription(entity.getDescription());
                 dto.setStartDate(entity.getStartDate());
                 dto.setEndDate(entity.getEndDate());
+                dto.setDiscountUrl(entity.getDiscountUrl());
 
                 OffsetDateTime updateDateTime;
                 updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();

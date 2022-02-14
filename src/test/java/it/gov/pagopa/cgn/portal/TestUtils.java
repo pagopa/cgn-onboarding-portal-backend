@@ -315,6 +315,7 @@ public class TestUtils {
         discountEntity.setAgreement(agreement);
         discountEntity.setStaticCode("static_code");
         discountEntity.setVisibleOnEyca(false);
+        discountEntity.setDiscountUrl("anurl.com");
         return discountEntity;
     }
 
