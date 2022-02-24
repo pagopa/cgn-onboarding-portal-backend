@@ -49,6 +49,8 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void createEmptyDiscountBucketCodeSummary(DiscountEntity discount) {
+        var existing = discountBucketCodeSummaryRepository.findById(discount.getId()).isPresent();
+        if (existing) return;
         DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = new DiscountBucketCodeSummaryEntity(discount);
         discountBucketCodeSummaryRepository.save(bucketCodeSummaryEntity);
     }
@@ -153,6 +155,7 @@ public class BucketService {
         if (discountId != null) {
             discountBucketCodeRepository.deleteByDiscountId(discountId);
             bucketCodeLoadRepository.deleteByDiscountId(discountId);
+            discountBucketCodeSummaryRepository.deleteByDiscountId(discountId);
         }
     }
 
