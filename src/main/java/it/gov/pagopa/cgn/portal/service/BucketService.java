@@ -136,7 +136,7 @@ public class BucketService {
                             bucketCodeLoadEntity.getId()))
                     .spliterator();
 
-            int chunkSize = 25000;
+            int chunkSize = 5000;
             while (true) {
                 List<DiscountBucketCodeEntity> bucketCodeListChunk = new ArrayList<>();
                 int i = 0;
