@@ -102,7 +102,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
@@ -124,7 +124,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         discountRepository.save(discountEntity);
 
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
 
         bucketService.performBucketLoad(discountEntity.getId());
@@ -148,7 +148,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
@@ -176,7 +176,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
@@ -225,7 +225,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
@@ -256,7 +256,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
@@ -282,7 +282,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         // we do not run loading => bucket code summary available codes are 0
         // => job should skip the check and not require a notification
@@ -303,7 +303,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
@@ -366,7 +366,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
     private DiscountEntity setupDiscount() throws IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
 
         // load 10 codes by uploading 5 times a "2 code" bucket.
         for (var i = 0; i < 5; i++) {

@@ -88,7 +88,7 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
             documentContainerClient.create();
         }
 
-        bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
+        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
 
         // load 10 codes by uploading 5 times a "2 code" bucket.
         for (var i = 0; i < 5; i++) {

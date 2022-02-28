@@ -55,6 +55,7 @@ public class DiscountService {
         ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity, true);
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
+            bucketService.prepareDiscountBucketCodeSummary(toReturn);
             bucketService.createPendingBucketLoad(toReturn);
         }
         return new CrudDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
@@ -103,6 +104,7 @@ public class DiscountService {
         validateDiscount(agreementId, dbEntity, isChangedBucketLoad);
 
         if (isChangedBucketLoad) {
+            bucketService.prepareDiscountBucketCodeSummary(dbEntity);
             dbEntity = bucketService.createPendingBucketLoad(dbEntity);
         }
 
@@ -361,7 +363,6 @@ public class DiscountService {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
-            bucketService.createEmptyDiscountBucketCodeSummary(discountEntity);
         }
 
         // If profile sales channel is OFFLINE, any discount is visible on eyca

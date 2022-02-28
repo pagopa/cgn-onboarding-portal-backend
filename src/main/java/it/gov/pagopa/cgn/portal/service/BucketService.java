@@ -48,10 +48,8 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void createEmptyDiscountBucketCodeSummary(DiscountEntity discount) {
-        var existing = discountBucketCodeSummaryRepository.findById(discount.getId()).isPresent();
-        if (existing) return;
-        DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = new DiscountBucketCodeSummaryEntity(discount);
+    public void prepareDiscountBucketCodeSummary(DiscountEntity discount) {
+        DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findById(discount.getId()).orElse(new DiscountBucketCodeSummaryEntity(discount));
         discountBucketCodeSummaryRepository.save(bucketCodeSummaryEntity);
     }
 
