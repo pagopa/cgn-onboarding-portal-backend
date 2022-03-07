@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgnonboardingportal.model.*;
 import it.gov.pagopa.cgn.portal.converter.discount.CreateDiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.UpdateDiscountConverter;
@@ -9,7 +8,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
-
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -65,6 +64,10 @@ public class DiscountFacade {
 
     public void publishDiscount(String agreementId, String discountId) {
         discountService.publishDiscount(agreementId, Long.valueOf(discountId));
+    }
+
+    public void suspendDiscount(String agreementId, String discountId) {
+        discountService.suspendDiscount(agreementId, Long.valueOf(discountId), "Offerta sospesa dall'operatore.");
     }
 
     public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {
