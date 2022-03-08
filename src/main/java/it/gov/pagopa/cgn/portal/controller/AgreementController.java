@@ -115,6 +115,12 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<Void> suspendDiscount(String agreementId, String discountId) {
+        discountFacade.suspendDiscount(agreementId, discountId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     public ResponseEntity<UploadedImage> uploadImage(String agreementId, MultipartFile image) {
         return agreementFacade.uploadImage(agreementId, image);
     }

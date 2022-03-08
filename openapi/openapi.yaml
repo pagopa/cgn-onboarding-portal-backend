@@ -343,6 +343,25 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
+  /agreements/{agreementId}/discounts/{discountId}/suspension:
+    post:
+      tags:
+        - discount
+      summary: Suspend a discount
+      operationId: suspendDiscount
+      parameters:
+        - $ref: '#/parameters/AgreementId'
+        - $ref: '#/parameters/DiscountId'
+      responses:
+        204:
+          description: Discount suspended
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
   /agreements/{agreementId}/document-templates/{documentType}:
     get:
       tags:
