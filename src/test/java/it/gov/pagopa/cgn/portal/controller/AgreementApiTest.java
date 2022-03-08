@@ -210,6 +210,51 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void SuspendDiscount_SuspendDiscount_Ok() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+
+        this.mockMvc.perform(post(TestUtils.getDiscountSuspensionPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log()).andExpect(status().isNoContent());
+    }
+
+    @Test
+    void SuspendDiscount_SuspendDiscount_Ko() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        // if we don't publish discount we expect an InvalidRequestException
+        this.mockMvc.perform(post(TestUtils.getDiscountSuspensionPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log()).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void UploadBucket_UploadValidBucketWithoutProfile_Ko() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
