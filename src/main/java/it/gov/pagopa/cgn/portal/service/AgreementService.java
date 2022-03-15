@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -102,7 +103,8 @@ public class AgreementService extends AgreementServiceLight {
         List<DiscountEntity> discounts = agreementEntity.getDiscountList();
         if (!CollectionUtils.isEmpty(discounts)) {
             discounts = discounts.stream()
-                    .filter(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()) || DiscountStateEnum.SUSPENDED.equals(d.getState()))
+                    .filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
+                            && LocalDate.now().isBefore(d.getEndDate())) // not expired
                     .collect(Collectors.toList());
             agreementEntity.setDiscountList(discounts);
         }
