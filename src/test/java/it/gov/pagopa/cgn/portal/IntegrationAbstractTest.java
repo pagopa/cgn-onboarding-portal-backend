@@ -225,6 +225,10 @@ public class IntegrationAbstractTest {
     }
 
     protected AgreementTestObject createApprovedAgreement(int idx) {
+        return createApprovedAgreement(idx, false);
+    }
+
+    protected AgreementTestObject createApprovedAgreement(int idx, boolean expireDiscount) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         // creating profile
@@ -233,6 +237,10 @@ public class IntegrationAbstractTest {
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        if (expireDiscount) {
+            discountEntity.setStartDate(discountEntity.getStartDate().minusDays(1));
+            discountEntity.setEndDate(discountEntity.getEndDate().minusDays(1));
+        }
         discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
