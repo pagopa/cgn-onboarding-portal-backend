@@ -115,8 +115,8 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
-    public ResponseEntity<Void> suspendDiscount(String agreementId, String discountId) {
-        discountFacade.suspendDiscount(agreementId, discountId);
+    public ResponseEntity<Void> unpublishDiscount(String agreementId, String discountId) {
+        discountFacade.unpublishDiscount(agreementId, discountId);
         return ResponseEntity.noContent().build();
     }
 

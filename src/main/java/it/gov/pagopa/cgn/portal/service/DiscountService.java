@@ -171,6 +171,23 @@ public class DiscountService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity unpublishDiscount(String agreementId, Long discountId) {
+        DiscountEntity discount = findById(discountId);
+        checkDiscountRelatedSameAgreement(discount, agreementId);
+        if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot unpublish a discount not public");
+        }
+        discount.setState(DiscountStateEnum.DRAFT);
+        discount = discountRepository.save(discount);
+
+        // refresh materialized views
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+        refreshMaterializedViews(profileEntity);
+
+        return discount;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity suspendDiscount(String agreementId, Long discountId, String reasonMessage) {
         DiscountEntity discount = findById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
