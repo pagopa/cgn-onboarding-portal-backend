@@ -66,8 +66,8 @@ public class DiscountFacade {
         discountService.publishDiscount(agreementId, Long.valueOf(discountId));
     }
 
-    public void suspendDiscount(String agreementId, String discountId) {
-        discountService.suspendDiscount(agreementId, Long.valueOf(discountId), "Offerta sospesa dall'operatore.");
+    public void unpublishDiscount(String agreementId, String discountId) {
+        discountService.unpublishDiscount(agreementId, Long.valueOf(discountId));
     }
 
     public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {

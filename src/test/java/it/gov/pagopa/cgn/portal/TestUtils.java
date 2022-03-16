@@ -60,8 +60,8 @@ public class TestUtils {
         return getDiscountPath(agreementId) + "/" + discountId + "/publishing";
     }
 
-    public static String getDiscountSuspensionPath(String agreementId, Long discountId) {
-        return getDiscountPath(agreementId) + "/" + discountId + "/suspension";
+    public static String getDiscountUnpublishingPath(String agreementId, Long discountId) {
+        return getDiscountPath(agreementId) + "/" + discountId + "/unpublishing";
     }
 
     public static String getDocumentPath(String agreementId) {

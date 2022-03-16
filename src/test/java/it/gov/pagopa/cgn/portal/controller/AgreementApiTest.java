@@ -210,7 +210,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void SuspendDiscount_SuspendDiscount_Ok() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_Ok() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         // creating profile
@@ -228,12 +228,12 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
         discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
-        this.mockMvc.perform(post(TestUtils.getDiscountSuspensionPath(agreementEntity.getId(), discountEntity.getId())))
+        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(), discountEntity.getId())))
                 .andDo(log()).andExpect(status().isNoContent());
     }
 
     @Test
-    void SuspendDiscount_SuspendDiscount_Ko() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_Ko() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         // creating profile
@@ -250,7 +250,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         agreementEntity = agreementRepository.save(agreementEntity);
 
         // if we don't publish discount we expect an InvalidRequestException
-        this.mockMvc.perform(post(TestUtils.getDiscountSuspensionPath(agreementEntity.getId(), discountEntity.getId())))
+        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(), discountEntity.getId())))
                 .andDo(log()).andExpect(status().isBadRequest());
     }
 
