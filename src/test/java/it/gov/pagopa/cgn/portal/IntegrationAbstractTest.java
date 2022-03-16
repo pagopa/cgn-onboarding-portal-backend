@@ -27,6 +27,7 @@ import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -238,8 +239,8 @@ public class IntegrationAbstractTest {
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         if (expireDiscount) {
-            discountEntity.setStartDate(discountEntity.getStartDate().minusDays(1));
-            discountEntity.setEndDate(discountEntity.getEndDate().minusDays(1));
+            discountEntity.setStartDate(LocalDate.now().minusDays(2));
+            discountEntity.setEndDate(LocalDate.now().minusDays(1));
         }
         discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
