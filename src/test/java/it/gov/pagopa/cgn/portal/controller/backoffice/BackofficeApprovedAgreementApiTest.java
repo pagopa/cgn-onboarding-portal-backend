@@ -142,4 +142,32 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
 
     }
 
+    @Test
+    void GetAgreements_GetAgreementsApprovedDetailsWithoutExpiredDiscounts_Ok() throws Exception {
+        AgreementTestObject agreementTestObject = createApprovedAgreement(1, true);
+        AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
+        ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
+        this.mockMvc.perform(
+                        get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
+                .andExpect(jsonPath("profile").isNotEmpty())
+                .andExpect(jsonPath("profile.name").value(profileEntity.getName()))
+                .andExpect(jsonPath("profile.description").value(profileEntity.getDescription()))
+                .andExpect(jsonPath("profile.imageUrl").value(agreementEntity.getImageUrl()))
+                .andExpect(jsonPath("profile.fullName").value(profileEntity.getFullName()))
+                .andExpect(jsonPath("profile.taxCodeOrVat").value(profileEntity.getTaxCodeOrVat()))
+                .andExpect(jsonPath("profile.pecAddress").value(profileEntity.getPecAddress()))
+                .andExpect(jsonPath("profile.legalOffice").value(profileEntity.getLegalOffice()))
+                .andExpect(jsonPath("profile.telephoneNumber").value(profileEntity.getTelephoneNumber()))
+                .andExpect(jsonPath("profile.legalRepresentativeFullName")
+                        .value(profileEntity.getLegalRepresentativeFullName()))
+                .andExpect(jsonPath("profile.legalRepresentativeTaxCode")
+                        .value(profileEntity.getLegalRepresentativeTaxCode()))
+                .andExpect(jsonPath("profile.referent").isNotEmpty())
+                .andExpect(jsonPath("discounts", hasSize(0)));
+    }
+
 }

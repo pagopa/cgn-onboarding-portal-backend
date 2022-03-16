@@ -27,6 +27,7 @@ import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -225,6 +226,10 @@ public class IntegrationAbstractTest {
     }
 
     protected AgreementTestObject createApprovedAgreement(int idx) {
+        return createApprovedAgreement(idx, false);
+    }
+
+    protected AgreementTestObject createApprovedAgreement(int idx, boolean expireDiscount) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         // creating profile
@@ -233,6 +238,10 @@ public class IntegrationAbstractTest {
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        if (expireDiscount) {
+            discountEntity.setStartDate(LocalDate.now().minusDays(2));
+            discountEntity.setEndDate(LocalDate.now().minusDays(1));
+        }
         discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
