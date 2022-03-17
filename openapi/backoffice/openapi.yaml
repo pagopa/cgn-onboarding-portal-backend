@@ -359,6 +359,7 @@ parameters:
       - Operator
       - AgreementDate
       - LastModifyDate
+      - PublishedDiscounts
 
   SortDirection:
     name: sortDirection

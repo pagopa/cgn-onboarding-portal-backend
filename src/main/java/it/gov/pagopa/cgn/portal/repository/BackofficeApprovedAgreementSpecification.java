@@ -50,6 +50,10 @@ public class BackofficeApprovedAgreementSpecification extends CommonAgreementSpe
                 return new OrderImpl(root.get("startDate"), isSortAscending());
             case LAST_MODIFY_DATE:
                 return new OrderImpl(getLastUpdateDatePath(root), isSortAscending());
+            case PUBLISHED_DISCOUNTS:
+                // publishedDiscounts is present in ApprovedAgreementEntity
+                // it is a variant of AgreementEntity taken from a view that calculate the number of published discounts
+                return new OrderImpl(root.get("publishedDiscounts"), isSortAscending());
             default:
                 throw new InvalidRequestException("Invalid sort column");
         }
