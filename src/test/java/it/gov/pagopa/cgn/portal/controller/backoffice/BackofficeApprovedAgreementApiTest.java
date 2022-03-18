@@ -81,6 +81,28 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok() throws Exception {
+        final int numRows = 3;
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
+        List<AgreementEntity> sortedByOperatorAgreementList = testObjectList.stream()
+                .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
+                .map(AgreementTestObject::getAgreementEntity)
+                .collect(Collectors.toList());
+        this.mockMvc.perform(
+                        get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS, Sort.Direction.ASC)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items", hasSize(numRows)))
+                .andExpect(jsonPath("$.total").value(numRows))
+                .andExpect(jsonPath("$.items[0].publishedDiscounts").value(1))
+                .andExpect(jsonPath("$.items[1].publishedDiscounts").value(2))
+                .andExpect(jsonPath("$.items[2].publishedDiscounts").value(3));
+    }
+
+    @Test
     void GetAgreements_GetAgreementsApprovedSortedByLastModifyDate_Ok() throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
@@ -144,7 +166,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetAgreements_GetAgreementsApprovedDetailsWithoutExpiredDiscounts_Ok() throws Exception {
-        AgreementTestObject agreementTestObject = createApprovedAgreement(1, true);
+        AgreementTestObject agreementTestObject = createApprovedAgreement(1, true, true);
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
         this.mockMvc.perform(

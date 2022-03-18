@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal;
 
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -29,7 +30,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -209,48 +209,61 @@ public class IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setName(discountEntity.getName() + idx);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        List<DiscountEntity> discountEntities = new ArrayList<>();
+        discountEntities.add(discountEntity);
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
+        return createAgreementTestObject(agreementEntity, profileEntity, discountEntities, documentEntityList);
     }
 
     protected List<AgreementTestObject> createMultipleApprovedAgreement(int numberToCreate) {
+        return createMultipleApprovedAgreement(numberToCreate, false);
+    }
+
+    protected List<AgreementTestObject> createMultipleApprovedAgreement(int numberToCreate, boolean publishDiscounts) {
         List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
-        IntStream.range(0, numberToCreate).forEach(idx -> testObjectList.add(createApprovedAgreement(idx)));
+        IntStream.range(0, numberToCreate).forEach(idx -> testObjectList.add(createApprovedAgreement(idx, publishDiscounts)));
 
         return testObjectList;
     }
 
     protected AgreementTestObject createApprovedAgreement() {
-        return createApprovedAgreement(1);
+        return createApprovedAgreement(1, false, false);
     }
 
-    protected AgreementTestObject createApprovedAgreement(int idx) {
-        return createApprovedAgreement(idx, false);
+    protected AgreementTestObject createApprovedAgreement(int idx, boolean publishDiscounts) {
+        return createApprovedAgreement(idx, publishDiscounts, false);
     }
 
-    protected AgreementTestObject createApprovedAgreement(int idx, boolean expireDiscount) {
+    protected AgreementTestObject createApprovedAgreement(int idx, boolean publishDiscounts, boolean expireDiscount) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity.setFullName(profileEntity.getFullName() + idx);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
-        // creating discount
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        if (expireDiscount) {
-            discountEntity.setStartDate(LocalDate.now().minusDays(2));
-            discountEntity.setEndDate(LocalDate.now().minusDays(1));
+        List<DiscountEntity> discountEntities = new ArrayList<>();
+        for (var i = 0; i < idx + 1; i++) {
+            // creating discount
+            DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+            if (publishDiscounts) {
+                discountEntity.setState(DiscountStateEnum.PUBLISHED);
+            }
+            if (expireDiscount) {
+                discountEntity.setStartDate(LocalDate.now().minusDays(2));
+                discountEntity.setEndDate(LocalDate.now().minusDays(1));
+            }
+            discountEntity.setName(discountEntity.getName() + idx);
+            discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+            discountEntities.add(discountEntity);
         }
-        discountEntity.setName(discountEntity.getName() + idx);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
         documentEntityList.addAll(saveBackofficeSampleDocuments(agreementEntity));
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
-        return createAgreementTestObject(agreementEntity, profileEntity, discountEntity, documentEntityList);
+        return createAgreementTestObject(agreementEntity, profileEntity, discountEntities, documentEntityList);
     }
 
     protected void setOperatorAuth() {
@@ -292,11 +305,11 @@ public class IntegrationAbstractTest {
     }
 
     private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity, ProfileEntity profileEntity,
-                                                          DiscountEntity discountEntity, List<DocumentEntity> documentEntityList) {
+                                                          List<DiscountEntity> discountEntities, List<DocumentEntity> documentEntityList) {
         AgreementTestObject testObject = new AgreementTestObject();
         testObject.setAgreementEntity(agreementEntity);
         testObject.setProfileEntity(profileEntity);
-        testObject.setDiscountEntityList(Collections.singletonList(discountEntity));
+        testObject.setDiscountEntityList(discountEntities);
         testObject.setDocumentEntityList(documentEntityList);
         return testObject;
     }
