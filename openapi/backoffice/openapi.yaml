@@ -403,7 +403,7 @@ paths:
       description: Insert a referent fiscalcode.
       parameters:
         - $ref: "#/parameters/KeyOrganizationFiscalCode"
-        - $ref: "#/parameters/ReferentFiscalCode"
+        - $ref: "#/parameters/ReferentFiscalCodeBody"
       responses:
         200:
           description: Inserted referent.
@@ -412,6 +412,7 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
+  "/organization/{keyOrganizationFiscalCode}/referents/{referentFiscalCode}":
     delete:
       tags:
         - activations
@@ -502,8 +503,15 @@ parameters:
     minLength: 8
     maxLength: 16
   ReferentFiscalCode:
-    name: body
+    in: path
+    name: referentFiscalCode
+    description: Referent fiscal code
+    required: true
+    type: string
+    pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$'
+  ReferentFiscalCodeBody:
     in: body
+    name: body
     required: true
     schema:
       $ref: "#/definitions/ReferentFiscalCode"
@@ -1055,9 +1063,14 @@ definitions:
           - referents
 
   Organizations:
-    type: array
-    items:
-      $ref: "#/definitions/OrganizationWithReferents"
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/OrganizationWithReferents"
+      count:
+        type: integer
 
 
 responses:
