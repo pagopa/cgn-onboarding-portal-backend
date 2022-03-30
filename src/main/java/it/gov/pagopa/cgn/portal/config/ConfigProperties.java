@@ -103,6 +103,9 @@ public class ConfigProperties {
     @Value("${cgn.geolocation.secret-token}")
     private String geolocationToken;
 
+    @Value("${cgn.attribute-authority.base-url}")
+    private String attributeAuthorityBaseUrl;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }
