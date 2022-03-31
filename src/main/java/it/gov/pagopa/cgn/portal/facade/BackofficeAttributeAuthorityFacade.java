@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsPostConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationsConverter;
 import it.gov.pagopa.cgn.portal.service.ApprovedAgreementService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -31,6 +32,8 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final OrganizationWithReferentsConverter organizationWithReferentsConverter;
 
+    private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
+
     public ResponseEntity<Organizations> getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
         return ResponseEntity.ok(organizationsConverter.fromAttributeAuthorityModel(attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection)));
     }
@@ -44,7 +47,7 @@ public class BackofficeAttributeAuthorityFacade {
     }
 
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
-        return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(attributeAuthorityService.upsertOrganization(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationWithReferents))));
+        return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents))));
     }
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
@@ -62,12 +65,14 @@ public class BackofficeAttributeAuthorityFacade {
                                               ApprovedAgreementService approvedAgreementService,
                                               OrganizationsConverter organizationsConverter,
                                               OrganizationConverter organizationConverter,
-                                              OrganizationWithReferentsConverter organizationWithReferentsConverter) {
+                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
+                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter) {
         this.attributeAuthorityService = attributeAuthorityService;
         this.backofficeAgreementService = backofficeAgreementService;
         this.approvedAgreementService = approvedAgreementService;
         this.organizationsConverter = organizationsConverter;
         this.organizationConverter = organizationConverter;
         this.organizationWithReferentsConverter = organizationWithReferentsConverter;
+        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
     }
 }

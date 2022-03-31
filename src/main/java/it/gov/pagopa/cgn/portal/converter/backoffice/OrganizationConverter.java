@@ -26,7 +26,6 @@ public class OrganizationConverter extends AbstractAttributeAuthorityConverter<O
         backofficeModel.setOrganizationFiscalCode(attributeAuthorityModel.getOrganizationFiscalCode());
         backofficeModel.setOrganizationName(attributeAuthorityModel.getOrganizationName());
         backofficeModel.setPec(attributeAuthorityModel.getPec());
-        backofficeModel.setInsertedAt(attributeAuthorityModel.getInsertedAt().toLocalDateTime().toLocalDate());
         return backofficeModel;
     };
 

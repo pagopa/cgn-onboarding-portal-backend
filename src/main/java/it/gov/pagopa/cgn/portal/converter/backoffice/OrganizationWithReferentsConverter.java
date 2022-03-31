@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 import it.gov.pagopa.cgn.portal.converter.AbstractAttributeAuthorityConverter;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
@@ -32,13 +33,7 @@ public class OrganizationWithReferentsConverter extends AbstractAttributeAuthori
     };
 
     protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
-        OrganizationWithReferentsAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsAttributeAuthority();
-        attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
-        attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
-        attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
-        attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setReferents(backofficeModel.getReferents());
-        return attributeAuthorityModel;
+        throw new NotImplementedException();
     };
 
 

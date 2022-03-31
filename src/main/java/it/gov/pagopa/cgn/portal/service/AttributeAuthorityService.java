@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class AttributeAuthorityService {
         return defaultApi.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection);
     }
 
-    public OrganizationWithReferentsAttributeAuthority upsertOrganization(OrganizationWithReferentsAttributeAuthority organizationWithReferentsAttributeAuthority) {
+    public OrganizationWithReferentsAttributeAuthority upsertOrganization(OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
         return defaultApi.upsertOrganization(organizationWithReferentsAttributeAuthority);
     }
 
