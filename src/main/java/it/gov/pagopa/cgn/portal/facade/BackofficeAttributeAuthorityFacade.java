@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.transaction.Transactional;
-import java.util.function.BiFunction;
+import java.util.function.BiConsumer;
 
 @Component
 public class BackofficeAttributeAuthorityFacade {
@@ -51,7 +51,7 @@ public class BackofficeAttributeAuthorityFacade {
         // find agreement for this organization and apply an update consumer
         agreementUserService
                 .findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
-                .ifPresent((agreementUserEntity) -> updateAgreementUserAndProfileConsumer.apply(agreementUserEntity, organizationWithReferents));
+                .ifPresent(agreementUserEntity -> updateAgreementUserAndProfileConsumer.accept(agreementUserEntity, organizationWithReferents));
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
@@ -79,7 +79,7 @@ public class BackofficeAttributeAuthorityFacade {
         this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
     }
 
-    private final BiFunction<AgreementUserEntity, OrganizationWithReferents, Boolean> updateAgreementUserAndProfileConsumer = (agreementUserEntity, organizationWithReferents) -> {
+    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserAndProfileConsumer = (agreementUserEntity, organizationWithReferents) -> {
         // update AgreementUser if merchant tax code has changed
         if (!organizationWithReferents.getKeyOrganizationFiscalCode().equals(organizationWithReferents.getOrganizationFiscalCode())) {
             agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(), organizationWithReferents.getOrganizationFiscalCode());
@@ -90,7 +90,5 @@ public class BackofficeAttributeAuthorityFacade {
         profile.setFullName(organizationWithReferents.getOrganizationName());
         profile.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
         profileService.updateProfile(agreementUserEntity.getAgreementId(), profile);
-
-        return true;
     };
 }
