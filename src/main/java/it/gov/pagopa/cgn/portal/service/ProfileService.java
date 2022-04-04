@@ -94,6 +94,7 @@ public class ProfileService {
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setFullName(toUpdateEntity.getFullName());
         dbEntity.setDescription(toUpdateEntity.getDescription());
         dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
         dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());

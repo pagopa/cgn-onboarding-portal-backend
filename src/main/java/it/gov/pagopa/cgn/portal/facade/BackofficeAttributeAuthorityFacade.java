@@ -1,34 +1,34 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsPostConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationsConverter;
-import it.gov.pagopa.cgn.portal.service.ApprovedAgreementService;
+import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.transaction.Transactional;
+import java.util.function.BiFunction;
+
 @Component
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class BackofficeAttributeAuthorityFacade {
 
     private final AttributeAuthorityService attributeAuthorityService;
 
-    private final BackofficeAgreementService backofficeAgreementService;
+    private AgreementUserService agreementUserService;
 
-    private final ApprovedAgreementService approvedAgreementService;
+    private ProfileService profileService;
 
     private final OrganizationsConverter organizationsConverter;
-
-    private final OrganizationConverter organizationConverter;
 
     private final OrganizationWithReferentsConverter organizationWithReferentsConverter;
 
@@ -46,8 +46,18 @@ public class BackofficeAttributeAuthorityFacade {
         }
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
-        return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents))));
+        // find agreement for this organization and apply an update consumer
+        agreementUserService
+                .findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
+                .ifPresent((agreementUserEntity) -> updateAgreementUserAndProfileConsumer.apply(agreementUserEntity, organizationWithReferents));
+
+        // we upsert into attribute authority only after the db has been updated successfully
+        // if attribute authority fails then the db transaction would be rolled back
+        OrganizationWithReferentsAttributeAuthority updatedOrganizationWithReferentsAttributeAuthority = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents));
+
+        return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(updatedOrganizationWithReferentsAttributeAuthority));
     }
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
@@ -60,19 +70,27 @@ public class BackofficeAttributeAuthorityFacade {
     }
 
     @Autowired
-    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
-                                              BackofficeAgreementService backofficeAgreementService,
-                                              ApprovedAgreementService approvedAgreementService,
-                                              OrganizationsConverter organizationsConverter,
-                                              OrganizationConverter organizationConverter,
-                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
-                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter) {
+    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService, AgreementUserService agreementUserService, ProfileService profileService, OrganizationsConverter organizationsConverter, OrganizationWithReferentsConverter organizationWithReferentsConverter, OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter) {
         this.attributeAuthorityService = attributeAuthorityService;
-        this.backofficeAgreementService = backofficeAgreementService;
-        this.approvedAgreementService = approvedAgreementService;
+        this.agreementUserService = agreementUserService;
+        this.profileService = profileService;
         this.organizationsConverter = organizationsConverter;
-        this.organizationConverter = organizationConverter;
         this.organizationWithReferentsConverter = organizationWithReferentsConverter;
         this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
     }
+
+    private final BiFunction<AgreementUserEntity, OrganizationWithReferents, Boolean> updateAgreementUserAndProfileConsumer = (agreementUserEntity, organizationWithReferents) -> {
+        // update AgreementUser if merchant tax code has changed
+        if (!organizationWithReferents.getKeyOrganizationFiscalCode().equals(organizationWithReferents.getOrganizationFiscalCode())) {
+            agreementUserService.updateMerchantTaxCode(organizationWithReferents.getKeyOrganizationFiscalCode(), organizationWithReferents.getOrganizationFiscalCode());
+        }
+
+        // get and update profile
+        ProfileEntity profile = profileService.getProfileFromAgreementId(agreementUserEntity.getAgreementId());
+        profile.setFullName(organizationWithReferents.getOrganizationName());
+        profile.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
+        profileService.updateProfile(agreementUserEntity.getAgreementId(), profile);
+
+        return true;
+    };
 }
