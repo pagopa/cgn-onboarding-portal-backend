@@ -94,7 +94,6 @@ public class ProfileService {
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
-        dbEntity.setFullName(toUpdateEntity.getFullName());
         dbEntity.setDescription(toUpdateEntity.getDescription());
         dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
         dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
@@ -107,6 +106,11 @@ public class ProfileService {
         updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
         updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
         dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
+        // fullname will never arrive from converted api model
+        // we will update it only internally so we have to check that it's not null
+        if (toUpdateEntity.getFullName() != null) {
+            dbEntity.setFullName(toUpdateEntity.getFullName());
+        }
     };
 
 }
