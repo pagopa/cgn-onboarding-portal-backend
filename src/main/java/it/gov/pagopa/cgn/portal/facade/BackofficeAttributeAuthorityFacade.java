@@ -82,7 +82,7 @@ public class BackofficeAttributeAuthorityFacade {
     private final BiFunction<AgreementUserEntity, OrganizationWithReferents, Boolean> updateAgreementUserAndProfileConsumer = (agreementUserEntity, organizationWithReferents) -> {
         // update AgreementUser if merchant tax code has changed
         if (!organizationWithReferents.getKeyOrganizationFiscalCode().equals(organizationWithReferents.getOrganizationFiscalCode())) {
-            agreementUserService.updateMerchantTaxCode(organizationWithReferents.getKeyOrganizationFiscalCode(), organizationWithReferents.getOrganizationFiscalCode());
+            agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(), organizationWithReferents.getOrganizationFiscalCode());
         }
 
         // get and update profile
