@@ -17,7 +17,7 @@ public class OrganizationsConverter extends AbstractAttributeAuthorityConverter<
     private OrganizationWithReferentsConverter organizationWithReferentsConverter;
 
     @Autowired
-    protected OrganizationsConverter(OrganizationWithReferentsConverter organizationWithReferentsConverter) {
+    public OrganizationsConverter(OrganizationWithReferentsConverter organizationWithReferentsConverter) {
         this.organizationWithReferentsConverter = organizationWithReferentsConverter;
     }
 
