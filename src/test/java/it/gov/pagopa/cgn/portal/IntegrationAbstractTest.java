@@ -110,34 +110,10 @@ public class IntegrationAbstractTest {
     protected AgreementUserRepository userRepository;
 
     @Autowired
+    protected AgreementUserRepository agreementUserRepository;
+
+    @Autowired
     protected DocumentRepository documentRepository;
-
-    @Autowired
-    protected AgreementService agreementService;
-
-    @Autowired
-    protected ProfileService profileService;
-
-    @Autowired
-    protected DiscountService discountService;
-
-    @Autowired
-    protected BucketService bucketService;
-
-    @Autowired
-    protected NotificationRepository notificationRepository;
-
-    @Autowired
-    protected BackofficeAgreementService backofficeAgreementService;
-
-    @Autowired
-    protected ApprovedAgreementService approvedAgreementService;
-
-    @Autowired
-    protected TestReferentRepository testReferentRepository;
-
-    @Autowired
-    protected AddressRepository addressRepository;
 
     @Autowired
     protected DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
@@ -150,6 +126,42 @@ public class IntegrationAbstractTest {
 
     @Autowired
     protected PublishedProductCategoryRepository publishedProductCategoryRepository;
+
+    @Autowired
+    protected NotificationRepository notificationRepository;
+
+    @Autowired
+    protected TestReferentRepository testReferentRepository;
+
+    @Autowired
+    protected AddressRepository addressRepository;
+
+    @Autowired
+    protected DocumentService documentService;
+
+    @Autowired
+    protected AgreementService agreementService;
+
+    @Autowired
+    protected AgreementServiceLight agreementServiceLight;
+
+    @Autowired
+    protected AgreementUserService agreementUserService;
+
+    @Autowired
+    protected ProfileService profileService;
+
+    @Autowired
+    protected DiscountService discountService;
+
+    @Autowired
+    protected BucketService bucketService;
+
+    @Autowired
+    protected BackofficeAgreementService backofficeAgreementService;
+
+    @Autowired
+    protected ApprovedAgreementService approvedAgreementService;
 
     @AfterEach
     protected void cleanAll() throws InterruptedException {

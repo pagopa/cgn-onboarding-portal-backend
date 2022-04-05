@@ -248,6 +248,11 @@
             <artifactId>log4j-to-slf4j</artifactId>
             <version>2.16.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -301,7 +306,6 @@
                         <configuration>
                             <inputSpec>${project.basedir}/openapi/openapi.yaml</inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
-
                             <generatorName>spring</generatorName>
                             <apiPackage>${project.groupId}.cgnonboardingportal.api</apiPackage>
                             <modelPackage>${project.groupId}.cgnonboardingportal.model</modelPackage>
@@ -319,7 +323,6 @@
                         <configuration>
                             <inputSpec>${project.basedir}/openapi/backoffice/openapi.yaml</inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
-
                             <generatorName>spring</generatorName>
                             <apiPackage>${project.groupId}.cgnonboardingportal.backoffice.api</apiPackage>
                             <modelPackage>${project.groupId}.cgnonboardingportal.backoffice.model</modelPackage>
@@ -337,13 +340,40 @@
                         <configuration>
                             <inputSpec>${project.basedir}/openapi/public.yaml</inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
-
                             <generatorName>spring</generatorName>
                             <apiPackage>${project.groupId}.cgnonboardingportal.publicapi.api</apiPackage>
                             <modelPackage>${project.groupId}.cgnonboardingportal.publicapi.model</modelPackage>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
                                 <serializableModel>true</serializableModel>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>attribute-authority-java-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                https://raw.githubusercontent.com/pagopa/ade-aa-ms-mock/master/openapi/index.yaml
+                            </inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <modelNameSuffix>AttributeAuthority</modelNameSuffix>
+                            <library>resttemplate</library>
+                            <configOptions>
+                                <basePackage>${project.groupId}.cgnonboardingportal.attributeauthority</basePackage>
+                                <modelPackage>${project.groupId}.cgnonboardingportal.attributeauthority.model
+                                </modelPackage>
+                                <apiPackage>${project.groupId}.cgnonboardingportal.attributeauthority.api</apiPackage>
+                                <invokerPackage>${project.groupId}.cgnonboardingportal.attributeauthority.client
+                                </invokerPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <serializableModel>true</serializableModel>
+                                <serializationLibrary>jackson</serializationLibrary>
                             </configOptions>
                         </configuration>
                     </execution>

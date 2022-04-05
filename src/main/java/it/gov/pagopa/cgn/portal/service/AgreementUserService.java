@@ -26,6 +26,11 @@ public class AgreementUserService {
         return userRepository.save(userEntity);
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void updateMerchantTaxCode(String agreementId, String newMerchantTaxCode) {
+        userRepository.updateMerchantTaxCode(agreementId, newMerchantTaxCode);
+    }
+
     @Autowired
     public AgreementUserService(AgreementUserRepository userRepository) {
         this.userRepository = userRepository;
