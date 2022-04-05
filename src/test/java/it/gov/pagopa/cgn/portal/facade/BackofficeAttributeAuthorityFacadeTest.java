@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 
 @SpringBootTest
@@ -50,7 +51,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
 
         backofficeAttributeAuthorityFacade = new BackofficeAttributeAuthorityFacade(attributeAuthorityService, agreementUserServiceSpy, profileServiceSpy, organizationsConverter, organizationWithReferentsConverter, organizationWithReferentsPostConverter);
 
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
+        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -83,6 +85,36 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
 
         Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
         Mockito.verify(profileServiceSpy, Mockito.times(0)).updateProfile(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    @Transactional(Transactional.TxType.REQUIRED)
+    void UpsertOrganization_Upsert_Ok() {
+        String anOrganizationFiscalCode = profileEntity.getTaxCodeOrVat();
+        String anOrganizationName = "New name";
+        String anOrganizationPec = "new-pec@pec.it";
+        LocalDate anInsertedAt = LocalDate.now();
+
+        OrganizationWithReferents organizationWithReferents = new OrganizationWithReferents();
+        organizationWithReferents.setKeyOrganizationFiscalCode(anOrganizationFiscalCode);
+        organizationWithReferents.setOrganizationFiscalCode(anOrganizationFiscalCode);
+        organizationWithReferents.setOrganizationName(anOrganizationName);
+        organizationWithReferents.setPec(anOrganizationPec);
+        organizationWithReferents.setInsertedAt(anInsertedAt);
+
+        Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenReturn(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationWithReferents));
+
+        ResponseEntity<OrganizationWithReferents> response = backofficeAttributeAuthorityFacade.upsertOrganization(organizationWithReferents);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(anOrganizationFiscalCode, response.getBody().getOrganizationFiscalCode());
+        Assertions.assertEquals(anOrganizationName, response.getBody().getOrganizationName());
+        Assertions.assertEquals(anOrganizationPec, response.getBody().getPec());
+        Assertions.assertEquals(anInsertedAt, response.getBody().getInsertedAt());
+
+        Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
+        Mockito.verify(profileServiceSpy, Mockito.times(1)).updateProfile(Mockito.any(), Mockito.any());
     }
 
 }
