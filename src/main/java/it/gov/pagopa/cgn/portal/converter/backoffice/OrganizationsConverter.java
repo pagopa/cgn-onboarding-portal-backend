@@ -1,10 +1,10 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractAttributeAuthorityConverter;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class OrganizationsConverter extends AbstractAttributeAuthorityConverter<
 
     @Override
     protected Function<Organizations, OrganizationsAttributeAuthority> toAttributeAuthorityModelFunction() {
-        throw new NotImplementedException();
+        return toAttributeAuthorityModel;
     }
 
     protected Function<OrganizationsAttributeAuthority, Organizations> fromAttributeAuthorityModel = attributeAuthorityModel -> {
@@ -36,6 +36,13 @@ public class OrganizationsConverter extends AbstractAttributeAuthorityConverter<
         backofficeModel.setItems((List<OrganizationWithReferents>) organizationWithReferentsConverter.fromAttributeAuthorityModelCollection(attributeAuthorityModel.getItems()));
         backofficeModel.setCount(attributeAuthorityModel.getCount());
         return backofficeModel;
+    };
+
+    protected Function<Organizations, OrganizationsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
+        OrganizationsAttributeAuthority attributeAuthorityModel = new OrganizationsAttributeAuthority();
+        attributeAuthorityModel.setCount(backofficeModel.getCount());
+        attributeAuthorityModel.setItems((List<OrganizationWithReferentsAttributeAuthority>) organizationWithReferentsConverter.toAttributeAuthorityModelCollection(backofficeModel.getItems()));
+        return attributeAuthorityModel;
     };
 
 
