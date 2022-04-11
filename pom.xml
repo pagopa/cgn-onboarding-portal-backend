@@ -364,8 +364,8 @@
                             <generateModelTests>false</generateModelTests>
                             <modelNameSuffix>AttributeAuthority</modelNameSuffix>
                             <library>resttemplate</library>
+                            <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
-                                <basePackage>${project.groupId}.cgnonboardingportal.attributeauthority</basePackage>
                                 <modelPackage>${project.groupId}.cgnonboardingportal.attributeauthority.model
                                 </modelPackage>
                                 <apiPackage>${project.groupId}.cgnonboardingportal.attributeauthority.api</apiPackage>

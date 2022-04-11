@@ -35,15 +35,11 @@ public class BackofficeAttributeAuthorityFacade {
     private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
 
     public ResponseEntity<Organizations> getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
-        return ResponseEntity.ok(organizationsConverter.fromAttributeAuthorityModel(attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection)));
+        return organizationsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection));
     }
 
     public ResponseEntity<OrganizationWithReferents> getOrganization(String keyOrganizationFiscalCode) {
-        try {
-            return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(attributeAuthorityService.getOrganization(keyOrganizationFiscalCode)));
-        } catch (HttpClientErrorException.NotFound e) {
-            return ResponseEntity.notFound().build();
-        }
+        return organizationWithReferentsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(keyOrganizationFiscalCode));
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -55,9 +51,9 @@ public class BackofficeAttributeAuthorityFacade {
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
-        OrganizationWithReferentsAttributeAuthority updatedOrganizationWithReferentsAttributeAuthority = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents));
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> updatedOrganizationWithReferentsAttributeAuthority = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents));
 
-        return ResponseEntity.ok(organizationWithReferentsConverter.fromAttributeAuthorityModel(updatedOrganizationWithReferentsAttributeAuthority));
+        return organizationWithReferentsConverter.fromAttributeAuthorityResponse(updatedOrganizationWithReferentsAttributeAuthority);
     }
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {

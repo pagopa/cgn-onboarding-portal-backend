@@ -24,7 +24,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @SpringBootTest
@@ -70,12 +70,12 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         UpsertResult organizationResponse1 = upsertOrganizationWithReferents("1234567891", "1234567891", "Org 1", "org1@pec.it", false);
         Organizations organizations = new Organizations();
         organizations.setCount(2);
-        List<OrganizationWithReferents> items = new ArrayList();
+        List<OrganizationWithReferents> items = new LinkedList();
         items.add(organizationResponse0.organizationWithReferents);
         items.add(organizationResponse1.organizationWithReferents);
         organizations.setItems(items);
 
-        Mockito.when(attributeAuthorityService.getOrganizations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(organizationsConverter.toAttributeAuthorityModel(organizations));
+        Mockito.when(attributeAuthorityService.getOrganizations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(ResponseEntity.ok(organizationsConverter.toAttributeAuthorityModel(organizations)));
         ResponseEntity<Organizations> organizationsResponse = backofficeAttributeAuthorityFacade.getOrganizations(null, 0, 2, null, null);
 
         Assertions.assertEquals(HttpStatus.OK, organizationsResponse.getStatusCode());
@@ -89,7 +89,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     void GetOrganization_Ok() {
         UpsertResult organizationResponse0 = upsertOrganizationWithReferents("1234567890", "1234567890", "Org 0", "org0@pec.it", false);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any())).thenReturn(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationResponse0.organizationWithReferents));
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any())).thenReturn(ResponseEntity.ok(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationResponse0.organizationWithReferents)));
         ResponseEntity<OrganizationWithReferents> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization("1234567890");
 
         Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
@@ -194,7 +194,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         if (testServiceError) {
             Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenThrow(RuntimeException.class);
         } else {
-            Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenReturn(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationWithReferents));
+            Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenReturn(ResponseEntity.ok(organizationWithReferentsConverter.toAttributeAuthorityModel(organizationWithReferents)));
         }
 
         ResponseEntity<OrganizationWithReferents> response = backofficeAttributeAuthorityFacade.upsertOrganization(organizationWithReferents);
