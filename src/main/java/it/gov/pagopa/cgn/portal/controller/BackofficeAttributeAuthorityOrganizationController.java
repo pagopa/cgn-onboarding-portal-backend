@@ -22,7 +22,6 @@ public class BackofficeAttributeAuthorityOrganizationController implements Organ
         this.backofficeAttributeAuthorityFacade = backofficeAttributeAuthorityFacade;
     }
 
-
     @Override
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
         return backofficeAttributeAuthorityFacade.deleteOrganization(keyOrganizationFiscalCode);
@@ -30,7 +29,7 @@ public class BackofficeAttributeAuthorityOrganizationController implements Organ
 
     @Override
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
-        return OrganizationApi.super.deleteReferent(keyOrganizationFiscalCode, referentFiscalCode);
+        return backofficeAttributeAuthorityFacade.deleteReferent(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
     @Override
@@ -38,14 +37,14 @@ public class BackofficeAttributeAuthorityOrganizationController implements Organ
         return backofficeAttributeAuthorityFacade.getOrganization(keyOrganizationFiscalCode);
     }
 
-
     @Override
     public ResponseEntity<List<String>> getReferents(String keyOrganizationFiscalCode) {
-        return OrganizationApi.super.getReferents(keyOrganizationFiscalCode);
+        return backofficeAttributeAuthorityFacade.getReferents(keyOrganizationFiscalCode);
     }
 
     @Override
-    public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode, ReferentFiscalCode body) {
-        return OrganizationApi.super.insertReferent(keyOrganizationFiscalCode, body);
+    public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
+                                               ReferentFiscalCode referentFiscalCode) {
+        return backofficeAttributeAuthorityFacade.insertReferent(keyOrganizationFiscalCode, referentFiscalCode);
     }
 }
