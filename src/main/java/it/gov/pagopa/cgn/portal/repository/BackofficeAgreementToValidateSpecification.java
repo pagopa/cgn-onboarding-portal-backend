@@ -1,29 +1,23 @@
 package it.gov.pagopa.cgn.portal.repository;
 
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Objects;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.criteria.internal.OrderImpl;
-
 import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.AssigneeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.query.criteria.internal.OrderImpl;
+
+import javax.persistence.criteria.*;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Objects;
 
 
-public class BackofficeAgreementToValidateSpecification extends CommonAgreementSpecification {
+public class BackofficeAgreementToValidateSpecification extends CommonBackofficeSpecification<AgreementEntity> {
 
     public BackofficeAgreementToValidateSpecification(BackofficeFilter filter, String currentUser) {
         super(filter, currentUser);
@@ -85,7 +79,6 @@ public class BackofficeAgreementToValidateSpecification extends CommonAgreementS
         }
         throw new InvalidRequestException("Invalid sort column");
     }
-
 
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {

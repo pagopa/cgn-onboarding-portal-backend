@@ -5,8 +5,11 @@ import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthori
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -19,11 +22,16 @@ public class AttributeAuthorityService {
         this.attributeAuthorityApi.getApiClient().setBasePath(configProperties.getAttributeAuthorityBaseUrl());
     }
 
-    public ResponseEntity<OrganizationsAttributeAuthority> getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
+    public ResponseEntity<OrganizationsAttributeAuthority> getOrganizations(String searchQuery,
+                                                                            Integer page,
+                                                                            Integer pageSize,
+                                                                            String sortBy,
+                                                                            String sortDirection) {
         return attributeAuthorityApi.getOrganizationsWithHttpInfo(searchQuery, page, pageSize, sortBy, sortDirection);
     }
 
-    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> upsertOrganization(OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
+    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> upsertOrganization(
+            OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
         return attributeAuthorityApi.upsertOrganizationWithHttpInfo(organizationWithReferentsAttributeAuthority);
     }
 
@@ -33,5 +41,19 @@ public class AttributeAuthorityService {
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
         return attributeAuthorityApi.deleteOrganizationWithHttpInfo(keyOrganizationFiscalCode);
+    }
+
+    public ResponseEntity<List<String>> getReferents(String keyOrganizationFiscalCode) {
+        return attributeAuthorityApi.getReferentsWithHttpInfo(keyOrganizationFiscalCode);
+    }
+
+    public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
+                                               ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
+        return attributeAuthorityApi.insertReferentWithHttpInfo(keyOrganizationFiscalCode,
+                                                                referentFiscalCodeAttributeAuthority);
+    }
+
+    public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
+        return attributeAuthorityApi.deleteReferentWithHttpInfo(keyOrganizationFiscalCode, referentFiscalCode);
     }
 }

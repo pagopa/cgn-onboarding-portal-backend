@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.repository;
 
 
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,14 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class CommonAgreementSpecification implements Specification<AgreementEntity>{
+public abstract class CommonBackofficeSpecification<T> implements Specification<T> {
 
     protected final Sort.Direction direction;
     protected final BackofficeFilter filter;
     protected final String currentUser;
 
-
-    protected CommonAgreementSpecification(final BackofficeFilter filter, final String currentUser) {
+    protected CommonBackofficeSpecification(final BackofficeFilter filter, final String currentUser) {
         this.direction = Sort.Direction.DESC;
         this.filter = filter;
         this.currentUser = currentUser;
@@ -39,16 +37,15 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
     }
 
     protected abstract void addFiltersDatePredicate(
-            Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList);
+            Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
 
     protected abstract void addStaticFiltersPredicate(
-            Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList);
+            Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
 
-    protected abstract Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb);
+    protected abstract Order getOrder(Root<T> root, CriteriaBuilder cb);
 
     @Override
-    public Predicate toPredicate(Root<AgreementEntity> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-
+    public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicateList = addFiltersPredicate(root, cb);
         addStaticFiltersPredicate(root, cb, predicateList);
         query.where(predicateList.toArray(new Predicate[predicateList.size()]));
@@ -56,7 +53,7 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
         return null;
     }
 
-    protected List<Predicate> addFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb) {
+    protected List<Predicate> addFiltersPredicate(Root<T> root, CriteriaBuilder cb) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotEmpty(filter.getProfileFullName())) {
             predicateList.add(cb.like(cb.upper(getProfileFullNamePath(root)),
@@ -78,7 +75,7 @@ public abstract class CommonAgreementSpecification implements Specification<Agre
         return toFullLikeString(value).toUpperCase();
     }
 
-    protected Path<String> getProfileFullNamePath(Root<AgreementEntity> root) {
+    protected Path<String> getProfileFullNamePath(Root<T> root) {
         return root.get("profile").get("fullName");
     }
 
