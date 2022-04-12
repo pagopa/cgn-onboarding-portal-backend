@@ -1,39 +1,37 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class AttributeAuthorityService {
 
-    private final DefaultApi defaultApi;
+    private final AttributeAuthorityApi attributeAuthorityApi;
 
-    public AttributeAuthorityService(ConfigProperties configProperties) {
-        this.defaultApi = new DefaultApi();
-        ApiClient apiClient = new ApiClient();
-        apiClient.setBasePath(configProperties.getAttributeAuthorityBaseUrl());
-        defaultApi.setApiClient(apiClient);
+    public AttributeAuthorityService(ConfigProperties configProperties, AttributeAuthorityApi attributeAuthorityApi) {
+        this.attributeAuthorityApi = attributeAuthorityApi;
+        this.attributeAuthorityApi.getApiClient().setBasePath(configProperties.getAttributeAuthorityBaseUrl());
     }
 
-    public OrganizationsAttributeAuthority getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
-        return defaultApi.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection);
+    public ResponseEntity<OrganizationsAttributeAuthority> getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
+        return attributeAuthorityApi.getOrganizationsWithHttpInfo(searchQuery, page, pageSize, sortBy, sortDirection);
     }
 
-    public OrganizationWithReferentsAttributeAuthority upsertOrganization(OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
-        return defaultApi.upsertOrganization(organizationWithReferentsAttributeAuthority);
+    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> upsertOrganization(OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
+        return attributeAuthorityApi.upsertOrganizationWithHttpInfo(organizationWithReferentsAttributeAuthority);
     }
 
-    public OrganizationWithReferentsAttributeAuthority getOrganization(String keyOrganizationFiscalCode) {
-        return defaultApi.getOrganization(keyOrganizationFiscalCode);
+    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> getOrganization(String keyOrganizationFiscalCode) {
+        return attributeAuthorityApi.getOrganizationWithHttpInfo(keyOrganizationFiscalCode);
     }
 
-    public void deleteOrganization(String keyOrganizationFiscalCode) {
-        defaultApi.deleteOrganization(keyOrganizationFiscalCode);
+    public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
+        return attributeAuthorityApi.deleteOrganizationWithHttpInfo(keyOrganizationFiscalCode);
     }
 }
