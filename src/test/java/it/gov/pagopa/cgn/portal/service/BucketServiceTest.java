@@ -125,7 +125,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-        bucketService.setRunningBucketLoad(discountEntity.getId());
+        // we do not set the bucket load running to force an exception inside performBucketLoad
+        //bucketService.setRunningBucketLoad(discountEntity.getId());
 
         bucketService.performBucketLoad(discountEntity.getId());
         Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoad().getUid() + ".csv"));
