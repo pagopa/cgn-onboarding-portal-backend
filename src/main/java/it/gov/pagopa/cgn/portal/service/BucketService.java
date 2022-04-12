@@ -139,9 +139,7 @@ public class BucketService {
             discountBucketCodeSummaryEntity.setExpiredAt(null);
             discountBucketCodeSummaryRepository.save(discountBucketCodeSummaryEntity);
         } catch (Exception e) {
-            Arrays.stream(e.getStackTrace()).forEach((traceElement) -> {
-                log.error(traceElement.toString());
-            });
+            Arrays.stream(e.getStackTrace()).forEach(traceElement -> log.error(traceElement.toString()));
             bucketCodeLoadEntity.setStatus(BucketCodeLoadStatusEnum.FAILED);
         } finally {
             bucketCodeLoadRepository.save(bucketCodeLoadEntity);
