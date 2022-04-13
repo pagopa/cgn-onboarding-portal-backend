@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -13,6 +14,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -74,6 +76,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
     @Autowired
     private BucketService bucketService;
 
+    @Autowired
+    private BucketCodeLoadRepository bucketCodeLoadRepository;
+
     private String discountPath;
     private AgreementEntity agreement;
 
@@ -81,17 +86,18 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     void initTest(DiscountCodeTypeEnum discountCodeType) throws IOException {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE,
-                discountCodeType);
+        ProfileEntity profileEntity =
+                TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE, discountCodeType);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
         setOperatorAuth();
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+        BlobContainerClient documentContainerClient =
+                new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
+                                                .containerName(configProperties.getDocumentsContainerName())
+                                                .buildClient();
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
@@ -102,25 +108,27 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(discount.getName()))
-                .andExpect(jsonPath("$.description").value(discount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
-                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
-                .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(discount.getName()))
+                    .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                    .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                    .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -128,54 +136,59 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
         CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(discount.getName()))
-                .andExpect(jsonPath("$.description").value(discount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
-                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(discount.getName()))
+                    .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                    .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
     void Create_CreateDiscountWithBucket_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeLoadUid(),
-                multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discount.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(discount.getName()))
-                .andExpect(jsonPath("$.description").value(discount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
-                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
-                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(discount.getName()))
+                    .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                    .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
+                    .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -184,35 +197,38 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
 
         // upload a csv
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discount.getLastBucketCodeLoadUid(),
-                multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discount.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         // introduce an anomaly to test retry
         dropAndRecoverBucketCodeLoadEntity();
 
         // call api to create a discount
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(discount.getName()))
-                .andExpect(jsonPath("$.description").value(discount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
-                .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
-                .andExpect(jsonPath("$.condition").value(discount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(discount.getName()))
+                    .andExpect(jsonPath("$.description").value(discount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
+                    .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadStatus").isNotEmpty())
+                    .andExpect(jsonPath("$.condition").value(discount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
 
         // we have to wait for all retries to complete
         Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
@@ -221,14 +237,13 @@ class DiscountApiTest extends IntegrationAbstractTest {
     protected void dropAndRecoverBucketCodeLoadEntity() {
         CompletableFuture.runAsync(() -> {
             log.info("#TESTING ANOMALY: Waiting for BucketCodeLoadEntity creation.");
-            Awaitility
-                    .with()
-                    .pollDelay(1, TimeUnit.MILLISECONDS)
-                    .and()
-                    .pollInterval(1, TimeUnit.MILLISECONDS)
-                    .await()
-                    .atMost(1, TimeUnit.SECONDS)
-                    .until(() -> bucketCodeLoadRepository.count() == 1);
+            Awaitility.with()
+                      .pollDelay(1, TimeUnit.MILLISECONDS)
+                      .and()
+                      .pollInterval(1, TimeUnit.MILLISECONDS)
+                      .await()
+                      .atMost(1, TimeUnit.SECONDS)
+                      .until(() -> bucketCodeLoadRepository.count() == 1);
 
             log.info("#TESTING ANOMALY: Get BucketCodeLoadEntity to recover before deleting it.");
             var bucketCodeLoad = bucketCodeLoadRepository.findAll().get(0);
@@ -248,7 +263,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 public void run() {
                     log.info("#TESTING ANOMALY: Recovering BucketCodeLoadEntity and DiscountEntity after delete.");
                     bucketCodeLoadRepository.save(recoverBucketCodeLoad);
-                    var discountEntity = discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
+                    var discountEntity =
+                            discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
                     discountEntity.setLastBucketCodeLoad(recoverBucketCodeLoad);
                     discountRepository.save(discountEntity);
                     log.info("#TESTING ANOMALY: Recovery finished.");
@@ -268,7 +284,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         discount.setLastBucketCodeLoadUid(null);
         discount.setLastBucketCodeLoadFileName(null);
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -277,7 +295,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
         azureStorage.uploadCsv(multipartFile.getInputStream(), UUID.randomUUID().toString(), multipartFile.getSize());
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -286,7 +306,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStartDate(null);
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -295,7 +317,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStaticCode(null);
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getJson(discount))).andDo(log()).andExpect(status().isBadRequest());
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -310,64 +334,65 @@ class DiscountApiTest extends IntegrationAbstractTest {
         updateDiscount.setStaticCode("new_static_code");
         updateDiscount.setDiscountUrl("https://anotherurl.com");
         this.mockMvc.perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(updateDiscount))).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
-                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").value(updateDiscount.getStaticCode()))
-                .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer")
-                        .value(updateDiscount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.discountUrl").value(updateDiscount.getDiscountUrl()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+                                                                       .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                    .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").value(updateDiscount.getStaticCode()))
+                    .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.discountUrl").value(updateDiscount.getDiscountUrl()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
     void Update_CreateAndUpdateDiscountWithLandingPage_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url",
-                "referrer");
+        DiscountEntity discountEntity =
+                TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url", "referrer");
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLandingPageUrl("new_url");
         updateDiscount.setLandingPageReferrer("new_referrer");
-        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
-                .andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
-                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").isEmpty())
-                .andExpect(jsonPath("$.landingPageUrl").isNotEmpty())
-                .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
-                .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
-                .andExpect(jsonPath("$.landingPageReferrer")
-                        .value(updateDiscount.getLandingPageReferrer()))
-                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
+                                                                             .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                    .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").isEmpty())
+                    .andExpect(jsonPath("$.landingPageUrl").isNotEmpty())
+                    .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
+                    .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
+                    .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -375,35 +400,37 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
-        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
-                .andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
-                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").isEmpty())
-                .andExpect(jsonPath("$.landingPageUrl").isEmpty())
-                .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
-                .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
-                .andExpect(jsonPath("$.lastBucketCodeLoadUid")
-                        .value(updateDiscount.getLastBucketCodeLoadUid()))
-                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
+                                                                             .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                    .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").isEmpty())
+                    .andExpect(jsonPath("$.landingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
+                    .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
+                    .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
+                    .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -411,42 +438,50 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        String firstBucketCodeLoad = discountEntity.getLastBucketCodeLoadUid();
+        azureStorage.uploadCsv(multipartFile.getInputStream(), firstBucketCodeLoad, multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         // load codes
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await()
+                  .atMost(5, TimeUnit.SECONDS)
+                  .until(() -> BucketCodeLoadStatusEnum.FINISHED.equals(bucketCodeLoadRepository.findByUid(
+                          firstBucketCodeLoad).getStatus()));
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
         updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
-        azureStorage.uploadCsv(multipartFile.getInputStream(), updateDiscount.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               updateDiscount.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
-        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateDiscount)))
-                .andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.id").value(discountEntity.getId()))
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
-                .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
-                .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
-                .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
-                .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
-                .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
-                .andExpect(jsonPath("$.productCategories").isArray())
-                .andExpect(jsonPath("$.productCategories").isNotEmpty())
-                .andExpect(jsonPath("$.staticCode").isEmpty())
-                .andExpect(jsonPath("$.landingPageUrl").isEmpty())
-                .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
-                .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
-                .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(updateDiscount.getLastBucketCodeLoadFileName()))
-                .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
-                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
+                                                                             .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.id").value(discountEntity.getId()))
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
+                    .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
+                    .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
+                    .andExpect(jsonPath("$.endDate").value(updateDiscount.getEndDate().toString()))
+                    .andExpect(jsonPath("$.discount").value(updateDiscount.getDiscount()))
+                    .andExpect(jsonPath("$.productCategories").isArray())
+                    .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                    .andExpect(jsonPath("$.staticCode").isEmpty())
+                    .andExpect(jsonPath("$.landingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
+                    .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
+                    .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(updateDiscount.getLastBucketCodeLoadFileName()))
+                    .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
+                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
     @Test
@@ -454,30 +489,32 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         // load codes
         bucketService.setRunningBucketLoad(discountEntity.getId());
 
-        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.loaded").value(0))
-                .andExpect(jsonPath("$.percent").value(0));
+        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress").contentType(
+                    MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.loaded").value(0))
+                    .andExpect(jsonPath("$.percent").value(0));
 
         bucketService.performBucketLoad(discountEntity.getId());
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
 
-        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.loaded").value(2))
-                .andExpect(jsonPath("$.percent").value(100));
+        this.mockMvc.perform(get(discountPath + "/" + discountEntity.getId() + "/bucket-loading-progress").contentType(
+                    MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.loaded").value(2))
+                    .andExpect(jsonPath("$.percent").value(100));
     }
 
     @Test
@@ -486,11 +523,14 @@ class DiscountApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
 
-        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isNotEmpty()).andExpect(jsonPath("$.items", hasSize(1)))
-                .andExpect(jsonPath("$.items[0].id").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isNotEmpty())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.items[0].id").isNotEmpty())
+                    .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
     }
 
     @Test
@@ -502,22 +542,27 @@ class DiscountApiTest extends IntegrationAbstractTest {
         discountEntity.setSuspendedReasonMessage("A reason");
         discountEntity = discountRepository.save(discountEntity);
 
-        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isNotEmpty()).andExpect(jsonPath("$.items", hasSize(1)))
-                .andExpect(jsonPath("$.items[0].id").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)))
-                .andExpect(jsonPath("$.items[0].state").value(DiscountState.SUSPENDED.getValue()))
-                .andExpect(jsonPath("$.items[0].suspendedReasonMessage")
-                        .value(discountEntity.getSuspendedReasonMessage()));
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isNotEmpty())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.items[0].id").isNotEmpty())
+                    .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.SUSPENDED.getValue()))
+                    .andExpect(jsonPath("$.items[0].suspendedReasonMessage").value(discountEntity.getSuspendedReasonMessage()));
     }
 
     @Test
     void Get_GetDiscount_NotFound() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
-        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON)).andDo(log())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.items").isArray()).andExpect(jsonPath("$.items").isEmpty());
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items").isEmpty());
     }
 
     @Test
@@ -525,9 +570,11 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.STATIC);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreement.getId(), discountEntity);
-        this.mockMvc.perform(delete(discountPath + "/" + discountEntity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)).andDo(log())
-                .andExpect(status().isNoContent());
+        this.mockMvc.perform(delete(discountPath +
+                                    "/" +
+                                    discountEntity.getId()).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());
@@ -537,7 +584,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Delete_DeleteDiscount_NotFound() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
         this.mockMvc.perform(delete(discountPath + "/" + 1).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log()).andExpect(status().isNotFound());
+                    .andDo(log())
+                    .andExpect(status().isNotFound());
         List<DiscountEntity> discounts = discountService.getDiscounts(agreement.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertEquals(0, discounts.size());

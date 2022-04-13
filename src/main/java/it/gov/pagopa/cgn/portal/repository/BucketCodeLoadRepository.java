@@ -10,4 +10,6 @@ public interface BucketCodeLoadRepository extends JpaRepository<BucketCodeLoadEn
     @Modifying
     @Query(value = "delete from bucket_code_load where discount_id=:discount_id", nativeQuery = true)
     void deleteByDiscountId(@Param("discount_id") Long discountId);
+
+    BucketCodeLoadEntity findByUid(String uid);
 }
