@@ -49,14 +49,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .cors().and()
-                .authorizeRequests()
-                .antMatchers("/actuator/**", "/help", "/").permitAll()
-                .anyRequest().authenticated();
+        httpSecurity.exceptionHandling()
+                    .authenticationEntryPoint(unauthorizedHandler)
+                    .and()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .cors()
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers("/actuator/**", "/help", "/")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
