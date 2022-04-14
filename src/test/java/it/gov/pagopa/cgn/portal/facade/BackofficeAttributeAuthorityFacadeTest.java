@@ -57,6 +57,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         var organizationWithReferentsPostConverter = new OrganizationWithReferentsPostConverter();
 
         backofficeAttributeAuthorityFacade = new BackofficeAttributeAuthorityFacade(attributeAuthorityService,
+                                                                                    agreementService,
                                                                                     agreementUserServiceSpy,
                                                                                     profileServiceSpy,
                                                                                     organizationsConverter,

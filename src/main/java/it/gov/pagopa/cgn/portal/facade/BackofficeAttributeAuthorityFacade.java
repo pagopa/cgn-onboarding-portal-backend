@@ -1,28 +1,32 @@
 package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.ReferentFiscalCode;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @Component
 public class BackofficeAttributeAuthorityFacade {
 
     private final AttributeAuthorityService attributeAuthorityService;
+
+    private AgreementService agreementService;
 
     private AgreementUserService agreementUserService;
 
@@ -43,17 +47,25 @@ public class BackofficeAttributeAuthorityFacade {
                                                           Integer pageSize,
                                                           String sortBy,
                                                           String sortDirection) {
-        return organizationsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganizations(
-                searchQuery,
-                page,
-                pageSize,
-                sortBy,
-                sortDirection));
+        ResponseEntity<Organizations> response =
+                organizationsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganizations(
+                        searchQuery,
+                        page,
+                        pageSize,
+                        sortBy,
+                        sortDirection));
+
+        getOrganizationsAgreementAndMapStatus.accept(response);
+
+        return response;
     }
 
     public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
-        return organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
-                keyOrganizationFiscalCode));
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
+                organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
+                        keyOrganizationFiscalCode));
+        getOrganizationAgreementAndMapStatus.accept(response);
+        return response;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -95,6 +107,7 @@ public class BackofficeAttributeAuthorityFacade {
 
     @Autowired
     public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
+                                              AgreementService agreementService,
                                               AgreementUserService agreementUserService,
                                               ProfileService profileService,
                                               OrganizationsConverter organizationsConverter,
@@ -103,6 +116,7 @@ public class BackofficeAttributeAuthorityFacade {
                                               OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
                                               ReferentFiscalCodeConverter referentFiscalCodeConverter) {
         this.attributeAuthorityService = attributeAuthorityService;
+        this.agreementService = agreementService;
         this.agreementUserService = agreementUserService;
         this.profileService = profileService;
         this.organizationsConverter = organizationsConverter;
@@ -127,4 +141,43 @@ public class BackofficeAttributeAuthorityFacade {
                 profile.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
                 profileService.updateProfile(agreementUserEntity.getAgreementId(), profile);
             };
+
+
+    private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus =
+            (organization) -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
+                                                  .ifPresent(agreementUserEntity -> {
+                                                      AgreementEntity agreement =
+                                                              agreementService.getById(agreementUserEntity.getAgreementId());
+                                                      switch (agreement.getState()) {
+                                                          case DRAFT:
+                                                              organization.setStatus(OrganizationStatus.DRAFT);
+                                                              break;
+                                                          case PENDING:
+                                                              organization.setStatus(OrganizationStatus.PENDING);
+                                                              break;
+                                                          case APPROVED:
+                                                              organization.setStatus(OrganizationStatus.ACTIVE);
+                                                              break;
+                                                          case REJECTED:
+                                                          default:
+                                                              break;
+                                                      }
+                                                  });
+
+    private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus =
+            (response) -> {
+                if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
+                    mapOrganizationStatus.accept(response.getBody());
+                }
+            };
+
+    private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus =
+            (organizations) -> organizations.forEach(mapOrganizationStatus);
+
+    private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = (response) -> {
+        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
+            mapOrganizationsStatus.accept(response.getBody().getItems());
+        }
+    };
+
 }

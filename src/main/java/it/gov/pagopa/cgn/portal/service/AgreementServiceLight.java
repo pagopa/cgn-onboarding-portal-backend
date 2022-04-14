@@ -18,7 +18,12 @@ public class AgreementServiceLight {
     @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity findById(String agreementId) {
         return agreementRepository.findById(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
+                                  .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public AgreementEntity getById(String agreementId) {
+        return agreementRepository.getOne(agreementId);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
