@@ -195,6 +195,45 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void GetOrganization_REJECTED_to_DRAFT_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveSampleDocuments(agreementEntity);
+        agreementService.requestApproval(agreementEntity.getId());
+
+        setAdminAuth();
+        backofficeAgreementService.assignAgreement(agreementEntity.getId());
+        backofficeAgreementService.rejectAgreement(agreementEntity.getId(), "test");
+
+        OrganizationWithReferentsAndStatus organization0 =
+                createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
+                                                             profileEntity.getTaxCodeOrVat(),
+                                                             "org0",
+                                                             "org0@pec.it");
+
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                       organization0)));
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization(profileEntity.getTaxCodeOrVat());
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNotNull(organizationResponse.getBody());
+        Assertions.assertEquals(OrganizationStatus.DRAFT, organizationResponse.getBody().getStatus());
+    }
+
+    @Test
+    void GetOrganization_Ko() {
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.notFound().build());
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization("1234567890");
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, organizationResponse.getStatusCode());
+        Assertions.assertNull(organizationResponse.getBody());
+    }
+
+    @Test
     void UpsertOrganization_New_Ok() {
         String anOrganizationFiscalCode = "12345678";
         String anOrganizationName = "An organization";
