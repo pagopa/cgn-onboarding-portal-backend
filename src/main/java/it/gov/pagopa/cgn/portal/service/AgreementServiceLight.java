@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class AgreementServiceLight {
@@ -18,7 +19,12 @@ public class AgreementServiceLight {
     @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity findById(String agreementId) {
         return agreementRepository.findById(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
+                                  .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public Optional<AgreementEntity> getById(String agreementId) {
+        return agreementRepository.findById(agreementId);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
