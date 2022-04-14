@@ -354,7 +354,7 @@ paths:
         200:
           description: An organization with referents.
           schema:
-            $ref: "#/definitions/OrganizationWithReferents"
+            $ref: "#/definitions/OrganizationWithReferentsAndStatus"
         403:
           $ref: '#/responses/Forbidden'
         404:
@@ -1050,6 +1050,14 @@ definitions:
       minLength: 16
       maxLength: 16
 
+  OrganizationStatus:
+    type: string
+    enum:
+      - Enabled
+      - Draft
+      - Pending
+      - Active
+
   OrganizationWithReferents:
     allOf:
       - $ref: "#/definitions/KeyOrganizationFiscalCode"
@@ -1061,13 +1069,23 @@ definitions:
         required:
           - referents
 
+  OrganizationWithReferentsAndStatus:
+    allOf:
+      - $ref: "#/definitions/OrganizationWithReferents"
+      - type: object
+        properties:
+          status:
+            $ref: "#/definitions/OrganizationStatus"
+        required:
+          - status
+
   Organizations:
     type: object
     properties:
       items:
         type: array
         items:
-          $ref: "#/definitions/OrganizationWithReferents"
+          $ref: "#/definitions/OrganizationWithReferentsAndStatus"
       count:
         type: integer
 

@@ -1,9 +1,6 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsConverter;
-import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsPostConverter;
-import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationsConverter;
-import it.gov.pagopa.cgn.portal.converter.backoffice.ReferentFiscalCodeConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
@@ -11,6 +8,7 @@ import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ReferentFiscalCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +32,8 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final OrganizationWithReferentsConverter organizationWithReferentsConverter;
 
+    private final OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
+
     private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
 
     private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
@@ -51,8 +51,8 @@ public class BackofficeAttributeAuthorityFacade {
                 sortDirection));
     }
 
-    public ResponseEntity<OrganizationWithReferents> getOrganization(String keyOrganizationFiscalCode) {
-        return organizationWithReferentsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
+    public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
+        return organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
                 keyOrganizationFiscalCode));
     }
 
@@ -99,6 +99,7 @@ public class BackofficeAttributeAuthorityFacade {
                                               ProfileService profileService,
                                               OrganizationsConverter organizationsConverter,
                                               OrganizationWithReferentsConverter organizationWithReferentsConverter,
+                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
                                               OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
                                               ReferentFiscalCodeConverter referentFiscalCodeConverter) {
         this.attributeAuthorityService = attributeAuthorityService;
@@ -106,6 +107,7 @@ public class BackofficeAttributeAuthorityFacade {
         this.profileService = profileService;
         this.organizationsConverter = organizationsConverter;
         this.organizationWithReferentsConverter = organizationWithReferentsConverter;
+        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
         this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
         this.referentFiscalCodeConverter = referentFiscalCodeConverter;
     }

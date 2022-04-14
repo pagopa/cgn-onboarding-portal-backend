@@ -2,7 +2,7 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.OrganizationApi;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ReferentFiscalCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class BackofficeAttributeAuthorityOrganizationController implements Organ
     }
 
     @Override
-    public ResponseEntity<OrganizationWithReferents> getOrganization(String keyOrganizationFiscalCode) {
+    public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
         return backofficeAttributeAuthorityFacade.getOrganization(keyOrganizationFiscalCode);
     }
 
