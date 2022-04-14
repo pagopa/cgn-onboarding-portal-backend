@@ -234,6 +234,16 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void GetOrganization_No_Content() {
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any())).thenReturn(ResponseEntity.ok().build());
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization("1234567890");
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNull(organizationResponse.getBody());
+    }
+
+    @Test
     void UpsertOrganization_New_Ok() {
         String anOrganizationFiscalCode = "12345678";
         String anOrganizationName = "An organization";
