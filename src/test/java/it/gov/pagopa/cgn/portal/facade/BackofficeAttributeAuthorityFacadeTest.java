@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -105,7 +106,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetOrganization_Ok() {
+    void GetOrganization_ENABLED_Ok() {
         OrganizationWithReferentsAndStatus organization0 =
                 createOrganizationWithReferentsAndStatusMock("12345678", "12345678", "org0", "org0@pec.it");
 
@@ -119,6 +120,78 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(organizationResponse.getBody());
         Assertions.assertEquals(organization0, organizationResponse.getBody());
         Assertions.assertEquals(OrganizationStatus.ENABLED, organizationResponse.getBody().getStatus());
+    }
+
+    @Test
+    void GetOrganization_DRAFT_Ok() {
+        OrganizationWithReferentsAndStatus organization0 =
+                createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
+                                                             profileEntity.getTaxCodeOrVat(),
+                                                             "org0",
+                                                             "org0@pec.it");
+
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                       organization0)));
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization(profileEntity.getTaxCodeOrVat());
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNotNull(organizationResponse.getBody());
+        Assertions.assertEquals(OrganizationStatus.DRAFT, organizationResponse.getBody().getStatus());
+    }
+
+    @Test
+    void GetOrganization_PENDING_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveSampleDocuments(agreementEntity);
+        agreementService.requestApproval(agreementEntity.getId());
+
+        OrganizationWithReferentsAndStatus organization0 =
+                createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
+                                                             profileEntity.getTaxCodeOrVat(),
+                                                             "org0",
+                                                             "org0@pec.it");
+
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                       organization0)));
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization(profileEntity.getTaxCodeOrVat());
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNotNull(organizationResponse.getBody());
+        Assertions.assertEquals(OrganizationStatus.PENDING, organizationResponse.getBody().getStatus());
+    }
+
+    @Test
+    void GetOrganization_ACTIVE_Ok() {
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveSampleDocuments(agreementEntity);
+        agreementService.requestApproval(agreementEntity.getId());
+
+        setAdminAuth();
+        backofficeAgreementService.assignAgreement(agreementEntity.getId());
+        documentRepository.saveAll(saveBackofficeSampleDocuments(agreementEntity));
+        backofficeAgreementService.approveAgreement(agreementEntity.getId());
+
+        OrganizationWithReferentsAndStatus organization0 =
+                createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
+                                                             profileEntity.getTaxCodeOrVat(),
+                                                             "org0",
+                                                             "org0@pec.it");
+
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                       organization0)));
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse =
+                backofficeAttributeAuthorityFacade.getOrganization(profileEntity.getTaxCodeOrVat());
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNotNull(organizationResponse.getBody());
+        Assertions.assertEquals(OrganizationStatus.ACTIVE, organizationResponse.getBody().getStatus());
     }
 
     @Test

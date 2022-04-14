@@ -60,6 +60,7 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
         ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
@@ -142,39 +143,41 @@ public class BackofficeAttributeAuthorityFacade {
                 profileService.updateProfile(agreementUserEntity.getAgreementId(), profile);
             };
 
+    private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus =
+            (agreement, organization) -> {
+                switch (agreement.getState()) {
+                    case DRAFT:
+                    case REJECTED:
+                        organization.setStatus(OrganizationStatus.DRAFT);
+                        break;
+                    case PENDING:
+                        organization.setStatus(OrganizationStatus.PENDING);
+                        break;
+                    case APPROVED:
+                        organization.setStatus(OrganizationStatus.ACTIVE);
+                        break;
+                    default:
+                        break;
+                }
+            };
 
     private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus =
-            (organization) -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
-                                                  .ifPresent(agreementUserEntity -> {
-                                                      AgreementEntity agreement =
-                                                              agreementService.getById(agreementUserEntity.getAgreementId());
-                                                      switch (agreement.getState()) {
-                                                          case DRAFT:
-                                                              organization.setStatus(OrganizationStatus.DRAFT);
-                                                              break;
-                                                          case PENDING:
-                                                              organization.setStatus(OrganizationStatus.PENDING);
-                                                              break;
-                                                          case APPROVED:
-                                                              organization.setStatus(OrganizationStatus.ACTIVE);
-                                                              break;
-                                                          case REJECTED:
-                                                          default:
-                                                              break;
-                                                      }
-                                                  });
+            organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
+                                                .flatMap(agreementUserEntity -> agreementService.getById(
+                                                        agreementUserEntity.getAgreementId()))
+                                                .ifPresent(a -> mapStatus.accept(a, organization));
 
     private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus =
-            (response) -> {
+            response -> {
                 if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
                     mapOrganizationStatus.accept(response.getBody());
                 }
             };
 
     private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus =
-            (organizations) -> organizations.forEach(mapOrganizationStatus);
+            organizations -> organizations.forEach(mapOrganizationStatus);
 
-    private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = (response) -> {
+    private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = response -> {
         if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
             mapOrganizationsStatus.accept(response.getBody().getItems());
         }
