@@ -114,7 +114,7 @@ public class BackofficeExportFacade {
                                                                  null)};
 
 
-    private Function<AgreementEntity, List<String[]>> getAgreementData = (agreement) -> {
+    private Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
