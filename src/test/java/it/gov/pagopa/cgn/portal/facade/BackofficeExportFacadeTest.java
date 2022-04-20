@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.io.IOException;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -31,25 +34,27 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_NO_DISCOUNTS_OK() {
+    void ExportAgreements_DRAFT_NO_DISCOUNTS_OK() throws IOException {
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(2, CsvUtils.countCsvLines(response.getBody().getInputStream()));
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_DISCOUNTS_OK() {
+    void ExportAgreements_DRAFT_WITH_DISCOUNTS_OK() throws IOException {
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
-        discountService.createDiscount(agreementEntity.getId(), discountEntity1).getDiscountEntity();
+        discountService.createDiscount(agreementEntity.getId(), discountEntity1);
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity2.setName("Discount 2");
-        discountService.createDiscount(agreementEntity.getId(), discountEntity2).getDiscountEntity();
+        discountService.createDiscount(agreementEntity.getId(), discountEntity2);
 
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(3, CsvUtils.countCsvLines(response.getBody().getInputStream()));
     }
 
 }
