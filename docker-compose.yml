@@ -3,7 +3,6 @@ version: '2'
 services:
   app:
     image: 'cgn-onboarding-portal-backend:latest'
-    cpus: 1.0
     mem_limit: "3g"
     build:
       context: .
