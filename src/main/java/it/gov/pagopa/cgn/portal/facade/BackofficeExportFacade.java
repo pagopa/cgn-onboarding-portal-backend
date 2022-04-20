@@ -76,6 +76,7 @@ public class BackofficeExportFacade {
                                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                                  .body(new ByteArrayResource(export));
         } catch (IOException ex) {
+            log.error(ex.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
