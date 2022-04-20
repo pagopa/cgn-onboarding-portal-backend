@@ -53,7 +53,8 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
         init();
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {
             s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now().minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
+            s.setExpiredAt(OffsetDateTime.now()
+                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
             discountBucketCodeSummaryRepository.save(s);
         });
         testJob(DiscountStateEnum.SUSPENDED);
@@ -76,7 +77,8 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
 
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {
             s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now().minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
+            s.setExpiredAt(OffsetDateTime.now()
+                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
             discountBucketCodeSummaryRepository.save(s);
         });
 

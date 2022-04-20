@@ -30,7 +30,7 @@ public class DiscountConverterTest {
     public void Convert_ConvertDiscountEntityWithStaticDiscountTypeToDTO_Ok() {
         AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
-                STATIC_CODE);
+                                                                                           STATIC_CODE);
         Discount dto = discountConverter.toDto(discountEntity);
 
         checkCommonDiscountEntityToDTOAssertions(discountEntity, dto);
@@ -42,8 +42,9 @@ public class DiscountConverterTest {
     @Test
     public void Convert_ConvertDiscountEntityWithLandingPageDiscountTypeToDTO_Ok() {
         AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL,
-                REFERRER);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            URL,
+                                                                                            REFERRER);
         Discount dto = discountConverter.toDto(discountEntity);
 
         checkCommonDiscountEntityToDTOAssertions(discountEntity, dto);

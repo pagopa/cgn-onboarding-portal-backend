@@ -65,8 +65,8 @@ class CheckExpiringDiscountsJobTest extends IntegrationAbstractTest {
     @Test
     void Scheduler_ScheduleCheckExpiringDiscountsJob_JobScheduled() throws SchedulerException {
         jobScheduler.scheduleCheckExpiringDiscountsJob();
-        List<? extends Trigger> triggersOfJob =
-                quartzScheduler.getTriggersOfJob(JobKey.jobKey("check-expiring", "discounts"));
+        List<? extends Trigger> triggersOfJob = quartzScheduler.getTriggersOfJob(JobKey.jobKey("check-expiring",
+                                                                                               "discounts"));
         Assertions.assertFalse(triggersOfJob.isEmpty());
         Assertions.assertNotNull(triggersOfJob.get(0).getNextFireTime());
     }

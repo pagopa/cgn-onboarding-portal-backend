@@ -43,7 +43,8 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(agreementEntity.getStartDate());
         Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
         Assertions.assertEquals(agreementEntity.getStartDate(), responseAgreement.getStartDate());
-        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(), responseAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(),
+                                responseAgreement.getInformationLastUpdateDate());
         Assertions.assertEquals(agreementEntity.getProfile().getFullName(), responseAgreement.getFullName());
         Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
     }
@@ -51,8 +52,10 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void GetApprovedAgreements_GetAgreementsWithProfileDateFilter_AgreementFound() {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
-        BackofficeFilter filter = BackofficeFilter.builder().dateFrom(LocalDate.now().minusDays(10))
-                .dateTo(LocalDate.now().plusDays(10)).build();
+        BackofficeFilter filter = BackofficeFilter.builder()
+                                                  .dateFrom(LocalDate.now().minusDays(10))
+                                                  .dateTo(LocalDate.now().plusDays(10))
+                                                  .build();
         Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
         Assertions.assertEquals(1, page.getTotalPages());
@@ -64,7 +67,8 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(agreementEntity.getStartDate());
         Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
         Assertions.assertEquals(agreementEntity.getStartDate(), responseAgreement.getStartDate());
-        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(), responseAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(agreementEntity.getInformationLastUpdateDate(),
+                                responseAgreement.getInformationLastUpdateDate());
         Assertions.assertEquals(agreementEntity.getProfile().getFullName(), responseAgreement.getFullName());
         Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
     }
@@ -72,8 +76,10 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void GetApprovedAgreements_GetAgreementsWithProfileDateFilter_AgreementNotFound() {
         createApprovedAgreement().getAgreementEntity();
-        BackofficeFilter filter = BackofficeFilter.builder().dateFrom(LocalDate.now().plusDays(2))
-                .dateTo(LocalDate.now().plusDays(10)).build();
+        BackofficeFilter filter = BackofficeFilter.builder()
+                                                  .dateFrom(LocalDate.now().plusDays(2))
+                                                  .dateTo(LocalDate.now().plusDays(10))
+                                                  .build();
         Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
         Assertions.assertEquals(0L, page.getTotalElements());
         Assertions.assertEquals(0, page.getTotalPages());
@@ -109,10 +115,16 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(approvedAgreement);
         Assertions.assertEquals(agreementEntity.getId(), approvedAgreement.getId());
         Assertions.assertEquals(2, approvedAgreement.getDiscountList().size());
-        Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList().stream()
-                .filter(d -> d.getState() == DiscountStateEnum.PUBLISHED).collect(Collectors.toList())));
-        Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList().stream()
-                .filter(d -> d.getState() == DiscountStateEnum.SUSPENDED).collect(Collectors.toList())));
+        Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList()
+                                                                        .stream()
+                                                                        .filter(d -> d.getState() ==
+                                                                                     DiscountStateEnum.PUBLISHED)
+                                                                        .collect(Collectors.toList())));
+        Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList()
+                                                                        .stream()
+                                                                        .filter(d -> d.getState() ==
+                                                                                     DiscountStateEnum.SUSPENDED)
+                                                                        .collect(Collectors.toList())));
 
     }
 

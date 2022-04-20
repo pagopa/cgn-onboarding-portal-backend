@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.facade.BackofficeExportFacade;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
@@ -41,32 +42,55 @@ import java.util.stream.Stream;
 public class IntegrationAbstractTest {
 
     protected String getAzureConnectionString() {
-        return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" + "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" + "BlobEndpoint=http://127.0.0.1:" + Initializer.azurite.getMappedPort(10000) + "/devstoreaccount1;";
+        return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
+               "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
+               "BlobEndpoint=http://127.0.0.1:" +
+               Initializer.azurite.getMappedPort(10000) +
+               "/devstoreaccount1;";
     }
 
     protected static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("11-2.5").withDatabaseName("integration-tests-db").withUsername("admin").withPassword("admin");
+        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("11-2.5")
+                                                                                 .withDatabaseName(
+                                                                                         "integration-tests-db")
+                                                                                 .withUsername("admin")
+                                                                                 .withPassword("admin");
 
-        public static GenericContainer<?> azurite = new GenericContainer<>(DockerImageName.parse("mcr.microsoft.com/azure-storage/azurite:3.11.0")).withExposedPorts(10000);
+        public static GenericContainer<?> azurite = new GenericContainer<>(DockerImageName.parse(
+                "mcr.microsoft.com/azure-storage/azurite:3.11.0")).withExposedPorts(10000);
 
-        public static GenericContainer<?> greenMailContainer = new GenericContainer<>(DockerImageName.parse("greenmail/standalone:1.6.3")).withExposedPorts(3025)
-                // override timeout to 5 seconds
-                .withEnv("GREENMAIL_OPTS", "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
+        public static GenericContainer<?> greenMailContainer = new GenericContainer<>(DockerImageName.parse(
+                "greenmail/standalone:1.6.3")).withExposedPorts(3025)
+                                              // override timeout to 5 seconds
+                                              .withEnv("GREENMAIL_OPTS",
+                                                       "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
 
         private static void startContainers() {
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
         }
 
         private static Map<String, String> createConnectionConfiguration() {
-            return Map.of("spring.datasource.url", postgres.getJdbcUrl(), "spring.datasource.username", postgres.getUsername(), "spring.datasource.password", postgres.getPassword(), "cgn.pe.storage.azure.blob-endpoint", "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1", "spring.mail.host", greenMailContainer.getHost(), "spring.mail.port", String.valueOf(greenMailContainer.getFirstMappedPort()));
+            return Map.of("spring.datasource.url",
+                          postgres.getJdbcUrl(),
+                          "spring.datasource.username",
+                          postgres.getUsername(),
+                          "spring.datasource.password",
+                          postgres.getPassword(),
+                          "cgn.pe.storage.azure.blob-endpoint",
+                          "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1",
+                          "spring.mail.host",
+                          greenMailContainer.getHost(),
+                          "spring.mail.port",
+                          String.valueOf(greenMailContainer.getFirstMappedPort()));
         }
 
         @Override
         public void initialize(ConfigurableApplicationContext applicationContext) {
             startContainers();
             ConfigurableEnvironment environment = applicationContext.getEnvironment();
-            MapPropertySource testcontainers = new MapPropertySource("testcontainers", (Map) createConnectionConfiguration());
+            MapPropertySource testcontainers = new MapPropertySource("testcontainers",
+                                                                     (Map) createConnectionConfiguration());
             environment.getPropertySources().addFirst(testcontainers);
         }
     }
@@ -155,6 +179,9 @@ public class IntegrationAbstractTest {
     @Autowired
     protected ConfigProperties configProperties;
 
+    @Autowired
+    protected BackofficeExportFacade backofficeExportFacade;
+
     @AfterEach
     protected void cleanAll() throws InterruptedException {
         documentRepository.deleteAll();
@@ -189,20 +216,28 @@ public class IntegrationAbstractTest {
 
     protected List<AgreementTestObject> createMultiplePendingAgreement(int numberToCreate) {
         List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
-        IntStream.range(0, numberToCreate).forEach(idx -> testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, idx)));
+        IntStream.range(0, numberToCreate)
+                 .forEach(idx -> testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                           DiscountCodeTypeEnum.STATIC,
+                                                                           idx)));
 
         return testObjectList;
     }
 
-    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
+    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
+                                                         DiscountCodeTypeEnum discountCodeType) {
         return createPendingAgreement(salesChannel, discountCodeType, 1);
     }
 
-    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType, int idx) {
+    protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
+                                                         DiscountCodeTypeEnum discountCodeType,
+                                                         int idx) {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
         // creating profile
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, salesChannel, discountCodeType);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity,
+                                                                          salesChannel,
+                                                                          discountCodeType);
         profileEntity.setFullName(profileEntity.getFullName() + idx);
         profileEntity = profileService.createProfile(profileEntity, agreementEntity.getId());
         // creating discount
@@ -222,7 +257,8 @@ public class IntegrationAbstractTest {
 
     protected List<AgreementTestObject> createMultipleApprovedAgreement(int numberToCreate, boolean publishDiscounts) {
         List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
-        IntStream.range(0, numberToCreate).forEach(idx -> testObjectList.add(createApprovedAgreement(idx, publishDiscounts)));
+        IntStream.range(0, numberToCreate)
+                 .forEach(idx -> testObjectList.add(createApprovedAgreement(idx, publishDiscounts)));
 
         return testObjectList;
     }
@@ -254,7 +290,8 @@ public class IntegrationAbstractTest {
                 discountEntity.setEndDate(LocalDate.now().minusDays(1));
             }
             discountEntity.setName(discountEntity.getName() + idx);
-            discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+            discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                            .getDiscountEntity();
             discountEntities.add(discountEntity);
         }
         List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
@@ -294,7 +331,8 @@ public class IntegrationAbstractTest {
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
 
-    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold, DiscountEntity discountEntity) {
+    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold,
+                                                                DiscountEntity discountEntity) {
         // use 100% - threshold codes
         int codeToUse = 10 - (int) Math.floor((float) 10 * threshold.getValue() / 100);
         log.info("Will use " + codeToUse + " codes.");
@@ -304,7 +342,10 @@ public class IntegrationAbstractTest {
         });
     }
 
-    private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity, ProfileEntity profileEntity, List<DiscountEntity> discountEntities, List<DocumentEntity> documentEntityList) {
+    private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity,
+                                                          ProfileEntity profileEntity,
+                                                          List<DiscountEntity> discountEntities,
+                                                          List<DocumentEntity> documentEntityList) {
         AgreementTestObject testObject = new AgreementTestObject();
         testObject.setAgreementEntity(agreementEntity);
         testObject.setProfileEntity(profileEntity);
