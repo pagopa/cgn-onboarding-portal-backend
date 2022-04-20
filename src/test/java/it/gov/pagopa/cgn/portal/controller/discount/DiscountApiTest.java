@@ -86,18 +86,17 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
     void initTest(DiscountCodeTypeEnum discountCodeType) throws IOException {
         agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        ProfileEntity profileEntity =
-                TestUtils.createSampleProfileEntity(agreement, SalesChannelEnum.ONLINE, discountCodeType);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement,
+                                                                          SalesChannelEnum.ONLINE,
+                                                                          discountCodeType);
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
         setOperatorAuth();
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        BlobContainerClient documentContainerClient =
-                new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
-                                                .containerName(configProperties.getDocumentsContainerName())
-                                                .buildClient();
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
@@ -263,8 +262,8 @@ class DiscountApiTest extends IntegrationAbstractTest {
                 public void run() {
                     log.info("#TESTING ANOMALY: Recovering BucketCodeLoadEntity and DiscountEntity after delete.");
                     bucketCodeLoadRepository.save(recoverBucketCodeLoad);
-                    var discountEntity =
-                            discountRepository.findById(recoverBucketCodeLoad.getDiscountId()).orElseThrow();
+                    var discountEntity = discountRepository.findById(recoverBucketCodeLoad.getDiscountId())
+                                                           .orElseThrow();
                     discountEntity.setLastBucketCodeLoad(recoverBucketCodeLoad);
                     discountRepository.save(discountEntity);
                     log.info("#TESTING ANOMALY: Recovery finished.");
@@ -361,8 +360,9 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Update_CreateAndUpdateDiscountWithLandingPage_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity =
-                TestUtils.createSampleDiscountEntityWithLandingPage(agreement, "url", "referrer");
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement,
+                                                                                            "url",
+                                                                                            "referrer");
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);

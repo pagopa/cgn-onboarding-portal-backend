@@ -412,7 +412,7 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  "/organization/{keyOrganizationFiscalCode}/referents/{referentFiscalCode}":
+  /organization/{keyOrganizationFiscalCode}/referents/{referentFiscalCode}:
     delete:
       tags:
         - attributeauthority
@@ -425,6 +425,24 @@ paths:
       responses:
         200:
           description: Deleted.
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
+  /export/agreements:
+    get:
+      tags:
+        - exports
+      summary: Download an export of agreements in CSV format
+      operationId: exportAgreements
+      responses:
+        200:
+          description: CSV export of all agreements
+          schema:
+            type: file
+        400:
+          $ref: '#/responses/InvalidRequest'
         403:
           $ref: '#/responses/Forbidden'
         404:

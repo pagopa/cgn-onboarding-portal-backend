@@ -1,26 +1,21 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
-
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
+import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -31,23 +26,16 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.AddressEntity;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.model.ReferentEntity;
-import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
-import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
-import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
-import it.gov.pagopa.cgn.portal.util.CsvUtils;
-import lombok.extern.slf4j.Slf4j;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -85,7 +73,9 @@ public class DocumentService {
     }
 
     @Transactional
-    public DocumentEntity storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content,
+    public DocumentEntity storeDocument(String agreementId,
+                                        DocumentTypeEnum documentType,
+                                        InputStream content,
                                         long size) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
@@ -105,7 +95,8 @@ public class DocumentService {
     @Transactional
     public String storeBucket(String agreementId, InputStream inputStream, long size) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Profile not found. Bucket not uploadable"));
+                                                       .orElseThrow(() -> new InvalidRequestException(
+                                                               "Profile not found. Bucket not uploadable"));
         if (!profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)) {
             throw new InvalidRequestException("Cannot load bucket for Discount Code type not equals to BUCKET");
         }
@@ -113,17 +104,23 @@ public class DocumentService {
             byte[] content = inputStream.readAllBytes();
             long csvRecordCount = countCsvRecord(content);
             if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
-                throw new InvalidRequestException(
-                        "Cannot load bucket because number of rows (" + csvRecordCount + ") does not respect minimum bound (" + configProperties.getBucketMinCsvRows() + ") on loaded content of length (" + content.length + ")");
+                throw new InvalidRequestException("Cannot load bucket because number of rows (" +
+                                                  csvRecordCount +
+                                                  ") does not respect minimum bound (" +
+                                                  configProperties.getBucketMinCsvRows() +
+                                                  ") on loaded content of length (" +
+                                                  content.length +
+                                                  ")");
             }
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-                if (content.length == 0
-                        || csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH
-                        || StringUtils.isBlank(line.get(0)))) {
+                if (content.length == 0 ||
+                    csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
+                                                     StringUtils.isBlank(line.get(0)))) {
                     throw new InvalidRequestException(
-                            "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect "
-                                    + MAX_ALLOWED_BUCKET_CODE_LENGTH + " code size");
+                            "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect " +
+                            MAX_ALLOWED_BUCKET_CODE_LENGTH +
+                            " code size");
                 }
             } catch (IOException e) {
                 throw new CGNException(e.getMessage());
@@ -168,7 +165,7 @@ public class DocumentService {
         resetMerchantDocuments(agreementId);
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_AGREEMENT);
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId,
-                DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
+                                                              DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
     }
 
     // if there are documents created by profile and backoffice user, the document
@@ -178,8 +175,9 @@ public class DocumentService {
             return documentEntityList;
         }
         return Arrays.stream(DocumentTypeEnum.Type.values())
-                .map(type -> filterDocumentsByPriorityAndType(type, documentEntityList)).filter(t -> !Objects.isNull(t))
-                .collect(Collectors.toList());
+                     .map(type -> filterDocumentsByPriorityAndType(type, documentEntityList))
+                     .filter(t -> !Objects.isNull(t))
+                     .collect(Collectors.toList());
     }
 
     private DocumentEntity filterDocumentsByPriorityAndType(DocumentTypeEnum.Type typeEnum,
@@ -210,7 +208,7 @@ public class DocumentService {
 
     private ByteArrayOutputStream renderAgreementDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                .orElseThrow(() -> new RuntimeException("no profile"));
+                                                       .orElseThrow(() -> new RuntimeException("no profile"));
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
@@ -230,14 +228,17 @@ public class DocumentService {
 
     private ByteArrayOutputStream renderAdhesionRequestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                .orElseThrow(() -> new RuntimeException("no profile"));
+                                                       .orElseThrow(() -> new RuntimeException("no profile"));
 
-        List<String> addressList = profileEntity.getAddressList().stream().map(AddressEntity::getFullAddress)
-                .collect(Collectors.toList());
+        List<String> addressList = profileEntity.getAddressList()
+                                                .stream()
+                                                .map(AddressEntity::getFullAddress)
+                                                .collect(Collectors.toList());
 
         List<DiscountEntity> discounts = discountRepository.findByAgreementId(agreementId);
-        List<RenderableDiscount> renderableDiscounts = discounts.stream().map(RenderableDiscount::fromEntity)
-                .collect(Collectors.toList());
+        List<RenderableDiscount> renderableDiscounts = discounts.stream()
+                                                                .map(RenderableDiscount::fromEntity)
+                                                                .collect(Collectors.toList());
 
         String discountMode = null;
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
@@ -259,9 +260,9 @@ public class DocumentService {
             }
         }
 
-        String merchantName =
-                profileEntity.getName() == null || profileEntity.getName().isEmpty() || profileEntity.getName().isBlank()
-                        ? profileEntity.getFullName() : profileEntity.getName();
+        String merchantName = profileEntity.getName() == null ||
+                              profileEntity.getName().isEmpty() ||
+                              profileEntity.getName().isBlank() ? profileEntity.getFullName() : profileEntity.getName();
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
@@ -321,9 +322,13 @@ public class DocumentService {
         return outputStream;
     }
 
-    public DocumentService(DocumentRepository documentRepository, ProfileRepository profileRepository,
-                           DiscountRepository discountRepository, AgreementServiceLight agreementServiceLight,
-                           AzureStorage azureStorage, TemplateEngine templateEngine, ConfigProperties configProperties) {
+    public DocumentService(DocumentRepository documentRepository,
+                           ProfileRepository profileRepository,
+                           DiscountRepository discountRepository,
+                           AgreementServiceLight agreementServiceLight,
+                           AzureStorage azureStorage,
+                           TemplateEngine templateEngine,
+                           ConfigProperties configProperties) {
         this.documentRepository = documentRepository;
         this.profileRepository = profileRepository;
         this.discountRepository = discountRepository;
@@ -345,14 +350,19 @@ public class DocumentService {
         public static RenderableDiscount fromEntity(DiscountEntity entity) {
             RenderableDiscount discount = new RenderableDiscount();
 
-            String categories = entity.getProducts().stream().map(p -> p.getProductCategory().getDescription())
-                    .collect(Collectors.joining(",\n"));
+            String categories = entity.getProducts()
+                                      .stream()
+                                      .map(p -> p.getProductCategory().getDescription())
+                                      .collect(Collectors.joining(",\n"));
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();
             discount.discountValue = entity.getDiscountValue() != null ? "" + entity.getDiscountValue() + "% " : "";
             discount.condition = entity.getCondition();
-            discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl()).filter(Objects::nonNull).findFirst().orElse("-");
+            discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl())
+                                       .filter(Objects::nonNull)
+                                       .findFirst()
+                                       .orElse("-");
             discount.categories = categories;
             discount.description = entity.getDescription();
 

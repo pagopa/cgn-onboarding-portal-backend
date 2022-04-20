@@ -81,9 +81,8 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         MockMultipartFile multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
@@ -112,7 +111,10 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
 
-        var notification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, threshold));
+        var notification
+                = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(
+                discountEntity,
+                threshold));
         Assertions.assertNotNull(notification);
     }
 }

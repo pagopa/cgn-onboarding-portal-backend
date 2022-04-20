@@ -43,7 +43,11 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         var createProfileConverter = new CreateProfileConverter(createReferentConverter);
         var updateProfileConverter = new UpdateProfileConverter(updateReferentConverter);
         var profileConverter = new ProfileConverter(referentConverter);
-        profileFacade = new ProfileFacade(profileService, createProfileConverter, updateProfileConverter, profileConverter, discountService);
+        profileFacade = new ProfileFacade(profileService,
+                                          createProfileConverter,
+                                          updateProfileConverter,
+                                          profileConverter,
+                                          discountService);
 
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
@@ -59,7 +63,9 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 
         // create a discount and request agreement approval
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            URL,
+                                                                                            REFERRER);
         discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
@@ -76,7 +82,8 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         });
 
         // operator change his profile to stati code
-        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity, DiscountCodeType.STATIC);
+        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
+                                                                                        DiscountCodeType.STATIC);
         profileFacade.updateProfile(agreementId, updateProfile);
 
         // discount should be landing page related and suspended
@@ -116,7 +123,9 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 
         // create a discount and request agreement approval
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, URL, REFERRER);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            URL,
+                                                                                            REFERRER);
         discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();

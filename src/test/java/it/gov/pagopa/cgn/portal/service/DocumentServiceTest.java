@@ -66,7 +66,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     void init() throws IOException {
 
         documentContainerClient = new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+                                                                  .containerName(configProperties.getDocumentsContainerName())
+                                                                  .buildClient();
 
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
@@ -106,14 +107,18 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
         DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(),
-                DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
+                                                                      DocumentTypeEnum.AGREEMENT,
+                                                                      new ByteArrayInputStream(content),
+                                                                      content.length);
 
         Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
         Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
 
-        BlobClient client = documentContainerClient.getBlobClient(
-                agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
+        BlobClient client = documentContainerClient.getBlobClient(agreementEntity.getId() +
+                                                                  "/" +
+                                                                  DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() +
+                                                                  ".pdf");
 
         Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
     }
@@ -123,8 +128,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         byte[] content = multipartFile.getInputStream().readAllBytes();
-        String bucketUID = documentService.storeBucket(agreementEntity.getId(), multipartFile.getInputStream(),
-                multipartFile.getSize());
+        String bucketUID = documentService.storeBucket(agreementEntity.getId(),
+                                                       multipartFile.getInputStream(),
+                                                       multipartFile.getSize());
 
         Assertions.assertNotNull(bucketUID);
 
@@ -141,7 +147,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                () -> documentService.storeBucket(agreementId, in, content.length));
 
     }
 
@@ -153,7 +159,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                () -> documentService.storeBucket(agreementId, in, content.length));
 
     }
 
@@ -161,8 +167,10 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     void Delete_DeleteDocument_Ok() {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
-        documentService.storeDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT,
-                new ByteArrayInputStream(content), content.length);
+        documentService.storeDocument(agreementEntity.getId(),
+                                      DocumentTypeEnum.AGREEMENT,
+                                      new ByteArrayInputStream(content),
+                                      content.length);
         long deleteDocument = documentService.deleteDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT);
         Assertions.assertEquals(1, deleteDocument);
         List<DocumentEntity> documents = documentService.getPrioritizedDocuments(agreementEntity.getId());
@@ -178,8 +186,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
 
     @Test
     void Get_GenerateAgreementDocument_Ok() throws Exception {
-        PDDocument document = PDDocument.load(
-                documentService.renderDocument(agreementEntity.getId(), DocumentTypeEnum.AGREEMENT).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.AGREEMENT).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -194,8 +202,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     @Test
     void Get_GenerateAdhesionRequestDocument_Ok() throws IOException {
 
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -210,8 +219,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -226,8 +236,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -242,8 +253,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -255,11 +267,14 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_LandingPage_Ok() throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity, "anurl.com", "areferrer");
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            "anurl.com",
+                                                                                            "areferrer");
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -272,13 +287,15 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(),
-                multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        PDDocument document = PDDocument.load(documentService
-                .renderDocument(agreementEntity.getId(), DocumentTypeEnum.ADHESION_REQUEST).toByteArray());
+        PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
+                                                                             DocumentTypeEnum.ADHESION_REQUEST)
+                                                             .toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);

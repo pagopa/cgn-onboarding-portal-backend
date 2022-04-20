@@ -72,11 +72,14 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateAgreement_Ok() throws Exception {
-        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH)).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.imageUrl").isEmpty())
-                .andExpect(jsonPath("$.completedSteps").isEmpty());
+        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.imageUrl").isEmpty())
+                    .andExpect(jsonPath("$.completedSteps").isEmpty());
 
     }
 
@@ -86,12 +89,16 @@ class AgreementApiTest extends IntegrationAbstractTest {
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
-        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH)).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.imageUrl").isEmpty())
-                .andExpect(jsonPath("$.completedSteps").isArray()).andExpect(jsonPath("$.completedSteps", hasSize(1)))
-                .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()));
+        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.imageUrl").isEmpty())
+                    .andExpect(jsonPath("$.completedSteps").isArray())
+                    .andExpect(jsonPath("$.completedSteps", hasSize(1)))
+                    .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()));
     }
 
     @Test
@@ -102,11 +109,15 @@ class AgreementApiTest extends IntegrationAbstractTest {
         profileService.createProfile(profileEntity, agreementEntity.getId());
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
-        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH)).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.imageUrl").isEmpty())
-                .andExpect(jsonPath("$.completedSteps").isArray()).andExpect(jsonPath("$.completedSteps", hasSize(2)));
+        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.imageUrl").isEmpty())
+                    .andExpect(jsonPath("$.completedSteps").isArray())
+                    .andExpect(jsonPath("$.completedSteps", hasSize(2)));
 
     }
 
@@ -121,11 +132,15 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
         List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
         documentRepository.saveAll(documentList);
-        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH)).andDo(log()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty()).andExpect(jsonPath("$.imageUrl").isEmpty())
-                .andExpect(jsonPath("$.completedSteps").isArray()).andExpect(jsonPath("$.completedSteps", hasSize(3)));
+        this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.imageUrl").isEmpty())
+                    .andExpect(jsonPath("$.completedSteps").isArray())
+                    .andExpect(jsonPath("$.completedSteps", hasSize(3)));
 
     }
 
@@ -143,8 +158,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
         List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
         documentRepository.saveAll(documentList);
 
-        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId()))).andDo(log())
-                .andExpect(status().isNoContent());
+        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
     }
 
     @Test
@@ -152,8 +168,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
-        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId()))).andDo(log())
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -167,8 +184,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
 
-        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId()))).andDo(log())
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -189,7 +207,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
         agreementEntity = agreementRepository.save(agreementEntity);
 
         this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
-                .andDo(log()).andExpect(status().isNoContent());
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
     }
 
     @Test
@@ -206,7 +225,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
 
         this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
-                .andDo(log()).andExpect(status().isBadRequest());
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -228,8 +248,10 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
         discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
-        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(), discountEntity.getId())))
-                .andDo(log()).andExpect(status().isNoContent());
+        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(),
+                                                                        discountEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
     }
 
     @Test
@@ -250,8 +272,10 @@ class AgreementApiTest extends IntegrationAbstractTest {
         agreementEntity = agreementRepository.save(agreementEntity);
 
         // if we don't publish discount we expect an InvalidRequestException
-        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(), discountEntity.getId())))
-                .andDo(log()).andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(),
+                                                                        discountEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -260,11 +284,14 @@ class AgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
 
-        MockMultipartFile multipartFile = new MockMultipartFile("document", "test-codes.csv", "multipart/form-data",
-                csv);
+        MockMultipartFile multipartFile = new MockMultipartFile("document",
+                                                                "test-codes.csv",
+                                                                "multipart/form-data",
+                                                                csv);
         createBlobDocument();
         this.mockMvc.perform(multipart(TestUtils.getUploadBucketPath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log()).andExpect(status().isBadRequest());
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -273,26 +300,33 @@ class AgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
         byte[] csv = "sample".getBytes();
 
-        MockMultipartFile multipartFile = new MockMultipartFile("document", "test-codes.pdf", "multipart/form-data",
-                csv);
+        MockMultipartFile multipartFile = new MockMultipartFile("document",
+                                                                "test-codes.pdf",
+                                                                "multipart/form-data",
+                                                                csv);
         createBlobDocument();
         this.mockMvc.perform(multipart(TestUtils.getUploadBucketPath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log()).andExpect(status().isBadRequest());
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
     void UploadBucket_UploadValidBucket_Ok() throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity, SalesChannelEnum.ONLINE,
-                DiscountCodeTypeEnum.BUCKET);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity,
+                                                                          SalesChannelEnum.ONLINE,
+                                                                          DiscountCodeTypeEnum.BUCKET);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
 
-        MockMultipartFile multipartFile = new MockMultipartFile("document", "test-codes.csv", "multipart/form-data",
-                csv);
+        MockMultipartFile multipartFile = new MockMultipartFile("document",
+                                                                "test-codes.csv",
+                                                                "multipart/form-data",
+                                                                csv);
         createBlobDocument();
         this.mockMvc.perform(multipart(TestUtils.getUploadBucketPath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log()).andExpect(status().isOk());
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test
@@ -303,7 +337,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
         MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.png", "image/png", image);
         createBlobImage();
         this.mockMvc.perform(multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log()).andExpect(status().isOk());
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test
@@ -315,23 +350,24 @@ class AgreementApiTest extends IntegrationAbstractTest {
         MockMultipartFile multipartFile = new MockMultipartFile("image", "test-image.pdf", "image/png", image);
         createBlobImage();
         this.mockMvc.perform(multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
-                .andDo(log()).andExpect(status().isBadRequest())
-                .andExpect(content().string(ImageErrorCode.INVALID_IMAGE_TYPE.getValue()));
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(ImageErrorCode.INVALID_IMAGE_TYPE.getValue()));
     }
 
     private void createBlobImage() {
-        BlobContainerClient imageContainer = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString()).containerName(configProperties.getImagesContainerName())
-                .buildClient();
+        BlobContainerClient imageContainer
+                = new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
+                                                  .containerName(configProperties.getImagesContainerName())
+                                                  .buildClient();
         if (!imageContainer.exists()) {
             imageContainer.create();
         }
     }
 
     private void createBlobDocument() {
-        BlobContainerClient documentContainer = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+        BlobContainerClient documentContainer = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
         if (!documentContainer.exists()) {
             documentContainer.create();
         }
