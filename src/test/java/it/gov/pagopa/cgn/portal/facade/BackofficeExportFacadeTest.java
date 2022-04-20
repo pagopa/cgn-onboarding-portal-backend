@@ -38,7 +38,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_DICOUNT_OK() {
+    void ExportAgreements_DRAFT_WITH_DISCOUNTS_OK() {
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountService.createDiscount(agreementEntity.getId(), discountEntity1).getDiscountEntity();

@@ -67,7 +67,7 @@ public class BackofficeExportFacade {
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
 
-            String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + ".csv";
+            String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
             return ResponseEntity.ok()
                                  .contentLength(export.length)
