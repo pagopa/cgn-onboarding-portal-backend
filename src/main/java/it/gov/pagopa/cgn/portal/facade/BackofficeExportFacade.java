@@ -29,27 +29,27 @@ import java.util.stream.Collectors;
 @Component
 public class BackofficeExportFacade {
 
-    private AgreementRepository agreementRepository;
+    private final AgreementRepository agreementRepository;
 
-    private String[] headers = new String[]{"Stato Convenzione",
-                                            "Ragione sociale",
-                                            "Nome alternativo",
-                                            "Canale di vendita",
-                                            "Modalità di riconoscimento",
-                                            "Sito",
-                                            "Titolo agevolazione",
-                                            "Descrizione agevolazione",
-                                            "Valore",
-                                            "Stato agevolazione",
-                                            "Data inizio",
-                                            "Data fine",
-                                            "Visibile su EYCA",
-                                            "Condizioni",
-                                            "Link agevolazione",
-                                            "Categorie",
-                                            "Codice statico",
-                                            "Landing page",
-                                            "Referer"};
+    private final String[] headers = new String[]{"Stato Convenzione",
+                                                  "Ragione sociale",
+                                                  "Nome alternativo",
+                                                  "Canale di vendita",
+                                                  "Modalità di riconoscimento",
+                                                  "Sito",
+                                                  "Titolo agevolazione",
+                                                  "Descrizione agevolazione",
+                                                  "Valore",
+                                                  "Stato agevolazione",
+                                                  "Data inizio",
+                                                  "Data fine",
+                                                  "Visibile su EYCA",
+                                                  "Condizioni",
+                                                  "Link agevolazione",
+                                                  "Categorie",
+                                                  "Codice statico",
+                                                  "Landing page",
+                                                  "Referer"};
 
     public BackofficeExportFacade(AgreementRepository agreementRepository) {
         this.agreementRepository = agreementRepository;
@@ -60,7 +60,7 @@ public class BackofficeExportFacade {
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
-            printer.printRecord(headers);
+            printerConsumer.apply(printer).accept(headers);
             agreementEntities.stream()
                              .map(getAgreementData)
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
@@ -80,7 +80,7 @@ public class BackofficeExportFacade {
         }
     }
 
-    private BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
+    private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
                                                          agreement.getProfile().getFullName(),
                                                          agreement.getProfile().getName(),
@@ -114,7 +114,7 @@ public class BackofficeExportFacade {
                                                                  null)};
 
 
-    private Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
+    private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
@@ -128,9 +128,10 @@ public class BackofficeExportFacade {
         return agreementRows;
     };
 
-    private Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
+    private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
         try {
-            printer.printRecord(row);
+            printer.print(row);
+            printer.println();
         } catch (IOException e) {
             log.error(e.getMessage());
         }

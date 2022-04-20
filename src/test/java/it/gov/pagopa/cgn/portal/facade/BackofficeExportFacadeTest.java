@@ -23,12 +23,10 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
 
     private AgreementEntity agreementEntity;
 
-    private ProfileEntity profileEntity;
-
     @BeforeEach
     void init() {
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
