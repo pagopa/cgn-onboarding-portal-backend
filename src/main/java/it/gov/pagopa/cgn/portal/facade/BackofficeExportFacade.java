@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.facade;
 
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
@@ -86,7 +87,8 @@ public class BackofficeExportFacade {
                                                          agreement.getProfile().getFullName(),
                                                          agreement.getProfile().getName(),
                                                          agreement.getProfile().getSalesChannel().getCode(),
-                                                         agreement.getProfile().getDiscountCodeType().getCode(),
+                                                         Optional.of(agreement.getProfile().getDiscountCodeType())
+                                                                 .map(DiscountCodeTypeEnum::getCode).orElse("FISICO"),
                                                          agreement.getProfile().getWebsiteUrl(),
                                                          maybeDiscount.map(DiscountEntity::getName).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
