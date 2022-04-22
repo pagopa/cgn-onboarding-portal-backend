@@ -58,7 +58,7 @@ public class BackofficeExportFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Resource> exportAgreements() {
-        log.info("exportAgreements start");
+        log.error("exportAgreements start");
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
@@ -71,7 +71,7 @@ public class BackofficeExportFacade {
 
             String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
-            log.info("exportAgreements end success");
+            log.error("exportAgreements end success");
             return ResponseEntity.ok()
                                  .contentLength(export.length)
                                  .contentType(MediaType.TEXT_PLAIN)
@@ -81,7 +81,7 @@ public class BackofficeExportFacade {
         } catch (Exception ex) {
             log.error(ex.getMessage());
         }
-        log.info("exportAgreements end failure");
+        log.error("exportAgreements end failure");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
@@ -121,7 +121,7 @@ public class BackofficeExportFacade {
 
 
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
-        log.info("getAgreementData start");
+        log.error("getAgreementData start");
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
@@ -132,13 +132,13 @@ public class BackofficeExportFacade {
             agreementRows.add(extractValuesForAgreementAndDiscount.apply(agreement, Optional.empty()));
         }
 
-        log.info("getAgreementData end");
+        log.error("getAgreementData end");
         return agreementRows;
     };
 
     private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
         try {
-            log.info("Printing: " + String.join(",", row));
+            log.error("Printing: " + String.join(",", row));
             printer.print(row);
             printer.println();
         } catch (IOException e) {
