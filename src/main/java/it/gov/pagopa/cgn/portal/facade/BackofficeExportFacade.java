@@ -58,6 +58,7 @@ public class BackofficeExportFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Resource> exportAgreements() {
+        log.info("exportAgreements start");
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
@@ -70,16 +71,18 @@ public class BackofficeExportFacade {
 
             String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
+            log.info("exportAgreements end success");
             return ResponseEntity.ok()
                                  .contentLength(export.length)
                                  .contentType(MediaType.TEXT_PLAIN)
                                  .cacheControl(CacheControl.noCache().mustRevalidate())
                                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                                  .body(new ByteArrayResource(export));
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        log.info("exportAgreements end failure");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
@@ -118,6 +121,7 @@ public class BackofficeExportFacade {
 
 
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
+        log.info("getAgreementData start");
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
@@ -128,11 +132,13 @@ public class BackofficeExportFacade {
             agreementRows.add(extractValuesForAgreementAndDiscount.apply(agreement, Optional.empty()));
         }
 
+        log.info("getAgreementData end");
         return agreementRows;
     };
 
     private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
         try {
+            log.info("Printing: " + String.join(",", row));
             printer.print(row);
             printer.println();
         } catch (IOException e) {
