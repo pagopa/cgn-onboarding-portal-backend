@@ -1,8 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -87,12 +89,18 @@ public class ExportService {
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
-                                                         agreement.getProfile().getFullName(),
-                                                         agreement.getProfile().getName(),
-                                                         agreement.getProfile().getSalesChannel().getCode(),
-                                                         Optional.of(agreement.getProfile().getDiscountCodeType())
-                                                                 .map(DiscountCodeTypeEnum::getCode).orElse("FISICO"),
-                                                         agreement.getProfile().getWebsiteUrl(),
+                                                         Optional.of(agreement.getProfile())
+                                                                 .map(ProfileEntity::getFullName).orElse(null),
+                                                         Optional.of(agreement.getProfile())
+                                                                 .map(ProfileEntity::getName).orElse(null),
+                                                         Optional.of(agreement.getProfile())
+                                                                 .map(ProfileEntity::getSalesChannel)
+                                                                 .map(SalesChannelEnum::getCode).orElse(null),
+                                                         Optional.of(agreement.getProfile())
+                                                                 .map(ProfileEntity::getDiscountCodeType)
+                                                                 .map(DiscountCodeTypeEnum::getCode).orElse(null),
+                                                         Optional.of(agreement.getProfile())
+                                                                 .map(ProfileEntity::getWebsiteUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getName).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountValue)
