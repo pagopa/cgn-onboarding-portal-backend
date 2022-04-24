@@ -64,13 +64,15 @@ public class ExportService {
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
+            log.info("printing headers...");
             printerConsumer.apply(printer).accept(headers);
+            log.info("printing data start");
             agreementEntities.stream()
                              .map(getAgreementData)
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
+            log.info("printing data end");
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
-
             String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
             log.info("exportAgreements end success");
@@ -126,7 +128,6 @@ public class ExportService {
                                                                  null),
                                                          maybeDiscount.map(DiscountEntity::getLandingPageReferrer).orElse(
                                                                  null)};
-
 
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
         log.info("getAgreementData start");
