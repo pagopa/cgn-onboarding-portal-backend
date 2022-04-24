@@ -130,7 +130,7 @@ public class ExportService {
                                                                  null)};
 
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
-        log.info("getAgreementData start");
+        log.info("getAgreementData " + agreement.getId() + " start");
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
@@ -138,10 +138,11 @@ public class ExportService {
                                                 .collect(Collectors.toList());
 
         if (agreementRows.isEmpty()) {
+            log.info("getAgreementData " + agreement.getId() + " no discounts");
             agreementRows.add(extractValuesForAgreementAndDiscount.apply(agreement, Optional.empty()));
         }
 
-        log.info("getAgreementData end");
+        log.info("getAgreementData " + agreement.getId() + " end");
         return agreementRows;
     };
 
