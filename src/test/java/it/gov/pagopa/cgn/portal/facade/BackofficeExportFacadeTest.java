@@ -26,13 +26,15 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() {
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+    }
+
+    private void createProfile() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
 
     @Test
-    void ExportAgreements_DRAFT_NO_DISCOUNTS_OK() throws IOException {
+    void ExportAgreements_DRAFT_NO_PROFILE_OK() throws IOException {
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
@@ -40,7 +42,26 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_DISCOUNTS_OK() throws IOException {
+    void ExportAgreements_DRAFT_WITH_PROFILE_OK() throws IOException {
+        createProfile();
+        ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(2, CsvUtils.countCsvLines(response.getBody().getInputStream()));
+    }
+
+    @Test
+    void ExportAgreements_DRAFT_WITH_PROFILE_NO_DISCOUNTS_OK() throws IOException {
+        createProfile();
+        ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(2, CsvUtils.countCsvLines(response.getBody().getInputStream()));
+    }
+
+    @Test
+    void ExportAgreements_DRAFT_WITH_PROFILE_WITH_DISCOUNTS_OK() throws IOException {
+        createProfile();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountService.createDiscount(agreementEntity.getId(), discountEntity1);

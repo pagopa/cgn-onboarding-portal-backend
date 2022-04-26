@@ -20,6 +20,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,13 +65,10 @@ public class ExportService {
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
-            log.info("printing headers...");
             printerConsumer.apply(printer).accept(headers);
-            log.info("printing data start");
             agreementEntities.stream()
                              .map(getAgreementData)
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
-            log.info("printing data end");
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
             String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
@@ -83,25 +81,27 @@ public class ExportService {
                                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                                  .body(new ByteArrayResource(export));
         } catch (Exception ex) {
-            log.error(ex.getMessage());
+            log.error("exportAgreements end failure: " + ex.getMessage());
+            log.error(Arrays.stream(ex.getStackTrace())
+                            .map(StackTraceElement::toString)
+                            .collect(Collectors.joining("\n")));
         }
-        log.info("exportAgreements end failure");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
-                                                         Optional.of(agreement.getProfile())
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getFullName).orElse(null),
-                                                         Optional.of(agreement.getProfile())
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getName).orElse(null),
-                                                         Optional.of(agreement.getProfile())
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getSalesChannel)
                                                                  .map(SalesChannelEnum::getCode).orElse(null),
-                                                         Optional.of(agreement.getProfile())
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getDiscountCodeType)
                                                                  .map(DiscountCodeTypeEnum::getCode).orElse(null),
-                                                         Optional.of(agreement.getProfile())
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getWebsiteUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getName).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
@@ -130,7 +130,6 @@ public class ExportService {
                                                                  null)};
 
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
-        log.info("getAgreementData " + agreement.getId() + " start");
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
@@ -138,17 +137,14 @@ public class ExportService {
                                                 .collect(Collectors.toList());
 
         if (agreementRows.isEmpty()) {
-            log.info("getAgreementData " + agreement.getId() + " no discounts");
             agreementRows.add(extractValuesForAgreementAndDiscount.apply(agreement, Optional.empty()));
         }
 
-        log.info("getAgreementData " + agreement.getId() + " end");
         return agreementRows;
     };
 
     private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
         try {
-            log.info("Printing: " + String.join(",", row));
             printer.print(row);
             printer.println();
         } catch (IOException e) {
