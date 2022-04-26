@@ -145,8 +145,7 @@ public class ExportService {
 
     private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
         try {
-            printer.print(row);
-            printer.println();
+            printer.printRecords(row);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
