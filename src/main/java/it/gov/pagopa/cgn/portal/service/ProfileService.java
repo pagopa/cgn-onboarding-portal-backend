@@ -61,7 +61,9 @@ public class ProfileService {
 
 
     @Autowired
-    public ProfileService(ProfileRepository profileRepository, AgreementServiceLight agreementServiceLight, DocumentService documentService) {
+    public ProfileService(ProfileRepository profileRepository,
+                          AgreementServiceLight agreementServiceLight,
+                          DocumentService documentService) {
         this.profileRepository = profileRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
@@ -69,11 +71,11 @@ public class ProfileService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity getProfileFromAgreementId(String agreementId) {
-        return getOptProfileFromAgreementId(agreementId)
-                .orElseThrow(() -> new InvalidRequestException("Updating profile was not found for agreement " + agreementId));
+        return getOptProfileFromAgreementId(agreementId).orElseThrow(() -> new InvalidRequestException(
+                "Updating profile was not found for agreement " + agreementId));
     }
 
-    private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
+    public Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
         return profileRepository.findByAgreementId(agreementId);
     }
 

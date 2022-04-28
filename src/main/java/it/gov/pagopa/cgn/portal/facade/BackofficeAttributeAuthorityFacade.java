@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -47,13 +46,8 @@ public class BackofficeAttributeAuthorityFacade {
                                                           Integer pageSize,
                                                           String sortBy,
                                                           String sortDirection) {
-        ResponseEntity<Organizations> response =
-                organizationsConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganizations(
-                        searchQuery,
-                        page,
-                        pageSize,
-                        sortBy,
-                        sortDirection));
+        ResponseEntity<Organizations> response = organizationsConverter.fromAttributeAuthorityResponse(
+                attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection));
 
         getOrganizationsAgreementAndMapStatus.accept(response);
 
@@ -62,9 +56,9 @@ public class BackofficeAttributeAuthorityFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
-        ResponseEntity<OrganizationWithReferentsAndStatus> response =
-                organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
-                        keyOrganizationFiscalCode));
+        ResponseEntity<OrganizationWithReferentsAndStatus> response
+                = organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
+                keyOrganizationFiscalCode));
         getOrganizationAgreementAndMapStatus.accept(response);
         return response;
     }
@@ -79,9 +73,9 @@ public class BackofficeAttributeAuthorityFacade {
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> updatedOrganizationWithReferentsAttributeAuthority =
-                attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(
-                        organizationWithReferents));
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> updatedOrganizationWithReferentsAttributeAuthority
+                = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(
+                organizationWithReferents));
 
         return organizationWithReferentsConverter.fromAttributeAuthorityResponse(
                 updatedOrganizationWithReferentsAttributeAuthority);
@@ -127,55 +121,56 @@ public class BackofficeAttributeAuthorityFacade {
         this.referentFiscalCodeConverter = referentFiscalCodeConverter;
     }
 
-    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserAndProfileConsumer =
-            (agreementUserEntity, organizationWithReferents) -> {
-                // update AgreementUser if merchant tax code has changed
-                if (!organizationWithReferents.getKeyOrganizationFiscalCode()
-                                              .equals(organizationWithReferents.getOrganizationFiscalCode())) {
-                    agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(),
-                                                               organizationWithReferents.getOrganizationFiscalCode());
-                }
+    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserAndProfileConsumer
+            = (agreementUserEntity, organizationWithReferents) -> {
+        // update AgreementUser if merchant tax code has changed
+        if (!organizationWithReferents.getKeyOrganizationFiscalCode()
+                                      .equals(organizationWithReferents.getOrganizationFiscalCode())) {
+            agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(),
+                                                       organizationWithReferents.getOrganizationFiscalCode());
+        }
 
-                // get and update profile
-                ProfileEntity profile = profileService.getProfileFromAgreementId(agreementUserEntity.getAgreementId());
-                profile.setFullName(organizationWithReferents.getOrganizationName());
-                profile.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
-                profileService.updateProfile(agreementUserEntity.getAgreementId(), profile);
-            };
+        // get and update profile if present
+        profileService.getOptProfileFromAgreementId(agreementUserEntity.getAgreementId()).ifPresent(p -> {
+            p.setFullName(organizationWithReferents.getOrganizationName());
+            p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
+            profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
+        });
+    };
 
-    private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus =
-            (agreement, organization) -> {
-                switch (agreement.getState()) {
-                    case DRAFT:
-                    case REJECTED:
-                        organization.setStatus(OrganizationStatus.DRAFT);
-                        break;
-                    case PENDING:
-                        organization.setStatus(OrganizationStatus.PENDING);
-                        break;
-                    case APPROVED:
-                        organization.setStatus(OrganizationStatus.ACTIVE);
-                        break;
-                    default:
-                        break;
-                }
-            };
+    private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus
+            = (agreement, organization) -> {
+        switch (agreement.getState()) {
+            case DRAFT:
+            case REJECTED:
+                organization.setStatus(OrganizationStatus.DRAFT);
+                break;
+            case PENDING:
+                organization.setStatus(OrganizationStatus.PENDING);
+                break;
+            case APPROVED:
+                organization.setStatus(OrganizationStatus.ACTIVE);
+                break;
+            default:
+                break;
+        }
+    };
 
-    private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus =
-            organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
-                                                .flatMap(agreementUserEntity -> agreementService.getById(
-                                                        agreementUserEntity.getAgreementId()))
-                                                .ifPresent(a -> mapStatus.accept(a, organization));
+    private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus
+            = organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
+                                                  .flatMap(agreementUserEntity -> agreementService.getById(
+                                                          agreementUserEntity.getAgreementId()))
+                                                  .ifPresent(a -> mapStatus.accept(a, organization));
 
-    private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus =
-            response -> {
-                if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
-                    mapOrganizationStatus.accept(response.getBody());
-                }
-            };
+    private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus
+            = response -> {
+        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
+            mapOrganizationStatus.accept(response.getBody());
+        }
+    };
 
-    private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus =
-            organizations -> organizations.forEach(mapOrganizationStatus);
+    private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus
+            = organizations -> organizations.forEach(mapOrganizationStatus);
 
     private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = response -> {
         if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody() != null) {
