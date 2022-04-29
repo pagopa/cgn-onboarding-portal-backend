@@ -46,7 +46,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return source;
     }
 
-
+    // we suppress "Disabling CSRF protections is security-sensitive"
+    // because JWT token prevents CSRF attack to the portal
+    @SuppressWarnings("java:S4502")
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf()

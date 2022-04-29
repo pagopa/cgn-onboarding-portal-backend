@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -133,13 +131,11 @@ public class BackofficeAttributeAuthorityFacade {
         }
 
         // get and update profile if present
-        Optional<ProfileEntity> maybeProfile = profileService.getProfile(agreementUserEntity.getAgreementId());
-        if (maybeProfile.isPresent()) {
-            ProfileEntity p = maybeProfile.get();
+        profileService.getProfile(agreementUserEntity.getAgreementId()).ifPresent(p -> {
             p.setFullName(organizationWithReferents.getOrganizationName());
             p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
-        }
+        });
     };
 
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus
