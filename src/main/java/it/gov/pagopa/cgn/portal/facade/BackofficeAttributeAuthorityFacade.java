@@ -133,8 +133,7 @@ public class BackofficeAttributeAuthorityFacade {
         }
 
         // get and update profile if present
-        Optional<ProfileEntity> maybeProfile
-                = profileService.getOptProfileFromAgreementId(agreementUserEntity.getAgreementId());
+        Optional<ProfileEntity> maybeProfile = profileService.getProfile(agreementUserEntity.getAgreementId());
         if (maybeProfile.isPresent()) {
             ProfileEntity p = maybeProfile.get();
             p.setFullName(organizationWithReferents.getOrganizationName());

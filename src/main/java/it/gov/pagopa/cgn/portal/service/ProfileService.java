@@ -75,7 +75,7 @@ public class ProfileService {
                 "Updating profile was not found for agreement " + agreementId));
     }
 
-    public Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
+    private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
         return profileRepository.findByAgreementId(agreementId);
     }
 
