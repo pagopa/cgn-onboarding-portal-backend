@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
@@ -51,8 +52,10 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profileDB.getReferent().getId());
         Assertions.assertNull(profileDB.getAddressList());
         Assertions.assertEquals(SalesChannelEnum.ONLINE, profileDB.getSalesChannel());
-        Assertions.assertEquals(profileEntity.getLegalRepresentativeTaxCode(), profileDB.getLegalRepresentativeTaxCode());
-        Assertions.assertEquals(profileEntity.getLegalRepresentativeFullName(), profileDB.getLegalRepresentativeFullName());
+        Assertions.assertEquals(profileEntity.getLegalRepresentativeTaxCode(),
+                                profileDB.getLegalRepresentativeTaxCode());
+        Assertions.assertEquals(profileEntity.getLegalRepresentativeFullName(),
+                                profileDB.getLegalRepresentativeFullName());
         Assertions.assertEquals(profileEntity.getLegalOffice(), profileDB.getLegalOffice());
         Assertions.assertEquals(profileEntity.getDiscountCodeType(), profileDB.getDiscountCodeType());
         Assertions.assertEquals(profileEntity.getTelephoneNumber(), profileDB.getTelephoneNumber());
@@ -75,6 +78,15 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profileDB.getAddressList().get(0).getId());
         Assertions.assertEquals(SalesChannelEnum.OFFLINE, profileDB.getSalesChannel());
         Assertions.assertNull(profileDB.getWebsiteUrl());
+    }
+
+    @Test
+    void Create_CreateProfilePhysicalWithoutAddresses_ThrowsException() {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
+        profileEntity.setAllNationalAddresses(false);
+        profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
+        Assertions.assertThrows(TransactionSystemException.class,
+                                () -> profileService.createProfile(profileEntity, agreementEntity.getId()));
     }
 
     @Test
@@ -107,7 +119,8 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         ProfileEntity profileEntity2 = TestUtils.createSampleProfileWithCommonFields();
         profileEntity2.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity2.setSalesChannel(SalesChannelEnum.ONLINE);
-        Assertions.assertThrows(InvalidRequestException.class, () -> profileService.createProfile(profileEntity2, agreementEntity.getId()));
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> profileService.createProfile(profileEntity2, agreementEntity.getId()));
     }
 
     @Test
@@ -160,6 +173,23 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profileDB.getAddressList());
         List<AddressEntity> addresses = addressRepository.findByProfileId(profileDB.getId());
         Assertions.assertEquals(profileDB.getAddressList().size(), addresses.size());
+    }
+
+    @Test
+    void Update_UpdateOfflineProfileRemovingAddresses_ThrowsException() {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
+        profileEntity.setAllNationalAddresses(false);
+        profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
+        profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        ProfileEntity toUpdateProfile = TestUtils.createSampleProfileWithCommonFields();
+        toUpdateProfile.setName("updated_name");
+        toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
+        toUpdateProfile.setAllNationalAddresses(false);
+        toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        Assertions.assertThrows(TransactionSystemException.class,
+                                () -> profileService.updateProfile(agreementEntity.getId(), toUpdateProfile));
     }
 
     @Test
