@@ -230,7 +230,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
 
         // we have to wait for all retries to complete
-        Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
     }
 
     protected void dropAndRecoverBucketCodeLoadEntity() {
