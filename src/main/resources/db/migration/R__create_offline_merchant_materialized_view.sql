@@ -105,14 +105,19 @@ SELECT m.id,
            WHEN a.full_address IS NULL AND p.all_national_addresses
                THEN 'Tutti i punti vendita sul territorio nazionale'
            ELSE a.full_address
-           END     as full_address,
+           END                                                  as full_address,
        a.latitude,
        a.longitude,
-       a.address_k AS address_id,
-       now()       AS last_update
+       a.address_k                                              AS address_id,
+       now()                                                    AS last_update,
+       EXISTS(SELECT 1
+              FROM discount d
+              WHERE d.agreement_fk = m.id
+                AND d.start_date >= NOW() - INTERVAL '15 days') AS new_discounts
 FROM merchant_without_address m
          JOIN profile p on m.id = p.agreement_fk
-         LEFT JOIN address a ON p.profile_k = a.profile_fk;
+         LEFT JOIN address a ON p.profile_k = a.profile_fk
+ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
 

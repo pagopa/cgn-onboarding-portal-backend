@@ -72,25 +72,30 @@ WITH merchant AS (
          FROM merchant m
                   JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk)
      )
-SELECT m.agreement_k                        AS id,
+SELECT m.agreement_k                                            AS id,
        m.name,
        m.website_url,
        m.discount_code_type,
-       array_agg(m.product_category)        AS product_categories,
-       lower(m.name)                        AS searchable_name,
-       bool_or(m.banking_services)          AS banking_services,
-       bool_or(m.culture_and_entertainment) AS culture_and_entertainment,
-       bool_or(m.health)                    AS health,
-       bool_or(m.home)                      AS home,
-       bool_or(m.job_offers)                AS job_offers,
-       bool_or(m.learning)                  AS learning,
-       bool_or(m.sports)                    AS sports,
-       bool_or(m.sustainable_mobility)      AS sustainable_mobility,
-       bool_or(m.telephony_and_internet)    AS telephony_and_internet,
-       bool_or(m.travelling)                AS travelling,
-       now()                                AS last_update
+       array_agg(m.product_category)                            AS product_categories,
+       lower(m.name)                                            AS searchable_name,
+       bool_or(m.banking_services)                              AS banking_services,
+       bool_or(m.culture_and_entertainment)                     AS culture_and_entertainment,
+       bool_or(m.health)                                        AS health,
+       bool_or(m.home)                                          AS home,
+       bool_or(m.job_offers)                                    AS job_offers,
+       bool_or(m.learning)                                      AS learning,
+       bool_or(m.sports)                                        AS sports,
+       bool_or(m.sustainable_mobility)                          AS sustainable_mobility,
+       bool_or(m.telephony_and_internet)                        AS telephony_and_internet,
+       bool_or(m.travelling)                                    AS travelling,
+       now()                                                    AS last_update,
+       EXISTS(SELECT 1
+              FROM discount d
+              WHERE d.agreement_fk = m.agreement_k
+                AND d.start_date >= NOW() - INTERVAL '15 days') AS new_discounts
 FROM merchant_with_categories m
-GROUP BY 1, 2, 3, 4;
+GROUP BY 1, 2, 3, 4
+ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
 

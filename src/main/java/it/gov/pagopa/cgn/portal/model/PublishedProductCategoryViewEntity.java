@@ -19,5 +19,8 @@ public class PublishedProductCategoryViewEntity {
     @Type(type = "product_category_enum")
     private ProductCategoryEnum productCategory;
 
+    @Column(name = "new_discounts")
+    private Long newDiscounts;
+
 }
 

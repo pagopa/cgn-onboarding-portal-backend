@@ -61,4 +61,7 @@ public class BaseMerchantViewEntity {
 
     @Column(name = "last_update")
     private OffsetDateTime lastUpdate;
+
+    @Column(name = "new_discounts")
+    private boolean newDiscounts;
 }
