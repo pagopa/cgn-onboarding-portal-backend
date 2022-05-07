@@ -20,7 +20,7 @@ public class PublishedProductCategoryViewEntity {
     private ProductCategoryEnum productCategory;
 
     @Column(name = "new_discounts")
-    private Long newDiscounts;
+    private Integer newDiscounts;
 
 }
 
