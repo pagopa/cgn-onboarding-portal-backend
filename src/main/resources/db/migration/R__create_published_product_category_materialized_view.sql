@@ -2,7 +2,7 @@ DROP MATERIALIZED VIEW IF EXISTS published_product_category;
 
 CREATE MATERIALIZED VIEW published_product_category AS
 SELECT DISTINCT pc.product_category,
-                (SELECT COUNT(*)
+                (SELECT COUNT(*)::int
                  FROM discount d2
                           JOIN discount_product_category pc2 ON (d2.discount_k = pc2.discount_fk)
                  WHERE pc2.product_category = pc.product_category
