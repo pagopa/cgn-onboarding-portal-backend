@@ -113,6 +113,7 @@ SELECT m.id,
        EXISTS(SELECT 1
               FROM discount d
               WHERE d.agreement_fk = m.id
+                AND d.state = 'PUBLISHED'
                 AND d.start_date >= NOW() - INTERVAL '15 days') AS new_discounts
 FROM merchant_without_address m
          JOIN profile p on m.id = p.agreement_fk

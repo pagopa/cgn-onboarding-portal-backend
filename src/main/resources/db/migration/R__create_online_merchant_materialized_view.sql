@@ -92,6 +92,7 @@ SELECT m.agreement_k                                            AS id,
        EXISTS(SELECT 1
               FROM discount d
               WHERE d.agreement_fk = m.agreement_k
+                AND d.state = 'PUBLISHED'
                 AND d.start_date >= NOW() - INTERVAL '15 days') AS new_discounts
 FROM merchant_with_categories m
 GROUP BY 1, 2, 3, 4
