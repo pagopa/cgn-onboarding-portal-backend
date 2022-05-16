@@ -7,7 +7,8 @@ SELECT DISTINCT pc.product_category,
                           JOIN discount_product_category pc2 ON (d2.discount_k = pc2.discount_fk)
                  WHERE pc2.product_category = pc.product_category
                    AND d2.state = 'PUBLISHED'
-                   AND d2.start_date >= NOW() - INTERVAL '15 days') AS new_discounts
+                   AND d2.start_date >= NOW() - INTERVAL '15 days'
+                   AND d2.end_date >= NOW()) AS new_discounts
 FROM discount d
          JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
 WHERE d.state = 'PUBLISHED'
