@@ -591,6 +591,81 @@ class DiscountApiTest extends IntegrationAbstractTest {
         Assertions.assertEquals(0, discounts.size());
     }
 
+    @Test
+    void Action_TestDiscount_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/testing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // get discount and check it's in TO_TEST status
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.TO_TEST.getValue()));
+    }
+
+    @Test
+    void Action_PublishDiscount_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // get discount and check it's in PUBLISHED status
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.PUBLISHED.getValue()));
+    }
+
+    @Test
+    void Action_UnpublishDiscount_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+
+        // publish
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // unpublish
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/unpublishing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // get discount and check it's in DRAFT status
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.DRAFT.getValue()));
+    }
+
     private CreateDiscount createSampleCreateDiscountWithStaticCode() {
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setStaticCode("create_discount_static_code");

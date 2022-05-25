@@ -45,11 +45,13 @@ public class DiscountFacade {
         return ResponseEntity.ok(discountConverter.toDto(discountEntity));
     }
 
-    public ResponseEntity<Discount> updateDiscount(String agreementId, String discountId,
+    public ResponseEntity<Discount> updateDiscount(String agreementId,
+                                                   String discountId,
                                                    UpdateDiscount updateDiscountDto) {
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(updateDiscountDto);
-        CrudDiscountWrapper wrapper = discountService.updateDiscount(agreementId, Long.valueOf(discountId),
-                discountEntity);
+        CrudDiscountWrapper wrapper = discountService.updateDiscount(agreementId,
+                                                                     Long.valueOf(discountId),
+                                                                     discountEntity);
         discountEntity = wrapper.getDiscountEntity();
         if (DiscountCodeTypeEnum.BUCKET.equals(wrapper.getProfileDiscountCodeType()) && wrapper.isChangedBucketLoad()) {
             bucketLoadUtils.storeCodesBucket(discountEntity.getId());
@@ -60,6 +62,10 @@ public class DiscountFacade {
     public void deleteDiscount(String agreementId, String discountId) {
         discountService.deleteDiscount(agreementId, Long.valueOf(discountId));
         bucketLoadUtils.deleteBucketCodes(Long.valueOf(discountId));
+    }
+
+    public void testDiscount(String agreementId, String discountId) {
+        discountService.testDiscount(agreementId, Long.valueOf(discountId));
     }
 
     public void publishDiscount(String agreementId, String discountId) {
@@ -75,8 +81,10 @@ public class DiscountFacade {
     }
 
     @Autowired
-    public DiscountFacade(DiscountService discountService, CreateDiscountConverter createDiscountConverter,
-                          DiscountConverter discountConverter, UpdateDiscountConverter updateDiscountConverter,
+    public DiscountFacade(DiscountService discountService,
+                          CreateDiscountConverter createDiscountConverter,
+                          DiscountConverter discountConverter,
+                          UpdateDiscountConverter updateDiscountConverter,
                           BucketLoadUtils bucketLoadUtils) {
         this.discountService = discountService;
         this.createDiscountConverter = createDiscountConverter;
@@ -84,6 +92,4 @@ public class DiscountFacade {
         this.updateDiscountConverter = updateDiscountConverter;
         this.bucketLoadUtils = bucketLoadUtils;
     }
-
-
 }

@@ -109,6 +109,12 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
+    public ResponseEntity<Void> testDiscount(String agreementId, String discountId) {
+        discountFacade.testDiscount(agreementId, discountId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     public ResponseEntity<Void> publishDiscount(String agreementId, String discountId) {
         discountFacade.publishDiscount(agreementId, discountId);
         return ResponseEntity.noContent().build();
@@ -137,19 +143,25 @@ public class AgreementController implements AgreementsApi {
 
     @Override
     public ResponseEntity<Void> sendHelpRequest(String agreementId, HelpRequest helpRequest) {
-        helpService.sendHelpMessage(agreementId, helpRequest.getCategory(), Optional.ofNullable(helpRequest.getTopic()),
-                helpRequest.getMessage());
+        helpService.sendHelpMessage(agreementId,
+                                    helpRequest.getCategory(),
+                                    Optional.ofNullable(helpRequest.getTopic()),
+                                    helpRequest.getMessage());
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<DiscountBucketCodeLoadingProgess> getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {
+    public ResponseEntity<DiscountBucketCodeLoadingProgess> getDiscountBucketCodeLoadingProgess(String agreementId,
+                                                                                                String discountId) {
         return ResponseEntity.ok(discountFacade.getDiscountBucketCodeLoadingProgess(agreementId, discountId));
     }
 
     @Autowired
-    public AgreementController(AgreementFacade agreementFacade, DocumentFacade documentFacade,
-                               ProfileFacade profileFacade, DiscountFacade discountFacade, ApiTokenService apiTokenService,
+    public AgreementController(AgreementFacade agreementFacade,
+                               DocumentFacade documentFacade,
+                               ProfileFacade profileFacade,
+                               DiscountFacade discountFacade,
+                               ApiTokenService apiTokenService,
                                HelpService helpService) {
         this.agreementFacade = agreementFacade;
         this.profileFacade = profileFacade;
