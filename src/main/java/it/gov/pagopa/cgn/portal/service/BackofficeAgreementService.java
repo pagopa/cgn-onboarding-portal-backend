@@ -20,9 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -38,6 +40,11 @@ public class BackofficeAgreementService {
 
     private final AzureStorage azureStorage;
 
+    private final Collection<DocumentTypeEnum> mandatoryDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
+                                                                              DocumentTypeEnum.ADHESION_REQUEST,
+                                                                              DocumentTypeEnum.BACKOFFICE_AGREEMENT)
+                                                                          .collect(Collectors.toList());
+
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
@@ -47,8 +54,10 @@ public class BackofficeAgreementService {
 
         // exclude backoffice documents
         agreementEntityPage.getContent().forEach(agreementEntity -> {
-            List<DocumentEntity> documents = agreementEntity.getDocumentList().stream()
-                    .filter(d -> !d.getDocumentType().isBackoffice()).collect(Collectors.toList());
+            List<DocumentEntity> documents = agreementEntity.getDocumentList()
+                                                            .stream()
+                                                            .filter(d -> !d.getDocumentType().isBackoffice())
+                                                            .collect(Collectors.toList());
             //setting SAS Url
             azureStorage.setSecureDocumentUrl(documents);
             agreementEntity.setDocumentList(documents);
@@ -78,8 +87,12 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
-        if (CollectionUtils.isEmpty(documents) || documents.size() != DocumentTypeEnum.values().length) {
-            throw new InvalidRequestException("Not all documents are loaded");
+        if (CollectionUtils.isEmpty(documents) ||
+            !documents.stream()
+                      .map(DocumentEntity::getDocumentType)
+                      .collect(Collectors.toList())
+                      .containsAll(mandatoryDocuments)) {
+            throw new InvalidRequestException("Mandatory documents are missing");
         }
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
@@ -90,11 +103,9 @@ public class BackofficeAgreementService {
 
         var profile = agreementEntity.getProfile();
         String referentEmail = profile.getReferent().getEmailAddress();
-        emailNotificationFacade.notifyMerchantAgreementRequestApproved(
-                referentEmail,
-                profile.getSalesChannel(),
-                Optional.ofNullable(profile.getDiscountCodeType())
-        );
+        emailNotificationFacade.notifyMerchantAgreementRequestApproved(referentEmail,
+                                                                       profile.getSalesChannel(),
+                                                                       Optional.ofNullable(profile.getDiscountCodeType()));
 
         return agreementEntity;
     }
@@ -118,8 +129,10 @@ public class BackofficeAgreementService {
 
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
-                                      AgreementServiceLight agreementServiceLight, DocumentService documentService,
-                                      EmailNotificationFacade emailNotificationFacade, AzureStorage azureStorage) {
+                                      AgreementServiceLight agreementServiceLight,
+                                      DocumentService documentService,
+                                      EmailNotificationFacade emailNotificationFacade,
+                                      AzureStorage azureStorage) {
         this.agreementRepository = agreementRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
@@ -140,7 +153,9 @@ public class BackofficeAgreementService {
 
     private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
         if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " isn't assigned to current user");
+            throw new InvalidRequestException(AGREEMENT_LABEL +
+                                              agreementEntity.getId() +
+                                              " isn't assigned to current user");
         }
     }
 
@@ -148,18 +163,23 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
             if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-                throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " is already assigned to current user");
+                throw new InvalidRequestException(AGREEMENT_LABEL +
+                                                  agreementEntity.getId() +
+                                                  " is already assigned to current user");
             }
-            log.info(String.format(
-                    "User %s is being assigned the agreement %s currently assigned to user %s",
-                    CGNUtils.getJwtAdminUserName(), agreementEntity.getId(), agreementEntity.getBackofficeAssignee()));
+            log.info(String.format("User %s is being assigned the agreement %s currently assigned to user %s",
+                                   CGNUtils.getJwtAdminUserName(),
+                                   agreementEntity.getId(),
+                                   agreementEntity.getBackofficeAssignee()));
         }
     }
 
     private void checkPendingStatus(AgreementEntity agreementEntity) {
         if (!AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() +
-                    " haven't the state expected. Status found: " + agreementEntity.getState());
+            throw new InvalidRequestException(AGREEMENT_LABEL +
+                                              agreementEntity.getId() +
+                                              " haven't the state expected. Status found: " +
+                                              agreementEntity.getState());
         }
     }
 }

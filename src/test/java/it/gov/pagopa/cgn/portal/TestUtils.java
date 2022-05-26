@@ -97,14 +97,20 @@ public class TestUtils {
 
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
-        return AGREEMENT_REQUESTS_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection="
-                + direction.name();
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH +
+               "?sortColumn=" +
+               columnEnum.getValue() +
+               "&sortDirection=" +
+               direction.name();
     }
 
     public static String getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
-        return AGREEMENT_APPROVED_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection="
-                + direction.name();
+        return AGREEMENT_APPROVED_CONTROLLER_PATH +
+               "?sortColumn=" +
+               columnEnum.getValue() +
+               "&sortDirection=" +
+               direction.name();
     }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
@@ -139,7 +145,8 @@ public class TestUtils {
         return profileEntity;
     }
 
-    public static UpdateProfile updatableOnlineProfileFromProfileEntity(ProfileEntity profileEntity, DiscountCodeType discountCodeType) {
+    public static UpdateProfile updatableOnlineProfileFromProfileEntity(ProfileEntity profileEntity,
+                                                                        DiscountCodeType discountCodeType) {
         OnlineChannel salesChannel = new OnlineChannel();
         salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
         salesChannel.setWebsiteUrl("anurl.com");
@@ -159,7 +166,8 @@ public class TestUtils {
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
     }
 
-    public static UpdateProfile updatableProfileFromProfileEntity(ProfileEntity profileEntity, SalesChannel salesChannel) {
+    public static UpdateProfile updatableProfileFromProfileEntity(ProfileEntity profileEntity,
+                                                                  SalesChannel salesChannel) {
         UpdateReferent referent = new UpdateReferent();
         referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
         referent.setFirstName(profileEntity.getReferent().getFirstName());
@@ -214,7 +222,8 @@ public class TestUtils {
     }
 
     public static ProfileEntity createSampleProfileEntity(AgreementEntity agreementEntity,
-                                                          SalesChannelEnum salesChannel, DiscountCodeTypeEnum discountCodeType) {
+                                                          SalesChannelEnum salesChannel,
+                                                          DiscountCodeTypeEnum discountCodeType) {
         ProfileEntity profileEntity = createSampleProfileWithCommonFields(discountCodeType);
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(salesChannel);
@@ -243,7 +252,8 @@ public class TestUtils {
     }
 
     public static it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest createSamplePublicApiHelpRequest() {
-        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest
+                = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
         helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest.CategoryEnum.ACCESS);
         helpRequest.setTopic("a topic");
         helpRequest.setMessage("I need help");
@@ -256,7 +266,8 @@ public class TestUtils {
     }
 
     public static it.gov.pagopa.cgnonboardingportal.model.HelpRequest createSampleAuthenticatedHelpRequest() {
-        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest
+                = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
         helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.model.HelpRequest.CategoryEnum.ACCESS);
         helpRequest.setTopic("a topic");
         helpRequest.setMessage("I need help");
@@ -273,7 +284,8 @@ public class TestUtils {
         return discountEntity;
     }
 
-    public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement, String url,
+    public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement,
+                                                                           String url,
                                                                            String referrer) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
@@ -367,7 +379,6 @@ public class TestUtils {
     public static List<DocumentEntity> createSampleBackofficeDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_AGREEMENT));
-        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST));
         return documentList;
     }
 
@@ -564,12 +575,13 @@ public class TestUtils {
     }
 
     public static void setOperatorAuth() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID, TestUtils.FAKE_ID)));
+        SecurityContextHolder.getContext()
+                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                                                                                               TestUtils.FAKE_ID)));
     }
 
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
-                .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+                             .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
     }
 }
