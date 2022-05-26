@@ -158,6 +158,10 @@ public class DiscountService {
         validatePublishingDiscount(agreementEntity, discount);
         discount.setState(DiscountStateEnum.TO_TEST);
         discount = discountRepository.save(discount);
+
+        emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),
+                                                                discount.getName());
+
         return discount;
     }
 
