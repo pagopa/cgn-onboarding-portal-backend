@@ -45,7 +45,7 @@ public class EmailNotificationFacade {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("operator_name", merchantFullName);
-        context.setVariable("discount_name", discountName);
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         final String errorMessage = "Failed to send test request notification from " +
                                     merchantFullName +
                                     " to department";
