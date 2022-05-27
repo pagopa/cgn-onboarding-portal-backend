@@ -156,7 +156,7 @@ public class DiscountService {
         DiscountEntity discount = findById(discountId);
         // do the same validation of publishing
         validatePublishingDiscount(agreementEntity, discount);
-        discount.setState(DiscountStateEnum.TO_TEST);
+        discount.setState(DiscountStateEnum.TEST_PENDING);
         discount = discountRepository.save(discount);
 
         emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),

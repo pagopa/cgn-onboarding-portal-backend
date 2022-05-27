@@ -1311,7 +1311,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         // test discount
         dbDiscount = discountService.testDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findById(agreementEntity.getId());
-        Assertions.assertEquals(DiscountStateEnum.TO_TEST, dbDiscount.getState());
+        Assertions.assertEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
     }
 
     @Test

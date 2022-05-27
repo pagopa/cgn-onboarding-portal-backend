@@ -157,7 +157,7 @@ public class EmailNotificationFacade {
         }
     }
 
-    public static String createTrackingKeyForExiprationNotification(DiscountEntity discount,
+    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
                                                                     BucketCodeExpiringThresholdEnum threshold) {
         return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
     }
@@ -171,7 +171,7 @@ public class EmailNotificationFacade {
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExiprationNotification(discount, threshold);
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
@@ -183,7 +183,7 @@ public class EmailNotificationFacade {
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExiprationNotification(discount,
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);

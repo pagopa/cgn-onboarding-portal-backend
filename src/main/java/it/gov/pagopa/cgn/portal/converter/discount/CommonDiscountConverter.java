@@ -32,9 +32,9 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
         enumMap.put(DiscountStateEnum.DRAFT, DiscountState.DRAFT);
         enumMap.put(DiscountStateEnum.PUBLISHED, DiscountState.PUBLISHED);
         enumMap.put(DiscountStateEnum.SUSPENDED, DiscountState.SUSPENDED);
-        enumMap.put(DiscountStateEnum.TO_TEST, DiscountState.TO_TEST);
-        enumMap.put(DiscountStateEnum.TEST_OK, DiscountState.TEST_OK);
-        enumMap.put(DiscountStateEnum.TEST_KO, DiscountState.TEST_KO);
+        enumMap.put(DiscountStateEnum.TEST_PENDING, DiscountState.TEST_PENDING);
+        enumMap.put(DiscountStateEnum.TEST_PASSED, DiscountState.TEST_PASSED);
+        enumMap.put(DiscountStateEnum.TEST_FAILED, DiscountState.TEST_FAILED);
 
         productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
         productCategoryEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT,

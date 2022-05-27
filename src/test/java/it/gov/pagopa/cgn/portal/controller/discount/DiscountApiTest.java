@@ -611,7 +611,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.TO_TEST.getValue()));
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.TEST_PENDING.getValue()));
     }
 
     @Test

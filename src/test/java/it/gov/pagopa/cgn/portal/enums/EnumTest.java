@@ -155,8 +155,12 @@ public class EnumTest {
                                  .map(DiscountStateEnum::getCode)
                                  .toArray(String[]::new);
         Assertions.assertEquals(6, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"DRAFT", "PUBLISHED", "SUSPENDED", "TEST_KO", "TEST_OK", "TO_TEST"},
-                                     sortedValues);
+        Assertions.assertArrayEquals(new String[]{"DRAFT",
+                                                  "PUBLISHED",
+                                                  "SUSPENDED",
+                                                  "TEST_FAILED",
+                                                  "TEST_PASSED",
+                                                  "TEST_PENDING"}, sortedValues);
     }
 
     @Test

@@ -10,9 +10,9 @@ public enum DiscountStateEnum {
     DRAFT("DRAFT"),
     PUBLISHED("PUBLISHED"),
     SUSPENDED("SUSPENDED"),
-    TO_TEST("TO_TEST"),
-    TEST_OK("TEST_OK"),
-    TEST_KO("TEST_KO");
+    TEST_PENDING("TEST_PENDING"),
+    TEST_PASSED("TEST_PASSED"),
+    TEST_FAILED("TEST_FAILED");
 
     private final String code;
 

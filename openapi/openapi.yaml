@@ -1145,9 +1145,9 @@ definitions:
       - published
       - suspended
       - expired
-      - to_test
-      - test_ok
-      - test_ko
+      - test_pending
+      - test_passed
+      - test_failed
 
   ProductCategory:
     type: string
