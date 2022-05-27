@@ -151,6 +151,21 @@ public class DiscountService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    public DiscountEntity testDiscount(String agreementId, Long discountId) {
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        DiscountEntity discount = findById(discountId);
+        // do the same validation of publishing
+        validatePublishingDiscount(agreementEntity, discount);
+        discount.setState(DiscountStateEnum.TEST_PENDING);
+        discount = discountRepository.save(discount);
+
+        emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),
+                                                                discount.getName());
+
+        return discount;
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity publishDiscount(String agreementId, Long discountId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
@@ -471,4 +486,6 @@ public class DiscountService {
                         configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() +
                         " giorni");
     }
+
+
 }

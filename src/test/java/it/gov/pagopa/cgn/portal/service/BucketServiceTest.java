@@ -69,7 +69,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
@@ -82,7 +83,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         discountEntity.setId(1L);
 
         bucketService.createPendingBucketLoad(discountEntity);
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.PENDING, bucketCodeLoadEntity.getStatus());
@@ -99,7 +101,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
@@ -107,7 +111,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).orElseThrow();
 
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
@@ -131,7 +136,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.performBucketLoad(discountEntity.getId());
         Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoad().getUid() + ".csv"));
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FAILED, bucketCodeLoadEntity.getStatus());
@@ -145,7 +151,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
@@ -153,7 +161,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
@@ -161,7 +170,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes());
         Assertions.assertNotNull(bucketCodeLoadEntity.getFileName());
 
-        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity
+                = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         Assertions.assertEquals(2, discountBucketCodeSummaryEntity.getAvailableCodes());
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
@@ -173,7 +183,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
@@ -181,9 +193,14 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get().getStatus() == BucketCodeLoadStatusEnum.FINISHED);
+        Awaitility.await()
+                  .atMost(5, TimeUnit.SECONDS)
+                  .until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId())
+                                                       .get()
+                                                       .getStatus() == BucketCodeLoadStatusEnum.FINISHED);
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
@@ -222,7 +239,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoadUid()));
         discountEntity = bucketService.createPendingBucketLoad(discountEntity);
@@ -230,7 +249,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketService.setRunningBucketLoad(discountEntity.getId());
         bucketService.performBucketLoad(discountEntity.getId());
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
@@ -253,7 +273,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         Assertions.assertTrue(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoadUid() + ".csv"));
         bucketService.createPendingBucketLoad(discountEntity);
@@ -261,9 +283,14 @@ class BucketServiceTest extends IntegrationAbstractTest {
         bucketLoadUtils.storeCodesBucket(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get().getStatus() == BucketCodeLoadStatusEnum.FINISHED);
+        Awaitility.await()
+                  .atMost(5, TimeUnit.SECONDS)
+                  .until(() -> bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId())
+                                                       .get()
+                                                       .getStatus() == BucketCodeLoadStatusEnum.FINISHED);
 
-        BucketCodeLoadEntity bucketCodeLoadEntity = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
+        BucketCodeLoadEntity bucketCodeLoadEntity
+                = bucketCodeLoadRepository.findById(discountEntity.getLastBucketCodeLoad().getId()).get();
         Assertions.assertNotNull(bucketCodeLoadEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), bucketCodeLoadEntity.getDiscountId());
         Assertions.assertEquals(BucketCodeLoadStatusEnum.FINISHED, bucketCodeLoadEntity.getStatus());
@@ -276,11 +303,14 @@ class BucketServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_BucketNotLoaded_NoNotifications() throws IOException {
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_BucketNotLoaded_NoNotifications() throws
+            IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
@@ -291,7 +321,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getAvailableCodes());
 
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
+                discountBucketCodeSummaryEntity);
         // no notification should be sent because bucket has not been loaded yet
         Assertions.assertFalse(notificationRequired);
     }
@@ -301,7 +332,9 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(), discountEntity.getLastBucketCodeLoadUid(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
@@ -311,28 +344,32 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
+                discountBucketCodeSummaryEntity);
 
         // no notification should be sent because all codes are available
         Assertions.assertFalse(notificationRequired);
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent50notificationRequired() throws IOException {
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent50notificationRequired() throws
+            IOException {
         var discountEntity = setupDiscount();
         var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_50);
         Assertions.assertTrue(notificationRequired);
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent25notificationRequired() throws IOException {
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent25notificationRequired() throws
+            IOException {
         var discountEntity = setupDiscount();
         var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_25);
         Assertions.assertTrue(notificationRequired);
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent10notificationRequired() throws IOException {
+    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent10notificationRequired() throws
+            IOException {
         var discountEntity = setupDiscount();
         var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_10);
         Assertions.assertTrue(notificationRequired);
@@ -353,11 +390,17 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
         Assertions.assertTrue(notificationRequired);
-        var firstNotification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0));
+        var firstNotification
+                = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                discountEntity,
+                BucketCodeExpiringThresholdEnum.PERCENT_0));
 
         notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
         Assertions.assertTrue(notificationRequired);
-        var secondNotification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0));
+        var secondNotification
+                = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                discountEntity,
+                BucketCodeExpiringThresholdEnum.PERCENT_0));
 
         Assertions.assertNotNull(firstNotification);
         Assertions.assertNotNull(secondNotification);
@@ -394,11 +437,15 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
         burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(discountBucketCodeSummaryEntity);
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
+                discountBucketCodeSummaryEntity);
 
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
 
-        var notification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExiprationNotification(discountEntity, threshold));
+        var notification
+                = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                discountEntity,
+                threshold));
         Assertions.assertNotNull(notification);
 
         return notificationRequired;

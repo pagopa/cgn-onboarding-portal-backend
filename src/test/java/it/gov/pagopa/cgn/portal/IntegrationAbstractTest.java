@@ -1,10 +1,7 @@
 package it.gov.pagopa.cgn.portal;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.facade.BackofficeExportFacade;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -340,6 +337,24 @@ public class IntegrationAbstractTest {
             c.setIsUsed(true);
             discountBucketCodeRepository.save(c);
         });
+    }
+
+    protected void saveDocumentsForApproval(AgreementEntity agreementEntity) {
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+    }
+
+    protected AgreementEntity approveAgreement(AgreementEntity agreementEntity) {
+        return approveAgreement(agreementEntity, false);
+    }
+
+    protected AgreementEntity approveAgreement(AgreementEntity agreementEntity, boolean persist) {
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        if (persist) {
+            agreementRepository.save(agreementEntity);
+        }
+        return agreementEntity;
     }
 
     private AgreementTestObject createAgreementTestObject(AgreementEntity agreementEntity,

@@ -14,9 +14,9 @@ public class EnumTest {
     @Test
     public void BucketCodeExpiringThresholdEnum_Ok() {
         var sortedValues = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
-                .sorted(Comparator.comparingInt(BucketCodeExpiringThresholdEnum::getValue))
-                .map(BucketCodeExpiringThresholdEnum::getValue)
-                .toArray(Integer[]::new);
+                                 .sorted(Comparator.comparingInt(BucketCodeExpiringThresholdEnum::getValue))
+                                 .map(BucketCodeExpiringThresholdEnum::getValue)
+                                 .toArray(Integer[]::new);
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new Integer[]{0, 10, 25, 50}, sortedValues);
     }
@@ -31,9 +31,9 @@ public class EnumTest {
     @Test
     public void AgreementStateEnum_Ok() {
         var sortedValues = Arrays.stream(AgreementStateEnum.values())
-                .sorted(Comparator.comparing(AgreementStateEnum::getCode))
-                .map(AgreementStateEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(AgreementStateEnum::getCode))
+                                 .map(AgreementStateEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"APPROVED", "DRAFT", "PENDING", "REJECTED"}, sortedValues);
     }
@@ -48,9 +48,9 @@ public class EnumTest {
     @Test
     public void ApiTokenTypeEnum_Ok() {
         var sortedValues = Arrays.stream(ApiTokenTypeEnum.values())
-                .sorted(Comparator.comparing(ApiTokenTypeEnum::getCode))
-                .map(ApiTokenTypeEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(ApiTokenTypeEnum::getCode))
+                                 .map(ApiTokenTypeEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(2, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"primary", "secondary"}, sortedValues);
     }
@@ -65,9 +65,9 @@ public class EnumTest {
     @Test
     public void AssigneeEnum_Ok() {
         var sortedValues = Arrays.stream(AssigneeEnum.values())
-                .sorted(Comparator.comparing(AssigneeEnum::getCode))
-                .map(AssigneeEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(AssigneeEnum::getCode))
+                                 .map(AssigneeEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(2, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"Me", "Others"}, sortedValues);
     }
@@ -82,11 +82,12 @@ public class EnumTest {
     @Test
     public void BackofficeApprovedSortColumnEnum_Ok() {
         var sortedValues = Arrays.stream(BackofficeApprovedSortColumnEnum.values())
-                .sorted(Comparator.comparing(BackofficeApprovedSortColumnEnum::getValue))
-                .map(BackofficeApprovedSortColumnEnum::getValue)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(BackofficeApprovedSortColumnEnum::getValue))
+                                 .map(BackofficeApprovedSortColumnEnum::getValue)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"AgreementDate", "LastModifyDate", "Operator", "PublishedDiscounts"}, sortedValues);
+        Assertions.assertArrayEquals(new String[]{"AgreementDate", "LastModifyDate", "Operator", "PublishedDiscounts"},
+                                     sortedValues);
     }
 
     @Test
@@ -99,9 +100,9 @@ public class EnumTest {
     @Test
     public void BackofficeRequestSortColumnEnum_Ok() {
         var sortedValues = Arrays.stream(BackofficeRequestSortColumnEnum.values())
-                .sorted(Comparator.comparing(BackofficeRequestSortColumnEnum::getValue))
-                .map(BackofficeRequestSortColumnEnum::getValue)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(BackofficeRequestSortColumnEnum::getValue))
+                                 .map(BackofficeRequestSortColumnEnum::getValue)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"Assignee", "Operator", "RequestDate", "State"}, sortedValues);
     }
@@ -116,9 +117,9 @@ public class EnumTest {
     @Test
     public void BucketCodeLoadStatusEnum_Ok() {
         var sortedValues = Arrays.stream(BucketCodeLoadStatusEnum.values())
-                .sorted(Comparator.comparing(BucketCodeLoadStatusEnum::getCode))
-                .map(BucketCodeLoadStatusEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(BucketCodeLoadStatusEnum::getCode))
+                                 .map(BucketCodeLoadStatusEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"FAILED", "FINISHED", "PENDING", "RUNNING"}, sortedValues);
     }
@@ -133,9 +134,9 @@ public class EnumTest {
     @Test
     public void DiscountCodeTypeEnum_Ok() {
         var sortedValues = Arrays.stream(DiscountCodeTypeEnum.values())
-                .sorted(Comparator.comparing(DiscountCodeTypeEnum::getCode))
-                .map(DiscountCodeTypeEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(DiscountCodeTypeEnum::getCode))
+                                 .map(DiscountCodeTypeEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"API", "BUCKET", "LANDINGPAGE", "STATIC"}, sortedValues);
     }
@@ -150,11 +151,16 @@ public class EnumTest {
     @Test
     public void DiscountStateEnum_Ok() {
         var sortedValues = Arrays.stream(DiscountStateEnum.values())
-                .sorted(Comparator.comparing(DiscountStateEnum::getCode))
-                .map(DiscountStateEnum::getCode)
-                .toArray(String[]::new);
-        Assertions.assertEquals(3, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"DRAFT", "PUBLISHED", "SUSPENDED"}, sortedValues);
+                                 .sorted(Comparator.comparing(DiscountStateEnum::getCode))
+                                 .map(DiscountStateEnum::getCode)
+                                 .toArray(String[]::new);
+        Assertions.assertEquals(6, sortedValues.length);
+        Assertions.assertArrayEquals(new String[]{"DRAFT",
+                                                  "PUBLISHED",
+                                                  "SUSPENDED",
+                                                  "TEST_FAILED",
+                                                  "TEST_PASSED",
+                                                  "TEST_PENDING"}, sortedValues);
     }
 
     @Test
@@ -167,11 +173,14 @@ public class EnumTest {
     @Test
     public void DocumentTypeEnum_Ok() {
         var sortedValues = Arrays.stream(DocumentTypeEnum.values())
-                .sorted(Comparator.comparing(DocumentTypeEnum::getCode))
-                .map(DocumentTypeEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(DocumentTypeEnum::getCode))
+                                 .map(DocumentTypeEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(4, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"ADHESION_REQUEST", "AGREEMENT", "BACKOFFICE_ADHESION_REQUEST", "BACKOFFICE_AGREEMENT"}, sortedValues);
+        Assertions.assertArrayEquals(new String[]{"ADHESION_REQUEST",
+                                                  "AGREEMENT",
+                                                  "BACKOFFICE_ADHESION_REQUEST",
+                                                  "BACKOFFICE_AGREEMENT"}, sortedValues);
     }
 
     @Test
@@ -184,22 +193,20 @@ public class EnumTest {
     @Test
     public void ProductCategoryEnum_Ok() {
         var sortedValues = Arrays.stream(ProductCategoryEnum.values())
-                .sorted(Comparator.comparing(ProductCategoryEnum::getDescription))
-                .map(ProductCategoryEnum::getDescription)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(ProductCategoryEnum::getDescription))
+                                 .map(ProductCategoryEnum::getDescription)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(10, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{
-                "Casa",
-                "Cultura e tempo libero",
-                "Istruzione e formazione",
-                "Lavoro e tirocini",
-                "Mobilità sostenibile",
-                "Salute e benessere",
-                "Servizi bancari",
-                "Sport",
-                "Telefonia e internet",
-                "Viaggi e trasporti"
-        }, sortedValues);
+        Assertions.assertArrayEquals(new String[]{"Casa",
+                                                  "Cultura e tempo libero",
+                                                  "Istruzione e formazione",
+                                                  "Lavoro e tirocini",
+                                                  "Mobilità sostenibile",
+                                                  "Salute e benessere",
+                                                  "Servizi bancari",
+                                                  "Sport",
+                                                  "Telefonia e internet",
+                                                  "Viaggi e trasporti"}, sortedValues);
     }
 
     @Test
@@ -212,9 +219,9 @@ public class EnumTest {
     @Test
     public void SalesChannelEnum_Ok() {
         var sortedValues = Arrays.stream(SalesChannelEnum.values())
-                .sorted(Comparator.comparing(SalesChannelEnum::getCode))
-                .map(SalesChannelEnum::getCode)
-                .toArray(String[]::new);
+                                 .sorted(Comparator.comparing(SalesChannelEnum::getCode))
+                                 .map(SalesChannelEnum::getCode)
+                                 .toArray(String[]::new);
         Assertions.assertEquals(3, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"BOTH", "OFFLINE", "ONLINE"}, sortedValues);
     }

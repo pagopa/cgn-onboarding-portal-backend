@@ -271,7 +271,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.*", hasSize(2)))
+                    .andExpect(jsonPath("$.*", hasSize(1)))
                     .andExpect(jsonPath("$.[0].documentUrl").isNotEmpty())
                     .andExpect(jsonPath("$.[0].creationDate").value(LocalDate.now().toString()));
     }

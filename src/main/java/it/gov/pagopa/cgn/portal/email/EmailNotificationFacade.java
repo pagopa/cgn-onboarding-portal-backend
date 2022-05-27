@@ -33,15 +33,29 @@ public class EmailNotificationFacade {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("merchant_fullname", merchantFullName);
-        final String errorMessage = "Failed to send New Agreement Request notification from " + merchantFullName +
-                " to department";
+        final String errorMessage = "Failed to send New Agreement Request notification from " +
+                                    merchantFullName +
+                                    " to department";
         String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
-        var emailParams = createEmailParams(
-                configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyMerchantAgreementRequestApproved(String referentEmail, SalesChannelEnum salesChannel,
+    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName) {
+        var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
+        var context = new Context();
+        context.setVariable("operator_name", merchantFullName);
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        final String errorMessage = "Failed to send test request notification from " +
+                                    merchantFullName +
+                                    " to department";
+        String body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_REQUEST, context);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyMerchantAgreementRequestApproved(String referentEmail,
+                                                       SalesChannelEnum salesChannel,
                                                        Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
         var subject = "[Carta Giovani Nazionale] Richiesta di convenzione approvata";
         final String errorMessage = "Failed to send Agreement Request Approved notification to: " + referentEmail;
@@ -55,15 +69,16 @@ public class EmailNotificationFacade {
         }
     }
 
-    private TemplateEmail getApprovedAgreementTemplateBySalesChannel(SalesChannelEnum salesChannel, Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
+    private TemplateEmail getApprovedAgreementTemplateBySalesChannel(SalesChannelEnum salesChannel,
+                                                                     Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
         switch (salesChannel) {
             case BOTH:
                 return TemplateEmail.APPROVED_AGREEMENT_BOTH;
             case OFFLINE:
                 return TemplateEmail.APPROVED_AGREEMENT_OFFLINE;
             case ONLINE:
-                return getApprovedAgreementTemplateByDiscountCodeType(discountCodeTypeOpt
-                        .orElseThrow(() -> new InvalidValueException("An online merchant must have a Discount Code validation type set")));
+                return getApprovedAgreementTemplateByDiscountCodeType(discountCodeTypeOpt.orElseThrow(() -> new InvalidValueException(
+                        "An online merchant must have a Discount Code validation type set")));
             default:
                 throw new InvalidValueException(salesChannel + " is not a valid Sales Channel");
         }
@@ -91,12 +106,14 @@ public class EmailNotificationFacade {
     }
 
     public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) throws MessagingException {
-        var subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
+        var subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " +
+                      helpRequestParams.getMerchantLegalName();
         var context = new Context();
 
-        var categoryAndTopic = helpRequestParams.getTopic().filter(s -> !s.isBlank())
-                .map(topic -> helpRequestParams.getHelpCategory() + ", " + topic)
-                .orElseGet(helpRequestParams::getHelpCategory);
+        var categoryAndTopic = helpRequestParams.getTopic()
+                                                .filter(s -> !s.isBlank())
+                                                .map(topic -> helpRequestParams.getHelpCategory() + ", " + topic)
+                                                .orElseGet(helpRequestParams::getHelpCategory);
 
         context.setVariable("help_category_and_topic", categoryAndTopic);
         context.setVariable("help_message", helpRequestParams.getMessage());
@@ -106,7 +123,10 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
         var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(),
-                Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body, null);
+                                            Optional.of(helpRequestParams.getReplyToEmailAddress()),
+                                            subject,
+                                            body,
+                                            null);
         emailNotificationService.sendSyncMessage(emailParams);
     }
 
@@ -137,17 +157,21 @@ public class EmailNotificationFacade {
         }
     }
 
-    public static String createTrackingKeyForExiprationNotification(DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold) {
+    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
+                                                                    BucketCodeExpiringThresholdEnum threshold) {
         return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
     }
 
-    public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail, DiscountEntity discount, BucketCodeExpiringThresholdEnum threshold, Long remainingCodes) {
+    public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail,
+                                                          DiscountEntity discount,
+                                                          BucketCodeExpiringThresholdEnum threshold,
+                                                          Long remainingCodes) {
         var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExiprationNotification(discount, threshold);
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
@@ -159,7 +183,8 @@ public class EmailNotificationFacade {
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExiprationNotification(discount, BucketCodeExpiringThresholdEnum.PERCENT_0);
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
@@ -167,7 +192,8 @@ public class EmailNotificationFacade {
     }
 
     @Autowired
-    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine, EmailNotificationService emailNotificationService,
+    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
+                                   EmailNotificationService emailNotificationService,
                                    ConfigProperties configProperties) {
         this.htmlTemplateEngine = htmlTemplateEngine;
         this.emailNotificationService = emailNotificationService;
@@ -178,17 +204,21 @@ public class EmailNotificationFacade {
         return createEmailParams(mailTo, Optional.empty(), subject, body, failureMessage);
     }
 
-    private EmailParams createEmailParams(String mailTo, Optional<String> replyToOpt, String subject, String body, String failureMessage) {
+    private EmailParams createEmailParams(String mailTo,
+                                          Optional<String> replyToOpt,
+                                          String subject,
+                                          String body,
+                                          String failureMessage) {
         return EmailParams.builder()
-                .mailFrom(configProperties.getCgnNotificationSender())
-                .logoName("cgn-logo.png")
-                .logo(configProperties.getCgnLogo())
-                .mailToList(Collections.singletonList(mailTo))
-                .replyToOpt(replyToOpt)
-                .subject(subject)
-                .body(body)
-                .failureMessage(failureMessage)
-                .build();
+                          .mailFrom(configProperties.getCgnNotificationSender())
+                          .logoName("cgn-logo.png")
+                          .logo(configProperties.getCgnLogo())
+                          .mailToList(Collections.singletonList(mailTo))
+                          .replyToOpt(replyToOpt)
+                          .subject(subject)
+                          .body(body)
+                          .failureMessage(failureMessage)
+                          .build();
     }
 
     private String getTemplateHtml(TemplateEmail template) {
