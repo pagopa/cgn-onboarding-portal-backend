@@ -530,6 +530,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].id").isNotEmpty())
+                    .andExpect(jsonPath("$.items[0].testFailureReason").isEmpty())
                     .andExpect(jsonPath("$.items[0].productCategories", hasSize(2)));
     }
 

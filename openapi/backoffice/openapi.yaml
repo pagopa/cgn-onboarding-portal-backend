@@ -883,6 +883,9 @@ definitions:
       discountUrl:
         type: string
         maxLength: 500
+      testFailureReason:
+        type: string
+        maxLength: 500
 
   DiscountState:
     type: string
