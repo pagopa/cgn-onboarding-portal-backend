@@ -666,6 +666,7 @@ definitions:
         $ref: '#/definitions/ApprovedAgreementDiscounts'
       documents:
         $ref: '#/definitions/Documents'
+
   AgreementState:
     type: string
     enum:
@@ -887,6 +888,15 @@ definitions:
       discountUrl:
         type: string
         maxLength: 500
+      staticCode:
+        type: string
+        maxLength: 100
+      landingPageUrl:
+        type: string
+        maxLength: 500
+      landingPageReferrer:
+        type: string
+        maxLength: 100
       testFailureReason:
         type: string
         maxLength: 500
@@ -898,6 +908,9 @@ definitions:
       - published
       - suspended
       - expired
+      - test_pending
+      - test_passed
+      - test_failed
 
   ProductCategory:
     type: string

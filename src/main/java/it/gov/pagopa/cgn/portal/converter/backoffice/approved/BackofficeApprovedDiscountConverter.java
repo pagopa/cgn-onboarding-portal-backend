@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementDiscount;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ProductCategory;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class BackofficeApprovedDiscountConverter
@@ -58,7 +60,7 @@ public class BackofficeApprovedDiscountConverter
                                                                       discountProductEntity.getProductCategory()))
                                                               .collect(Collectors.toList());
 
-    protected Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
+    public Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
         ApprovedAgreementDiscount dto = new ApprovedAgreementDiscount();
         dto.setId(String.valueOf(entity.getId()));
         dto.setDiscount(entity.getDiscountValue());
@@ -68,13 +70,22 @@ public class BackofficeApprovedDiscountConverter
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
         dto.setDiscountUrl(entity.getDiscountUrl());
-        dto.setTestFailureReason(entity.getTestFailureReason());
 
         OffsetDateTime updateDateTime;
         updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();
         dto.setLastUpateDate(LocalDate.from(updateDateTime));
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
         dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
+
+        if (Stream.of(DiscountState.TEST_PENDING, DiscountState.TEST_PASSED, DiscountState.TEST_FAILED)
+                  .collect(Collectors.toList())
+                  .contains(dto.getState())) {
+            dto.setTestFailureReason(entity.getTestFailureReason());
+            dto.setStaticCode(entity.getStaticCode());
+            dto.setLandingPageUrl(entity.getLandingPageUrl());
+            dto.setLandingPageReferrer(entity.getLandingPageReferrer());
+        }
+
         return dto;
     };
 }
