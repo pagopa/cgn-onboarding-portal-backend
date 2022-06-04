@@ -48,6 +48,9 @@ public class ApprovedAgreementEntity {
     @Column(name = "published_discounts")
     private Long publishedDiscounts;
 
+    @Column(name = "test_pending")
+    private Boolean testPending;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)

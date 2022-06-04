@@ -154,13 +154,23 @@ public class DiscountService {
     public DiscountEntity testDiscount(String agreementId, Long discountId) {
         AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         DiscountEntity discount = findById(discountId);
+
+        // check sales channel
+        if (SalesChannelEnum.OFFLINE.equals(discount.getAgreement().getProfile().getSalesChannel())) {
+            throw new ConflictErrorException("Cannot test discounts for offline merchants.");
+        }
+
         // do the same validation of publishing
         validatePublishingDiscount(agreementEntity, discount);
         discount.setState(DiscountStateEnum.TEST_PENDING);
         discount = discountRepository.save(discount);
 
         emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),
-                                                                discount.getName());
+                                                                discount.getName(),
+                                                                discount.getAgreement()
+                                                                        .getProfile()
+                                                                        .getDiscountCodeType()
+                                                                        .getCode());
 
         return discount;
     }

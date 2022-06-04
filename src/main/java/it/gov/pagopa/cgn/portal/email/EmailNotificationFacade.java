@@ -41,11 +41,12 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName) {
+    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName, String discountType) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("operator_name", merchantFullName);
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        context.setVariable("discount_type", discountType);
         final String errorMessage = "Failed to send test request notification from " +
                                     merchantFullName +
                                     " to department";

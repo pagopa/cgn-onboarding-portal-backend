@@ -632,6 +632,7 @@ definitions:
       - agreementStartDate
       - agreementLastUpdateDate
       - publishedDiscounts
+      - testPending
     properties:
       agreementId:
         type: string
@@ -646,6 +647,9 @@ definitions:
       publishedDiscounts:
         type: integer
         format: int64
+      testPending:
+        type: boolean
+        default: false
 
   ApprovedAgreementDetail:
     type: object
