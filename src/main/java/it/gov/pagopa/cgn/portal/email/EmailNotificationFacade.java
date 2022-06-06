@@ -143,6 +143,29 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
+    public void notifyMerchantDiscountTestPassed(String referentEmail, String discountName) {
+        var subject = "[Carta Giovani Nazionale] Il test è stato superato";
+        var context = new Context();
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        final String errorMessage = "Failed to send Discount Test Passed notification to: " + referentEmail;
+
+        var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyMerchantDiscountTestFailed(String referentEmail, String discountName, String reasonMessage) {
+        var subject = "[Carta Giovani Nazionale] Il test non è stato superato";
+        var context = new Context();
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        context.setVariable("suspension_message", reasonMessage);
+        final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
+
+        var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
     public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();

@@ -88,6 +88,22 @@ public class TestUtils {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
 
+    public static String getAgreementRequestsDiscountPath(String agreementId, String discountId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/discounts/" + discountId;
+    }
+
+    public static String getAgreementRequestsDiscountBucketCodePath(String agreementId, String discountId) {
+        return getAgreementRequestsDiscountPath(agreementId, discountId) + "/bucket-code";
+    }
+
+    public static String getAgreementRequestsDiscountTestPassedPath(String agreementId, String discountId) {
+        return getAgreementRequestsDiscountPath(agreementId, discountId) + "/test-passed";
+    }
+
+    public static String getAgreementRequestsDiscountTestFailedPath(String agreementId, String discountId) {
+        return getAgreementRequestsDiscountPath(agreementId, discountId) + "/test-failed";
+    }
+
     public static String getAgreementRequestsWithStatusFilterPath(String state, Optional<String> assigneeOpt) {
         StringBuilder path = new StringBuilder(AGREEMENT_REQUESTS_CONTROLLER_PATH);
         path.append("?states=").append(state);

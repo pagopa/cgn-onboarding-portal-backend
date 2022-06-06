@@ -92,15 +92,17 @@ public class BackofficeAgreementFacade {
         DocumentTypeEnum documentTypeEnum = documentConverter.getBackofficeDocumentTypeEnum(documentType);
         long deleteDocument = documentService.deleteDocument(agreementId, documentTypeEnum);
         if (deleteDocument != 1) {
-            throw new InvalidRequestException(
-                    String.format("Document with agreement %s and document type %s not found", agreementId, documentType));
+            throw new InvalidRequestException(String.format("Document with agreement %s and document type %s not found",
+                                                            agreementId,
+                                                            documentType));
         }
         return ResponseEntity.noContent().build();
     }
 
     public ResponseEntity<List<Document>> getDocuments(String agreementId) {
         List<DocumentEntity> backofficeDocuments = documentService.getAllDocuments(agreementId,
-                documentEntity -> documentEntity.getDocumentType().isBackoffice());
+                                                                                   documentEntity -> documentEntity.getDocumentType()
+                                                                                                                   .isBackoffice());
         return ResponseEntity.ok(new ArrayList<>(documentConverter.toDtoCollection(backofficeDocuments)));
     }
 
@@ -109,8 +111,9 @@ public class BackofficeAgreementFacade {
         DocumentEntity documentEntity;
         try {
             documentEntity = documentService.storeDocument(agreementId,
-                    documentConverter.getBackofficeDocumentTypeEnum(documentType), document.getInputStream(),
-                    document.getSize());
+                                                           documentConverter.getBackofficeDocumentTypeEnum(documentType),
+                                                           document.getInputStream(),
+                                                           document.getSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -123,13 +126,34 @@ public class BackofficeAgreementFacade {
         return ResponseEntity.noContent().build();
     }
 
+    public ResponseEntity<BucketCode> getDiscountBucketCode(String agreementId, String discountId) {
+        String code = discountService.getDiscountBucketCode(agreementId, Long.valueOf(discountId));
+        BucketCode bucketCode = new BucketCode();
+        bucketCode.setCode(code);
+        return ResponseEntity.ok(bucketCode);
+    }
+
+    public ResponseEntity<Void> setDiscountTestPassed(String agreementId, String discountId) {
+        discountService.setDiscountTestPassed(agreementId, Long.valueOf(discountId));
+        return ResponseEntity.noContent().build();
+    }
+
+    public ResponseEntity<Void> setDiscountTestFailed(String agreementId, String discountId, String reasonMessage) {
+        discountService.setDiscountTestFailed(agreementId, Long.valueOf(discountId), reasonMessage);
+        return ResponseEntity.noContent().build();
+    }
+
     @Autowired
-    public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService, BackofficeAgreementConverter agreementConverter,
-                                     BackofficeDocumentConverter documentConverter, DocumentService documentService,
-                                     AgreementService agreementService, DiscountService discountService,
+    public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService,
+                                     BackofficeAgreementConverter agreementConverter,
+                                     BackofficeDocumentConverter documentConverter,
+                                     DocumentService documentService,
+                                     AgreementService agreementService,
+                                     DiscountService discountService,
                                      BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
                                      BackofficeApprovedAgreementConverter approvedAgreementConverter,
-                                     AzureStorage azureStorage, ApprovedAgreementService approvedAgreementService) {
+                                     AzureStorage azureStorage,
+                                     ApprovedAgreementService approvedAgreementService) {
         this.backofficeAgreementService = backofficeAgreementService;
         this.agreementService = agreementService;
         this.discountService = discountService;

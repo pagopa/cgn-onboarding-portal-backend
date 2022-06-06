@@ -16,6 +16,8 @@ public enum TemplateEmail {
     SUSPENDED_DISCOUNT("email/discount-suspended.html"),
     EXPIRED_DISCOUNT("email/discount-expiring.html"),
     DISCOUNT_TEST_REQUEST("email/discount-test-request.html"),
+    DISCOUNT_TEST_PASSED("email/discount-test-passed.html"),
+    DISCOUNT_TEST_FAILED("email/discount-test-failed.html"),
     EXPIRING_BUCKET_CODES("email/bucket-codes-expiring.html"),
     EXPIRED_BUCKET_CODES("email/bucket-codes-expired.html"),
     HELP_REQUEST("email/help-request.html");

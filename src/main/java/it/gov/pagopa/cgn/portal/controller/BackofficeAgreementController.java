@@ -4,10 +4,7 @@ import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.AgreementRequestsApi;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreements;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.RefuseAgreement;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +21,25 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     private final BackofficeAgreementFacade agreementFacade;
 
     @Override
-    public ResponseEntity<Agreements> getAgreements(
-            String states, String assignee, String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,
-            Integer pageSize, Integer page, String sortColumn, String sortDirection) {
+    public ResponseEntity<Agreements> getAgreements(String states,
+                                                    String assignee,
+                                                    String profileFullName,
+                                                    LocalDate requestDateFrom,
+                                                    LocalDate requestDateTo,
+                                                    Integer pageSize,
+                                                    Integer page,
+                                                    String sortColumn,
+                                                    String sortDirection) {
 
-        var filter = BackofficeFilter.getRequestFilter(states, profileFullName, assignee, requestDateFrom,
-                requestDateTo, pageSize, page, sortColumn, sortDirection);
+        var filter = BackofficeFilter.getRequestFilter(states,
+                                                       profileFullName,
+                                                       assignee,
+                                                       requestDateFrom,
+                                                       requestDateTo,
+                                                       pageSize,
+                                                       page,
+                                                       sortColumn,
+                                                       sortDirection);
         return agreementFacade.getAgreements(filter);
     }
 
@@ -72,6 +82,23 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
     @Override
     public ResponseEntity<Void> suspendDiscount(String agreementId, String discountId, SuspendDiscount suspension) {
         return agreementFacade.suspendDiscount(agreementId, discountId, suspension);
+    }
+
+    @Override
+    public ResponseEntity<BucketCode> getDiscountBucketCode(String agreementId, String discountId) {
+        return agreementFacade.getDiscountBucketCode(agreementId, discountId);
+    }
+
+    @Override
+    public ResponseEntity<Void> setDiscountTestPassed(String agreementId, String discountId) {
+        return agreementFacade.setDiscountTestPassed(agreementId, discountId);
+    }
+
+    @Override
+    public ResponseEntity<Void> setDiscountTestFailed(String agreementId,
+                                                      String discountId,
+                                                      FailureReason failureReason) {
+        return agreementFacade.setDiscountTestFailed(agreementId, discountId, failureReason.getReasonMessage());
     }
 
     @Autowired

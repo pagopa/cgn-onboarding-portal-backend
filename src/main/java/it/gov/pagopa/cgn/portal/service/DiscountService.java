@@ -40,6 +40,7 @@ public class DiscountService {
     private final DocumentService documentService;
     private final ValidatorFactory factory;
     private final BucketService bucketService;
+    private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final ConfigProperties configProperties;
     private final BucketLoadUtils bucketLoadUtils;
@@ -243,6 +244,60 @@ public class DiscountService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    public String getDiscountBucketCode(String agreementId, Long discountId) {
+        DiscountEntity discount = findById(discountId);
+        checkDiscountRelatedSameAgreement(discount, agreementId);
+        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot get a code for a discount not in test");
+        }
+
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+        if (!DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
+            throw new InvalidRequestException("Cannot get a code for a discount with no bucket codes");
+        }
+
+        DiscountBucketCodeEntity bucketCodeEntity = discountBucketCodeRepository.getOneForDiscount(discountId);
+        discountBucketCodeRepository.burnDiscountBucketCode(bucketCodeEntity.getId());
+
+        return bucketCodeEntity.getCode();
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void setDiscountTestPassed(String agreementId, Long discountId) {
+        DiscountEntity discount = findById(discountId);
+        checkDiscountRelatedSameAgreement(discount, agreementId);
+        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot apply to a discount not in test");
+        }
+        discount.setTestFailureReason(null);
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
+        // send notification
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity.getReferent().getEmailAddress(),
+                                                                 discount.getName());
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void setDiscountTestFailed(String agreementId, Long discountId, String reasonMessage) {
+        DiscountEntity discount = findById(discountId);
+        checkDiscountRelatedSameAgreement(discount, agreementId);
+        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot apply to a discount not in test");
+        }
+        discount.setState(DiscountStateEnum.TEST_FAILED);
+        discount.setTestFailureReason(reasonMessage);
+        discount = discountRepository.save(discount);
+
+        // send notification
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
+        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity.getReferent().getEmailAddress(),
+                                                                 discount.getName(),
+                                                                 reasonMessage);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public void refreshMaterializedViews(ProfileEntity profileEntity) {
         publishedProductCategoryRepository.refreshView();
         switch (profileEntity.getSalesChannel()) {
@@ -276,6 +331,7 @@ public class DiscountService {
                            DocumentService documentService,
                            ValidatorFactory factory,
                            BucketService bucketService,
+                           DiscountBucketCodeRepository discountBucketCodeRepository,
                            DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
                            ConfigProperties configProperties,
                            BucketLoadUtils bucketLoadUtils,
@@ -289,6 +345,7 @@ public class DiscountService {
         this.documentService = documentService;
         this.factory = factory;
         this.bucketService = bucketService;
+        this.discountBucketCodeRepository = discountBucketCodeRepository;
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.configProperties = configProperties;
         this.bucketLoadUtils = bucketLoadUtils;
@@ -496,6 +553,4 @@ public class DiscountService {
                         configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() +
                         " giorni");
     }
-
-
 }
