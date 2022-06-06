@@ -60,7 +60,7 @@ public class BackofficeApprovedDiscountConverter
                                                                       discountProductEntity.getProductCategory()))
                                                               .collect(Collectors.toList());
 
-    public Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
+    protected Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
         ApprovedAgreementDiscount dto = new ApprovedAgreementDiscount();
         dto.setId(String.valueOf(entity.getId()));
         dto.setDiscount(entity.getDiscountValue());
