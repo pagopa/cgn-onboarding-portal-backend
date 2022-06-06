@@ -244,7 +244,7 @@ paths:
           $ref: '#/responses/Conflict'
 
   /agreement-requests/{agreementId}/discounts/{discountId}/bucket-code:
-    post:
+    get:
       tags:
         - discount
       summary: Get a bucket code for discount
