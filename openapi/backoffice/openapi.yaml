@@ -248,7 +248,7 @@ paths:
       tags:
         - discount
       summary: Get a bucket code for discount
-      operationId: getBucketCode
+      operationId: getDiscountBucketCode
       parameters:
         - $ref: '#/parameters/AgreementId'
         - $ref: '#/parameters/DiscountId'
@@ -271,7 +271,7 @@ paths:
       tags:
         - discount
       summary: Mark as test passed
-      operationId: setTestPassed
+      operationId: setDiscountTestPassed
       parameters:
         - $ref: '#/parameters/AgreementId'
         - $ref: '#/parameters/DiscountId'
@@ -292,7 +292,7 @@ paths:
       tags:
         - discount
       summary: Mark as test failed with a reason
-      operationId: setTestFailed
+      operationId: setDiscountTestFailed
       parameters:
         - $ref: '#/parameters/AgreementId'
         - $ref: '#/parameters/DiscountId'
