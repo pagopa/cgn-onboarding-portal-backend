@@ -345,6 +345,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(discountEntity.getStaticCode(), discountDB.getStaticCode());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertNotNull(discountDB.getProducts());
+        Assertions.assertNull(discountDB.getTestFailureReason());
         Assertions.assertEquals(discountEntity.getProducts().size(), discountDB.getProducts().size());
         IntStream.range(0, discountEntity.getProducts().size())
                  .forEach(idx -> Assertions.assertEquals(discountEntity.getProducts().get(idx).getProductCategory(),

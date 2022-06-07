@@ -12,7 +12,8 @@ import java.util.Collection;
 import java.util.function.Function;
 
 @Component
-public class BackofficeApprovedAgreementConverter extends AbstractConverter<ApprovedAgreementEntity, ApprovedAgreement> {
+public class BackofficeApprovedAgreementConverter
+        extends AbstractConverter<ApprovedAgreementEntity, ApprovedAgreement> {
 
     @Override
     protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDtoFunction() {
@@ -24,16 +25,16 @@ public class BackofficeApprovedAgreementConverter extends AbstractConverter<Appr
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDto =
-            entity -> {
-                ApprovedAgreement dto = new ApprovedAgreement();
-                dto.setAgreementId(entity.getId());
-                dto.setAgreementLastUpdateDate(entity.getInformationLastUpdateDate());
-                dto.setFullName(entity.getFullName());
-                dto.setAgreementStartDate(entity.getStartDate());
-                dto.setPublishedDiscounts(entity.getPublishedDiscounts());
-                return dto;
-            };
+    protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDto = entity -> {
+        ApprovedAgreement dto = new ApprovedAgreement();
+        dto.setAgreementId(entity.getId());
+        dto.setAgreementLastUpdateDate(entity.getInformationLastUpdateDate());
+        dto.setFullName(entity.getFullName());
+        dto.setAgreementStartDate(entity.getStartDate());
+        dto.setPublishedDiscounts(entity.getPublishedDiscounts());
+        dto.setTestPending(entity.getTestPending());
+        return dto;
+    };
 
     public ApprovedAgreements getApprovedAgreementsFromPage(Page<ApprovedAgreementEntity> agreementEntityPage) {
         Collection<ApprovedAgreement> dtoCollection = toDtoCollection(agreementEntityPage.getContent());

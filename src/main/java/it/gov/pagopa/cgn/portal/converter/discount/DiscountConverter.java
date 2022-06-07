@@ -30,8 +30,9 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
     }
 
     protected Function<List<DiscountEntity>, Discounts> toDiscountsDto = discountEntities -> {
-        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities) ? Collections.emptyList()
-                : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
+        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities)
+                                      ? Collections.emptyList()
+                                      : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
         Discounts discounts = new Discounts();
         discounts.setItems(discountList);
         return discounts;
@@ -56,10 +57,12 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         dto.setCreationDate(LocalDate.from(entity.getInsertTime()));
         dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
         dto.setDiscountUrl(entity.getDiscountUrl());
+        dto.setTestFailureReason(entity.getTestFailureReason());
         if (entity.getLastBucketCodeLoad() != null) {
             dto.setLastBucketCodeLoadUid(entity.getLastBucketCodeLoad().getUid());
             dto.setLastBucketCodeLoadFileName(entity.getLastBucketCodeLoad().getFileName());
-            dto.setLastBucketCodeLoadStatus(toBucketCodeLoadStatusDtoEnum.apply(entity.getLastBucketCodeLoad().getStatus()));
+            dto.setLastBucketCodeLoadStatus(toBucketCodeLoadStatusDtoEnum.apply(entity.getLastBucketCodeLoad()
+                                                                                      .getStatus()));
         }
         return dto;
     };

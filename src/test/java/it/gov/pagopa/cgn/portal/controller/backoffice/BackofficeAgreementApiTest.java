@@ -1,13 +1,17 @@
 package it.gov.pagopa.cgn.portal.controller.backoffice;
 
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.enums.BackofficeRequestSortColumnEnum;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.enums.*;
+import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
+import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.FailureReason;
+import org.apache.commons.io.IOUtils;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,17 +20,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -37,8 +43,22 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private AzureStorage azureStorage;
+
+    private MockMultipartFile multipartFile;
+
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws IOException {
+        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
+        multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
+
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
+        if (!documentContainerClient.exists()) {
+            documentContainerClient.create();
+        }
+
         setAdminAuth();
     }
 
@@ -287,4 +307,156 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.*", hasSize(0)));
     }
 
+    @Test
+    void GetBucketCode_NotFound_Ko() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        createDiscountAndApproveAgreement(agreementEntity);
+
+        String notExistingDiscountId = "-1";
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      notExistingDiscountId)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void GetBucketCode_Found_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
+
+        // set discount to TEST_PENDING
+        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      discountEntity.getId()
+                                                                                                    .toString())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.*", hasSize(1)))
+                    .andExpect(jsonPath("$.code").isNotEmpty());
+
+        List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
+        Assertions.assertEquals(2, codes.size());
+
+        List<DiscountBucketCodeEntity> usedCodes = codes.stream()
+                                                        .filter(DiscountBucketCodeEntity::getIsUsed)
+                                                        .collect(Collectors.toList());
+        Assertions.assertEquals(1, usedCodes.size());
+
+        List<DiscountBucketCodeEntity> unusedCodes = codes.stream()
+                                                          .filter(c -> !c.getIsUsed())
+                                                          .collect(Collectors.toList());
+        Assertions.assertEquals(1, unusedCodes.size());
+    }
+
+    @Test
+    void SetDiscountTestPassed_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
+
+        // set discount to TEST_PENDING
+        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountTestPassedPath(agreementEntity.getId(),
+                                                                                       discountEntity.getId()
+                                                                                                     .toString())))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // assert discount is in TEST_PASSED
+        discountEntity = discountRepository.findById(discountEntity.getId()).orElseThrow();
+        Assertions.assertEquals(DiscountStateEnum.TEST_PASSED, discountEntity.getState());
+        Assertions.assertNull(discountEntity.getTestFailureReason());
+    }
+
+    @Test
+    void SetDiscountTestPassed_NotTestPending_Ko() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountTestPassedPath(agreementEntity.getId(),
+                                                                                       discountEntity.getId()
+                                                                                                     .toString())))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void SetDiscountTestFailed_Ok() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
+
+        // set discount to TEST_PENDING
+        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
+        discountRepository.save(discountEntity);
+
+        FailureReason failureReason = new FailureReason();
+        failureReason.setReasonMessage("A reason");
+
+        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountTestFailedPath(agreementEntity.getId(),
+                                                                                       discountEntity.getId()
+                                                                                                     .toString())).contentType(
+                    MediaType.APPLICATION_JSON).content(TestUtils.getJson(failureReason)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        // assert discount is in TEST_FAILED with a reason
+        discountEntity = discountRepository.findById(discountEntity.getId()).orElseThrow();
+        Assertions.assertEquals(DiscountStateEnum.TEST_FAILED, discountEntity.getState());
+        Assertions.assertEquals(failureReason.getReasonMessage(), discountEntity.getTestFailureReason());
+    }
+
+    @Test
+    void SetDiscountTestFailed_NotTestPending_Ko() throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
+        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
+
+        FailureReason failureReason = new FailureReason();
+        failureReason.setReasonMessage("A reason");
+
+        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountTestFailedPath(agreementEntity.getId(),
+                                                                                       discountEntity.getId()
+                                                                                                     .toString())).contentType(
+                    MediaType.APPLICATION_JSON).content(TestUtils.getJson(failureReason)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
+    }
+
+    private DiscountEntity createDiscountAndApproveAgreement(AgreementEntity agreementEntity) throws IOException {
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.BUCKET);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        azureStorage.uploadCsv(multipartFile.getInputStream(),
+                               discountEntity.getLastBucketCodeLoadUid(),
+                               multipartFile.getSize());
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        // load a couple bucket codes and await
+        bucketService.performBucketLoad(discountEntity.getId());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
+
+        // approve agreement
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementRepository.save(agreementEntity);
+
+        return discountEntity;
+    }
 }

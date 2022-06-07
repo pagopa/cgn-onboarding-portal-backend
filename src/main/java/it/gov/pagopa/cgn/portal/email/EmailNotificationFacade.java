@@ -41,11 +41,12 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName) {
+    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName, String discountType) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("operator_name", merchantFullName);
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        context.setVariable("discount_type", discountType);
         final String errorMessage = "Failed to send test request notification from " +
                                     merchantFullName +
                                     " to department";
@@ -138,6 +139,29 @@ public class EmailNotificationFacade {
         final String errorMessage = "Failed to send Discount Suspended notification to: " + referentEmail;
 
         var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyMerchantDiscountTestPassed(String referentEmail, String discountName) {
+        var subject = "[Carta Giovani Nazionale] Il test è stato superato";
+        var context = new Context();
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        final String errorMessage = "Failed to send Discount Test Passed notification to: " + referentEmail;
+
+        var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
+        var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyMerchantDiscountTestFailed(String referentEmail, String discountName, String reasonMessage) {
+        var subject = "[Carta Giovani Nazionale] Il test non è stato superato";
+        var context = new Context();
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        context.setVariable("suspension_message", reasonMessage);
+        final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
+
+        var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
         var emailParams = createEmailParams(referentEmail, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
