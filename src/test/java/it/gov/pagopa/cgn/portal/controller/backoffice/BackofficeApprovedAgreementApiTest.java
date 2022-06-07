@@ -162,10 +162,11 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("profile.legalRepresentativeFullName").value(profileEntity.getLegalRepresentativeFullName()))
                     .andExpect(jsonPath("profile.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
+                    .andExpect(jsonPath("profile.salesChannel.discountCodeType").isNotEmpty())
                     .andExpect(jsonPath("discounts[0].id").value(discountEntity.getId()))
                     .andExpect(jsonPath("discounts[0].name").value(discountEntity.getName()))
-                    .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()));
-
+                    .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()))
+                    .andExpect(jsonPath("discounts[0].visibleOnEyca").value(discountEntity.getVisibleOnEyca()));
     }
 
     @Test

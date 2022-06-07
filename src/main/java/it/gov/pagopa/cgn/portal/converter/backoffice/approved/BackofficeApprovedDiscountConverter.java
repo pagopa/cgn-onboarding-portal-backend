@@ -70,6 +70,7 @@ public class BackofficeApprovedDiscountConverter
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
         dto.setDiscountUrl(entity.getDiscountUrl());
+        dto.setVisibleOnEyca(entity.getVisibleOnEyca());
 
         OffsetDateTime updateDateTime;
         updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();

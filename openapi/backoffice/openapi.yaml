@@ -925,6 +925,7 @@ definitions:
       - condition
       - lastUpateDate
       - state
+      - visibleOnEyca
     properties:
       id:
         type: string
@@ -971,6 +972,9 @@ definitions:
       testFailureReason:
         type: string
         maxLength: 500
+      visibleOnEyca:
+        type: boolean
+        default: false
 
   DiscountState:
     type: string
@@ -1012,9 +1016,12 @@ definitions:
       - type: object
         required:
           - websiteUrl
+          - discountCodeType
         properties:
           websiteUrl:
             type: string
+          discountCodeType:
+            $ref: '#/definitions/DiscountCodeType'
 
   OfflineChannel:
     allOf:
@@ -1034,6 +1041,7 @@ definitions:
           allNationalAddresses:
             type: boolean
             default: false
+
   BothChannels:
     allOf:
       - $ref: '#/definitions/SalesChannel'
@@ -1053,6 +1061,8 @@ definitions:
           allNationalAddresses:
             type: boolean
             default: false
+          discountCodeType:
+            $ref: '#/definitions/DiscountCodeType'
 
   SalesChannelType:
     type: string
@@ -1060,6 +1070,14 @@ definitions:
       - OnlineChannel
       - OfflineChannel
       - BothChannels
+
+  DiscountCodeType:
+    type: string
+    enum:
+      - Static
+      - API
+      - LandingPage
+      - Bucket
 
   Documents:
     type: array
