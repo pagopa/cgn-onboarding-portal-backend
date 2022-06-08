@@ -161,8 +161,8 @@ public class DiscountService {
             throw new ConflictErrorException("Cannot test discounts for offline merchants.");
         }
 
-        // do the same validation of publishing
-        validatePublishingDiscount(agreementEntity, discount);
+        validateTestingDiscount(agreementEntity, discount);
+
         discount.setState(DiscountStateEnum.TEST_PENDING);
         discount = discountRepository.save(discount);
 
@@ -398,30 +398,59 @@ public class DiscountService {
         // perform common discount validation to keep entities coherent
         commonDiscountValidation(profileEntity, discount, false);
 
+        // perform testing specific validation
+        validateTestingDiscount(profileEntity, agreementEntity, discount);
+
+        // perform publishing specific validation
+        validatePublishingDiscount(profileEntity, discount);
+    }
+
+    private void validatePublishingDiscount(ProfileEntity profileEntity, DiscountEntity discount) {
         //perform publishing specific validation
+        if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
+            !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot proceed with an online discount that's not passed a test");
+        }
+    }
+
+    private void validateTestingDiscount(AgreementEntity agreementEntity, DiscountEntity discount) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
+                                                    .orElseThrow(() -> new InvalidRequestException(
+                                                            "Cannot get discount's profile"));
+
+        // perform common discount validation to keep entities coherent
+        commonDiscountValidation(profileEntity, discount, false);
+
+        // perform testing specific validation
+        validateTestingDiscount(profileEntity, agreementEntity, discount);
+    }
+
+    private void validateTestingDiscount(ProfileEntity profileEntity,
+                                         AgreementEntity agreementEntity,
+                                         DiscountEntity discount) {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
             (discount.getLastBucketCodeLoad() == null ||
              bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
-            throw new ConflictErrorException("Cannot publish a discount with a bucket load in progress");
+            throw new ConflictErrorException("Cannot proceed with a discount with a bucket load in progress");
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException("Cannot publish a discount with a not approved agreement");
+            throw new InvalidRequestException("Cannot proceed with a discount with a not approved agreement");
         }
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot publish a suspended discount");
+            throw new InvalidRequestException("Cannot proceed with a suspended discount");
         }
         if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish a discount because the agreement is expired");
+            throw new InvalidRequestException("Cannot proceed with a discount because the agreement is expired");
         }
 
         if (LocalDate.now().isAfter(discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot publish an expired discount");
+            throw new InvalidRequestException("Cannot proceed with an expired discount");
         }
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
         long publishedDiscount = discountRepository.countByAgreementIdAndState(agreementEntity.getId(),
                                                                                DiscountStateEnum.PUBLISHED);
         if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
-            throw new InvalidRequestException("Cannot publish the discount because there are already " +
+            throw new InvalidRequestException("Cannot proceed with the discount because there are already " +
                                               MAX_NUMBER_PUBLISHED_DISCOUNT +
                                               " public ones");
         }

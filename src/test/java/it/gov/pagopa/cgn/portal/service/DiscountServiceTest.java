@@ -708,10 +708,16 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity); // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
         // publish discount
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findById(agreementEntity.getId());
@@ -743,6 +749,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         discountEntity.setStartDate(LocalDate.now().minusDays(30));
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -795,12 +806,86 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Publish_PublishDraftOfflineDiscount_Ok() {
+        setProfileSalesChannel(agreementEntity, SalesChannelEnum.OFFLINE);
+        setProfileDiscountType(agreementEntity, null); // offline merchant don't have discount type
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        // no test done because it's a physical store discount
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        // publish discount should work directly from draft
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+    }
+
+    @Test
+    void Publish_PublishDraftOnlineDiscount_ThrowInvalidRequestException() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        String agreementId = agreementEntity.getId();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        // no status update
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        Long discountId = dbDiscount.getId();
+        // publish discount
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.publishDiscount(agreementId, discountId));
+    }
+
+    @Test
+    void Publish_PublishTestFailedOnlineDiscount_ThrowInvalidRequestException() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        String agreementId = agreementEntity.getId();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        // simulate test failed
+        dbDiscount.setState(DiscountStateEnum.TEST_FAILED);
+        dbDiscount.setTestFailureReason("any reason");
+        dbDiscount = discountRepository.save(dbDiscount);
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        Long discountId = dbDiscount.getId();
+        // publish discount
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.publishDiscount(agreementId, discountId));
+    }
+
+    @Test
     void Publish_PublishDiscountWithMultiplePublishedDiscounts_Ok() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -812,6 +897,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount2 = discountService.createDiscount(agreementEntity.getId(), discountEntity2)
                                                     .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount2.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount2 = discountRepository.save(dbDiscount2);
+
         discountService.publishDiscount(agreementEntity.getId(), dbDiscount2.getId());
 
         agreementEntity = agreementService.findById(agreementEntity.getId());
@@ -827,6 +917,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity.setStartDate(LocalDate.now().plusDays(2));
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementId);
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -851,6 +946,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementId);
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -918,6 +1018,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
@@ -936,6 +1041,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         // creating the second discount
         discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
 
         // first publication date wasn't updated
@@ -974,6 +1084,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         String agreementId = agreementEntity.getId();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementId);
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -984,6 +1099,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         IntStream.range(2, 7).forEach(idx -> {
             DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
             DiscountEntity dbDiscountN = discountService.createDiscount(agreementId, discount).getDiscountEntity();
+
+            // simulate test passed
+            dbDiscountN.setState(DiscountStateEnum.TEST_PASSED);
+            dbDiscountN = discountRepository.save(dbDiscountN);
+
             long discountId = dbDiscountN.getId();
 
             if (idx < 6) {
@@ -1009,6 +1129,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         setAdminAuth();
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
@@ -1029,6 +1154,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1110,6 +1240,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1160,6 +1295,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1176,6 +1316,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         // create and publish the second discount
         discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
 
         // assert that published discounts are 2
@@ -1222,6 +1367,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1262,6 +1412,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1302,6 +1457,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
@@ -1322,6 +1482,9 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         setAdminAuth();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         agreementEntity = agreementRepository.save(agreementEntity);
@@ -1375,6 +1538,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                                    .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
         agreementEntity = agreementRepository.save(agreementEntity);

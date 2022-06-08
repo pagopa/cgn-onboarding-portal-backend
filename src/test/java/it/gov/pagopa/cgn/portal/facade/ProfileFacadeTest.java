@@ -67,6 +67,11 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                                                                             URL,
                                                                                             REFERRER);
         discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
 
@@ -81,7 +86,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
             Assertions.assertNotNull(d.getLandingPageReferrer());
         });
 
-        // operator change his profile to stati code
+        // operator change his profile to static code
         UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
                                                                                         DiscountCodeType.STATIC);
         profileFacade.updateProfile(agreementId, updateProfile);
@@ -101,6 +106,10 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         // update the discount to be a static code base discount
         discountEntity.setStaticCode(STATIC_CODE);
         discountService.updateDiscount(agreementId, discountId, discountEntity);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
 
         // now we can publish the discount
         discountService.publishDiscount(agreementId, discountId);
@@ -127,6 +136,11 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                                                                             URL,
                                                                                             REFERRER);
         discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
 

@@ -390,6 +390,11 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
         DiscountEntity discountEntity = testObject.getDiscountEntityList().get(0);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
         String reasonMsg = "reasonMessage";
         discountEntity = discountService.suspendDiscount(agreementEntity.getId(), discountEntity.getId(), reasonMsg);

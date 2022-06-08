@@ -100,6 +100,7 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
         agreementEntity = testObject.getAgreementEntity();
         discountEntity = testObject.getDiscountEntityList().get(0);
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
         discountRepository.save(discountEntity);
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);

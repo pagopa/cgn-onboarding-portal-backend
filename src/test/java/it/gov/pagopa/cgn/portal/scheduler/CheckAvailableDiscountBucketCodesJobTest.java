@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -73,6 +74,11 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
         discountEntity = testObject.getDiscountEntityList().get(0);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
         discountEntity.setEndDate(LocalDate.now().plusDays(3));
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");

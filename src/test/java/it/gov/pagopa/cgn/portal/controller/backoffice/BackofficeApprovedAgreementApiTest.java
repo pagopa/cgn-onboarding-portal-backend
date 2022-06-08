@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.BackofficeApprovedSortColumnEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -144,7 +145,14 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
         DiscountEntity discountEntity = agreementTestObject.getDiscountEntityList().get(0);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        // publish discount
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+
         this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
                     .andDo(log())
                     .andExpect(status().isOk())
