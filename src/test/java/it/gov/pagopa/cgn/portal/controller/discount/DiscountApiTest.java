@@ -622,6 +622,10 @@ class DiscountApiTest extends IntegrationAbstractTest {
         DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
 
+        // simulate test passed
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
         saveDocumentsForApproval(agreement);
         agreement = agreementService.requestApproval(agreement.getId());
         agreement = approveAgreement(agreement, true);
@@ -644,6 +648,10 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        // simulate test passed
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
 
         saveDocumentsForApproval(agreement);
         agreement = agreementService.requestApproval(agreement.getId());

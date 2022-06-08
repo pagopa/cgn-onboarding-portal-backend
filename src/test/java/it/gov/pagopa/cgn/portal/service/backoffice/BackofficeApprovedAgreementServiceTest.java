@@ -90,6 +90,11 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         AgreementTestObject agreementTestObject = createApprovedAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         DiscountEntity discountEntity = agreementTestObject.getDiscountEntityList().get(0);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
         AgreementEntity approvedAgreement = agreementService.getApprovedAgreement(agreementEntity.getId());
@@ -104,10 +109,20 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         AgreementTestObject agreementTestObject = createApprovedAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         DiscountEntity discountEntity = agreementTestObject.getDiscountEntityList().get(0);
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
         discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity2 = discountService.createDiscount(agreementEntity.getId(), discountEntity2).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity2.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity2 = discountRepository.save(discountEntity2);
+
         discountService.publishDiscount(agreementEntity.getId(), discountEntity2.getId());
         discountService.suspendDiscount(agreementEntity.getId(), discountEntity2.getId(), "Bad discount");
 
