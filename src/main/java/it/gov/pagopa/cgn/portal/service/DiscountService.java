@@ -399,6 +399,11 @@ public class DiscountService {
         commonDiscountValidation(profileEntity, discount, false);
 
         //perform publishing specific validation
+        if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
+            !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
+            throw new InvalidRequestException("Cannot publish an online discount that's not been tested");
+        }
+
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
             (discount.getLastBucketCodeLoad() == null ||
              bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
