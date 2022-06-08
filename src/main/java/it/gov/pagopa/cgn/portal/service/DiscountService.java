@@ -402,12 +402,10 @@ public class DiscountService {
         validateTestingDiscount(profileEntity, agreementEntity, discount);
 
         // perform publishing specific validation
-        validatePublishingDiscount(profileEntity, agreementEntity, discount);
+        validatePublishingDiscount(profileEntity, discount);
     }
 
-    private void validatePublishingDiscount(ProfileEntity profileEntity,
-                                            AgreementEntity agreementEntity,
-                                            DiscountEntity discount) {
+    private void validatePublishingDiscount(ProfileEntity profileEntity, DiscountEntity discount) {
         //perform publishing specific validation
         if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
             !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
