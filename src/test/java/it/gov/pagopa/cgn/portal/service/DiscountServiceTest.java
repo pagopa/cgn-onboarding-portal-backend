@@ -155,6 +155,32 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscount_DoNotAllowPassedEndDate_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setEndDate(LocalDate.now().minusDays(1));
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
+
+    }
+
+    @Test
+    void Create_CreateDiscountWithLandingPage_DoNotAllowNullUrl_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            URL,
+                                                                                            REFERRER);
+        discountEntity.setLandingPageUrl(null);
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
+
+    }
+
+    @Test
     void Create_CreateDiscountWithLandingPage_Ok() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 
