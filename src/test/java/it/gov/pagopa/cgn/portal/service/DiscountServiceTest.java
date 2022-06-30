@@ -37,6 +37,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
     private static final String REFERRER = "referrer";
+    private static String AGREEMENT_ID;
 
     @Autowired
     private BackofficeAgreementService backofficeAgreementService;
@@ -68,6 +69,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
+
+        AGREEMENT_ID = agreementEntity.getId();
     }
 
     @Test
@@ -162,7 +165,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         discountEntity.setEndDate(LocalDate.now().minusDays(1));
 
         Assertions.assertThrows(InvalidRequestException.class,
-                                () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
+                                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
 
     }
 
@@ -176,7 +179,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         discountEntity.setLandingPageUrl(null);
 
         Assertions.assertThrows(InvalidRequestException.class,
-                                () -> discountService.createDiscount(agreementEntity.getId(), discountEntity));
+                                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
 
     }
 
