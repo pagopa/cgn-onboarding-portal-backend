@@ -87,6 +87,23 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWith100PercentDiscount_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setDiscountValue(100);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        Assertions.assertNotNull(discountEntity.getId());
+        Assertions.assertNotNull(discountEntity.getAgreement());
+        Assertions.assertNotNull(discountEntity.getProducts());
+        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0));
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+    }
+
+    @Test
     void Create_CreateDiscountWithStaticCode_Ok() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
