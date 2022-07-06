@@ -466,10 +466,9 @@ public class DiscountService {
         }
 
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
-            (StringUtils.isBlank(discountEntity.getLandingPageUrl()) ||
-             StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
+            (StringUtils.isBlank(discountEntity.getLandingPageUrl()))) {
             throw new InvalidRequestException(
-                    "Discount cannot have empty landing page values for a profile with discount code type landingpage");
+                    "Discount cannot have empty landing page url for a profile with discount code type landingpage");
         }
 
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
