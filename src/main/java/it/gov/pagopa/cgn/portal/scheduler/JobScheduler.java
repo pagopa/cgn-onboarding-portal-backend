@@ -20,32 +20,34 @@ public class JobScheduler {
 
     public void scheduleCheckExpiringDiscountsJob() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("check-expiring", DISCOUNTS_JOB_GROUP);
-        scheduleJob(jobKey, configProperties.getExpiringDiscountsJobCronExpression());
+        scheduleJob(jobKey, configProperties.getExpiringDiscountsJobCronExpression(), CheckExpiringDiscountsJob.class);
     }
 
     public void scheduleCheckAvailableDiscountBucketCodesJob() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("check-available-codes", DISCOUNTS_JOB_GROUP);
-        scheduleJob(jobKey, configProperties.getAvailableDiscountBucketCodesJobCronExpression());
+        scheduleJob(jobKey,
+                    configProperties.getAvailableDiscountBucketCodesJobCronExpression(),
+                    CheckAvailableDiscountBucketCodesJob.class);
     }
 
     public void scheduleSuspendDiscountsWithoutAvailableBucketCodesJob() throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("suspend-discount-with-expired-bucket", DISCOUNTS_JOB_GROUP);
-        scheduleJob(jobKey, configProperties.getSuspendDiscountsWithoutAvailableBucketCodesJobCronExpression());
+        scheduleJob(jobKey,
+                    configProperties.getSuspendDiscountsWithoutAvailableBucketCodesJobCronExpression(),
+                    SuspendDiscountsWithoutAvailableBucketCodesJob.class);
     }
 
-    private void scheduleJob(JobKey jobKey, String cronExpression) throws SchedulerException {
+    private void scheduleJob(JobKey jobKey, String cronExpression, Class jobClass) throws SchedulerException {
         for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
             scheduler.unscheduleJob(trigger.getKey());
         }
 
-        JobDetail job = JobBuilder.newJob(CheckAvailableDiscountBucketCodesJob.class).withIdentity(jobKey).build();
+        JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobKey).build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
-                .withSchedule(
-                        CronScheduleBuilder
-                                .cronSchedule(cronExpression)
-                                .inTimeZone(TimeZone.getTimeZone("Europe/Rome")))
-                .build();
+                                        .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)
+                                                                         .inTimeZone(TimeZone.getTimeZone("Europe/Rome")))
+                                        .build();
 
         scheduler.scheduleJob(job, trigger);
     }
