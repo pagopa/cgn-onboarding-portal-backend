@@ -799,7 +799,15 @@ definitions:
     properties:
       name:
         type: string
+      name_en:
+        type: string
+      name_de:
+        type: string
       description:
+        type: string
+      description_en:
+        type: string
+      description_de:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
@@ -912,6 +920,12 @@ definitions:
       name:
         type: string
         maxLength: 100
+      name_en:
+        type: string
+        maxLength: 100
+      name_de:
+        type: string
+        maxLength: 100
 
   ApprovedAgreementDiscount:
     type: object
@@ -932,7 +946,17 @@ definitions:
       name:
         type: string
         maxLength: 100
+      name_en:
+        type: string
+        maxLength: 100
+      name_de:
+        type: string
+        maxLength: 100
       description:
+        type: string
+      description_en:
+        type: string
+      description_de:
         type: string
       startDate:
         type: string
@@ -951,6 +975,10 @@ definitions:
           $ref: '#/definitions/ProductCategory'
         minItems: 1
       condition:
+        type: string
+      condition_en:
+        type: string
+      condition_de:
         type: string
       lastUpateDate:
         type: string

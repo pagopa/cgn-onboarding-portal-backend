@@ -643,11 +643,17 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       fullName:
         type: string
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       taxCodeOrVat:
         type: string
@@ -694,6 +700,10 @@ definitions:
       - salesChannel
     properties:
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       pecAddress:
         type: string
@@ -746,6 +756,10 @@ definitions:
       fullName:
         type: string
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       taxCodeOrVat:
         type: string
@@ -952,6 +966,8 @@ definitions:
     type: object
     required:
       - name
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
@@ -1025,11 +1041,11 @@ definitions:
     type: object
     required:
       - name
-      - description
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
-      - condition
     properties:
       name:
         type: string
@@ -1113,11 +1129,11 @@ definitions:
       - agreementId
       - state
       - name
-      - description
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
-      - condition
     properties:
       id:
         type: string
