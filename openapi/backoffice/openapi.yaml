@@ -785,6 +785,8 @@ definitions:
     type: object
     required:
       - description
+      - description_en
+      - description_de
       - salesChannel
       - lastUpateDate
       #tab profilo

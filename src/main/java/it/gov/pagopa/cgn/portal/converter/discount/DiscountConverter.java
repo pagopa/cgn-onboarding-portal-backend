@@ -42,10 +42,16 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         Discount dto = new Discount();
         dto.setId(String.valueOf(entity.getId()));
         dto.setName(entity.getName());
+        dto.setNameEn(entity.getNameEn());
+        dto.setNameDe(entity.getNameDe());
         dto.setDescription(entity.getDescription());
+        dto.setDescriptionEn(entity.getDescriptionEn());
+        dto.setDescriptionDe(entity.getDescriptionDe());
         dto.setDiscount(entity.getDiscountValue());
         dto.setAgreementId(entity.getAgreement().getId());
         dto.setCondition(entity.getCondition());
+        dto.setConditionEn(entity.getConditionEn());
+        dto.setConditionDe(entity.getConditionDe());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
         dto.setStaticCode(entity.getStaticCode());

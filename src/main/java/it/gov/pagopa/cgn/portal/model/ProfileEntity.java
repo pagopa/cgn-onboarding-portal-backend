@@ -25,11 +25,8 @@ public class ProfileEntity extends BaseEntity {
 
     @Id
     @Column(name = "profile_k")
-    @SequenceGenerator(name="profile_profile_k_seq",
-            sequenceName="profile_profile_k_seq",
-            allocationSize=1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="profile_profile_k_seq")
+    @SequenceGenerator(name = "profile_profile_k_seq", sequenceName = "profile_profile_k_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "profile_profile_k_seq")
     private Long id;
 
     @NotNull
@@ -41,6 +38,14 @@ public class ProfileEntity extends BaseEntity {
     @Size(max = 100)
     @Column(name = "name", length = 100)
     private String name;
+
+    @Size(max = 100)
+    @Column(name = "name_en", length = 100)
+    private String nameEn;
+
+    @Size(max = 100)
+    @Column(name = "name_de", length = 100)
+    private String nameDe;
 
     @NotNull
     @NotBlank
@@ -60,6 +65,18 @@ public class ProfileEntity extends BaseEntity {
     @Size(max = 300)
     @Column(name = "description", length = 300)
     private String description;
+
+    @NotNull
+    @NotBlank
+    @Size(max = 300)
+    @Column(name = "description_en", length = 300)
+    private String descriptionEn;
+    
+    @NotNull
+    @NotBlank
+    @Size(max = 300)
+    @Column(name = "description_de", length = 300)
+    private String descriptionDe;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "sales_channel", length = 50)

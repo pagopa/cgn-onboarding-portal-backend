@@ -27,7 +27,11 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
     protected Function<CreateDiscount, DiscountEntity> toEntity = createDiscountDTO -> {
         DiscountEntity entity = new DiscountEntity();
         entity.setDescription(createDiscountDTO.getDescription());
+        entity.setDescriptionEn(createDiscountDTO.getDescriptionEn());
+        entity.setDescriptionDe(createDiscountDTO.getDescriptionDe());
         entity.setName(createDiscountDTO.getName());
+        entity.setNameEn(createDiscountDTO.getNameEn());
+        entity.setNameDe(createDiscountDTO.getNameDe());
         entity.setStartDate(createDiscountDTO.getStartDate());
         entity.setEndDate(createDiscountDTO.getEndDate());
         entity.setDiscountValue(createDiscountDTO.getDiscount());
@@ -36,6 +40,8 @@ public class CreateDiscountConverter extends CommonDiscountConverter<DiscountEnt
         entity.setLandingPageUrl(createDiscountDTO.getLandingPageUrl());
         entity.setLandingPageReferrer(createDiscountDTO.getLandingPageReferrer());
         entity.setCondition(createDiscountDTO.getCondition());
+        entity.setConditionEn(createDiscountDTO.getConditionEn());
+        entity.setConditionDe(createDiscountDTO.getConditionDe());
         entity.setProducts(toEntityDiscountProduct.apply(createDiscountDTO.getProductCategories(), entity));
         entity.setState(DiscountStateEnum.DRAFT); // default state
         entity.setLastBucketCodeLoadUid(createDiscountDTO.getLastBucketCodeLoadUid());

@@ -697,6 +697,8 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       name:
@@ -747,6 +749,8 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       id:
