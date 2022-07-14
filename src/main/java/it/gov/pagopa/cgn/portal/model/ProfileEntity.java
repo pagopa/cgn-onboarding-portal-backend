@@ -1,6 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
-import it.gov.pagopa.cgn.portal.annotation.CheckAddresses;
+import it.gov.pagopa.cgn.portal.annotation.CheckProfile;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import lombok.Data;
@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "profile")
 @Data
-@CheckAddresses
+@CheckProfile
 public class ProfileEntity extends BaseEntity {
 
     @Id
@@ -71,7 +71,7 @@ public class ProfileEntity extends BaseEntity {
     @Size(max = 300)
     @Column(name = "description_en", length = 300)
     private String descriptionEn;
-    
+
     @NotNull
     @NotBlank
     @Size(max = 300)

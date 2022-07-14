@@ -698,9 +698,15 @@ class DiscountApiTest extends IntegrationAbstractTest {
     private CreateDiscount createSampleCreateDiscount() {
         CreateDiscount createDiscount = new CreateDiscount();
         createDiscount.setName("create_discount_name");
+        createDiscount.setNameEn("create_discount_name_en");
+        createDiscount.setNameDe("create_discount_name_de");
         createDiscount.setDescription("create_discount_description");
+        createDiscount.setDescriptionEn("create_discount_description_en");
+        createDiscount.setDescriptionDe("create_discount_description_de");
         createDiscount.setDiscount(15);
         createDiscount.setCondition("create_discount_condition");
+        createDiscount.setConditionEn("create_discount_condition_en");
+        createDiscount.setConditionDe("create_discount_condition_de");
         createDiscount.setStartDate(LocalDate.now());
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));

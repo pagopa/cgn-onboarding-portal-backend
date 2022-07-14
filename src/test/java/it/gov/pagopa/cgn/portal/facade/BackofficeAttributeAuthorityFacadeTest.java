@@ -43,7 +43,10 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        ProfileService profileService = new ProfileService(profileRepository, agreementServiceLight, documentService);
+        ProfileService profileService = new ProfileService(factory,
+                                                           profileRepository,
+                                                           agreementServiceLight,
+                                                           documentService);
         profileServiceSpy = Mockito.spy(profileService);
 
         AgreementUserService agreementUserService = new AgreementUserService(agreementUserRepository);

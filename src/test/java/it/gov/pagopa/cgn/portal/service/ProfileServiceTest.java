@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
@@ -84,11 +83,20 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateProfileWithoutEnAndDeNamesIfItIsGiven_ThrowsException() {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
+        profileEntity.setNameEn(null);
+        profileEntity.setNameDe(null);
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> profileService.createProfile(profileEntity, agreementId));
+    }
+
+    @Test
     void Create_CreateProfilePhysicalWithoutAddresses_ThrowsException() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setAllNationalAddresses(false);
         profileEntity.setSalesChannel(SalesChannelEnum.OFFLINE);
-        Assertions.assertThrows(TransactionSystemException.class,
+        Assertions.assertThrows(InvalidRequestException.class,
                                 () -> profileService.createProfile(profileEntity, agreementId));
     }
 
@@ -191,7 +199,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
         toUpdateProfile.setAllNationalAddresses(false);
         toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
-        Assertions.assertThrows(TransactionSystemException.class,
+        Assertions.assertThrows(InvalidRequestException.class,
                                 () -> profileService.updateProfile(agreementId, toUpdateProfile));
     }
 

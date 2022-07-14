@@ -187,6 +187,32 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscount_DoNotAllowEmptyEnAndDeDescriptionsIfItIsGiven_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setDescriptionEn(null);
+        discountEntity.setDescriptionDe(null);
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
+
+    }
+
+    @Test
+    void Create_CreateDiscount_DoNotAllowEmptyEnAndDeConditionsIfItIsGiven_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity.setConditionEn(null);
+        discountEntity.setConditionDe(null);
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
+
+    }
+
+    @Test
     void Create_CreateDiscountWithLandingPage_DoNotAllowNullUrl_Ko() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 
