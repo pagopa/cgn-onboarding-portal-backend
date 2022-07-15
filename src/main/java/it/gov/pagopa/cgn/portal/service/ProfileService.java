@@ -100,6 +100,9 @@ public class ProfileService {
     };
 
     private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
+        if (CollectionUtils.isEmpty(addressesList)) {
+            return; // do nothing if addresses list is empty
+        }
         if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
             profileEntity.removeAllAddress();
         }
@@ -108,7 +111,11 @@ public class ProfileService {
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setNameEn(toUpdateEntity.getNameEn());
+        dbEntity.setNameDe(toUpdateEntity.getNameDe());
         dbEntity.setDescription(toUpdateEntity.getDescription());
+        dbEntity.setDescriptionEn(toUpdateEntity.getDescriptionEn());
+        dbEntity.setDescriptionDe(toUpdateEntity.getDescriptionDe());
         dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
         dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
         dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());

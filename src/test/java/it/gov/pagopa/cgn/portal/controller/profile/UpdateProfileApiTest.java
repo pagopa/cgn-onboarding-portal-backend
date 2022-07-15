@@ -45,18 +45,16 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
 
     @Test
     void Update_UpdateProfileWithInvalidAgreementId_Forbidden() throws Exception {
-        this.mockMvc.perform(
-                get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isForbidden());
+        this.mockMvc.perform(get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isForbidden());
     }
 
     @Test
     void Update_UpdateProfileNotExists_NotFound() throws Exception {
-        this.mockMvc.perform(
-                get(profilePath).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isNotFound());
+        this.mockMvc.perform(get(profilePath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isNotFound());
     }
 
     @Test
@@ -70,31 +68,32 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
         offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         updateProfile.setSalesChannel(offlineChannel);
 
-        this.mockMvc.perform(
-                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateProfile)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(profileEntity.getId()))
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.fullName").value(profileEntity.getFullName()))
-                .andExpect(jsonPath("$.name").value(updateProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
-                .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent").isNotEmpty())
-                .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
-                .andExpect(jsonPath("$.salesChannel").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.channelType").value(offlineChannel.getChannelType().getValue()))
-                .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.websiteUrl").value(offlineChannel.getWebsiteUrl()));
+        this.mockMvc.perform(put(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                             .content(TestUtils.getJson(updateProfile)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").value(profileEntity.getId()))
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.fullName").value(profileEntity.getFullName()))
+                    .andExpect(jsonPath("$.name").value(updateProfile.getName()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
+                    .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
+                    .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent").isNotEmpty())
+                    .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
+                    .andExpect(jsonPath("$.salesChannel").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(offlineChannel.getChannelType().getValue()))
+                    .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.websiteUrl").value(offlineChannel.getWebsiteUrl()));
 
     }
 
@@ -110,32 +109,38 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
         bothChannels.setDiscountCodeType(DiscountCodeType.STATIC);
         updateProfile.setSalesChannel(bothChannels);
 
-        this.mockMvc.perform(
-                put(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(updateProfile)))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(profileEntity.getId()))
-                .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                .andExpect(jsonPath("$.fullName").value(profileEntity.getFullName()))
-                .andExpect(jsonPath("$.name").value(updateProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
-                .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent").isNotEmpty())
-                .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
-                .andExpect(jsonPath("$.salesChannel").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.channelType").value(bothChannels.getChannelType().getValue()))
-                .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.discountCodeType").value(bothChannels.getDiscountCodeType().getValue()))
-                .andExpect(jsonPath("$.salesChannel.websiteUrl").value(bothChannels.getWebsiteUrl()));
+        this.mockMvc.perform(put(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                             .content(TestUtils.getJson(updateProfile)))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.id").value(profileEntity.getId()))
+                    .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
+                    .andExpect(jsonPath("$.fullName").value(profileEntity.getFullName()))
+                    .andExpect(jsonPath("$.name").value(updateProfile.getName()))
+                    .andExpect(jsonPath("$.name_en").value(updateProfile.getNameEn()))
+                    .andExpect(jsonPath("$.name_de").value(updateProfile.getNameDe()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").isNotEmpty())
+                    .andExpect(jsonPath("$.pecAddress").value(updateProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(updateProfile.getDescription()))
+                    .andExpect(jsonPath("$.description_en").value(updateProfile.getDescriptionEn()))
+                    .andExpect(jsonPath("$.description_de").value(updateProfile.getDescriptionDe()))
+                    .andExpect(jsonPath("$.legalOffice").value(updateProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(updateProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(updateProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(updateProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent").isNotEmpty())
+                    .andExpect(jsonPath("$.referent.lastName").value(updateProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(updateProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(updateProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(updateProfile.getReferent().getRole()))
+                    .andExpect(jsonPath("$.salesChannel").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(bothChannels.getChannelType().getValue()))
+                    .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.discountCodeType").value(bothChannels.getDiscountCodeType()
+                                                                                             .getValue()))
+                    .andExpect(jsonPath("$.salesChannel.websiteUrl").value(bothChannels.getWebsiteUrl()));
     }
 
 }

@@ -254,7 +254,11 @@ public class TestUtils {
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
         profileDto.setName("name_dto");
+        profileDto.setNameEn("name_dto_en");
+        profileDto.setNameDe("name_dto_de");
         profileDto.setDescription("description_dto");
+        profileDto.setDescriptionEn("description_dto_en");
+        profileDto.setDescriptionDe("description_dto_de");
         profileDto.setPecAddress("myname.profile@pagopa.it");
         profileDto.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         profileDto.setLegalRepresentativeFullName("full name");
