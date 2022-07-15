@@ -100,9 +100,6 @@ public class ProfileService {
     };
 
     private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
-        if (CollectionUtils.isEmpty(addressesList)) {
-            return; // do nothing if addresses list is empty
-        }
         if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
             profileEntity.removeAllAddress();
         }

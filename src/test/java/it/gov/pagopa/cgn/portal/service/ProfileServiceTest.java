@@ -199,6 +199,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
         toUpdateProfile.setAllNationalAddresses(false);
         toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
+        
         Assertions.assertThrows(InvalidRequestException.class,
                                 () -> profileService.updateProfile(agreementId, toUpdateProfile));
     }
