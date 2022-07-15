@@ -197,8 +197,12 @@ public class TestUtils {
 
         UpdateProfile updateProfile = new UpdateProfile();
         updateProfile.setDescription(profileEntity.getDescription());
+        updateProfile.setDescriptionEn(profileEntity.getDescriptionEn());
+        updateProfile.setDescriptionDe(profileEntity.getDescriptionDe());
         updateProfile.setSalesChannel(salesChannel);
         updateProfile.setName(profileEntity.getName());
+        updateProfile.setNameEn(profileEntity.getNameEn());
+        updateProfile.setNameDe(profileEntity.getNameDe());
         updateProfile.setLegalOffice(profileEntity.getLegalOffice());
         updateProfile.setReferent(referent);
         updateProfile.setPecAddress(profileEntity.getPecAddress());
