@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import it.gov.pagopa.cgn.portal.annotation.CheckDiscount;
 import it.gov.pagopa.cgn.portal.annotation.DateBefore;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
@@ -20,6 +21,7 @@ import java.util.List;
 @Table(name = "discount")
 @Data
 @TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class) // postgress enum type
+@CheckDiscount
 @DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
 public class DiscountEntity extends BaseEntity {
 
@@ -41,9 +43,29 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "name", length = 100)
     private String name;
 
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "name_en", length = 100)
+    private String nameEn;
+
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
+    @Column(name = "name_de", length = 100)
+    private String nameDe;
+
     @Size(max = 250)
     @Column(name = "description", length = 250)
     private String description;
+
+    @Size(max = 250)
+    @Column(name = "description_en", length = 250)
+    private String descriptionEn;
+
+    @Size(max = 250)
+    @Column(name = "description_de", length = 250)
+    private String descriptionDe;
 
     @NotNull
     @Column(name = "start_date")
@@ -61,6 +83,14 @@ public class DiscountEntity extends BaseEntity {
     @Size(max = 200)
     @Column(name = "condition", length = 200)
     private String condition;
+
+    @Size(max = 200)
+    @Column(name = "condition_en", length = 200)
+    private String conditionEn;
+
+    @Size(max = 200)
+    @Column(name = "condition_de", length = 200)
+    private String conditionDe;
 
     @Size(max = 100)
     @Column(name = "static_code", length = 100)

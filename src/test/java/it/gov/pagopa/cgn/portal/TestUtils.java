@@ -148,9 +148,13 @@ public class TestUtils {
         ProfileEntity profileEntity = new ProfileEntity();
         profileEntity.setFullName("FULL_NAME");
         profileEntity.setName("NAME");
+        profileEntity.setNameEn("NAME_EN");
+        profileEntity.setNameDe("NAME_DE");
         profileEntity.setTaxCodeOrVat("abcdeghilmnopqrs");
         profileEntity.setPecAddress("pec.address@pagopa.it");
         profileEntity.setDescription("A Description");
+        profileEntity.setDescriptionEn("A Description EN");
+        profileEntity.setDescriptionDe("A Description DE");
         profileEntity.setReferent(createSampleReferent(profileEntity));
         profileEntity.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         profileEntity.setLegalRepresentativeFullName("full name");
@@ -193,8 +197,12 @@ public class TestUtils {
 
         UpdateProfile updateProfile = new UpdateProfile();
         updateProfile.setDescription(profileEntity.getDescription());
+        updateProfile.setDescriptionEn(profileEntity.getDescriptionEn());
+        updateProfile.setDescriptionDe(profileEntity.getDescriptionDe());
         updateProfile.setSalesChannel(salesChannel);
         updateProfile.setName(profileEntity.getName());
+        updateProfile.setNameEn(profileEntity.getNameEn());
+        updateProfile.setNameDe(profileEntity.getNameDe());
         updateProfile.setLegalOffice(profileEntity.getLegalOffice());
         updateProfile.setReferent(referent);
         updateProfile.setPecAddress(profileEntity.getPecAddress());
@@ -250,7 +258,11 @@ public class TestUtils {
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
         profileDto.setName("name_dto");
+        profileDto.setNameEn("name_dto_en");
+        profileDto.setNameDe("name_dto_de");
         profileDto.setDescription("description_dto");
+        profileDto.setDescriptionEn("description_dto_en");
+        profileDto.setDescriptionDe("description_dto_de");
         profileDto.setPecAddress("myname.profile@pagopa.it");
         profileDto.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         profileDto.setLegalRepresentativeFullName("full name");
@@ -339,9 +351,15 @@ public class TestUtils {
         DiscountEntity discountEntity = new DiscountEntity();
         discountEntity.setState(DiscountStateEnum.DRAFT);
         discountEntity.setName("discount_name");
+        discountEntity.setNameEn("discount_name_en");
+        discountEntity.setNameDe("discount_name_de");
         discountEntity.setDescription("discount_description");
+        discountEntity.setDescriptionEn("discount_description_en");
+        discountEntity.setDescriptionDe("discount_description_de");
         discountEntity.setDiscountValue(15);
         discountEntity.setCondition("discount_condition");
+        discountEntity.setConditionEn("discount_condition_en");
+        discountEntity.setConditionDe("discount_condition_de");
         discountEntity.setStartDate(LocalDate.now());
         discountEntity.setEndDate(LocalDate.now().plusMonths(6));
         discountEntity.setAgreement(agreement);
@@ -372,6 +390,8 @@ public class TestUtils {
         Discount discount = discountConverter.toDto(discountEntity);
         UpdateDiscount updateDiscount = new UpdateDiscount();
         updateDiscount.setName(discount.getName());
+        updateDiscount.setNameEn(discount.getNameEn());
+        updateDiscount.setNameDe(discount.getNameDe());
         updateDiscount.setDescription(discount.getDescription());
         updateDiscount.setCondition(discount.getCondition());
         updateDiscount.setStartDate(discount.getStartDate());

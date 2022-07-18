@@ -7,11 +7,13 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
+import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import javax.validation.ValidatorFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -20,6 +22,7 @@ import java.util.function.BiConsumer;
 @Service
 public class ProfileService {
 
+    private final ValidatorFactory factory;
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileRepository profileRepository;
     private final DocumentService documentService;
@@ -31,6 +34,7 @@ public class ProfileService {
             throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
         }
         profileEntity.setAgreement(agreement);
+        validateProfile(profileEntity);
         return profileRepository.save(profileEntity);
     }
 
@@ -56,14 +60,17 @@ public class ProfileService {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
         }
+        validateProfile(profileEntity);
         return profileRepository.save(profileEntity);
     }
 
 
     @Autowired
-    public ProfileService(ProfileRepository profileRepository,
+    public ProfileService(ValidatorFactory factory,
+                          ProfileRepository profileRepository,
                           AgreementServiceLight agreementServiceLight,
                           DocumentService documentService) {
+        this.factory = factory;
         this.profileRepository = profileRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.documentService = documentService;
@@ -74,6 +81,11 @@ public class ProfileService {
         return getOptProfileFromAgreementId(agreementId).orElseThrow(() -> new InvalidRequestException(
                 "Updating profile was not found for agreement " + agreementId));
     }
+
+    private void validateProfile(ProfileEntity profileEntity) {
+        ValidationUtils.performConstraintValidation(factory.getValidator(), profileEntity);
+    }
+
 
     private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
         return profileRepository.findByAgreementId(agreementId);
@@ -96,7 +108,11 @@ public class ProfileService {
 
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setNameEn(toUpdateEntity.getNameEn());
+        dbEntity.setNameDe(toUpdateEntity.getNameDe());
         dbEntity.setDescription(toUpdateEntity.getDescription());
+        dbEntity.setDescriptionEn(toUpdateEntity.getDescriptionEn());
+        dbEntity.setDescriptionDe(toUpdateEntity.getDescriptionDe());
         dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
         dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
         dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());

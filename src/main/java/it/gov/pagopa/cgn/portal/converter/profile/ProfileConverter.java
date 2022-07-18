@@ -1,8 +1,8 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
-import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,11 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
         entity.setName(dto.getName());
+        entity.setNameEn(dto.getNameEn());
+        entity.setNameDe(dto.getNameDe());
         entity.setDescription(dto.getDescription());
+        entity.setDescriptionEn(dto.getDescriptionEn());
+        entity.setDescriptionDe(dto.getDescriptionDe());
         entity.setPecAddress(dto.getPecAddress());
         this.salesChannelConsumer.accept(dto.getSalesChannel(), entity);
         entity.setReferent(this.referentConverter.toEntity(dto.getReferent()));
@@ -31,7 +35,11 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         profile.setTaxCodeOrVat(entity.getTaxCodeOrVat());
         profile.setFullName(entity.getFullName());
         profile.setName(entity.getName());
+        profile.setNameEn(entity.getNameEn());
+        profile.setNameDe(entity.getNameDe());
         profile.setDescription(entity.getDescription());
+        profile.setDescriptionEn(entity.getDescriptionEn());
+        profile.setDescriptionDe(entity.getDescriptionDe());
         profile.setPecAddress(entity.getPecAddress());
         profile.setReferent(this.referentConverter.toDto(entity.getReferent()));
         profile.setSalesChannel(this.salesChannelToDto.apply(entity));

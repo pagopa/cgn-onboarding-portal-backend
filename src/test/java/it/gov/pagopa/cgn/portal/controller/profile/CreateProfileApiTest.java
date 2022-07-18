@@ -40,26 +40,27 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void Create_CreateOnlineProfileWithApiDiscountType_Ok() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
-                .andExpect(jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
-                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                    .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                    .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                    .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
 
     }
 
@@ -67,26 +68,27 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void Create_CreateOnlineProfileWithStaticDiscountType_Ok() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.STATIC);
 
-        this.mockMvc.perform(
-                        post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
-                .andExpect(jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
-                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                    .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                    .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                    .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
 
     }
 
@@ -94,26 +96,27 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void Create_CreateOnlineProfileWithLandingPageDiscountType_Ok() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.LANDINGPAGE);
 
-        this.mockMvc.perform(
-                        post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
-                .andExpect(jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
-                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                    .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                    .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                    .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
 
     }
 
@@ -123,33 +126,36 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         OfflineChannel offlineChannel = (OfflineChannel) createProfile.getSalesChannel();
         Address firstAddress = offlineChannel.getAddresses().get(0);
 
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
-                .andExpect(jsonPath("$.salesChannel.allNationalAddresses").value(false))
-                .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.addresses").isArray())
-                .andExpect(jsonPath("$.salesChannel.addresses[0].fullAddress").value(firstAddress.getFullAddress()))
-                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates").isNotEmpty())
-                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.latitude").value(firstAddress.getCoordinates().getLatitude()))
-                .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.longitude").value(firstAddress.getCoordinates().getLongitude()))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
-                .andExpect(jsonPath("$.name").value(createProfile.getName()))
-                .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
-                .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
-                .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
-                .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
-                .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
-                .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
-                .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
-                .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent().getTelephoneNumber()))
-                .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
-                .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.salesChannel.allNationalAddresses").value(false))
+                    .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.addresses").isArray())
+                    .andExpect(jsonPath("$.salesChannel.addresses[0].fullAddress").value(firstAddress.getFullAddress()))
+                    .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates").isNotEmpty())
+                    .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.latitude").value(firstAddress.getCoordinates()
+                                                                                                              .getLatitude()))
+                    .andExpect(jsonPath("$.salesChannel.addresses[0].coordinates.longitude").value(firstAddress.getCoordinates()
+                                                                                                               .getLongitude()))
+                    .andExpect(jsonPath("$.id").isNotEmpty())
+                    .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
+                    .andExpect(jsonPath("$.name").value(createProfile.getName()))
+                    .andExpect(jsonPath("$.taxCodeOrVat").value(createProfile.getTaxCodeOrVat()))
+                    .andExpect(jsonPath("$.pecAddress").value(createProfile.getPecAddress()))
+                    .andExpect(jsonPath("$.description").value(createProfile.getDescription()))
+                    .andExpect(jsonPath("$.legalOffice").value(createProfile.getLegalOffice()))
+                    .andExpect(jsonPath("$.legalRepresentativeFullName").value(createProfile.getLegalRepresentativeFullName()))
+                    .andExpect(jsonPath("$.legalRepresentativeTaxCode").value(createProfile.getLegalRepresentativeTaxCode()))
+                    .andExpect(jsonPath("$.telephoneNumber").value(createProfile.getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.lastName").value(createProfile.getReferent().getLastName()))
+                    .andExpect(jsonPath("$.referent.telephoneNumber").value(createProfile.getReferent()
+                                                                                         .getTelephoneNumber()))
+                    .andExpect(jsonPath("$.referent.emailAddress").value(createProfile.getReferent().getEmailAddress()))
+                    .andExpect(jsonPath("$.referent.role").value(createProfile.getReferent().getRole()));
 
     }
 
@@ -160,10 +166,10 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         OnlineChannel onlineChannel = (OnlineChannel) createProfile.getSalesChannel();
         onlineChannel.setWebsiteUrl(null);
 
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
 
     }
 
@@ -171,10 +177,10 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void Create_CreateIncompleteBothProfile_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateBothWithoutRequiredWebsiteUrlProfile();
 
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
 
     }
 
@@ -182,14 +188,14 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     void Create_CreateProfileMultipleTimes_BadRequest() throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().is2xxSuccessful());
-        this.mockMvc.perform(
-                post(profilePath).contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(createProfile)))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().is2xxSuccessful());
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
 
     }
 
@@ -234,8 +240,12 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         CreateProfile createProfile = new CreateProfile();
         createProfile.setFullName("profile_full_name");
         createProfile.setName("profile_name");
+        createProfile.setNameEn("profile_name_en");
+        createProfile.setNameDe("profile_name_de");
         createProfile.setTaxCodeOrVat("abcdeghilmnopqrs");
         createProfile.setDescription("profile_description");
+        createProfile.setDescriptionEn("profile_description_en");
+        createProfile.setDescriptionDe("profile_description_de");
         createProfile.setPecAddress("pec.address@pagopa.it");
         createProfile.setLegalOffice("legalOffice");
         createProfile.setLegalRepresentativeFullName("legal representative full name");

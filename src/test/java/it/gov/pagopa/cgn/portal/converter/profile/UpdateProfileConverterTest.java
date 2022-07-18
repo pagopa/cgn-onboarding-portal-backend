@@ -14,11 +14,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.stream.IntStream;
+
 @RunWith(SpringRunner.class)
 public class UpdateProfileConverterTest {
 
 
-    private final UpdateProfileConverter updateProfileConverter = new UpdateProfileConverter(new UpdateReferentConverter());
+    private final UpdateProfileConverter updateProfileConverter
+            = new UpdateProfileConverter(new UpdateReferentConverter());
 
     @Test
     public void Convert_ConvertProfileEntityOfflineToDTO_ThrowUnsupportedException() {
@@ -98,8 +100,10 @@ public class UpdateProfileConverterTest {
             AddressEntity entityAddress = profileEntity.getAddressList().get(idx);
             Assert.assertEquals(dtoAddress.getFullAddress(), entityAddress.getFullAddress());
             Assert.assertNotNull(dtoAddress.getCoordinates());
-            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(), BigDecimal.valueOf(entityAddress.getLatitude()));
-            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(), BigDecimal.valueOf(entityAddress.getLongitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(),
+                                BigDecimal.valueOf(entityAddress.getLatitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(),
+                                BigDecimal.valueOf(entityAddress.getLongitude()));
         });
     }
 
@@ -127,8 +131,10 @@ public class UpdateProfileConverterTest {
             AddressEntity entityAddress = profileEntity.getAddressList().get(idx);
             Assert.assertEquals(dtoAddress.getFullAddress(), entityAddress.getFullAddress());
             Assert.assertNotNull(dtoAddress.getCoordinates());
-            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(), BigDecimal.valueOf(entityAddress.getLatitude()));
-            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(), BigDecimal.valueOf(entityAddress.getLongitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLatitude(),
+                                BigDecimal.valueOf(entityAddress.getLatitude()));
+            Assert.assertEquals(dtoAddress.getCoordinates().getLongitude(),
+                                BigDecimal.valueOf(entityAddress.getLongitude()));
         });
     }
 
@@ -150,7 +156,11 @@ public class UpdateProfileConverterTest {
 
     private void checkCommonsUpdateProfileAssertions(UpdateProfile dto, ProfileEntity profileEntity) {
         Assert.assertEquals(dto.getName(), profileEntity.getName());
+        Assert.assertEquals(dto.getNameEn(), profileEntity.getNameEn());
+        Assert.assertEquals(dto.getNameDe(), profileEntity.getNameDe());
         Assert.assertEquals(dto.getDescription(), profileEntity.getDescription());
+        Assert.assertEquals(dto.getDescriptionEn(), profileEntity.getDescriptionEn());
+        Assert.assertEquals(dto.getDescriptionDe(), profileEntity.getDescriptionDe());
         Assert.assertEquals(dto.getPecAddress(), profileEntity.getPecAddress());
         Assert.assertNotNull(profileEntity.getReferent());
         Assert.assertNotNull(dto.getReferent());

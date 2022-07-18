@@ -27,6 +27,7 @@ import org.testcontainers.containers.PostgisContainerProvider;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,6 +179,9 @@ public class IntegrationAbstractTest {
 
     @Autowired
     protected BackofficeExportFacade backofficeExportFacade;
+
+    @Autowired
+    protected ValidatorFactory factory;
 
     @AfterEach
     protected void cleanAll() throws InterruptedException {

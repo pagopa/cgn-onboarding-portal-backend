@@ -643,11 +643,17 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       fullName:
         type: string
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       taxCodeOrVat:
         type: string
@@ -674,6 +680,10 @@ definitions:
         $ref: '#/definitions/CreateReferent'
       description:
         type: string
+      description_en:
+        type: string
+      description_de:
+        type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
@@ -687,9 +697,15 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       pecAddress:
         type: string
@@ -712,6 +728,10 @@ definitions:
         $ref: '#/definitions/UpdateReferent'
       description:
         type: string
+      description_en:
+        type: string
+      description_de:
+        type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
 
@@ -729,6 +749,8 @@ definitions:
       - legalRepresentativeTaxCode
       - referent
       - description
+      - description_en
+      - description_de
       - salesChannel
     properties:
       id:
@@ -738,6 +760,10 @@ definitions:
       fullName:
         type: string
       name:
+        type: string
+      name_en:
+        type: string
+      name_de:
         type: string
       taxCodeOrVat:
         type: string
@@ -761,6 +787,10 @@ definitions:
       referent:
         $ref: '#/definitions/Referent'
       description:
+        type: string
+      description_en:
+        type: string
+      description_de:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
@@ -940,6 +970,8 @@ definitions:
     type: object
     required:
       - name
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
@@ -947,7 +979,19 @@ definitions:
       name:
         type: string
         maxLength: 100
+      name_en:
+        type: string
+        maxLength: 100
+      name_de:
+        type: string
+        maxLength: 100
       description:
+        type: string
+        maxLength: 250
+      description_en:
+        type: string
+        maxLength: 250
+      description_de:
         type: string
         maxLength: 250
       startDate:
@@ -967,6 +1011,12 @@ definitions:
           $ref: '#/definitions/ProductCategory'
         minItems: 1
       condition:
+        type: string
+        maxLength: 200
+      condition_en:
+        type: string
+        maxLength: 200
+      condition_de:
         type: string
         maxLength: 200
       staticCode:
@@ -995,16 +1045,28 @@ definitions:
     type: object
     required:
       - name
-      - description
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
-      - condition
     properties:
       name:
         type: string
         maxLength: 100
+      name_en:
+        type: string
+        maxLength: 100
+      name_de:
+        type: string
+        maxLength: 100
       description:
+        type: string
+        maxLength: 250
+      description_en:
+        type: string
+        maxLength: 250
+      description_de:
         type: string
         maxLength: 250
       startDate:
@@ -1024,6 +1086,12 @@ definitions:
           $ref: '#/definitions/ProductCategory'
         minItems: 1
       condition:
+        type: string
+        maxLength: 200
+      condition_en:
+        type: string
+        maxLength: 200
+      condition_de:
         type: string
         maxLength: 200
       staticCode:
@@ -1065,11 +1133,11 @@ definitions:
       - agreementId
       - state
       - name
-      - description
+      - name_en
+      - name_de
       - startDate
       - endDate
       - productCategories
-      - condition
     properties:
       id:
         type: string
@@ -1080,8 +1148,21 @@ definitions:
       name:
         type: string
         maxLength: 100
+      name_en:
+        type: string
+        maxLength: 100
+      name_de:
+        type: string
+        maxLength: 100
       description:
         type: string
+        maxLength: 250
+      description_en:
+        type: string
+        maxLength: 250
+      description_de:
+        type: string
+        maxLength: 250
       startDate:
         type: string
         format: date
@@ -1100,6 +1181,13 @@ definitions:
         minItems: 1
       condition:
         type: string
+        maxLength: 200
+      condition_en:
+        type: string
+        maxLength: 200
+      condition_de:
+        type: string
+        maxLength: 200
       staticCode:
         type: string
         maxLength: 100
