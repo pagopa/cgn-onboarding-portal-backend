@@ -46,6 +46,8 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
+        entity.setSupportType(toEntitySupportTypeEnum.apply(dto.getSupportType()));
+        entity.setSupportValue(dto.getSupportValue());
         return entity;
     };
 

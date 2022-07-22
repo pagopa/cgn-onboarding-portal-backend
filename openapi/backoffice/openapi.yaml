@@ -781,6 +781,13 @@ definitions:
       referent:
         $ref: '#/definitions/Referent'
 
+  SupportType:
+    type: string
+    enum:
+      - EmailAddress
+      - Website
+      - PhoneNumber
+
   ApprovedAgreementProfile:
     type: object
     required:
@@ -798,6 +805,8 @@ definitions:
       - legalRepresentativeFullName
       - legalRepresentativeTaxCode
       - referent
+      - supportType
+      - supportValue
     properties:
       name:
         type: string
@@ -845,6 +854,12 @@ definitions:
         maxLength: 20
       referent:
         $ref: '#/definitions/ApprovedAgreementReferent'
+      supportType:
+        $ref: '#/definitions/SupportType'
+      supportValue:
+        type: string
+        minLength: 5
+        maxLength: 500
 
   Referent:
     type: object

@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.model;
 import it.gov.pagopa.cgn.portal.annotation.CheckProfile;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.util.CollectionUtils;
@@ -130,6 +131,18 @@ public class ProfileEntity extends BaseEntity {
 
     @Column(name = "all_national_addresses")
     private Boolean allNationalAddresses = false;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "support_type", length = 20)
+    private SupportTypeEnum supportType;
+
+    @NotNull
+    @NotBlank
+    @Size(min = 5, max = 500)
+    @Column(name = "support_value", length = 500)
+    private String supportValue;
+
 
     public void removeAllAddress() {
         this.addressList.clear();
