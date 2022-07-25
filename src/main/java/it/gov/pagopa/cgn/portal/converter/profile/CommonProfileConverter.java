@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.converter.profile;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -23,20 +24,41 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
     private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
+    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
+
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
+
+        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
+        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
+        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
     }
 
-    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum -> Optional
-            .ofNullable(discountCodeTypeMap.get(entityEnum))
-            .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
+    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
+            = entityEnum -> Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
+                                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
-    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType -> discountCodeTypeMap
-            .entrySet().stream().filter(entry -> entry.getValue().equals(discountCodeType)).map(Map.Entry::getKey)
-            .findFirst().orElseThrow();
+    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum
+            = discountCodeType -> discountCodeTypeMap.entrySet()
+                                                     .stream()
+                                                     .filter(entry -> entry.getValue().equals(discountCodeType))
+                                                     .map(Map.Entry::getKey)
+                                                     .findFirst()
+                                                     .orElseThrow();
+
+    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
+            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
+
+    protected Function<SupportType, SupportTypeEnum> toEntitySupportTypeEnum = supportType -> supportTypeMap.entrySet()
+                                                                                                            .stream()
+                                                                                                            .filter(entry -> entry.getValue()
+                                                                                                                                  .equals(supportType))
+                                                                                                            .map(Map.Entry::getKey)
+                                                                                                            .findFirst()
+                                                                                                            .orElseThrow();
 
     protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity) -> {
         if (coordinates != null && coordinates.getLongitude() != null && coordinates.getLatitude() != null) {
@@ -81,16 +103,22 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
                 physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
-                physicalStoreChannel.setAddresses(entity.getAddressList().stream().sorted(getAddressComparator())
-                        .map(addressToDto).collect(Collectors.toList()));
+                physicalStoreChannel.setAddresses(entity.getAddressList()
+                                                        .stream()
+                                                        .sorted(getAddressComparator())
+                                                        .map(addressToDto)
+                                                        .collect(Collectors.toList()));
                 physicalStoreChannel.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
                 bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
-                bothChannels.setAddresses(entity.getAddressList().stream().sorted(getAddressComparator()).map(addressToDto)
-                        .collect(Collectors.toList()));
+                bothChannels.setAddresses(entity.getAddressList()
+                                                .stream()
+                                                .sorted(getAddressComparator())
+                                                .map(addressToDto)
+                                                .collect(Collectors.toList()));
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 bothChannels.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return bothChannels;
@@ -119,8 +147,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
                     entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
                     // addressList must be not empty
-                    entity.setAddressList(physicalStoreChannel.getAddresses().stream()
-                            .map(address -> addressToEntity.apply(address, entity)).collect(Collectors.toList()));
+                    entity.setAddressList(physicalStoreChannel.getAddresses()
+                                                              .stream()
+                                                              .map(address -> addressToEntity.apply(address, entity))
+                                                              .collect(Collectors.toList()));
                     entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
                 } else {
                     throwInvalidSalesChannel();
@@ -131,8 +161,10 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     BothChannels bothChannels = (BothChannels) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.BOTH);
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
-                    entity.setAddressList(bothChannels.getAddresses().stream()
-                            .map(address -> addressToEntity.apply(address, entity)).collect(Collectors.toList()));
+                    entity.setAddressList(bothChannels.getAddresses()
+                                                      .stream()
+                                                      .map(address -> addressToEntity.apply(address, entity))
+                                                      .collect(Collectors.toList()));
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
                     entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
                 } else {

@@ -65,8 +65,14 @@ public class BackofficeApprovedDiscountConverter
         dto.setId(String.valueOf(entity.getId()));
         dto.setDiscount(entity.getDiscountValue());
         dto.setName(entity.getName());
+        dto.setNameEn(entity.getNameEn());
+        dto.setNameDe(entity.getNameDe());
         dto.setCondition(entity.getCondition());
+        dto.setConditionEn(entity.getConditionEn());
+        dto.setConditionDe(entity.getConditionDe());
         dto.setDescription(entity.getDescription());
+        dto.setDescriptionEn(entity.getDescriptionEn());
+        dto.setDescriptionDe(entity.getDescriptionDe());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
         dto.setDiscountUrl(entity.getDiscountUrl());

@@ -27,6 +27,8 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
+        entity.setSupportType(toEntitySupportTypeEnum.apply(dto.getSupportType()));
+        entity.setSupportValue(dto.getSupportValue());
         return entity;
     };
     protected Function<ProfileEntity, Profile> toDto = entity -> {
@@ -48,6 +50,8 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         profile.setLegalRepresentativeFullName(entity.getLegalRepresentativeFullName());
         profile.setLegalOffice(entity.getLegalOffice());
         profile.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
+        profile.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
+        profile.setSupportValue(entity.getSupportValue());
         return profile;
     };
 

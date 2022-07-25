@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
@@ -24,16 +25,25 @@ public class BackofficeApprovedAgreementProfileConverter
     private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
+    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
+
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
+
+        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
+        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
+        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
     }
 
     protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
             = entityEnum -> Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
                                     .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
+
+    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
+            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
     @Override
     protected Function<ProfileEntity, ApprovedAgreementProfile> toDtoFunction() {
@@ -88,7 +98,11 @@ public class BackofficeApprovedAgreementProfileConverter
     protected Function<ProfileEntity, ApprovedAgreementProfile> toDto = entity -> {
         ApprovedAgreementProfile dto = new ApprovedAgreementProfile();
         dto.setName(entity.getName());
+        dto.setNameEn(entity.getNameEn());
+        dto.setNameDe(entity.getNameDe());
         dto.setDescription(entity.getDescription());
+        dto.setDescriptionEn(entity.getDescriptionEn());
+        dto.setDescriptionDe(entity.getDescriptionDe());
         dto.setImageUrl(entity.getAgreement().getImageUrl());
         OffsetDateTime updateDateTime;
         updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();
@@ -102,6 +116,8 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
         dto.setReferent(toDtoReferent.apply(entity.getReferent()));
         dto.setSalesChannel(salesChannelToDto.apply(entity));
+        dto.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
+        dto.setSupportValue(entity.getSupportValue());
         return dto;
     };
 }

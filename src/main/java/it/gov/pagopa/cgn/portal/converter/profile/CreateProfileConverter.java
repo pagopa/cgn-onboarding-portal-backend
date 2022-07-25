@@ -48,6 +48,8 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
         entity.setTelephoneNumber(dto.getTelephoneNumber());
+        entity.setSupportType(toEntitySupportTypeEnum.apply(dto.getSupportType()));
+        entity.setSupportValue(dto.getSupportValue());
         return entity;
     };
 }
