@@ -35,25 +35,25 @@ public class ExportService {
 
     private final AgreementRepository agreementRepository;
 
-    private final String[] headers = new String[]{"Stato Convenzione",
-                                                  "Ragione sociale",
-                                                  "Nome alternativo",
-                                                  "Canale di vendita",
-                                                  "Modalità di riconoscimento",
-                                                  "Sito",
-                                                  "Titolo agevolazione",
-                                                  "Descrizione agevolazione",
-                                                  "Valore",
-                                                  "Stato agevolazione",
-                                                  "Data inizio",
-                                                  "Data fine",
-                                                  "Visibile su EYCA",
-                                                  "Condizioni",
-                                                  "Link agevolazione",
-                                                  "Categorie",
-                                                  "Codice statico",
-                                                  "Landing page",
-                                                  "Referer"};
+    private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
+                                                                  "Ragione sociale",
+                                                                  "Nome alternativo",
+                                                                  "Canale di vendita",
+                                                                  "Modalità di riconoscimento",
+                                                                  "Sito",
+                                                                  "Titolo agevolazione",
+                                                                  "Descrizione agevolazione",
+                                                                  "Valore",
+                                                                  "Stato agevolazione",
+                                                                  "Data inizio",
+                                                                  "Data fine",
+                                                                  "Visibile su EYCA",
+                                                                  "Condizioni",
+                                                                  "Link agevolazione",
+                                                                  "Categorie",
+                                                                  "Codice statico",
+                                                                  "Landing page",
+                                                                  "Referer"};
 
     public ExportService(AgreementRepository agreementRepository) {
         this.agreementRepository = agreementRepository;
@@ -65,7 +65,7 @@ public class ExportService {
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
-            printerConsumer.apply(printer).accept(headers);
+            printerConsumer.apply(printer).accept(exportAgreementsHeaders);
             agreementEntities.stream()
                              .map(getAgreementData)
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
@@ -132,6 +132,7 @@ public class ExportService {
     private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
+                                                .filter(d -> d.getEndDate().isAfter(LocalDate.now()))
                                                 .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
                                                                                                      Optional.of(d)))
                                                 .collect(Collectors.toList());
