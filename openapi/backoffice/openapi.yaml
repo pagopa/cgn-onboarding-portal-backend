@@ -519,6 +519,24 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
+  /export/eyca-discounts:
+    get:
+      tags:
+        - exports
+      summary: Download an export of eyca discounts in CSV format
+      operationId: exportEycaDiscounts
+      responses:
+        200:
+          description: CSV export of all agreements
+          schema:
+            type: file
+        400:
+          $ref: '#/responses/InvalidRequest'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
 consumes:
   - application/json
 

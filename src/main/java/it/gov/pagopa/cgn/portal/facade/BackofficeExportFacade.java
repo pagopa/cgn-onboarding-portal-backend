@@ -21,5 +21,10 @@ public class BackofficeExportFacade {
         return exportService.exportAgreements();
     }
 
+    @Transactional(Transactional.TxType.REQUIRED)
+    public ResponseEntity<Resource> exportEycaDiscounts() {
+        return exportService.exportEycaDiscounts();
+    }
+
 
 }

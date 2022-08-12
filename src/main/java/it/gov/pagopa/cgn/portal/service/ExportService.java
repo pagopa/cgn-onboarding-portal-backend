@@ -4,8 +4,10 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
+import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 public class ExportService {
 
     private final AgreementRepository agreementRepository;
+    private final EycaDataExportRepository eycaDataExportRepository;
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
                                                                   "Ragione sociale",
@@ -55,8 +58,31 @@ public class ExportService {
                                                                   "Landing page",
                                                                   "Referer"};
 
-    public ExportService(AgreementRepository agreementRepository) {
+    private final String[] exportEycaHeaders = new String[]{"LOCAL_ID",
+                                                            "CATEGORIES",
+                                                            "VENDOR",
+                                                            "NAME",
+                                                            "NAME_LOCAL",
+                                                            "TEXT",
+                                                            "TEXT_LOCAL",
+                                                            "EMAIL",
+                                                            "PHONE",
+                                                            "WEB",
+                                                            "TAGS",
+                                                            "IMAGE",
+                                                            "LIVE",
+                                                            "LOCATION_LOCAL_ID",
+                                                            "STREET",
+                                                            "CITY",
+                                                            "ZIP",
+                                                            "COUNTRY",
+                                                            "REGION",
+                                                            "GEO - Latitude",
+                                                            "GEO - Longitude"};
+
+    public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository) {
         this.agreementRepository = agreementRepository;
+        this.eycaDataExportRepository = eycaDataExportRepository;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -67,7 +93,7 @@ public class ExportService {
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
             printerConsumer.apply(printer).accept(exportAgreementsHeaders);
             agreementEntities.stream()
-                             .map(getAgreementData)
+                             .map(expandAgreementToList)
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
@@ -89,7 +115,58 @@ public class ExportService {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> extractValuesForAgreementAndDiscount
+    @Transactional(Transactional.TxType.REQUIRED)
+    public ResponseEntity<Resource> exportEycaDiscounts() {
+        log.info("exportEycaDiscounts start");
+        List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
+        StringWriter writer = new StringWriter();
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
+            printerConsumer.apply(printer).accept(exportEycaHeaders);
+            exportViewEntities.stream()
+                              .map(r -> new String[]{r.getId().toString(),
+                                                     r.getCategories(),
+                                                     r.getVendor(),
+                                                     r.getName(),
+                                                     r.getNameLocal(),
+                                                     r.getText(),
+                                                     r.getTextLocal(),
+                                                     r.getEmail(),
+                                                     r.getPhone(),
+                                                     r.getWeb(),
+                                                     r.getTags(),
+                                                     r.getImage(),
+                                                     r.getLive(),
+                                                     r.getLocationLocalId(),
+                                                     r.getStreet(),
+                                                     r.getCity(),
+                                                     r.getZip(),
+                                                     r.getCountry(),
+                                                     r.getRegion(),
+                                                     r.getLatitude(),
+                                                     r.getLongitude()})
+                              .forEach(printerConsumer.apply(printer));
+
+            byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
+            String filename = "export-eyca-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+
+            log.info("exportEycaDiscounts end success");
+            return ResponseEntity.ok()
+                                 .contentLength(export.length)
+                                 .contentType(MediaType.TEXT_PLAIN)
+                                 .cacheControl(CacheControl.noCache().mustRevalidate())
+                                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                                 .body(new ByteArrayResource(export));
+        } catch (Exception ex) {
+            log.error("exportEycaDiscounts end failure: " + ex.getMessage());
+            log.error(Arrays.stream(ex.getStackTrace())
+                            .map(StackTraceElement::toString)
+                            .collect(Collectors.joining("\n")));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>
+            agreementWithProfileAndDiscountToStringArray
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
                                                          Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getFullName).orElse(null),
@@ -129,16 +206,17 @@ public class ExportService {
                                                          maybeDiscount.map(DiscountEntity::getLandingPageReferrer).orElse(
                                                                  null)};
 
-    private final Function<AgreementEntity, List<String[]>> getAgreementData = agreement -> {
+    private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
                                                 .filter(d -> d.getEndDate().isAfter(LocalDate.now()))
-                                                .map(d -> extractValuesForAgreementAndDiscount.apply(agreement,
-                                                                                                     Optional.of(d)))
+                                                .map(d -> agreementWithProfileAndDiscountToStringArray.apply(agreement,
+                                                                                                             Optional.of(
+                                                                                                                     d)))
                                                 .collect(Collectors.toList());
 
         if (agreementRows.isEmpty()) {
-            agreementRows.add(extractValuesForAgreementAndDiscount.apply(agreement, Optional.empty()));
+            agreementRows.add(agreementWithProfileAndDiscountToStringArray.apply(agreement, Optional.empty()));
         }
 
         return agreementRows;

@@ -24,4 +24,9 @@ public class BackofficeExportController implements ExportApi {
     public ResponseEntity<Resource> exportAgreements() {
         return backofficeExportFacade.exportAgreements();
     }
+
+    @Override
+    public ResponseEntity<Resource> exportEycaDiscounts() {
+        return backofficeExportFacade.exportEycaDiscounts();
+    }
 }
