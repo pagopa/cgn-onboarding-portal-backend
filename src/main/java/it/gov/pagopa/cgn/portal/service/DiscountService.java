@@ -550,12 +550,18 @@ public class DiscountService {
 
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setNameEn(toUpdateEntity.getNameEn());
+        dbEntity.setNameDe(toUpdateEntity.getNameDe());
         dbEntity.setDescription(toUpdateEntity.getDescription());
+        dbEntity.setDescriptionEn(toUpdateEntity.getDescriptionEn());
+        dbEntity.setDescriptionDe(toUpdateEntity.getDescriptionDe());
         dbEntity.setStartDate(toUpdateEntity.getStartDate());
         dbEntity.setEndDate(toUpdateEntity.getEndDate());
         dbEntity.setDiscountValue(toUpdateEntity.getDiscountValue());
         updateProducts.accept(dbEntity, toUpdateEntity.getProducts());
         dbEntity.setCondition(toUpdateEntity.getCondition());
+        dbEntity.setConditionEn(toUpdateEntity.getConditionEn());
+        dbEntity.setConditionDe(toUpdateEntity.getConditionDe());
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
         dbEntity.setVisibleOnEyca(toUpdateEntity.getVisibleOnEyca());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
