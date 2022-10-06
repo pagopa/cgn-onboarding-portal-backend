@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -83,11 +85,15 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountEntity1.setVisibleOnEyca(true);
+        discountEntity1.setState(DiscountStateEnum.PUBLISHED);
+        discountEntity1.setEndDate(LocalDate.now().plusDays(10));
         discountService.createDiscount(agreementEntity.getId(), discountEntity1);
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity2.setName("Discount 2");
         discountEntity2.setVisibleOnEyca(true);
+        discountEntity2.setState(DiscountStateEnum.PUBLISHED);
+        discountEntity2.setEndDate(LocalDate.now().plusDays(10));
         discountService.createDiscount(agreementEntity.getId(), discountEntity2);
 
         ResponseEntity<Resource> response = backofficeExportFacade.exportEycaDiscounts();
