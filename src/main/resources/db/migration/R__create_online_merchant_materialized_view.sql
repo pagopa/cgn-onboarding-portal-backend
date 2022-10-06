@@ -1,77 +1,71 @@
 DROP MATERIALIZED VIEW IF EXISTS online_merchant;
 
 CREATE MATERIALIZED VIEW online_merchant AS
-WITH merchant AS (
-    SELECT a.agreement_k,
-           COALESCE(NULLIF(p.name, ''), p.full_name) AS name,
-           p.website_url,
-           p.discount_code_type
-    FROM agreement a
-             JOIN profile p ON (p.agreement_fk = a.agreement_k)
-    WHERE a.state = 'APPROVED'
-      AND a.start_date <= CURRENT_TIMESTAMP
-      AND CURRENT_TIMESTAMP <= a.end_date
-      AND p.sales_channel IN ('ONLINE', 'BOTH')
-),
-     product_categories AS (
-         SELECT DISTINCT d.agreement_fk,
-                         pc.product_category
-         FROM discount d
-                  JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
-         WHERE d.state = 'PUBLISHED'
-           AND d.start_date <= CURRENT_TIMESTAMP
-           AND CURRENT_TIMESTAMP <= d.end_date
-           AND EXISTS(SELECT 1 FROM merchant m WHERE m.agreement_k = d.agreement_fk)
-     ),
-     merchant_with_categories AS (
-         SELECT m.agreement_k,
-                m.name,
-                m.website_url,
-                m.discount_code_type,
-                pc.product_category,
-                CASE
-                    WHEN pc.product_category = 'BANKING_SERVICES' THEN TRUE
-                    ELSE FALSE
-                    END AS banking_services,
-                CASE
-                    WHEN pc.product_category = 'CULTURE_AND_ENTERTAINMENT' THEN TRUE
-                    ELSE FALSE
-                    END AS culture_and_entertainment,
-                CASE
-                    WHEN pc.product_category = 'HEALTH' THEN TRUE
-                    ELSE FALSE
-                    END AS health,
-                CASE
-                    WHEN pc.product_category = 'HOME' THEN TRUE
-                    ELSE FALSE
-                    END AS home,
-                CASE
-                    WHEN pc.product_category = 'JOB_OFFERS' THEN TRUE
-                    ELSE FALSE
-                    END AS job_offers,
-                CASE
-                    WHEN pc.product_category = 'LEARNING' THEN TRUE
-                    ELSE FALSE
-                    END AS learning,
-                CASE
-                    WHEN pc.product_category = 'SPORTS' THEN TRUE
-                    ELSE FALSE
-                    END AS sports,
-                CASE
-                    WHEN pc.product_category = 'SUSTAINABLE_MOBILITY' THEN TRUE
-                    ELSE FALSE
-                    END AS sustainable_mobility,
-                CASE
-                    WHEN pc.product_category = 'TELEPHONY_AND_INTERNET' THEN TRUE
-                    ELSE FALSE
-                    END AS telephony_and_internet,
-                CASE
-                    WHEN pc.product_category = 'TRAVELLING' THEN TRUE
-                    ELSE FALSE
-                    END AS travelling
-         FROM merchant m
-                  JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk)
-     )
+WITH merchant AS (SELECT a.agreement_k,
+                         COALESCE(NULLIF(p.name, ''), p.full_name) AS name,
+                         p.website_url,
+                         p.discount_code_type
+                  FROM agreement a
+                           JOIN profile p ON (p.agreement_fk = a.agreement_k)
+                  WHERE a.state = 'APPROVED'
+                    AND a.start_date <= CURRENT_DATE
+                    AND CURRENT_DATE <= a.end_date
+                    AND p.sales_channel IN ('ONLINE', 'BOTH')),
+     product_categories AS (SELECT DISTINCT d.agreement_fk,
+                                            pc.product_category
+                            FROM discount d
+                                     JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
+                            WHERE d.state = 'PUBLISHED'
+                              AND d.start_date <= CURRENT_DATE
+                              AND CURRENT_DATE <= d.end_date
+                              AND EXISTS(SELECT 1 FROM merchant m WHERE m.agreement_k = d.agreement_fk)),
+     merchant_with_categories AS (SELECT m.agreement_k,
+                                         m.name,
+                                         m.website_url,
+                                         m.discount_code_type,
+                                         pc.product_category,
+                                         CASE
+                                             WHEN pc.product_category = 'BANKING_SERVICES' THEN TRUE
+                                             ELSE FALSE
+                                             END AS banking_services,
+                                         CASE
+                                             WHEN pc.product_category = 'CULTURE_AND_ENTERTAINMENT' THEN TRUE
+                                             ELSE FALSE
+                                             END AS culture_and_entertainment,
+                                         CASE
+                                             WHEN pc.product_category = 'HEALTH' THEN TRUE
+                                             ELSE FALSE
+                                             END AS health,
+                                         CASE
+                                             WHEN pc.product_category = 'HOME' THEN TRUE
+                                             ELSE FALSE
+                                             END AS home,
+                                         CASE
+                                             WHEN pc.product_category = 'JOB_OFFERS' THEN TRUE
+                                             ELSE FALSE
+                                             END AS job_offers,
+                                         CASE
+                                             WHEN pc.product_category = 'LEARNING' THEN TRUE
+                                             ELSE FALSE
+                                             END AS learning,
+                                         CASE
+                                             WHEN pc.product_category = 'SPORTS' THEN TRUE
+                                             ELSE FALSE
+                                             END AS sports,
+                                         CASE
+                                             WHEN pc.product_category = 'SUSTAINABLE_MOBILITY' THEN TRUE
+                                             ELSE FALSE
+                                             END AS sustainable_mobility,
+                                         CASE
+                                             WHEN pc.product_category = 'TELEPHONY_AND_INTERNET' THEN TRUE
+                                             ELSE FALSE
+                                             END AS telephony_and_internet,
+                                         CASE
+                                             WHEN pc.product_category = 'TRAVELLING' THEN TRUE
+                                             ELSE FALSE
+                                             END AS travelling
+                                  FROM merchant m
+                                           JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk))
 SELECT m.agreement_k                        AS id,
        m.name,
        m.website_url,
