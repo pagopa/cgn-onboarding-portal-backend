@@ -36,29 +36,24 @@ SELECT row_number() over ()                                                     
 FROM agreement ag
          INNER JOIN discount d ON d.agreement_fk = ag.agreement_k
          INNER JOIN profile p ON p.agreement_fk = ag.agreement_k
-         INNER JOIN (
-    select dpc.discount_fk,
-           array_agg(eyca_map.eyca_cat) as categories
-    from discount_product_category dpc
-             INNER JOIN (
-        SELECT *
-        FROM (
-                 VALUES ('BANKING_SERVICES', 'SV'),
-                        ('CULTURE_AND_ENTERTAINMENT', 'GO'),
-                        ('HEALTH', 'HB'),
-                        ('HOME', 'SV'),
-                        ('JOB_OFFERS', 'SV'),
-                        ('LEARNING', 'LR'),
-                        ('SPORTS', 'SP'),
-                        ('SUSTAINABLE_MOBILITY', 'TT'),
-                        ('TELEPHONY_AND_INTERNET', 'SV'),
-                        ('TRAVELLING', 'TT')
-             ) AS ec (cat, eyca_cat)
-    ) eyca_map ON eyca_map.cat = dpc.product_category::text
-    group by dpc.discount_fk
-) as cat ON cat.discount_fk = d.discount_k
+         INNER JOIN (select dpc.discount_fk,
+                            array_agg(eyca_map.eyca_cat) as categories
+                     from discount_product_category dpc
+                              INNER JOIN (SELECT *
+                                          FROM (VALUES ('BANKING_SERVICES', 'SV'),
+                                                       ('CULTURE_AND_ENTERTAINMENT', 'GO'),
+                                                       ('HEALTH', 'HB'),
+                                                       ('HOME', 'SV'),
+                                                       ('JOB_OFFERS', 'SV'),
+                                                       ('LEARNING', 'LR'),
+                                                       ('SPORTS', 'SP'),
+                                                       ('SUSTAINABLE_MOBILITY', 'TT'),
+                                                       ('TELEPHONY_AND_INTERNET', 'SV'),
+                                                       ('TRAVELLING', 'TT')) AS ec (cat, eyca_cat)) eyca_map
+                                         ON eyca_map.cat = dpc.product_category::text
+                     group by dpc.discount_fk) as cat ON cat.discount_fk = d.discount_k
          LEFT JOIN address ad ON ad.profile_fk = p.profile_k
-WHERE (d.visible_on_eyca = true
+WHERE (d.visible_on_eyca = true AND d.state = 'PUBLISHED' AND CURRENT_DATE <= d.end_date
     AND ((p.sales_channel IN ('BOTH', 'OFFLINE') AND
           (p.discount_code_type IS NULL OR p.discount_code_type IN ('STATIC', 'LANDINGPAGE')))
         OR (p.sales_channel = 'ONLINE' AND (p.discount_code_type IN ('STATIC', 'LANDINGPAGE'))))
