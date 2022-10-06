@@ -399,7 +399,11 @@ public class TestUtils {
         updateDiscount.setNameEn(discount.getNameEn());
         updateDiscount.setNameDe(discount.getNameDe());
         updateDiscount.setDescription(discount.getDescription());
+        updateDiscount.setDescriptionEn(discount.getDescriptionEn());
+        updateDiscount.setDescriptionDe(discount.getDescriptionDe());
         updateDiscount.setCondition(discount.getCondition());
+        updateDiscount.setConditionEn(discount.getConditionEn());
+        updateDiscount.setConditionDe(discount.getConditionDe());
         updateDiscount.setStartDate(discount.getStartDate());
         updateDiscount.setEndDate(discount.getEndDate());
         updateDiscount.setStaticCode(discount.getStaticCode());
