@@ -12,7 +12,8 @@ WITH discounts_counter AS (SELECT a.agreement_k,
                                      COUNT(d.state) > 0 as test_pending
                               FROM agreement a
                                        LEFT JOIN discount d
-                                                 ON (d.agreement_fk = a.agreement_k and d.state = 'TEST_PENDING')
+                                                 ON (d.agreement_fk = a.agreement_k and d.state = 'TEST_PENDING' and
+                                                     CURRENT_DATE <= d.end_date)
                               GROUP BY a.agreement_k)
 SELECT a.agreement_k,
        a.information_last_update_date,
