@@ -4,10 +4,19 @@ CREATE VIEW eyca_data_export AS
 SELECT row_number() over ()                                                               as "id",
        REPLACE(REPLACE(cat.categories::text, '{', ''), '}', '')                           as "categories",
        coalesce(p.full_name, p.name)                                                      as "vendor",
-       ''                                                                                 as "name",
+       d.name_en                                                                          as "name",
        d.name                                                                             as "name_local",
-       ''                                                                                 as "text",
-       d.description || ' - ' || d.condition || (
+       CONCAT_WS(' - ', NULLIF(TRIM(d.description_en), ''), NULLIF(TRIM(d.condition_en), ''), (
+           CASE
+               WHEN p.discount_code_type IS NULL
+                   THEN 'To access the discount, show your EYCA card at the point of sale.'
+               WHEN p.discount_code_type = 'STATIC'
+                   THEN 'To access the discount, use the code ' || d.static_code
+               WHEN p.discount_code_type = 'LANDINGPAGE'
+                   THEN 'To access the discount, use the link ' || d.landing_page_url
+               END
+           ))                                                                             as "text",
+       CONCAT_WS(' - ', NULLIF(TRIM(d.description), ''), NULLIF(TRIM(d.condition), ''), (
            CASE
                WHEN p.discount_code_type IS NULL
                    THEN 'Per accedere all''agevolazione, mostra la tua carta EYCA presso il punto vendita.'
@@ -16,7 +25,7 @@ SELECT row_number() over ()                                                     
                WHEN p.discount_code_type = 'LANDINGPAGE'
                    THEN 'Per accedere all''agevolazione, vai al link ' || d.landing_page_url
                END
-           )                                                                              as "text_local",
+           ))                                                                             as "text_local",
        ''                                                                                 as "email",
        ''                                                                                 as "phone",
        p.website_url                                                                      as "web",
