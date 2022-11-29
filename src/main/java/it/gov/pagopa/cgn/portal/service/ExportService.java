@@ -184,7 +184,7 @@ public class ExportService {
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountValue)
                                                                       .map(Objects::toString).orElse(null),
-                                                         maybeDiscount.map(DiscountEntity::getState)
+                                                         maybeDiscount.map(d -> d.getEndDate().isAfter(LocalDate.now()) ? d.getState() : "EXPIRED")
                                                                       .map(Objects::toString).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getStartDate)
                                                                       .map(Objects::toString).orElse(null),
@@ -209,7 +209,6 @@ public class ExportService {
     private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
-                                                .filter(d -> d.getEndDate().isAfter(LocalDate.now()))
                                                 .map(d -> agreementWithProfileAndDiscountToStringArray.apply(agreement,
                                                                                                              Optional.of(
                                                                                                                      d)))
