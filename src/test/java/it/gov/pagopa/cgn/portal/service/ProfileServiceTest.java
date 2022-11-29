@@ -187,7 +187,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_UpdateOfflineProfileRemovingAddresses_ThrowsException() {
+    void Update_UpdateOfflineProfileRemovingAddresses_ShouldSetAllNationalAddresses() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
         profileEntity.setAllNationalAddresses(false);
         profileEntity.setAddressList(TestUtils.createSampleAddress(profileEntity));
@@ -199,9 +199,9 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         toUpdateProfile.setWebsiteUrl("https://www.pagopa.gov.it/test");
         toUpdateProfile.setAllNationalAddresses(false);
         toUpdateProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
-        
-        Assertions.assertThrows(InvalidRequestException.class,
-                                () -> profileService.updateProfile(agreementId, toUpdateProfile));
+    
+        ProfileEntity profileDB = profileService.updateProfile(agreementId, toUpdateProfile);
+        Assertions.assertTrue(profileDB.getAllNationalAddresses());
     }
 
     @Test
