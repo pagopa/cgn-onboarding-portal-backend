@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -59,6 +60,10 @@ public class ProfileService {
         if (AgreementStateEnum.REJECTED.equals(agreementEntity.getState())) {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
+        }
+        // fix for misalignments with addresses
+        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) && profileEntity.getAddressList().isEmpty() && !profileEntity.getAllNationalAddresses()) {
+            profileEntity.setAllNationalAddresses(true);
         }
         validateProfile(profileEntity);
         return profileRepository.save(profileEntity);
