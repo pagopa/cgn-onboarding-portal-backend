@@ -41,17 +41,21 @@ public class ExportService {
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
                                                                   "Ragione sociale",
                                                                   "Nome alternativo",
+                                                                  "Nome alternativo inglese",
                                                                   "Canale di vendita",
                                                                   "Modalità di riconoscimento",
                                                                   "Sito",
                                                                   "Titolo agevolazione",
+                                                                  "Titolo agevolazione inglese",
                                                                   "Descrizione agevolazione",
+                                                                  "Descrizione agevolazione inglese",
                                                                   "Valore",
                                                                   "Stato agevolazione",
                                                                   "Data inizio",
                                                                   "Data fine",
                                                                   "Visibile su EYCA",
                                                                   "Condizioni",
+                                                                  "Condizioni inglese",
                                                                   "Link agevolazione",
                                                                   "Categorie",
                                                                   "Codice statico",
@@ -175,6 +179,8 @@ public class ExportService {
                                                          Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getName).orElse(null),
                                                          Optional.ofNullable(agreement.getProfile())
+                                                                 .map(ProfileEntity::getNameEn).orElse(null),
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getSalesChannel)
                                                                  .map(SalesChannelEnum::getCode).orElse(null),
                                                          Optional.ofNullable(agreement.getProfile())
@@ -183,7 +189,9 @@ public class ExportService {
                                                          Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getWebsiteUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getName).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getNameEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getDescriptionEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountValue)
                                                                       .map(Objects::toString).orElse(null),
                                                          maybeDiscount.map(d -> d.getEndDate().isAfter(LocalDate.now()) ? d.getState() : "EXPIRED")
@@ -195,6 +203,7 @@ public class ExportService {
                                                          maybeDiscount.map(DiscountEntity::getVisibleOnEyca)
                                                                       .map(Objects::toString).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getCondition).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getConditionEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getProducts)
                                                                       .map(l -> l.stream()
