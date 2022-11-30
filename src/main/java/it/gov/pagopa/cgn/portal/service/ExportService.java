@@ -78,7 +78,8 @@ public class ExportService {
                                                             "COUNTRY",
                                                             "REGION",
                                                             "GEO - Latitude",
-                                                            "GEO - Longitude"};
+                                                            "GEO - Longitude",
+                                                            "DISCOUNT TYPE"};
 
     public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository) {
         this.agreementRepository = agreementRepository;
@@ -143,7 +144,8 @@ public class ExportService {
                                                      r.getCountry(),
                                                      r.getRegion(),
                                                      r.getLatitude(),
-                                                     r.getLongitude()})
+                                                     r.getLongitude(),
+                                                     r.getDiscountType()})
                               .forEach(printerConsumer.apply(printer));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
