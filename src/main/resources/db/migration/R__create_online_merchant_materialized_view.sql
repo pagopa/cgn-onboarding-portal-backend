@@ -9,7 +9,6 @@ WITH merchant AS (SELECT a.agreement_k,
                            JOIN profile p ON (p.agreement_fk = a.agreement_k)
                   WHERE a.state = 'APPROVED'
                     AND a.start_date <= CURRENT_DATE
-                    AND CURRENT_DATE <= a.end_date
                     AND p.sales_channel IN ('ONLINE', 'BOTH')),
      product_categories AS (SELECT DISTINCT d.agreement_fk,
                                             pc.product_category
