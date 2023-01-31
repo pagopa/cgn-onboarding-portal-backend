@@ -104,7 +104,7 @@ public class AgreementService extends AgreementServiceLight {
         if (!CollectionUtils.isEmpty(discounts)) {
             discounts = discounts.stream()
                     .filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
-                            && LocalDate.now().isBefore(d.getEndDate())) // not expired
+                            && LocalDate.now().isBefore(d.getEndDate().plusDays(1))) // not expired
                     .collect(Collectors.toList());
             agreementEntity.setDiscountList(discounts);
         }

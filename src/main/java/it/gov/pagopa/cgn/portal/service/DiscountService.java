@@ -439,10 +439,6 @@ public class DiscountService {
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
             throw new InvalidRequestException("Cannot proceed with a suspended discount");
         }
-        if (!isContainsToday(agreementEntity.getStartDate(), agreementEntity.getEndDate())) {
-            throw new InvalidRequestException("Cannot proceed with a discount because the agreement is expired");
-        }
-
         if (LocalDate.now().isAfter(discount.getEndDate())) {
             throw new InvalidRequestException("Cannot proceed with an expired discount");
         }
