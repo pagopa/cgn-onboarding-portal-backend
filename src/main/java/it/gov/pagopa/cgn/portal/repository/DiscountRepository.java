@@ -13,6 +13,8 @@ public interface DiscountRepository extends JpaRepository<DiscountEntity, Long> 
 
     long countByAgreementIdAndState(String agreementId, DiscountStateEnum discountStateEnum);
 
+    long countByAgreementIdAndStateAndEndDateLessThanEqual(String agreementId, DiscountStateEnum discountStateEnum, LocalDate aDate);
+
     List<DiscountEntity> findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
             DiscountStateEnum discountStateEnum, LocalDate endDate);
 }
