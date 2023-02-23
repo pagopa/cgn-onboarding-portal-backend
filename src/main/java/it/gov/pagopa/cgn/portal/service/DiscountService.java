@@ -445,7 +445,7 @@ public class DiscountService {
 
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
 
-        long publishedDiscount = discountRepository.countByAgreementIdAndStateAndEndDateLessThanEqual(agreementEntity.getId(),
+        long publishedDiscount = discountRepository.countByAgreementIdAndStateAndEndDateGreaterThan(agreementEntity.getId(),
                 DiscountStateEnum.PUBLISHED,
                 LocalDate.now());
 
