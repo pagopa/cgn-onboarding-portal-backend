@@ -105,6 +105,7 @@ SELECT m.id,
               FROM discount d
               WHERE d.agreement_fk = m.id
                 AND d.state = 'PUBLISHED'
+                AND d.start_date <= NOW()
                 AND d.start_date >= NOW() - INTERVAL '15 days'
                 AND d.end_date >= NOW()) AS new_discounts
 FROM merchant_without_address m
