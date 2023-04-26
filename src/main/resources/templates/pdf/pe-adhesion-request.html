@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th>
+<html lang="en" xmlns:th xmlns="http://www.w3.org/1999/html">
 
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
@@ -200,6 +200,7 @@
         corrispettivo a carico dell’Amministrazione procedente;
     </li>
 </ul>
+</p>
 <p>E pertanto</p>
 <p class="title text-center text-uppercase">CHIEDE</p>
 <p>al Dipartimento per le Politiche Giovanili e il Servizio Civile Universale della Presidenza del Consiglio dei
@@ -215,17 +216,17 @@
     beni/servizi e/o iniziative,
     come descritti nei seguenti punti (da compilarsi obbligatoriamente ad eccezione del punto 3): </p>
 <ol class="ol">
-    <li>NOME OPERATORE COME VISUALIZZATO IN APP DAI BENEFICIARI:</li>
+    <li>NOME OPERATORE COME VISUALIZZATO IN APP DAI BENEFICIARI:
     <div class="mt box"><span th:text="${merchant_name}"></span></div>
-    <div class="page-break"></div>
+        <div class="page-break"></div></li>
     <li class="mt" th:each="discount : ${discounts}">ESPLICAZIONE SPECIFICA:
         <ol class="ol">
             <li>DELL’OGGETTO, DEI CONTENUTI E DELLA DURATA DELLA OPPORTUNITA’/AGEVOLAZIONE PROPOSTA;
                 <div class="mt box">
-                    <p><span th:text="${discount.name}"/></p>
-                    <p><span th:text="${discount.description}"/></p>
-                    <p><span th:text="${discount.discountValue}"/></p>
-                    <p><span th:text="${discount.validityPeriod}"/></p></div>
+                    <span th:text="${discount.name}"/>
+                    <span th:text="${discount.description}"/>
+                    <span th:text="${discount.discountValue}"/>
+                    <span th:text="${discount.validityPeriod}"/></div>
             </li>
             <li>DEI TERMINI E CONDIZIONI DI ACCESSIBILITA’ ED USO DELLA AGEVOLAZIONE PER I BENEFICIARI;
                 <div class="mt box"><span th:text="${discount.condition}"></span></div>
@@ -250,7 +251,7 @@
 <!--this div for e-commerce-->
 </ol>
 <div class="page-break"></div>
-</p>
+
 <!-- Third page -->
 <h1 class="title text-center text-uppercase">Indica</h1>
 <p>inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento di convenzionamento e/o all’attuazione
@@ -284,7 +285,7 @@
 </ul>
 </p>
 <span class="list-title">Modalità di trattamento</span>
-<p>Per trattamento si intende qualunque operazione applicata, con o senza l’ausilio di processi automatizzati, ai dati personali.<br>
+<p>Per trattamento si intende qualunque operazione applicata, con o senza l’ausilio di processi automatizzati, ai dati personali.<br/>
     Il trattamento avverrà mediante strumenti elettronici in modo da garantire la sicurezza e la riservatezza dei dati stessi
     ed è finalizzato a consentire lo svolgimento dei rapporti tra le parti ed in particolare per l’attuazione della Convenzione
     per le finalità indicate di seguito.
@@ -304,9 +305,9 @@
         all’attuazione dell’iniziativa Carta Giovani Nazionale (art. 6, comma 1, lettera e) del Regolamento).</li>
 </ul>
 <p>I dati personali degli Interessati possono essere utilizzati dal Titolare in giudizio o nelle fasi propedeutiche alla sua
-    eventuale instaurazione per la difesa da abusi perpetrati dagli Interessati.<br>
+    eventuale instaurazione per la difesa da abusi perpetrati dagli Interessati.<br/>
     Gli Interessati possono ottenere chiarimenti sulla finalità della raccolta dei dati o su quali dati siano effettivamente
-    acquisiti, contattando il Titolare.<br>
+    acquisiti, contattando il Titolare.<br/>
     Il trattamento è necessario per le seguenti finalità:
     <ol>
     <li>creazione del profilo Operatore nel portale dedicato ed inserimento dello stesso nell’elenco pubblicato nell’APP IO e sui
@@ -333,6 +334,7 @@
     <li>ad altri eventuali soggetti terzi, nei casi espressamente previsti dalla legge, ovvero ancora se la comunicazione si renderà necessaria
     per la tutela dell’Agenzia in sede giudiziaria, nel rispetto delle vigenti disposizioni in materia di protezione dei dati personali</li>
 </ul>
+</p>
 <span class="list-title">Trasferimento dati fuori dall’UE</span>
 <p>Alcuni dei fornitori terzi che PagoPA S.p.A. utilizza per il progetto IO risiedono negli USA. PagoPA S.p.A. ha concluso con tali
     fornitori accordi di servizio ai sensi dell’art. 28 del Regolamento. Tutti i fornitori sono conformi al Regolamento e, in assenza
@@ -351,7 +353,7 @@
 <p>Gli interessati hanno il diritto di ottenere dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale, nei casi
     previsti dal Regolamento, l’accesso ai propri dati personali, la rettifica o la cancellazione degli stessi o la limitazione del
     trattamento che li riguarda, o di opporsi al trattamento, secondo quanto previsto dal Regolamento.
-    Le relative istanze vanno presentate al Titolare del trattamento dei dati.<br>
+    Le relative istanze vanno presentate al Titolare del trattamento dei dati.<br/>
     Il Consenso al trattamento può essere revocato in ogni momento mediante comunicazione scritta o via email al Titolare. La revoca
     del consenso non pregiudica il trattamento effettuato prima della revoca, che resta valido e legittimo a tutti gli effetti.
 </p>
