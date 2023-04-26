@@ -223,10 +223,23 @@
         <ol class="ol">
             <li>DELL’OGGETTO, DEI CONTENUTI E DELLA DURATA DELLA OPPORTUNITA’/AGEVOLAZIONE PROPOSTA;
                 <div class="mt box">
-                    <span th:text="${discount.name}"/>
-                    <span th:text="${discount.description}"/>
-                    <span th:text="${discount.discountValue}"/>
-                    <span th:text="${discount.validityPeriod}"/></div>
+                    <div>
+                        <b>Beni/servizi
+                            oggetto
+                            dell’agevolazione:</b> <span th:text="${discount.name}"></span>
+                    </div>
+                    <div>
+                        <b>Descrizione
+                            dell’agevolazione:</b> <span th:text="${discount.description}"></span>
+                    </div>
+                    <div>
+                        <b>Entità
+                            sconto (%):</b> <span th:text="${discount.discountValue}"></span>
+                    </div>
+                    <div>
+                        <b>Durata
+                            dell’agevolazione:</b> <span th:text="${discount.validityPeriod}"></span>
+                    </div></div>
             </li>
             <li>DEI TERMINI E CONDIZIONI DI ACCESSIBILITA’ ED USO DELLA AGEVOLAZIONE PER I BENEFICIARI;
                 <div class="mt box"><span th:text="${discount.condition}"></span></div>
