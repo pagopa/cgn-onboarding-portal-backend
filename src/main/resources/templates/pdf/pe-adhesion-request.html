@@ -239,14 +239,19 @@
                     <div>
                         <b>Durata
                             dell’agevolazione:</b> <span th:text="${discount.validityPeriod}"></span>
-                    </div></div>
+                    </div>
+                    <br/>
+                </div>
             </li>
+            
             <li>DEI TERMINI E CONDIZIONI DI ACCESSIBILITA’ ED USO DELLA AGEVOLAZIONE PER I BENEFICIARI;
                 <div class="mt box"><span th:text="${discount.condition}"></span></div>
+                <br/>
             </li>
             <li>DELLA MODALITÀ DI RICONOSCIMENTO PRESCELTA TRA QUELLE INDICATE NELLA DOCUMENTAZIONE TECNICA
                 (accesso fisico ai locali, accesso via web tramite landing page, accesso tramite web con codice statico etc.)
                 <div class="mt box"><span th:text="${discount.modeValue}"></span></div>
+                <br/>
             </li>
 
         </ol>
