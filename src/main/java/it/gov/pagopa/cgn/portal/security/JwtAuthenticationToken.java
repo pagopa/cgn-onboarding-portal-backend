@@ -14,6 +14,7 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
         this.setAuthenticated(true);
     }
 
+    //this return the same as getPrincipal and it's never used
     @Override
     public Object getCredentials() {
         return jwtUser;
