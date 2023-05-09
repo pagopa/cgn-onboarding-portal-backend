@@ -45,7 +45,7 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
             s.setExpiredAt(OffsetDateTime.now());
             discountBucketCodeSummaryRepository.save(s);
         });
-        testJob(DiscountStateEnum.PUBLISHED);
+        testJob(DiscountStateEnum.SUSPENDED);
     }
 
     @Test
