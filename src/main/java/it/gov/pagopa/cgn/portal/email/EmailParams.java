@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.core.io.Resource;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ public class EmailParams {
 
     private final String mailFrom;
     private final List<String> mailToList;
+    private final Optional<List<String>> mailCCListOpt;
     private final Optional<String> replyToOpt;
     private final String subject;
     private final String body;
@@ -29,5 +31,6 @@ public class EmailParams {
                 ", subject='" + subject + '\'' +
                 '}';
     }
+
 
 }
