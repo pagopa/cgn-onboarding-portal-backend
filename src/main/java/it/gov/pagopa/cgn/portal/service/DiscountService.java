@@ -42,11 +42,11 @@ public class DiscountService {
     private final BucketService bucketService;
     private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
-    private final ConfigProperties configProperties;
     private final BucketLoadUtils bucketLoadUtils;
     private final OfflineMerchantRepository offlineMerchantRepository;
     private final OnlineMerchantRepository onlineMerchantRepository;
     private final PublishedProductCategoryRepository publishedProductCategoryRepository;
+
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
@@ -347,7 +347,6 @@ public class DiscountService {
         this.bucketService = bucketService;
         this.discountBucketCodeRepository = discountBucketCodeRepository;
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
-        this.configProperties = configProperties;
         this.bucketLoadUtils = bucketLoadUtils;
         this.offlineMerchantRepository = offlineMerchantRepository;
         this.onlineMerchantRepository = onlineMerchantRepository;
@@ -571,11 +570,6 @@ public class DiscountService {
         dbEntity.setDiscountUrl(toUpdateEntity.getDiscountUrl());
     };
 
-    private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
-        LocalDate now = LocalDate.now();
-        return (!now.isBefore(startDate)) && (now.isBefore(endDate));
-    }
-
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary
@@ -583,8 +577,6 @@ public class DiscountService {
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         suspendDiscount(discount.getAgreement().getId(),
                 discount.getId(),
-                "La lista di codici è esaurita da più di " +
-                        configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() +
-                        " giorni");
+                "La lista di codici è esaurita.");
     }
 }
