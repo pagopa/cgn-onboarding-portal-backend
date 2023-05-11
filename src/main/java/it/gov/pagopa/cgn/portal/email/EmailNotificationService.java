@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -59,8 +60,8 @@ public class EmailNotificationService {
             helper.setFrom(emailParams.getMailFrom());
             helper.setTo(emailParams.getMailToList().toArray(new String[0]));
 
-            if (emailParams.getMailCCListOpt().isPresent()) {
-                helper.setCc(emailParams.getMailCCListOpt().orElseThrow().toArray(new String[0]));
+            if (Objects.nonNull(emailParams.getMailCCList()) && !emailParams.getMailCCList().isEmpty()) {
+                helper.setCc(emailParams.getMailCCList().toArray(new String[0]));
             }
 
             if (emailParams.getReplyToOpt().isPresent()) {

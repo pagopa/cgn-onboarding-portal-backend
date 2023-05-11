@@ -16,7 +16,7 @@ public class EmailParams {
 
     private final String mailFrom;
     private final List<String> mailToList;
-    private final Optional<List<String>> mailCCListOpt;
+    private final List<String> mailCCList;
     private final Optional<String> replyToOpt;
     private final String subject;
     private final String body;
