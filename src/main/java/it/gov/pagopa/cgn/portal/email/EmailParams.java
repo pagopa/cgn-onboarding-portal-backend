@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.core.io.Resource;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
