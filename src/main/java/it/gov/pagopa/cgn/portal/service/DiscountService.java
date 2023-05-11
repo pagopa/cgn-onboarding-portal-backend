@@ -583,8 +583,6 @@ public class DiscountService {
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         suspendDiscount(discount.getAgreement().getId(),
                 discount.getId(),
-                "La lista di codici è esaurita da più di " +
-                        configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays() +
-                        " giorni");
+                "La lista di codici è esaurita.");
     }
 }
