@@ -46,7 +46,7 @@ public class ProfileFacade {
         ProfileEntity profileEntity = updateProfileConverter.toEntity(updateProfile);
         ProfileEntity dbProfile = profileService.getProfileFromAgreementId(agreementId);
         if (!profileEntity.getSalesChannel().equals(dbProfile.getSalesChannel()) ||
-            !profileEntity.getDiscountCodeType().equals(dbProfile.getDiscountCodeType())) {
+            (profileEntity.getDiscountCodeType() != null && !profileEntity.getDiscountCodeType().equals(dbProfile.getDiscountCodeType()))) {
             // if sales channel or discount code type are changed we should unpublish all the discount of this profile
             discountService.getDiscounts(agreementId)
                            .stream()

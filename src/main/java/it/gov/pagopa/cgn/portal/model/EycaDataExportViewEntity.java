@@ -77,6 +77,9 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "longitude")
     private String longitude;
+    
+    @Column(name = "discount_type")
+    private String discountType;
 
 }
 

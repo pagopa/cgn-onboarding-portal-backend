@@ -41,17 +41,21 @@ public class ExportService {
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
                                                                   "Ragione sociale",
                                                                   "Nome alternativo",
+                                                                  "Nome alternativo inglese",
                                                                   "Canale di vendita",
                                                                   "Modalità di riconoscimento",
                                                                   "Sito",
                                                                   "Titolo agevolazione",
+                                                                  "Titolo agevolazione inglese",
                                                                   "Descrizione agevolazione",
+                                                                  "Descrizione agevolazione inglese",
                                                                   "Valore",
                                                                   "Stato agevolazione",
                                                                   "Data inizio",
                                                                   "Data fine",
                                                                   "Visibile su EYCA",
                                                                   "Condizioni",
+                                                                  "Condizioni inglese",
                                                                   "Link agevolazione",
                                                                   "Categorie",
                                                                   "Codice statico",
@@ -78,7 +82,8 @@ public class ExportService {
                                                             "COUNTRY",
                                                             "REGION",
                                                             "GEO - Latitude",
-                                                            "GEO - Longitude"};
+                                                            "GEO - Longitude",
+                                                            "DISCOUNT TYPE"};
 
     public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository) {
         this.agreementRepository = agreementRepository;
@@ -143,7 +148,8 @@ public class ExportService {
                                                      r.getCountry(),
                                                      r.getRegion(),
                                                      r.getLatitude(),
-                                                     r.getLongitude()})
+                                                     r.getLongitude(),
+                                                     r.getDiscountType()})
                               .forEach(printerConsumer.apply(printer));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
@@ -173,6 +179,8 @@ public class ExportService {
                                                          Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getName).orElse(null),
                                                          Optional.ofNullable(agreement.getProfile())
+                                                                 .map(ProfileEntity::getNameEn).orElse(null),
+                                                         Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getSalesChannel)
                                                                  .map(SalesChannelEnum::getCode).orElse(null),
                                                          Optional.ofNullable(agreement.getProfile())
@@ -181,10 +189,12 @@ public class ExportService {
                                                          Optional.ofNullable(agreement.getProfile())
                                                                  .map(ProfileEntity::getWebsiteUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getName).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getNameEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getDescriptionEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountValue)
                                                                       .map(Objects::toString).orElse(null),
-                                                         maybeDiscount.map(DiscountEntity::getState)
+                                                         maybeDiscount.map(d -> d.getEndDate().isAfter(LocalDate.now()) ? d.getState() : "EXPIRED")
                                                                       .map(Objects::toString).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getStartDate)
                                                                       .map(Objects::toString).orElse(null),
@@ -193,6 +203,7 @@ public class ExportService {
                                                          maybeDiscount.map(DiscountEntity::getVisibleOnEyca)
                                                                       .map(Objects::toString).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getCondition).orElse(null),
+                                                         maybeDiscount.map(DiscountEntity::getConditionEn).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getDiscountUrl).orElse(null),
                                                          maybeDiscount.map(DiscountEntity::getProducts)
                                                                       .map(l -> l.stream()
@@ -209,7 +220,6 @@ public class ExportService {
     private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()
                                                 .stream()
-                                                .filter(d -> d.getEndDate().isAfter(LocalDate.now()))
                                                 .map(d -> agreementWithProfileAndDiscountToStringArray.apply(agreement,
                                                                                                              Optional.of(
                                                                                                                      d)))

@@ -7,7 +7,6 @@ WITH merchant AS (SELECT a.agreement_k,
                            JOIN profile p ON (p.agreement_fk = a.agreement_k)
                   WHERE a.state = 'APPROVED'
                     AND a.start_date <= CURRENT_DATE
-                    AND CURRENT_DATE <= a.end_date
                     AND p.sales_channel IN ('OFFLINE', 'BOTH')),
      product_categories AS (SELECT DISTINCT d.agreement_fk,
                                             pc.product_category
@@ -106,6 +105,7 @@ SELECT m.id,
               FROM discount d
               WHERE d.agreement_fk = m.id
                 AND d.state = 'PUBLISHED'
+                AND d.start_date <= NOW()
                 AND d.start_date >= NOW() - INTERVAL '15 days'
                 AND d.end_date >= NOW()) AS new_discounts
 FROM merchant_without_address m

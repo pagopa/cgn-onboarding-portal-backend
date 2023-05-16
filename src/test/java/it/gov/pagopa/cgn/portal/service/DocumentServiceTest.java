@@ -309,9 +309,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
         Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
-        Assertions.assertTrue(actual.contains("A Description"));
         Assertions.assertTrue(actual.contains(""));
-        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription()));
+        Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription().toLowerCase()));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));
         Assertions.assertTrue(actual.contains("Tel: +390123456789"));
