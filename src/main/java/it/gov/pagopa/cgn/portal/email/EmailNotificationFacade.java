@@ -64,7 +64,8 @@ public class EmailNotificationFacade {
         try {
             TemplateEmail template = getApprovedAgreementTemplateBySalesChannel(salesChannel, discountCodeTypeOpt);
             String body = getTemplateHtml(template);
-            var emailParams = createEmailParams(referentEmail,Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+            var emailParams = createEmailParams(referentEmail,
+                    Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                     subject, body, errorMessage);
             emailNotificationService.sendAsyncMessage(emailParams);
         } catch (Exception e) {
@@ -104,7 +105,7 @@ public class EmailNotificationFacade {
         context.setVariable("rejection_message", rejectionMessage);
         final String errorMessage = "Failed to send Agreement Request Rejected notification to: " + referentEmail;
         var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
@@ -143,7 +144,7 @@ public class EmailNotificationFacade {
         final String errorMessage = "Failed to send Discount Suspended notification to: " + referentEmail;
 
         var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
@@ -155,7 +156,7 @@ public class EmailNotificationFacade {
         final String errorMessage = "Failed to send Discount Test Passed notification to: " + referentEmail;
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
@@ -168,7 +169,7 @@ public class EmailNotificationFacade {
         final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
@@ -180,7 +181,7 @@ public class EmailNotificationFacade {
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+            var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                     subject, body, null);
             emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
@@ -206,7 +207,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
@@ -220,7 +221,7 @@ public class EmailNotificationFacade {
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+        var emailParams = createEmailParams(referentEmail, Optional.of(Collections.singletonList(configProperties.getCgnDepartmentEmail())),
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
@@ -234,12 +235,12 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
-    private EmailParams createEmailParams(String mailTo, List<String> ccList, String subject, String body, String failureMessage) {
+    private EmailParams createEmailParams(String mailTo, Optional<List<String>> ccList, String subject, String body, String failureMessage) {
         return createEmailParams(mailTo, ccList, Optional.empty(), subject, body, failureMessage);
     }
 
     private EmailParams createEmailParams(String mailTo,
-                                          List<String> ccList,
+                                          Optional<List<String>> ccList,
                                           Optional<String> replyToOpt,
                                           String subject,
                                           String body,
