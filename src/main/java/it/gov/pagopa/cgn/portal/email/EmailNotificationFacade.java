@@ -38,7 +38,7 @@ public class EmailNotificationFacade {
                                     merchantFullName +
                                     " to department";
         String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), null, subject, body, errorMessage);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.empty(), subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
@@ -52,7 +52,7 @@ public class EmailNotificationFacade {
                                     merchantFullName +
                                     " to department";
         String body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_REQUEST, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), null, subject, body, errorMessage);
+        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), Optional.empty(), subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
@@ -128,7 +128,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
         var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(),
-                                            null,
+                                            Optional.empty(),
                                             Optional.of(helpRequestParams.getReplyToEmailAddress()),
                                             subject,
                                             body,
