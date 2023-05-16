@@ -115,12 +115,6 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
 
         job.execute(null);
 
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> notificationRepository.count() >= 1);
-
-        var notification
-                = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                discountEntity,
-                threshold));
-        Assertions.assertNotNull(notification);
+        Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(discountEntity, threshold)) != null);
     }
 }
