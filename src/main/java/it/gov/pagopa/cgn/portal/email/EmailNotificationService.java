@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
