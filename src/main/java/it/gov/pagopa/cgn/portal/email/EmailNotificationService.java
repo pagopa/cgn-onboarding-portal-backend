@@ -30,9 +30,6 @@ public class EmailNotificationService {
         return sendAsyncMessage(emailParams, null);
     }
 
-
-
-
     public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams, String trackingKey) {
         return CompletableFuture.supplyAsync(() -> {
             try {
