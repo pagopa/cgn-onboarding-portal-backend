@@ -129,8 +129,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
         var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(),
-                                            Optional.empty(),
-                                            Optional.of(helpRequestParams.getReplyToEmailAddress()),
+                                            helpRequestParams.getReplyToEmailAddress(),
                                             subject,
                                             body,
                                             null);
