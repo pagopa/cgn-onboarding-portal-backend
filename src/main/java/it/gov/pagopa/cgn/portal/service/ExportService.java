@@ -61,7 +61,9 @@ public class ExportService {
             "Categorie",
             "Codice statico",
             "Landing page",
-            "Referer"};
+            "Referer",
+            "Id Operatore",
+            "Id Agevolazione"};
 
     private final String[] exportEycaHeaders = new String[]{"LOCAL_ID",
             "CATEGORIES",
@@ -196,7 +198,6 @@ public class ExportService {
             maybeDiscount.map(DiscountEntity::getDiscountValue)
                     .map(Objects::toString).orElse(null),
             maybeDiscount.map(d -> DiscountStateEnum.PUBLISHED.equals(d.getState())
-                    && Objects.nonNull(d.getEndDate())
                     && d.getEndDate().compareTo(LocalDate.now()) < 0 ? "EXPIRED" : d.getState())
                     .map(Objects::toString).orElse(null),
             maybeDiscount.map(DiscountEntity::getStartDate)
