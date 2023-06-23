@@ -719,8 +719,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                 .getDiscountEntity();
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3)
+        Assertions.assertEquals(2, updatedDiscount.getProducts().size());
+        IntStream.range(0, 2)
                 .forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
                         dbDiscount.getProducts().get(index)));
 
@@ -745,8 +745,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                 .getDiscountEntity();
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3)
+        Assertions.assertEquals(2, updatedDiscount.getProducts().size());
+        IntStream.range(0, 2)
                 .forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
                         dbDiscount.getProducts().get(index)));
         Assertions.assertNull(dbDiscount.getDiscountValue());
@@ -1713,4 +1713,34 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(2, progress.getLoaded());
         Assertions.assertEquals(100, progress.getPercent());
     }
+
+
+    @Test
+    void Create_CreateDiscount_WithMoreThanTwoCategories_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                .getDiscountEntity();
+
+        // simulate test passed
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount.setName("updated_name");
+        dbDiscount.setDescription("updated_description");
+        dbDiscount.setStartDate(LocalDate.now().plusDays(1));
+        dbDiscount.setEndDate(LocalDate.now().plusMonths(3));
+        dbDiscount.setDiscountValue(40);
+        dbDiscount.setStaticCode(null);
+        DiscountProductEntity productEntity = new DiscountProductEntity();
+        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
+        productEntity.setDiscount(dbDiscount);
+        dbDiscount.addProductList(Collections.singletonList(productEntity));
+        dbDiscount = discountRepository.save(dbDiscount);
+
+
+        DiscountEntity finalDbDiscount = dbDiscount;
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.testDiscount(agreementEntity.getId(), finalDbDiscount.getId()));
+    }
+
 }
