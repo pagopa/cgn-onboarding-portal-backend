@@ -1723,7 +1723,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                 .getDiscountEntity();
 
-        // simulate test passed
         dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
         dbDiscount.setName("updated_name");
         dbDiscount.setDescription("updated_description");
@@ -1739,8 +1738,11 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
 
         DiscountEntity finalDbDiscount = dbDiscount;
+        String agreementId = agreementEntity.getId();
+        Long finalDiscountId = finalDbDiscount.getId();
+
         Assertions.assertThrows(InvalidRequestException.class,
-                () -> discountService.testDiscount(agreementEntity.getId(), finalDbDiscount.getId()));
+                () -> discountService.testDiscount(agreementId, finalDiscountId));
     }
 
 }
