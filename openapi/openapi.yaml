@@ -825,6 +825,10 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
+      ccRecipients:
+        type: array
+        items:
+          $ref: '#/definitions/CcRecipient'
 
   Referent:
     type: object
@@ -1332,7 +1336,15 @@ definitions:
       documentTimestamp:
         type: string
         format: date-time
-  
+
+  CcRecipient:
+    type: object
+    properties:
+      emailAddress:
+        type: string
+      profileId:
+        type: string
+
   BucketLoad:
     type: object
     required:
