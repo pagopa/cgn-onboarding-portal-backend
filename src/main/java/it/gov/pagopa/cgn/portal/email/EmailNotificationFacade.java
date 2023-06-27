@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.model.CCRecipientEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import javax.mail.MessagingException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -205,6 +207,10 @@ public class EmailNotificationFacade {
                                                           Long remainingCodes) {
         var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
         var context = new Context();
+
+        List<String> ccRecipients = discount.getAgreement().getProfile().
+                getCcRecipientList().stream().map(CCRecipientEntity::getEmailAddress).collect(Collectors.toList());
+        ccRecipients.addAll(Collections.singletonList(configProperties.getCgnDepartmentEmail()));
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
@@ -212,8 +218,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
-                subject, body, errorMessage);
+                ccRecipients, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
 
