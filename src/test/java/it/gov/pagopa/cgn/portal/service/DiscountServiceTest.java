@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -1720,29 +1721,25 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
-                .getDiscountEntity();
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
 
-        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
-        dbDiscount.setName("updated_name");
-        dbDiscount.setDescription("updated_description");
-        dbDiscount.setStartDate(LocalDate.now().plusDays(1));
-        dbDiscount.setEndDate(LocalDate.now().plusMonths(3));
-        dbDiscount.setDiscountValue(40);
-        dbDiscount.setStaticCode(null);
-        DiscountProductEntity productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
-        productEntity.setDiscount(dbDiscount);
-        dbDiscount.addProductList(Collections.singletonList(productEntity));
-        dbDiscount = discountRepository.save(dbDiscount);
+        DiscountProductEntity productEntity0 = new DiscountProductEntity();
+        productEntity0.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
+        productEntity0.setDiscount(discountEntity);
 
+        DiscountProductEntity productEntity1 = new DiscountProductEntity();
+        productEntity1.setProductCategory(ProductCategoryEnum.HEALTH);
+        productEntity1.setDiscount(discountEntity);
 
-        DiscountEntity finalDbDiscount = dbDiscount;
-        String agreementId = agreementEntity.getId();
-        Long finalDiscountId = finalDbDiscount.getId();
+        DiscountProductEntity productEntity2 = new DiscountProductEntity();
+        productEntity2.setProductCategory(ProductCategoryEnum.HOME);
+        productEntity2.setDiscount(discountEntity);
 
+        discountEntity.addProductList(Arrays.asList(productEntity0, productEntity1, productEntity2));
+
+        DiscountEntity finalDiscountEntity = discountEntity;
         Assertions.assertThrows(InvalidRequestException.class,
-                () -> discountService.testDiscount(agreementId, finalDiscountId));
+                () -> discountService.createDiscount(AGREEMENT_ID, finalDiscountEntity));
     }
 
 }
