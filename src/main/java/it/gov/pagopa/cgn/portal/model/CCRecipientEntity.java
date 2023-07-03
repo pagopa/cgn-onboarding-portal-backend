@@ -7,7 +7,6 @@ import lombok.ToString;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -15,6 +14,10 @@ import javax.validation.constraints.Size;
 @Data
 public class CCRecipientEntity extends BaseEntity{
 
+    public CCRecipientEntity(String emailAddress, ProfileEntity profile) {
+        this.emailAddress = emailAddress;
+        this.profile = profile;
+    }
 
     @Id
     @Column(name = "ccrecipient_k")
@@ -26,19 +29,19 @@ public class CCRecipientEntity extends BaseEntity{
     private Long id;
 
 
-    @NotNull
     @NotBlank
     @Email
     @Size(min = 5, max = 100)
     @Column(name = "email_address", length = 100)
     private String emailAddress;
 
-
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "profile_fk", nullable = false)
     private ProfileEntity profile;
+
+
 
 
 }

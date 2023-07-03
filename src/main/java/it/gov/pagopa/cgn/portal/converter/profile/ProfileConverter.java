@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
-import it.gov.pagopa.cgn.portal.converter.CcRecipientConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
+import it.gov.pagopa.cgn.portal.model.CCRecipientEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Profile> {
     private ReferentConverter referentConverter;
-    private CcRecipientConverter ccRecipientConverter;
     protected Function<Profile, ProfileEntity> toEntity = dto -> {
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
@@ -33,7 +32,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setSupportType(toEntitySupportTypeEnum.apply(dto.getSupportType()));
         entity.setSupportValue(dto.getSupportValue());
         entity.setCcRecipientList(dto.getCcRecipients().stream()
-                .map(ccRecipientDto-> this.ccRecipientConverter.toEntity(ccRecipientDto)).collect(Collectors.toList()));
+                .map(ccRecipient-> new CCRecipientEntity(ccRecipient, entity)).collect(Collectors.toList()));
         return entity;
     };
     protected Function<ProfileEntity, Profile> toDto = entity -> {
@@ -58,7 +57,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         profile.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
         profile.setSupportValue(entity.getSupportValue());
         profile.setCcRecipients(entity.getCcRecipientList().stream()
-                .map(ccRecipientEntity -> this.ccRecipientConverter.toDto(ccRecipientEntity)).collect(Collectors.toList()));
+                .map(CCRecipientEntity::getEmailAddress).collect(Collectors.toList()));
         return profile;
     };
 

@@ -701,6 +701,10 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
+      ccRecipients:
+        type: array
+        items:
+          type: string
 
   UpdateProfile:
     type: object
@@ -757,6 +761,11 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
+      ccRecipients:
+        type: array
+        items:
+          type: string
+
 
   Profile:
     type: object
@@ -828,7 +837,7 @@ definitions:
       ccRecipients:
         type: array
         items:
-          $ref: '#/definitions/CcRecipient'
+          type: string
 
   Referent:
     type: object
@@ -1336,14 +1345,6 @@ definitions:
       documentTimestamp:
         type: string
         format: date-time
-
-  CcRecipient:
-    type: object
-    properties:
-      emailAddress:
-        type: string
-      profileId:
-        type: string
 
   BucketLoad:
     type: object
