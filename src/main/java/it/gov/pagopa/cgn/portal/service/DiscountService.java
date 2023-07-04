@@ -458,6 +458,12 @@ public class DiscountService {
     private void commonDiscountValidation(ProfileEntity profileEntity,
                                           DiscountEntity discountEntity,
                                           boolean isBucketFileChanged) {
+
+        if (discountEntity.getProducts().size()>2){
+            throw new InvalidRequestException(
+                    "Discount cannot have more than 2 product categories");
+        }
+
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
@@ -477,6 +483,7 @@ public class DiscountService {
             throw new InvalidRequestException(
                     "Discount cannot reference to empty or not existing bucket file for a profile with discount code type bucket");
         }
+
 
         // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
