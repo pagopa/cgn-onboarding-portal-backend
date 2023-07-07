@@ -377,6 +377,34 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>eyca-integration-java-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/openapi/eyca-integration.yaml
+                            </inputSpec>
+                            <output>${project.build.directory}/generated-sources</output>
+                            <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <modelNameSuffix>EycaIntegration</modelNameSuffix>
+                            <library>resttemplate</library>
+                            <enablePostProcessFile>true</enablePostProcessFile>
+                            <configOptions>
+                                <modelPackage>${project.groupId}.cgnonboardingportal.eycaintegration.model
+                                </modelPackage>
+                                <apiPackage>${project.groupId}.cgnonboardingportal.eycaintegration.api</apiPackage>
+                                <invokerPackage>${project.groupId}.cgnonboardingportal.eycaintegration.client
+                                </invokerPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <serializableModel>true</serializableModel>
+                                <serializationLibrary>jackson</serializationLibrary>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

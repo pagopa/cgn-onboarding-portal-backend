@@ -1,0 +1,171 @@
+swagger: '2.0'
+info:
+  version: 1.1.0
+  title: EYCA Integration
+
+host: ccdb.eyca.org
+schemes:
+  - https
+
+paths:
+  /api/auth:
+    get:
+      operationId: authentication
+      tags:
+        - EycaIntegration
+      summary: session authentication
+      description: authenticated session
+      parameters:
+        - in: query
+          name: username
+          type: string
+          required: false
+        - in: query
+          name: password
+          type: string
+          required: false
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              session_id:
+                type: string
+              ccdb_session:
+                type: string
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+
+  /api/create_discount:
+    post:
+      operationId: createDiscount
+      tags:
+        - EycaIntegration
+      summary: create a new discount.
+      description: Create a new discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/DiscountRequest"
+      responses:
+        '200':
+          description: Upserted organization.
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters: null
+
+definitions:
+  DiscountRequest:
+    type: object
+    required:
+      - vendor
+      - name
+      - text
+    properties:
+      local_id:
+        type: string
+      vendor:
+        type: string
+      name:
+        type: string
+      name_local:
+        type: string
+      text:
+        type: string
+      text_local:
+        type: string
+      +locations:
+        type: array
+        items:
+          $ref: "#/definitions/Location"
+      phone:
+        type: string
+      web:
+        type: string
+      email:
+        type: string
+      +tags:
+        type: array
+        items:
+          type: string
+      +categories:
+        type: array
+        items:
+          type: string
+      live:
+        type: integer
+      image_source__file:
+        type: string
+      files:
+        type: array
+        items:
+          $ref: "#/components/File"
+
+  Location:
+    type: object
+    properties:
+      street:
+        type: string
+      zip:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      point_x:
+        type: string
+      point_y:
+        type: string
+      region:
+        type: string
+
+  File:
+    type: object
+    properties:
+      name:
+        type: string
+      base64:
+        type: string
+
+  ApiResponse:
+    type: object
+    properties:
+      api_response:
+        $ref: "#/definitions/ApiResponseBody"
+  ApiResponseBody:
+    type: object
+    properties:
+      http_status:
+        type: integer
+        format: int32
+      error:
+        type: integer
+        format: int32
+      data:
+        $ref: "#/definitions/DiscountData"
+      text:
+        type: string
+      code:
+        type: integer
+        format: int32
+  DiscountData:
+    type: object
+    properties:
+      discount:
+        type: array
+        items:
+          $ref: "#/definitions/DiscountRequest"
