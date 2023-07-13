@@ -701,10 +701,10 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      ccRecipients:
+      secondaryRecipients:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/CreateReferent'
 
   UpdateProfile:
     type: object
@@ -761,10 +761,10 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      ccRecipients:
+      secondaryRecipients:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/UpdateReferent'
 
 
   Profile:
@@ -834,10 +834,10 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      ccRecipients:
+      secondaryRecipients:
         type: array
         items:
-          type: string
+         $ref: '#/definitions/Referent'
 
   Referent:
     type: object

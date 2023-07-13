@@ -233,7 +233,7 @@ public class DiscountService {
         discount = discountRepository.save(discount);
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity,
                 discount.getName(),
                 reasonMessage);
 
@@ -275,7 +275,7 @@ public class DiscountService {
 
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity,
                 discount.getName());
     }
 
@@ -292,7 +292,7 @@ public class DiscountService {
 
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity,
                 discount.getName(),
                 reasonMessage);
     }
@@ -316,9 +316,8 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void sendNotificationDiscountExpiring(DiscountEntity discount) {
-        String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
 
-        emailNotificationFacade.notifyMerchantDiscountExpiring(referentEmailAddress, discount.getName());
+        emailNotificationFacade.notifyMerchantDiscountExpiring(discount);
         discount.setExpirationWarningSentDateTime(OffsetDateTime.now());
         discountRepository.save(discount);
     }

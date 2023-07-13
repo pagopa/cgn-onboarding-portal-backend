@@ -174,6 +174,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         }
     };
 
+
     private Comparator<AddressEntity> getAddressComparator() {
         return Comparator.comparing(AddressEntity::getId);
     }

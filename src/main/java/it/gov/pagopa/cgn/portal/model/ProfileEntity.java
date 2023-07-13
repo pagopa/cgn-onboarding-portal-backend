@@ -130,8 +130,9 @@ public class ProfileEntity extends BaseEntity {
     private List<AddressEntity> addressList;
 
     @EqualsAndHashCode.Exclude
+    @Size(max = 4)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CCRecipientEntity> ccRecipientList;
+    private List<SecondaryRecipientEntity> secondaryRecipientList;
 
     @Column(name = "all_national_addresses")
     private Boolean allNationalAddresses = false;

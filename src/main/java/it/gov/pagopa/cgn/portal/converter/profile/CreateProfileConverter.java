@@ -1,13 +1,17 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
+import it.gov.pagopa.cgn.portal.model.SecondaryRecipientEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
+import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity, CreateProfile> {
@@ -44,12 +48,25 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = createReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
+        entity.setSecondaryRecipientList(dto.getSecondaryRecipients().stream()
+                .map(secondaryRecipient -> this.createReferentToCCRecipientEntity.apply(secondaryRecipient, entity))
+                .collect(Collectors.toList()));
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setSupportType(toEntitySupportTypeEnum.apply(dto.getSupportType()));
         entity.setSupportValue(dto.getSupportValue());
+
         return entity;
     };
+
+    private final BiFunction<CreateReferent, ProfileEntity, SecondaryRecipientEntity> createReferentToCCRecipientEntity = (createReferent, profileEntity) -> {
+        SecondaryRecipientEntity secondaryRecipientEntity = (SecondaryRecipientEntity) this.createReferentConverter.toEntity(createReferent);
+        secondaryRecipientEntity.setProfile(profileEntity);
+        return secondaryRecipientEntity;
+    };
+
+
+
 }

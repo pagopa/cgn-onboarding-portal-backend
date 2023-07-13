@@ -5,7 +5,9 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.CCRecipientEntity;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.SecondaryRecipientEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,14 +103,19 @@ public class EmailNotificationFacade {
         }
     }
 
-    public void notifyMerchantAgreementRequestRejected(String referentEmail, String rejectionMessage) {
+    public void notifyMerchantAgreementRequestRejected(ProfileEntity profile, String rejectionMessage) {
         var subject = "[Carta Giovani Nazionale] Richiesta di convenzione rifiutata";
         var context = new Context();
         context.setVariable("rejection_message", rejectionMessage);
+        var referentEmail = profile.getReferent().getEmailAddress();
+
         final String errorMessage = "Failed to send Agreement Request Rejected notification to: " + referentEmail;
+
+        var secondaryRecipients = retrieveSecondaryRecipients(profile);
+
         var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                secondaryRecipients,
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
@@ -138,56 +145,70 @@ public class EmailNotificationFacade {
         emailNotificationService.sendSyncMessage(emailParams);
     }
 
-    public void notifyMerchantDiscountSuspended(String referentEmail, String discountName, String suspensionMessage) {
+    public void notifyMerchantDiscountSuspended(ProfileEntity profile, String discountName, String suspensionMessage) {
         var subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable("suspension_message", suspensionMessage);
+        var referentEmail = profile.getReferent().getEmailAddress();
+
         final String errorMessage = "Failed to send Discount Suspended notification to: " + referentEmail;
+
+        var secondaryRecipients = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                secondaryRecipients,
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyMerchantDiscountTestPassed(String referentEmail, String discountName) {
+    public void notifyMerchantDiscountTestPassed(ProfileEntity profile, String discountName) {
         var subject = "[Carta Giovani Nazionale] Il test è stato superato";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        var referentEmail = profile.getReferent().getEmailAddress();
         final String errorMessage = "Failed to send Discount Test Passed notification to: " + referentEmail;
+
+        var secondaryRecipients = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                secondaryRecipients,
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyMerchantDiscountTestFailed(String referentEmail, String discountName, String reasonMessage) {
+    public void notifyMerchantDiscountTestFailed(ProfileEntity profile, String discountName, String reasonMessage) {
         var subject = "[Carta Giovani Nazionale] Il test non è stato superato";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable("suspension_message", reasonMessage);
+        var referentEmail = profile.getReferent().getEmailAddress();
         final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
+
+        var secondaryRecipients = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                secondaryRecipients,
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyMerchantDiscountExpiring(String referentEmail, String discountName) {
+    public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();
-        context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
+        context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
+
+        ProfileEntity profileEntity = discount.getAgreement().getProfile();
+        String referentEmail = profileEntity.getReferent().getEmailAddress();
+        List<String> secondaryRecipients = retrieveSecondaryRecipients(profileEntity);
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
             var emailParams = createEmailParams(referentEmail,
-                    Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                    secondaryRecipients,
                     subject, body, null);
             emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
@@ -201,16 +222,16 @@ public class EmailNotificationFacade {
         return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
     }
 
-    public void notifyMerchantDiscountBucketCodesExpiring(String referentEmail,
-                                                          DiscountEntity discount,
+    public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
                                                           BucketCodeExpiringThresholdEnum threshold,
                                                           Long remainingCodes) {
         var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
         var context = new Context();
 
-        List<String> ccRecipients = discount.getAgreement().getProfile().
-                getCcRecipientList().stream().map(CCRecipientEntity::getEmailAddress).collect(Collectors.toList());
-        ccRecipients.addAll(Collections.singletonList(configProperties.getCgnDepartmentEmail()));
+        ProfileEntity profileEntity = discount.getAgreement().getProfile();
+        String referentEmail = profileEntity.getReferent().getEmailAddress();
+        List<String> secondaryRecipients = retrieveSecondaryRecipients(profileEntity);
+
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         context.setVariable("missing_codes", remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
@@ -218,21 +239,26 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail,
-                ccRecipients, subject, body, errorMessage);
+                secondaryRecipients,
+                subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
 
-    public void notifyMerchantDiscountBucketCodesExpired(String referentEmail, DiscountEntity discount) {
+    public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione è esaurita";
         var context = new Context();
+
+        ProfileEntity profileEntity = discount.getAgreement().getProfile();
+        String referentEmail = profileEntity.getReferent().getEmailAddress();
+        List<String> secondaryRecipients = retrieveSecondaryRecipients(profileEntity);
+
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExpirationNotification(discount,
-                                                                              BucketCodeExpiringThresholdEnum.PERCENT_0);
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount, BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail,
-                Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                secondaryRecipients,
                 subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
@@ -250,8 +276,8 @@ public class EmailNotificationFacade {
         return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage);
     }
 
-    private EmailParams createEmailParams(String mailTo, List<String> ccList, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.of(ccList), Optional.empty(), subject, body, failureMessage);
+    private EmailParams createEmailParams(String mailTo, List<String> secondaryMailToList, String subject, String body, String failureMessage) {
+        return createEmailParams(mailTo, Optional.of(secondaryMailToList), Optional.empty(), subject, body, failureMessage);
     }
 
     private EmailParams createEmailParams(String mailTo, String replyToOpt, String subject, String body, String failureMessage) {
@@ -284,6 +310,17 @@ public class EmailNotificationFacade {
 
     private String getTemplateHtml(TemplateEmail template, Context context) {
         return htmlTemplateEngine.process(template.getTemplateName(), context);
+    }
+
+    private List<String> retrieveSecondaryRecipients(ProfileEntity profileEntity) {
+        List<String> secondaryRecipients = Optional.ofNullable(profileEntity.getSecondaryRecipientList())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(SecondaryRecipientEntity::getEmailAddress)
+                .collect(Collectors.toList());
+        secondaryRecipients.addAll(Collections.singletonList(configProperties.getCgnDepartmentEmail()));
+
+        return secondaryRecipients;
     }
 
     private static class InvalidValueException extends RuntimeException {

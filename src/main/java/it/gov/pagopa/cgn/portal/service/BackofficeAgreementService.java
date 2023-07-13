@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
@@ -121,8 +122,8 @@ public class BackofficeAgreementService {
 
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        String referentEmail = agreementEntity.getProfile().getReferent().getEmailAddress();
-        emailNotificationFacade.notifyMerchantAgreementRequestRejected(referentEmail, reasonMessage);
+        ProfileEntity profileEntity = agreementEntity.getProfile();
+        emailNotificationFacade.notifyMerchantAgreementRequestRejected(profileEntity, reasonMessage);
 
         return agreementEntity;
     }
