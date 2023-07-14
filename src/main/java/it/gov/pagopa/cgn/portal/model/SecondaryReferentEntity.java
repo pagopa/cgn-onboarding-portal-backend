@@ -10,17 +10,17 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "secondaryrecipient")
+@Table(name = "secondaryreferent")
 @Data
-public class SecondaryRecipientEntity extends ReferentEntity {
+public class SecondaryReferentEntity extends ReferentEntity {
 
     @Id
-    @Column(name = "secondaryrecipient_k")
-    @SequenceGenerator(name="secondaryrecipient_secondaryrecipient_k_seq",
-            sequenceName="secondaryrecipient_secondaryrecipient_k_seq",
+    @Column(name = "secondaryreferent_k")
+    @SequenceGenerator(name="secondaryreferent_secondaryreferent_k_seq",
+            sequenceName="secondaryreferent_secondaryreferent_k_seq",
             allocationSize=1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="secondaryrecipient_secondaryrecipient_k_seq")
+            generator="secondaryreferent_secondaryreferent_k_seq")
     private Long id;
 
 

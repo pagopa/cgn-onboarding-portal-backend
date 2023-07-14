@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
-import it.gov.pagopa.cgn.portal.model.SecondaryRecipientEntity;
+import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
@@ -48,8 +48,8 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = createReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
-        entity.setSecondaryRecipientList(dto.getSecondaryRecipients().stream()
-                .map(secondaryRecipient -> this.createReferentToCCRecipientEntity.apply(secondaryRecipient, entity))
+        entity.setSecondaryReferentList(dto.getSecondaryReferents().stream()
+                .map(secondaryReferent -> this.createReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
                 .collect(Collectors.toList()));
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
@@ -61,10 +61,10 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         return entity;
     };
 
-    private final BiFunction<CreateReferent, ProfileEntity, SecondaryRecipientEntity> createReferentToCCRecipientEntity = (createReferent, profileEntity) -> {
-        SecondaryRecipientEntity secondaryRecipientEntity = (SecondaryRecipientEntity) this.createReferentConverter.toEntity(createReferent);
-        secondaryRecipientEntity.setProfile(profileEntity);
-        return secondaryRecipientEntity;
+    private final BiFunction<CreateReferent, ProfileEntity, SecondaryReferentEntity> createReferentToSecondaryReferentEntity = (createReferent, profileEntity) -> {
+        SecondaryReferentEntity secondaryReferentEntity = (SecondaryReferentEntity) this.createReferentConverter.toEntity(createReferent);
+        secondaryReferentEntity.setProfile(profileEntity);
+        return secondaryReferentEntity;
     };
 
 

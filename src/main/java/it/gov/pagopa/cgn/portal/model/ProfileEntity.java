@@ -132,7 +132,7 @@ public class ProfileEntity extends BaseEntity {
     @EqualsAndHashCode.Exclude
     @Size(max = 4)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SecondaryRecipientEntity> secondaryRecipientList;
+    private List<SecondaryReferentEntity> secondaryReferentList;
 
     @Column(name = "all_national_addresses")
     private Boolean allNationalAddresses = false;

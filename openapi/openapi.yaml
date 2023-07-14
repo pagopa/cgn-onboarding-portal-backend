@@ -701,7 +701,7 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      secondaryRecipients:
+      secondaryReferents:
         type: array
         items:
           $ref: '#/definitions/CreateReferent'
@@ -761,7 +761,7 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      secondaryRecipients:
+      secondaryReferents:
         type: array
         items:
           $ref: '#/definitions/UpdateReferent'
@@ -834,7 +834,7 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
-      secondaryRecipients:
+      secondaryReferents:
         type: array
         items:
          $ref: '#/definitions/Referent'

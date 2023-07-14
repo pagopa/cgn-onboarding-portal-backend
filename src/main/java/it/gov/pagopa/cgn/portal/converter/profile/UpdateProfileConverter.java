@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
-import it.gov.pagopa.cgn.portal.model.SecondaryRecipientEntity;
+import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
@@ -46,8 +46,8 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = updateReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
-        entity.setSecondaryRecipientList(dto.getSecondaryRecipients().stream()
-                .map(secondaryRecipient -> this.updateReferentToCCRecipientEntity.apply(secondaryRecipient, entity))
+        entity.setSecondaryReferentList(dto.getSecondaryReferents().stream()
+                .map(secondaryReferent -> this.updateReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
                 .collect(Collectors.toList()));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalOffice(dto.getLegalOffice());
@@ -58,10 +58,10 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         return entity;
     };
 
-    private final BiFunction<UpdateReferent, ProfileEntity, SecondaryRecipientEntity> updateReferentToCCRecipientEntity = (updateReferent, profileEntity) -> {
-        SecondaryRecipientEntity secondaryRecipientEntity = (SecondaryRecipientEntity) this.updateReferentConverter.toEntity(updateReferent);
-        secondaryRecipientEntity.setProfile(profileEntity);
-        return secondaryRecipientEntity;
+    private final BiFunction<UpdateReferent, ProfileEntity, SecondaryReferentEntity> updateReferentToSecondaryReferentEntity = (updateReferent, profileEntity) -> {
+        SecondaryReferentEntity secondaryReferentEntity = (SecondaryReferentEntity) this.updateReferentConverter.toEntity(updateReferent);
+        secondaryReferentEntity.setProfile(profileEntity);
+        return secondaryReferentEntity;
     };
 
 

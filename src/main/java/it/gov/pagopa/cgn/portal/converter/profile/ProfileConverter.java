@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
-import it.gov.pagopa.cgn.portal.model.SecondaryRecipientEntity;
+import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setPecAddress(dto.getPecAddress());
         this.salesChannelConsumer.accept(dto.getSalesChannel(), entity);
         entity.setReferent(this.referentConverter.toEntity(dto.getReferent()));
-        entity.setSecondaryRecipientList(dto.getSecondaryRecipients().stream()
-                .map(secondaryRecipient-> (SecondaryRecipientEntity)this.referentConverter.toEntity(secondaryRecipient))
+        entity.setSecondaryReferentList(dto.getSecondaryReferents().stream()
+                .map(secondaryReferent-> (SecondaryReferentEntity)this.referentConverter.toEntity(secondaryReferent))
                 .collect(Collectors.toList()));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
@@ -49,8 +49,8 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         profile.setDescriptionDe(entity.getDescriptionDe());
         profile.setPecAddress(entity.getPecAddress());
         profile.setReferent(this.referentConverter.toDto(entity.getReferent()));
-        profile.secondaryRecipients(entity.getSecondaryRecipientList().stream()
-                .map(secondaryRecipient-> this.referentConverter.toDto(secondaryRecipient)).collect(Collectors.toList()));
+        profile.secondaryReferents(entity.getSecondaryReferentList().stream()
+                .map(secondaryReferent-> this.referentConverter.toDto(secondaryReferent)).collect(Collectors.toList()));
         profile.setSalesChannel(this.salesChannelToDto.apply(entity));
         profile.setAgreementId(entity.getAgreement().getId());
         profile.setTelephoneNumber(entity.getTelephoneNumber());

@@ -103,8 +103,7 @@ public class BackofficeAgreementService {
         agreementEntity = agreementRepository.save(agreementEntity);
 
         var profile = agreementEntity.getProfile();
-        String referentEmail = profile.getReferent().getEmailAddress();
-        emailNotificationFacade.notifyMerchantAgreementRequestApproved(referentEmail,
+        emailNotificationFacade.notifyMerchantAgreementRequestApproved(profile,
                                                                        profile.getSalesChannel(),
                                                                        Optional.ofNullable(profile.getDiscountCodeType()));
 
