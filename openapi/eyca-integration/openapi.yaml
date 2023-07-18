@@ -6,6 +6,11 @@ info:
 host: ccdb.eyca.org
 schemes:
   - https
+securityDefinitions:
+  CookieAuth:
+    type: apiKey
+    in: cookie
+    name: session-id
 
 paths:
   /api/auth:
@@ -43,6 +48,8 @@ paths:
 
   /api/create_discount:
     post:
+      security:
+        - Bearer: [ ]
       operationId: createDiscount
       tags:
         - EycaIntegration
@@ -113,7 +120,7 @@ definitions:
       files:
         type: array
         items:
-          $ref: "#/components/File"
+          $ref: "#/definitions/File"
 
   Location:
     type: object

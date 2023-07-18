@@ -384,7 +384,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/openapi/eyca-integration.yaml
+                                ${project.basedir}/openapi/eyca-integration/openapi.yaml
                             </inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <generatorName>java</generatorName>
