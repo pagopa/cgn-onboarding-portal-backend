@@ -50,9 +50,8 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = updateReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
-        List<UpdateReferent> secondaryReferents = Optional.ofNullable(dto.getSecondaryReferents())
-                .orElse(Collections.emptyList());
-        entity.setSecondaryReferentList(secondaryReferents.stream()
+        entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
+                .orElse(Collections.emptyList()).stream()
                 .map(secondaryReferent -> this.updateReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
                 .collect(Collectors.toList()));
         entity.setTelephoneNumber(dto.getTelephoneNumber());

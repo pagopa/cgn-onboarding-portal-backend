@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -51,9 +50,8 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = createReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
-        List<CreateReferent> secondaryReferents = Optional.ofNullable(dto.getSecondaryReferents())
-                .orElse(Collections.emptyList());
-        entity.setSecondaryReferentList(secondaryReferents.stream()
+        entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
+                .orElse(Collections.emptyList()).stream()
                 .map(secondaryReferent -> this.createReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
                 .collect(Collectors.toList()));
         entity.setLegalOffice(dto.getLegalOffice());
