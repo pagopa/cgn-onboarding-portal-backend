@@ -15,11 +15,14 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
+import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
@@ -190,5 +193,15 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         saveBackofficeSampleDocuments(agreementEntity);
         backofficeAgreementService.approveAgreement(agreementEntity.getId());
     }
+
+    @Test
+    void getProfile(){
+        var agreementId = agreementEntity.getId();
+
+        ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+
 
 }
