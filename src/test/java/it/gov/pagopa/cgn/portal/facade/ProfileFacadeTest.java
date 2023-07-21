@@ -53,9 +53,8 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                           updateProfileConverter,
                                           profileConverter,
                                           discountService);
-
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity = TestUtils.createProfileEntityWithSecondaryEntityReferentList(agreementEntity)    ;
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -198,7 +197,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
     @Test
     @Transactional
-    void getProfile(){
+    void Get_Profile_Expect_OK(){
         var agreementId = agreementEntity.getId();
 
         ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);

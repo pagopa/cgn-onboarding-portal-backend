@@ -259,6 +259,36 @@ public class TestUtils {
         return profileEntity;
     }
 
+    public static ProfileEntity createProfileEntityWithSecondaryEntityReferentList(AgreementEntity agreementEntity){
+        ProfileEntity profileEntity = createSampleProfileEntity(agreementEntity);
+        profileEntity.setSecondaryReferentList(createSampleSecondaryReferentEntityList(profileEntity));
+        return profileEntity;
+    }
+
+    private static List<SecondaryReferentEntity> createSampleSecondaryReferentEntityList(ProfileEntity profileEntity) {
+
+        SecondaryReferentEntity secondaryReferentEntity_0 = new SecondaryReferentEntity();
+        secondaryReferentEntity_0.setFirstName("FIRST_NAME_0");
+        secondaryReferentEntity_0.setLastName("LAST_NAME_0");
+        secondaryReferentEntity_0.setEmailAddress("referent.registry_0@pagopa.it");
+        secondaryReferentEntity_0.setTelephoneNumber("+390123456789");
+        secondaryReferentEntity_0.setProfile(profileEntity);
+        secondaryReferentEntity_0.setRole("CEO");
+
+        SecondaryReferentEntity secondaryReferentEntity_1 = new SecondaryReferentEntity();
+        secondaryReferentEntity_1.setFirstName("FIRST_NAME_1");
+        secondaryReferentEntity_1.setLastName("LAST_NAME_1");
+        secondaryReferentEntity_1.setEmailAddress("referent.registry_1@pagopa.it");
+        secondaryReferentEntity_1.setTelephoneNumber("+390123456789");
+        secondaryReferentEntity_1.setProfile(profileEntity);
+        secondaryReferentEntity_1.setRole("CEO");
+
+        List<SecondaryReferentEntity> secondaryReferentEntityList = Collections.EMPTY_LIST;
+        Collections.addAll(secondaryReferentEntityList = new ArrayList<SecondaryReferentEntity>(), secondaryReferentEntity_0, secondaryReferentEntity_1);
+
+        return  secondaryReferentEntityList;
+    }
+
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
         profileDto.setName("name_dto");
