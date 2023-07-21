@@ -253,6 +253,10 @@
             <artifactId>spotbugs-annotations</artifactId>
             <version>4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -399,6 +403,7 @@
                                 <apiPackage>${project.groupId}.cgnonboardingportal.eycaintegration.api</apiPackage>
                                 <invokerPackage>${project.groupId}.cgnonboardingportal.eycaintegration.client
                                 </invokerPackage>
+                                <library>resttemplate</library>
                                 <dateLibrary>java8</dateLibrary>
                                 <serializableModel>true</serializableModel>
                                 <serializationLibrary>jackson</serializationLibrary>

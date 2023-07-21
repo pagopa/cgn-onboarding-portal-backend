@@ -106,6 +106,10 @@ public class ConfigProperties {
     @Value("${cgn.attribute-authority.base-url}")
     private String attributeAuthorityBaseUrl;
 
+    @Value("${eyca.integration.base-url}")
+    private String eycaBaseUrl;
+
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }

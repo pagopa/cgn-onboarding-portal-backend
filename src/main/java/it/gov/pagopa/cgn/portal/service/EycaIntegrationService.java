@@ -1,15 +1,19 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
+import com.google.common.net.HttpHeaders;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.api.EycaIntegrationApi;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.DiscountRequestEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.InlineResponse200EycaIntegration;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
 
 @Service
 public class EycaIntegrationService {
@@ -17,12 +21,13 @@ public class EycaIntegrationService {
 
     private final EycaIntegrationApi eycaIntegrationApi;
 
-    public EycaIntegrationService(ConfigProperties configProperties, EycaIntegrationApi eycaIntegrationApi) {
+    public EycaIntegrationService(EycaIntegrationApi eycaIntegrationApi) {
         this.eycaIntegrationApi = eycaIntegrationApi;
-        this.eycaIntegrationApi.getApiClient().setBasePath(configProperties.getAttributeAuthorityBaseUrl());
+        //this.eycaIntegrationApi.getApiClient().setBasePath(configProperties.getEycaBaseUrl());
+        this.eycaIntegrationApi.getApiClient().setBasePath("https://ccdb.eyca.org");
     }
 
-    public InlineResponse200EycaIntegration authorize(String username, String password){
+    private InlineResponse200EycaIntegration authorize(String username, String password){
         return eycaIntegrationApi.authentication(username, password);
     };
 
@@ -37,7 +42,7 @@ public class EycaIntegrationService {
         ApiClient apiClient = eycaIntegrationApi.getApiClient();
 
         // Eseguire l'autenticazione
-        InlineResponse200EycaIntegration authResponse = eycaIntegrationApi.authentication(username, password);
+        InlineResponse200EycaIntegration authResponse = authorize(username, password);
 
         // Ottenere il cookie di sessione dalla risposta di autenticazione
         String sessionId = authResponse.getSessionId();
@@ -48,6 +53,17 @@ public class EycaIntegrationService {
         // Effettuare la chiamata a createDiscount con l'autenticazione tramite cookie
         return eycaIntegrationApi.createDiscount(discountRequestEycaIntegration);
     }
+
+    void webClient(){
+        WebClient client = WebClient.builder()
+                .baseUrl("http://localhost:8080")
+                .defaultCookie("cookieKey", "cookieValue")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"))
+                .build();
+
+    }
+
 
 
 }
