@@ -25,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import javax.transaction.Transactional;
+
 @SpringBootTest
 @ActiveProfiles("dev")
 class ProfileFacadeTest extends IntegrationAbstractTest {
@@ -195,6 +197,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
+    @Transactional
     void getProfile(){
         var agreementId = agreementEntity.getId();
 
