@@ -62,9 +62,8 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
     };
 
     private final BiFunction<UpdateReferent, ProfileEntity, SecondaryReferentEntity> updateReferentToSecondaryReferentEntity = (updateReferent, profileEntity) -> {
-        SecondaryReferentEntity secondaryReferentEntity = (SecondaryReferentEntity) this.updateReferentConverter.toEntity(updateReferent);
-        secondaryReferentEntity.setProfile(profileEntity);
-        return secondaryReferentEntity;
+        ReferentEntity referentEntity = this.updateReferentConverter.toEntity(updateReferent);
+        return new SecondaryReferentEntity(referentEntity);
     };
 
 }

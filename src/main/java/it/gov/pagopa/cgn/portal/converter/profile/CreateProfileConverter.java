@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,12 +65,10 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         return entity;
     };
 
-    private final BiFunction<CreateReferent, ProfileEntity, SecondaryReferentEntity> createReferentToSecondaryReferentEntity = (createReferent, profileEntity) -> {
-        SecondaryReferentEntity secondaryReferentEntity = (SecondaryReferentEntity) this.createReferentConverter.toEntity(createReferent);
-        secondaryReferentEntity.setProfile(profileEntity);
-        return secondaryReferentEntity;
+
+    private final BiFunction<CreateReferent, ProfileEntity, SecondaryReferentEntity> createReferentToSecondaryReferentEntity = (updateReferent, profileEntity) -> {
+        ReferentEntity referentEntity = this.createReferentConverter.toEntity(updateReferent);
+        return new SecondaryReferentEntity(referentEntity);
     };
-
-
 
 }

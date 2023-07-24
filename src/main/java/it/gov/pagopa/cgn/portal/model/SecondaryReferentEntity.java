@@ -11,6 +11,19 @@ import javax.persistence.*;
 @Data
 public class SecondaryReferentEntity extends ReferentEntity {
 
+    public SecondaryReferentEntity() {
+    }
+
+    public SecondaryReferentEntity(ReferentEntity entity){
+        this.setProfile(entity.getProfile());
+        this.setEmailAddress(entity.getEmailAddress());
+        this.setFirstName(entity.getFirstName());
+        this.setLastName(entity.getLastName());
+        this.setTelephoneNumber(entity.getTelephoneNumber());
+        this.setRole(entity.getRole());
+    }
+
+
     @Id
     @Column(name = "referent_k")
     @SequenceGenerator(name="secondary_referent_referent_k_seq",
@@ -26,5 +39,7 @@ public class SecondaryReferentEntity extends ReferentEntity {
     @ManyToOne
     @JoinColumn(name = "profile_fk", nullable = false)
     private ProfileEntity profile;
+
+
 
 }

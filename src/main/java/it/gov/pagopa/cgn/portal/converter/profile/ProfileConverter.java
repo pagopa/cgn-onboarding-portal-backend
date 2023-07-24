@@ -29,7 +29,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setReferent(this.referentConverter.toEntity(dto.getReferent()));
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                 .orElse(Collections.emptyList()).stream()
-                .map(secondaryReferent-> (SecondaryReferentEntity)this.referentConverter.toEntity(secondaryReferent))
+                .map(secondaryReferent-> new SecondaryReferentEntity(this.referentConverter.toEntity(secondaryReferent)))
                 .collect(Collectors.toList()));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());

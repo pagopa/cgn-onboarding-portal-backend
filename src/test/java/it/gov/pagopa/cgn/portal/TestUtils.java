@@ -215,7 +215,7 @@ public class TestUtils {
         updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
         updateProfile.setSupportType(SupportType.EMAILADDRESS);
         updateProfile.setSupportValue("an.email@domain.com");
-        updateProfile.setSecondaryReferents(creteUpdateReferentList());
+        updateProfile.setSecondaryReferents(createUpdateReferentList());
 
         return updateProfile;
     }
@@ -286,11 +286,8 @@ public class TestUtils {
         secondaryReferentEntity_1.setProfile(profileEntity);
         secondaryReferentEntity_1.setRole("CEO");
 
-        List<SecondaryReferentEntity> secondaryReferentEntityList = Collections.EMPTY_LIST;
-        Collections.addAll(secondaryReferentEntityList = new ArrayList<SecondaryReferentEntity>(), secondaryReferentEntity_0, secondaryReferentEntity_1);
-
-        return  secondaryReferentEntityList;
-    }
+        return Arrays.asList(secondaryReferentEntity_0, secondaryReferentEntity_1);
+        }
 
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
@@ -469,7 +466,7 @@ public class TestUtils {
         return documentEntity;
     }
 
-    public static List<UpdateReferent> creteUpdateReferentList(){
+    public static List<UpdateReferent> createUpdateReferentList(){
         UpdateReferent updateReferent_0 = new UpdateReferent();
         updateReferent_0.setEmailAddress("mail.mail@mail.com");
         updateReferent_0.setFirstName("FIRSTNAME");
