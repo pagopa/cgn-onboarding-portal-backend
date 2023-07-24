@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
+import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
@@ -213,6 +215,7 @@ public class TestUtils {
         updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
         updateProfile.setSupportType(SupportType.EMAILADDRESS);
         updateProfile.setSupportValue("an.email@domain.com");
+        updateProfile.setSecondaryReferents(creteUpdateReferentList());
 
         return updateProfile;
     }
@@ -466,6 +469,23 @@ public class TestUtils {
         return documentEntity;
     }
 
+    public static List<UpdateReferent> creteUpdateReferentList(){
+        UpdateReferent updateReferent_0 = new UpdateReferent();
+        updateReferent_0.setEmailAddress("mail.mail@mail.com");
+        updateReferent_0.setFirstName("FIRSTNAME");
+        updateReferent_0.setLastName("LASTNAME");
+        updateReferent_0.setRole("ROLE");
+
+        UpdateReferent updateReferent_1 = new UpdateReferent();
+        updateReferent_1.setEmailAddress("mail.mail@mail.com");
+        updateReferent_1.setFirstName("FIRSTNAME");
+        updateReferent_1.setLastName("LASTNAME");
+        updateReferent_1.setRole("ROLE");
+
+        return Arrays.asList(updateReferent_0, updateReferent_1);
+
+    }
+
     public static String getJson(Object obj) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -490,6 +510,8 @@ public class TestUtils {
     public static SubscriptionContract createSubscriptionContract() {
         return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
     }
+
+
 
     public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
         private String primaryKey;

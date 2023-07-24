@@ -67,6 +67,4 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         return secondaryReferentEntity;
     };
 
-
-
 }
