@@ -62,7 +62,8 @@ public class ProfileService {
             documentService.resetAllDocuments(agreementId);
         }
         // fix for misalignments with addresses
-        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) && profileEntity.getAddressList().isEmpty() && !profileEntity.getAllNationalAddresses()) {
+        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) && profileEntity.getAddressList().isEmpty()
+                && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
             profileEntity.setAllNationalAddresses(true);
         }
         validateProfile(profileEntity);
