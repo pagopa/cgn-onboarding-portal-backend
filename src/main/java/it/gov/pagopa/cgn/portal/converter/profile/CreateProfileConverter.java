@@ -6,7 +6,6 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
-import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
