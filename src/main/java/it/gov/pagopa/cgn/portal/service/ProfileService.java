@@ -129,6 +129,8 @@ public class ProfileService {
         updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
         updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
         dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
+        dbEntity.setSupportType(toUpdateEntity.getSupportType());
+        dbEntity.setSupportValue(toUpdateEntity.getSupportValue());
         // fullname will never arrive from converted api model
         // we will update it only internally so we have to check that it's not null
         if (toUpdateEntity.getFullName() != null) {
