@@ -40,8 +40,8 @@ public class EycaIntegrationServiceTest {
     //    doNothing().when(apiClient).setBasePath(anyString());
 
   //      eycaIntegrationApi.setApiClient(apiClient);
-        eycaIntegrationApi = new EycaIntegrationApi(apiClient);
-        eycaIntegrationApi.setApiClient(apiClient);
+        eycaIntegrationApi = new EycaIntegrationApi();
+     //   eycaIntegrationApi.setApiClient(apiClient);
         eycaIntegrationService = new EycaIntegrationService(eycaIntegrationApi);
     }
 
@@ -52,11 +52,11 @@ public class EycaIntegrationServiceTest {
         authResponse.setSessionId("mocked-session-id");
 
         // Configurazione del mock del client API per restituire la risposta di autenticazione
-        when(eycaIntegrationApi.authentication(anyString(), anyString())).thenReturn(authResponse);
+      //  when(eycaIntegrationApi.authentication(anyString(), anyString())).thenReturn(authResponse);
 
         // Mock della risposta della chiamata a createDiscount
         ApiResponseEycaIntegration expectedResponse = new ApiResponseEycaIntegration();
-        when(eycaIntegrationApi.createDiscount(any(DiscountRequestEycaIntegration.class))).thenReturn(expectedResponse);
+      //  when(eycaIntegrationApi.createDiscount(any(DiscountRequestEycaIntegration.class))).thenReturn(expectedResponse);
 
         // Chiamata al metodo da testare con parametri di esempio
         String username = "test-username";

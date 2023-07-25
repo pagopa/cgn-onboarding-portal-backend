@@ -5,6 +5,7 @@ import com.google.common.net.HttpHeaders;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.api.EycaIntegrationApi;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.client.ApiClient;
+import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseBodyEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.DiscountRequestEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.InlineResponse200EycaIntegration;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 
@@ -63,13 +65,13 @@ public class EycaIntegrationService {
     @Autowired
     WebClient webClient;
 
-    public Mono<Employee> create(Employee empl)
+    public Mono<ApiResponseBodyEycaIntegration> create(DiscountRequestEycaIntegration empl)
     {
         return webClient.post()
                 .uri("/create/emp")
-                .body(Mono.just(empl), Employee.class)
+                .body(Mono.just(empl), DiscountRequestEycaIntegration.class)
                 .retrieve()
-                .bodyToMono(Employee.class)
+                .bodyToMono(ApiResponseBodyEycaIntegration.class)
                 .timeout(Duration.ofMillis(10_000));
     }
 
