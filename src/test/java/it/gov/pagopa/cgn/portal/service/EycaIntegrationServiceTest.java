@@ -48,9 +48,6 @@ public class EycaIntegrationServiceTest {
     @Test
     public void testCreateDiscountWithAuthorization() {
         // Mock della risposta di autenticazione
-        InlineResponse200EycaIntegration authResponse = new InlineResponse200EycaIntegration();
-        authResponse.setSessionId("mocked-session-id");
-
         // Configurazione del mock del client API per restituire la risposta di autenticazione
       //  when(eycaIntegrationApi.authentication(anyString(), anyString())).thenReturn(authResponse);
 

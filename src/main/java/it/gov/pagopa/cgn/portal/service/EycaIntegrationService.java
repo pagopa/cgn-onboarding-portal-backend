@@ -1,27 +1,12 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
-import com.google.common.net.HttpHeaders;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.api.EycaIntegrationApi;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseBodyEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.DiscountRequestEycaIntegration;
 import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.InlineResponse200EycaIntegration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-
-import javax.annotation.PostConstruct;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.Collections;
 
 @Service
 public class EycaIntegrationService {
@@ -62,55 +47,5 @@ public class EycaIntegrationService {
         return eycaIntegrationApi.createDiscount(discountRequestEycaIntegration);
     }
 
-    @Autowired
-    WebClient webClient;
-
-    public Mono<ApiResponseBodyEycaIntegration> create(DiscountRequestEycaIntegration empl)
-    {
-        return webClient.post()
-                .uri("/create/emp")
-                .body(Mono.just(empl), DiscountRequestEycaIntegration.class)
-                .retrieve()
-                .bodyToMono(ApiResponseBodyEycaIntegration.class)
-                .timeout(Duration.ofMillis(10_000));
-    }
-
-   /* void webClient(){
-        WebClient client = WebClient.builder()
-                .baseUrl("http://localhost:8080")
-                .defaultCookie("cookieKey", "cookieValue")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultUriVariables(Collections.singletonMap("url", "http://localhost:8080"))
-                .build();
-
-        WebClient.UriSpec<WebClient.RequestBodySpec> uriSpec = client.method(HttpMethod.POST);
-        WebClient.RequestBodySpec bodySpec = uriSpec.uri(
-                uriBuilder -> uriBuilder.pathSegment("/resource").build());
-
-        WebClient.RequestHeadersSpec<?> headersSpec = bodySpec.bodyValue("data");
-
-        WebClient.ResponseSpec responseSpec = headersSpec.header(
-                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
-                .acceptCharset(StandardCharsets.UTF_8)
-                .ifNoneMatch("*")
-                .ifModifiedSince(ZonedDateTime.now())
-                .retrieve();
-
-
-        Mono<String> response = headersSpec.exchangeToMono(resp -> {
-            if (resp.statusCode().equals(HttpStatus.OK)) {
-                return resp.bodyToMono(String.class);
-            } else if (resp.statusCode().is4xxClientError()) {
-                return Mono.just("Error response");
-            } else {
-                return resp.createException()
-                        .flatMap(Mono::error);
-            }
-        });
-
-    }*/
-
-
-
 }
+
