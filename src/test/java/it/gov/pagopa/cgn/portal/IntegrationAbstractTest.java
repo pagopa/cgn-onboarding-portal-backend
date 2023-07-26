@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class IntegrationAbstractTest {
 
-    @SuppressWarnings("java:S6338")
+    @SuppressWarnings("secrets:S6338")
     protected String getAzureConnectionString() {
         return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
