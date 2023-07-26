@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -719,8 +720,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                 .getDiscountEntity();
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3)
+        Assertions.assertEquals(2, updatedDiscount.getProducts().size());
+        IntStream.range(0, 2)
                 .forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
                         dbDiscount.getProducts().get(index)));
 
@@ -745,8 +746,8 @@ class DiscountServiceTest extends IntegrationAbstractTest {
                 .getDiscountEntity();
         Assertions.assertEquals(updatedDiscount.getName(), dbDiscount.getName());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(3, updatedDiscount.getProducts().size());
-        IntStream.range(0, 3)
+        Assertions.assertEquals(2, updatedDiscount.getProducts().size());
+        IntStream.range(0, 2)
                 .forEach(index -> Assertions.assertEquals(updatedDiscount.getProducts().get(index),
                         dbDiscount.getProducts().get(index)));
         Assertions.assertNull(dbDiscount.getDiscountValue());
@@ -1713,4 +1714,32 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(2, progress.getLoaded());
         Assertions.assertEquals(100, progress.getPercent());
     }
+
+
+    @Test
+    void Create_CreateDiscount_WithMoreThanTwoCategories_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        DiscountProductEntity productEntity0 = new DiscountProductEntity();
+        productEntity0.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
+        productEntity0.setDiscount(discountEntity);
+
+        DiscountProductEntity productEntity1 = new DiscountProductEntity();
+        productEntity1.setProductCategory(ProductCategoryEnum.HEALTH);
+        productEntity1.setDiscount(discountEntity);
+
+        DiscountProductEntity productEntity2 = new DiscountProductEntity();
+        productEntity2.setProductCategory(ProductCategoryEnum.HOME);
+        productEntity2.setDiscount(discountEntity);
+
+        discountEntity.addProductList(Arrays.asList(productEntity0, productEntity1, productEntity2));
+
+        DiscountEntity finalDiscountEntity = discountEntity;
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.createDiscount(AGREEMENT_ID, finalDiscountEntity));
+    }
+
 }

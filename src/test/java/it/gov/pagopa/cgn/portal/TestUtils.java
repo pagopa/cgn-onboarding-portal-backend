@@ -410,9 +410,9 @@ public class TestUtils {
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.TRAVELLING);
         productEntityList.add(productEntity);
-        productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
-        productEntityList.add(productEntity);
+      //  productEntity = new DiscountProductEntity();
+      //  productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
+      //  productEntityList.add(productEntity);
         productEntityList.forEach(p -> p.setDiscount(discountEntity));
         return productEntityList;
     }
