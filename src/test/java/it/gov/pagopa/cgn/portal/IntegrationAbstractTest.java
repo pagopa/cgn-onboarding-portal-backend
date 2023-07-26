@@ -148,6 +148,9 @@ public class IntegrationAbstractTest {
     protected AddressRepository addressRepository;
 
     @Autowired
+    protected SecondaryReferentRepository secondaryReferentRepository;
+
+    @Autowired
     protected DocumentService documentService;
 
     @Autowired
@@ -318,6 +321,7 @@ public class IntegrationAbstractTest {
         // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -328,6 +332,7 @@ public class IntegrationAbstractTest {
         // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }

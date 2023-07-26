@@ -90,6 +90,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -99,6 +100,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         profileEntity.setDiscountCodeType(discountType);
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
     }
 
