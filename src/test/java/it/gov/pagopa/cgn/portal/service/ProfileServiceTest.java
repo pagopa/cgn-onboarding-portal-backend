@@ -241,6 +241,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
         profileEntity.setReferent(referentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
 
         profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
         Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
@@ -278,6 +279,8 @@ class ProfileServiceTest extends IntegrationAbstractTest {
         //added to avoid LazyInitializationException
         profileEntity.setReferent(referentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
+
         profileEntity = profileService.updateProfile(agreement.getId(), profileEntity);
         Assertions.assertEquals(legalOffice, profileEntity.getLegalOffice());
         agreement = agreementRepository.findById(agreement.getId()).orElseThrow();

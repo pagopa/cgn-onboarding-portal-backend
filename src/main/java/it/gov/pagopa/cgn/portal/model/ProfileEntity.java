@@ -129,6 +129,11 @@ public class ProfileEntity extends BaseEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addressList;
 
+    @EqualsAndHashCode.Exclude
+    @Size(max = 4)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SecondaryReferentEntity> secondaryReferentList;
+
     @Column(name = "all_national_addresses")
     private Boolean allNationalAddresses = false;
 
@@ -159,6 +164,24 @@ public class ProfileEntity extends BaseEntity {
             });
         }
     }
+
+
+    public void removeAllSecondaryReferents() {
+        this.secondaryReferentList.clear();
+    }
+
+    public void addSecondaryReferentsList(Collection<SecondaryReferentEntity> secondaryReferents) {
+        if (!CollectionUtils.isEmpty(secondaryReferents)) {
+            if (this.secondaryReferentList == null) {
+                this.secondaryReferentList = new ArrayList<>();
+            }
+            secondaryReferents.forEach(sr -> {
+                secondaryReferentList.add(sr);
+                sr.setProfile(this);
+            });
+        }
+    }
+
 
     public OffsetDateTime getInsertTime() {
         return insertTime;

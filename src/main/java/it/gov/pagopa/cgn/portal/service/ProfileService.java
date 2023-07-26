@@ -3,10 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgn.portal.model.AddressEntity;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.model.ReferentEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +64,7 @@ public class ProfileService {
             profileEntity.setAllNationalAddresses(true);
         }
         validateProfile(profileEntity);
+
         return profileRepository.save(profileEntity);
     }
 
@@ -112,6 +110,14 @@ public class ProfileService {
         profileEntity.addAddressList(addressesList);
     };
 
+    private final BiConsumer<ProfileEntity, List<SecondaryReferentEntity>> updateSecondaryReferents = (profileEntity, secondaryReferentList) -> {
+        if (!CollectionUtils.isEmpty(profileEntity.getSecondaryReferentList())) {
+            profileEntity.removeAllSecondaryReferents();
+        }
+        profileEntity.addSecondaryReferentsList(secondaryReferentList);
+    };
+
+
     private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
         dbEntity.setName(toUpdateEntity.getName());
         dbEntity.setNameEn(toUpdateEntity.getNameEn());
@@ -129,6 +135,7 @@ public class ProfileService {
         dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
         updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
         updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
+        updateSecondaryReferents.accept(dbEntity, toUpdateEntity.getSecondaryReferentList());
         dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
         dbEntity.setSupportType(toUpdateEntity.getSupportType());
         dbEntity.setSupportValue(toUpdateEntity.getSupportValue());

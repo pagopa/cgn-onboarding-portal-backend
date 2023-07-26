@@ -1,13 +1,20 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
+import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity, UpdateProfile> {
@@ -42,6 +49,10 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         ReferentEntity referentEntity = updateReferentConverter.toEntity(dto.getReferent());
         referentEntity.setProfile(entity);
         entity.setReferent(referentEntity);
+        entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
+                .orElse(Collections.emptyList()).stream()
+                .map(secondaryReferent -> this.updateReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
+                .collect(Collectors.toCollection(ArrayList::new)));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
@@ -51,5 +62,9 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         return entity;
     };
 
+    private final BiFunction<UpdateReferent, ProfileEntity, SecondaryReferentEntity> updateReferentToSecondaryReferentEntity = (updateReferent, profileEntity) -> {
+        ReferentEntity referentEntity = this.updateReferentConverter.toEntity(updateReferent);
+        return new SecondaryReferentEntity(referentEntity);
+    };
 
 }
