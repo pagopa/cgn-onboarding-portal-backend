@@ -286,7 +286,7 @@ public class TestUtils {
         secondaryReferentEntity_1.setProfile(profileEntity);
         secondaryReferentEntity_1.setRole("CEO");
 
-        return Arrays.asList(secondaryReferentEntity_0, secondaryReferentEntity_1);
+        return new ArrayList<>(Arrays.asList(secondaryReferentEntity_0, secondaryReferentEntity_1));
         }
 
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
@@ -468,18 +468,20 @@ public class TestUtils {
 
     public static List<UpdateReferent> createUpdateReferentList(){
         UpdateReferent updateReferent_0 = new UpdateReferent();
-        updateReferent_0.setEmailAddress("mail.mail@mail.com");
-        updateReferent_0.setFirstName("FIRSTNAME");
-        updateReferent_0.setLastName("LASTNAME");
+        updateReferent_0.setEmailAddress("mail_a.mail@mail.com");
+        updateReferent_0.setFirstName("FIRSTNAME_A");
+        updateReferent_0.setLastName("LASTNAME_A");
+        updateReferent_0.setTelephoneNumber("54654654");
         updateReferent_0.setRole("ROLE");
 
         UpdateReferent updateReferent_1 = new UpdateReferent();
-        updateReferent_1.setEmailAddress("mail.mail@mail.com");
-        updateReferent_1.setFirstName("FIRSTNAME");
-        updateReferent_1.setLastName("LASTNAME");
+        updateReferent_1.setEmailAddress("mail_b.mail@mail.com");
+        updateReferent_1.setFirstName("FIRSTNAME_B");
+        updateReferent_1.setLastName("LASTNAME_B");
+        updateReferent_1.setTelephoneNumber("54654654");
         updateReferent_1.setRole("ROLE");
 
-        return Arrays.asList(updateReferent_0, updateReferent_1);
+        return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
 
     }
 

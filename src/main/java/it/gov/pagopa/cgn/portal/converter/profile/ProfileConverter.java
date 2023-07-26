@@ -7,6 +7,7 @@ import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,7 +31,7 @@ public class ProfileConverter extends CommonProfileConverter<ProfileEntity, Prof
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                 .orElse(Collections.emptyList()).stream()
                 .map(secondaryReferent-> new SecondaryReferentEntity(this.referentConverter.toEntity(secondaryReferent)))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(ArrayList::new)));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalOffice(dto.getLegalOffice());

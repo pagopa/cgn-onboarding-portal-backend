@@ -200,8 +200,15 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     void Get_Profile_Expect_OK(){
         var agreementId = agreementEntity.getId();
 
+        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
+                DiscountCodeType.STATIC);
+        profileFacade.updateProfile(agreementId, updateProfile);
+
         ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Profile profile = response.getBody();
+        Assertions.assertNotNull(profile.getSecondaryReferents());
+
     }
 
 

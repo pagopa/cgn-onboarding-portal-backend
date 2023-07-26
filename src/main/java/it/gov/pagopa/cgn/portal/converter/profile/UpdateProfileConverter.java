@@ -9,6 +9,7 @@ import it.gov.pagopa.cgnonboardingportal.model.UpdateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -51,7 +52,7 @@ public class UpdateProfileConverter extends CommonProfileConverter<ProfileEntity
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                 .orElse(Collections.emptyList()).stream()
                 .map(secondaryReferent -> this.updateReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(ArrayList::new)));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());

@@ -9,6 +9,7 @@ import it.gov.pagopa.cgnonboardingportal.model.CreateReferent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -53,7 +54,7 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                 .orElse(Collections.emptyList()).stream()
                 .map(secondaryReferent -> this.createReferentToSecondaryReferentEntity.apply(secondaryReferent, entity))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(ArrayList::new)));
         entity.setLegalOffice(dto.getLegalOffice());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());

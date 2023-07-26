@@ -165,6 +165,24 @@ public class ProfileEntity extends BaseEntity {
         }
     }
 
+
+    public void removeAllSecondaryReferents() {
+        this.secondaryReferentList.clear();
+    }
+
+    public void addSecondaryReferentsList(Collection<SecondaryReferentEntity> secondaryReferents) {
+        if (!CollectionUtils.isEmpty(secondaryReferents)) {
+            if (this.secondaryReferentList == null) {
+                this.secondaryReferentList = new ArrayList<>();
+            }
+            secondaryReferents.forEach(sr -> {
+                secondaryReferentList.add(sr);
+                sr.setProfile(this);
+            });
+        }
+    }
+
+
     public OffsetDateTime getInsertTime() {
         return insertTime;
     }
