@@ -106,8 +106,11 @@ public class ConfigProperties {
     @Value("${cgn.attribute-authority.base-url}")
     private String attributeAuthorityBaseUrl;
 
-    @Value("${eyca.integration.base-url}")
-    private String eycaBaseUrl;
+   // @Value("${eyca.integration.base-url}")
+   // private String eycaBaseUrl;
+
+    //@Value("${eyca.not.allowed.discount.modes}")
+    //private String eycaNotAllowedDiscountModes;
 
 
     public boolean isActiveProfileDev() {

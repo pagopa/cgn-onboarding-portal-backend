@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -12,6 +13,7 @@ import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -23,10 +25,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,6 +37,9 @@ public class ExportService {
 
     private final AgreementRepository agreementRepository;
     private final EycaDataExportRepository eycaDataExportRepository;
+    private final ConfigProperties configProperties;
+    private final EycaExportService eycaIntegrationService;
+
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
             "Ragione sociale",
@@ -88,9 +90,12 @@ public class ExportService {
             "GEO - Longitude",
             "DISCOUNT TYPE"};
 
-    public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository) {
+    public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository,
+                         ConfigProperties configProperties, EycaExportService eycaIntegrationService) {
         this.agreementRepository = agreementRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
+        this.configProperties = configProperties;
+        this.eycaIntegrationService = eycaIntegrationService;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -174,6 +179,31 @@ public class ExportService {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
+
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public ResponseEntity<Resource> sendDiscountsToEyca() {
+      /* log.info("exportEycaDiscounts start");
+        List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
+
+        String eycaNotAllowedDiscountModes = configProperties.getEycaNotAllowedDiscountModes();
+
+        List<EycaDataExportViewEntity> filteredList = exportViewEntities.stream()
+                .filter(entity -> !(!StringUtils.isBlank(entity.getDiscountType())
+                        &&listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                        .contains(entity.getDiscountType())))
+                .collect(Collectors.toList());
+*/
+return null;
+
+
+
+
+      //  exportViewEntities.stream().
+
+    }
+
+
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>
             agreementWithProfileAndDiscountToStringArray
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
@@ -248,4 +278,9 @@ public class ExportService {
         }
     };
 
+    private final Function<String, List<String>> listFromCommaSeparatedString= value-> Optional.ofNullable(value)
+            .map(str -> Arrays.stream(str.split(","))
+                    .map(String::trim)
+                    .collect(Collectors.toList()))
+            .orElse(new ArrayList<>());
 }

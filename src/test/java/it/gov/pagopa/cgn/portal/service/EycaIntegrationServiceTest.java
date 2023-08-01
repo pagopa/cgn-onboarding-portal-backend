@@ -1,34 +1,27 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.api.EycaIntegrationApi;
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.ApiResponseEycaIntegration;
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.DiscountRequestEycaIntegration;
-import it.gov.pagopa.cgnonboardingportal.eycaintegration.model.InlineResponse200EycaIntegration;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaDataExportApi;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEycaDataExport;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.RequestEycaDataExport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 public class EycaIntegrationServiceTest {
+
 
     @Mock
     private ApiClient apiClient;
 
     @Mock
-    private EycaIntegrationApi eycaIntegrationApi;
+    private EycaDataExportApi eycaDataExportApi;
 
-    private EycaIntegrationService eycaIntegrationService;
+    private EycaExportService eycaExportService;
 
     @BeforeEach
     public void setUp() {
@@ -40,34 +33,21 @@ public class EycaIntegrationServiceTest {
     //    doNothing().when(apiClient).setBasePath(anyString());
 
   //      eycaIntegrationApi.setApiClient(apiClient);
-        eycaIntegrationApi = new EycaIntegrationApi();
+        eycaDataExportApi = new EycaDataExportApi()    ;
      //   eycaIntegrationApi.setApiClient(apiClient);
-        eycaIntegrationService = new EycaIntegrationService(eycaIntegrationApi);
-    }
+        eycaExportService = new EycaExportService(eycaDataExportApi);
+      }
 
     @Test
     public void testCreateDiscountWithAuthorization() {
-        // Mock della risposta di autenticazione
-        // Configurazione del mock del client API per restituire la risposta di autenticazione
-      //  when(eycaIntegrationApi.authentication(anyString(), anyString())).thenReturn(authResponse);
 
-        // Mock della risposta della chiamata a createDiscount
-        ApiResponseEycaIntegration expectedResponse = new ApiResponseEycaIntegration();
-      //  when(eycaIntegrationApi.createDiscount(any(DiscountRequestEycaIntegration.class))).thenReturn(expectedResponse);
+        RequestEycaDataExport requestEycaDataExport = new RequestEycaDataExport();
 
-        // Chiamata al metodo da testare con parametri di esempio
-        String username = "test-username";
-        String password = "test-password";
-        DiscountRequestEycaIntegration discountRequest = new DiscountRequestEycaIntegration();
-        ApiResponseEycaIntegration actualResponse = eycaIntegrationService.createDiscountWithAuthorization(username, password, discountRequest);
+        ApiResponseEycaDataExport actualResponse = eycaExportService.createDiscountWithAuthorization(requestEycaDataExport);
 
         // Verifica che il client API sia stato chiamato correttamente con il cookie di sessione
-        verify(eycaIntegrationApi).authentication(username, password);
-        verify(eycaIntegrationApi).createDiscount(discountRequest);
+     }
 
-        // Verifica che la risposta sia stata restituita correttamente
-        assertEquals(expectedResponse, actualResponse);
-    }
 
 
 

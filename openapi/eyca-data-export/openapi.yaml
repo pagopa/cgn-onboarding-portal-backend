@@ -1,46 +1,30 @@
 swagger: '2.0'
 info:
   version: 1.1.0
-  title: EYCA Integration
+  title: EYCA Data Export
 
 host: ccdb.eyca.org
 schemes:
   - https
 securityDefinitions:
-  CookieAuth:
-    type: apiKey
-    in: cookie
-    name: session-id
+  basicAuth:
+    type: basic
 
 paths:
   /api/auth:
     get:
       operationId: authentication
       tags:
-        - EycaIntegration
+        - EycaDataExport
       summary: session authentication
+      security:
+          - basicAuth: [ ]
       description: authenticated session
-      parameters:
-        - in: query
-          name: username
-          type: string
-          required: false
-        - in: query
-          name: password
-          type: string
-          required: false
       responses:
         '200':
           description: OK
           schema:
-            type: object
-            properties:
-              message:
-                type: string
-              session_id:
-                type: string
-              ccdb_session:
-                type: string
+            type: string
         '404':
           description: Not found.
         '500':
@@ -52,14 +36,14 @@ paths:
         - Bearer: [ ]
       operationId: createDiscount
       tags:
-        - EycaIntegration
+        - EycaDataExport
       summary: create a new discount.
       description: Create a new discount.
       parameters:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/DiscountRequest"
+            $ref: "#/definitions/Request"
       responses:
         '200':
           description: Upserted organization.
@@ -76,7 +60,7 @@ produces:
 parameters: null
 
 definitions:
-  DiscountRequest:
+  Request:
     type: object
     required:
       - vendor
@@ -175,4 +159,4 @@ definitions:
       discount:
         type: array
         items:
-          $ref: "#/definitions/DiscountRequest"
+          $ref: "#/definitions/Request"

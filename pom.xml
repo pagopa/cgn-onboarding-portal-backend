@@ -388,20 +388,20 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/openapi/eyca-integration/openapi.yaml
+                                ${project.basedir}/openapi/eyca-data-export/openapi.yaml
                             </inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <generatorName>java</generatorName>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
-                            <modelNameSuffix>EycaIntegration</modelNameSuffix>
+                            <modelNameSuffix>EycaDataExport</modelNameSuffix>
                             <library>resttemplate</library>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
-                                <modelPackage>${project.groupId}.cgnonboardingportal.eycaintegration.model
+                                <modelPackage>${project.groupId}.cgnonboardingportal.eycadataexport.model
                                 </modelPackage>
-                                <apiPackage>${project.groupId}.cgnonboardingportal.eycaintegration.api</apiPackage>
-                                <invokerPackage>${project.groupId}.cgnonboardingportal.eycaintegration.client
+                                <apiPackage>${project.groupId}.cgnonboardingportal.eycadataexport.api</apiPackage>
+                                <invokerPackage>${project.groupId}.cgnonboardingportal.eycadataexport.client
                                 </invokerPackage>
                                 <library>resttemplate</library>
                                 <dateLibrary>java8</dateLibrary>
