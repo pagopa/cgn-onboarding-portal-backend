@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -10,6 +11,7 @@ import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -38,7 +40,8 @@ public class ExportService {
     private final AgreementRepository agreementRepository;
     private final EycaDataExportRepository eycaDataExportRepository;
     private final ConfigProperties configProperties;
-    private final EycaExportService eycaIntegrationService;
+    private final EycaExportService eycaExportService;
+    private final DataExportEycaConverter dataExportEycaConverter;
 
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
@@ -91,11 +94,12 @@ public class ExportService {
             "DISCOUNT TYPE"};
 
     public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository,
-                         ConfigProperties configProperties, EycaExportService eycaIntegrationService) {
+                         ConfigProperties configProperties, EycaExportService eycaExportService, DataExportEycaConverter dataExportEycaConverter) {
         this.agreementRepository = agreementRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
         this.configProperties = configProperties;
-        this.eycaIntegrationService = eycaIntegrationService;
+        this.eycaExportService = eycaExportService;
+        this.dataExportEycaConverter = dataExportEycaConverter;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -179,28 +183,35 @@ public class ExportService {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-
-
     @Transactional(Transactional.TxType.REQUIRED)
-    public ResponseEntity<Resource> sendDiscountsToEyca() {
-      /* log.info("exportEycaDiscounts start");
+    public ResponseEntity<String> sendDiscountsToEyca() {
+        log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
         String eycaNotAllowedDiscountModes = configProperties.getEycaNotAllowedDiscountModes();
 
-        List<EycaDataExportViewEntity> filteredList = exportViewEntities.stream()
-                .filter(entity -> !(!StringUtils.isBlank(entity.getDiscountType())
-                        &&listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
-                        .contains(entity.getDiscountType())))
-                .collect(Collectors.toList());
-*/
-return null;
+        try {
+            List<DataExportEyca> exportEycaList = exportViewEntities.stream()
+                    .filter(entity -> !(!StringUtils.isBlank(entity.getDiscountType())
+                            && listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                            .contains(entity.getDiscountType())))
+                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
+                    .entrySet().stream()
+                    .map(dataExportEycaConverter::groupedEntityToDto)
+                    .collect(Collectors.toList());
 
+            exportEycaList.forEach(dataExportEyca -> eycaExportService.createDiscountWithAuthorization(dataExportEyca, "json"));
+            log.info("sendDiscountsToEyca end success");
 
+            return ResponseEntity.status(HttpStatus.OK).build();
 
-
-      //  exportViewEntities.stream().
-
+        } catch (Exception ex) {
+            log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
+            log.error(Arrays.stream(ex.getStackTrace())
+                    .map(StackTraceElement::toString)
+                    .collect(Collectors.joining("\n")));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
 
@@ -253,7 +264,7 @@ return null;
             Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getId)
                     .map(Objects::toString).orElse(null),
             maybeDiscount.map(DiscountEntity::getId).map(Objects::toString).orElse(null)
-  };
+    };
 
     private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
         List<String[]> agreementRows = agreement.getDiscountList()

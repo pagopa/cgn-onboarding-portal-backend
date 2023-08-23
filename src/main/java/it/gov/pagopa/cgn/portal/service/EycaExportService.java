@@ -1,52 +1,50 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaDataExportApi;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEycaDataExport;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.RequestEycaDataExport;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EycaExportService {
 
-
-    private final EycaDataExportApi eycaIntegrationApi;
+   private final EycaApi eycaApi;
     private final ApiClient apiClient;
+    private final ConfigProperties configProperties;
 
-    public EycaExportService(EycaDataExportApi eycaIntegrationApi) {
-        this.eycaIntegrationApi = eycaIntegrationApi;
-        this.apiClient=eycaIntegrationApi.getApiClient();
-        this.apiClient.setUsername("andrea.rovere@dgsspa.com");
-        this.apiClient.setPassword("N'EXd+{2752\"WPuL");
-        this.apiClient.setBasePath("https://ccdb.eyca.org");
+    public EycaExportService(EycaApi eycaApi, ConfigProperties configProperties) {
+        this.eycaApi = eycaApi;
+        this.configProperties = configProperties;
+        this.apiClient=eycaApi.getApiClient();
+        this.apiClient.setUsername(configProperties.getEycaUsername());
+        this.apiClient.setPassword(configProperties.getEycaPassword());
+     //   this.apiClient.setBasePath(configProperties.getEycaBaseUrl());
     }
 
-    private String  authorize(){
-        return eycaIntegrationApi.authentication();
-    };
-
-    public ApiResponseEycaDataExport createDiscount   (RequestEycaDataExport discountRequestEycaIntegration) {
-        return eycaIntegrationApi.createDiscount(discountRequestEycaIntegration);
+    private String authenticateOnEyca(){
+            return eycaApi.authentication();
     }
 
-   public ApiResponseEycaDataExport createDiscountWithAuthorization(RequestEycaDataExport discountRequestEycaIntegration) {
-       // Eseguire l'autenticazione
-        String authResponse = authorize();
-        System.out.println("::::::::: authResponse: " + authResponse);
+    public ApiResponseEyca createDiscount(DataExportEyca discountRequestEycaIntegration, String type) {
+        return eycaApi.createDiscount(type, discountRequestEycaIntegration);
+    }
+
+   public ApiResponseEyca createDiscountWithAuthorization(DataExportEyca discountRequestEycaIntegration, String type) {
+        String authResponse = authenticateOnEyca();
+
+        if (authResponse.contains("ERR")){
+            throw new EycaAuthenticationException(authResponse);
+        }
 
        int colonIndex = authResponse.indexOf(':');
-
-       // Estrai la parte della stringa dopo l'indice del carattere ':' (ignorando lo spazio dopo ':')
        String sessionId = authResponse.substring(colonIndex + 1).trim();
+       apiClient.addDefaultCookie("ccdb_session", sessionId);
+       return eycaApi.createDiscount(type, discountRequestEycaIntegration);
 
-       // Ottenere il cookie di sessione dalla risposta di autenticazione
-
-        // Aggiungere il cookie di sessione alle richieste successive
-         apiClient.addDefaultCookie("ccdb_session", sessionId);
-
-        // Effettuare la chiamata a createDiscount con l'autenticazione tramite cookie
-        return eycaIntegrationApi.createDiscount(discountRequestEycaIntegration);
     }
 
 }

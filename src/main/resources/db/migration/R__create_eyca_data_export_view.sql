@@ -4,6 +4,7 @@ CREATE VIEW eyca_data_export AS
 SELECT
     row_number() over () as "id",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
+    p.profile_k as "profile_id",
     coalesce(p.full_name, p.name) as "vendor",
     d.name_en as "name",
     d.name as "name_local",

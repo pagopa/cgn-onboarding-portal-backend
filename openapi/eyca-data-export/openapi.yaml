@@ -15,10 +15,10 @@ paths:
     get:
       operationId: authentication
       tags:
-        - EycaDataExport
+        - Eyca
       summary: session authentication
       security:
-          - basicAuth: [ ]
+        - basicAuth: [ ]
       description: authenticated session
       responses:
         '200':
@@ -36,17 +36,22 @@ paths:
         - Bearer: [ ]
       operationId: createDiscount
       tags:
-        - EycaDataExport
+        - Eyca
       summary: create a new discount.
       description: Create a new discount.
       parameters:
         - in: body
           name: body
           schema:
-            $ref: "#/definitions/Request"
+            $ref: "#/definitions/DataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
       responses:
         '200':
-          description: Upserted organization.
+          description: Discount created.
           schema:
             $ref: "#/definitions/ApiResponse"
         '404':
@@ -60,7 +65,7 @@ produces:
 parameters: null
 
 definitions:
-  Request:
+  DataExport:
     type: object
     required:
       - vendor
@@ -106,24 +111,6 @@ definitions:
         items:
           $ref: "#/definitions/File"
 
-  Location:
-    type: object
-    properties:
-      street:
-        type: string
-      zip:
-        type: string
-      city:
-        type: string
-      country:
-        type: string
-      point_x:
-        type: string
-      point_y:
-        type: string
-      region:
-        type: string
-
   File:
     type: object
     properties:
@@ -136,27 +123,218 @@ definitions:
     type: object
     properties:
       api_response:
-        $ref: "#/definitions/ApiResponseBody"
-  ApiResponseBody:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 1
+          data:
+            type: object
+            properties:
+              discounts:
+                type: object
+                properties:
+                  CCDB:
+                    type: object
+                    properties:
+                      offset:
+                        type: integer
+                        example: 0
+                      pageNumber:
+                        type: integer
+                        example: 1
+                      pagesTotal:
+                        type: integer
+                        example: 246
+                      rowsPerPage:
+                        type: integer
+                        example: 1
+                      rowsReturned:
+                        type: integer
+                        example: 1
+                      rowsTotal:
+                        type: integer
+                        example: 246
+                  count:
+                    type: integer
+                    example: 246
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/definitions/DiscountItem"
+                  realCount:
+                    type: integer
+                    example: 1
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+
+  DiscountItem:
     type: object
     properties:
-      http_status:
-        type: integer
-        format: int32
-      error:
-        type: integer
-        format: int32
-      data:
-        $ref: "#/definitions/DiscountData"
-      text:
-        type: string
-      code:
-        type: integer
-        format: int32
-  DiscountData:
-    type: object
-    properties:
-      discount:
+      categories:
         type: array
         items:
-          $ref: "#/definitions/Request"
+          $ref: "#/definitions/Category"
+      ccdb_id:
+        type: string
+        example: "38905"
+      ccdb_member_id:
+        type: integer
+        example: 20
+      created:
+        type: string
+        format: date-time
+        example: "2017-08-02 08:41:04"
+      deleted:
+        type: integer
+        example: 0
+      email:
+        type: string
+        example: "suministros@bomarhosteleria.com"
+      id:
+        type: string
+        example: "598190209328fd0739980027"
+      image:
+        type: string
+        example: "https://ccdb.eyca.org/cstatic/lhbophmzefwgqzbpkwrbiopsemgocxqn_1611584193.jpg"
+      international:
+        type: integer
+        example: 0
+      live:
+        type: integer
+        example: 1
+      local_id:
+        type: string
+        example: null
+      locations:
+        $ref: "#/definitions/LocationData"
+      member_id:
+        type: string
+        example: "59086ccdbddd883747454dd0"
+      name:
+        type: string
+        example: "10% discount"
+      name_local:
+        type: string
+        example: null
+      online:
+        type: integer
+        example: 0
+      phone:
+        type: string
+        example: "0034927233125"
+      physical:
+        type: integer
+        example: 1
+      tags:
+        type: array
+        items:
+          type: string
+      text:
+        type: string
+        example: "10% on all hotel supplies, uniforms, tableware, cuberturias, household items and furniture"
+      text_local:
+        type: string
+        example: "10% de descuentos en suministros de hostelería, uniforme, vajillas, cuberterías, menaje y mobiliario."
+      updated:
+        type: string
+        format: date-time
+        example: "2021-02-05 08:22:53"
+      vendor:
+        type: string
+        example: "Bomar Hostelería"
+      web:
+        type: string
+        example: "http://www.bomarhosteleria.com/"
+
+  Category:
+    type: object
+    properties:
+      ccdb_id:
+        type: string
+        example: "40102"
+      id:
+        type: string
+        example: "SH"
+      name:
+        type: string
+        example: "Shopping"
+
+  LocationData:
+    type: object
+    properties:
+      count:
+        type: integer
+        example: 1
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Location"
+
+  Location:
+    type: object
+    properties:
+      ccdb_id:
+        type: string
+        example: "1150"
+      city:
+        type: string
+        example: "Cáceres"
+      country:
+        $ref: "#/definitions/Country"
+      geo:
+        $ref: "#/definitions/GeoData"
+      id:
+        type: string
+        example: "598190209328fd0739980028"
+      point_x:
+        type: string
+        example: "-6.38247299"
+      point_y:
+        type: string
+        example: "39.44942093"
+      street:
+        type: string
+        example: "C/Trasera de Mérida Cr, 5"
+      zip:
+        type: string
+        example: "10195"
+
+  Country:
+    type: object
+    properties:
+      ccdb_id:
+        type: integer
+        example: 132
+      id:
+        type: string
+        example: "ES"
+      name:
+        type: string
+        example: "Spain"
+      region:
+        type: string
+        example: "Extremadura"
+
+  GeoData:
+    type: object
+    properties:
+      lat:
+        type: string
+        example: "39.44942093"
+      lng:
+        type: string
+        example: "-6.38247299"
+      point_x:
+        type: string
+        example: "-6.38247299"
+      point_y:
+        type: string
+        example: "39.44942093"

@@ -387,6 +387,28 @@ public class TestUtils {
         return productEntityList;
     }
 
+    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList(){
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(1L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(1L);
+        entity_1.setVendor("vendor_1");
+        entity_1.setName("name_1");
+        entity_1.setNameLocal("name_local_1");
+
+        return Arrays.asList(entity_0,entity_1);
+
+    }
+
+
     public static String generateDiscountBucketCodeUid() {
         return UUID.randomUUID().toString();
     }

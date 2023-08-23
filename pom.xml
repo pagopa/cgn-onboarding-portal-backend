@@ -394,7 +394,7 @@
                             <generatorName>java</generatorName>
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
-                            <modelNameSuffix>EycaDataExport</modelNameSuffix>
+                            <modelNameSuffix>Eyca</modelNameSuffix>
                             <library>resttemplate</library>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>

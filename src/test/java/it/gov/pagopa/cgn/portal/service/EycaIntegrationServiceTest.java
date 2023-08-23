@@ -1,52 +1,67 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaDataExportApi;
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
+import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
+import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEycaDataExport;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.RequestEycaDataExport;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
-@ExtendWith(MockitoExtension.class)
-public class EycaIntegrationServiceTest {
+@SpringBootTest
+@ActiveProfiles("dev")
+public class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
 
-    @Mock
-    private ApiClient apiClient;
-
-    @Mock
-    private EycaDataExportApi eycaDataExportApi;
-
+    private EycaApi eycaApi;
     private EycaExportService eycaExportService;
+    private EycaDataExportRepository eycaDataExportRepository;
+    private AgreementRepository agreementRepository;
+    private ExportService exportService;
+    private ConfigProperties configProperties;
+    private DataExportEycaConverter eycaDataExportConverter;
 
     @BeforeEach
-    public void setUp() {
+    void init() {
+        eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
+        agreementRepository = Mockito.mock(AgreementRepository.class);
+        configProperties = Mockito.mock(ConfigProperties.class);
+        eycaDataExportConverter = Mockito.mock(DataExportEycaConverter.class);
 
-        // Configura il mock di eycaIntegrationApi per restituire il mock di ApiClient
-    //    when(eycaIntegrationApi.getApiClient()).thenReturn(apiClient);
+        eycaApi = Mockito.mock(EycaApi.class);
+        Mockito.when(eycaApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
+        eycaExportService = new EycaExportService(eycaApi, configProperties);
+        exportService = new ExportService(agreementRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter );
+    }
 
-        // Configura il mock di ApiClient con il metodo setBasePath
-    //    doNothing().when(apiClient).setBasePath(anyString());
-
-  //      eycaIntegrationApi.setApiClient(apiClient);
-        eycaDataExportApi = new EycaDataExportApi()    ;
-     //   eycaIntegrationApi.setApiClient(apiClient);
-        eycaExportService = new EycaExportService(eycaDataExportApi);
-      }
 
     @Test
-    public void testCreateDiscountWithAuthorization() {
+    void provaTest(){
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(new ApiResponseEyca());
 
-        RequestEycaDataExport requestEycaDataExport = new RequestEycaDataExport();
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
-        ApiResponseEycaDataExport actualResponse = eycaExportService.createDiscountWithAuthorization(requestEycaDataExport);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        // Verifica che il client API sia stato chiamato correttamente con il cookie di sessione
-     }
+    }
+
+
+
+
 
 
 
