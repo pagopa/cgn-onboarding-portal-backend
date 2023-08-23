@@ -14,27 +14,16 @@ public class EycaExportService {
 
    private final EycaApi eycaApi;
     private final ApiClient apiClient;
-    private final ConfigProperties configProperties;
 
     public EycaExportService(EycaApi eycaApi, ConfigProperties configProperties) {
         this.eycaApi = eycaApi;
-        this.configProperties = configProperties;
         this.apiClient=eycaApi.getApiClient();
         this.apiClient.setUsername(configProperties.getEycaUsername());
         this.apiClient.setPassword(configProperties.getEycaPassword());
-     //   this.apiClient.setBasePath(configProperties.getEycaBaseUrl());
-    }
-
-    private String authenticateOnEyca(){
-            return eycaApi.authentication();
-    }
-
-    public ApiResponseEyca createDiscount(DataExportEyca discountRequestEycaIntegration, String type) {
-        return eycaApi.createDiscount(type, discountRequestEycaIntegration);
     }
 
    public ApiResponseEyca createDiscountWithAuthorization(DataExportEyca discountRequestEycaIntegration, String type) {
-        String authResponse = authenticateOnEyca();
+        String authResponse = eycaApi.authentication();
 
         if (authResponse.contains("ERR")){
             throw new EycaAuthenticationException(authResponse);

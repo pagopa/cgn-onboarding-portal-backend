@@ -14,7 +14,6 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -67,7 +66,8 @@ class EycaIntegrationServiceTest extends IntegrationAbstractTest {
     void provaTeste(){
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
-        Mockito.when(eycaApi.authentication()).thenThrow(new RestClientException("ERROR"));
+       // Mockito.when(eycaApi.authentication()).thenThrow(new RestClientException("ERROR"));
+        Mockito.when(eycaApi.authentication()).thenReturn("ERROR");
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
