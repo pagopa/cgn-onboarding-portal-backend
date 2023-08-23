@@ -14,15 +14,17 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClientException;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-public class EycaIntegrationServiceTest extends IntegrationAbstractTest {
+class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
 
     private EycaApi eycaApi;
@@ -49,6 +51,7 @@ public class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
     @Test
     void provaTest(){
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(new ApiResponseEyca());
@@ -57,9 +60,21 @@ public class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
+
     }
 
+    @Test
+    void provaTeste(){
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
+        Mockito.when(eycaApi.authentication()).thenThrow(new RestClientException("ERROR"));
 
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+
+
+    }
 
 
 
