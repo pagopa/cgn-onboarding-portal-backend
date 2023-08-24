@@ -46,7 +46,7 @@ class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void provaTest(){
+    void sendEycaDiscounts_OK(){
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
@@ -60,22 +60,15 @@ class EycaIntegrationServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void provaTeste(){
+    void sendEycaDiscounts_KO(){
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
-       // Mockito.when(eycaApi.authentication()).thenThrow(new RestClientException("ERROR"));
         Mockito.when(eycaApi.authentication()).thenReturn("ERROR");
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
         Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 
-
     }
-
-
-
-
-
 
 }
