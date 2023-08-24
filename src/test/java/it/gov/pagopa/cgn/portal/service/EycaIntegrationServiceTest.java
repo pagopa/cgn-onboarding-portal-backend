@@ -27,24 +27,21 @@ class EycaIntegrationServiceTest extends IntegrationAbstractTest {
 
 
     private EycaApi eycaApi;
-    private EycaExportService eycaExportService;
     private EycaDataExportRepository eycaDataExportRepository;
-    private AgreementRepository agreementRepository;
     private ExportService exportService;
     private ConfigProperties configProperties;
-    private DataExportEycaConverter eycaDataExportConverter;
 
     @BeforeEach
     void init() {
         eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
-        agreementRepository = Mockito.mock(AgreementRepository.class);
+        AgreementRepository agreementRepository = Mockito.mock(AgreementRepository.class);
         configProperties = Mockito.mock(ConfigProperties.class);
-        eycaDataExportConverter = Mockito.mock(DataExportEycaConverter.class);
-
-        eycaApi = Mockito.mock(EycaApi.class);
+         eycaApi = Mockito.mock(EycaApi.class);
         Mockito.when(eycaApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
-        eycaExportService = new EycaExportService(eycaApi, configProperties);
-        exportService = new ExportService(agreementRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter );
+
+        DataExportEycaConverter eycaDataExportConverter = new DataExportEycaConverter();
+        EycaExportService eycaExportService = new EycaExportService(eycaApi, configProperties);
+        exportService = new ExportService(agreementRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter);
     }
 
 

@@ -43,13 +43,13 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 dto.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
                         .collect(Collectors.toList()));
                 dto.setImageSourceFile(entity.getImage());
-                if (!StringUtils.isBlank(entity.getStreet())){
+                if (!StringUtils.isBlank(entity.getStreet())) {
                     LocationEyca locationEyca = new LocationEyca();
                     locationEyca.setStreet(entity.getStreet());
                     dto.setPlusLocations(Collections.singletonList(locationEyca));
-        }
+                }
 
-       return dto;
+                return dto;
             };
 
 
@@ -57,10 +57,14 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
         Optional<EycaDataExportViewEntity> entity = entry.getValue().stream().findFirst();
         DataExportEyca dto = toDto(entity.orElseThrow());
         dto.setPlusLocations(entry.getValue().stream()
-                .map(en-> { LocationEyca loc = new LocationEyca();
-                        loc.setStreet(en.getStreet());
-                        return loc;})
+                .map(en -> {
+                    LocationEyca loc = new LocationEyca();
+                    loc.setStreet(en.getStreet());
+                    return loc;
+                })
                 .collect(Collectors.toList()));
         return dto;
+
     }
+
 }
