@@ -97,6 +97,9 @@ public class ConfigProperties {
     @Value("${suspend.discounts.without.available.bucket.codes.after.days}")
     private int suspendDiscountsWithoutAvailableBucketCodesAfterDays;
 
+    @Value("${send.discounts.to.eyca.job.cron}")
+    private String sendDiscountsToEycaJobCronExpression;
+
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
 

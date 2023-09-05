@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClientException;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class EycaIntegrationServiceTest extends IntegrationAbstractTest {
+class EycaExportServiceTest extends IntegrationAbstractTest {
 
 
     private EycaApi eycaApi;
@@ -36,7 +36,7 @@ class EycaIntegrationServiceTest extends IntegrationAbstractTest {
         eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
         AgreementRepository agreementRepository = Mockito.mock(AgreementRepository.class);
         configProperties = Mockito.mock(ConfigProperties.class);
-         eycaApi = Mockito.mock(EycaApi.class);
+        eycaApi = Mockito.mock(EycaApi.class);
         Mockito.when(eycaApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
 
         DataExportEycaConverter eycaDataExportConverter = new DataExportEycaConverter();
