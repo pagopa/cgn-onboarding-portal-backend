@@ -195,10 +195,10 @@ public class ExportService {
 
         try {
             List<DataExportEyca> exportEycaList = exportViewEntities.stream()
-                    .filter(entity -> !(!StringUtils.isBlank(entity.getDiscountType())
-                            && listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
-                            .contains(entity.getDiscountType())))
-                    .filter(entity -> !(entity.getDiscountType().equals(LANDINGPAGE) && entity.getReferent() != null))
+                    .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
+                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                            .contains(entity.getDiscountType()))
+                    .filter(entity -> !(entity.getDiscountType().equals(LANDINGPAGE) && !Objects.isNull(entity.getReferent())))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
