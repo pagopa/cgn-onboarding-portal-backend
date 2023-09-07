@@ -58,7 +58,8 @@ SELECT
             WHEN p.discount_code_type = 'LANDINGPAGE' THEN 'LANDING PAGE'
             WHEN p.discount_code_type = 'BUCKET' THEN 'LIST OF STATIC CODES'
         END
-    ) AS "discount_type"
+    ) AS "discount_type",
+    p.referent_fk as "referent"
 FROM
     agreement ag
     INNER JOIN discount d ON d.agreement_fk = ag.agreement_k

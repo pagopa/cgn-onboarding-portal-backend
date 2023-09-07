@@ -84,5 +84,9 @@ public class EycaDataExportViewEntity {
     @Column(name = "discount_type")
     private String discountType;
 
+    @Column(name = "referent")
+    private Long referent;
+
+
 }
 

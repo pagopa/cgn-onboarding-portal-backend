@@ -93,6 +93,9 @@ public class ExportService {
             "GEO - Longitude",
             "DISCOUNT TYPE"};
 
+
+    private final String LANDINGPAGE = "LANDINGPAGE";
+
     public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService, DataExportEycaConverter dataExportEycaConverter) {
         this.agreementRepository = agreementRepository;
@@ -195,6 +198,7 @@ public class ExportService {
                     .filter(entity -> !(!StringUtils.isBlank(entity.getDiscountType())
                             && listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType())))
+                    .filter(entity -> !(entity.getDiscountType().equals(LANDINGPAGE) && entity.getReferent() != null))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
