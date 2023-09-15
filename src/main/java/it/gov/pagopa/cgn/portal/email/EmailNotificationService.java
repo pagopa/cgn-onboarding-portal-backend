@@ -56,9 +56,14 @@ public class EmailNotificationService {
             helper.setFrom(emailParams.getMailFrom());
             helper.setTo(emailParams.getMailToList().toArray(new String[0]));
 
+            if (emailParams.getMailCCList().isPresent()) {
+                helper.setCc(emailParams.getMailCCList().orElseThrow().toArray(new String[0]));
+            }
+
             if (emailParams.getReplyToOpt().isPresent()) {
                 helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
             }
+
             helper.setSubject(emailParams.getSubject());
             helper.setText(emailParams.getBody(), true);
             helper.addInline(emailParams.getLogoName(), emailParams.getLogo());

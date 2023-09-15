@@ -15,6 +15,7 @@ public class EmailParams {
 
     private final String mailFrom;
     private final List<String> mailToList;
+    private final Optional<List<String>> mailCCList;
     private final Optional<String> replyToOpt;
     private final String subject;
     private final String body;
@@ -26,8 +27,10 @@ public class EmailParams {
         return "EmailParams{" +
                 "mailFrom='" + mailFrom + '\'' +
                 ", mailToList=" + mailToList +
+                ", mailCCList=" + mailCCList +
                 ", subject='" + subject + '\'' +
                 '}';
     }
+
 
 }

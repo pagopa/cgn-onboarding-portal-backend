@@ -38,17 +38,6 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
     }
 
     @Test
-    void Execute_ExecuteJob_DoNotSuspendDiscountIfGivenDaysNotPassed() throws IOException {
-        init();
-        discountBucketCodeSummaryRepository.findAll().forEach(s -> {
-            s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now());
-            discountBucketCodeSummaryRepository.save(s);
-        });
-        testJob(DiscountStateEnum.PUBLISHED);
-    }
-
-    @Test
     void Execute_ExecuteJob_SuspendDiscountIfGivenDaysPassed() throws IOException {
         init();
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {

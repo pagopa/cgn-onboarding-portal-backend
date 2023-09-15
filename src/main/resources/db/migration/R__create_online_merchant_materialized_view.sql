@@ -99,7 +99,7 @@ SELECT m.agreement_k                        AS id,
 FROM merchant_with_categories m
          LEFT JOIN agreements_with_new_discounts a ON a.agreement_fk = m.agreement_k
 GROUP BY 1, 2, 3, 4, 5, 6
-ORDER BY new_discounts DESC, name ASC
+ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
 

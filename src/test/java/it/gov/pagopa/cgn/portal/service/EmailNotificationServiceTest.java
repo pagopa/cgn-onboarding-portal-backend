@@ -59,6 +59,7 @@ class EmailNotificationServiceTest extends IntegrationAbstractTest {
                 .logoName(logoName)
                 .logo(logo)
                 .mailToList(List.of(new String[]{"test@test.test"}))
+                .mailCCList(Optional.of(List.of(new String[]{"test@test.test"})))
                 .replyToOpt(Optional.of("test@test.test"))
                 .subject("test")
                 .body("test")
