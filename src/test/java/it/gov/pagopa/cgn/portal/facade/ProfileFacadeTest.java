@@ -15,12 +15,17 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
+import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import javax.transaction.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -48,9 +53,8 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                           updateProfileConverter,
                                           profileConverter,
                                           discountService);
-
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
-        profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity = TestUtils.createProfileEntityWithSecondaryEntityReferentList(agreementEntity)    ;
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -190,5 +194,23 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         saveBackofficeSampleDocuments(agreementEntity);
         backofficeAgreementService.approveAgreement(agreementEntity.getId());
     }
+
+    @Test
+    @Transactional
+    void Get_Profile_Expect_OK(){
+        var agreementId = agreementEntity.getId();
+
+        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
+                DiscountCodeType.STATIC);
+        profileFacade.updateProfile(agreementId, updateProfile);
+
+        ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Profile profile = response.getBody();
+        Assertions.assertNotNull(profile.getSecondaryReferents());
+
+    }
+
+
 
 }

@@ -57,20 +57,19 @@ public class BucketService {
     public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
-        String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
         var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
         var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values()).sorted().filter(t -> remainingPercent <= t.getValue()).findFirst().map(t -> {
             switch (t) {
                 case PERCENT_0:
-                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(referentEmailAddress, discount);
+                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
                     discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
                     discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
                     break;
                 case PERCENT_10:
                 case PERCENT_25:
                 case PERCENT_50:
-                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(referentEmailAddress, discount, t, remainingCodes);
+                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount, t, remainingCodes);
                     break;
             }
             return true;

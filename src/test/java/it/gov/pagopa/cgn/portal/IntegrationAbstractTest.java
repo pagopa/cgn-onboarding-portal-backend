@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class IntegrationAbstractTest {
 
+    @SuppressWarnings("secrets:S6338")
     protected String getAzureConnectionString() {
         return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
@@ -146,6 +147,9 @@ public class IntegrationAbstractTest {
 
     @Autowired
     protected AddressRepository addressRepository;
+
+    @Autowired
+    protected SecondaryReferentRepository secondaryReferentRepository;
 
     @Autowired
     protected DocumentService documentService;
@@ -318,6 +322,7 @@ public class IntegrationAbstractTest {
         // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -328,6 +333,7 @@ public class IntegrationAbstractTest {
         // to avoid LazyInitializationException
         profileEntity.setReferent(testReferentRepository.findByProfileId(profileEntity.getId()));
         profileEntity.setAddressList(addressRepository.findByProfileId(profileEntity.getId()));
+        profileEntity.setSecondaryReferentList(secondaryReferentRepository.findByProfileId(profileEntity.getId()));
         profileService.updateProfile(agreementEntity.getId(), profileEntity);
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
