@@ -24,6 +24,7 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -566,11 +567,6 @@ public class DiscountService {
         dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
         dbEntity.setDiscountUrl(toUpdateEntity.getDiscountUrl());
     };
-
-    private boolean isContainsToday(LocalDate startDate, LocalDate endDate) {
-        LocalDate now = LocalDate.now();
-        return (!now.isBefore(startDate)) && (now.isBefore(endDate));
-    }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
