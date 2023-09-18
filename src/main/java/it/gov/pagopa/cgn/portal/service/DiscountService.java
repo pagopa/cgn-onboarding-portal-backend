@@ -24,6 +24,7 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -233,7 +234,7 @@ public class DiscountService {
         discount = discountRepository.save(discount);
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity,
                 discount.getName(),
                 reasonMessage);
 
@@ -275,7 +276,7 @@ public class DiscountService {
 
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity,
                 discount.getName());
     }
 
@@ -292,7 +293,7 @@ public class DiscountService {
 
         // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow();
-        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity.getReferent().getEmailAddress(),
+        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity,
                 discount.getName(),
                 reasonMessage);
     }
@@ -316,9 +317,8 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void sendNotificationDiscountExpiring(DiscountEntity discount) {
-        String referentEmailAddress = discount.getAgreement().getProfile().getReferent().getEmailAddress();
 
-        emailNotificationFacade.notifyMerchantDiscountExpiring(referentEmailAddress, discount.getName());
+        emailNotificationFacade.notifyMerchantDiscountExpiring(discount);
         discount.setExpirationWarningSentDateTime(OffsetDateTime.now());
         discountRepository.save(discount);
     }
@@ -458,6 +458,12 @@ public class DiscountService {
     private void commonDiscountValidation(ProfileEntity profileEntity,
                                           DiscountEntity discountEntity,
                                           boolean isBucketFileChanged) {
+
+        if (discountEntity.getProducts().size()>2){
+            throw new InvalidRequestException(
+                    "Discount cannot have more than 2 product categories");
+        }
+
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
@@ -477,6 +483,7 @@ public class DiscountService {
             throw new InvalidRequestException(
                     "Discount cannot reference to empty or not existing bucket file for a profile with discount code type bucket");
         }
+
 
         // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {

@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
+import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
@@ -213,6 +215,7 @@ public class TestUtils {
         updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
         updateProfile.setSupportType(SupportType.EMAILADDRESS);
         updateProfile.setSupportValue("an.email@domain.com");
+        updateProfile.setSecondaryReferents(createUpdateReferentList());
 
         return updateProfile;
     }
@@ -258,6 +261,33 @@ public class TestUtils {
         profileEntity.setAgreement(agreementEntity);
         return profileEntity;
     }
+
+    public static ProfileEntity createProfileEntityWithSecondaryEntityReferentList(AgreementEntity agreementEntity){
+        ProfileEntity profileEntity = createSampleProfileEntity(agreementEntity);
+        profileEntity.setSecondaryReferentList(createSampleSecondaryReferentEntityList(profileEntity));
+        return profileEntity;
+    }
+
+    private static List<SecondaryReferentEntity> createSampleSecondaryReferentEntityList(ProfileEntity profileEntity) {
+
+        SecondaryReferentEntity secondaryReferentEntity_0 = new SecondaryReferentEntity();
+        secondaryReferentEntity_0.setFirstName("FIRST_NAME_0");
+        secondaryReferentEntity_0.setLastName("LAST_NAME_0");
+        secondaryReferentEntity_0.setEmailAddress("referent.registry_0@pagopa.it");
+        secondaryReferentEntity_0.setTelephoneNumber("+390123456789");
+        secondaryReferentEntity_0.setProfile(profileEntity);
+        secondaryReferentEntity_0.setRole("CEO");
+
+        SecondaryReferentEntity secondaryReferentEntity_1 = new SecondaryReferentEntity();
+        secondaryReferentEntity_1.setFirstName("FIRST_NAME_1");
+        secondaryReferentEntity_1.setLastName("LAST_NAME_1");
+        secondaryReferentEntity_1.setEmailAddress("referent.registry_1@pagopa.it");
+        secondaryReferentEntity_1.setTelephoneNumber("+390123456789");
+        secondaryReferentEntity_1.setProfile(profileEntity);
+        secondaryReferentEntity_1.setRole("CEO");
+
+        return new ArrayList<>(Arrays.asList(secondaryReferentEntity_0, secondaryReferentEntity_1));
+        }
 
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
@@ -380,9 +410,9 @@ public class TestUtils {
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.TRAVELLING);
         productEntityList.add(productEntity);
-        productEntity = new DiscountProductEntity();
-        productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
-        productEntityList.add(productEntity);
+      //  productEntity = new DiscountProductEntity();
+      //  productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
+      //  productEntityList.add(productEntity);
         productEntityList.forEach(p -> p.setDiscount(discountEntity));
         return productEntityList;
     }
@@ -462,6 +492,25 @@ public class TestUtils {
         return documentEntity;
     }
 
+    public static List<UpdateReferent> createUpdateReferentList(){
+        UpdateReferent updateReferent_0 = new UpdateReferent();
+        updateReferent_0.setEmailAddress("mail_a.mail@mail.com");
+        updateReferent_0.setFirstName("FIRSTNAME_A");
+        updateReferent_0.setLastName("LASTNAME_A");
+        updateReferent_0.setTelephoneNumber("54654654");
+        updateReferent_0.setRole("ROLE");
+
+        UpdateReferent updateReferent_1 = new UpdateReferent();
+        updateReferent_1.setEmailAddress("mail_b.mail@mail.com");
+        updateReferent_1.setFirstName("FIRSTNAME_B");
+        updateReferent_1.setLastName("LASTNAME_B");
+        updateReferent_1.setTelephoneNumber("54654654");
+        updateReferent_1.setRole("ROLE");
+
+        return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
+
+    }
+
     public static String getJson(Object obj) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -486,6 +535,8 @@ public class TestUtils {
     public static SubscriptionContract createSubscriptionContract() {
         return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
     }
+
+
 
     public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
         private String primaryKey;

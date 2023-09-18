@@ -64,11 +64,25 @@ WITH merchant AS (SELECT a.agreement_k,
                                              ELSE FALSE
                                              END AS travelling
                                   FROM merchant m
-                                           JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk))
+                                           JOIN product_categories pc ON (m.agreement_k = pc.agreement_fk)),
+     agreements_with_new_discounts AS (SELECT d.agreement_fk,
+                                              array_agg(pc.product_category) as categories_with_new_discounts
+                                       FROM discount d
+                                                JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
+                                       WHERE d.state = 'PUBLISHED'
+                                         AND d.start_date >= NOW() - INTERVAL '15 days'
+                                         AND d.end_date >= NOW()
+                                       GROUP BY d.agreement_fk)
 SELECT m.agreement_k                        AS id,
        m.name,
        m.website_url,
        m.discount_code_type,
+       CASE
+           WHEN a.agreement_fk IS NOT NULL
+               THEN TRUE
+           ELSE FALSE
+           END                              AS new_discounts,
+       a.categories_with_new_discounts,
        array_agg(m.product_category)        AS product_categories,
        lower(m.name)                        AS searchable_name,
        bool_or(m.banking_services)          AS banking_services,
@@ -81,16 +95,10 @@ SELECT m.agreement_k                        AS id,
        bool_or(m.sustainable_mobility)      AS sustainable_mobility,
        bool_or(m.telephony_and_internet)    AS telephony_and_internet,
        bool_or(m.travelling)                AS travelling,
-       now()                                AS last_update,
-       EXISTS(SELECT 1
-              FROM discount d
-              WHERE d.agreement_fk = m.agreement_k
-                AND d.state = 'PUBLISHED'
-                AND d.start_date <= NOW()
-                AND d.start_date >= NOW() - INTERVAL '15 days'
-                AND d.end_date >= NOW())    AS new_discounts
+       now()                                AS last_update
 FROM merchant_with_categories m
-GROUP BY 1, 2, 3, 4
+         LEFT JOIN agreements_with_new_discounts a ON a.agreement_fk = m.agreement_k
+GROUP BY 1, 2, 3, 4, 5, 6
 ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX online_merchant_id_unique_idx ON online_merchant (id);
