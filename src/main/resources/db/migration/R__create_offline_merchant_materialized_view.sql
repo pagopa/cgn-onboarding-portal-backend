@@ -77,9 +77,24 @@ WITH merchant AS (SELECT a.agreement_k,
                                          bool_or(m.telephony_and_internet)    AS telephony_and_internet,
                                          bool_or(m.travelling)                AS travelling
                                   FROM merchant_with_categories m
-                                  GROUP BY 1, 2)
+                                  GROUP BY 1, 2),
+     agreements_with_new_discounts AS (
+         SELECT d.agreement_fk, array_agg(pc.product_category) as categories_with_new_discounts
+         FROM discount d
+                  JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
+         WHERE d.state = 'PUBLISHED'
+           AND d.start_date >= CURRENT_DATE - INTERVAL '15 days'
+           AND d.end_date >= CURRENT_DATE
+         GROUP BY d.agreement_fk
+     )
 SELECT m.id,
        m.name,
+       CASE
+           WHEN nd.agreement_fk IS NOT NULL
+               THEN TRUE
+           ELSE FALSE
+           END								    AS new_discounts,
+       nd.categories_with_new_discounts,
        m.product_categories,
        m.searchable_name,
        m.banking_services,
@@ -100,17 +115,11 @@ SELECT m.id,
        a.latitude,
        a.longitude,
        a.address_k                       AS address_id,
-       now()                             AS last_update,
-       EXISTS(SELECT 1
-              FROM discount d
-              WHERE d.agreement_fk = m.id
-                AND d.state = 'PUBLISHED'
-                AND d.start_date <= NOW()
-                AND d.start_date >= NOW() - INTERVAL '15 days'
-                AND d.end_date >= NOW()) AS new_discounts
+       now()                             AS last_update
 FROM merchant_without_address m
          JOIN profile p on m.id = p.agreement_fk
          LEFT JOIN address a ON p.profile_k = a.profile_fk
+         LEFT JOIN agreements_with_new_discounts nd ON nd.agreement_fk = m.id
 ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
