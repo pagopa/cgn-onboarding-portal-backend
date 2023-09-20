@@ -447,6 +447,7 @@ public class TestUtils {
         entity_2.setName("name_2");
         entity_2.setNameLocal("name_local_2");
         entity_2.setDiscountType("lANDINGPAGE");
+        entity_2.setReferent(2L);
         entity_2.setStreet("address2");
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
