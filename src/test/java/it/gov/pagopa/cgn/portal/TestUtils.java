@@ -457,6 +457,7 @@ public class TestUtils {
         entity_3.setName("name_2");
         entity_3.setNameLocal("name_local_2");
         entity_3.setStreet("address2");
+        entity_3.setReferent(3L);
 
         return Arrays.asList(entity_0,entity_1, entity_2, entity_3);
 
