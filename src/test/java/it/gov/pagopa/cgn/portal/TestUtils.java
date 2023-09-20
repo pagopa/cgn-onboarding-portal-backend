@@ -429,9 +429,9 @@ public class TestUtils {
         entity_0.setStreet("address0");
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
-        entity_1.setId(1L);
+        entity_1.setId(2L);
         entity_1.setCategories("products");
-        entity_1.setProfileId(1L);
+        entity_1.setProfileId(2L);
         entity_1.setVendor("vendor_1");
         entity_1.setName("name_1");
         entity_1.setNameLocal("name_local_1");
@@ -439,9 +439,9 @@ public class TestUtils {
         entity_1.setStreet("address1");
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
-        entity_2.setId(2L);
+        entity_2.setId(3L);
         entity_2.setCategories("products");
-        entity_2.setProfileId(2L);
+        entity_2.setProfileId(3L);
         entity_2.setVendor("vendor_2");
         entity_2.setName("name_2");
         entity_2.setNameLocal("name_local_2");
@@ -450,9 +450,9 @@ public class TestUtils {
         entity_2.setStreet("address2");
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
-        entity_3.setId(2L);
+        entity_3.setId(4L);
         entity_3.setCategories("products");
-        entity_3.setProfileId(2L);
+        entity_3.setProfileId(4L);
         entity_3.setVendor("vendor_2");
         entity_3.setName("name_2");
         entity_3.setNameLocal("name_local_2");
