@@ -425,9 +425,8 @@ public class TestUtils {
         entity_0.setVendor("vendor_0");
         entity_0.setName("name_0");
         entity_0.setNameLocal("name_local_0");
-        entity_0.setDiscountType("DISCOUNT0");
+        entity_0.setDiscountType("lANDINGPAGE");
         entity_0.setStreet("address0");
-        entity_0.setReferent(1L);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(1L);
@@ -436,7 +435,7 @@ public class TestUtils {
         entity_1.setVendor("vendor_1");
         entity_1.setName("name_1");
         entity_1.setNameLocal("name_local_1");
-        entity_1.setDiscountType("DISCOUNT1");
+        entity_1.setDiscountType("mode0");
         entity_1.setStreet("address1");
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
