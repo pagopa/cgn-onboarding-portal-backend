@@ -62,6 +62,8 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     @Test
     void sendEycaDiscounts_KO(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
         Mockito.when(eycaApi.authentication()).thenReturn("ERROR");
