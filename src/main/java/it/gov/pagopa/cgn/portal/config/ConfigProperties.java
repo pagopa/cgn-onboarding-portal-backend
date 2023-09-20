@@ -118,6 +118,9 @@ public class ConfigProperties {
     @Value("${eyca.export.password}")
     private String eycaPassword;
 
+    @Value("${eyca.export.enabled}")
+    private Boolean eycaExportEnabled;
+
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
