@@ -438,6 +438,18 @@ public class TestUtils {
         entity_1.setDiscountType("DISCOUNT1");
         entity_1.setStreet("address1");
 
+
+        EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
+        entity_1.setId(2L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(2L);
+        entity_1.setVendor("vendor_2");
+        entity_1.setName("name_2");
+        entity_1.setNameLocal("name_local_2");
+        entity_1.setDiscountType("lANDINGPAGE");
+        entity_1.setStreet("address2");
+
+
         return Arrays.asList(entity_0,entity_1);
 
     }
