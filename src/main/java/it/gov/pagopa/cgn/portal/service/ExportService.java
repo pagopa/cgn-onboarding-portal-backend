@@ -188,6 +188,13 @@ public class ExportService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<String> sendDiscountsToEyca() {
+
+        Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
+        if (eycaExportEnabled.isPresent()&& Boolean.FALSE.equals(eycaExportEnabled.get())) {
+            log.info("sendDiscountsToEyca aborted - env not PROD");
+            return null;
+        }
+
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 

@@ -17,24 +17,17 @@ import java.util.Optional;
 public class SendDiscountsToEycaJob implements Job {
 
     private final ExportService exportService;
-    private final ConfigProperties configProperties;
 
     private static final String JOB_LOG_NAME = "Send Discounts to EYCA Job ";
 
 
     @Autowired
-    public SendDiscountsToEycaJob(ExportService exportService, ConfigProperties configProperties){
+    public SendDiscountsToEycaJob(ExportService exportService){
         this.exportService = exportService;
-      this.configProperties = configProperties;
     }
 
 
     public void execute(JobExecutionContext context) {
-
-        Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
-        if (eycaExportEnabled.isPresent()&& Boolean.FALSE.equals(eycaExportEnabled.get())) {
-            return;
-        }
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
