@@ -22,5 +22,6 @@ public class SchedulerRunner implements ApplicationRunner {
         jobScheduler.scheduleCheckExpiringDiscountsJob();
         jobScheduler.scheduleCheckAvailableDiscountBucketCodesJob();
         jobScheduler.scheduleSuspendDiscountsWithoutAvailableBucketCodesJob();
+        jobScheduler.scheduleSendDiscountsToEycaJob();
     }
 }

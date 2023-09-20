@@ -37,6 +37,15 @@ public class JobScheduler {
                     SuspendDiscountsWithoutAvailableBucketCodesJob.class);
     }
 
+    public void scheduleSendDiscountsToEycaJob() throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("send-discount-to-eyca", DISCOUNTS_JOB_GROUP);
+        scheduleJob(jobKey,
+                configProperties.getSendDiscountsToEycaJobCronExpression(),
+                SendDiscountsToEycaJob.class);
+    }
+
+
+
     private void scheduleJob(JobKey jobKey, String cronExpression, Class jobClass) throws SchedulerException {
         for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
             scheduler.unscheduleJob(trigger.getKey());

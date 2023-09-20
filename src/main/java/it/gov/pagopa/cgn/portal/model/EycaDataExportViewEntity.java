@@ -21,6 +21,9 @@ public class EycaDataExportViewEntity {
     @Column(name = "categories")
     private String categories;
 
+    @Column(name = "profile_id")
+    private Long profileId;
+
     @Column(name = "vendor")
     private String vendor;
 
@@ -80,6 +83,10 @@ public class EycaDataExportViewEntity {
     
     @Column(name = "discount_type")
     private String discountType;
+
+    @Column(name = "referent")
+    private Long referent;
+
 
 }
 

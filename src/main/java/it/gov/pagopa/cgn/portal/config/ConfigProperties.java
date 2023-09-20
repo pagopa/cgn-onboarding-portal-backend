@@ -97,6 +97,9 @@ public class ConfigProperties {
     @Value("${suspend.discounts.without.available.bucket.codes.after.days}")
     private int suspendDiscountsWithoutAvailableBucketCodesAfterDays;
 
+    @Value("${send.discounts.to.eyca.job.cron}")
+    private String sendDiscountsToEycaJobCronExpression;
+
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
 
@@ -105,6 +108,16 @@ public class ConfigProperties {
 
     @Value("${cgn.attribute-authority.base-url}")
     private String attributeAuthorityBaseUrl;
+
+    @Value("${eyca.export.not.allowed.discount.modes}")
+    private String eycaNotAllowedDiscountModes;
+
+    @Value("${eyca.export.username}")
+    private String eycaUsername;
+
+    @Value("${eyca.export.password}")
+    private String eycaPassword;
+
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

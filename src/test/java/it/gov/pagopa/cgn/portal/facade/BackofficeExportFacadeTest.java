@@ -8,9 +8,12 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
+
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
     }
 
@@ -125,5 +129,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(3, CsvUtils.countCsvLines(response.getBody().getInputStream()));
     }
+
+
 
 }
