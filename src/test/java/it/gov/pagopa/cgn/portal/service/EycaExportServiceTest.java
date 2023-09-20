@@ -84,5 +84,15 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     }
 
+    @Test
+    void sendEycaDiscounts_NotPresent(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(null);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertNull(response);
+
+    }
+
 
 }

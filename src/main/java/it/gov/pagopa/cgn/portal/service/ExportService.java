@@ -190,7 +190,7 @@ public class ExportService {
     public ResponseEntity<String> sendDiscountsToEyca() {
 
         Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
-        if (eycaExportEnabled.isPresent() && Boolean.FALSE.equals(eycaExportEnabled.get())) {
+        if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
             log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
             return null;
         }
