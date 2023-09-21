@@ -425,8 +425,9 @@ public class TestUtils {
         entity_0.setVendor("vendor_0");
         entity_0.setName("name_0");
         entity_0.setNameLocal("name_local_0");
-        entity_0.setDiscountType("lANDINGPAGE");
         entity_0.setStreet("address0");
+        entity_0.setDiscountType("lANDINGPAGE");
+        entity_0.setReferent(2L);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(2L);
@@ -435,8 +436,8 @@ public class TestUtils {
         entity_1.setVendor("vendor_1");
         entity_1.setName("name_1");
         entity_1.setNameLocal("name_local_1");
-        entity_1.setDiscountType("mode0");
         entity_1.setStreet("address1");
+        entity_1.setDiscountType("lANDINGPAGE");
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(3L);
@@ -445,39 +446,42 @@ public class TestUtils {
         entity_2.setVendor("vendor_2");
         entity_2.setName("name_2");
         entity_2.setNameLocal("name_local_2");
-        entity_2.setDiscountType("lANDINGPAGE");
-        entity_2.setReferent(2L);
         entity_2.setStreet("address2");
+        entity_2.setDiscountType("mode0");
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(4L);
         entity_3.setCategories("products");
         entity_3.setProfileId(4L);
-        entity_3.setVendor("vendor_2");
-        entity_3.setName("name_2");
-        entity_3.setDiscountType("lANDINGPAGE");
-        entity_3.setNameLocal("name_local_2");
-        entity_3.setStreet("address2");
+        entity_3.setVendor("vendor_3");
+        entity_3.setName("name_3");
+        entity_3.setNameLocal("name_local_3");
+        entity_3.setStreet("address3");
+        entity_3.setDiscountType("mode0");
         entity_3.setReferent(3L);
 
-/*
-        entity.getDiscountType().equals(LANDING_PAGE) è vero e Objects.isNull(entity.getReferent()) è vero.
-        entity.getDiscountType().equals(LANDING_PAGE) è vero e Objects.isNull(entity.getReferent()) è falso.
-        entity.getDiscountType().equals(LANDING_PAGE) è falso e Objects.isNull(entity.getReferent()) è vero.
-        entity.getDiscountType().equals(LANDING_PAGE) è falso e Objects.isNull(entity.getReferent()) è falso.
-*/
+        EycaDataExportViewEntity entity_4 = new EycaDataExportViewEntity();
+        entity_4.setId(5L);
+        entity_4.setCategories("products");
+        entity_4.setProfileId(5L);
+        entity_4.setVendor("vendor_4");
+        entity_4.setName("name_4");
+        entity_4.setNameLocal("name_local_4");
+        entity_4.setStreet("address4");
+        entity_4.setDiscountType("default_value");
 
+        EycaDataExportViewEntity entity_5 = new EycaDataExportViewEntity();
+        entity_5.setId(5L);
+        entity_5.setCategories("products");
+        entity_5.setProfileId(5L);
+        entity_5.setVendor("vendor_5");
+        entity_5.setName("name_5");
+        entity_5.setNameLocal("name_local_5");
+        entity_5.setStreet("address5");
+        entity_5.setDiscountType("default_value");
+        entity_5.setReferent(4L);
 
-
-
-
-
-
-
-
-
-
-        return Arrays.asList(entity_0,entity_1, entity_2, entity_3);
+        return Arrays.asList(entity_0,entity_1, entity_2, entity_3, entity_4, entity_5);
 
     }
 
