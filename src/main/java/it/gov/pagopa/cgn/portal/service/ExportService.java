@@ -198,6 +198,11 @@ public class ExportService {
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
+        if (exportViewEntities.isEmpty()) {
+            log.info("No EYCA data to export");
+            return null;
+        }
+
         String eycaNotAllowedDiscountModes = configProperties.getEycaNotAllowedDiscountModes();
 
         try {
