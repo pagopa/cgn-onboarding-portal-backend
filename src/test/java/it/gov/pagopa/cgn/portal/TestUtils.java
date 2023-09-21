@@ -455,9 +455,27 @@ public class TestUtils {
         entity_3.setProfileId(4L);
         entity_3.setVendor("vendor_2");
         entity_3.setName("name_2");
+        entity_3.setDiscountType("lANDINGPAGE");
         entity_3.setNameLocal("name_local_2");
         entity_3.setStreet("address2");
         entity_3.setReferent(3L);
+
+/*
+        entity.getDiscountType().equals(LANDING_PAGE) è vero e Objects.isNull(entity.getReferent()) è vero.
+        entity.getDiscountType().equals(LANDING_PAGE) è vero e Objects.isNull(entity.getReferent()) è falso.
+        entity.getDiscountType().equals(LANDING_PAGE) è falso e Objects.isNull(entity.getReferent()) è vero.
+        entity.getDiscountType().equals(LANDING_PAGE) è falso e Objects.isNull(entity.getReferent()) è falso.
+*/
+
+
+
+
+
+
+
+
+
+
 
         return Arrays.asList(entity_0,entity_1, entity_2, entity_3);
 
