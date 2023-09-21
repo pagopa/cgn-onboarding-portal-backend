@@ -481,7 +481,27 @@ public class TestUtils {
         entity_5.setDiscountType("default_value");
         entity_5.setReferent(4L);
 
-        return Arrays.asList(entity_0,entity_1, entity_2, entity_3, entity_4, entity_5);
+        EycaDataExportViewEntity entity_6 = new EycaDataExportViewEntity();
+        entity_6.setId(6L);
+        entity_6.setCategories("products");
+        entity_6.setProfileId(6L);
+        entity_6.setVendor("vendor_6");
+        entity_6.setName("name_6");
+        entity_6.setNameLocal("name_local_6");
+        entity_6.setStreet("address6");
+        entity_6.setReferent(4L);
+
+        EycaDataExportViewEntity entity_7 = new EycaDataExportViewEntity();
+        entity_7.setId(7L);
+        entity_7.setCategories("products");
+        entity_7.setProfileId(7L);
+        entity_7.setVendor("vendor_6");
+        entity_7.setName("name_6");
+        entity_7.setNameLocal("name_local_6");
+        entity_7.setStreet("address6");
+
+
+        return Arrays.asList(entity_0,entity_1, entity_2, entity_3, entity_4, entity_5, entity_6, entity_7);
 
     }
 
