@@ -94,7 +94,7 @@ public class ExportService {
             "DISCOUNT TYPE"};
 
 
-    private final String LANDINGPAGE = "LANDINGPAGE";
+    private static final String LANDING_PAGE = "LANDINGPAGE";
 
     public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService, DataExportEycaConverter dataExportEycaConverter) {
@@ -188,6 +188,13 @@ public class ExportService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<String> sendDiscountsToEyca() {
+
+        Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
+        if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
+            log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
+            return null;
+        }
+
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
@@ -198,7 +205,7 @@ public class ExportService {
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
                     .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
-                    .filter(entity -> !(entity.getDiscountType().equals(LANDINGPAGE) && !Objects.isNull(entity.getReferent())))
+                    .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
