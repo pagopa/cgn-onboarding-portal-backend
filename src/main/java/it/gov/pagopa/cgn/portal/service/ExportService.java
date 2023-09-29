@@ -211,7 +211,7 @@ public class ExportService {
                     .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
                     .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
-                    .filter(entity -> (entity.getLive().equals("Y")))
+                    .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
