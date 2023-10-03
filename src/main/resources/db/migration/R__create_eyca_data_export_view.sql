@@ -7,6 +7,7 @@ SELECT
     p.profile_k as "profile_id",
     coalesce(p.full_name, p.name) as "vendor",
     d.name_en as "name",
+    d.start_date as "start_date",
     d.name as "name_local",
     CONCAT_WS(
         ' - ',

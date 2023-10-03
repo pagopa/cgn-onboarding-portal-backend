@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaExtension;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -198,6 +199,7 @@ public class ExportService {
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
+
         if (exportViewEntities.isEmpty()) {
             log.info("No EYCA data to export");
             return null;
@@ -206,7 +208,7 @@ public class ExportService {
         String eycaNotAllowedDiscountModes = configProperties.getEycaNotAllowedDiscountModes();
 
         try {
-            List<DataExportEyca> exportEycaList = exportViewEntities.stream()
+            List<DataExportEycaExtension> exportEycaList = exportViewEntities.stream()
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
                     .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
@@ -216,6 +218,16 @@ public class ExportService {
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
+
+
+            List<DataExportEyca> create = exportEycaList.stream().
+                    filter(entity->entity.getCreate()).collect(Collectors.toList());
+
+            List<DataExportEyca> update = exportEycaList.stream().
+                    filter(entity->!entity.getCreate()).collect(Collectors.toList());
+
+
+
 
             exportEycaList.forEach(dataExportEyca -> eycaExportService.createDiscountWithAuthorization(dataExportEyca, "json"));
             log.info("sendDiscountsToEyca end success");

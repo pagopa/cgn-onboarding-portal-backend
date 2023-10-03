@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -29,6 +30,9 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
 
     @Column(name = "name_local")
     private String nameLocal;
