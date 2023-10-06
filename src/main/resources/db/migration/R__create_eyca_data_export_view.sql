@@ -6,6 +6,7 @@ SELECT
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
     p.profile_k as "profile_id",
     coalesce(p.full_name, p.name) as "vendor",
+    d.id AS "discount_id",
     d.name_en as "name",
     d.start_date as "start_date",
     d.name as "name_local",

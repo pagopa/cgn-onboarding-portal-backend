@@ -5,7 +5,9 @@ import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaExtension;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.LocationEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.sql.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -45,14 +47,14 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 dto.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
                         .collect(Collectors.toList()));
                 dto.setImageSourceFile(entity.getImage());
-                dto.setCreate(entity.getStartDate().isAfter(LocalDate.now().minusDays(1)));
+                dto.setEycaUpdateId(entity.getEycaUpdateId());
+                dto.setDiscountID(entity.getDiscountId());
                 if (!StringUtils.isBlank(entity.getStreet())) {
                     LocationEyca locationEyca = new LocationEyca();
                     locationEyca.setStreet(entity.getStreet());
                     dto.setPlusLocations(Collections.singletonList(locationEyca));
                 }
-
-                return dto;
+            return dto;
             };
 
 
@@ -69,5 +71,29 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
         return dto;
 
     }
+
+
+
+    public UpdateDataExportEyca convertDataExportEycaExtension(DataExportEycaExtension dto) {
+
+        UpdateDataExportEyca updateDataExportEyca = new UpdateDataExportEyca();
+                 updateDataExportEyca.setId(dto.getEycaUpdateId());
+                    updateDataExportEyca.setEmail(dto.getEmail());
+                updateDataExportEyca.setFiles(dto.getFiles());
+                updateDataExportEyca.setName(dto.getName());
+                updateDataExportEyca.setLive(dto.getLive());
+                updateDataExportEyca.setPhone(dto.getPhone());
+                updateDataExportEyca.setNameLocal(dto.getNameLocal());
+                updateDataExportEyca.setPlusCategories(dto.getPlusCategories());
+                updateDataExportEyca.setPlusLocations(dto.getPlusLocations());
+                updateDataExportEyca.setImageSourceFile(dto.getImageSourceFile());
+                updateDataExportEyca.setPlusTags(dto.getPlusTags());
+                updateDataExportEyca.setVendor(dto.getVendor());
+                updateDataExportEyca.setWeb(dto.getWeb());
+   return updateDataExportEyca;
+
+    }
+
+
 
 }

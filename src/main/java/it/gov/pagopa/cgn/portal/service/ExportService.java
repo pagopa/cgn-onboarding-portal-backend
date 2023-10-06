@@ -11,8 +11,11 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -39,6 +42,8 @@ import java.util.stream.Collectors;
 public class ExportService {
 
     private final AgreementRepository agreementRepository;
+    private final DiscountRepository discountRepository;
+
     private final EycaDataExportRepository eycaDataExportRepository;
     private final ConfigProperties configProperties;
     private final EycaExportService eycaExportService;
@@ -97,9 +102,11 @@ public class ExportService {
 
     private static final String LANDING_PAGE = "LANDINGPAGE";
 
-    public ExportService(AgreementRepository agreementRepository, EycaDataExportRepository eycaDataExportRepository,
-                         ConfigProperties configProperties, EycaExportService eycaExportService, DataExportEycaConverter dataExportEycaConverter) {
+    public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
+                         ConfigProperties configProperties, EycaExportService eycaExportService,
+                         DataExportEycaConverter dataExportEycaConverter) {
         this.agreementRepository = agreementRepository;
+        this.discountRepository = discountRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
         this.configProperties = configProperties;
         this.eycaExportService = eycaExportService;
@@ -199,7 +206,6 @@ public class ExportService {
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
-
         if (exportViewEntities.isEmpty()) {
             log.info("No EYCA data to export");
             return null;
@@ -219,17 +225,9 @@ public class ExportService {
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
+            createNewDicountsOnEyca(exportEycaList);
+            updateOldDiscountsOnEyca(exportEycaList);
 
-            List<DataExportEyca> create = exportEycaList.stream().
-                    filter(entity->entity.getCreate()).collect(Collectors.toList());
-
-            List<DataExportEyca> update = exportEycaList.stream().
-                    filter(entity->!entity.getCreate()).collect(Collectors.toList());
-
-
-
-
-            exportEycaList.forEach(dataExportEyca -> eycaExportService.createDiscountWithAuthorization(dataExportEyca, "json"));
             log.info("sendDiscountsToEyca end success");
 
             return ResponseEntity.status(HttpStatus.OK).build();
@@ -242,6 +240,38 @@ public class ExportService {
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+    private void createNewDicountsOnEyca(List<DataExportEycaExtension> exportEycaList){
+        List<DataExportEycaExtension> createList = exportEycaList.stream().
+                filter(entity->entity.getEycaUpdateId().isEmpty()).collect(Collectors.toList());
+
+        createList.forEach(exportEyca -> {
+            ApiResponseEyca response = eycaExportService.createDiscountWithAuthorization(exportEyca, "json");
+            Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEyca.getDiscountID());
+
+            discountEntity.ifPresent(entity -> {
+                assert response.getApiResponse() != null &&
+                        response.getApiResponse().getData() != null &&
+                        response.getApiResponse().getData().getDiscounts() != null &&
+                        response.getApiResponse().getData().getDiscounts().getData() != null;
+
+                entity.setEycaUpdateId(response.getApiResponse().getData().getDiscounts().getData().get(0).getId());
+                discountRepository.save(entity);
+            });
+            // Gestione del caso in cui discountEntity è vuoto (Optional vuoto)
+        });
+
+    }
+
+
+    private void updateOldDiscountsOnEyca (List<DataExportEycaExtension> exportEycaList){
+
+        List<UpdateDataExportEyca> updateList = exportEycaList.stream().
+                filter(entity->!entity.getEycaUpdateId().isEmpty())
+                    .map(dataExportEycaConverter::convertDataExportEycaExtension).collect(Collectors.toList());
+
+        updateList.forEach(exportEyca -> eycaExportService.updateDiscountWithAuthorization(exportEyca, "json"));
+        }
 
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>

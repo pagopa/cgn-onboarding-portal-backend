@@ -54,6 +54,7 @@ public class DiscountService {
         // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findById(agreementId);
         discountEntity.setAgreement(agreement);
+        discountEntity.setEycaUpdateId();
         ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity, true);
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {

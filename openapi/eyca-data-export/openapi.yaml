@@ -58,6 +58,37 @@ paths:
           description: Not found.
         '500':
           description: Service unavailable.
+
+  /api/update_discount:
+    post:
+      security:
+        - Bearer: [ ]
+      operationId: updateDiscount
+      tags:
+        - Eyca
+      summary: upadte a  discount.
+      description: pdate a new discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/UpdateDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discount created.
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+
+
 consumes:
   - application/json
 produces:
@@ -77,6 +108,50 @@ definitions:
       - text
     properties:
       local_id:
+        type: string
+      vendor:
+        type: string
+      name:
+        type: string
+      name_local:
+        type: string
+      text:
+        type: string
+      text_local:
+        type: string
+      +locations:
+        type: array
+        items:
+          $ref: "#/definitions/Location"
+      phone:
+        type: string
+      web:
+        type: string
+      email:
+        type: string
+      +tags:
+        type: array
+        items:
+          type: string
+      +categories:
+        type: array
+        items:
+          type: string
+      live:
+        type: integer
+      image_source__file:
+        type: string
+      files:
+        type: array
+        items:
+          $ref: "#/definitions/File"
+
+  UpdateDataExport:
+    type: object
+    required:
+      - id
+    properties:
+      id:
         type: string
       vendor:
         type: string

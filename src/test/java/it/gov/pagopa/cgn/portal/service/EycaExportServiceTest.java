@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestClientException;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -41,7 +40,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         DataExportEycaConverter eycaDataExportConverter = new DataExportEycaConverter();
         EycaExportService eycaExportService = new EycaExportService(eycaApi, configProperties);
-        exportService = new ExportService(agreementRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter);
+        exportService = new ExportService(agreementRepository, discountRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter);
     }
 
 
