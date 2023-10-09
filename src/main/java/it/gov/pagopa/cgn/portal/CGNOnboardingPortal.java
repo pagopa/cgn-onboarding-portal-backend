@@ -18,11 +18,11 @@ public class CGNOnboardingPortal {
 
     public static void main(String[] args) {
 
-        ApplicationContext applicationContext =SpringApplication.run(CGNOnboardingPortal.class, args);
+//        ApplicationContext applicationContext =SpringApplication.run(CGNOnboardingPortal.class, args);
 
-        ExportService exportService = applicationContext.getBean(ExportService.class);
+  //      ExportService exportService = applicationContext.getBean(ExportService.class);
 
-        exportService.sendDiscountsToEyca();
+    //    exportService.sendDiscountsToEyca();
 
 
 //        EycaExportService service = applicationContext.getBean(EycaExportService.class);
