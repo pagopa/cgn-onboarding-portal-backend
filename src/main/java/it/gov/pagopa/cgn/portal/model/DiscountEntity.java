@@ -140,7 +140,6 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "eyca_update_id", length = 24)
     private String eycaUpdateId;
 
-
     @Transient
     private String lastBucketCodeLoadUid;
 

@@ -103,6 +103,7 @@ CREATE TABLE discount
     condition      VARCHAR(200)        NOT NULL,
     static_code    VARCHAR(100),
     agreement_fk   VARCHAR(36)         NOT NULL,
+    eyca_update_id VARCHAR(24),
     insert_time    TIMESTAMPTZ         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time    TIMESTAMPTZ,
 

@@ -35,7 +35,7 @@ public class EycaDataExportViewEntity {
     @Column(name = "discount_id")
     private Long discountId;
 
-    @Column(name = "eyca_update_id")
+   @Column(name = "eyca_update_id")
     @Max(24)
     private String eycaUpdateId;
 
