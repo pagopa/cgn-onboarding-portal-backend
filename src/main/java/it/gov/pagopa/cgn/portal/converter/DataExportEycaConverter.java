@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaExtension;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.CountryEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.LocationEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
@@ -70,6 +71,8 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 .map(en -> {
                     LocationEyca loc = new LocationEyca();
                     loc.setStreet(en.getStreet());
+                    loc.setCity(en.getCity());
+                  //  loc.setCountry(new ;
                     return loc;
                 })
                 .collect(Collectors.toList()));

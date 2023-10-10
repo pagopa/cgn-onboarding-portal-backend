@@ -1,4 +1,5 @@
 DROP VIEW IF EXISTS eyca_data_export;
+DROP VIEW IF EXISTS eyca_data_export;
 
 CREATE VIEW eyca_data_export AS
 SELECT

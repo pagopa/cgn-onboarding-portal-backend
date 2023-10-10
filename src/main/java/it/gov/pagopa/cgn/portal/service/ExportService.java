@@ -352,6 +352,7 @@ public class ExportService {
 
         createList.forEach(exportEycaExtension -> {
                      DataExportEyca exportEyca = exportEycaExtension.getDataExportEyca();
+                     exportEyca.setPlusLocations(exportEycaExtension.getPlusLocations());
 
             ApiResponseEyca response = eycaExportService.createDiscountWithAuthorization(exportEyca, "json");
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaExtension.getDiscountID());

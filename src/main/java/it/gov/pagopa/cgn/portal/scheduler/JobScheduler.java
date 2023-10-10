@@ -38,7 +38,7 @@ public class JobScheduler {
     }
 
     public void scheduleSendDiscountsToEycaJob() throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey("send-discount-to-eyca", DISCOUNTS_JOB_GROUP);
+        JobKey jobKey = JobKey.jobKey("send-discoddunt-to-eyca", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
                 configProperties.getSendDiscountsToEycaJobCronExpression(),
                 SendDiscountsToEycaJob.class);
