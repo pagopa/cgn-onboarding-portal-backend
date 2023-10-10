@@ -19,7 +19,7 @@ public class JobScheduler {
     }
 
     public void scheduleCheckExpiringDiscountsJob() throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey("check-expiring", DISCOUNTS_JOB_GROUP);
+        JobKey jobKey = JobKey.jobKey("check-expisdring", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey, configProperties.getExpiringDiscountsJobCronExpression(), CheckExpiringDiscountsJob.class);
     }
 

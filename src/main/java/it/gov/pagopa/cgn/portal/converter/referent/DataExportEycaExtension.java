@@ -16,5 +16,14 @@ public class DataExportEycaExtension extends DataExportEyca {
     @JsonIgnore
     @Max(24)
     private String eycaUpdateId;
+    private DataExportEyca dataExportEyca;
+
+    public DataExportEycaExtension (DataExportEyca dataExportEyca) {
+        this.dataExportEyca = dataExportEyca;
+    }
+
+    public DataExportEyca getDataExportEyca (){
+        return this.dataExportEyca;
+    }
 
 }
