@@ -427,7 +427,6 @@ public class TestUtils {
         entity_0.setNameLocal("name_local_0");
         entity_0.setStreet("address0");
         entity_0.setDiscountType("LANDINGPAGE");
-        entity_0.setReferent(2L);
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
 
@@ -440,10 +439,11 @@ public class TestUtils {
         entity_1.setNameLocal("name_local_1");
         entity_1.setStreet("address1");
         entity_1.setDiscountType("LANDINGPAGE");
+        entity_1.setReferent(1L);
         entity_1.setLive("N");
         entity_1.setDiscountId(8L);
 
-        return Arrays.asList(entity_0,entity_1);
+       return Arrays.asList(entity_0,entity_1);
 
     }
 

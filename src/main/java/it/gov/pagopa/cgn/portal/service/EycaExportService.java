@@ -23,22 +23,12 @@ public class EycaExportService {
         this.apiClient.setPassword(configProperties.getEycaPassword());
     }
 
-   public ApiResponseEyca createDiscountWithAuthorization(DataExportEyca dataExportEyca, String type) {
-        String authResponse = eycaApi.authentication();
-
-        if (authResponse.contains("ERR")){
-            throw new EycaAuthenticationException(authResponse);
-        }
-
-       int colonIndex = authResponse.indexOf(':');
-       String sessionId = authResponse.substring(colonIndex + 1).trim();
-       apiClient.addDefaultCookie("ccdb_session", sessionId);
+   public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) {
        return eycaApi.createDiscount(type, dataExportEyca);
-
     }
 
 
-    public ApiResponseEyca updateDiscountWithAuthorization(UpdateDataExportEyca updateDataExportEyca, String type) {
+    public void authenticateOnEyca() {
         String authResponse = eycaApi.authentication();
 
         if (authResponse.contains("ERR")){
@@ -48,6 +38,10 @@ public class EycaExportService {
         int colonIndex = authResponse.indexOf(':');
         String sessionId = authResponse.substring(colonIndex + 1).trim();
         apiClient.addDefaultCookie("ccdb_session", sessionId);
+    }
+
+
+    public ApiResponseEyca updateDiscountWithAuthorization(UpdateDataExportEyca updateDataExportEyca, String type) {
         return eycaApi.updateDiscount(type, updateDataExportEyca);
 
     }

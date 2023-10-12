@@ -216,15 +216,20 @@ public class ExportService {
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
-                    .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
+                   .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
                     .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
-             createNewDiscountsOnEyca(exportEycaList);
-          updateOldDiscountsOnEyca(exportEycaList);
+            if (exportEycaList.isEmpty()){
+                log.info("List to be sent to EYCA is empty");
+                return ResponseEntity.status(HttpStatus.OK).build();
+            }
+
+            createNewDiscountsOnEyca(exportEycaList);
+              updateOldDiscountsOnEyca(exportEycaList);
 
             log.info("sendDiscountsToEyca end success");
 
@@ -240,13 +245,15 @@ public class ExportService {
     }
 
     private void createNewDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList){
+        eycaExportService.authenticateOnEyca();
+
         List<DataExportEycaWrapper> createList = exportEycaList.stream().
                 filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
 
         createList.forEach(exportEycaWrapper -> {
                      DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
-            ApiResponseEyca response = eycaExportService.createDiscountWithAuthorization(exportEyca, "json");
+            ApiResponseEyca response = eycaExportService.createDiscount(exportEyca, "json");
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaWrapper.getDiscountID());
 
             discountEntity.ifPresent(entity -> {
@@ -263,6 +270,7 @@ public class ExportService {
 
 
     private void updateOldDiscountsOnEyca (List<DataExportEycaWrapper> exportEycaList) {
+        eycaExportService.authenticateOnEyca();
 
         List<UpdateDataExportEyca> updateList = exportEycaList.stream()
                  .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
