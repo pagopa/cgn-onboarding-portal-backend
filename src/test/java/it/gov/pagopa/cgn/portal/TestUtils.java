@@ -442,6 +442,7 @@ public class TestUtils {
         entity_1.setReferent(1L);
         entity_1.setLive("N");
         entity_1.setDiscountId(8L);
+        entity_1.setEycaUpdateId("5749000118520");
 
        return Arrays.asList(entity_0,entity_1);
 
