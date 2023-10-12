@@ -417,7 +417,26 @@ public class TestUtils {
         return productEntityList;
     }
 
-    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList(){
+    public static List<EycaDataExportViewEntity> getListWIthLandingPageAndReferent(){
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDINGPAGE");
+        entity_0.setReferent(1L);
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(7L);
+
+       return Collections.singletonList(entity_0);
+
+    }
+
+
+    public static List<EycaDataExportViewEntity> getListWIthLandingPageNoReferent() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -430,22 +449,42 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
 
-        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
-        entity_1.setId(2L);
-        entity_1.setCategories("products");
-        entity_1.setProfileId(2L);
-        entity_1.setVendor("vendor_1");
-        entity_1.setName("name_1");
-        entity_1.setNameLocal("name_local_1");
-        entity_1.setStreet("address1");
-        entity_1.setDiscountType("LANDINGPAGE");
-        entity_1.setReferent(1L);
-        entity_1.setLive("N");
-        entity_1.setDiscountId(8L);
-        entity_1.setEycaUpdateId("5749000118520");
+        return Collections.singletonList(entity_0);
+    }
 
-       return Arrays.asList(entity_0,entity_1);
 
+    public static List<EycaDataExportViewEntity> getListWIthLandingPageNoReferentANdEycaUpdateId() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDINGPAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(7L);
+        entity_0.setEycaUpdateId("655464565");
+
+        return Collections.singletonList(entity_0);
+    }
+
+
+    public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(7L);
+        entity_0.setEycaUpdateId("655464565");
+
+        return Collections.singletonList(entity_0);
     }
 
 
