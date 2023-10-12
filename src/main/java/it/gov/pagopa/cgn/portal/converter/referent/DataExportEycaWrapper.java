@@ -9,7 +9,7 @@ import javax.validation.constraints.Max;
 
 @Getter
 @Setter
-public class DataExportEycaExtension extends DataExportEyca {
+public class DataExportEycaWrapper {
 
     @JsonIgnore
     private Long discountID;
@@ -18,7 +18,7 @@ public class DataExportEycaExtension extends DataExportEyca {
     private String eycaUpdateId;
     private DataExportEyca dataExportEyca;
 
-    public DataExportEycaExtension (DataExportEyca dataExportEyca) {
+    public DataExportEycaWrapper(DataExportEyca dataExportEyca) {
         this.dataExportEyca = dataExportEyca;
     }
 

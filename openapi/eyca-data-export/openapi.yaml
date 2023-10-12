@@ -208,42 +208,11 @@ definitions:
             type: integer
             example: 1
           data:
-            type: object
             properties:
-              discounts:
-                type: object
-                properties:
-                  CCDB:
-                    type: object
-                    properties:
-                      offset:
-                        type: integer
-                        example: 0
-                      pageNumber:
-                        type: integer
-                        example: 1
-                      pagesTotal:
-                        type: integer
-                        example: 246
-                      rowsPerPage:
-                        type: integer
-                        example: 1
-                      rowsReturned:
-                        type: integer
-                        example: 1
-                      rowsTotal:
-                        type: integer
-                        example: 246
-                  count:
-                    type: integer
-                    example: 246
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/DiscountItem"
-                  realCount:
-                    type: integer
-                    example: 1
+              discount:
+               type: array
+               items:
+                  $ref: "#/definitions/DiscountItem"
           error:
             type: integer
             example: 0
@@ -269,7 +238,6 @@ definitions:
         example: 20
       created:
         type: string
-        format: date-time
         example: "2017-08-02 08:41:04"
       deleted:
         type: integer
@@ -292,8 +260,6 @@ definitions:
       local_id:
         type: string
         example: null
-      locations:
-        $ref: "#/definitions/LocationData"
       member_id:
         type: string
         example: "59086ccdbddd883747454dd0"
@@ -324,8 +290,6 @@ definitions:
         example: "10% de descuentos en suministros de hostelería, uniforme, vajillas, cuberterías, menaje y mobiliario."
       updated:
         type: string
-        format: date-time
-        example: "2021-02-05 08:22:53"
       vendor:
         type: string
         example: "Bomar Hostelería"
@@ -360,29 +324,25 @@ definitions:
   Location:
     type: object
     properties:
-      ccdb_id:
+      street:
         type: string
         example: "1150"
       city:
         type: string
         example: "Cáceres"
       country:
-        $ref: "#/definitions/Country"
-      geo:
-        $ref: "#/definitions/GeoData"
-      id:
         type: string
-        example: "598190209328fd0739980028"
+        example: "IT"
       point_x:
         type: string
         example: "-6.38247299"
       point_y:
         type: string
         example: "39.44942093"
-      street:
-        type: string
-        example: "C/Trasera de Mérida Cr, 5"
       zip:
+        type: string
+        example: "10195"
+      region:
         type: string
         example: "10195"
 
