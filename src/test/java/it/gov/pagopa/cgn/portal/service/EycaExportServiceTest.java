@@ -1,12 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
-import io.swagger.annotations.ApiResponse;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
-import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
@@ -84,6 +82,66 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void sendCreateEycaDiscountsWithReferentNoLandingPage_OK(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthReferentnoLandingaPAge());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+
+    }
+
+
+
+    @Test
+    void notAllowedDiscountTypeReturn_OK(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthNotAllowedDiscounTpe());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+
+
+    @Test
+    void notLiveReturn_OK(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListNotLive());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+
+    @Test
     void listViewEntityEmptyReturn_NUll(){
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
@@ -116,9 +174,6 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
-
-
-
 
     @Test
    void sendUpdateEycaDiscounts_OK(){

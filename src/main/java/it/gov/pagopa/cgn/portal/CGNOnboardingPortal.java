@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CGNOnboardingPortal {
 
     public static void main(String[] args) {
+       //Method used to test eyca sending
     }
 
 }
