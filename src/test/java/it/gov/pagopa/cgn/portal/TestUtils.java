@@ -472,7 +472,7 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListNotLive() {
+    public static List<EycaDataExportViewEntity> getListLiveEmptyOrNotY() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -484,7 +484,19 @@ public class TestUtils {
         entity_0.setDiscountType("mode0");
         entity_0.setDiscountId(7L);
 
-        return Collections.singletonList(entity_0);
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(2L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(1L);
+        entity_1.setVendor("vendor_0");
+        entity_1.setName("name_0");
+        entity_1.setNameLocal("name_local_0");
+        entity_1.setStreet("address0");
+        entity_1.setDiscountType("mode0");
+        entity_1.setLive("N");
+        entity_1.setDiscountId(7L);
+
+        return Arrays.asList(entity_1, entity_1);
     }
 
 
@@ -607,6 +619,11 @@ public class TestUtils {
         return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
 
     }
+
+
+    DiscountEntity discountEntity = new DiscountEntity();
+    org.testcontainers.shaded.com.google.common.base.Optional<DiscountEntity> discountEntityOptional = org.testcontainers.shaded.com.google.common.base.Optional.of(discountEntity);
+
 
     public static String getJson(Object obj) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();

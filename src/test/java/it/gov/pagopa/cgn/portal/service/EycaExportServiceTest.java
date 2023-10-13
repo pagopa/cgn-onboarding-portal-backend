@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
@@ -22,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -58,6 +60,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthLandingPageNoReferent());
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+        DiscountEntity discountEntity = new DiscountEntity();
+        Optional<DiscountEntity> discountEntityOptional = Optional.of(discountEntity);
+        Mockito.when(discountRepository.findById(7l)).thenReturn(discountEntityOptional);
 
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
@@ -77,7 +82,6 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-
 
     }
 
@@ -107,10 +111,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
-
     }
-
-
 
     @Test
     void notAllowedDiscountTypeReturn_OK(){
@@ -125,13 +126,11 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     }
 
-
-
     @Test
     void notLiveReturn_OK(){
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListNotLive());
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListLiveEmptyOrNotY());
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
