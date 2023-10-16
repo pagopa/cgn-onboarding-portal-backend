@@ -212,7 +212,7 @@ public class ExportService {
         String eycaNotAllowedDiscountModes = configProperties.getEycaNotAllowedDiscountModes();
 
         try {
-            List<DataExportEycaWrapper> exportEycaList = exportViewEntities.stream()
+            List<DataExportEycaWrapper> upsertOnEycaList = exportViewEntities.stream()
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
@@ -223,13 +223,22 @@ public class ExportService {
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
-            if (exportEycaList.isEmpty()){
+            if (upsertOnEycaList.isEmpty()){
                 log.info("List to be sent to EYCA is empty");
                 return ResponseEntity.status(HttpStatus.OK).build();
             }
 
-            createNewDiscountsOnEyca(exportEycaList);
-              updateOldDiscountsOnEyca(exportEycaList);
+            createNewDiscountsOnEyca(upsertOnEycaList);
+            updateOldDiscountsOnEyca(upsertOnEycaList);
+
+            List<DataExportEycaWrapper> deleteOnEycaList = exportViewEntities.stream()
+                    .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
+                    .filter(entity -> StringUtils.isBlank(entity.getLive()) || !entity.getLive().equals("Y"))
+                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
+                    .entrySet().stream()
+                    .map(dataExportEycaConverter::groupedEntityToDto)
+                    .collect(Collectors.toList());
+
 
             log.info("sendDiscountsToEyca end success");
 
@@ -284,6 +293,23 @@ public class ExportService {
                 }
         );
     }
+
+    private void deleteDiscountsOnEyca (List<DataExportEycaWrapper> deleteEycaList) {
+        eycaExportService.authenticateOnEyca();
+
+        List<UpdateDataExportEyca> updateList = deleteEycaList.stream()
+                .map(dataExportEycaConverter::convertToUpdateDataExportEyca).collect(Collectors.toList());
+
+        updateList.forEach(exportEyca ->
+                {
+                    ApiResponseEyca apiResponse =
+                            eycaExportService.updateDiscountWithAuthorization(exportEyca, "json");
+                    apiResponse.toString();
+                }
+        );
+    }
+
+
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>
             agreementWithProfileAndDiscountToStringArray
