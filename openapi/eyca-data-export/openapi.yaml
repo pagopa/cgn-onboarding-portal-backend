@@ -60,7 +60,7 @@ paths:
           description: Service unavailable.
 
   /api/update_discount:
-    post:
+    put:
       security:
         - Bearer: [ ]
       operationId: updateDiscount
