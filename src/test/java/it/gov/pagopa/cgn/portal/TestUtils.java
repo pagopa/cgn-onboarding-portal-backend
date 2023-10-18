@@ -500,7 +500,7 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListWIthLandingPageNoReferent() {
+    public static List<EycaDataExportViewEntity> getListWithLandingPageNoReferent() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");

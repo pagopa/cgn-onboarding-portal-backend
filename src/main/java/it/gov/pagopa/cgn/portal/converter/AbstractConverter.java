@@ -19,7 +19,7 @@ public abstract class AbstractConverter<E, D> {
         return convertToDto(entityOpt, toDtoFunction());
     }
 
-    public D  toDto(E entity) {
+    public D toDto(E entity) {
         return toDto(Optional.ofNullable(entity)).orElse(null);
     }
 
