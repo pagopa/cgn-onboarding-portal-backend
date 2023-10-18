@@ -239,6 +239,7 @@ public class ExportService {
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
+            deleteDiscountsOnEyca(deleteOnEycaList);
 
             log.info("sendDiscountsToEyca end success");
 
@@ -288,7 +289,7 @@ public class ExportService {
         updateList.forEach(exportEyca ->
                 {
                     ApiResponseEyca apiResponse =
-                            eycaExportService.updateDiscountWithAuthorization(exportEyca, "json");
+                            eycaExportService.updateDiscount(exportEyca, "json");
                     apiResponse.toString();
                 }
         );
@@ -297,18 +298,17 @@ public class ExportService {
     private void deleteDiscountsOnEyca (List<DataExportEycaWrapper> deleteEycaList) {
         eycaExportService.authenticateOnEyca();
 
-        List<UpdateDataExportEyca> updateList = deleteEycaList.stream()
-                .map(dataExportEycaConverter::convertToUpdateDataExportEyca).collect(Collectors.toList());
+        List<DeleteDataExportEyca> deleteList = deleteEycaList.stream()
+                .map(dataExportEycaConverter::convertToDeleteDataExportEyca).collect(Collectors.toList());
 
-        updateList.forEach(exportEyca ->
+        deleteList.forEach(deleteEyca ->
                 {
-                    ApiResponseEyca apiResponse =
-                            eycaExportService.updateDiscountWithAuthorization(exportEyca, "json");
+                    DeleteApiResponseEyca apiResponse =
+                            eycaExportService.deleteDIscount(deleteEyca, "json");
                     apiResponse.toString();
                 }
         );
     }
-
 
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>

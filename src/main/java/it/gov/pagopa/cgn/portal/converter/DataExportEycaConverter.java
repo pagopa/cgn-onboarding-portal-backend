@@ -4,6 +4,7 @@ package it.gov.pagopa.cgn.portal.converter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DeleteDataExportEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.LocationEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 import org.apache.commons.lang3.StringUtils;
@@ -93,10 +94,14 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 updateDataExportEyca.setVendor(dto.getDataExportEyca().getVendor());
                 updateDataExportEyca.setWeb(dto.getDataExportEyca().getWeb());
                 updateDataExportEyca.setText(dto.getDataExportEyca().getText());
-   return updateDataExportEyca;
+        return updateDataExportEyca;
 
     }
 
+    public DeleteDataExportEyca convertToDeleteDataExportEyca(DataExportEycaWrapper dto) {
 
-
+        DeleteDataExportEyca deleteDataExportEyca = new DeleteDataExportEyca();
+        deleteDataExportEyca.setId(dto.getEycaUpdateId());
+        return deleteDataExportEyca;
+    }
 }
