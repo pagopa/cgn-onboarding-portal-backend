@@ -247,6 +247,8 @@ public class ExportService {
     private void createNewDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList){
         eycaExportService.authenticateOnEyca();
 
+        log.info("creeting new discount on EYCA");
+
         List<DataExportEycaWrapper> createList = exportEycaList.stream().
                 filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
 
@@ -271,7 +273,7 @@ public class ExportService {
 
     private void updateOldDiscountsOnEyca (List<DataExportEycaWrapper> exportEycaList) {
         eycaExportService.authenticateOnEyca();
-
+        log.info("updating old discount on EYCA");
         List<UpdateDataExportEyca> updateList = exportEycaList.stream()
                  .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
                 .map(dataExportEycaConverter::convertToUpdateDataExportEyca).collect(Collectors.toList());
