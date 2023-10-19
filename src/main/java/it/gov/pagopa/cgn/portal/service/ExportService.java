@@ -233,7 +233,8 @@ public class ExportService {
 
             List<DataExportEycaWrapper> deleteOnEycaList = exportViewEntities.stream()
                     .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
-                    .filter(entity -> StringUtils.isBlank(entity.getLive()) || !entity.getLive().equals("Y"))
+                    .filter(entity -> StringUtils.isBlank(entity.getLive()) || !entity.getLive().equals("N"))
+                    .filter(entity -> entity.getEndDate().)
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
@@ -257,8 +258,9 @@ public class ExportService {
     private void createNewDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList){
         eycaExportService.authenticateOnEyca();
 
-        List<DataExportEycaWrapper> createList = exportEycaList.stream().
-                filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
+        List<DataExportEycaWrapper> createList = exportEycaList.stream()
+                  .filter(entity -> !StringUtils.isBlank(entity.getDataExportEyca().getLive()) && entity.getLive().equals("Y"))
+                    .filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
 
         createList.forEach(exportEycaWrapper -> {
                      DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
