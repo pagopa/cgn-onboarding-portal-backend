@@ -232,15 +232,14 @@ public class ExportService {
             updateOldDiscountsOnEyca(upsertOnEycaList);
 
             List<DataExportEycaWrapper> deleteOnEycaList = exportViewEntities.stream()
-                    .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
-                    .filter(entity -> StringUtils.isBlank(entity.getLive()) || !entity.getLive().equals("N"))
-                    .filter(entity -> entity.getEndDate().)
+                    .filter(entity -> StringUtils.isBlank(entity.getLive()) || entity.getLive().equals("N"))
+                    .filter(entity -> !entity.getEndDate().isBefore(LocalDate.now().minusDays(1)))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
-            deleteDiscountsOnEyca(deleteOnEycaList);
+            updateOldDiscountsOnEyca(deleteOnEycaList);
 
             log.info("sendDiscountsToEyca end success");
 
@@ -259,7 +258,6 @@ public class ExportService {
         eycaExportService.authenticateOnEyca();
 
         List<DataExportEycaWrapper> createList = exportEycaList.stream()
-                  .filter(entity -> !StringUtils.isBlank(entity.getDataExportEyca().getLive()) && entity.getLive().equals("Y"))
                     .filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
 
         createList.forEach(exportEycaWrapper -> {
@@ -290,24 +288,7 @@ public class ExportService {
 
         updateList.forEach(exportEyca ->
                 {
-                    ApiResponseEyca apiResponse =
-                            eycaExportService.updateDiscount(exportEyca, "json");
-                    apiResponse.toString();
-                }
-        );
-    }
-
-    private void deleteDiscountsOnEyca (List<DataExportEycaWrapper> deleteEycaList) {
-        eycaExportService.authenticateOnEyca();
-
-        List<DeleteDataExportEyca> deleteList = deleteEycaList.stream()
-                .map(dataExportEycaConverter::convertToDeleteDataExportEyca).collect(Collectors.toList());
-
-        deleteList.forEach(deleteEyca ->
-                {
-                    DeleteApiResponseEyca apiResponse =
-                            eycaExportService.deleteDIscount(deleteEyca, "json");
-                    apiResponse.toString();
+                    ApiResponseEyca apiResponse = eycaExportService.updateDiscount(exportEyca, "json");
                 }
         );
     }
