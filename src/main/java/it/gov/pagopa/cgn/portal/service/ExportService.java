@@ -229,7 +229,7 @@ public class ExportService {
             }
 
             createNewDiscountsOnEyca(exportEycaList);
-              updateOldDiscountsOnEyca(exportEycaList);
+            updateOldDiscountsOnEyca(exportEycaList);
 
             log.info("sendDiscountsToEyca end success");
 

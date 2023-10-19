@@ -33,7 +33,8 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 DataExportEyca dataExport = new DataExportEyca();
 
                 Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
-                        .map(val->val.equals("Y")?1:0);
+                        .map(val -> (val.equals("Y") && entity.getDiscountType().equals("BUCKET")) ? 0 : (val.equals("Y") ? 1 : 0));
+
                 dataExport.setLive(optIntLiveValue.orElse(0));
                 dataExport.setEmail(entity.getEmail());
                 dataExport.setLocalId(entity.getLocationLocalId());
