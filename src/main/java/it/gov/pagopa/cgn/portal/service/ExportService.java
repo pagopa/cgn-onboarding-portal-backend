@@ -269,12 +269,14 @@ public class ExportService {
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaWrapper.getDiscountID());
 
             discountEntity.ifPresent(entity -> {
-                assert response.getApiResponse() != null &&
+                if(response!=null &&
+                        response.getApiResponse() != null &&
                         response.getApiResponse().getData() != null &&
-                        response.getApiResponse().getData().getDiscount() != null;
+                        response.getApiResponse().getData().getDiscount() != null){
+                    entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
+                    discountRepository.save(entity);
+                }
 
-              entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
-              discountRepository.save(entity);
             });
         });
 

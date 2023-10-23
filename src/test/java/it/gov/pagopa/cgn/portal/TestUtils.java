@@ -483,6 +483,7 @@ public class TestUtils {
         entity_0.setStreet("address0");
         entity_0.setDiscountType("mode0");
         entity_0.setDiscountId(7L);
+        entity_0.setLive(null);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(2L);
@@ -496,7 +497,7 @@ public class TestUtils {
         entity_1.setLive("N");
         entity_1.setDiscountId(7L);
 
-        return Arrays.asList(entity_1, entity_1);
+        return Arrays.asList(entity_0, entity_1);
     }
 
 
@@ -527,11 +528,41 @@ public class TestUtils {
         entity_0.setNameLocal("name_local_0");
         entity_0.setStreet("address0");
         entity_0.setDiscountType("LANDINGPAGE");
-        entity_0.setLive("Y");
+        entity_0.setLive("y");
         entity_0.setDiscountId(7L);
         entity_0.setEycaUpdateId("655464565");
 
-        return Collections.singletonList(entity_0);
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(1L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(1L);
+        entity_1.setVendor("vendor_1");
+        entity_1.setName("name_1");
+        entity_1.setNameLocal("name_local_1");
+        entity_1.setStreet("address1");
+        entity_1.setDiscountType("LANDINGPAGE");
+        entity_1.setLive("N");
+        entity_1.setDiscountId(3L);
+        entity_1.setEycaUpdateId("650054665");
+        entity_1.setEndDate(LocalDate.now().minusDays(4));
+
+        EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
+
+        entity_2.setId(1L);
+        entity_2.setCategories("products");
+        entity_2.setProfileId(1L);
+        entity_2.setVendor("vendor_2");
+        entity_2.setName("name_2");
+        entity_2.setNameLocal("name_local_2");
+        entity_2.setStreet("address2");
+        entity_2.setDiscountType("LANDINGPAGE");
+        entity_2.setLive("N");
+        entity_2.setDiscountId(4L);
+        entity_2.setEycaUpdateId("6551114565");
+        entity_2.setEndDate(LocalDate.now());
+
+
+        return Arrays.asList(entity_0, entity_1, entity_2);
     }
 
 

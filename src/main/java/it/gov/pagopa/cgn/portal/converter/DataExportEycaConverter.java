@@ -34,7 +34,17 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 DataExportEyca dataExport = new DataExportEyca();
 
                 Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
-                        .map(val -> (val.equals("Y") && entity.getDiscountType().equals("BUCKET")) ? 0 : (val.equals("Y") ? 1 : 0));
+                        .map(val -> {
+                            if (val.equals("Y")) {
+                                if (entity.getDiscountType().equals("BUCKET")) {
+                                    return 0;
+                                } else {
+                                    return 1;
+                                }
+                            } else {
+                                return 0;
+                            }
+                        });
 
                 dataExport.setLive(optIntLiveValue.orElse(0));
                 dataExport.setEmail(entity.getEmail());
@@ -46,10 +56,10 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 dataExport.setNameLocal(entity.getNameLocal());
                 dataExport.setTextLocal(entity.getTextLocal());
                 dataExport.setWeb(entity.getWeb());
-               if (!StringUtils.isEmpty(entity.getCategories())){
-                   dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
-                           .collect(Collectors.toList()));
-               }
+                if (!StringUtils.isEmpty(entity.getCategories())) {
+                    dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
+                            .collect(Collectors.toList()));
+                }
                 dataExport.setImageSourceFile(entity.getImage());
 
                 DataExportEycaWrapper dto = new DataExportEycaWrapper(dataExport);
@@ -82,19 +92,19 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
     public UpdateDataExportEyca convertToUpdateDataExportEyca(DataExportEycaWrapper dto) {
 
         UpdateDataExportEyca updateDataExportEyca = new UpdateDataExportEyca();
-                 updateDataExportEyca.setId(dto.getEycaUpdateId());
-                 updateDataExportEyca.setEmail(dto.getDataExportEyca().getEmail());
-                updateDataExportEyca.setFiles(dto.getDataExportEyca().getFiles());
-                updateDataExportEyca.setName(dto.getDataExportEyca().getName());
-                updateDataExportEyca.setLive(dto.getDataExportEyca().getLive());
-                updateDataExportEyca.setPhone(dto.getDataExportEyca().getPhone());
-                updateDataExportEyca.setNameLocal(dto.getDataExportEyca().getNameLocal());
-                updateDataExportEyca.setPlusCategories(dto.getDataExportEyca().getPlusCategories());
-                updateDataExportEyca.setImageSourceFile(dto.getDataExportEyca().getImageSourceFile());
-                updateDataExportEyca.setPlusTags(dto.getDataExportEyca().getPlusTags());
-                updateDataExportEyca.setVendor(dto.getDataExportEyca().getVendor());
-                updateDataExportEyca.setWeb(dto.getDataExportEyca().getWeb());
-                updateDataExportEyca.setText(dto.getDataExportEyca().getText());
+        updateDataExportEyca.setId(dto.getEycaUpdateId());
+        updateDataExportEyca.setEmail(dto.getDataExportEyca().getEmail());
+        updateDataExportEyca.setFiles(dto.getDataExportEyca().getFiles());
+        updateDataExportEyca.setName(dto.getDataExportEyca().getName());
+        updateDataExportEyca.setLive(dto.getDataExportEyca().getLive());
+        updateDataExportEyca.setPhone(dto.getDataExportEyca().getPhone());
+        updateDataExportEyca.setNameLocal(dto.getDataExportEyca().getNameLocal());
+        updateDataExportEyca.setPlusCategories(dto.getDataExportEyca().getPlusCategories());
+        updateDataExportEyca.setImageSourceFile(dto.getDataExportEyca().getImageSourceFile());
+        updateDataExportEyca.setPlusTags(dto.getDataExportEyca().getPlusTags());
+        updateDataExportEyca.setVendor(dto.getDataExportEyca().getVendor());
+        updateDataExportEyca.setWeb(dto.getDataExportEyca().getWeb());
+        updateDataExportEyca.setText(dto.getDataExportEyca().getText());
         return updateDataExportEyca;
 
     }
@@ -105,4 +115,5 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
         deleteDataExportEyca.setId(dto.getEycaUpdateId());
         return deleteDataExportEyca;
     }
+
 }

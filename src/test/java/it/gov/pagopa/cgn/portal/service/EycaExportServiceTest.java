@@ -56,13 +56,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     @Test
     void sendCreateEycaDiscounts_OK(){
-        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
-        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWithLandingPageWithoutReferent());
-        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
-        DiscountEntity discountEntity = new DiscountEntity();
-        Optional<DiscountEntity> discountEntityOptional = Optional.of(discountEntity);
-        Mockito.when(discountRepository.findById(7l)).thenReturn(discountEntityOptional);
+        createPreconditions();
 
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
@@ -84,6 +78,90 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
+
+
+    private void createPreconditions(){
+     Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWithLandingPageWithoutReferent());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+    DiscountEntity discountEntity = new DiscountEntity();
+    Optional<DiscountEntity> discountEntityOptional = Optional.of(discountEntity);
+        Mockito.when(discountRepository.findById(7l)).thenReturn(discountEntityOptional);
+
+}
+
+    @Test
+    void sendCreateEycassDiscounts_OK(){
+        createPreconditions();
+
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(null);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+    @Test
+    void sendCreateEycaDiscoeeunts_OK(){
+        createPreconditions();
+
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(null);
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+    @Test
+    void sendCreateEycaDeeeiscounts_OK(){
+        createPreconditions();
+
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(null);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+
+
+
 
     @Test
     void sendCreateEycaDiscountsWithReferentNoLandingPage_OK(){
