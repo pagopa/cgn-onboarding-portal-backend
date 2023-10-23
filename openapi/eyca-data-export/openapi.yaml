@@ -33,7 +33,7 @@ paths:
   /api/create_discount:
     post:
       security:
-        - bearerAuth: [ ]
+        - Bearer: [ ]
       operationId: createDiscount
       tags:
         - Eyca
@@ -62,7 +62,7 @@ paths:
   /api/update_discount:
     put:
       security:
-        - bearerAuth: [ ]
+        - Bearer: [ ]
       operationId: updateDiscount
       tags:
         - Eyca
@@ -91,7 +91,7 @@ paths:
   /api/delete_discount:
     delete:
       security:
-      - bearerAuth: [ ]
+      - Bearer: [ ]
       operationId: deleteDiscount
       tags:
       - Eyca
