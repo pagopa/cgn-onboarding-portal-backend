@@ -435,7 +435,7 @@ public class TestUtils {
 
     }
 
-    public static List<EycaDataExportViewEntity> getListWIthReferentnoLandingaPAge(){
+    public static List<EycaDataExportViewEntity> getListWithoutLandingPageWithReferent(){
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -455,7 +455,7 @@ public class TestUtils {
 
 
 
-    public static List<EycaDataExportViewEntity> getListWIthNotAllowedDiscounTpe() {
+    public static List<EycaDataExportViewEntity> getListWithNotAllowedDiscounTpe() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -500,7 +500,7 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListWithLandingPageNoReferent() {
+    public static List<EycaDataExportViewEntity> getListWithLandingPageWithoutReferent() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -517,7 +517,7 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListWIthLandingPageNoReferentANdEycaUpdateId() {
+    public static List<EycaDataExportViewEntity> getListWithLandingPageWithoutReferentWithEycaUpdateId() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
