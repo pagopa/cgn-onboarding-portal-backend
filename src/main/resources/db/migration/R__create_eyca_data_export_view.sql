@@ -10,6 +10,7 @@ SELECT
     d.eyca_update_id AS "eyca_update_id",
     d.name_en as "name",
     d.start_date as "start_date",
+    d.end_date as "end_date",
     d.name as "name_local",
     CONCAT_WS(
         ' - ',

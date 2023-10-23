@@ -33,7 +33,7 @@ paths:
   /api/create_discount:
     post:
       security:
-        - Bearer: [ ]
+        - bearerAuth: [ ]
       operationId: createDiscount
       tags:
         - Eyca
@@ -62,12 +62,12 @@ paths:
   /api/update_discount:
     put:
       security:
-        - Bearer: [ ]
+        - bearerAuth: [ ]
       operationId: updateDiscount
       tags:
         - Eyca
-      summary: upadte a  discount.
-      description: pdate a new discount.
+      summary: update a discount.
+      description: update a new discount.
       parameters:
         - in: body
           name: body
@@ -88,15 +88,40 @@ paths:
         '500':
           description: Service unavailable.
 
+  /api/delete_discount:
+    delete:
+      security:
+      - bearerAuth: [ ]
+      operationId: deleteDiscount
+      tags:
+      - Eyca
+      summary: delete a discount.
+      description: delete a discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/DeleteDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discount created.
+          schema:
+            $ref: "#/definitions/DeleteApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
 
 consumes:
   - application/json
 produces:
   - application/json
 parameters: null
-
-
-
 
 
 definitions:
@@ -190,6 +215,14 @@ definitions:
         items:
           $ref: "#/definitions/File"
 
+  DeleteDataExport:
+    type: object
+    required:
+        - id
+    properties:
+      id:
+        type: string
+
   File:
     type: object
     properties:
@@ -222,6 +255,25 @@ definitions:
           text:
             type: string
             example: "OK"
+
+  DeleteApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: array
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+
 
   DiscountItem:
     type: object

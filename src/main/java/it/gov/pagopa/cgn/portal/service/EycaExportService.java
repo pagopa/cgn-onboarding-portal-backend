@@ -5,9 +5,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,9 +39,12 @@ public class EycaExportService {
     }
 
 
-    public ApiResponseEyca updateDiscountWithAuthorization(UpdateDataExportEyca updateDataExportEyca, String type) {
+    public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type) {
         return eycaApi.updateDiscount(type, updateDataExportEyca);
+   }
 
+    public DeleteApiResponseEyca deleteDIscount(DeleteDataExportEyca deleteDataExportEyca, String type) {
+        return eycaApi.deleteDiscount(type, deleteDataExportEyca);
     }
 
 }
