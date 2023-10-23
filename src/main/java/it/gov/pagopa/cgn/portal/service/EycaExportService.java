@@ -43,9 +43,6 @@ public class EycaExportService {
         return eycaApi.updateDiscount(type, updateDataExportEyca);
    }
 
-    public DeleteApiResponseEyca deleteDIscount(DeleteDataExportEyca deleteDataExportEyca, String type) {
-        return eycaApi.deleteDiscount(type, deleteDataExportEyca);
-    }
 
 }
 

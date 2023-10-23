@@ -561,8 +561,23 @@ public class TestUtils {
         entity_2.setEycaUpdateId("6551114565");
         entity_2.setEndDate(LocalDate.now());
 
+        EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
 
-        return Arrays.asList(entity_0, entity_1, entity_2);
+        entity_3.setId(1L);
+        entity_3.setCategories("products");
+        entity_3.setProfileId(1L);
+        entity_3.setVendor("vendor_2");
+        entity_3.setName("name_2");
+        entity_3.setNameLocal("name_local_2");
+        entity_3.setStreet("address2");
+        entity_3.setDiscountType("LANDINGPAGE");
+        entity_3.setLive("Y");
+        entity_3.setDiscountId(4L);
+        entity_3.setEycaUpdateId("6551114565");
+        entity_3.setEndDate(LocalDate.now().plusDays(2));
+
+
+        return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
     }
 
 

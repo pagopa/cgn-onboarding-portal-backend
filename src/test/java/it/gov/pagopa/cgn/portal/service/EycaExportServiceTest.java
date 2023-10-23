@@ -92,7 +92,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 }
 
     @Test
-    void sendCreateEycassDiscounts_OK(){
+    void sendCreateEycaDiscountsResponseNull_OK(){
         createPreconditions();
 
         List<DiscountItemEyca> items = new ArrayList<>();
@@ -110,7 +110,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void sendCreateEycaDiscoeeunts_OK(){
+    void sendCreateEycaDiscountsApiResponseNull_OK(){
         createPreconditions();
 
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
@@ -135,7 +135,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void sendCreateEycaDeeeiscounts_OK(){
+    void sendCreateEycaDiscountsDataNull_OK(){
         createPreconditions();
 
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
@@ -158,10 +158,6 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
-
-
-
-
 
     @Test
     void sendCreateEycaDiscountsWithReferentNoLandingPage_OK(){
