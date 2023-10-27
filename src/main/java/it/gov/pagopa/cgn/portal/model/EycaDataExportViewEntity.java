@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -29,6 +31,19 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "discount_id")
+    private Long discountId;
+
+    @Column(name = "eyca_update_id")
+    @Max(24)
+    private String eycaUpdateId;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @Column(name = "name_local")
     private String nameLocal;

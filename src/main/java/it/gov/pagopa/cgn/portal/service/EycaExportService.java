@@ -5,8 +5,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,19 +21,28 @@ public class EycaExportService {
         this.apiClient.setPassword(configProperties.getEycaPassword());
     }
 
-   public ApiResponseEyca createDiscountWithAuthorization(DataExportEyca discountRequestEycaIntegration, String type) {
+   public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) {
+       return eycaApi.createDiscount(type, dataExportEyca);
+    }
+
+
+    public void authenticateOnEyca() {
         String authResponse = eycaApi.authentication();
 
         if (authResponse.contains("ERR")){
             throw new EycaAuthenticationException(authResponse);
         }
 
-       int colonIndex = authResponse.indexOf(':');
-       String sessionId = authResponse.substring(colonIndex + 1).trim();
-       apiClient.addDefaultCookie("ccdb_session", sessionId);
-       return eycaApi.createDiscount(type, discountRequestEycaIntegration);
-
+        int colonIndex = authResponse.indexOf(':');
+        String sessionId = authResponse.substring(colonIndex + 1).trim();
+        apiClient.addDefaultCookie("ccdb_session", sessionId);
     }
+
+
+    public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type) {
+        return eycaApi.updateDiscount(type, updateDataExportEyca);
+   }
+
 
 }
 

@@ -136,6 +136,10 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "test_failure_reason", length = 500)
     private String testFailureReason;
 
+    @Size(max = 24)
+    @Column(name = "eyca_update_id", length = 24)
+    private String eycaUpdateId;
+
     @Transient
     private String lastBucketCodeLoadUid;
 

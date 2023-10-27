@@ -58,11 +58,71 @@ paths:
           description: Not found.
         '500':
           description: Service unavailable.
+
+  /api/update_discount:
+    put:
+      security:
+        - Bearer: [ ]
+      operationId: updateDiscount
+      tags:
+        - Eyca
+      summary: update a discount.
+      description: update a new discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/UpdateDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discount updated.
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+
+  /api/delete_discount:
+    delete:
+      security:
+      - Bearer: [ ]
+      operationId: deleteDiscount
+      tags:
+      - Eyca
+      summary: delete a discount.
+      description: delete a discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/DeleteDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discount created.
+          schema:
+            $ref: "#/definitions/DeleteApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+
 consumes:
   - application/json
 produces:
   - application/json
 parameters: null
+
 
 definitions:
   DataExport:
@@ -111,6 +171,58 @@ definitions:
         items:
           $ref: "#/definitions/File"
 
+  UpdateDataExport:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+      vendor:
+        type: string
+      name:
+        type: string
+      name_local:
+        type: string
+      text:
+        type: string
+      text_local:
+        type: string
+      +locations:
+        type: array
+        items:
+          $ref: "#/definitions/Location"
+      phone:
+        type: string
+      web:
+        type: string
+      email:
+        type: string
+      +tags:
+        type: array
+        items:
+          type: string
+      +categories:
+        type: array
+        items:
+          type: string
+      live:
+        type: integer
+      image_source__file:
+        type: string
+      files:
+        type: array
+        items:
+          $ref: "#/definitions/File"
+
+  DeleteDataExport:
+    type: object
+    required:
+        - id
+    properties:
+      id:
+        type: string
+
   File:
     type: object
     properties:
@@ -129,42 +241,11 @@ definitions:
             type: integer
             example: 1
           data:
-            type: object
             properties:
-              discounts:
-                type: object
-                properties:
-                  CCDB:
-                    type: object
-                    properties:
-                      offset:
-                        type: integer
-                        example: 0
-                      pageNumber:
-                        type: integer
-                        example: 1
-                      pagesTotal:
-                        type: integer
-                        example: 246
-                      rowsPerPage:
-                        type: integer
-                        example: 1
-                      rowsReturned:
-                        type: integer
-                        example: 1
-                      rowsTotal:
-                        type: integer
-                        example: 246
-                  count:
-                    type: integer
-                    example: 246
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/DiscountItem"
-                  realCount:
-                    type: integer
-                    example: 1
+              discount:
+               type: array
+               items:
+                  $ref: "#/definitions/DiscountItem"
           error:
             type: integer
             example: 0
@@ -174,6 +255,25 @@ definitions:
           text:
             type: string
             example: "OK"
+
+  DeleteApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: array
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+
 
   DiscountItem:
     type: object
@@ -190,7 +290,6 @@ definitions:
         example: 20
       created:
         type: string
-        format: date-time
         example: "2017-08-02 08:41:04"
       deleted:
         type: integer
@@ -213,8 +312,6 @@ definitions:
       local_id:
         type: string
         example: null
-      locations:
-        $ref: "#/definitions/LocationData"
       member_id:
         type: string
         example: "59086ccdbddd883747454dd0"
@@ -245,8 +342,6 @@ definitions:
         example: "10% de descuentos en suministros de hostelería, uniforme, vajillas, cuberterías, menaje y mobiliario."
       updated:
         type: string
-        format: date-time
-        example: "2021-02-05 08:22:53"
       vendor:
         type: string
         example: "Bomar Hostelería"
@@ -281,29 +376,25 @@ definitions:
   Location:
     type: object
     properties:
-      ccdb_id:
+      street:
         type: string
         example: "1150"
       city:
         type: string
         example: "Cáceres"
       country:
-        $ref: "#/definitions/Country"
-      geo:
-        $ref: "#/definitions/GeoData"
-      id:
         type: string
-        example: "598190209328fd0739980028"
+        example: "IT"
       point_x:
         type: string
         example: "-6.38247299"
       point_y:
         type: string
         example: "39.44942093"
-      street:
-        type: string
-        example: "C/Trasera de Mérida Cr, 5"
       zip:
+        type: string
+        example: "10195"
+      region:
         type: string
         example: "10195"
 
