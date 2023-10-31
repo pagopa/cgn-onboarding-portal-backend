@@ -32,12 +32,6 @@ public class AgreementController implements AgreementsApi {
     private final ApiTokenService apiTokenService;
     private final HelpService helpService;
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
-    }
-
-
     @Override
     public ResponseEntity<Agreement> createAgreement() {
         return agreementFacade.createAgreement(CGNUtils.getJwtOperatorUserId());
