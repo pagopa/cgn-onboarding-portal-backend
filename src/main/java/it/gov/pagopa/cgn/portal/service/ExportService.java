@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -13,6 +14,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgn.portal.util.DebugUtil;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -23,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -46,7 +49,6 @@ public class ExportService {
     private final ConfigProperties configProperties;
     private final EycaExportService eycaExportService;
     private final DataExportEycaConverter dataExportEycaConverter;
-
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
             "Ragione sociale",
@@ -204,6 +206,15 @@ public class ExportService {
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
+        exportViewEntities.forEach(exportViewEntity ->
+        {
+            try {
+                DebugUtil.sendEmail("andrea.rovere@dgsspa.com", "exportViewEntity", exportViewEntity.toString());
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        });
+
         if (exportViewEntities.isEmpty()) {
             log.info("No EYCA data to export");
             return null;
@@ -264,6 +275,12 @@ public class ExportService {
 
         createList.forEach(exportEycaWrapper -> {
                      DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
+
+            try {
+                DebugUtil.sendEmail("andrea.rovere@dgsspa.com", "exportEyca", exportEyca.toString());
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
 
             ApiResponseEyca response = eycaExportService.createDiscount(exportEyca, "json");
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaWrapper.getDiscountID());

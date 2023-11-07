@@ -102,6 +102,38 @@ public class EycaDataExportViewEntity {
     @Column(name = "referent")
     private Long referent;
 
-
+    @Override
+    public String toString() {
+        return "EycaDataExportViewEntity{" +
+                "id=" + id +
+                ", categories='" + categories + '\'' +
+                ", profileId=" + profileId +
+                ", vendor='" + vendor + '\'' +
+                ", name='" + name + '\'' +
+                ", discountId=" + discountId +
+                ", eycaUpdateId='" + eycaUpdateId + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", nameLocal='" + nameLocal + '\'' +
+                ", text='" + text + '\'' +
+                ", textLocal='" + textLocal + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", web='" + web + '\'' +
+                ", tags='" + tags + '\'' +
+                ", image='" + image + '\'' +
+                ", live='" + live + '\'' +
+                ", locationLocalId='" + locationLocalId + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", zip='" + zip + '\'' +
+                ", country='" + country + '\'' +
+                ", region='" + region + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
+                ", discountType='" + discountType + '\'' +
+                ", referent=" + referent +
+                '}';
+    }
 }
 
