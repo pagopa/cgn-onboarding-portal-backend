@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
+import it.gov.pagopa.cgn.portal.email.EmailParams;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -49,6 +50,8 @@ public class ExportService {
     private final ConfigProperties configProperties;
     private final EycaExportService eycaExportService;
     private final DataExportEycaConverter dataExportEycaConverter;
+
+    private final EmailNotificationService emailNotificationService;
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
             "Ragione sociale",
@@ -104,13 +107,14 @@ public class ExportService {
 
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService,
-                         DataExportEycaConverter dataExportEycaConverter) {
+                         DataExportEycaConverter dataExportEycaConverter, EmailNotificationService emailNotificationService) {
         this.agreementRepository = agreementRepository;
         this.discountRepository = discountRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
         this.configProperties = configProperties;
         this.eycaExportService = eycaExportService;
         this.dataExportEycaConverter = dataExportEycaConverter;
+        this.emailNotificationService = emailNotificationService;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -208,11 +212,14 @@ public class ExportService {
 
         exportViewEntities.forEach(exportViewEntity ->
         {
+            EmailParams params = DebugUtil.createEmailParams("andrea.rovere@dgsspa.com", "exportViewEntity",
+                    exportViewEntity.toString(), configProperties.getCgnDepartmentEmail());
             try {
-                DebugUtil.sendEmail("andrea.rovere@dgsspa.com", "exportViewEntity", exportViewEntity.toString());
+                emailNotificationService.sendSyncMessage(params);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
+
         });
 
         if (exportViewEntities.isEmpty()) {
@@ -225,9 +232,9 @@ public class ExportService {
         try {
             List<DataExportEycaWrapper> upsertOnEycaList = exportViewEntities.stream()
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
-                   .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
-                   .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
+                    .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
                     .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
@@ -274,14 +281,15 @@ public class ExportService {
                 filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
 
         createList.forEach(exportEycaWrapper -> {
-                     DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
+            DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
             try {
-                DebugUtil.sendEmail("andrea.rovere@dgsspa.com", "exportEyca", exportEyca.toString());
+                EmailParams params = DebugUtil.createEmailParams("andrea.rovere@dgsspa.com", "exportViewEntity",
+                        exportEyca .toString(), configProperties.getCgnDepartmentEmail());
+                emailNotificationService.sendSyncMessage(params);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
-
             ApiResponseEyca response = eycaExportService.createDiscount(exportEyca, "json");
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaWrapper.getDiscountID());
 
@@ -304,7 +312,7 @@ public class ExportService {
         eycaExportService.authenticateOnEyca();
         log.info("updating old discount on EYCA");
         List<UpdateDataExportEyca> updateList = exportEycaList.stream()
-                 .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
+                .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
                 .map(dataExportEycaConverter::convertToUpdateDataExportEyca).collect(Collectors.toList());
 
         updateList.forEach(exportEyca ->
