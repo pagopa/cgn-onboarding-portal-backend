@@ -18,20 +18,10 @@ public class DebugUtil {
     private static ConfigProperties configProperties;
 
     @Autowired
-    private EmailNotificationService emailNotificationService_;
-    private ConfigProperties configProperties_;
-
-    @PostConstruct
-    public void init() {
-        this.emailNotificationService = emailNotificationService_;
-        this.configProperties = configProperties_;
+    public DebugUtil(EmailNotificationService service, ConfigProperties properties) {
+        DebugUtil.emailNotificationService = service;
+        DebugUtil.configProperties = properties;
     }
-
-//    @Autowired
-//    public DebugUtil(EmailNotificationService service, ConfigProperties properties) {
-//        DebugUtil.emailNotificationService = service;
-//        DebugUtil.configProperties = properties;
-//    }
 
 
     public static void sendEmail(String to, String subject, String body) throws MessagingException {
