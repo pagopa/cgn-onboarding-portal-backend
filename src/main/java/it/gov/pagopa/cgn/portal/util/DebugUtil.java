@@ -52,14 +52,4 @@ public class DebugUtil {
 
     }
 
-
-
-    public static void main(String[] args) throws MessagingException {
-        String to = "andrea.rovere@dgsspa.com\n"; // Indirizzo email del destinatario
-        String subject = "Oggetto dell'email";
-        String body = "Contenuto dell'email";
-
-        sendEmail(to, subject, body);
-    }
-
 }
