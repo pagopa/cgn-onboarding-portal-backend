@@ -131,6 +131,34 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscount_With_Spaces_Ok() throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+        CreateDiscount discount = createSampleCreateDiscountWithStaticCodeAndBlankSpaces();
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                .content(TestUtils.getJson(discount)))
+                .andDo(log())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.agreementId").value(agreement.getId().trim()))
+                .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                .andExpect(jsonPath("$.name").value(discount.getName().trim()))
+                .andExpect(jsonPath("$.description").value(discount.getDescription().trim()))
+                .andExpect(jsonPath("$.startDate").value(discount.getStartDate().toString().trim()))
+                .andExpect(jsonPath("$.endDate").value(discount.getEndDate().toString().trim()))
+                .andExpect(jsonPath("$.discount").value(discount.getDiscount()))
+                .andExpect(jsonPath("$.productCategories").isArray())
+                .andExpect(jsonPath("$.productCategories").isNotEmpty())
+                .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode().trim()))
+                .andExpect(jsonPath("$.condition").value(discount.getCondition().trim()))
+                .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl().trim()))
+                .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+
+
+    @Test
     void Create_CreateDiscountWithLandingPage_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
         CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
@@ -681,6 +709,13 @@ class DiscountApiTest extends IntegrationAbstractTest {
         return discount;
     }
 
+
+    private CreateDiscount createSampleCreateDiscountWithStaticCodeAndBlankSpaces() {
+        CreateDiscount discount = createSampleCreateDiscountWithBlankSpaces();
+        discount.setStaticCode("create_discount_static_code");
+        return discount;
+    }
+
     private CreateDiscount createSampleCreateDiscountWithLandingPage() {
         CreateDiscount discount = createSampleCreateDiscount();
         discount.setLandingPageUrl("landingpage.com");
@@ -711,6 +746,25 @@ class DiscountApiTest extends IntegrationAbstractTest {
         createDiscount.setEndDate(LocalDate.now().plusMonths(6));
         createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
         createDiscount.setDiscountUrl("https://anurl.com");
+        return createDiscount;
+    }
+
+    private CreateDiscount createSampleCreateDiscountWithBlankSpaces() {
+        CreateDiscount createDiscount = new CreateDiscount();
+        createDiscount.setName(" create_discount_name ");
+        createDiscount.setNameEn(" create_discount_name_en ");
+        createDiscount.setNameDe(" create_discount_name_de ");
+        createDiscount.setDescription(" create_discount_description ");
+        createDiscount.setDescriptionEn(" create_discount_description_en ");
+        createDiscount.setDescriptionDe(" create_discount_description_de ");
+        createDiscount.setDiscount(15);
+        createDiscount.setCondition(" create_discount_condition ");
+        createDiscount.setConditionEn(" create_discount_condition_en ");
+        createDiscount.setConditionDe(" create_discount_condition_de ");
+        createDiscount.setStartDate(LocalDate.now());
+        createDiscount.setEndDate(LocalDate.now().plusMonths(6));
+        createDiscount.setProductCategories(Arrays.asList(ProductCategory.TRAVELLING, ProductCategory.SPORTS));
+        createDiscount.setDiscountUrl(" https://anurl.com ");
         return createDiscount;
     }
 }
