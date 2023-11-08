@@ -204,6 +204,10 @@ public class ExportService {
         log.info("sendDiscountsToEyca start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
+        exportViewEntities.forEach(exportViewEntity -> log.info(
+                "<<EYCA_LOG>><<exportViewEntity<<: " +
+                exportViewEntity.toString()));
+
         if (exportViewEntities.isEmpty()) {
             log.info("No EYCA data to export");
             return null;
@@ -265,6 +269,8 @@ public class ExportService {
         createList.forEach(exportEycaWrapper -> {
                      DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
+         log.info("<<EYCA_LOG>><<CREATE_exportEyca<<: " + exportEyca.toString());
+
             ApiResponseEyca response = eycaExportService.createDiscount(exportEyca, "json");
             Optional<DiscountEntity> discountEntity = discountRepository.findById(exportEycaWrapper.getDiscountID());
 
@@ -291,7 +297,8 @@ public class ExportService {
                 .map(dataExportEycaConverter::convertToUpdateDataExportEyca).collect(Collectors.toList());
 
         updateList.forEach(exportEyca ->
-                {
+                {  log.info("<<EYCA_LOG>><<UPDATE_exportEyca<<: " + exportEyca.toString());
+
                     ApiResponseEyca apiResponse = eycaExportService.updateDiscount(exportEyca, "json");
                     log.info(apiResponse.toString());
                 }
