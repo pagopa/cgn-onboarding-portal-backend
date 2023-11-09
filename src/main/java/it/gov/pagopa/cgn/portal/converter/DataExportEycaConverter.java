@@ -76,17 +76,21 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
         dto.getDataExportEyca().setPlusLocations(entry.getValue().stream()
                 .map(en -> {
                     LocationEyca loc = new LocationEyca();
-                    loc.setStreet(en.getStreet());
-                    loc.setCity(en.getCity());
-                    loc.setPointY(en.getLatitude());
-                    loc.setPointX(en.getLongitude());
-                    loc.setCountry(en.getCountry());
+                    loc.setStreet(replaceNullStringWithBlank(en.getStreet()));
+                    loc.setCity(replaceNullStringWithBlank(en.getCity()));
+                    loc.setPointY(replaceNullStringWithBlank(en.getLatitude()));
+                    loc.setPointX(replaceNullStringWithBlank(en.getLongitude()));
+                    loc.setCountry(replaceNullStringWithBlank(en.getCountry()));
                     return loc;
                 })
                 .collect(Collectors.toList()));
         return dto;
 
     }
+
+    private static String replaceNullStringWithBlank(String string){
+            return StringUtils.defaultString(string, "");
+        }
 
 
     public UpdateDataExportEyca convertToUpdateDataExportEyca(DataExportEycaWrapper dto) {
