@@ -89,7 +89,7 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
     }
 
     private static String replaceNullStringWithBlank(String string){
-            return StringUtils.defaultString(string, "");
+            return StringUtils.defaultString(string, "data");
         }
 
 
