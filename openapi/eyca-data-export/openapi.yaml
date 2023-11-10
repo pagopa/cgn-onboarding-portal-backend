@@ -164,6 +164,8 @@ definitions:
           type: string
       live:
         type: integer
+      image_source__web:
+        type: string
       image_source__file:
         type: string
       files:
