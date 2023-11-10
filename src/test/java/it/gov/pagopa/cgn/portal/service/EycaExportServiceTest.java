@@ -53,6 +53,16 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         exportService = new ExportService(agreementRepository, discountRepository, eycaDataExportRepository, configProperties, eycaExportService, eycaDataExportConverter);
     }
 
+    private void createPreconditions(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWithLandingPageWithoutReferent());
+        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
+        DiscountEntity discountEntity = new DiscountEntity();
+        Optional<DiscountEntity> discountEntityOptional = Optional.of(discountEntity);
+        Mockito.when(discountRepository.findById(7l)).thenReturn(discountEntityOptional);
+
+    }
 
     @Test
     void sendCreateEycaDiscounts_OK(){
@@ -78,18 +88,6 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
-
-
-    private void createPreconditions(){
-     Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
-        Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWithLandingPageWithoutReferent());
-        Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
-    DiscountEntity discountEntity = new DiscountEntity();
-    Optional<DiscountEntity> discountEntityOptional = Optional.of(discountEntity);
-        Mockito.when(discountRepository.findById(7l)).thenReturn(discountEntityOptional);
-
-}
 
     @Test
     void sendCreateEycaDiscountsResponseNull_OK(){
@@ -249,8 +247,8 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-   void sendUpdateEycaDiscounts_OK(){
-       Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
+    void sendUpdateEycaDiscounts_OK(){
+        Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWithLandingPageWithoutReferentWithEycaUpdateId());
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
