@@ -130,7 +130,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
     }
 
- //   @Test
+    @Test
     void Create_CreateDiscount_With_Spaces_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
         CreateDiscount discount = createSampleCreateDiscountWithStaticCodeAndBlankSpaces();
