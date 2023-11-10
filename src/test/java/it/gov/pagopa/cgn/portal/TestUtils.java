@@ -514,7 +514,85 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
 
-        return Collections.singletonList(entity_0);
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(1L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(1L);
+        entity_1.setVendor("vendor_0");
+        entity_1.setName("name_0");
+        entity_1.setNameLocal("name_local_0");
+        entity_1.setDiscountType("LANDINGPAGE");
+        entity_1.setLive("Y");
+        entity_1.setDiscountId(7L);
+        entity_1.setCountry("italy");
+        entity_1.setCity("city");
+        entity_1.setStreet("address0");
+        entity_1.setLatitude("48");
+        entity_1.setLongitude("12");
+
+        EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
+        entity_2.setId(1L);
+        entity_2.setCategories("products");
+        entity_2.setProfileId(1L);
+        entity_2.setVendor("vendor_0");
+        entity_2.setName("name_0");
+        entity_2.setNameLocal("name_local_0");
+        entity_2.setDiscountType("LANDINGPAGE");
+        entity_2.setLive("Y");
+        entity_2.setDiscountId(7L);
+        entity_2.setCity("city");
+        entity_2.setStreet("address0");
+        entity_2.setLatitude("48");
+        entity_2.setLongitude("12");
+
+
+        EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
+        entity_3.setId(1L);
+        entity_3.setCategories("products");
+        entity_3.setProfileId(1L);
+        entity_3.setVendor("vendor_0");
+        entity_3.setName("name_0");
+        entity_3.setNameLocal("name_local_0");
+        entity_3.setDiscountType("LANDINGPAGE");
+        entity_3.setLive("Y");
+        entity_3.setDiscountId(7L);
+        entity_3.setCountry("italy");
+        entity_3.setStreet("address0");
+        entity_3.setLatitude("48");
+        entity_3.setLongitude("12");
+
+        EycaDataExportViewEntity entity_4 = new EycaDataExportViewEntity();
+        entity_4.setId(1L);
+        entity_4.setCategories("products");
+        entity_4.setProfileId(1L);
+        entity_4.setVendor("vendor_0");
+        entity_4.setName("name_0");
+        entity_4.setNameLocal("name_local_0");
+        entity_4.setDiscountType("LANDINGPAGE");
+        entity_4.setLive("Y");
+        entity_4.setDiscountId(7L);
+        entity_4.setCountry("italy");
+        entity_4.setCity("city");
+        entity_4.setLatitude("48");
+        entity_4.setLongitude("12");
+
+        EycaDataExportViewEntity entity_5 = new EycaDataExportViewEntity();
+        entity_5.setId(1L);
+        entity_5.setCategories("products");
+        entity_5.setProfileId(1L);
+        entity_5.setVendor("vendor_0");
+        entity_5.setName("name_0");
+        entity_5.setNameLocal("name_local_0");
+        entity_5.setDiscountType("LANDINGPAGE");
+        entity_5.setLive("Y");
+        entity_5.setDiscountId(7L);
+        entity_5.setCountry("italy");
+        entity_5.setCity("city");
+        entity_5.setStreet("address0");
+        entity_5.setLongitude("12");
+        entity_5.setTags("tag1, tag2");
+
+        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5);
     }
 
 
@@ -576,7 +654,6 @@ public class TestUtils {
         entity_3.setEycaUpdateId("6551114565");
         entity_3.setEndDate(LocalDate.now().plusDays(2));
 
-
         return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
     }
 
@@ -593,6 +670,8 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
         entity_0.setEycaUpdateId("655464565");
+
+
 
         return Collections.singletonList(entity_0);
     }

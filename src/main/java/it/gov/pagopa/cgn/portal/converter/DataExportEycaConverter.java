@@ -56,11 +56,15 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 dataExport.setNameLocal(entity.getNameLocal());
                 dataExport.setTextLocal(entity.getTextLocal());
                 dataExport.setWeb(entity.getWeb());
+                if (!StringUtils.isEmpty(entity.getTags())) {
+                    dataExport.setPlusTags(Arrays.stream(entity.getTags().split(","))
+                            .collect(Collectors.toList()));
+                }
                 if (!StringUtils.isEmpty(entity.getCategories())) {
                     dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
                             .collect(Collectors.toList()));
                 }
-                dataExport.setImageSourceFile(entity.getImage());
+                dataExport.setImageSourceWeb(entity.getImage());
 
                 DataExportEycaWrapper dto = new DataExportEycaWrapper(dataExport);
                 dto.setEycaUpdateId(entity.getEycaUpdateId());
@@ -73,25 +77,39 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
     public DataExportEycaWrapper groupedEntityToDto(Map.Entry<Long, List<EycaDataExportViewEntity>> entry) {
         Optional<EycaDataExportViewEntity> entity = entry.getValue().stream().findFirst();
         DataExportEycaWrapper dto = toDto(entity.orElseThrow());
-        dto.getDataExportEyca().setPlusLocations(entry.getValue().stream()
+
+        List<LocationEyca>  locationEycaList = entry.getValue().stream()
                 .map(en -> {
-                    LocationEyca loc = new LocationEyca();
-                    loc.setStreet(replaceNullStringWithBlank(en.getStreet()));
-                    loc.setCity(replaceNullStringWithBlank(en.getCity()));
-                    loc.setPointY(replaceNullStringWithBlank(en.getLatitude()));
-                    loc.setPointX(replaceNullStringWithBlank(en.getLongitude()));
-                    loc.setCountry(replaceNullStringWithBlank(en.getCountry()));
-                    return loc;
+                    if (!StringUtils.isEmpty(en.getCountry())&&
+                            !StringUtils.isEmpty(en.getCity())&&
+                            !StringUtils.isEmpty(en.getStreet())&&
+                            !StringUtils.isEmpty(en.getLatitude())&&
+                            !StringUtils.isEmpty(en.getLongitude())
+                    ) {
+                        LocationEyca loc = new LocationEyca();
+                        loc.setCountry((en.getCountry()));
+                        loc.setStreet((en.getStreet()));
+                        loc.setCity((en.getCity()));
+                        loc.setPointY((en.getLatitude()));
+                        loc.setPointX((en.getLongitude()));
+                        return loc;
+                    } else {
+                        return null;
+                    }
                 })
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+
+       locationEycaList = locationEycaList.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (!locationEycaList.isEmpty()) {
+            dto.getDataExportEyca().setPlusLocations(locationEycaList);
+        }
+
         return dto;
 
     }
-
-    private static String replaceNullStringWithBlank(String string){
-            return StringUtils.defaultString(string, "");
-        }
-
 
     public UpdateDataExportEyca convertToUpdateDataExportEyca(DataExportEycaWrapper dto) {
 
