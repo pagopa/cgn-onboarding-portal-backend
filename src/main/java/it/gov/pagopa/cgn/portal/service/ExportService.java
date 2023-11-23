@@ -97,9 +97,7 @@ public class ExportService {
             "GEO - Longitude",
             "DISCOUNT TYPE"};
 
-
-    private static final String LANDING_PAGE = "LANDINGPAGE";
-
+    
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService,
                          DataExportEycaConverter dataExportEycaConverter) {
