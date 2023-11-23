@@ -501,7 +501,7 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListWithLandingPageWithoutReferent() {
+    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -510,7 +510,7 @@ public class TestUtils {
         entity_0.setName("name_0");
         entity_0.setNameLocal("name_local_0");
         entity_0.setStreet("address0");
-        entity_0.setDiscountType("LANDINGPAGE");
+        entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
 
@@ -521,7 +521,7 @@ public class TestUtils {
         entity_1.setVendor("vendor_0");
         entity_1.setName("name_0");
         entity_1.setNameLocal("name_local_0");
-        entity_1.setDiscountType("LANDINGPAGE");
+        entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive("Y");
         entity_1.setDiscountId(7L);
         entity_1.setCountry("italy");
@@ -537,7 +537,7 @@ public class TestUtils {
         entity_2.setVendor("vendor_0");
         entity_2.setName("name_0");
         entity_2.setNameLocal("name_local_0");
-        entity_2.setDiscountType("LANDINGPAGE");
+        entity_2.setDiscountType("LANDING PAGE");
         entity_2.setLive("Y");
         entity_2.setDiscountId(7L);
         entity_2.setCity("city");
@@ -553,7 +553,7 @@ public class TestUtils {
         entity_3.setVendor("vendor_0");
         entity_3.setName("name_0");
         entity_3.setNameLocal("name_local_0");
-        entity_3.setDiscountType("LANDINGPAGE");
+        entity_3.setDiscountType("LANDING PAGE");
         entity_3.setLive("Y");
         entity_3.setDiscountId(7L);
         entity_3.setCountry("italy");
@@ -568,7 +568,7 @@ public class TestUtils {
         entity_4.setVendor("vendor_0");
         entity_4.setName("name_0");
         entity_4.setNameLocal("name_local_0");
-        entity_4.setDiscountType("LANDINGPAGE");
+        entity_4.setDiscountType("LANDING PAGE");
         entity_4.setLive("Y");
         entity_4.setDiscountId(7L);
         entity_4.setCountry("italy");
@@ -583,7 +583,7 @@ public class TestUtils {
         entity_5.setVendor("vendor_0");
         entity_5.setName("name_0");
         entity_5.setNameLocal("name_local_0");
-        entity_5.setDiscountType("LANDINGPAGE");
+        entity_5.setDiscountType("LANDING PAGE");
         entity_5.setLive("Y");
         entity_5.setDiscountId(7L);
         entity_5.setCountry("italy");
@@ -592,69 +592,128 @@ public class TestUtils {
         entity_5.setLongitude("12");
         entity_5.setTags("tag1, tag2");
 
-        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5);
-    }
+        EycaDataExportViewEntity entity_6 = new EycaDataExportViewEntity();
+        entity_6.setId(1L);
+        entity_6.setCategories("products");
+        entity_6.setProfileId(1L);
+        entity_6.setVendor("vendor_0");
+        entity_6.setName("name_0");
+        entity_6.setNameLocal("name_local_0");
+        entity_6.setStreet("address0");
+        entity_6.setDiscountType("mode0");
+        entity_6.setDiscountId(7L);
+        entity_6.setLive(null);
+        entity_6.setEndDate(LocalDate.now().minusDays(4));
+
+        EycaDataExportViewEntity entity_7 = new EycaDataExportViewEntity();
+        entity_7.setId(2L);
+        entity_7.setCategories("products");
+        entity_7.setProfileId(1L);
+        entity_7.setVendor("vendor_0");
+        entity_7.setName("name_0");
+        entity_7.setNameLocal("name_local_0");
+        entity_7.setStreet("address0");
+        entity_7.setDiscountType("mode0");
+        entity_7.setLive("N");
+        entity_7.setDiscountId(7L);
+        entity_7.setEndDate(LocalDate.now().minusDays(2));
+
+        EycaDataExportViewEntity entity_8 = new EycaDataExportViewEntity();
+        entity_8.setId(1L);
+        entity_8.setCategories("products");
+        entity_8.setProfileId(1L);
+        entity_8.setVendor("vendor_0");
+        entity_8.setName("name_0");
+        entity_8.setNameLocal("name_local_0");
+        entity_8.setStreet("address0");
+        entity_8.setDiscountType("LANDING PAGE");
+        entity_8.setLive("y");
+        entity_8.setDiscountId(7L);
+        entity_8.setEycaUpdateId("655464565");
+
+        EycaDataExportViewEntity entity_9 = new EycaDataExportViewEntity();
+        entity_9.setId(1L);
+        entity_9.setCategories("products");
+        entity_9.setProfileId(1L);
+        entity_9.setVendor("vendor_1");
+        entity_9.setName("name_1");
+        entity_9.setNameLocal("name_local_1");
+        entity_9.setStreet("address1");
+        entity_9.setDiscountType("LANDING PAGE");
+        entity_9.setLive("N");
+        entity_9.setDiscountId(3L);
+        entity_9.setEycaUpdateId("650054665");
+        entity_9.setEndDate(LocalDate.now().minusDays(4));
+
+        EycaDataExportViewEntity entity_10 = new EycaDataExportViewEntity();
+
+        entity_10.setId(1L);
+        entity_10.setCategories("products");
+        entity_10.setProfileId(1L);
+        entity_10.setVendor("vendor_2");
+        entity_10.setName("name_2");
+        entity_10.setNameLocal("name_local_2");
+        entity_10.setStreet("address2");
+        entity_10.setDiscountType("LANDING PAGE");
+        entity_10.setLive("N");
+        entity_10.setDiscountId(4L);
+        entity_10.setEycaUpdateId("6551114565");
+        entity_10.setEndDate(LocalDate.now());
+
+        EycaDataExportViewEntity entity_11= new EycaDataExportViewEntity();
+
+        entity_11.setId(1L);
+        entity_11.setCategories("products");
+        entity_11.setProfileId(1L);
+        entity_11.setVendor("vendor_2");
+        entity_11.setName("name_2");
+        entity_11.setNameLocal("name_local_2");
+        entity_11.setStreet("address2");
+        entity_11.setDiscountType("LANDING PAGE");
+        entity_11.setLive("Y");
+        entity_11.setDiscountId(4L);
+        entity_11.setEycaUpdateId("6551114565");
+        entity_11.setEndDate(LocalDate.now().plusDays(2));
+
+        EycaDataExportViewEntity entity_12 = new EycaDataExportViewEntity();
+        entity_12.setId(1L);
+        entity_12.setCategories("products");
+        entity_12.setProfileId(1L);
+        entity_12.setVendor("vendor_0");
+        entity_12.setName("name_0");
+        entity_12.setNameLocal("name_local_0");
+        entity_12.setStreet("address0");
+        entity_12.setLive("Y");
+        entity_12.setDiscountId(7L);
+        entity_12.setEycaUpdateId("655464565");
+
+        EycaDataExportViewEntity entity_13 = new EycaDataExportViewEntity();
+        entity_13.setId(1L);
+        entity_13.setCategories("products");
+        entity_13.setProfileId(1L);
+        entity_13.setVendor("vendor_0");
+        entity_13.setName("name_0");
+        entity_13.setNameLocal("name_local_0");
+        entity_13.setStreet("address0");
+        entity_13.setLive("Y");
+        entity_13.setDiscountId(7L);
+        entity_13.setDiscountType("LIST OF STATIC CODES");
+
+        EycaDataExportViewEntity entity_14 = new EycaDataExportViewEntity();
+        entity_14.setId(1L);
+        entity_14.setCategories("products");
+        entity_14.setProfileId(1L);
+        entity_14.setVendor("vendor_0");
+        entity_14.setName("name_0");
+        entity_14.setNameLocal("name_local_0");
+        entity_14.setStreet("address0");
+        entity_14.setDiscountType("mode0");
+        entity_14.setLive("Y");
+        entity_14.setDiscountId(7L);
 
 
-    public static List<EycaDataExportViewEntity> getListWithLandingPageWithoutReferentWithEycaUpdateId() {
-        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
-        entity_0.setId(1L);
-        entity_0.setCategories("products");
-        entity_0.setProfileId(1L);
-        entity_0.setVendor("vendor_0");
-        entity_0.setName("name_0");
-        entity_0.setNameLocal("name_local_0");
-        entity_0.setStreet("address0");
-        entity_0.setDiscountType("LANDINGPAGE");
-        entity_0.setLive("y");
-        entity_0.setDiscountId(7L);
-        entity_0.setEycaUpdateId("655464565");
-
-        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
-        entity_1.setId(1L);
-        entity_1.setCategories("products");
-        entity_1.setProfileId(1L);
-        entity_1.setVendor("vendor_1");
-        entity_1.setName("name_1");
-        entity_1.setNameLocal("name_local_1");
-        entity_1.setStreet("address1");
-        entity_1.setDiscountType("LANDINGPAGE");
-        entity_1.setLive("N");
-        entity_1.setDiscountId(3L);
-        entity_1.setEycaUpdateId("650054665");
-        entity_1.setEndDate(LocalDate.now().minusDays(4));
-
-        EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
-
-        entity_2.setId(1L);
-        entity_2.setCategories("products");
-        entity_2.setProfileId(1L);
-        entity_2.setVendor("vendor_2");
-        entity_2.setName("name_2");
-        entity_2.setNameLocal("name_local_2");
-        entity_2.setStreet("address2");
-        entity_2.setDiscountType("LANDINGPAGE");
-        entity_2.setLive("N");
-        entity_2.setDiscountId(4L);
-        entity_2.setEycaUpdateId("6551114565");
-        entity_2.setEndDate(LocalDate.now());
-
-        EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
-
-        entity_3.setId(1L);
-        entity_3.setCategories("products");
-        entity_3.setProfileId(1L);
-        entity_3.setVendor("vendor_2");
-        entity_3.setName("name_2");
-        entity_3.setNameLocal("name_local_2");
-        entity_3.setStreet("address2");
-        entity_3.setDiscountType("LANDINGPAGE");
-        entity_3.setLive("Y");
-        entity_3.setDiscountId(4L);
-        entity_3.setEycaUpdateId("6551114565");
-        entity_3.setEndDate(LocalDate.now().plusDays(2));
-
-        return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
+        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
+                entity_7, entity_8, entity_9, entity_10, entity_11, entity_12);
     }
 
 

@@ -299,7 +299,9 @@ public class ExportService {
                 {  log.info("<<EYCA_LOG>><<UPDATE_exportEyca<<: " + exportEyca.toString());
 
                     ApiResponseEyca apiResponse = eycaExportService.updateDiscount(exportEyca, "json");
-                    log.info(apiResponse.toString());
+                    if (Objects.nonNull(apiResponse)){
+                        log.info(apiResponse.toString());
+                    }
                 }
         );
     }
