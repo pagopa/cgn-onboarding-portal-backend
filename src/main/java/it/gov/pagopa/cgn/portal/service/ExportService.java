@@ -218,9 +218,10 @@ public class ExportService {
         try {
             List<DataExportEycaWrapper> upsertOnEycaList = exportViewEntities.stream()
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
-                   .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
-                   .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
+                    .filter(entity -> !(entity.getDiscountType().equals(DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode())
+                            && !Objects.isNull(entity.getReferent())))
                     .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
