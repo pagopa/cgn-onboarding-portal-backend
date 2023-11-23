@@ -426,7 +426,7 @@ public class TestUtils {
         entity_0.setName("name_0");
         entity_0.setNameLocal("name_local_0");
         entity_0.setStreet("address0");
-        entity_0.setDiscountType("LANDINGPAGE");
+        entity_0.setDiscountType("LANDING PAGE");
         entity_0.setReferent(1L);
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
