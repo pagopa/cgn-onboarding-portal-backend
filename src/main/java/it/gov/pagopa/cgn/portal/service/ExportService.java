@@ -97,9 +97,7 @@ public class ExportService {
             "GEO - Longitude",
             "DISCOUNT TYPE"};
 
-
-    private static final String LANDING_PAGE = "LANDINGPAGE";
-
+    
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService,
                          DataExportEycaConverter dataExportEycaConverter) {
@@ -218,9 +216,10 @@ public class ExportService {
         try {
             List<DataExportEycaWrapper> upsertOnEycaList = exportViewEntities.stream()
                     .filter(entity -> !StringUtils.isBlank(entity.getDiscountType()))
-                   .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
+                    .filter(entity -> !listFromCommaSeparatedString.apply(eycaNotAllowedDiscountModes)
                             .contains(entity.getDiscountType()))
-                   .filter(entity -> !(entity.getDiscountType().equals(LANDING_PAGE) && !Objects.isNull(entity.getReferent())))
+                    .filter(entity -> !(entity.getDiscountType().equals(DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode())
+                            && !Objects.isNull(entity.getReferent())))
                     .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
                     .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
                     .entrySet().stream()
@@ -300,7 +299,9 @@ public class ExportService {
                 {  log.info("<<EYCA_LOG>><<UPDATE_exportEyca<<: " + exportEyca.toString());
 
                     ApiResponseEyca apiResponse = eycaExportService.updateDiscount(exportEyca, "json");
-                    log.info(apiResponse.toString());
+                    if (Objects.nonNull(apiResponse)){
+                        log.info(apiResponse.toString());
+                    }
                 }
         );
     }
