@@ -187,7 +187,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void testTest_OK(){
+    void Test_Data_Filter_OK(){
         initMockitoPreconditions();
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.tempList());
 
