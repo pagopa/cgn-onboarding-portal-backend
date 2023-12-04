@@ -14,6 +14,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
@@ -210,7 +211,23 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profile.getSecondaryReferents());
 
     }
+    @Test
+    @Transactional
+    void Create_Profile_Expect_OK(){
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2);
 
+        var agreementId = agreementEntity.getId();
+
+        CreateProfile createProfile = TestUtils.offLineProfileFromProfileEntity(profileEntity);
+
+        profileFacade.createProfile(agreementId, createProfile);
+
+        ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Profile profile = response.getBody();
+        Assertions.assertNotNull(profile.getSecondaryReferents());
+
+    }
 
 
 }

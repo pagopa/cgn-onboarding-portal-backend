@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
-import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
@@ -49,6 +47,7 @@ public class TestUtils {
     public static final String GEOLOCATION_PATH = "/geolocation-token";
 
     public static final String FAKE_ID = "FAKE_ID";
+    public static final String FAKE_ID_2 = "FAKE_ID_2";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -219,6 +218,54 @@ public class TestUtils {
 
         return updateProfile;
     }
+
+    public static CreateProfile offLineProfileFromProfileEntity(ProfileEntity profileEntity) {
+        Address address = new Address();
+        address.setFullAddress("Via unavia, n.1, 30000, Veneto");
+
+        OfflineChannel salesChannel = new OfflineChannel();
+        salesChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setAddresses(Stream.of(address).collect(Collectors.toList()));
+        salesChannel.setAllNationalAddresses(true);
+        return createProfileFromProfileEntity(profileEntity, salesChannel);
+    }
+
+
+
+    public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity,
+                                                                  SalesChannel salesChannel) {
+        CreateReferent referent = new CreateReferent();
+        referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
+        referent.setFirstName(profileEntity.getReferent().getFirstName());
+        referent.setTelephoneNumber(profileEntity.getReferent().getTelephoneNumber());
+        referent.setLastName(profileEntity.getReferent().getLastName());
+        referent.setRole(profileEntity.getReferent().getRole());
+
+        CreateProfile createProfile = new CreateProfile();
+        createProfile.setFullName("Full name");
+        createProfile.setTaxCodeOrVat("BGCMNN80V12K909Z");
+        createProfile.setDescription(profileEntity.getDescription());
+        createProfile.setDescriptionEn(profileEntity.getDescriptionEn());
+        createProfile.setDescriptionDe(profileEntity.getDescriptionDe());
+        createProfile.setSalesChannel(salesChannel);
+        createProfile.setName(profileEntity.getName());
+        createProfile.setNameEn(profileEntity.getNameEn());
+        createProfile.setNameDe(profileEntity.getNameDe());
+        createProfile.setLegalOffice(profileEntity.getLegalOffice());
+        createProfile.setReferent(referent);
+        createProfile.setPecAddress(profileEntity.getPecAddress());
+        createProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
+        createProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
+        createProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
+        createProfile.setSupportType(SupportType.EMAILADDRESS);
+        createProfile.setSupportValue("an.email@domain.com");
+        createProfile.setSecondaryReferents(createCreateReferentList());
+
+        return createProfile;
+    }
+
+
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
@@ -801,6 +848,25 @@ public class TestUtils {
         updateReferent_1.setRole("ROLE");
 
         return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
+
+    }
+
+    public static List<CreateReferent> createCreateReferentList(){
+        CreateReferent createReferent_0 = new CreateReferent();
+        createReferent_0.setEmailAddress("mail_a.mail@mail.com");
+        createReferent_0.setFirstName("FIRSTNAME_A");
+        createReferent_0.setLastName("LASTNAME_A");
+        createReferent_0.setTelephoneNumber("54654654");
+        createReferent_0.setRole("ROLE");
+
+        CreateReferent createReferent_1 = new CreateReferent();
+        createReferent_1.setEmailAddress("mail_b.mail@mail.com");
+        createReferent_1.setFirstName("FIRSTNAME_B");
+        createReferent_1.setLastName("LASTNAME_B");
+        createReferent_1.setTelephoneNumber("54654654");
+        createReferent_1.setRole("ROLE");
+
+        return new ArrayList<>(Arrays.asList(createReferent_0, createReferent_1));
 
     }
 
