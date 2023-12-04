@@ -229,6 +229,10 @@ public class ExportService {
             if (upsertOnEycaList.isEmpty()){
                 log.info("List to be sent to EYCA is empty");
                 return ResponseEntity.status(HttpStatus.OK).build();
+            } else {
+                upsertOnEycaList.forEach(dataExportEycaWrapper -> log.info(
+                        "<<EYCA_LOG>><<DataExportEycaWrapper<<: " +
+                                dataExportEycaWrapper.toString()));
             }
 
             createNewDiscountsOnEyca(upsertOnEycaList);

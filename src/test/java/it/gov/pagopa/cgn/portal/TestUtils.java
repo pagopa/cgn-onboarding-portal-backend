@@ -548,6 +548,41 @@ public class TestUtils {
     }
 
 
+    public static List<EycaDataExportViewEntity> tempList() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(40L);
+        entity_0.setCategories("SV");
+        entity_0.setProfileId(134L);
+        entity_0.setDiscountId(591L);
+        entity_0.setReferent(134L);
+        entity_0.setEycaUpdateId(null);
+        entity_0.setVendor("Dipartimento per le Politiche giovanili e il Servizio civile universale");
+        entity_0.setName("-");
+        entity_0.setNameLocal("OpportunitÃ  di Stage con Milano Premier Padel P1");
+        entity_0.setText("- - - - To access the discount, show your EYCA card at the point of sale.");
+        entity_0.setTextLocal("Durante l'evento,allo stand del Ministro per lo Sport e i Giovani,Ã¨ possibile presentare il proprio CV per uno stage di 6 mesi nell'organizzazione di eventi sportivi internazionali.E' previsto un rimborso spese mensile di â‚¬400 per 20 ore a settimana. - Necessaria l'iscrizione a un corso di laurea specialistica,master o dottorato,oltre a un eccellente livello di inglese. Requisiti e ulteriori informazioni al link. - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+        entity_0.setStartDate(LocalDate.of(2023, 11, 29));
+        entity_0.setEndDate(LocalDate.of(2023, 12, 10));
+        entity_0.setEmail("");
+        entity_0.setPhone("");
+        entity_0.setWeb(null);
+        entity_0.setTags("");
+        entity_0.setImage("https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+        entity_0.setLocationLocalId("");
+        entity_0.setStreet(null);
+        entity_0.setCity("");
+        entity_0.setZip("");
+        entity_0.setCountry("");
+        entity_0.setRegion("");
+        entity_0.setLongitude("");
+        entity_0.setLatitude("");
+        entity_0.setDiscountType("SHOP");
+        entity_0.setLive("Y");
+
+        return List.of(entity_0);
+    }
+
+
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
