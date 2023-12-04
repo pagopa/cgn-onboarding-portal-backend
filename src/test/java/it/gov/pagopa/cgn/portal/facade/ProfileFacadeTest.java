@@ -214,12 +214,13 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     @Test
     @Transactional
     void Get_Profiddle_Expect_OK(){
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2);
+
         var agreementId = agreementEntity.getId();
 
-        CreateProfile createProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
-                DiscountCodeType.STATIC);
+        CreateProfile createProfile = TestUtils.offLineProfileFromProfileEntity(profileEntity);
 
-        profileFacade.createProfile(agreementId, updateProfile);
+        profileFacade.createProfile(agreementId, createProfile);
 
         ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

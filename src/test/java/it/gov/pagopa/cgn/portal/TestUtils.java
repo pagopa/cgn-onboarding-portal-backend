@@ -47,6 +47,7 @@ public class TestUtils {
     public static final String GEOLOCATION_PATH = "/geolocation-token";
 
     public static final String FAKE_ID = "FAKE_ID";
+    public static final String FAKE_ID_2 = "FAKE_ID_2";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -176,17 +177,6 @@ public class TestUtils {
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
     }
 
-
-    public static CreateProfile onlineProfileFromProfileEntity(ProfileEntity profileEntity,
-                                                                        DiscountCodeType discountCodeType) {
-        OnlineChannel salesChannel = new OnlineChannel();
-        salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
-        salesChannel.setWebsiteUrl("anurl.com");
-        salesChannel.setDiscountCodeType(discountCodeType);
-        return updatableProfileFromProfileEntity(profileEntity, salesChannel);
-    }
-
-
     public static UpdateProfile updatableOfflineProfileFromProfileEntity(ProfileEntity profileEntity) {
         Address address = new Address();
         address.setFullAddress("Via unavia, n.1, 30000, Veneto");
@@ -229,7 +219,21 @@ public class TestUtils {
         return updateProfile;
     }
 
-    public static CreateProfile updatableProfssileFromProfileEntity(ProfileEntity profileEntity,
+    public static CreateProfile offLineProfileFromProfileEntity(ProfileEntity profileEntity) {
+        Address address = new Address();
+        address.setFullAddress("Via unavia, n.1, 30000, Veneto");
+
+        OfflineChannel salesChannel = new OfflineChannel();
+        salesChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setAddresses(Stream.of(address).collect(Collectors.toList()));
+        salesChannel.setAllNationalAddresses(true);
+        return createProfileFromProfileEntity(profileEntity, salesChannel);
+    }
+
+
+
+    public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity,
                                                                   SalesChannel salesChannel) {
         CreateReferent referent = new CreateReferent();
         referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
@@ -239,6 +243,8 @@ public class TestUtils {
         referent.setRole(profileEntity.getReferent().getRole());
 
         CreateProfile createProfile = new CreateProfile();
+        createProfile.setFullName("Full name");
+        createProfile.setTaxCodeOrVat("BGCMNN80V12K909Z");
         createProfile.setDescription(profileEntity.getDescription());
         createProfile.setDescriptionEn(profileEntity.getDescriptionEn());
         createProfile.setDescriptionDe(profileEntity.getDescriptionDe());
@@ -254,7 +260,7 @@ public class TestUtils {
         createProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
         createProfile.setSupportType(SupportType.EMAILADDRESS);
         createProfile.setSupportValue("an.email@domain.com");
-        createProfile.setSecondaryReferents(createUpdateReferentList());
+        createProfile.setSecondaryReferents(createCreateReferentList());
 
         return createProfile;
     }
@@ -345,7 +351,7 @@ public class TestUtils {
         profileDto.setTelephoneNumber("12345678");
         profileDto.setSupportType(SupportType.PHONENUMBER);
         profileDto.setSupportValue("00000000");
-        CreateReferent updateReferent = new UpdateReferent();
+        UpdateReferent updateReferent = new UpdateReferent();
         updateReferent.setFirstName("referent_first_name");
         updateReferent.setLastName("referent_last_name");
         updateReferent.setEmailAddress("referent.profile@pagopa.it");
