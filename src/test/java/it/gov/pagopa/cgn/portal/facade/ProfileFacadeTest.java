@@ -213,7 +213,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     }
     @Test
     @Transactional
-    void Get_Profiddle_Expect_OK(){
+    void Create_Profile_Expect_OK(){
         AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2);
 
         var agreementId = agreementEntity.getId();
