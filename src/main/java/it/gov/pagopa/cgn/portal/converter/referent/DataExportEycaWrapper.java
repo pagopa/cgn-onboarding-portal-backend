@@ -26,4 +26,12 @@ public class DataExportEycaWrapper {
         return this.dataExportEyca;
     }
 
+    @Override
+    public String toString() {
+        return "DataExportEycaWrapper{" +
+                "discountID=" + discountID +
+                ", eycaUpdateId='" + eycaUpdateId + '\'' +
+                ", dataExportEyca=" + dataExportEyca +
+                '}';
+    }
 }
