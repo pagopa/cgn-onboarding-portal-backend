@@ -12,8 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
-import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
@@ -178,6 +176,17 @@ public class TestUtils {
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
     }
 
+
+    public static CreateProfile onlineProfileFromProfileEntity(ProfileEntity profileEntity,
+                                                                        DiscountCodeType discountCodeType) {
+        OnlineChannel salesChannel = new OnlineChannel();
+        salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setDiscountCodeType(discountCodeType);
+        return updatableProfileFromProfileEntity(profileEntity, salesChannel);
+    }
+
+
     public static UpdateProfile updatableOfflineProfileFromProfileEntity(ProfileEntity profileEntity) {
         Address address = new Address();
         address.setFullAddress("Via unavia, n.1, 30000, Veneto");
@@ -219,6 +228,38 @@ public class TestUtils {
 
         return updateProfile;
     }
+
+    public static CreateProfile updatableProfssileFromProfileEntity(ProfileEntity profileEntity,
+                                                                  SalesChannel salesChannel) {
+        CreateReferent referent = new CreateReferent();
+        referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
+        referent.setFirstName(profileEntity.getReferent().getFirstName());
+        referent.setTelephoneNumber(profileEntity.getReferent().getTelephoneNumber());
+        referent.setLastName(profileEntity.getReferent().getLastName());
+        referent.setRole(profileEntity.getReferent().getRole());
+
+        CreateProfile createProfile = new CreateProfile();
+        createProfile.setDescription(profileEntity.getDescription());
+        createProfile.setDescriptionEn(profileEntity.getDescriptionEn());
+        createProfile.setDescriptionDe(profileEntity.getDescriptionDe());
+        createProfile.setSalesChannel(salesChannel);
+        createProfile.setName(profileEntity.getName());
+        createProfile.setNameEn(profileEntity.getNameEn());
+        createProfile.setNameDe(profileEntity.getNameDe());
+        createProfile.setLegalOffice(profileEntity.getLegalOffice());
+        createProfile.setReferent(referent);
+        createProfile.setPecAddress(profileEntity.getPecAddress());
+        createProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
+        createProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
+        createProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
+        createProfile.setSupportType(SupportType.EMAILADDRESS);
+        createProfile.setSupportValue("an.email@domain.com");
+        createProfile.setSecondaryReferents(createUpdateReferentList());
+
+        return createProfile;
+    }
+
+
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
@@ -304,7 +345,7 @@ public class TestUtils {
         profileDto.setTelephoneNumber("12345678");
         profileDto.setSupportType(SupportType.PHONENUMBER);
         profileDto.setSupportValue("00000000");
-        UpdateReferent updateReferent = new UpdateReferent();
+        CreateReferent updateReferent = new UpdateReferent();
         updateReferent.setFirstName("referent_first_name");
         updateReferent.setLastName("referent_last_name");
         updateReferent.setEmailAddress("referent.profile@pagopa.it");
@@ -801,6 +842,25 @@ public class TestUtils {
         updateReferent_1.setRole("ROLE");
 
         return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
+
+    }
+
+    public static List<CreateReferent> createCreateReferentList(){
+        CreateReferent createReferent_0 = new CreateReferent();
+        createReferent_0.setEmailAddress("mail_a.mail@mail.com");
+        createReferent_0.setFirstName("FIRSTNAME_A");
+        createReferent_0.setLastName("LASTNAME_A");
+        createReferent_0.setTelephoneNumber("54654654");
+        createReferent_0.setRole("ROLE");
+
+        CreateReferent createReferent_1 = new CreateReferent();
+        createReferent_1.setEmailAddress("mail_b.mail@mail.com");
+        createReferent_1.setFirstName("FIRSTNAME_B");
+        createReferent_1.setLastName("LASTNAME_B");
+        createReferent_1.setTelephoneNumber("54654654");
+        createReferent_1.setRole("ROLE");
+
+        return new ArrayList<>(Arrays.asList(createReferent_0, createReferent_1));
 
     }
 
