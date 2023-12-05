@@ -716,6 +716,9 @@ definitions:
         $ref: '#/definitions/Discounts'
       documents:
         $ref: '#/definitions/Documents'
+      entityType:
+        $ref: '#/definitions/EntityType'
+
 
   PendingAgreement:
     allOf:
@@ -758,6 +761,8 @@ definitions:
       testPending:
         type: boolean
         default: false
+      entityType:
+        $ref: '#/definitions/EntityType'
 
   ApprovedAgreementDetail:
     type: object
@@ -782,6 +787,12 @@ definitions:
       - AssignedAgreement
       - ApprovedAgreement
       - RejectedAgreement
+
+  EntityType:
+    type: string
+    enum:
+      - Private
+      - PublicAdministration
 
   RefuseAgreement:
     type: object
@@ -897,6 +908,8 @@ definitions:
         type: string
         minLength: 5
         maxLength: 500
+      entityType:
+        $ref: '#/definitions/EntityType'
 
   Referent:
     type: object

@@ -260,7 +260,7 @@ public class ExportService {
     private void createNewDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList){
         eycaExportService.authenticateOnEyca();
 
-        log.info("creeting new discount on EYCA");
+        log.info("creating new discount on EYCA");
 
         List<DataExportEycaWrapper> createList = exportEycaList.stream().
                 filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());

@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -118,6 +119,7 @@ public class AgreementService extends AgreementServiceLight {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
+
         return agreementRepository.save(agreementEntity);
     }
 
