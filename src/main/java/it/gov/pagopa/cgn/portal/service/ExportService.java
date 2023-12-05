@@ -221,7 +221,7 @@ public class ExportService {
                     .filter(entity -> !(entity.getDiscountType().equals(DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode())
                             && !Objects.isNull(entity.getReferent())))
                     .filter(entity -> !StringUtils.isBlank(entity.getLive()) && entity.getLive().equals("Y"))
-                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
+                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getDiscountId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
@@ -229,10 +229,6 @@ public class ExportService {
             if (upsertOnEycaList.isEmpty()){
                 log.info("List to be sent to EYCA is empty");
                 return ResponseEntity.status(HttpStatus.OK).build();
-            } else {
-                upsertOnEycaList.forEach(dataExportEycaWrapper -> log.info(
-                        "<<EYCA_LOG>><<DataExportEycaWrapper<<: " +
-                                dataExportEycaWrapper.toString()));
             }
 
             createNewDiscountsOnEyca(upsertOnEycaList);
