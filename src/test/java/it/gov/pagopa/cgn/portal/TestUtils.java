@@ -579,7 +579,39 @@ public class TestUtils {
         entity_0.setDiscountType("SHOP");
         entity_0.setLive("Y");
 
-        return List.of(entity_0);
+
+
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(26L);
+        entity_1.setCategories("LR,SV");
+        entity_1.setProfileId(134L);
+        entity_1.setDiscountId(402L);
+        entity_1.setReferent(134L);
+        entity_1.setEycaUpdateId(null);
+        entity_1.setVendor("Dipartimento per le Politiche giovanili e il Servizio civile universale");
+        entity_1.setName("Giovani2030");
+        entity_1.setNameLocal("Giovani2030");
+        entity_1.setText("GIOVANI2030 is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
+        entity_1.setTextLocal("GIOVANI2030 Ã¨ la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+        entity_1.setStartDate(LocalDate.of(2023, 4, 17));
+        entity_1.setEndDate(LocalDate.of(2023, 12, 31));
+        entity_1.setEmail("");
+        entity_1.setPhone("");
+        entity_1.setWeb(null);
+        entity_1.setTags("");
+        entity_1.setImage("https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+        entity_1.setLocationLocalId("");
+        entity_1.setStreet(null);
+        entity_1.setCity("");
+        entity_1.setZip("");
+        entity_1.setCountry("");
+        entity_1.setRegion("");
+        entity_1.setLongitude("");
+        entity_1.setLatitude("");
+        entity_1.setDiscountType("SHOP");
+        entity_1.setLive("Y");
+
+        return  Arrays.asList(entity_0, entity_1);
     }
 
 
