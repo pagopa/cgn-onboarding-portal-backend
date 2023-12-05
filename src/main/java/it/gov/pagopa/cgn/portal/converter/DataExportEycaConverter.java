@@ -37,7 +37,7 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                 Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
                         .map(val -> {
                             if (val.equals("Y")) {
-                                if (entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
+                                if (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
                                     return 0;
                                 } else {
                                     return 1;
