@@ -17,8 +17,7 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -820,6 +819,49 @@ public class TestUtils {
         updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
         return updateDiscount;
     }
+
+
+    public static ApiResponseEyca getApiResponse(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_0(){
+        return new ApiResponseEyca();
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_1(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_2(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
 
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
