@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClientException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +89,29 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
+
+
+    @Test
+    void sendCreateEycaDiscountsWithException_OK(){
+        initMockitoPreconditions();
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
+
+        ApiResponseEyca apiResponseEyca = getApiResponse();
+
+        Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_0())).thenReturn(apiResponseEyca);
+        Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_1())).thenThrow(RestClientException.class);
+
+        Mockito.when(eycaApi.updateDiscount("json", TestUtils.getRealUpdateDataExportEyca_0())).thenReturn(apiResponseEyca);
+        Mockito.when(eycaApi.updateDiscount("json", TestUtils.getRealUpdateDataExportEyca_1())).thenThrow(RestClientException.class);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+
+
 
     @Test
     void sendCreateEycaDiscountsResponseNull_OK(){
@@ -189,7 +213,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     @Test
     void Test_Data_Filter_OK(){
         initMockitoPreconditions();
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.tempList());
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
 
         ApiResponseEyca apiResponseEyca = getApiResponse();
 

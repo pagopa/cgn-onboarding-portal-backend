@@ -17,6 +17,8 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -547,8 +549,7 @@ public class TestUtils {
         return Arrays.asList(entity_0, entity_1);
     }
 
-
-    public static List<EycaDataExportViewEntity> tempList() {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(){
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(40L);
         entity_0.setCategories("SV");
@@ -579,8 +580,11 @@ public class TestUtils {
         entity_0.setDiscountType("SHOP");
         entity_0.setLive("Y");
 
+        return entity_0;
+    }
 
 
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(){
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(26L);
         entity_1.setCategories("LR,SV");
@@ -611,7 +615,79 @@ public class TestUtils {
         entity_1.setDiscountType("SHOP");
         entity_1.setLive("Y");
 
-        return  Arrays.asList(entity_0, entity_1);
+        return entity_1;
+    }
+
+    private static EycaDataExportViewEntity getUpdatableRealEycaDataExportViewEntity_0() {
+        EycaDataExportViewEntity eycaDataExportViewEntity = getRealEycaDataExportViewEntity_0();
+        eycaDataExportViewEntity.setId(27L);
+        eycaDataExportViewEntity.setProfileId(100L);
+        eycaDataExportViewEntity.setDiscountId(599L);
+        eycaDataExportViewEntity.setReferent(100L);
+                eycaDataExportViewEntity.setEycaUpdateId("c39020231110173112734574");
+                return eycaDataExportViewEntity;
+    }
+
+
+    private static EycaDataExportViewEntity getUpdatableRealEycaDataExportViewEntity_1() {
+        EycaDataExportViewEntity eycaDataExportViewEntity = getRealEycaDataExportViewEntity_0();
+        eycaDataExportViewEntity.setId(28L);
+        eycaDataExportViewEntity.setProfileId(101L);
+        eycaDataExportViewEntity.setDiscountId(600L);
+        eycaDataExportViewEntity.setReferent(101L);
+        eycaDataExportViewEntity.setEycaUpdateId("c39020232220173112734574");
+        return eycaDataExportViewEntity;
+    }
+
+
+    private static DataExportEyca fromEycaDataExportViewEntityToDataExportEyca(EycaDataExportViewEntity eycaDataExportViewEntity){
+        DataExportEyca dataExportEyca = new DataExportEyca();
+
+        dataExportEyca.setVendor(eycaDataExportViewEntity.getVendor());
+        dataExportEyca.setName(eycaDataExportViewEntity.getName());
+        dataExportEyca.setEmail(eycaDataExportViewEntity.getEmail());
+        dataExportEyca.setLive(1);
+        dataExportEyca.setPhone(eycaDataExportViewEntity.getPhone());
+        dataExportEyca.setText(eycaDataExportViewEntity.getText());
+        dataExportEyca.setTextLocal(eycaDataExportViewEntity.getTextLocal());
+        dataExportEyca.setWeb(eycaDataExportViewEntity.getWeb());
+         return dataExportEyca;
+    }
+
+    public static DataExportEyca getRealDataExportEyca_0(){
+       return fromEycaDataExportViewEntityToDataExportEyca(getRealEycaDataExportViewEntity_0());
+    }
+
+    public static DataExportEyca getRealDataExportEyca_1(){
+        return fromEycaDataExportViewEntityToDataExportEyca(getRealEycaDataExportViewEntity_1());
+    }
+
+    private static UpdateDataExportEyca fromEycaDataExportViewEntityToUpdateDataExportEyca(EycaDataExportViewEntity eycaDataExportViewEntity){
+        UpdateDataExportEyca updateDataExportEyca = new UpdateDataExportEyca();
+
+        updateDataExportEyca.setVendor(eycaDataExportViewEntity.getVendor());
+        updateDataExportEyca.setName(eycaDataExportViewEntity.getName());
+        updateDataExportEyca.setEmail(eycaDataExportViewEntity.getEmail());
+        updateDataExportEyca.setLive(1);
+        updateDataExportEyca.setPhone(eycaDataExportViewEntity.getPhone());
+        updateDataExportEyca.setText(eycaDataExportViewEntity.getText());
+        updateDataExportEyca.setTextLocal(eycaDataExportViewEntity.getTextLocal());
+        updateDataExportEyca.setWeb(eycaDataExportViewEntity.getWeb());
+        return updateDataExportEyca;
+    }
+
+
+    public static UpdateDataExportEyca getRealUpdateDataExportEyca_0(){
+        return fromEycaDataExportViewEntityToUpdateDataExportEyca(getUpdatableRealEycaDataExportViewEntity_0());
+    }
+
+    public static UpdateDataExportEyca getRealUpdateDataExportEyca_1(){
+        return fromEycaDataExportViewEntityToUpdateDataExportEyca(getUpdatableRealEycaDataExportViewEntity_1());
+    }
+
+
+    public static List<EycaDataExportViewEntity> realDataList() {
+        return  Arrays.asList(getRealEycaDataExportViewEntity_0(), getRealEycaDataExportViewEntity_1());
     }
 
 
