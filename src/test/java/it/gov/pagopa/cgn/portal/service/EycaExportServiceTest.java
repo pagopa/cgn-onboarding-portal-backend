@@ -5,6 +5,8 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.DataExportEycaConverter;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
@@ -23,6 +25,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -34,12 +37,15 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     private ExportService exportService;
     private ConfigProperties configProperties;
 
+    private AgreementEntity agreement;
 
     @BeforeEach
     void init() {
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+
         eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
         AgreementRepository agreementRepository = Mockito.mock(AgreementRepository.class);
-        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
+        discountRepository = Mockito.mock(DiscountRepository.class);
 
         configProperties = Mockito.mock(ConfigProperties.class);
         eycaApi = Mockito.mock(EycaApi.class);
@@ -92,17 +98,19 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void sendCreateEycaDiscountsWithException_OK(){
+    void sendEycaDiscountsWithRealData_OK(){
         initMockitoPreconditions();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
+
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
+        Mockito.when(discountRepository.findById(402L)).thenReturn(Optional.of(discountEntity));
 
         ApiResponseEyca apiResponseEyca = getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_0())).thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_1())).thenThrow(RestClientException.class);
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
+       // Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_1())).thenThrow(RestClientException.class);
 
-        Mockito.when(eycaApi.updateDiscount("json", TestUtils.getRealUpdateDataExportEyca_0())).thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount("json", TestUtils.getRealUpdateDataExportEyca_1())).thenThrow(RestClientException.class);
+        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
@@ -110,6 +118,21 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     }
 
+    @Test
+    void sendEycaDiscountsWithRealDataThrowsException_OK(){
+        initMockitoPreconditions();
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
+
+        ApiResponseEyca apiResponseEyca = getApiResponse();
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenThrow(RestClientException.class);;
+        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenThrow(RestClientException.class);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
 
 
 
