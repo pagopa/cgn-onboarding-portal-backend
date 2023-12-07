@@ -102,14 +102,12 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         initMockitoPreconditions();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
 
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
-        Mockito.when(discountRepository.findById(402L)).thenReturn(Optional.of(discountEntity));
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
+        Mockito.when(discountRepository.findById(500L)).thenReturn(Optional.of(discountEntity));
 
         ApiResponseEyca apiResponseEyca = getApiResponse();
 
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
-       // Mockito.when(eycaApi.createDiscount("json", TestUtils.getRealDataExportEyca_1())).thenThrow(RestClientException.class);
-
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
@@ -121,7 +119,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     @Test
     void sendEycaDiscountsWithRealDataThrowsException_OK(){
         initMockitoPreconditions();
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
 
         ApiResponseEyca apiResponseEyca = getApiResponse();
 
@@ -236,7 +234,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     @Test
     void Test_Data_Filter_OK(){
         initMockitoPreconditions();
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.realDataList());
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
 
         ApiResponseEyca apiResponseEyca = getApiResponse();
 
