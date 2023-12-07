@@ -17,6 +17,7 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -457,9 +458,6 @@ public class TestUtils {
         DiscountProductEntity productEntity = new DiscountProductEntity();
         productEntity.setProductCategory(ProductCategoryEnum.TRAVELLING);
         productEntityList.add(productEntity);
-      //  productEntity = new DiscountProductEntity();
-      //  productEntity.setProductCategory(ProductCategoryEnum.SPORTS);
-      //  productEntityList.add(productEntity);
         productEntityList.forEach(p -> p.setDiscount(discountEntity));
         return productEntityList;
     }
@@ -482,80 +480,15 @@ public class TestUtils {
 
     }
 
-    public static List<EycaDataExportViewEntity> getListWithoutLandingPageWithReferent(){
-        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
-        entity_0.setId(1L);
-        entity_0.setCategories("products");
-        entity_0.setProfileId(1L);
-        entity_0.setVendor("vendor_0");
-        entity_0.setName("name_0");
-        entity_0.setNameLocal("name_local_0");
-        entity_0.setStreet("address0");
-        entity_0.setDiscountType("STATIC");
-        entity_0.setReferent(1L);
-        entity_0.setLive("Y");
-        entity_0.setDiscountId(7L);
 
-        return Collections.singletonList(entity_0);
-
-    }
-
-
-
-    public static List<EycaDataExportViewEntity> getListWithNotAllowedDiscounTpe() {
-        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
-        entity_0.setId(1L);
-        entity_0.setCategories("products");
-        entity_0.setProfileId(1L);
-        entity_0.setVendor("vendor_0");
-        entity_0.setName("name_0");
-        entity_0.setNameLocal("name_local_0");
-        entity_0.setStreet("address0");
-        entity_0.setDiscountType("mode0");
-        entity_0.setLive("Y");
-        entity_0.setDiscountId(7L);
-
-        return Collections.singletonList(entity_0);
-    }
-
-
-    public static List<EycaDataExportViewEntity> getListLiveEmptyOrNotY() {
-        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
-        entity_0.setId(1L);
-        entity_0.setCategories("products");
-        entity_0.setProfileId(1L);
-        entity_0.setVendor("vendor_0");
-        entity_0.setName("name_0");
-        entity_0.setNameLocal("name_local_0");
-        entity_0.setStreet("address0");
-        entity_0.setDiscountType("mode0");
-        entity_0.setDiscountId(7L);
-        entity_0.setLive(null);
-
-        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
-        entity_1.setId(2L);
-        entity_1.setCategories("products");
-        entity_1.setProfileId(1L);
-        entity_1.setVendor("vendor_0");
-        entity_1.setName("name_0");
-        entity_1.setNameLocal("name_local_0");
-        entity_1.setStreet("address0");
-        entity_1.setDiscountType("mode0");
-        entity_1.setLive("N");
-        entity_1.setDiscountId(7L);
-
-        return Arrays.asList(entity_0, entity_1);
-    }
-
-
-    public static List<EycaDataExportViewEntity> tempList() {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(Long discountId,   String eycaUpdateId){
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(40L);
         entity_0.setCategories("SV");
         entity_0.setProfileId(134L);
-        entity_0.setDiscountId(591L);
+        entity_0.setDiscountId(discountId);
         entity_0.setReferent(134L);
-        entity_0.setEycaUpdateId(null);
+        entity_0.setEycaUpdateId(eycaUpdateId);
         entity_0.setVendor("Dipartimento per le Politiche giovanili e il Servizio civile universale");
         entity_0.setName("-");
         entity_0.setNameLocal("OpportunitÃ  di Stage con Milano Premier Padel P1");
@@ -579,15 +512,18 @@ public class TestUtils {
         entity_0.setDiscountType("SHOP");
         entity_0.setLive("Y");
 
+        return entity_0;
+    }
 
 
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(Long discountId, String eycaUpdateId){
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(26L);
         entity_1.setCategories("LR,SV");
         entity_1.setProfileId(134L);
-        entity_1.setDiscountId(402L);
+        entity_1.setDiscountId(discountId);
         entity_1.setReferent(134L);
-        entity_1.setEycaUpdateId(null);
+        entity_1.setEycaUpdateId(eycaUpdateId);
         entity_1.setVendor("Dipartimento per le Politiche giovanili e il Servizio civile universale");
         entity_1.setName("Giovani2030");
         entity_1.setNameLocal("Giovani2030");
@@ -611,7 +547,13 @@ public class TestUtils {
         entity_1.setDiscountType("SHOP");
         entity_1.setLive("Y");
 
-        return  Arrays.asList(entity_0, entity_1);
+        return entity_1;
+    }
+
+
+    public static List<EycaDataExportViewEntity> getRealDataList() {
+        return  Arrays.asList(getRealEycaDataExportViewEntity_0(500L,null), getRealEycaDataExportViewEntity_1(501L,null),
+                getRealEycaDataExportViewEntity_0(502L,"c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L,"c49020232220173105078447"));
     }
 
 
@@ -878,6 +820,49 @@ public class TestUtils {
         return updateDiscount;
     }
 
+
+    public static ApiResponseEyca getApiResponse(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_0(){
+        return new ApiResponseEyca();
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_1(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+    public static ApiResponseEyca getIncompleteApiResponse_2(){
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
         documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
@@ -936,10 +921,6 @@ public class TestUtils {
         return new ArrayList<>(Arrays.asList(createReferent_0, createReferent_1));
 
     }
-
-
-    DiscountEntity discountEntity = new DiscountEntity();
-    org.testcontainers.shaded.com.google.common.base.Optional<DiscountEntity> discountEntityOptional = org.testcontainers.shaded.com.google.common.base.Optional.of(discountEntity);
 
 
     public static String getJson(Object obj) throws JsonProcessingException {
