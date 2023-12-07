@@ -7,6 +7,7 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 @Service
 public class EycaExportService {
@@ -21,7 +22,7 @@ public class EycaExportService {
         this.apiClient.setPassword(configProperties.getEycaPassword());
     }
 
-   public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) {
+   public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) throws RestClientException {
        return eycaApi.createDiscount(type, dataExportEyca);
     }
 
@@ -39,7 +40,7 @@ public class EycaExportService {
     }
 
 
-    public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type) {
+    public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type) throws RestClientException{
         return eycaApi.updateDiscount(type, updateDataExportEyca);
    }
 
