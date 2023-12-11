@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
@@ -58,7 +59,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() throws IOException {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -1089,7 +1090,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Publish_UpdateDiscountNotRelatedToAgreement_ThrowException() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
-        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement");
+        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement", EntityType.PUBLICADMINISTRATION);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)

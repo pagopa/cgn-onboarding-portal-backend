@@ -2,10 +2,12 @@ package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.annotation.CheckProfile;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Type;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;
@@ -147,6 +149,12 @@ public class ProfileEntity extends BaseEntity {
     @Size(min = 5, max = 500)
     @Column(name = "support_value", length = 500)
     private String supportValue;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "entity_type", length = 24)
+    @Type( type = "entity_type_enum" )
+    @NotNull
+    private EntityTypeEnum entityType;
 
 
     public void removeAllAddress() {

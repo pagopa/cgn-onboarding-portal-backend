@@ -571,6 +571,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/CompletedStep'
+      entityType:
+        $ref: '#/definitions/EntityType'
+
   DraftAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
@@ -638,6 +641,12 @@ definitions:
       - Website
       - PhoneNumber
 
+  EntityType:
+    type: string
+    enum:
+      - Private
+      - PublicAdministration
+
   CreateProfile:
     type: object
     required:
@@ -697,6 +706,8 @@ definitions:
         $ref: '#/definitions/SalesChannel'
       supportType:
         $ref: '#/definitions/SupportType'
+      entityType:
+        $ref: '#/definitions/EntityType'
       supportValue:
         type: string
         minLength: 5
@@ -830,6 +841,8 @@ definitions:
         $ref: '#/definitions/SalesChannel'
       supportType:
         $ref: '#/definitions/SupportType'
+      entityType:
+        $ref: '#/definitions/EntityType'
       supportValue:
         type: string
         minLength: 5

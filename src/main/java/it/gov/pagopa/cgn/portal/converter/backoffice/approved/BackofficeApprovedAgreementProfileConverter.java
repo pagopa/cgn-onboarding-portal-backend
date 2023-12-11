@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -22,10 +23,11 @@ import java.util.stream.Collectors;
 public class BackofficeApprovedAgreementProfileConverter
         extends AbstractConverter<ProfileEntity, ApprovedAgreementProfile> {
 
-    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
+   private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
     private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
+    private static final Map<EntityTypeEnum, EntityType> entityTypeMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
@@ -36,6 +38,10 @@ public class BackofficeApprovedAgreementProfileConverter
         supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
         supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
         supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
+
+        entityTypeMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
+        entityTypeMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+
     }
 
     protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
@@ -118,6 +124,8 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setSalesChannel(salesChannelToDto.apply(entity));
         dto.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
         dto.setSupportValue(entity.getSupportValue());
+        dto.setEntityType(entityTypeMap.get(entity.getEntityType()));
+
         return dto;
     };
 }

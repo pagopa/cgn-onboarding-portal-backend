@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocuments_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
         documentService.storeDocument(agreementEntity.getId(),
                 DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
@@ -75,7 +76,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
     @Test
     void UploadDocument_UploadDocumentWithValidDocumentType_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
         MockMultipartFile multipartFile = new MockMultipartFile("document", "document.pdf", "multipart/form-data", content);
@@ -90,7 +91,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
     @Test
     void UploadDocument_UploadDocumentWithInvalidDocumentType_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
         MockMultipartFile multipartFile = new MockMultipartFile("document", "document.pdf", "multipart/form-data", content);
@@ -104,7 +105,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentWithValidDocumentType_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         this.mockMvc.perform(
                 delete(TestUtils.getDocumentPath(agreementEntity.getId()) + "/" +
                         DocumentTypeEnum.AGREEMENT.getCode()))
@@ -115,7 +116,7 @@ class DocumentApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentWithInvalidDocumentType_Ok() throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         this.mockMvc.perform(
                 delete(TestUtils.getDocumentPath(agreementEntity.getId()) + "/invalidType"))
                 .andDo(log())

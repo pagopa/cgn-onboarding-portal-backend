@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         multipartFile = new MockMultipartFile("fileItem", "test-image.png", "image/png", image);
 
         BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()

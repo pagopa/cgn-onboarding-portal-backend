@@ -14,13 +14,4 @@ public enum EntityTypeEnum {
     private final String code;
     private final String restRequestCode;
 
-    public static EntityTypeEnum getByRestRequestCode(String restRequestCode) {
-        for (EntityTypeEnum entityType : values()) {
-            if (entityType.restRequestCode.equals(restRequestCode)) {
-                return entityType;
-            }
-        }
-        throw new IllegalArgumentException("No enum constant for restRequestCode: " + restRequestCode);
-    }
-
 }

@@ -71,7 +71,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                                     referentFiscalCodeConverter);
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
-        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat);
+        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PUBLICADMINISTRATION);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));

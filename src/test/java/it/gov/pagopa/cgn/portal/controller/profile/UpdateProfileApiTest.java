@@ -38,7 +38,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType.PUBLICADMINISTRATION);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }

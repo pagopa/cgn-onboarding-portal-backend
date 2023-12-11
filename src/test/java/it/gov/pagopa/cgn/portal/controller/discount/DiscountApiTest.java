@@ -20,6 +20,7 @@ import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
@@ -85,7 +86,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     private MockMultipartFile multipartFile;
 
     void initTest(DiscountCodeTypeEnum discountCodeType) throws IOException {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement,
                                                                           SalesChannelEnum.ONLINE,
                                                                           discountCodeType);

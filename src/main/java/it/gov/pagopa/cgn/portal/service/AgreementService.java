@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,8 +43,23 @@ public class AgreementService extends AgreementServiceLight {
 
     private final ConfigProperties configProperties;
 
+    private static final Map<EntityType, EntityTypeEnum> serviceEntityTypeEnumMap = new EnumMap<>(EntityType.class);
+
+    static {
+        serviceEntityTypeEnumMap.put(
+                EntityType.PRIVATE, EntityTypeEnum.PRIVATE);
+        serviceEntityTypeEnumMap.put(
+                EntityType.PUBLICADMINISTRATION, EntityTypeEnum.PUBLIC_ADMINISTRATION);
+    }
+
+    public static EntityTypeEnum getEntityTypeFromEntityTypeEnum(EntityType etEnum) {
+        return Optional.ofNullable(serviceEntityTypeEnumMap.get(etEnum))
+                .orElseThrow(() ->  new InvalidRequestException("Enum mapping not found for " + etEnum.getValue()));
+
+    }
+
     @Transactional
-    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode) {
+    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
@@ -52,7 +70,7 @@ public class AgreementService extends AgreementServiceLight {
                     .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
         } else {
             userAgreement = userService.create(merchantTaxCode);
-            agreementEntity = createAgreement(userAgreement.getAgreementId());
+            agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType);
         }
         return agreementEntity;
     }
@@ -115,10 +133,11 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
-    private AgreementEntity createAgreement(String agreementId) {
+    private AgreementEntity createAgreement(String agreementId, EntityType entityType) {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
+        agreementEntity.setEntityType(serviceEntityTypeEnumMap.get(entityType));
 
         return agreementRepository.save(agreementEntity);
     }

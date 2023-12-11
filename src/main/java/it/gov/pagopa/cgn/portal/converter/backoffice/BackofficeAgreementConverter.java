@@ -2,6 +2,8 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
@@ -17,12 +19,18 @@ import java.util.function.Function;
 public class BackofficeAgreementConverter extends AbstractConverter<AgreementEntity, Agreement> {
 
     private static final Map<String, AgreementStateEnum> enumMap = new HashMap<>(4);
+    private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
+
 
     static {
         enumMap.put(AgreementState.APPROVEDAGREEMENT.getValue(), AgreementStateEnum.APPROVED);
         enumMap.put(AgreementState.PENDINGAGREEMENT.getValue(), AgreementStateEnum.PENDING);
         enumMap.put(AgreementState.REJECTEDAGREEMENT.getValue(), AgreementStateEnum.REJECTED);
         enumMap.put(AgreementState.ASSIGNEDAGREEMENT.getValue(), AgreementStateEnum.PENDING);
+        backofficeEntityTypeEnumMap.put(
+                EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
+        backofficeEntityTypeEnumMap.put(
+                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
     }
 
     private BackofficeDiscountConverter discountConverter;
@@ -69,6 +77,13 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
 
     }
 
+    public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {
+        return Optional.ofNullable(backofficeEntityTypeEnumMap.get(etEnum))
+                .orElseThrow(() -> getInvalidEnumMapping(etEnum.getCode()));
+
+    }
+
+
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;
         if (entity.getState() == AgreementStateEnum.PENDING) {
@@ -93,6 +108,7 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
             entity -> {
                 Agreement dto = toDtoWithStatusFilled.apply(entity);
                 dto.setId(entity.getId());
+                dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
                 if (entity.getRequestApprovalTime() != null) {
                     dto.setRequestDate(entity.getRequestApprovalTime().toLocalDate());
                 }

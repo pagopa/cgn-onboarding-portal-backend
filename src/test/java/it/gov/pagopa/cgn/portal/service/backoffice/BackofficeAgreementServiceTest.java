@@ -18,6 +18,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -181,7 +182,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void AssignAgreement_AssignAgreementWithStatusDraft_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
@@ -234,7 +235,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementSaleChannelBoth_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.BOTH,
-                                                                  DiscountCodeTypeEnum.API).getAgreementEntity();
+                                                                  DiscountCodeTypeEnum.API, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
@@ -248,7 +249,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementWithoutBackofficeDocuments_InvalidRequestException() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.BOTH,
-                                                                  DiscountCodeTypeEnum.API).getAgreementEntity();
+                                                                  DiscountCodeTypeEnum.API, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         final String agreementId = pendingAgreement.getId();
@@ -259,7 +260,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementSaleChannelOffline_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.OFFLINE,
-                                                                  DiscountCodeTypeEnum.STATIC).getAgreementEntity();
+                                                                  DiscountCodeTypeEnum.STATIC, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
@@ -273,7 +274,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementSaleChannelOnlineWithStaticCode_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
-                                                                  DiscountCodeTypeEnum.STATIC).getAgreementEntity();
+                                                                  DiscountCodeTypeEnum.STATIC, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
@@ -287,7 +288,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementSaleChannelOnlineWithApiCode_Ok() {
         AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
-                                                                  DiscountCodeTypeEnum.API).getAgreementEntity();
+                                                                  DiscountCodeTypeEnum.API, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
@@ -307,7 +308,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         logger.addAppender(memoryAppender);
         memoryAppender.start();
 
-        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, null).getAgreementEntity();
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE, null, true).getAgreementEntity();
         pendingAgreement.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
@@ -328,7 +329,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void ApproveAgreement_ApproveAgreementWithDraftStatus_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -364,7 +365,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
     @Test
     void RejectAgreement_RejectAgreementWithDraftStatus_ThrowException() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());

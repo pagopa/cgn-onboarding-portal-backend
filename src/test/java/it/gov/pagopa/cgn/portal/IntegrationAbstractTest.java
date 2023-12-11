@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -216,29 +217,32 @@ public class IntegrationAbstractTest {
     }
 
     protected AgreementTestObject createPendingAgreement() {
-        return createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC);
+        return createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, true);
     }
 
     protected List<AgreementTestObject> createMultiplePendingAgreement(int numberToCreate) {
         List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
         IntStream.range(0, numberToCreate)
-                 .forEach(idx -> testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE,
+                 .forEach(idx ->{
+                         boolean isPA = idx  > numberToCreate/2;
+                         testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE,
                                                                            DiscountCodeTypeEnum.STATIC,
-                                                                           idx)));
-
+                                                                           idx, isPA));
+                 });
         return testObjectList;
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
-                                                         DiscountCodeTypeEnum discountCodeType) {
-        return createPendingAgreement(salesChannel, discountCodeType, 1);
+                                                         DiscountCodeTypeEnum discountCodeType, boolean isPA) {
+        return createPendingAgreement(salesChannel, discountCodeType, 1, isPA);
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
                                                          DiscountCodeTypeEnum discountCodeType,
-                                                         int idx) {
+                                                         int idx, boolean isPA) {
+        EntityType entityType = isPA? EntityType.PUBLICADMINISTRATION : EntityType.PRIVATE;
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, entityType);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity,
                                                                           salesChannel,
@@ -278,7 +282,8 @@ public class IntegrationAbstractTest {
 
     protected AgreementTestObject createApprovedAgreement(int idx, boolean publishDiscounts, boolean expireDiscount) {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                 EntityType.PUBLICADMINISTRATION);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity.setFullName(profileEntity.getFullName() + idx);

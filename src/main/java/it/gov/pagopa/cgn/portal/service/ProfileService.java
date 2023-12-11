@@ -32,6 +32,7 @@ public class ProfileService {
             throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
         }
         profileEntity.setAgreement(agreement);
+        profileEntity.setEntityType(agreement.getEntityType());
         validateProfile(profileEntity);
         return profileRepository.save(profileEntity);
     }

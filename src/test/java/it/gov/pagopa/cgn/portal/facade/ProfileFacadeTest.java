@@ -14,6 +14,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.CreateProfile;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
@@ -54,7 +55,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                           updateProfileConverter,
                                           profileConverter,
                                           discountService);
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
         profileEntity = TestUtils.createProfileEntityWithSecondaryEntityReferentList(agreementEntity)    ;
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -214,7 +215,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     @Test
     @Transactional
     void Create_Profile_Expect_OK(){
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2);
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
 
         var agreementId = agreementEntity.getId();
 

@@ -66,10 +66,11 @@ public class BackofficeAttributeAuthorityFacade {
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
         // find agreement for this organization and apply an update consumer
-        agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
-                            .ifPresent(agreementUserEntity -> updateAgreementUserAndProfileConsumer.accept(
-                                    agreementUserEntity,
-                                    organizationWithReferents));
+
+        agreementUserService.findCurrentAgreementUser(organizationWithReferents.getOrganizationFiscalCode())
+                            .ifPresentOrElse(agreementUserEntity -> updateAgreementUserAndProfileConsumer.accept(agreementUserEntity, organizationWithReferents),
+                                    ()-> agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(),
+                                            organizationWithReferents.getEntityType()));
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
@@ -178,4 +179,9 @@ public class BackofficeAttributeAuthorityFacade {
         }
     };
 
+    /*private final Consumer<OrganizationWithReferents> createAgreementWithEntityType = organizationWithReferents -> {
+        agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(), organizationWithReferents.);
+
+    }
+*/
 }

@@ -1279,6 +1279,8 @@ definitions:
           insertedAt:
             type: string
             format: date
+          entityType:
+            $ref: '#/definitions/EntityType'
         required:
           - pec
 
