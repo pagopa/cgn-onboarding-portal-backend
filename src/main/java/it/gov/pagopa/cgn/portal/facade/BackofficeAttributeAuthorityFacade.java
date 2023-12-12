@@ -179,9 +179,4 @@ public class BackofficeAttributeAuthorityFacade {
         }
     };
 
-    /*private final Consumer<OrganizationWithReferents> createAgreementWithEntityType = organizationWithReferents -> {
-        agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(), organizationWithReferents.);
-
-    }
-*/
 }

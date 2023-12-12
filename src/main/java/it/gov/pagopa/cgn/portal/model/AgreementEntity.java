@@ -22,8 +22,8 @@ import java.util.List;
 @Entity
 @Table(name = "agreement")
 @Data
-@TypeDefs({@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class),  // postgress enum type
-@TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)})  // postgress enum type
+@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
+@TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 public class  AgreementEntity extends BaseEntity {
 
     @Id
