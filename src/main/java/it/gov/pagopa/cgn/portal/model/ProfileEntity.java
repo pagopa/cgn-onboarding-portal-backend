@@ -152,7 +152,6 @@ public class ProfileEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", length = 24)
-    @Type( type = "entity_type_enum" )
     @NotNull
     private EntityTypeEnum entityType;
 

@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -21,8 +22,8 @@ import java.util.List;
 @Entity
 @Table(name = "agreement")
 @Data
-@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
-@TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
+@TypeDefs({@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class),  // postgress enum type
+@TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)})  // postgress enum type
 public class  AgreementEntity extends BaseEntity {
 
     @Id
