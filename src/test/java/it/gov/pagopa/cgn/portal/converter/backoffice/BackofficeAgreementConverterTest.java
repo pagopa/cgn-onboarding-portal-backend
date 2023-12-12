@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreement;
@@ -75,6 +76,7 @@ public class BackofficeAgreementConverterTest {
 
         agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());
+        agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         return agreementEntity;
     }
 

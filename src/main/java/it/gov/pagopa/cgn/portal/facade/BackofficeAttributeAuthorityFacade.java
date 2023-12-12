@@ -67,7 +67,7 @@ public class BackofficeAttributeAuthorityFacade {
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
         // find agreement for this organization and apply an update consumer
 
-        agreementUserService.findCurrentAgreementUser(organizationWithReferents.getOrganizationFiscalCode())
+        agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
                             .ifPresentOrElse(agreementUserEntity -> updateAgreementUserAndProfileConsumer.accept(agreementUserEntity, organizationWithReferents),
                                     ()-> agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(),
                                             organizationWithReferents.getEntityType()));

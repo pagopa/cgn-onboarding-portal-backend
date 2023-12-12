@@ -215,7 +215,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
     @Test
     @Transactional
     void Create_Profile_Expect_OK(){
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2, EntityType.PUBLICADMINISTRATION);
 
         var agreementId = agreementEntity.getId();
 

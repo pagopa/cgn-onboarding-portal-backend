@@ -242,7 +242,7 @@ public class IntegrationAbstractTest {
                                                          int idx, boolean isPA) {
         EntityType entityType = isPA? EntityType.PUBLICADMINISTRATION : EntityType.PRIVATE;
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, entityType);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx, entityType);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity,
                                                                           salesChannel,
@@ -282,7 +282,7 @@ public class IntegrationAbstractTest {
 
     protected AgreementTestObject createApprovedAgreement(int idx, boolean publishDiscounts, boolean expireDiscount) {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID +idx,
                  EntityType.PUBLICADMINISTRATION);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
