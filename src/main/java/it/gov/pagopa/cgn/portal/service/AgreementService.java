@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -137,7 +138,7 @@ public class AgreementService extends AgreementServiceLight {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
-        agreementEntity.setEntityType(serviceEntityTypeEnumMap.get(entityType));
+        agreementEntity.setEntityType(!ObjectUtils.isEmpty(entityType)?getEntityTypeFromEntityTypeEnum(entityType):null);
 
         return agreementRepository.save(agreementEntity);
     }
