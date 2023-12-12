@@ -15,7 +15,8 @@ public class AgreementUserService {
     private final AgreementUserRepository userRepository;
 
     public Optional<AgreementUserEntity> findCurrentAgreementUser(String merchantTaxCode) {
-        return userRepository.findById(merchantTaxCode);
+        Optional<AgreementUserEntity> result = userRepository.findById(merchantTaxCode);
+        return result;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
