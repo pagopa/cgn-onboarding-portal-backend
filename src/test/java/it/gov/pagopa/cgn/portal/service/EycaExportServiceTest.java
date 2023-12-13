@@ -24,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClientException;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -100,7 +99,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void sendCreateEycaDiscountsPartialResponse_OK(){
+    void sendCreateEycaDiscountsPartialResponse1_OK(){
         initMockitoPreconditions();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
 
@@ -156,6 +155,25 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
+
+
+    @Test
+    void deleteEycaDiscounts_OK(){
+        initMockitoPreconditions();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
+
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
+
+        DeleteApiResponseEyca apiResponseEyca = TestUtils.getDeleteApiResponse();
+
+        Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class))).thenReturn(apiResponseEyca);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
 
     @Test
     void sendEycaDiscountsWithRealDataThrowsException_OK(){

@@ -45,5 +45,9 @@ public class EycaExportService {
    }
 
 
+    public DeleteApiResponseEyca deleteDiscount(DeleteDataExportEyca deleteDataExportEyca, String type) throws RestClientException{
+        return eycaApi.deleteDiscount(type, deleteDataExportEyca);
+    }
+
 }
 

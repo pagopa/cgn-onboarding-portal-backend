@@ -233,17 +233,18 @@ public class ExportService {
             }
 
             createNewDiscountsOnEyca(upsertOnEycaList);
-            updateOldDiscountsOnEyca(upsertOnEycaList);
+            updateDiscountsOnEyca(upsertOnEycaList);
 
             List<DataExportEycaWrapper> deleteOnEycaList = exportViewEntities.stream()
                     .filter(entity -> StringUtils.isBlank(entity.getLive()) || entity.getLive().equals("N"))
                     .filter(entity -> !entity.getEndDate().isBefore(LocalDate.now().minusDays(1)))
-                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getProfileId))
+                    .filter(entity->!StringUtils.isEmpty(entity.getEycaUpdateId()))
+                    .collect(Collectors.groupingBy(EycaDataExportViewEntity::getDiscountId))
                     .entrySet().stream()
                     .map(dataExportEycaConverter::groupedEntityToDto)
                     .collect(Collectors.toList());
 
-            updateOldDiscountsOnEyca(deleteOnEycaList);
+            deleteDiscountsOnEyca(deleteOnEycaList);
 
             log.info("sendDiscountsToEyca end success");
 
@@ -294,7 +295,7 @@ public class ExportService {
     }
 
 
-    private void updateOldDiscountsOnEyca (List<DataExportEycaWrapper> exportEycaList) {
+    private void updateDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList) {
         eycaExportService.authenticateOnEyca();
         log.info("updating old discount on EYCA");
         List<UpdateDataExportEyca> updateList = exportEycaList.stream()
@@ -316,6 +317,30 @@ public class ExportService {
                 }
         );
     }
+
+
+    private void deleteDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList) {
+        eycaExportService.authenticateOnEyca();
+        log.info("deleting discount on EYCA");
+        List<DeleteDataExportEyca> deleteList = exportEycaList.stream()
+                .map(dataExportEycaConverter::convertToDeleteDataExportEyca).collect(Collectors.toList());
+
+        deleteList.forEach(exportEyca ->
+                {  log.info("<<EYCA_LOG>><<DELETE_exportEyca<<: " + exportEyca.toString());
+                    DeleteApiResponseEyca apiResponse = null;
+                    try {
+                        apiResponse = eycaExportService.deleteDiscount(exportEyca, "json");
+                    }  catch (RestClientException rce) {
+                        log.info("<<EYCA_LOG>><<eycaApi.deleteDiscount Exception>>: " + rce.getMessage());
+                    }
+
+                    if (Objects.nonNull(apiResponse)){
+                        log.info(apiResponse.toString());
+                    }
+                }
+        );
+    }
+
 
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>

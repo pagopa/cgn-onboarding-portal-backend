@@ -601,7 +601,6 @@ public class TestUtils {
         entity_2.setLatitude("48");
         entity_2.setLongitude("12");
 
-
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(1L);
         entity_3.setCategories("products");
@@ -773,7 +772,49 @@ public class TestUtils {
     }
 
 
-    public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
+
+    public static List<EycaDataExportViewEntity> getTobeDeletedEycaDataExportViewEntityList() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("N");
+        entity_0.setDiscountId(6L);
+
+        EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
+        entity_1.setId(2L);
+        entity_1.setCategories("products");
+        entity_1.setProfileId(1L);
+        entity_1.setVendor("vendor_0");
+        entity_1.setName("name_0");
+        entity_1.setNameLocal("name_local_0");
+        entity_1.setDiscountType("LANDING PAGE");
+        entity_1.setLive(null);
+        entity_1.setEndDate(LocalDate.now().minusDays(3));
+        entity_1.setDiscountId(7L);
+
+        EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
+        entity_2.setId(1L);
+        entity_2.setCategories("products");
+        entity_2.setProfileId(1L);
+        entity_2.setVendor("vendor_0");
+        entity_2.setName("name_0");
+        entity_2.setNameLocal("name_local_0");
+        entity_2.setDiscountType("LANDING PAGE");
+        entity_2.setLive("N");
+        entity_2.setEndDate(LocalDate.now().minusDays(2));
+        entity_2.setDiscountId(8L);
+
+        return  Arrays.asList(entity_0, entity_1, entity_2);
+
+    }
+
+        public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -785,8 +826,6 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
         entity_0.setEycaUpdateId("655464565");
-
-
 
         return Collections.singletonList(entity_0);
     }
@@ -858,6 +897,20 @@ public class TestUtils {
         ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
         apiResponseApiResponseEyca.setData(apiResponseDataEyca);
         apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
+
+    public static DeleteApiResponseEyca getDeleteApiResponse(){
+        DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
+
+        DeleteApiResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteApiResponseApiResponseEyca();
+       deleteApiResponseApiResponseEyca.setError(0);
+       deleteApiResponseApiResponseEyca.setCode(1);
+       deleteApiResponseApiResponseEyca.setText("DELETED");
+       deleteApiResponseApiResponseEyca.setData(null);
+       apiResponseEyca.setApiResponse(deleteApiResponseApiResponseEyca);
 
         return apiResponseEyca;
     }
