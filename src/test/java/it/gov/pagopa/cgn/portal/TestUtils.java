@@ -785,6 +785,8 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("N");
         entity_0.setDiscountId(6L);
+        entity_0.setEycaUpdateId("ce00958658596");
+        entity_0.setEndDate(LocalDate.now());
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(2L);
@@ -795,8 +797,9 @@ public class TestUtils {
         entity_1.setNameLocal("name_local_0");
         entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive(null);
-        entity_1.setEndDate(LocalDate.now().minusDays(3));
+        entity_1.setEndDate(LocalDate.now());
         entity_1.setDiscountId(7L);
+        entity_1.setEycaUpdateId("ce00957778596");
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(1L);
@@ -809,6 +812,7 @@ public class TestUtils {
         entity_2.setLive("N");
         entity_2.setEndDate(LocalDate.now().minusDays(2));
         entity_2.setDiscountId(8L);
+        entity_2.setEycaUpdateId("ce00958999596");
 
         return  Arrays.asList(entity_0, entity_1, entity_2);
 
