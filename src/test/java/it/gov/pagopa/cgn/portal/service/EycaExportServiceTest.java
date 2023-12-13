@@ -198,9 +198,8 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void deleteEycaDiscounts_OK(){
+    void sendDeleteEycaDiscounts_OK(){
         initMockitoPreconditions();
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
 
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
 

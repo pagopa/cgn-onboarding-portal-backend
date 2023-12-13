@@ -826,7 +826,7 @@ public class TestUtils {
         entity_3.setEndDate(LocalDate.now().minusDays(2));
         entity_3.setDiscountId(8L);
 
-        return  Arrays.asList(entity_0, entity_1, entity_2);
+        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3);
 
     }
 
