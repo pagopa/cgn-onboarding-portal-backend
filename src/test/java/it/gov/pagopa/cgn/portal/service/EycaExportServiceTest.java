@@ -180,10 +180,22 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         initMockitoPreconditions();
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
 
-        ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
-
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenThrow(RestClientException.class);;
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenThrow(RestClientException.class);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
+
+
+    @Test
+    void deleteEycaDiscountsThrowsException_OK(){
+        initMockitoPreconditions();
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
+
+        Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class))).thenThrow(RestClientException.class);;
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
