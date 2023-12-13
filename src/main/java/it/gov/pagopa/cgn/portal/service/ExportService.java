@@ -260,7 +260,7 @@ public class ExportService {
         log.info("creeting new discount on EYCA");
 
         List<DataExportEycaWrapper> createList = exportEycaList.stream().
-                filter(entity->entity.getEycaUpdateId()==null).collect(Collectors.toList());
+                filter(entity->StringUtils.isEmpty(entity.getEycaUpdateId())).collect(Collectors.toList());
 
         if (createList.isEmpty()) {
             log.info("List of EYCA Discounts to be created is empty");
