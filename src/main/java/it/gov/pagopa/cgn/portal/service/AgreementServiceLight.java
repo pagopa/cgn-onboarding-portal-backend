@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
@@ -49,6 +50,14 @@ public class AgreementServiceLight {
         agreement.setBackofficeAssignee(null);
         return agreementRepository.save(agreement);
     }
+
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void setEntityTYpe(AgreementEntity agreementEntity, EntityTypeEnum entityTypeEnum) {
+        agreementEntity.setEntityType(entityTypeEnum);
+        agreementRepository.save(agreementEntity);
+    }
+
 
     @Autowired
     public AgreementServiceLight(AgreementRepository agreementRepository) {

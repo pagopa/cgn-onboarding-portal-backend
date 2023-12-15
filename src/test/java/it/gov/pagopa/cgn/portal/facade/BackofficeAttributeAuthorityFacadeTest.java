@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -40,6 +41,11 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     private ProfileService profileServiceSpy;
     private AgreementEntity agreementEntity;
     private ProfileEntity profileEntity;
+    private BackofficeAgreementConverter backofficeAgreementConverter;
+    private BackofficeDiscountConverter backofficeDiscountConverter;
+    private BackofficeProfileConverter backofficeProfileConverter;
+    private BackofficeDocumentConverter backofficeDocumentConverter;
+
 
     @BeforeEach
     void init() {
@@ -57,6 +63,11 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         organizationWithReferentsAndStatusConverter = new OrganizationWithReferentsAndStatusConverter();
         organizationsConverter = new OrganizationsConverter(organizationWithReferentsAndStatusConverter);
         referentFiscalCodeConverter = new ReferentFiscalCodeConverter();
+        backofficeDiscountConverter = new BackofficeDiscountConverter();
+        backofficeProfileConverter = new BackofficeProfileConverter();
+        backofficeDocumentConverter = new BackofficeDocumentConverter();
+
+        backofficeAgreementConverter = new BackofficeAgreementConverter(backofficeDiscountConverter,backofficeDocumentConverter,backofficeProfileConverter);
 
         var organizationWithReferentsPostConverter = new OrganizationWithReferentsPostConverter();
 
@@ -68,10 +79,12 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                                     organizationWithReferentsConverter,
                                                                                     organizationWithReferentsAndStatusConverter,
                                                                                     organizationWithReferentsPostConverter,
-                                                                                    referentFiscalCodeConverter);
+                                                                                    referentFiscalCodeConverter,
+                                                                                    backofficeAgreementConverter);
+
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
-        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PUBLICADMINISTRATION);
+        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PRIVATE);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -266,7 +279,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
-                                                                    EntityType.PUBLICADMINISTRATION);
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());
@@ -292,7 +305,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
-                                                                    EntityType.PUBLICADMINISTRATION);
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());
@@ -319,7 +332,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
-                                                                    EntityType.PUBLICADMINISTRATION);
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());

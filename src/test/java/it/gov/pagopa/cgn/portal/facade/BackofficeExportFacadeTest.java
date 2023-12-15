@@ -34,7 +34,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() {
 
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
     }
 
     private void createProfile() {

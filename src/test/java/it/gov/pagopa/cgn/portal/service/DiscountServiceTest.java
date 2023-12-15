@@ -59,7 +59,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() throws IOException {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -1090,7 +1090,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Publish_UpdateDiscountNotRelatedToAgreement_ThrowException() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
-        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement", EntityType.PUBLICADMINISTRATION);
+        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement", EntityType.PRIVATE);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)

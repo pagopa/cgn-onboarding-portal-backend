@@ -150,12 +150,6 @@ public class ProfileEntity extends BaseEntity {
     @Column(name = "support_value", length = 500)
     private String supportValue;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", length = 24)
-    @NotNull
-    private EntityTypeEnum entityType;
-
-
     public void removeAllAddress() {
         this.addressList.clear();
     }

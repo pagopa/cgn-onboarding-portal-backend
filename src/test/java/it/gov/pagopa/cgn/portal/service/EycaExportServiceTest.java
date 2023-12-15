@@ -42,7 +42,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
         AgreementRepository agreementRepository = Mockito.mock(AgreementRepository.class);

@@ -275,7 +275,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void DeleteDocument_DeleteDocumentWithWrongType_BadRequest() throws Exception {
         String documentTypeDto = "Invalid";
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         this.mockMvc.perform(delete(TestUtils.getBackofficeDocumentPath(agreementEntity.getId()) +
                                     "/" +
                                     documentTypeDto)).andDo(log()).andExpect(status().isBadRequest());
@@ -284,7 +284,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocuments_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         List<DocumentEntity> documents = TestUtils.createSampleBackofficeDocumentList(agreementEntity);
         documentRepository.saveAll(documents);
 
@@ -299,7 +299,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetDocuments_GetDocumentNotFound_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         this.mockMvc.perform(get(TestUtils.getBackofficeDocumentPath(agreementEntity.getId())))
                     .andDo(log())
@@ -310,7 +310,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetBucketCode_NotFound_Ko() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         createDiscountAndApproveAgreement(agreementEntity);
 
@@ -324,7 +324,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void GetBucketCode_Found_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
 
@@ -357,7 +357,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void SetDiscountTestPassed_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
 
@@ -379,7 +379,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void SetDiscountTestPassed_NotTestPending_Ko() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
 
@@ -392,7 +392,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void SetDiscountTestFailed_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
 
@@ -418,7 +418,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
     @Test
     void SetDiscountTestFailed_NotTestPending_Ko() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
 

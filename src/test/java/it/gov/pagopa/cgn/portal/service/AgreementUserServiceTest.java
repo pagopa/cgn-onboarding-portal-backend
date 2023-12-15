@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

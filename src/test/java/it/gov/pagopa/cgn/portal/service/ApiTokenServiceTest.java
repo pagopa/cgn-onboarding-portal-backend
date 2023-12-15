@@ -40,24 +40,24 @@ public class ApiTokenServiceTest {
 
         ApiTokens expected = TestUtils.createSampleApiTokens();
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
         when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
-        ApiTokens actualTokens = apiTokenService.getTokens(TestUtils.FAKE_ID );
+        ApiTokens actualTokens = apiTokenService.getTokens(TestUtils.FAKE_ID);
 
         Assert.assertEquals(expected, actualTokens);
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
 
     @Test
     public void Get_getApiTokensWithoutProfile_ThrowsException() {
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.empty());
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.getTokens(TestUtils.FAKE_ID ));
+        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.getTokens(TestUtils.FAKE_ID));
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
     }
 
@@ -67,11 +67,11 @@ public class ApiTokenServiceTest {
         pe.setTaxCodeOrVat("sample-tax-code");
         pe.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.getTokens(TestUtils.FAKE_ID ));
+        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.getTokens(TestUtils.FAKE_ID));
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
     }
 
@@ -83,7 +83,7 @@ public class ApiTokenServiceTest {
 
         ApiTokens expected = TestUtils.createSampleApiTokens();
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
         doNothing().when(azureApimClient).regeneratePrimaryKey(eq(pe.getTaxCodeOrVat()));
         when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
@@ -91,7 +91,7 @@ public class ApiTokenServiceTest {
 
         Assert.assertEquals(expected, actualTokens);
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient).regeneratePrimaryKey(pe.getTaxCodeOrVat());
         verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
@@ -104,7 +104,7 @@ public class ApiTokenServiceTest {
 
         ApiTokens expected = TestUtils.createSampleApiTokens();
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
         doNothing().when(azureApimClient).regenerateSecondaryKey(pe.getTaxCodeOrVat());
         when(azureApimClient.getTokens(pe.getTaxCodeOrVat())).thenReturn(expected);
 
@@ -112,19 +112,19 @@ public class ApiTokenServiceTest {
 
         Assert.assertEquals(expected, actualTokens);
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient).regenerateSecondaryKey(pe.getTaxCodeOrVat());
         verify(azureApimClient).getTokens(pe.getTaxCodeOrVat());
     }
 
     @Test
     public void Get_regenerateTokensWithoutProfile_ThrowsException() {
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.empty());
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID,
                 ApiTokenTypeEnum.PRIMARY.toString()));
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
     }
 
@@ -134,12 +134,12 @@ public class ApiTokenServiceTest {
         pe.setTaxCodeOrVat("sample-tax-code");
         pe.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
         Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID,
                 ApiTokenTypeEnum.PRIMARY.toString()));
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
     }
 
@@ -149,11 +149,11 @@ public class ApiTokenServiceTest {
         pe.setTaxCodeOrVat("sample-tax-code");
         pe.setDiscountCodeType(DiscountCodeTypeEnum.API);
 
-        when(profileService.getProfile(TestUtils.FAKE_ID )).thenReturn(Optional.of(pe));
+        when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
         Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID,  "wrong-token-type"));
 
-        verify(profileService).getProfile(TestUtils.FAKE_ID );
+        verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).regenerateSecondaryKey(anyString());
         verify(azureApimClient, never()).getTokens(anyString());
     }

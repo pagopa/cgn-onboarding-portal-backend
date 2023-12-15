@@ -86,7 +86,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     private MockMultipartFile multipartFile;
 
     void initTest(DiscountCodeTypeEnum discountCodeType) throws IOException {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement,
                                                                           SalesChannelEnum.ONLINE,
                                                                           discountCodeType);

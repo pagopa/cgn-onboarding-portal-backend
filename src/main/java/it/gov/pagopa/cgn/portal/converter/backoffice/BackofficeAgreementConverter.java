@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
@@ -82,6 +83,14 @@ public class BackofficeAgreementConverter extends AbstractConverter<AgreementEnt
 
     }
 
+    public EntityTypeEnum toEntityEntityTypeEnum(EntityType entityType) {
+        return backofficeEntityTypeEnumMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().equals(entityType))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow();
+    }
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;

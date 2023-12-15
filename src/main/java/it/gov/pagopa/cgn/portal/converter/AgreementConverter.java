@@ -2,11 +2,9 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgnonboardingportal.model.Agreement;
-import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
-import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
-import it.gov.pagopa.cgnonboardingportal.model.RejectedAgreement;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -19,6 +17,8 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
 
 
     private static final Map<AgreementStateEnum, AgreementState> enumMap = new EnumMap<>(AgreementStateEnum.class);
+
+
     static {
         enumMap.put(AgreementStateEnum.DRAFT, AgreementState.DRAFTAGREEMENT);
         enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDINGAGREEMENT);
@@ -102,3 +102,7 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
             };
 
 }
+
+
+
+

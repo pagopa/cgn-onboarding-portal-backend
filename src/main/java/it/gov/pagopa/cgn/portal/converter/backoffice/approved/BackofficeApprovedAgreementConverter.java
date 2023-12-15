@@ -1,10 +1,8 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreements;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
@@ -50,7 +48,7 @@ public class BackofficeApprovedAgreementConverter
         dto.setAgreementStartDate(entity.getStartDate());
         dto.setPublishedDiscounts(entity.getPublishedDiscounts());
         dto.setTestPending(entity.getTestPending());
-        dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getProfile().getEntityType()));
+        dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
         return dto;
     };
 

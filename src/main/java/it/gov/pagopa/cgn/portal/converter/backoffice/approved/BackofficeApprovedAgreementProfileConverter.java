@@ -124,7 +124,7 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setSalesChannel(salesChannelToDto.apply(entity));
         dto.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
         dto.setSupportValue(entity.getSupportValue());
-        dto.setEntityType(entityTypeMap.get(entity.getEntityType()));
+        dto.setEntityType(entityTypeMap.get(entity.getAgreement().getEntityType()));
 
         return dto;
     };

@@ -31,8 +31,17 @@ public class AgreementFacade {
         AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(merchantTaxCode, null);
         Agreement dto = agreementConverter.toDto(agreementEntity);
         dto.setCompletedSteps(getCompletedSteps(agreementEntity));
+        return ResponseEntity.ok(dto);  //NOT IMPLEMENTED
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public ResponseEntity<Agreement> getAgreement(String merchantTaxCode) {
+        AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
+        Agreement dto = agreementConverter.toDto(agreementEntity);
+        dto.setCompletedSteps(getCompletedSteps(agreementEntity));
         return ResponseEntity.ok(dto);
     }
+
 
     public ResponseEntity<Void> requestApproval(String agreementId) {
         agreementService.requestApproval(agreementId);

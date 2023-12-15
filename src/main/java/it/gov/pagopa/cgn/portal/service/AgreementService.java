@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -16,14 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,20 +40,23 @@ public class AgreementService extends AgreementServiceLight {
 
     private final EmailNotificationFacade emailNotificationFacade;
 
+    private final BackofficeAgreementConverter backofficeAgreementConverter;
+
     private final ConfigProperties configProperties;
 
-    private static final Map<EntityType, EntityTypeEnum> serviceEntityTypeEnumMap = new EnumMap<>(EntityType.class);
 
-    static {
-        serviceEntityTypeEnumMap.put(
-                EntityType.PRIVATE, EntityTypeEnum.PRIVATE);
-        serviceEntityTypeEnumMap.put(
-                EntityType.PUBLICADMINISTRATION, EntityTypeEnum.PUBLIC_ADMINISTRATION);
-    }
+    @Transactional
+    public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode){
+        AgreementUserEntity userAgreement;
 
-    public static EntityTypeEnum getEntityTypeFromEntityTypeEnum(EntityType etEnum) {
-        return Optional.ofNullable(serviceEntityTypeEnumMap.get(etEnum))
-                .orElseThrow(() ->  new InvalidRequestException("Enum mapping not found for " + etEnum.getValue()));
+        Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
+        if (userAgreementOpt.isPresent()) {
+            userAgreement = userAgreementOpt.get();
+            return agreementRepository.findById(userAgreement.getAgreementId())
+                    .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
+        }  else {
+            throw new InvalidRequestException("No Agreement User found with tax code " + merchantTaxCode);
+        }
 
     }
 
@@ -138,7 +139,8 @@ public class AgreementService extends AgreementServiceLight {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
-        agreementEntity.setEntityType(!ObjectUtils.isEmpty(entityType)?getEntityTypeFromEntityTypeEnum(entityType):null);
+        EntityTypeEnum entityTypeEnum = backofficeAgreementConverter.toEntityEntityTypeEnum(entityType);
+        agreementEntity.setEntityType(entityTypeEnum);
 
         return agreementRepository.save(agreementEntity);
     }
@@ -148,7 +150,7 @@ public class AgreementService extends AgreementServiceLight {
                             ProfileService profileService, DiscountService discountService,
                             DocumentService documentService, AzureStorage azureStorage,
                             EmailNotificationFacade emailNotificationFacade,
-                            ConfigProperties configProperties) {
+                            BackofficeAgreementConverter backofficeAgreementConverter, ConfigProperties configProperties) {
         super(agreementRepository);
         this.userService = userService;
         this.profileService = profileService;
@@ -156,6 +158,7 @@ public class AgreementService extends AgreementServiceLight {
         this.documentService = documentService;
         this.azureStorage = azureStorage;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.backofficeAgreementConverter = backofficeAgreementConverter;
         this.configProperties = configProperties;
     }
 

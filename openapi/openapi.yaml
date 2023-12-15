@@ -59,6 +59,21 @@ paths:
         403:
           $ref: '#/responses/Forbidden'
 
+    get:
+      tags:
+        - agreement
+      summary: Get an agreement
+      operationId: getAgreement
+      responses:
+        200:
+          description: Agreement
+          schema:
+            $ref: '#/definitions/Agreement'
+        403:
+          $ref: '#/responses/Forbidden'
+        404:
+          $ref: '#/responses/NotFound'
+
   /agreements/{agreementId}/images:
     post:
       tags:
@@ -706,8 +721,6 @@ definitions:
         $ref: '#/definitions/SalesChannel'
       supportType:
         $ref: '#/definitions/SupportType'
-      entityType:
-        $ref: '#/definitions/EntityType'
       supportValue:
         type: string
         minLength: 5
@@ -841,8 +854,6 @@ definitions:
         $ref: '#/definitions/SalesChannel'
       supportType:
         $ref: '#/definitions/SupportType'
-      entityType:
-        $ref: '#/definitions/EntityType'
       supportValue:
         type: string
         minLength: 5

@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -51,10 +52,17 @@ public class ApprovedAgreementEntity {
     @Column(name = "test_pending")
     private Boolean testPending;
 
+    @Column(name = "entity_type")
+    @Enumerated(EnumType.STRING)
+    @Type(type = "entity_type_enum")
+    private EntityTypeEnum entityType;
+
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)
     private ProfileEntity profile;
+
+
 
 }
 

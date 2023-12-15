@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -32,7 +33,6 @@ public class ProfileService {
             throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
         }
         profileEntity.setAgreement(agreement);
-        profileEntity.setEntityType(agreement.getEntityType());
         validateProfile(profileEntity);
         return profileRepository.save(profileEntity);
     }

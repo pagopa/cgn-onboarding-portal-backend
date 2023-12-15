@@ -23,7 +23,8 @@ SELECT a.agreement_k,
        a.request_approval_time,
        p.full_name,
        c.published_discounts,
-       t.test_pending
+       t.test_pending,
+       a.entity_type
 FROM agreement a
          JOIN profile p ON (a.agreement_k = p.agreement_fk)
          JOIN discounts_counter c ON (a.agreement_k = c.agreement_k)

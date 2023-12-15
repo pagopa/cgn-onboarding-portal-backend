@@ -40,7 +40,7 @@ class GetProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PUBLICADMINISTRATION);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }
