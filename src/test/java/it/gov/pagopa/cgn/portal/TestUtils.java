@@ -846,11 +846,11 @@ public class TestUtils {
         entity_16.setNameLocal("name_local_0");
         entity_16.setDiscountType("LIST OF STATIC CODES");
         entity_16.setLive("Y");
-        entity_16.setDiscountId(15L);
+        entity_16.setDiscountId(16L);
 
 
         return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
-                entity_7, entity_8, entity_9, entity_10, entity_11, entity_12);
+                entity_7, entity_8, entity_9, entity_10, entity_11, entity_12, entity_13, entity_14, entity_15, entity_16);
     }
 
 
