@@ -836,6 +836,17 @@ public class TestUtils {
         entity_15.setLive("Y");
         entity_15.setDiscountId(15L);
 
+        EycaDataExportViewEntity entity_16 = new EycaDataExportViewEntity();
+        entity_16.setId(1L);
+        entity_16.setCategories("products");
+        entity_16.setEycaUpdateId("hughgt7y98565");
+        entity_16.setProfileId(1L);
+        entity_16.setVendor("vendor_0");
+        entity_16.setName("name_0");
+        entity_16.setNameLocal("name_local_0");
+        entity_16.setDiscountType("BUCKET");
+        entity_16.setLive("Y");
+        entity_16.setDiscountId(15L);
 
 
         return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
