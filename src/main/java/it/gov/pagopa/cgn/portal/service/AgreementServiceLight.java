@@ -51,14 +51,6 @@ public class AgreementServiceLight {
         return agreementRepository.save(agreement);
     }
 
-
-    @Transactional(Transactional.TxType.REQUIRED)
-    public void setEntityTYpe(AgreementEntity agreementEntity, EntityTypeEnum entityTypeEnum) {
-        agreementEntity.setEntityType(entityTypeEnum);
-        agreementRepository.save(agreementEntity);
-    }
-
-
     @Autowired
     public AgreementServiceLight(AgreementRepository agreementRepository) {
         this.agreementRepository = agreementRepository;
