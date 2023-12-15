@@ -832,7 +832,7 @@ public class TestUtils {
         entity_15.setVendor("vendor_0");
         entity_15.setName("name_0");
         entity_15.setNameLocal("name_local_0");
-        entity_15.setDiscountType("BUCKET");
+        entity_15.setDiscountType("LIST OF STATIC CODES");
         entity_15.setLive("Y");
         entity_15.setDiscountId(15L);
 
@@ -844,7 +844,7 @@ public class TestUtils {
         entity_16.setVendor("vendor_0");
         entity_16.setName("name_0");
         entity_16.setNameLocal("name_local_0");
-        entity_16.setDiscountType("BUCKET");
+        entity_16.setDiscountType("LIST OF STATIC CODES");
         entity_16.setLive("Y");
         entity_16.setDiscountId(15L);
 
