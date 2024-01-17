@@ -35,11 +35,6 @@ public class AgreementController implements AgreementsApi {
     }
 
     @Override
-    public ResponseEntity<Agreement> getAgreement() {
-        return agreementFacade.getAgreement(CGNUtils.getJwtOperatorUserId());
-    }
-
-    @Override
     public ResponseEntity<Void> requestApproval(String agreementId) {
         return agreementFacade.requestApproval(agreementId);
     }

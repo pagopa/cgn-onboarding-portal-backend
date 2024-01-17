@@ -57,7 +57,6 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
-
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
         ResponseEntity<OrganizationWithReferentsAndStatus> response
@@ -70,7 +69,6 @@ public class BackofficeAttributeAuthorityFacade {
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
         // find agreement for this organization and apply an update consumer
-
         agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
                             .ifPresentOrElse(agreementUserEntity -> updateAgreementUserProfileAndAgreement.accept(agreementUserEntity, organizationWithReferents),
                                     ()-> agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(),
@@ -105,7 +103,6 @@ public class BackofficeAttributeAuthorityFacade {
         return attributeAuthorityService.deleteReferent(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
-
     private EntityTypeEnum getEntityTypeEnumFromEntityType(EntityType entityType){
         return agreementConverter.toEntityEntityTypeEnum(entityType);
     }
@@ -126,7 +123,6 @@ public class BackofficeAttributeAuthorityFacade {
             p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
         });
-
     };
 
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus

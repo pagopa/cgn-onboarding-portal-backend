@@ -36,6 +36,7 @@ public class AgreementService extends AgreementServiceLight {
     private final DiscountService discountService;
 
     private final DocumentService documentService;
+
     private final AzureStorage azureStorage;
 
     private final EmailNotificationFacade emailNotificationFacade;
@@ -44,11 +45,9 @@ public class AgreementService extends AgreementServiceLight {
 
     private final ConfigProperties configProperties;
 
-
     @Transactional
     public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode){
         AgreementUserEntity userAgreement;
-
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
         if (userAgreementOpt.isPresent()) {
             userAgreement = userAgreementOpt.get();
@@ -141,7 +140,6 @@ public class AgreementService extends AgreementServiceLight {
         agreementEntity.setState(AgreementStateEnum.DRAFT);
         EntityTypeEnum entityTypeEnum = backofficeAgreementConverter.toEntityEntityTypeEnum(entityType);
         agreementEntity.setEntityType(entityTypeEnum);
-
         return agreementRepository.save(agreementEntity);
     }
 

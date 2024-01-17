@@ -19,8 +19,6 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
 
 
     private static final Map<AgreementStateEnum, AgreementState> enumMap = new EnumMap<>(AgreementStateEnum.class);
-
-
     static {
         enumMap.put(AgreementStateEnum.DRAFT, AgreementState.DRAFTAGREEMENT);
         enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDINGAGREEMENT);
@@ -104,7 +102,3 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
             };
 
 }
-
-
-
-

@@ -73,9 +73,9 @@ class AgreementApiTest extends IntegrationAbstractTest {
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 0);
     }
 
-//    @Test
+    @Test
     void Create_CreateAgreement_Ok() throws Exception {
-
+        this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
         this.mockMvc.perform(post(TestUtils.AGREEMENTS_CONTROLLER_PATH))
                     .andDo(log())
@@ -87,23 +87,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.completedSteps").isEmpty());
 
     }
-
-    @Test
-    void Get_CreateAgreement_Ok() throws Exception {
-
-        this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        this.mockMvc.perform(get(TestUtils.AGREEMENTS_CONTROLLER_PATH))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.imageUrl").isEmpty())
-                .andExpect(jsonPath("$.completedSteps").isEmpty());
-
-    }
-
 
     @Test
     void GetAgreement_GetAgreementWithProfile_Ok() throws Exception {

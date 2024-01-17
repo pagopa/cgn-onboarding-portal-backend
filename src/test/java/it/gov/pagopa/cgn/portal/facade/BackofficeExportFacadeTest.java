@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import com.azure.storage.blob.models.BlobContainerAccessPolicies;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -9,21 +8,16 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ApiResponseEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -33,7 +27,6 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
     }
 

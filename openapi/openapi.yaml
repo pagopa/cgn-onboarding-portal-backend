@@ -59,21 +59,6 @@ paths:
         403:
           $ref: '#/responses/Forbidden'
 
-    get:
-      tags:
-        - agreement
-      summary: Get an agreement
-      operationId: getAgreement
-      responses:
-        200:
-          description: Agreement
-          schema:
-            $ref: '#/definitions/Agreement'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
   /agreements/{agreementId}/images:
     post:
       tags:

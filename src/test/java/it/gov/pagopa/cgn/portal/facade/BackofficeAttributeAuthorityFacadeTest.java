@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -46,7 +45,6 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     private BackofficeProfileConverter backofficeProfileConverter;
     private BackofficeDocumentConverter backofficeDocumentConverter;
 
-
     @BeforeEach
     void init() {
         ProfileService profileService = new ProfileService(factory,
@@ -66,7 +64,6 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         backofficeDiscountConverter = new BackofficeDiscountConverter();
         backofficeProfileConverter = new BackofficeProfileConverter();
         backofficeDocumentConverter = new BackofficeDocumentConverter();
-
         backofficeAgreementConverter = new BackofficeAgreementConverter(backofficeDiscountConverter,backofficeDocumentConverter,backofficeProfileConverter);
 
         var organizationWithReferentsPostConverter = new OrganizationWithReferentsPostConverter();
@@ -81,7 +78,6 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                                     organizationWithReferentsPostConverter,
                                                                                     referentFiscalCodeConverter,
                                                                                     backofficeAgreementConverter);
-
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
         agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PRIVATE);

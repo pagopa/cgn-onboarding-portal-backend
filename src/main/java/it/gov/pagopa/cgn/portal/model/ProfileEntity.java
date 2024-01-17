@@ -2,12 +2,10 @@ package it.gov.pagopa.cgn.portal.model;
 
 import it.gov.pagopa.cgn.portal.annotation.CheckProfile;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.Type;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.*;

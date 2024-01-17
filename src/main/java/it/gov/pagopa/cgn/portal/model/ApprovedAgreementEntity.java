@@ -61,8 +61,5 @@ public class ApprovedAgreementEntity {
     @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)
     private ProfileEntity profile;
-
-
-
 }
 

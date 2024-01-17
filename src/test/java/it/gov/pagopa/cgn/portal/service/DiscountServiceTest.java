@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
