@@ -265,7 +265,7 @@ definitions:
         type: object
         properties:
           data:
-            type: array
+            type: object
           error:
             type: integer
             example: 0
@@ -275,6 +275,9 @@ definitions:
           text:
             type: string
             example: "OK"
+          code:
+            type: integer
+            example: 1
 
 
   DiscountItem:
