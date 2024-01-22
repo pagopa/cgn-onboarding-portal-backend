@@ -14,7 +14,7 @@
     <version>0.0.9</version>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <swagger-annotations-version>1.5.8</swagger-annotations-version>
@@ -135,7 +135,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-            <version>1.18.20</version>
+            <version>1.18.22</version>
         </dependency>
         <dependency>
             <groupId>org.thymeleaf</groupId>
@@ -416,7 +416,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
