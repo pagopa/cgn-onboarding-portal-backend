@@ -98,11 +98,11 @@ public class DataExportEycaConverter extends AbstractConverter<EycaDataExportVie
                         return null;
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
 
        locationEycaList = locationEycaList.stream()
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         if (!locationEycaList.isEmpty()) {
             dto.getDataExportEyca().setPlusLocations(locationEycaList);
