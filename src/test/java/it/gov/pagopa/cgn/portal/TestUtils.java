@@ -116,19 +116,19 @@ public class TestUtils {
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH +
-               "?sortColumn=" +
-               columnEnum.getValue() +
-               "&sortDirection=" +
-               direction.name();
+                "?sortColumn=" +
+                columnEnum.getValue() +
+                "&sortDirection=" +
+                direction.name();
     }
 
     public static String getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
         return AGREEMENT_APPROVED_CONTROLLER_PATH +
-               "?sortColumn=" +
-               columnEnum.getValue() +
-               "&sortDirection=" +
-               direction.name();
+                "?sortColumn=" +
+                columnEnum.getValue() +
+                "&sortDirection=" +
+                direction.name();
     }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
@@ -233,9 +233,8 @@ public class TestUtils {
     }
 
 
-
     public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity,
-                                                                  SalesChannel salesChannel) {
+                                                               SalesChannel salesChannel) {
         CreateReferent referent = new CreateReferent();
         referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
         referent.setFirstName(profileEntity.getReferent().getFirstName());
@@ -265,7 +264,6 @@ public class TestUtils {
 
         return createProfile;
     }
-
 
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
@@ -310,7 +308,7 @@ public class TestUtils {
         return profileEntity;
     }
 
-    public static ProfileEntity createProfileEntityWithSecondaryEntityReferentList(AgreementEntity agreementEntity){
+    public static ProfileEntity createProfileEntityWithSecondaryEntityReferentList(AgreementEntity agreementEntity) {
         ProfileEntity profileEntity = createSampleProfileEntity(agreementEntity);
         profileEntity.setSecondaryReferentList(createSampleSecondaryReferentEntityList(profileEntity));
         return profileEntity;
@@ -335,7 +333,7 @@ public class TestUtils {
         secondaryReferentEntity_1.setRole("CEO");
 
         return new ArrayList<>(Arrays.asList(secondaryReferentEntity_0, secondaryReferentEntity_1));
-        }
+    }
 
     public static UpdateProfile createSampleUpdateProfileWithCommonFields() {
         UpdateProfile profileDto = new UpdateProfile();
@@ -462,7 +460,7 @@ public class TestUtils {
         return productEntityList;
     }
 
-    public static List<EycaDataExportViewEntity> getListWIthLandingPageAndReferent(){
+    public static List<EycaDataExportViewEntity> getListWIthLandingPageAndReferent() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -476,12 +474,12 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
 
-       return Collections.singletonList(entity_0);
+        return Collections.singletonList(entity_0);
 
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(Long discountId,   String eycaUpdateId){
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(40L);
         entity_0.setCategories("SV");
@@ -516,7 +514,7 @@ public class TestUtils {
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(Long discountId, String eycaUpdateId){
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(26L);
         entity_1.setCategories("LR,SV");
@@ -552,8 +550,8 @@ public class TestUtils {
 
 
     public static List<EycaDataExportViewEntity> getRealDataList() {
-        return  Arrays.asList(getRealEycaDataExportViewEntity_0(500L,null), getRealEycaDataExportViewEntity_1(501L,null),
-                getRealEycaDataExportViewEntity_0(502L,"c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L,"c49020232220173105078447"));
+        return Arrays.asList(getRealEycaDataExportViewEntity_0(500L, null), getRealEycaDataExportViewEntity_1(501L, null),
+                getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L, "c49020232220173105078447"));
     }
 
 
@@ -715,7 +713,7 @@ public class TestUtils {
         entity_10.setEycaUpdateId("6551114565");
         entity_10.setEndDate(LocalDate.now());
 
-        EycaDataExportViewEntity entity_11= new EycaDataExportViewEntity();
+        EycaDataExportViewEntity entity_11 = new EycaDataExportViewEntity();
 
         entity_11.setId(1L);
         entity_11.setCategories("products");
@@ -790,10 +788,9 @@ public class TestUtils {
         entity_16.setDiscountId(16L);
 
 
-        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
+        return Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
                 entity_7, entity_8, entity_9, entity_10, entity_11, entity_12, entity_13, entity_14, entity_15, entity_16);
     }
-
 
 
     public static List<EycaDataExportViewEntity> getTobeDeletedEycaDataExportViewEntityList() {
@@ -849,11 +846,11 @@ public class TestUtils {
         entity_3.setEndDate(LocalDate.now().minusDays(2));
         entity_3.setDiscountId(8L);
 
-        return  Arrays.asList(entity_0, entity_1, entity_2, entity_3);
+        return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
 
     }
 
-        public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
+    public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
         entity_0.setCategories("products");
@@ -899,7 +896,7 @@ public class TestUtils {
     }
 
 
-    public static ApiResponseEyca getApiResponse(){
+    public static ApiResponseEyca getApiResponse() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
         ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
@@ -916,11 +913,11 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_0(){
+    public static ApiResponseEyca getIncompleteApiResponse_0() {
         return new ApiResponseEyca();
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_1(){
+    public static ApiResponseEyca getIncompleteApiResponse_1() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
         ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
@@ -929,7 +926,7 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_2(){
+    public static ApiResponseEyca getIncompleteApiResponse_2() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
         ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
@@ -941,15 +938,15 @@ public class TestUtils {
     }
 
 
-    public static DeleteApiResponseEyca getDeleteApiResponse(){
+    public static DeleteApiResponseEyca getDeleteApiResponse() {
         DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
 
         DeleteApiResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteApiResponseApiResponseEyca();
-       deleteApiResponseApiResponseEyca.setError(0);
-       deleteApiResponseApiResponseEyca.setCode(1);
-       deleteApiResponseApiResponseEyca.setText("DELETED");
-       deleteApiResponseApiResponseEyca.setData(null);
-       apiResponseEyca.setApiResponse(deleteApiResponseApiResponseEyca);
+        deleteApiResponseApiResponseEyca.setError(0);
+        deleteApiResponseApiResponseEyca.setCode(1);
+        deleteApiResponseApiResponseEyca.setText("DELETED");
+        deleteApiResponseApiResponseEyca.setData(null);
+        apiResponseEyca.setApiResponse(deleteApiResponseApiResponseEyca);
 
         return apiResponseEyca;
     }
@@ -976,7 +973,7 @@ public class TestUtils {
         return documentEntity;
     }
 
-    public static List<UpdateReferent> createUpdateReferentList(){
+    public static List<UpdateReferent> createUpdateReferentList() {
         UpdateReferent updateReferent_0 = new UpdateReferent();
         updateReferent_0.setEmailAddress("mail_a.mail@mail.com");
         updateReferent_0.setFirstName("FIRSTNAME_A");
@@ -995,7 +992,7 @@ public class TestUtils {
 
     }
 
-    public static List<CreateReferent> createCreateReferentList(){
+    public static List<CreateReferent> createCreateReferentList() {
         CreateReferent createReferent_0 = new CreateReferent();
         createReferent_0.setEmailAddress("mail_a.mail@mail.com");
         createReferent_0.setFirstName("FIRSTNAME_A");
@@ -1039,7 +1036,6 @@ public class TestUtils {
     public static SubscriptionContract createSubscriptionContract() {
         return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
     }
-
 
 
     public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
@@ -1203,12 +1199,12 @@ public class TestUtils {
 
     public static void setOperatorAuth() {
         SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
-                                                                                               TestUtils.FAKE_ID)));
+                .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                        TestUtils.FAKE_ID)));
     }
 
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+                .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
     }
 }
