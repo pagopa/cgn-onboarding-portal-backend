@@ -571,6 +571,9 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/CompletedStep'
+      entityType:
+        $ref: '#/definitions/EntityType'
+
   DraftAgreement:
     allOf:
       - $ref: '#/definitions/Agreement'
@@ -637,6 +640,12 @@ definitions:
       - EmailAddress
       - Website
       - PhoneNumber
+
+  EntityType:
+    type: string
+    enum:
+      - Private
+      - PublicAdministration
 
   CreateProfile:
     type: object

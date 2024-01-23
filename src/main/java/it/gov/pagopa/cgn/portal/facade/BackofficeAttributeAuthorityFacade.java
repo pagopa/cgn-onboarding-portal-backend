@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
@@ -41,6 +42,8 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
 
+    private final BackofficeAgreementConverter agreementConverter;
+
     public ResponseEntity<Organizations> getOrganizations(String searchQuery,
                                                           Integer page,
                                                           Integer pageSize,
@@ -67,9 +70,9 @@ public class BackofficeAttributeAuthorityFacade {
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
         // find agreement for this organization and apply an update consumer
         agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
-                            .ifPresent(agreementUserEntity -> updateAgreementUserAndProfileConsumer.accept(
-                                    agreementUserEntity,
-                                    organizationWithReferents));
+                            .ifPresentOrElse(agreementUserEntity -> updateAgreementUserProfileAndAgreement.accept(agreementUserEntity, organizationWithReferents),
+                                    ()-> agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(),
+                                            organizationWithReferents.getEntityType()));
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
@@ -100,28 +103,11 @@ public class BackofficeAttributeAuthorityFacade {
         return attributeAuthorityService.deleteReferent(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
-    @Autowired
-    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
-                                              AgreementService agreementService,
-                                              AgreementUserService agreementUserService,
-                                              ProfileService profileService,
-                                              OrganizationsConverter organizationsConverter,
-                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
-                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
-                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
-                                              ReferentFiscalCodeConverter referentFiscalCodeConverter) {
-        this.attributeAuthorityService = attributeAuthorityService;
-        this.agreementService = agreementService;
-        this.agreementUserService = agreementUserService;
-        this.profileService = profileService;
-        this.organizationsConverter = organizationsConverter;
-        this.organizationWithReferentsConverter = organizationWithReferentsConverter;
-        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
-        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
-        this.referentFiscalCodeConverter = referentFiscalCodeConverter;
+    private EntityTypeEnum getEntityTypeEnumFromEntityType(EntityType entityType){
+        return agreementConverter.toEntityEntityTypeEnum(entityType);
     }
 
-    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserAndProfileConsumer
+    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserProfileAndAgreement
             = (agreementUserEntity, organizationWithReferents) -> {
         // update AgreementUser if merchant tax code has changed
         if (!organizationWithReferents.getKeyOrganizationFiscalCode()
@@ -134,6 +120,7 @@ public class BackofficeAttributeAuthorityFacade {
         profileService.getProfile(agreementUserEntity.getAgreementId()).ifPresent(p -> {
             p.setFullName(organizationWithReferents.getOrganizationName());
             p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
+            p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
         });
     };
@@ -177,5 +164,30 @@ public class BackofficeAttributeAuthorityFacade {
             mapOrganizationsStatus.accept(response.getBody().getItems());
         }
     };
+
+
+    @Autowired
+    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
+                                              AgreementService agreementService,
+                                              AgreementUserService agreementUserService,
+                                              ProfileService profileService,
+                                              OrganizationsConverter organizationsConverter,
+                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
+                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
+                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
+                                              ReferentFiscalCodeConverter referentFiscalCodeConverter,
+                                              BackofficeAgreementConverter agreementConverter) {
+        this.attributeAuthorityService = attributeAuthorityService;
+        this.agreementService = agreementService;
+        this.agreementUserService = agreementUserService;
+        this.profileService = profileService;
+        this.organizationsConverter = organizationsConverter;
+        this.organizationWithReferentsConverter = organizationWithReferentsConverter;
+        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
+        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
+        this.referentFiscalCodeConverter = referentFiscalCodeConverter;
+        this.agreementConverter = agreementConverter;
+    }
+
 
 }

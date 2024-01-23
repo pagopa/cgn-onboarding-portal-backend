@@ -40,6 +40,10 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     private ProfileService profileServiceSpy;
     private AgreementEntity agreementEntity;
     private ProfileEntity profileEntity;
+    private BackofficeAgreementConverter backofficeAgreementConverter;
+    private BackofficeDiscountConverter backofficeDiscountConverter;
+    private BackofficeProfileConverter backofficeProfileConverter;
+    private BackofficeDocumentConverter backofficeDocumentConverter;
 
     @BeforeEach
     void init() {
@@ -57,6 +61,10 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         organizationWithReferentsAndStatusConverter = new OrganizationWithReferentsAndStatusConverter();
         organizationsConverter = new OrganizationsConverter(organizationWithReferentsAndStatusConverter);
         referentFiscalCodeConverter = new ReferentFiscalCodeConverter();
+        backofficeDiscountConverter = new BackofficeDiscountConverter();
+        backofficeProfileConverter = new BackofficeProfileConverter();
+        backofficeDocumentConverter = new BackofficeDocumentConverter();
+        backofficeAgreementConverter = new BackofficeAgreementConverter(backofficeDiscountConverter,backofficeDocumentConverter,backofficeProfileConverter);
 
         var organizationWithReferentsPostConverter = new OrganizationWithReferentsPostConverter();
 
@@ -68,10 +76,11 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                                     organizationWithReferentsConverter,
                                                                                     organizationWithReferentsAndStatusConverter,
                                                                                     organizationWithReferentsPostConverter,
-                                                                                    referentFiscalCodeConverter);
+                                                                                    referentFiscalCodeConverter,
+                                                                                    backofficeAgreementConverter);
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
-        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat);
+        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PRIVATE);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -265,7 +274,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationFiscalCode,
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
-                                                                    false);
+                                                                    false,
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());
@@ -290,7 +300,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationFiscalCode,
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
-                                                                    false);
+                                                                    false,
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());
@@ -316,7 +327,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     aNewOrganizationFiscalCode,
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
-                                                                    false);
+                                                                    false,
+                                                                    EntityType.PRIVATE);
 
         Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
         Assertions.assertNotNull(upsertResult.response.getBody());
@@ -390,13 +402,15 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     private OrganizationWithReferents createOrganizationWithReferentsMock(String aKeyOrganizationFiscalCode,
                                                                           String anOrganizationFiscalCode,
                                                                           String anOrganizationName,
-                                                                          String anOrganizationPec) {
+                                                                          String anOrganizationPec,
+                                                                          EntityType entityType) {
         OrganizationWithReferents organizationWithReferents = new OrganizationWithReferents();
         organizationWithReferents.setKeyOrganizationFiscalCode(aKeyOrganizationFiscalCode);
         organizationWithReferents.setOrganizationFiscalCode(anOrganizationFiscalCode);
         organizationWithReferents.setOrganizationName(anOrganizationName);
         organizationWithReferents.setPec(anOrganizationPec);
         organizationWithReferents.setInsertedAt(LocalDate.now());
+        organizationWithReferents.setEntityType(entityType);
         return organizationWithReferents;
     }
 
@@ -418,12 +432,14 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                          String anOrganizationFiscalCode,
                                                          String anOrganizationName,
                                                          String anOrganizationPec,
-                                                         boolean testServiceError) {
+                                                         boolean testServiceError,
+                                                         EntityType entityType) {
         OrganizationWithReferents organizationWithReferents = createOrganizationWithReferentsMock(
                 aKeyOrganizationFiscalCode,
                 anOrganizationFiscalCode,
                 anOrganizationName,
-                anOrganizationPec);
+                anOrganizationPec,
+                entityType);
 
         if (testServiceError) {
             Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenThrow(RuntimeException.class);

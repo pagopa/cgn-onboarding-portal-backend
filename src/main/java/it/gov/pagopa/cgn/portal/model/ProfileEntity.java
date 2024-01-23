@@ -148,7 +148,6 @@ public class ProfileEntity extends BaseEntity {
     @Column(name = "support_value", length = 500)
     private String supportValue;
 
-
     public void removeAllAddress() {
         this.addressList.clear();
     }

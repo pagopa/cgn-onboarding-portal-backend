@@ -1,15 +1,18 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,14 +36,31 @@ public class AgreementService extends AgreementServiceLight {
     private final DiscountService discountService;
 
     private final DocumentService documentService;
+
     private final AzureStorage azureStorage;
 
     private final EmailNotificationFacade emailNotificationFacade;
 
+    private final BackofficeAgreementConverter backofficeAgreementConverter;
+
     private final ConfigProperties configProperties;
 
     @Transactional
-    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode) {
+    public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode){
+        AgreementUserEntity userAgreement;
+        Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
+        if (userAgreementOpt.isPresent()) {
+            userAgreement = userAgreementOpt.get();
+            return agreementRepository.findById(userAgreement.getAgreementId())
+                    .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
+        }  else {
+            throw new InvalidRequestException("No Agreement User found with tax code " + merchantTaxCode);
+        }
+
+    }
+
+    @Transactional
+    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
@@ -51,7 +71,7 @@ public class AgreementService extends AgreementServiceLight {
                     .orElseThrow(() -> new RuntimeException("User " + userAgreement.getUserId() + " doesn't have an agreement"));
         } else {
             userAgreement = userService.create(merchantTaxCode);
-            agreementEntity = createAgreement(userAgreement.getAgreementId());
+            agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType);
         }
         return agreementEntity;
     }
@@ -114,10 +134,12 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
-    private AgreementEntity createAgreement(String agreementId) {
+    private AgreementEntity createAgreement(String agreementId, EntityType entityType) {
         AgreementEntity agreementEntity = new AgreementEntity();
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
+        EntityTypeEnum entityTypeEnum = backofficeAgreementConverter.toEntityEntityTypeEnum(entityType);
+        agreementEntity.setEntityType(entityTypeEnum);
         return agreementRepository.save(agreementEntity);
     }
 
@@ -126,7 +148,7 @@ public class AgreementService extends AgreementServiceLight {
                             ProfileService profileService, DiscountService discountService,
                             DocumentService documentService, AzureStorage azureStorage,
                             EmailNotificationFacade emailNotificationFacade,
-                            ConfigProperties configProperties) {
+                            BackofficeAgreementConverter backofficeAgreementConverter, ConfigProperties configProperties) {
         super(agreementRepository);
         this.userService = userService;
         this.profileService = profileService;
@@ -134,6 +156,7 @@ public class AgreementService extends AgreementServiceLight {
         this.documentService = documentService;
         this.azureStorage = azureStorage;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.backofficeAgreementConverter = backofficeAgreementConverter;
         this.configProperties = configProperties;
     }
 

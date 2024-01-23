@@ -257,7 +257,10 @@ public class ExportService {
     }
 
     private void createNewDiscountsOnEyca(List<DataExportEycaWrapper> exportEycaList){
-        log.info("creeting new discount on EYCA");
+
+        eycaExportService.authenticateOnEyca();
+
+        log.info("creating new discount on EYCA");
 
         List<DataExportEycaWrapper> createList = exportEycaList.stream().
                 filter(entity->StringUtils.isEmpty(entity.getEycaUpdateId())).collect(Collectors.toList());

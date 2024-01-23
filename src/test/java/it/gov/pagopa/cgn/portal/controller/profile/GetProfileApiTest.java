@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
 import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class GetProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }

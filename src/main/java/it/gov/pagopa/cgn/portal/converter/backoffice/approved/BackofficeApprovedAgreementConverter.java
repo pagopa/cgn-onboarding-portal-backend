@@ -1,19 +1,34 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreements;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
 public class BackofficeApprovedAgreementConverter
         extends AbstractConverter<ApprovedAgreementEntity, ApprovedAgreement> {
+    private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
+
+    static {
+        backofficeEntityTypeEnumMap.put(
+                EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
+        backofficeEntityTypeEnumMap.put(
+                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+    }
+
+    public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {
+        return Optional.ofNullable(backofficeEntityTypeEnumMap.get(etEnum))
+                .orElseThrow(() -> getInvalidEnumMapping(etEnum.getCode()));
+
+    }
 
     @Override
     protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDtoFunction() {
@@ -33,6 +48,7 @@ public class BackofficeApprovedAgreementConverter
         dto.setAgreementStartDate(entity.getStartDate());
         dto.setPublishedDiscounts(entity.getPublishedDiscounts());
         dto.setTestPending(entity.getTestPending());
+        dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
         return dto;
     };
 
