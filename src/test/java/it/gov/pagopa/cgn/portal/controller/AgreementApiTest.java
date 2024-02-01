@@ -102,7 +102,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
                     .andExpect(jsonPath("$.completedSteps", hasSize(1)))
-                    .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()));
+                    .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
     }
 
     @Test
@@ -121,7 +122,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
-                    .andExpect(jsonPath("$.completedSteps", hasSize(2)));
+                    .andExpect(jsonPath("$.completedSteps", hasSize(2)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 
@@ -144,7 +146,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
-                    .andExpect(jsonPath("$.completedSteps", hasSize(3)));
+                    .andExpect(jsonPath("$.completedSteps", hasSize(3)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 
