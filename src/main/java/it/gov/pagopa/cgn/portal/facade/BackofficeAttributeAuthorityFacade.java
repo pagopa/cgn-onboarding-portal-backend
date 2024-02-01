@@ -26,8 +26,6 @@ public class BackofficeAttributeAuthorityFacade {
 
     private AgreementService agreementService;
 
-    private BackofficeAgreementService backofficeAgreementService;
-
     private AgreementUserService agreementUserService;
 
     private ProfileService profileService;
