@@ -4,10 +4,7 @@ import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.AgreementUserService;
-import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Status;
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +25,8 @@ public class BackofficeAttributeAuthorityFacade {
     private final AttributeAuthorityService attributeAuthorityService;
 
     private AgreementService agreementService;
+
+    private BackofficeAgreementService backofficeAgreementService;
 
     private AgreementUserService agreementUserService;
 
@@ -80,8 +80,26 @@ public class BackofficeAttributeAuthorityFacade {
                 = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(
                 organizationWithReferents));
 
-        return organizationWithReferentsConverter.fromAttributeAuthorityResponse(
+        ResponseEntity<OrganizationWithReferents> response = organizationWithReferentsConverter.fromAttributeAuthorityResponse(
                 updatedOrganizationWithReferentsAttributeAuthority);
+
+        if(response.getBody() != null && response.getStatusCode() == HttpStatus.OK) {
+
+            OrganizationWithReferents body = new OrganizationWithReferents();
+
+            body.setEntityType(organizationWithReferents.getEntityType());
+            body.setKeyOrganizationFiscalCode(response.getBody().getKeyOrganizationFiscalCode());
+            body.setOrganizationFiscalCode(response.getBody().getOrganizationFiscalCode());
+            body.setOrganizationName(response.getBody().getOrganizationName());
+            body.setPec(response.getBody().getPec());
+            body.setInsertedAt(response.getBody().getInsertedAt());
+            body.setReferents(response.getBody().getReferents());
+
+            return ResponseEntity.ok().body(body);
+        }
+
+        return response;
+
     }
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
