@@ -284,6 +284,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         Assertions.assertEquals(anOrganizationPec, upsertResult.response.getBody().getPec());
         Assertions.assertEquals(upsertResult.organizationWithReferents.getInsertedAt(),
                                 upsertResult.response.getBody().getInsertedAt());
+        Assertions.assertEquals(upsertResult.organizationWithReferents.getEntityType(),upsertResult.response.getBody().getEntityType());
 
         Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
         Mockito.verify(profileServiceSpy, Mockito.times(0)).updateProfile(Mockito.any(), Mockito.any());

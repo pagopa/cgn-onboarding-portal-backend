@@ -49,6 +49,7 @@ public class OrganizationWithReferentsPostConverterTest {
         Assert.assertEquals(organizationWithReferents.getKeyOrganizationFiscalCode(), organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode());
         Assert.assertEquals(organizationWithReferents.getPec(), organizationWithReferentsAttributeAuthority.getPec());
         Assert.assertEquals(organizationWithReferents.getReferents(), organizationWithReferentsAttributeAuthority.getReferents());
+        Assert.assertNotNull(organizationWithReferents.getEntityType());
     }
 
 }

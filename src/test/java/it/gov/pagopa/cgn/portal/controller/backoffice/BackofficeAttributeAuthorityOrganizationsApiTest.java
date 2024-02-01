@@ -4,7 +4,9 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,9 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -52,9 +56,14 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
         organization.setOrganizationFiscalCode("12345678");
         organization.setOrganizationName("org 1");
         organization.setPec("org1@pec.it");
+        organization.setEntityType(EntityType.PRIVATE);
+
         mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
                                               .content(TestUtils.getJson(organization)))
                .andDo(log())
-               .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
+                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE));
+
     }
 }
