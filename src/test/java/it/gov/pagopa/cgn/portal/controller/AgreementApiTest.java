@@ -40,7 +40,6 @@ import java.util.List;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -84,8 +83,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
-                    .andExpect(jsonPath("$.completedSteps").isEmpty());
-
+                    .andExpect(jsonPath("$.completedSteps").isEmpty())
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
     }
 
     @Test

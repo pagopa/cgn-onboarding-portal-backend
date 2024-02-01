@@ -2,11 +2,9 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgnonboardingportal.model.Agreement;
-import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
-import it.gov.pagopa.cgnonboardingportal.model.ApprovedAgreement;
-import it.gov.pagopa.cgnonboardingportal.model.RejectedAgreement;
+import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -18,12 +16,18 @@ import java.util.function.Function;
 public class AgreementConverter extends AbstractConverter<AgreementEntity, Agreement> {
 
 
+    private static final Map<EntityTypeEnum, EntityType> entityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
     private static final Map<AgreementStateEnum, AgreementState> enumMap = new EnumMap<>(AgreementStateEnum.class);
     static {
         enumMap.put(AgreementStateEnum.DRAFT, AgreementState.DRAFTAGREEMENT);
         enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDINGAGREEMENT);
         enumMap.put(AgreementStateEnum.APPROVED, AgreementState.APPROVEDAGREEMENT);
         enumMap.put(AgreementStateEnum.REJECTED, AgreementState.REJECTEDAGREEMENT);
+
+        entityTypeEnumMap.put(
+                EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
+        entityTypeEnumMap.put(
+                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
     }
 
     @Override
@@ -74,6 +78,7 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                 dto.setId(entity.getId());
                 dto.setState(toDtoEnum.apply(entity.getState()));
                 dto.setImageUrl(entity.getImageUrl());
+                dto.setEntityType(toEntityType(entity.getEntityType()));
                 return dto;
             };
 
@@ -98,7 +103,21 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
                 entity.setId(dto.getId());
                 entity.setState(toEntityEnum.apply(dto.getState()));
                 entity.setImageUrl(dto.getImageUrl());
+                entity.setEntityType(toEntityTypeEnum(dto.getEntityType()));
                 return entity;
             };
 
+    public EntityType toEntityType(EntityTypeEnum etEnum) {
+        return Optional.ofNullable(entityTypeEnumMap.get(etEnum))
+                .orElseThrow(() -> getInvalidEnumMapping(etEnum.getCode()));
+
+    }
+    public EntityTypeEnum toEntityTypeEnum(EntityType entityType) {
+        return entityTypeEnumMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().equals(entityType))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElseThrow();
+    }
 }
