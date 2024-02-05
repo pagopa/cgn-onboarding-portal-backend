@@ -152,7 +152,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void RequestApproval_RequestApproval_Ok() throws Exception {
+    void RequestApproval_RequestApproval_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -197,7 +197,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void PublishDiscount_PublishDiscount_Ok() throws Exception {
+    void PublishDiscount_PublishDiscount_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -242,7 +242,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void SuspendDiscount_UnpublishDiscount_Ok() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -272,7 +272,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void SuspendDiscount_UnpublishDiscount_Ko() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -296,7 +296,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void UploadBucket_UploadValidBucketWithoutProfile_Ko() throws Exception {
+    void UploadBucket_UploadValidBucketWithoutProfile_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
@@ -312,7 +312,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void UploadBucket_UploadInvalidBucket_Ko() throws Exception {
+    void UploadBucket_UploadInvalidBucket_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         byte[] csv = "sample".getBytes();

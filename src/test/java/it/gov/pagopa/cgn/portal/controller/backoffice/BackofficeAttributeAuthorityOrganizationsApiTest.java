@@ -63,7 +63,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
-                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE));
+                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 }
