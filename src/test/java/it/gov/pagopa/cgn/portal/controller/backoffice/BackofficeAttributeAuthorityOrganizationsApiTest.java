@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -55,14 +56,14 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
     @Autowired
     protected BackofficeAgreementConverter backofficeAgreementConverter;
 
+    @Mock
     private AttributeAuthorityService attributeAuthorityServiceMock;
 
     @Autowired
     protected MockMvc mockMvc;
 
-    @BeforeEach
-    void beforeEach() {
-        attributeAuthorityServiceMock = Mockito.mock(AttributeAuthorityService.class);
+    @PostConstruct
+    void setup(){
         BackofficeAttributeAuthorityFacade facade =
                 new BackofficeAttributeAuthorityFacade(
                         attributeAuthorityServiceMock,
@@ -77,11 +78,16 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                         backofficeAgreementConverter);
         BackofficeAttributeAuthorityOrganizationsController controller = new BackofficeAttributeAuthorityOrganizationsController(facade);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    }
+
+    @BeforeEach
+    void beforeEach() {
         setAdminAuth();
     }
 
     @Test
     void GetOrganizations_Ok() throws Exception {
+        Mockito.doReturn(ResponseEntity.ok().build()).when(attributeAuthorityServiceMock).getOrganizations(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any());
         mockMvc.perform(get("/organizations")).andDo(log()).andExpect(status().isOk());
     }
 
@@ -111,5 +117,22 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                 .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
                 .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
+    }
+
+    @Test
+    void UpsertOrganization_Ko() throws Exception {
+        OrganizationWithReferents organization = new OrganizationWithReferents();
+        organization.setKeyOrganizationFiscalCode("12345678");
+        organization.setOrganizationFiscalCode("12345678");
+        organization.setOrganizationName("org 1");
+        organization.setPec("org1@pec.it");
+        organization.setEntityType(EntityType.PRIVATE);
+
+        Mockito.doReturn(ResponseEntity.badRequest().build()).when(attributeAuthorityServiceMock).upsertOrganization(Mockito.any());
+
+        mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.getJson(organization)))
+                .andDo(log())
+                .andExpect(status().isBadRequest());
     }
 }
