@@ -9,6 +9,7 @@ import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscal
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 
@@ -17,8 +18,15 @@ public class AttributeAuthorityService {
 
     private final AttributeAuthorityApi attributeAuthorityApi;
 
+    private final ConfigProperties configProperties;
+
     public AttributeAuthorityService(ConfigProperties configProperties, AttributeAuthorityApi attributeAuthorityApi) {
         this.attributeAuthorityApi = attributeAuthorityApi;
+        this.configProperties = configProperties;
+    }
+
+    @PostConstruct
+    public void setup() {
         this.attributeAuthorityApi.getApiClient().setBasePath(configProperties.getAttributeAuthorityBaseUrl());
     }
 
@@ -50,7 +58,7 @@ public class AttributeAuthorityService {
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
                                                ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
         return attributeAuthorityApi.insertReferentWithHttpInfo(keyOrganizationFiscalCode,
-                                                                referentFiscalCodeAttributeAuthority);
+                referentFiscalCodeAttributeAuthority);
     }
 
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
