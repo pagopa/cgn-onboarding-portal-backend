@@ -2,17 +2,13 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -120,7 +116,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
     }
 
     @Test
-    void UpsertOrganization_Ko() throws Exception {
+    void UpsertOrganization_BadRequest() throws Exception {
         OrganizationWithReferents organization = new OrganizationWithReferents();
         organization.setKeyOrganizationFiscalCode("12345678");
         organization.setOrganizationFiscalCode("12345678");

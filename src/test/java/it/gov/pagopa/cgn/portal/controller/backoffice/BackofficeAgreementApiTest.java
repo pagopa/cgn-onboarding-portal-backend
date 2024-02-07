@@ -85,7 +85,8 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items[0].profile.agreementId").value(pendingAgreement.getId()))
                     .andExpect(jsonPath("$.items[0].discounts[0].id").value(discountEntity.getId()))
                     .andExpect(jsonPath("$.items[0].documents").isNotEmpty())
-                    .andExpect(jsonPath("$.items[0].documents", hasSize(2)));
+                    .andExpect(jsonPath("$.items[0].documents", hasSize(2)))
+        			.andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 
@@ -102,8 +103,8 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isArray())
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(1)))
-                    .andExpect(jsonPath("$.total").value(1));
-
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()));
     }
 
     @Test
@@ -153,6 +154,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(5)))
                     .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].id").value(sortedByOperatorAgreementList.get(0).getId()))
                     .andExpect(jsonPath("$.items[1].id").value(sortedByOperatorAgreementList.get(1).getId()))
                     .andExpect(jsonPath("$.items[2].id").value(sortedByOperatorAgreementList.get(2).getId()))
@@ -180,6 +182,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(5)))
                     .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
                     .andExpect(jsonPath("$.items[0].id").value(sortedByRequestDateAgreementList.get(0).getId()))
                     .andExpect(jsonPath("$.items[1].id").value(sortedByRequestDateAgreementList.get(1).getId()))
                     .andExpect(jsonPath("$.items[2].id").value(sortedByRequestDateAgreementList.get(2).getId()))
@@ -206,6 +209,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(5)))
                     .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].id").value(agreementEntityList.get(2).getId()))
                     .andExpect(jsonPath("$.items[0].state").value(AgreementState.ASSIGNEDAGREEMENT.getValue()))
                     .andExpect(jsonPath("$.items[0].assignee").isNotEmpty())
@@ -240,6 +244,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(5)))
                     .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].assignee").doesNotExist())
                     .andExpect(jsonPath("$.items[1].assignee").doesNotExist())
                     .andExpect(jsonPath("$.items[2].assignee").doesNotExist())

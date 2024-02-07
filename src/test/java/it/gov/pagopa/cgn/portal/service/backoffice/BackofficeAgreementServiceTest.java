@@ -55,6 +55,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertFalse(page.getContent().isEmpty());
         AgreementEntity retrievedAgreement = page.getContent().get(0);
         Assertions.assertEquals(pendingAgreement.getId(), retrievedAgreement.getId());
+        Assertions.assertNotNull(retrievedAgreement.getEntityType());
     }
 
     @Test
@@ -69,6 +70,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
         Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -85,6 +87,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
         Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -97,6 +100,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
         Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -109,6 +113,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
         Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -125,6 +130,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertFalse(page.getContent().isEmpty());
         AgreementEntity retrievedAgreement = page.getContent().get(0);
         Assertions.assertEquals(pendingAgreement.getId(), retrievedAgreement.getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -138,7 +144,6 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(0L, page.getTotalElements());
         Assertions.assertEquals(0, page.getTotalPages());
         Assertions.assertTrue(CollectionUtils.isEmpty(page.getContent()));
-
     }
 
     @Test
@@ -153,8 +158,9 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(1, page.getTotalPages());
         Assertions.assertNotNull(page.getContent());
         Assertions.assertFalse(page.getContent().isEmpty());
-        Assertions.assertEquals(pendingAgreement.getId(), page.getContent().get(0).getId());
-
+        AgreementEntity retrievedAgreement = page.getContent().get(0);
+        Assertions.assertEquals(pendingAgreement.getId(), retrievedAgreement.getId());
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
 
@@ -164,7 +170,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         AgreementEntity agreementEntity = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
         Assertions.assertTrue(StringUtils.isNotBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
-
+        Assertions.assertNotNull(pendingAgreement.getEntityType());
     }
 
     @Test
@@ -228,6 +234,8 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -242,6 +250,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -267,6 +276,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -281,6 +291,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -295,6 +306,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         pendingAgreement = agreementRepository.save(pendingAgreement);
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(pendingAgreement.getId());
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -316,6 +328,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         documentRepository.saveAll(saveBackofficeSampleDocuments(pendingAgreement));
         var agreementId = pendingAgreement.getId();
         AgreementEntity approveAgreement = backofficeAgreementService.approveAgreement(agreementId);
+        Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
         Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
@@ -403,6 +416,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         discountEntity = discountService.suspendDiscount(agreementEntity.getId(), discountEntity.getId(), reasonMsg);
         Assertions.assertEquals(DiscountStateEnum.SUSPENDED, discountEntity.getState());
         Assertions.assertEquals(reasonMsg, discountEntity.getSuspendedReasonMessage());
+        Assertions.assertNotNull(agreementEntity.getEntityType());
     }
 
 
