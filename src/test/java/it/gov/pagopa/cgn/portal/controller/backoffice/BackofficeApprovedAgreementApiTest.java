@@ -89,12 +89,11 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     @Test
     void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok() throws Exception {
         final int numRows = 3;
-//        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
-//        List<AgreementEntity> sortedByOperatorAgreementList = testObjectList.stream()
-//                                                                            .sorted(Comparator.comparing(a -> a.getProfileEntity()
-//                                                                                                               .getFullName()))
-//                                                                            .map(AgreementTestObject::getAgreementEntity)
-//                                                                            .collect(Collectors.toList());
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
+        testObjectList.stream()
+        .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
+        .map(AgreementTestObject::getAgreementEntity)
+        .collect(Collectors.toList());
         
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS,
                                                                                 Sort.Direction.ASC)))

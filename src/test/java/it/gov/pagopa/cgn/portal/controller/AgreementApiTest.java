@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
@@ -62,9 +61,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
     @Autowired
     private ConfigProperties configProperties;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void beforeEach() {
