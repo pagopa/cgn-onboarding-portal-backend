@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Status;
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +64,7 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
-    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = (owr) ->
+    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr ->
             agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(),
                     owr.getEntityType());
 
@@ -90,19 +88,20 @@ public class BackofficeAttributeAuthorityFacade {
         ResponseEntity<OrganizationWithReferents> response = organizationWithReferentsConverter.fromAttributeAuthorityResponse(
                 updatedOrganizationWithReferentsAttributeAuthority);
 
-        if (response.getBody() != null && response.getStatusCode() == HttpStatus.OK) {
+        OrganizationWithReferents respBody = response.getBody();
+        if (respBody != null && response.getStatusCode() == HttpStatus.OK) {
 
-            OrganizationWithReferents body = new OrganizationWithReferents();
+            OrganizationWithReferents newRespBody = new OrganizationWithReferents();
 
-            body.setEntityType(organizationWithReferents.getEntityType());
-            body.setKeyOrganizationFiscalCode(response.getBody().getKeyOrganizationFiscalCode());
-            body.setOrganizationFiscalCode(response.getBody().getOrganizationFiscalCode());
-            body.setOrganizationName(response.getBody().getOrganizationName());
-            body.setPec(response.getBody().getPec());
-            body.setInsertedAt(response.getBody().getInsertedAt());
-            body.setReferents(response.getBody().getReferents());
+            newRespBody.setEntityType(organizationWithReferents.getEntityType());
+            newRespBody.setKeyOrganizationFiscalCode(respBody.getKeyOrganizationFiscalCode());
+            newRespBody.setOrganizationFiscalCode(respBody.getOrganizationFiscalCode());
+            newRespBody.setOrganizationName(respBody.getOrganizationName());
+            newRespBody.setPec(respBody.getPec());
+            newRespBody.setInsertedAt(respBody.getInsertedAt());
+            newRespBody.setReferents(respBody.getReferents());
 
-            return ResponseEntity.ok().body(body);
+            return ResponseEntity.ok().body(newRespBody);
         }
 
         return response;
@@ -153,8 +152,7 @@ public class BackofficeAttributeAuthorityFacade {
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus
             = (agreement, organization) -> {
         switch (agreement.getState()) {
-            case DRAFT:
-            case REJECTED:
+            case DRAFT,REJECTED:
                 organization.setStatus(OrganizationStatus.DRAFT);
                 break;
             case PENDING:
