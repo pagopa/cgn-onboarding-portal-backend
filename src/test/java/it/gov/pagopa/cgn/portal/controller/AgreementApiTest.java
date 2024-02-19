@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.controller;
 
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
@@ -40,7 +39,6 @@ import java.util.List;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -64,9 +62,6 @@ class AgreementApiTest extends IntegrationAbstractTest {
     @Autowired
     private ConfigProperties configProperties;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @BeforeEach
     void beforeEach() {
         setOperatorAuth();
@@ -84,8 +79,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
-                    .andExpect(jsonPath("$.completedSteps").isEmpty());
-
+                    .andExpect(jsonPath("$.completedSteps").isEmpty())
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
     }
 
     @Test
@@ -103,7 +98,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
                     .andExpect(jsonPath("$.completedSteps", hasSize(1)))
-                    .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()));
+                    .andExpect(jsonPath("$.completedSteps[0]").value(CompletedStep.PROFILE.getValue()))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
     }
 
     @Test
@@ -122,7 +118,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
-                    .andExpect(jsonPath("$.completedSteps", hasSize(2)));
+                    .andExpect(jsonPath("$.completedSteps", hasSize(2)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 
@@ -145,12 +142,13 @@ class AgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
-                    .andExpect(jsonPath("$.completedSteps", hasSize(3)));
+                    .andExpect(jsonPath("$.completedSteps", hasSize(3)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
 
     @Test
-    void RequestApproval_RequestApproval_Ok() throws Exception {
+    void RequestApproval_RequestApproval_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -195,7 +193,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void PublishDiscount_PublishDiscount_Ok() throws Exception {
+    void PublishDiscount_PublishDiscount_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -240,7 +238,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void SuspendDiscount_UnpublishDiscount_Ok() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_NoContent() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -270,7 +268,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void SuspendDiscount_UnpublishDiscount_Ko() throws Exception {
+    void SuspendDiscount_UnpublishDiscount_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         // creating profile
@@ -294,7 +292,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void UploadBucket_UploadValidBucketWithoutProfile_Ko() throws Exception {
+    void UploadBucket_UploadValidBucketWithoutProfile_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
@@ -310,7 +308,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void UploadBucket_UploadInvalidBucket_Ko() throws Exception {
+    void UploadBucket_UploadInvalidBucket_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
         byte[] csv = "sample".getBytes();

@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
                     .andExpect(jsonPath("$.items[0].agreementId").value(agreementEntity.getId()))
                     .andExpect(jsonPath("$.items[0].publishedDiscounts").value(0))
                     .andExpect(jsonPath("$.items[0].testPending").value(false))
@@ -78,6 +80,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
                     .andExpect(jsonPath("$.items[0].agreementId").value(sortedByOperatorAgreementList.get(0).getId()))
                     .andExpect(jsonPath("$.items[1].agreementId").value(sortedByOperatorAgreementList.get(1).getId()))
                     .andExpect(jsonPath("$.items[2].agreementId").value(sortedByOperatorAgreementList.get(2).getId()));
@@ -87,11 +90,11 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok() throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
-        List<AgreementEntity> sortedByOperatorAgreementList = testObjectList.stream()
-                                                                            .sorted(Comparator.comparing(a -> a.getProfileEntity()
-                                                                                                               .getFullName()))
-                                                                            .map(AgreementTestObject::getAgreementEntity)
-                                                                            .collect(Collectors.toList());
+        testObjectList.stream()
+        .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
+        .map(AgreementTestObject::getAgreementEntity)
+        .collect(Collectors.toList());
+        
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
@@ -101,6 +104,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
                     .andExpect(jsonPath("$.items[0].publishedDiscounts").value(1))
                     .andExpect(jsonPath("$.items[1].publishedDiscounts").value(2))
                     .andExpect(jsonPath("$.items[2].publishedDiscounts").value(3));
@@ -130,6 +134,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
                     .andExpect(jsonPath("$.items[0].agreementId").value(sortedByLastModifyDateAgreementList.get(0)
                                                                                                            .getId()))
                     .andExpect(jsonPath("$.items[1].agreementId").value(sortedByLastModifyDateAgreementList.get(1)
@@ -171,6 +176,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("profile.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
                     .andExpect(jsonPath("profile.salesChannel.discountCodeType").isNotEmpty())
+                    .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("discounts[0].id").value(discountEntity.getId()))
                     .andExpect(jsonPath("discounts[0].name").value(discountEntity.getName()))
                     .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()))
@@ -199,6 +205,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("profile.legalRepresentativeFullName").value(profileEntity.getLegalRepresentativeFullName()))
                     .andExpect(jsonPath("profile.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
+                    .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("discounts", hasSize(0)));
     }
 

@@ -4,10 +4,7 @@ import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.AgreementUserService;
-import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -66,13 +64,20 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
+    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr ->
+            agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(),
+                    owr.getEntityType());
+
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
         // find agreement for this organization and apply an update consumer
-        agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode())
-                            .ifPresentOrElse(agreementUserEntity -> updateAgreementUserProfileAndAgreement.accept(agreementUserEntity, organizationWithReferents),
-                                    ()-> agreementService.createAgreementIfNotExists(organizationWithReferents.getOrganizationFiscalCode(),
-                                            organizationWithReferents.getEntityType()));
+        Optional<AgreementUserEntity> maybeAgreementUserEntity = agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode());
+        if(maybeAgreementUserEntity.isPresent()) {
+            updateAgreementUserProfileAndAgreement.accept(maybeAgreementUserEntity.get(), organizationWithReferents);
+        }
+        else {
+            createAgreementIfNotExistsConsumer.accept(organizationWithReferents);
+        }
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
@@ -80,8 +85,27 @@ public class BackofficeAttributeAuthorityFacade {
                 = attributeAuthorityService.upsertOrganization(organizationWithReferentsPostConverter.toAttributeAuthorityModel(
                 organizationWithReferents));
 
-        return organizationWithReferentsConverter.fromAttributeAuthorityResponse(
+        ResponseEntity<OrganizationWithReferents> response = organizationWithReferentsConverter.fromAttributeAuthorityResponse(
                 updatedOrganizationWithReferentsAttributeAuthority);
+
+        OrganizationWithReferents respBody = response.getBody();
+        if (respBody != null && response.getStatusCode() == HttpStatus.OK) {
+
+            OrganizationWithReferents newRespBody = new OrganizationWithReferents();
+
+            newRespBody.setEntityType(organizationWithReferents.getEntityType());
+            newRespBody.setKeyOrganizationFiscalCode(respBody.getKeyOrganizationFiscalCode());
+            newRespBody.setOrganizationFiscalCode(respBody.getOrganizationFiscalCode());
+            newRespBody.setOrganizationName(respBody.getOrganizationName());
+            newRespBody.setPec(respBody.getPec());
+            newRespBody.setInsertedAt(respBody.getInsertedAt());
+            newRespBody.setReferents(respBody.getReferents());
+
+            return ResponseEntity.ok().body(newRespBody);
+        }
+
+        return response;
+
     }
 
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
@@ -95,15 +119,15 @@ public class BackofficeAttributeAuthorityFacade {
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
                                                ReferentFiscalCode referentFiscalCode) {
         return attributeAuthorityService.insertReferent(keyOrganizationFiscalCode,
-                                                        referentFiscalCodeConverter.toAttributeAuthorityModel(
-                                                                referentFiscalCode));
+                referentFiscalCodeConverter.toAttributeAuthorityModel(
+                        referentFiscalCode));
     }
 
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
         return attributeAuthorityService.deleteReferent(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
-    private EntityTypeEnum getEntityTypeEnumFromEntityType(EntityType entityType){
+    private EntityTypeEnum getEntityTypeEnumFromEntityType(EntityType entityType) {
         return agreementConverter.toEntityEntityTypeEnum(entityType);
     }
 
@@ -111,9 +135,9 @@ public class BackofficeAttributeAuthorityFacade {
             = (agreementUserEntity, organizationWithReferents) -> {
         // update AgreementUser if merchant tax code has changed
         if (!organizationWithReferents.getKeyOrganizationFiscalCode()
-                                      .equals(organizationWithReferents.getOrganizationFiscalCode())) {
+                .equals(organizationWithReferents.getOrganizationFiscalCode())) {
             agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(),
-                                                       organizationWithReferents.getOrganizationFiscalCode());
+                    organizationWithReferents.getOrganizationFiscalCode());
         }
 
         // get and update profile if present
@@ -128,8 +152,7 @@ public class BackofficeAttributeAuthorityFacade {
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus
             = (agreement, organization) -> {
         switch (agreement.getState()) {
-            case DRAFT:
-            case REJECTED:
+            case DRAFT,REJECTED:
                 organization.setStatus(OrganizationStatus.DRAFT);
                 break;
             case PENDING:
@@ -145,9 +168,9 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus
             = organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
-                                                  .flatMap(agreementUserEntity -> agreementService.getById(
-                                                          agreementUserEntity.getAgreementId()))
-                                                  .ifPresent(a -> mapStatus.accept(a, organization));
+            .flatMap(agreementUserEntity -> agreementService.getById(
+                    agreementUserEntity.getAgreementId()))
+            .ifPresent(a -> mapStatus.accept(a, organization));
 
     private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus
             = response -> {

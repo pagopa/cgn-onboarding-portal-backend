@@ -211,6 +211,13 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(profile.getSecondaryReferents());
 
     }
+
+    @Test
+    @Transactional
+    void Get_Profile_Expect_Not_Found(){
+        ResponseEntity<Profile> response =  profileFacade.getProfile(TestUtils.FAKE_ID_2);
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
     @Test
     @Transactional
     void Create_Profile_Expect_OK(){
