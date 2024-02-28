@@ -21,9 +21,11 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.web.servlet.ResultActions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -1206,5 +1208,9 @@ public class TestUtils {
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
                 .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+    }
+
+    public static void printMvcResponse(ResultActions resultActions) throws UnsupportedEncodingException {
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
     }
 }

@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
@@ -23,6 +24,8 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -91,13 +94,14 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         OrganizationWithReferentsAndStatus organization0 = createOrganizationWithReferentsAndStatusMock("12345678",
                                                                                                         "12345678",
                                                                                                         "org0",
-                                                                                                        "org0@pec.it");
+                                                                                                        "org0@pec.it",OrganizationStatus.DRAFT,EntityType.PRIVATE);
+
         OrganizationWithReferentsAndStatus organization1 = createOrganizationWithReferentsAndStatusMock("12345679",
                                                                                                         "12345679",
                                                                                                         "org1",
-                                                                                                        "org1@pec.it");
+                                                                                                        "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
 
-        List<OrganizationWithReferentsAndStatus> items = new LinkedList();
+        List<OrganizationWithReferentsAndStatus> items = new LinkedList<>();
         items.add(organization0);
         items.add(organization1);
 
@@ -111,6 +115,11 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                 Mockito.any(),
                                                                 Mockito.any()))
                .thenReturn(ResponseEntity.ok(organizationsConverter.toAttributeAuthorityModel(organizations)));
+
+        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType());
+
+        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType());
+
         ResponseEntity<Organizations> organizationsResponse = backofficeAttributeAuthorityFacade.getOrganizations(null,
                                                                                                                   0,
                                                                                                                   2,
@@ -129,37 +138,57 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         OrganizationWithReferentsAndStatus organization0 = createOrganizationWithReferentsAndStatusMock("12345678",
                                                                                                         "12345678",
                                                                                                         "org0",
-                                                                                                        "org0@pec.it");
+                                                                                                        "org0@pec.it",OrganizationStatus.ENABLED,null);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
-        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse
-                = backofficeAttributeAuthorityFacade.getOrganization("1234567890");
+            Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+                   .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                           organization0)));
 
-        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
-        Assertions.assertNotNull(organizationResponse.getBody());
-        Assertions.assertEquals(organization0, organizationResponse.getBody());
-        Assertions.assertEquals(OrganizationStatus.ENABLED, organizationResponse.getBody().getStatus());
+            ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse
+                    = backofficeAttributeAuthorityFacade.getOrganization(organization0.getKeyOrganizationFiscalCode());
+
+            Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+            Assertions.assertNotNull(organizationResponse.getBody());
+            Assertions.assertEquals(organization0, organizationResponse.getBody());
+            Assertions.assertEquals(organization0.getStatus(), organizationResponse.getBody().getStatus());
     }
 
     @Test
     void GetOrganization_DRAFT_Ok() {
+
         OrganizationWithReferentsAndStatus organization0
                 = createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
                                                                profileEntity.getTaxCodeOrVat(),
                                                                "org0",
-                                                               "org0@pec.it");
+                                                               "org0@pec.it",OrganizationStatus.DRAFT,EntityType.PRIVATE);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
-        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse
-                = backofficeAttributeAuthorityFacade.getOrganization(profileEntity.getTaxCodeOrVat());
+        OrganizationWithReferentsAndStatus organization1
+               = createOrganizationWithReferentsAndStatusMock("abcdef",
+                                                                "abcdef",
+                                                                "org0",
+                                                                "org0@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
 
-        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
-        Assertions.assertNotNull(organizationResponse.getBody());
-        Assertions.assertEquals(OrganizationStatus.DRAFT, organizationResponse.getBody().getStatus());
+
+
+        Consumer<OrganizationWithReferentsAndStatus> assertions =(org) -> {
+            Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+                    .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
+                            org)));
+
+            agreementService.createAgreementIfNotExists(org.getKeyOrganizationFiscalCode(),org.getEntityType());
+
+            ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse
+                    = backofficeAttributeAuthorityFacade.getOrganization(org.getKeyOrganizationFiscalCode());
+
+            Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+            Assertions.assertNotNull(organizationResponse.getBody());
+            Assertions.assertEquals(org, organizationResponse.getBody());
+            Assertions.assertEquals(org.getStatus(), organizationResponse.getBody().getStatus());
+            Assertions.assertEquals(org.getEntityType(), organizationResponse.getBody().getEntityType());
+        };
+
+        assertions.accept(organization0);
+        assertions.accept(organization1);
     }
 
     @Test
@@ -173,7 +202,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                 = createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
                                                                profileEntity.getTaxCodeOrVat(),
                                                                "org0",
-                                                               "org0@pec.it");
+                                                               "org0@pec.it",OrganizationStatus.PENDING,null);
+
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
                .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
@@ -202,7 +232,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                 = createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
                                                                profileEntity.getTaxCodeOrVat(),
                                                                "org0",
-                                                               "org0@pec.it");
+                                                               "org0@pec.it",OrganizationStatus.ACTIVE,null);
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
                .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
@@ -230,7 +260,8 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                 = createOrganizationWithReferentsAndStatusMock(profileEntity.getTaxCodeOrVat(),
                                                                profileEntity.getTaxCodeOrVat(),
                                                                "org0",
-                                                               "org0@pec.it");
+                                                               "org0@pec.it",null,null);
+
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
                .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
@@ -270,21 +301,33 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         String anOrganizationName = "An organization";
         String anOrganizationPec = "an-organization@pec.it";
 
-        UpsertResult upsertResult = upsertOrganizationWithReferents(anOrganizationFiscalCode,
+        UpsertResult upsertResult0 = upsertOrganizationWithReferents(anOrganizationFiscalCode,
                                                                     anOrganizationFiscalCode,
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
                                                                     EntityType.PRIVATE);
 
-        Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
-        Assertions.assertNotNull(upsertResult.response.getBody());
-        Assertions.assertEquals(anOrganizationFiscalCode, upsertResult.response.getBody().getOrganizationFiscalCode());
-        Assertions.assertEquals(anOrganizationName, upsertResult.response.getBody().getOrganizationName());
-        Assertions.assertEquals(anOrganizationPec, upsertResult.response.getBody().getPec());
-        Assertions.assertEquals(upsertResult.organizationWithReferents.getInsertedAt(),
-                                upsertResult.response.getBody().getInsertedAt());
-        Assertions.assertEquals(upsertResult.organizationWithReferents.getEntityType(),upsertResult.response.getBody().getEntityType());
+        UpsertResult upsertResult1 = upsertOrganizationWithReferents(anOrganizationFiscalCode,
+                                                                        anOrganizationFiscalCode,
+                                                                        anOrganizationName,
+                                                                        anOrganizationPec,
+                                                                        false,
+                                                                        EntityType.PUBLICADMINISTRATION);
+        Consumer<UpsertResult> assertionsBlock = (ur) -> {;
+            Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
+            Assertions.assertNotNull(ur.response.getBody());
+            Assertions.assertEquals(anOrganizationFiscalCode, ur.response.getBody().getOrganizationFiscalCode());
+            Assertions.assertEquals(anOrganizationName, ur.response.getBody().getOrganizationName());
+            Assertions.assertEquals(anOrganizationPec, ur.response.getBody().getPec());
+            Assertions.assertEquals(ur.organizationWithReferents.getInsertedAt(),
+                                    ur.response.getBody().getInsertedAt());
+            Assertions.assertEquals(ur.organizationWithReferents.getEntityType()
+                    ,ur.response.getBody().getEntityType());
+        };
+
+        assertionsBlock.accept(upsertResult0);
+        assertionsBlock.accept(upsertResult1);
 
         Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
         Mockito.verify(profileServiceSpy, Mockito.times(0)).updateProfile(Mockito.any(), Mockito.any());
@@ -297,23 +340,35 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         String anOrganizationName = "New name";
         String anOrganizationPec = "new-pec@pec.it";
 
-        UpsertResult upsertResult = upsertOrganizationWithReferents(anOrganizationFiscalCode,
+        UpsertResult upsertResult0 = upsertOrganizationWithReferents(anOrganizationFiscalCode,
                                                                     anOrganizationFiscalCode,
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
                                                                     EntityType.PRIVATE);
 
-        Assertions.assertEquals(HttpStatus.OK, upsertResult.response.getStatusCode());
-        Assertions.assertNotNull(upsertResult.response.getBody());
-        Assertions.assertEquals(anOrganizationFiscalCode, upsertResult.response.getBody().getOrganizationFiscalCode());
-        Assertions.assertEquals(anOrganizationName, upsertResult.response.getBody().getOrganizationName());
-        Assertions.assertEquals(anOrganizationPec, upsertResult.response.getBody().getPec());
-        Assertions.assertEquals(upsertResult.organizationWithReferents.getInsertedAt(),
-                                upsertResult.response.getBody().getInsertedAt());
+        UpsertResult upsertResult1 = upsertOrganizationWithReferents(anOrganizationFiscalCode,
+                                                                    anOrganizationFiscalCode,
+                                                                    anOrganizationName,
+                                                                    anOrganizationPec,
+                                                                    false,
+                                                                    EntityType.PUBLICADMINISTRATION);
+
+        Consumer<UpsertResult> assertionsBlock = (ur) -> {;
+            Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
+            Assertions.assertNotNull(ur.response.getBody());
+            Assertions.assertEquals(anOrganizationFiscalCode, ur.response.getBody().getOrganizationFiscalCode());
+            Assertions.assertEquals(anOrganizationName, ur.response.getBody().getOrganizationName());
+            Assertions.assertEquals(anOrganizationPec, ur.response.getBody().getPec());
+            Assertions.assertEquals(ur.organizationWithReferents.getInsertedAt(),
+                    ur.response.getBody().getInsertedAt());
+        };
+
+        assertionsBlock.accept(upsertResult0);
+        assertionsBlock.accept(upsertResult1);
 
         Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
-        Mockito.verify(profileServiceSpy, Mockito.times(1)).updateProfile(Mockito.any(), Mockito.any());
+        Mockito.verify(profileServiceSpy, Mockito.times(2)).updateProfile(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -418,14 +473,15 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
     private OrganizationWithReferentsAndStatus createOrganizationWithReferentsAndStatusMock(String aKeyOrganizationFiscalCode,
                                                                                             String anOrganizationFiscalCode,
                                                                                             String anOrganizationName,
-                                                                                            String anOrganizationPec) {
+                                                                                            String anOrganizationPec, OrganizationStatus status, EntityType entityType) {
         OrganizationWithReferentsAndStatus organizationWithReferents = new OrganizationWithReferentsAndStatus();
         organizationWithReferents.setKeyOrganizationFiscalCode(aKeyOrganizationFiscalCode);
         organizationWithReferents.setOrganizationFiscalCode(anOrganizationFiscalCode);
         organizationWithReferents.setOrganizationName(anOrganizationName);
         organizationWithReferents.setPec(anOrganizationPec);
         organizationWithReferents.setInsertedAt(LocalDate.now());
-        organizationWithReferents.setStatus(OrganizationStatus.ENABLED);
+        organizationWithReferents.setStatus(status);
+        organizationWithReferents.setEntityType(entityType);
         return organizationWithReferents;
     }
 
