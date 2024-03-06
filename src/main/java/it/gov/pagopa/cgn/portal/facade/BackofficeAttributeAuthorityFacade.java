@@ -5,7 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.service.*;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +47,7 @@ public class BackofficeAttributeAuthorityFacade {
                                                           Integer pageSize,
                                                           String sortBy,
                                                           String sortDirection) {
+
         ResponseEntity<Organizations> response = organizationsConverter.fromAttributeAuthorityResponse(
                 attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection));
 
@@ -60,6 +61,7 @@ public class BackofficeAttributeAuthorityFacade {
         ResponseEntity<OrganizationWithReferentsAndStatus> response
                 = organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(attributeAuthorityService.getOrganization(
                 keyOrganizationFiscalCode));
+
         getOrganizationAgreementAndMapStatus.accept(response);
         return response;
     }
@@ -164,6 +166,8 @@ public class BackofficeAttributeAuthorityFacade {
             default:
                 break;
         }
+
+        organization.setEntityType(BackofficeAgreementConverter.getEntityTypeFromEntityTypeEnum(agreement.getEntityType()));
     };
 
     private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus
