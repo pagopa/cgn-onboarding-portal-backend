@@ -62,10 +62,10 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         MimeMessage expectedMimeMessage = new MimeMessage(s);
 
         try {
-            expectedMimeMessage.setFrom("alessandro.forcuti@dgsspa.com");
-            expectedMimeMessage.setRecipient(RecipientType.TO, new InternetAddress("alessandro.forcuti@dgsspa.com"));
-            expectedMimeMessage.setSubject("prova");        	
-			expectedMimeMessage.setText("questa è una prova", StandardCharset.UTF_8.name());
+            expectedMimeMessage.setFrom("aa@bb.cc");
+            expectedMimeMessage.setRecipient(RecipientType.TO, new InternetAddress("aa@bb.cc"));
+            expectedMimeMessage.setSubject("test");        	
+			expectedMimeMessage.setText("questa è una test", StandardCharset.UTF_8.name());
 			
 		} catch (MessagingException e) {
 			e.printStackTrace();
