@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Immutable
 @Table(name = "eyca_data_export")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EycaDataExportViewEntity {
 
     @Id
@@ -33,6 +35,7 @@ public class EycaDataExportViewEntity {
     private String name;
 
     @Column(name = "discount_id")
+    @EqualsAndHashCode.Include
     private Long discountId;
 
     @Column(name = "eyca_update_id")

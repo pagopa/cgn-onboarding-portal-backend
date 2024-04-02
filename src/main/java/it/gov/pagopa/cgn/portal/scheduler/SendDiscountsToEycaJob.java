@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.service.ExportService;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 
 @Component
 @Slf4j
@@ -27,7 +25,8 @@ public class SendDiscountsToEycaJob implements Job {
     }
 
 
-    public void execute(JobExecutionContext context) {
+    @Override
+	public void execute(JobExecutionContext context) {
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();

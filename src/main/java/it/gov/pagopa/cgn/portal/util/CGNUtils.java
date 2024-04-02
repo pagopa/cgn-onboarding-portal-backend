@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Iterator;
 
+import com.fasterxml.jackson.databind.*;
+
 public class CGNUtils {
 
     private CGNUtils() {
@@ -110,5 +112,13 @@ public class CGNUtils {
         }
         throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
-
+    
+    public static String toJson (Object o) {
+          try {  
+              return new ObjectMapper().writer().writeValueAsString(o);  
+          }  
+          catch (Exception e) {
+        	  return "null";
+          }  
+    }
 }
