@@ -95,24 +95,17 @@ public class BackofficeAgreementService {
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
         
-        if (agreementEntity != null && agreementEntity.getEntityType().equals(EntityTypeEnum.PRIVATE) &&
-                (CollectionUtils.isEmpty(documents) ||
+        Collection<DocumentTypeEnum> manDocs = EntityTypeEnum.PRIVATE.equals(agreementEntity.getEntityType())
+        		? mandatoryDocuments : mandatoryPaDocuments;
+        
+        if (CollectionUtils.isEmpty(documents) ||
                     !documents.stream()
                       .map(DocumentEntity::getDocumentType)
                       .collect(Collectors.toList())
-                      .containsAll(mandatoryDocuments))) {
+                      .containsAll(manDocs)) {
             throw new InvalidRequestException("Mandatory documents are missing");
         }
-        
-        else if (agreementEntity != null && agreementEntity.getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)  &&
-                     (CollectionUtils.isEmpty(documents) ||
-                        !documents.stream()
-                          .map(DocumentEntity::getDocumentType)
-                          .collect(Collectors.toList())
-                          .containsAll(mandatoryPaDocuments))) {
-                throw new InvalidRequestException("Mandatory documents are missing");
-        }
-        
+
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
