@@ -54,7 +54,7 @@ public class DocumentService {
     private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
 
     public List<DocumentEntity> getPrioritizedDocuments(String agreementId) {
-        return filterDocumentsByPriority(getAllDocuments(agreementId));
+        return filterDocumentsByPriority(documentRepository.findByAgreementId(agreementId));
     }
 
     @Transactional
@@ -64,7 +64,7 @@ public class DocumentService {
 
     @Transactional(readOnly = true)
     public List<DocumentEntity> getAllDocuments(String agreementId, Predicate<DocumentEntity> documentFilter) {
-        List<DocumentEntity> documents = getAllDocuments(agreementId);
+        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreementId);
         if (!CollectionUtils.isEmpty(documents)) {
             documents = documents.stream().filter(documentFilter).collect(Collectors.toList());
             documents.forEach(azureStorage::setSecureDocumentUrl);
@@ -163,7 +163,8 @@ public class DocumentService {
 
     @Transactional
     public void resetAllDocuments(String agreementId) {
-        resetMerchantDocuments(agreementId);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.AGREEMENT);
+        documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.ADHESION_REQUEST);
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId, DocumentTypeEnum.BACKOFFICE_AGREEMENT);
         documentRepository.deleteByAgreementIdAndDocumentType(agreementId,
                                                               DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
