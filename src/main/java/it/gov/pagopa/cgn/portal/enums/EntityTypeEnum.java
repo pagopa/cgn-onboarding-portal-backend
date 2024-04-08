@@ -8,10 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum EntityTypeEnum {
 
-    PRIVATE("PRIVATE", "Private"),
-    PUBLIC_ADMINISTRATION("PUBLIC_ADMINISTRATION", "PublicAdministration");
+    PRIVATE("PRIVATE", "Private",2),
+    PUBLIC_ADMINISTRATION("PUBLIC_ADMINISTRATION", "PublicAdministration",1);
 
     private final String code;
     private final String restRequestCode;
+    private final int nrDocs;
 
 }

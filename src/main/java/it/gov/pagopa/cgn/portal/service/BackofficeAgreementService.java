@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
@@ -45,7 +46,11 @@ public class BackofficeAgreementService {
                                                                               DocumentTypeEnum.ADHESION_REQUEST,
                                                                               DocumentTypeEnum.BACKOFFICE_AGREEMENT)
                                                                           .collect(Collectors.toList());
-
+    
+    private final Collection<DocumentTypeEnum> mandatoryPaDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
+                    DocumentTypeEnum.BACKOFFICE_AGREEMENT)
+        .collect(Collectors.toList());
+    
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
@@ -84,17 +89,30 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity approveAgreement(String agreementId) {
-        var agreementEntity = agreementServiceLight.findById(agreementId);
+    	
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
-        if (CollectionUtils.isEmpty(documents) ||
-            !documents.stream()
+        
+        if (agreementEntity != null && agreementEntity.getEntityType().equals(EntityTypeEnum.PRIVATE) &&
+                (CollectionUtils.isEmpty(documents) ||
+                    !documents.stream()
                       .map(DocumentEntity::getDocumentType)
                       .collect(Collectors.toList())
-                      .containsAll(mandatoryDocuments)) {
+                      .containsAll(mandatoryDocuments))) {
             throw new InvalidRequestException("Mandatory documents are missing");
         }
+        
+        else if (agreementEntity != null && agreementEntity.getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)  &&
+                     (CollectionUtils.isEmpty(documents) ||
+                        !documents.stream()
+                          .map(DocumentEntity::getDocumentType)
+                          .collect(Collectors.toList())
+                          .containsAll(mandatoryPaDocuments))) {
+                throw new InvalidRequestException("Mandatory documents are missing");
+        }
+        
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());

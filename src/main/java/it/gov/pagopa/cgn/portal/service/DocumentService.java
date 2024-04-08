@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
@@ -209,26 +210,35 @@ public class DocumentService {
     private ByteArrayOutputStream renderAgreementDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
                                                        .orElseThrow(() -> new RuntimeException("no profile"));
+        String docPath = "pdf/pe-agreement-public.html";
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
         context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
-        context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
-        context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
-        context.setVariable("legal_office", profileEntity.getLegalOffice());
-        context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
+        if(profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PRIVATE)) {
+        	docPath = "pdf/pe-agreement.html";
+	        context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
+	        context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
+	        context.setVariable("legal_office", profileEntity.getLegalOffice());
+	        context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
+        }
         context.setVariable("pec_address", profileEntity.getPecAddress());
         context.setVariable("department_reference_email", "cartagiovaninazionale@governo.it");
         context.setVariable("department_pec_address", "giovanieserviziocivile@pec.governo.it");
         context.setVariable("current_date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-        String renderedContent = templateEngine.process("pdf/pe-agreement.html", context);
+        String renderedContent = templateEngine.process(docPath, context);
         return generatePdfFromHtml(renderedContent);
     }
 
     private ByteArrayOutputStream renderAdhesionRequestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
                                                        .orElseThrow(() -> new RuntimeException("no profile"));
+        
+        if(profileEntity != null && profileEntity.getAgreement() != null 
+        		&& profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)) {
+        	throw new CGNException("The adhesion document is not required for PA");
+        }
 
         List<String> addressList = profileEntity.getAddressList()
                                                 .stream()
