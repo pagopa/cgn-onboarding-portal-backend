@@ -124,8 +124,8 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
     @Test
     void UpsertOrganization_Ok() throws Exception {
         OrganizationWithReferents organization = new OrganizationWithReferents();
-        organization.setKeyOrganizationFiscalCode("12345678");
-        organization.setOrganizationFiscalCode("12345678");
+        organization.setKeyOrganizationFiscalCode("00000000000");
+        organization.setOrganizationFiscalCode("00000000000");
         organization.setOrganizationName("org 1");
         organization.setPec("org1@pec.it");
         organization.setEntityType(EntityType.PRIVATE);
