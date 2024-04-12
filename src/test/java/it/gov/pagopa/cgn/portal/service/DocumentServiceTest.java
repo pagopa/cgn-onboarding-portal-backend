@@ -23,7 +23,6 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -289,7 +288,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertTrue(actual.contains("PER L’ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
 
         Assertions.assertTrue(actual.contains("FULL_NAME"));
-        Assertions.assertTrue(actual.contains("address@pagopa.it"));
+        Assertions.assertFalse(actual.contains("${current_date}"));
     }
 
     @Test
