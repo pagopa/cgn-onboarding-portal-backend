@@ -206,6 +206,11 @@ public class IntegrationAbstractTest {
         userRepository.flush();
     }
 
+    protected List<DocumentEntity> saveSamplePaDocuments(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = TestUtils.createSamplePaDocumentList(agreementEntity);
+        return documentRepository.saveAll(documentList);
+    }
+
     protected List<DocumentEntity> saveSampleDocuments(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = TestUtils.createSampleDocumentList(agreementEntity);
         return documentRepository.saveAll(documentList);
@@ -255,7 +260,7 @@ public class IntegrationAbstractTest {
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DiscountEntity> discountEntities = new ArrayList<>();
         discountEntities.add(discountEntity);
-        List<DocumentEntity> documentEntityList = saveSampleDocuments(agreementEntity);
+        List<DocumentEntity> documentEntityList = isPA ? saveSamplePaDocuments(agreementEntity) : saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         return createAgreementTestObject(agreementEntity, profileEntity, discountEntities, documentEntityList);
     }

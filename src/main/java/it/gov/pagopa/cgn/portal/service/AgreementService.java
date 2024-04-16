@@ -5,7 +5,6 @@ import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverte
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
@@ -44,7 +43,7 @@ public class AgreementService extends AgreementServiceLight {
     private final BackofficeAgreementConverter backofficeAgreementConverter;
 
     private final ConfigProperties configProperties;
-
+    
     @Transactional
     public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode){
         AgreementUserEntity userAgreement;
@@ -83,12 +82,16 @@ public class AgreementService extends AgreementServiceLight {
         ProfileEntity profile = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException("Profile not found. Agreement not approvable"));
         List<DiscountEntity> discounts = discountService.getDiscounts(agreementId);
-        if (CollectionUtils.isEmpty(discounts)) {
+        if (CollectionUtils.isEmpty(discounts) && EntityTypeEnum.PRIVATE.equals(agreementEntity.getEntityType())) {
             throw new InvalidRequestException("Discounts not found. Agreement not approvable");
         }
         List<DocumentEntity> documents = documentService.getPrioritizedDocuments(agreementId);
-        if (documents == null || documents.size() < DocumentTypeEnum.getNumberOfDocumentProfile()) {
-            throw new InvalidRequestException("Documents not or partially loaded. Agreement not approvable");
+
+        int nrDocs = agreementEntity.getEntityType().getNrDocs();
+
+        if (documents == null || documents.size() != nrDocs) {
+            throw new InvalidRequestException("Mandatory documents for "+agreementEntity.getEntityType()+":"+nrDocs
+            											+", loaded: "+documents.size()+". Agreement not approvable");
         }
         agreementEntity.setState(AgreementStateEnum.PENDING);
         agreementEntity.setRequestApprovalTime(OffsetDateTime.now());

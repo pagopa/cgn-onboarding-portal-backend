@@ -992,6 +992,11 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
+    public static List<DocumentEntity> createSamplePaDocumentList(AgreementEntity agreementEntity) {
+        List<DocumentEntity> documentList = new ArrayList<>();
+        documentList.add(createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT));
+        return documentList;
+    }
 
     public static List<DocumentEntity> createSampleDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();

@@ -360,7 +360,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                https://raw.githubusercontent.com/pagopa/ade-aa-ms-mock/master/openapi/index.yaml
+                                https://raw.githubusercontent.com/pagopa/ade-aa-ms-mock/1d4cad7f226d472cd3cfa5a73e8ec98d1bf95ee5/openapi/index.yaml
                             </inputSpec>
                             <output>${project.build.directory}/generated-sources</output>
                             <generatorName>java</generatorName>
