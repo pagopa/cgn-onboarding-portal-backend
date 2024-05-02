@@ -4,6 +4,7 @@ package it.gov.pagopa.cgn.portal.converter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
+import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
 
         Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
                 .map(val -> {
-                    if (val.equals("Y")) {
+                    if (ExportService.LIVE_YES.equals(val)) {
                         if (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
                             return 0;
                         } else {

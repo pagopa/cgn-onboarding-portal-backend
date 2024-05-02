@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.email;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -15,9 +16,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -277,36 +279,59 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
+    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage, List<Attachment> attachments) {
+        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage, Optional.of(attachments));
+    }
+    
     private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage);
+        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage, Optional.empty());
     }
 
     private EmailParams createEmailParams(String mailTo, List<String> secondaryMailToList, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.of(secondaryMailToList), Optional.empty(), subject, body, failureMessage);
+        return createEmailParams(mailTo, Optional.of(secondaryMailToList), Optional.empty(), subject, body, failureMessage, Optional.empty());
     }
 
     private EmailParams createEmailParams(String mailTo, String replyToOpt, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.empty(), Optional.of(replyToOpt), subject, body, failureMessage);
+        return createEmailParams(mailTo, Optional.empty(), Optional.of(replyToOpt), subject, body, failureMessage, Optional.empty());
     }
 
 
+    private EmailParams createEmailParams(List<String> mailTo,
+		            Optional<List<String>> ccList,
+		            Optional<String> replyToOpt,
+		            String subject,
+		            String body,
+		            String failureMessage, Optional<List<Attachment>> attachments) {
+		return EmailParams.builder()
+		.mailFrom(configProperties.getCgnNotificationSender())
+		.logoName("cgn-logo.png")
+		.logo(configProperties.getCgnLogo())
+		.mailToList(mailTo)
+		.mailCCList(ccList)
+		.replyToOpt(replyToOpt)
+		.subject(subject)
+		.body(body)
+		.failureMessage(failureMessage)
+		.attachments(attachments)
+		.build();
+    }
+    
     private EmailParams createEmailParams(String mailTo,
                                           Optional<List<String>> ccList,
                                           Optional<String> replyToOpt,
                                           String subject,
                                           String body,
-                                          String failureMessage) {
-        return EmailParams.builder()
-                          .mailFrom(configProperties.getCgnNotificationSender())
-                          .logoName("cgn-logo.png")
-                          .logo(configProperties.getCgnLogo())
-                          .mailToList(Collections.singletonList(mailTo))
-                          .mailCCList(ccList)
-                          .replyToOpt(replyToOpt)
-                          .subject(subject)
-                          .body(body)
-                          .failureMessage(failureMessage)
-                          .build();
+                                          String failureMessage, Optional<List<Attachment>> attachments) {
+        return createEmailParams(Collections.singletonList(mailTo),ccList, replyToOpt, subject, body, failureMessage, attachments);
+    }
+    
+    public void notifyAdminForJobEyca(List<Attachment> attachments) {
+        String subject = "Eyca job launch summary attachments of: "+ LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String body = "The Eyca job summary attachments";
+        String failureMessage = "It is not possible to send the email with the job summary attacchments.";
+        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaJobMailTo().split(";")), subject, body, 
+        		failureMessage, attachments);
+        emailNotificationService.sendAsyncMessage(emailParams);
     }
 
     private String getTemplateHtml(TemplateEmail template) {

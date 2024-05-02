@@ -1,9 +1,8 @@
 package it.gov.pagopa.cgn.portal.email;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
-import org.springframework.core.io.Resource;
+import lombok.*;
+
+import org.springframework.core.io.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +21,7 @@ public class EmailParams {
     private final Resource logo;
     private final String logoName;
     private final String failureMessage;
+    private final Optional<List<Attachment>> attachments;
 
     public String toLightString() {
         return "EmailParams{" +
@@ -32,5 +32,10 @@ public class EmailParams {
                 '}';
     }
 
-
+    @Getter
+    @AllArgsConstructor
+    public static final class Attachment {
+    	private String attachmentFilename;
+    	private ByteArrayResource resource;
+    }
 }

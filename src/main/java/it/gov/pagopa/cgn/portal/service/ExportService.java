@@ -3,7 +3,8 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.*;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.email.EmailParams;
+import it.gov.pagopa.cgn.portal.email.*;
+import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -24,11 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
-import org.springframework.mail.javamail.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
-import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -44,11 +43,9 @@ import java.util.stream.*;
 @Slf4j
 @Service
 public class ExportService {
-	
-	private final JavaMailSender javaMailSender;
 
-    private static final String LIVE_YES="Y";
-    private static final String LIVE_NO="N";
+    public static final String LIVE_YES="Y";
+    public static final String LIVE_NO="N";
 
     private final AgreementRepository agreementRepository;
     private final DiscountRepository discountRepository;
@@ -58,6 +55,8 @@ public class ExportService {
     private final EycaExportService eycaExportService;
     private final DataExportEycaWrapperConverter dataExportEycaConverter;
     private final UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter;
+    
+    private EmailNotificationFacade emailNotificationFacade;
     
     private final String[] eycaDataExportHeaders = new String[] {
     		"id","categories","profile_id","vendor","discount_id","eyca_update_id","name","start_date","end_date","name_local","text","text_local","email","phone","web","tags","image","live","location_local_id","street","city","zip","country","region","latitude","longitude","discount_type","referent"
@@ -115,16 +114,16 @@ public class ExportService {
 
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
                          ConfigProperties configProperties, EycaExportService eycaExportService,
-                         DataExportEycaWrapperConverter dataExportEycaConverter, UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter,
-                         JavaMailSender javaMailSender) {
-        this.agreementRepository = agreementRepository;
+                         DataExportEycaWrapperConverter dataExportEycaConverter, UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter, 
+                         EmailNotificationFacade emailNotificationFacade) {
+		this.agreementRepository = agreementRepository;
         this.discountRepository = discountRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
         this.configProperties = configProperties;
         this.eycaExportService = eycaExportService;
         this.dataExportEycaConverter = dataExportEycaConverter;
         this.updateDataExportEycaConverter=updateDataExportEycaConverter;
-        this.javaMailSender = javaMailSender;
+        this.emailNotificationFacade = emailNotificationFacade;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -209,7 +208,7 @@ public class ExportService {
     }
     
     @Transactional(Transactional.TxType.REQUIRED)
-    public byte[] buildEycaCsv(List<EycaDataExportViewEntity> exportViewEntities) {
+    public ByteArrayResource buildEycaCsv(List<EycaDataExportViewEntity> exportViewEntities) {
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
         	
@@ -253,11 +252,11 @@ public class ExportService {
 
 
             log.info("buildEycaCsv end success");
-            return writer.toString().getBytes(StandardCharsets.UTF_8);
+            return new ByteArrayResource(writer.toString().getBytes(StandardCharsets.UTF_8));
         } catch (Exception ex) {
             log.error("buildEycaCsv end failure: " + ex.getMessage());
         }
-        return new byte[] {};
+        return new ByteArrayResource(new byte[] {});
     }
     
     
@@ -299,42 +298,14 @@ public class ExportService {
 		    
 		    log.info("EYCA_LOG_DELETE:");
            	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);		    
-
-            log.info("sendDiscountsToEyca end success");
             
-//            TODO: creare quattro csv da inviare come allegato
-             byte[] csvAll = buildEycaCsv(exportViewEntities);
-             byte[] csvCreate = buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()));
-             byte[] csvUpdate = buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()));
-             byte[] csvDelete = buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList()));
-
-            EmailParams emailParams = createEmailParams("alessandro.forcuti@dgspsa.com", Optional.of(new ArrayList<String>()), Optional.of("test@test.it"),"prova","prova","prova");
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            try {
-                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-                helper.setFrom(emailParams.getMailFrom());
-                helper.setTo(emailParams.getMailToList().toArray(new String[0]));
-
-                if (emailParams.getMailCCList().isPresent()) {
-                    helper.setCc(emailParams.getMailCCList().orElseThrow().toArray(new String[0]));
-                }
-
-                if (emailParams.getReplyToOpt().isPresent()) {
-                    helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
-                }
-
-                helper.setSubject(emailParams.getSubject());
-                helper.setText(emailParams.getBody(), true);
-//                helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
-                helper.addAttachment("all.csv", new ByteArrayResource(csvAll));
-                helper.addAttachment("createOnEyca.csv", new ByteArrayResource(csvCreate));
-                helper.addAttachment("updateOnEyca.csv", new ByteArrayResource(csvUpdate));
-                helper.addAttachment("deleteOnEyca.csv", new ByteArrayResource(csvDelete));
-
-                javaMailSender.send(mimeMessage);
-            } catch (Exception e) {
-                throw e;
-            }
+            List<Attachment> attachments = new ArrayList<>();
+            attachments.add(new Attachment("all.csv", 		   buildEycaCsv(exportViewEntities))); 
+            attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
+            attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
+            attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
+             
+            emailNotificationFacade.notifyAdminForJobEyca(attachments);
 
             return ResponseEntity.status(HttpStatus.OK).build();
 
@@ -344,28 +315,11 @@ public class ExportService {
                     .map(StackTraceElement::toString)
                     .collect(Collectors.joining("\n")));
         }
+    	
+        log.info("sendDiscountsToEyca end success");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    
-    private EmailParams createEmailParams(String mailTo,
-            Optional<List<String>> ccList,
-            Optional<String> replyToOpt,
-            String subject,
-            String body,
-            String failureMessage) {
-				return EmailParams.builder()
-				.mailFrom("alessandro.forcuti@dgsspa.com")
-				.logoName("cgn-logo.png")
-				.logo(configProperties.getCgnLogo())
-				.mailToList(Collections.singletonList(mailTo))
-				.mailCCList(ccList)
-				.replyToOpt(replyToOpt)
-				.subject(subject)
-				.body(body)
-				.failureMessage(failureMessage)
-				.build();
-    }
-
+  
     
 //  private List<DataExportEycaWrapper> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 //		return exportViewEntities.stream()
@@ -489,6 +443,7 @@ public class ExportService {
 	    	log.info("UPDATE UpdateDataExportEyca: " + CGNUtils.toJson(exportEyca));
 	        ApiResponseEyca response = null;
 	        try {
+	        	
 	        	response = eycaExportService.updateDiscount(exportEyca, "json");
 	        	
 	            if (Objects.nonNull(response)){

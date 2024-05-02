@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.*;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -87,9 +89,11 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         DataExportEycaWrapperConverter dataExportEycaConverter = new DataExportEycaWrapperConverter();
         UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter = new UpdateDataExportEycaWrapperConverter();
         
+        EmailNotificationFacade emailNotificationFacade = Mockito.mock(EmailNotificationFacade.class);
+        
         EycaExportService eycaExportService = new EycaExportService(eycaApi, configProperties);
         exportService = new ExportService(agreementRepository, discountRepository, eycaDataExportRepository, configProperties, 
-        										eycaExportService, dataExportEycaConverter, updateDataExportEycaConverter,javaMailSenderMock);
+        										eycaExportService, dataExportEycaConverter, updateDataExportEycaConverter, emailNotificationFacade);
     }
 
 
@@ -445,13 +449,8 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
     @Test
     void testBuildCsv() {
-    	byte[] bytes = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-    	Assert.assertNotNull(bytes);
-//    	try {
-//			FileUtils.writeByteArrayToFile(new File("c:\\develop\\test.csv"), bytes);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+    	ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
+    	Assert.assertFalse(resource.getByteArray().length == 0);
     }
 
 }
