@@ -29,8 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.StringWriter;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -160,6 +160,8 @@ public class ExportService {
     public ResponseEntity<Resource> exportEycaDiscounts() {
         log.info("exportEycaDiscounts start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
+        exportViewEntities = exportViewEntities.stream().distinct().collect(Collectors.toList());
+        
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
@@ -297,16 +299,34 @@ public class ExportService {
 		    updateDiscountsOnEyca(entitiesToUpdateOnEyca);
 		    
 		    log.info("EYCA_LOG_DELETE:");
-           	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);		    
-            
+         	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);
+         	
             List<Attachment> attachments = new ArrayList<>();
-            attachments.add(new Attachment("all.csv", 		   buildEycaCsv(exportViewEntities))); 
-            attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
-            attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
-            attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList())))); 
+            if(exportViewEntities.size() > 0) {
+            	attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
+            }
+            
+            if(entitiesToCreateOnEyca.size() > 0) {
+            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            }
+            
+            if(entitiesToUpdateOnEyca.size() > 0) {
+            	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            }
+            
+            if(entitiesToDeleteOnEyca.size() > 0) {
+            	attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            }
              
-            emailNotificationFacade.notifyAdminForJobEyca(attachments);
-
+            String body = "All discounts for Eyca excluding duplicates: "+exportViewEntities.size()
+            			  +"<br /> Discounts to create: "+entitiesToCreateOnEyca.size()
+            			  +"<br /> Discounts to update: "+entitiesToUpdateOnEyca.size()
+            			  +"<br /> Discounts to delete: "+entitiesToDeleteOnEyca.size();
+            
+            System.out.println("MAIL-BODY: "+body);
+            
+            emailNotificationFacade.notifyAdminForJobEyca(attachments,body);
+            
             return ResponseEntity.status(HttpStatus.OK).build();
 
         } catch (Exception ex) {

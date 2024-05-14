@@ -325,9 +325,8 @@ public class EmailNotificationFacade {
         return createEmailParams(Collections.singletonList(mailTo),ccList, replyToOpt, subject, body, failureMessage, attachments);
     }
     
-    public void notifyAdminForJobEyca(List<Attachment> attachments) {
+    public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
         String subject = "Eyca job launch summary attachments of: "+ LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String body = "The Eyca job summary attachments";
         String failureMessage = "It is not possible to send the email with the job summary attacchments.";
         EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaJobMailTo().split(";")), subject, body, 
         		failureMessage, attachments);
