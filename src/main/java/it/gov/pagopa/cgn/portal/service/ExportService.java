@@ -166,7 +166,9 @@ public class ExportService {
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
             exportViewEntities.stream()
-                    .map(r -> new String[]{r.getId().toString(),
+                    .map(r -> new String[]{
+                    		r.getDiscountId().toString(),                    		
+                    		r.getId().toString(),
                             r.getCategories(),
                             r.getVendor(),
                             r.getName(),
@@ -187,7 +189,10 @@ public class ExportService {
                             r.getRegion(),
                             r.getLatitude(),
                             r.getLongitude(),
-                            r.getDiscountType()})
+                            r.getSalesChannel().toString(),
+                            r.getDiscountType(),
+                            r.getLandingPageReferrer(),
+                            })
                     .forEach(printerConsumer.apply(printer));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
@@ -213,14 +218,13 @@ public class ExportService {
     public ByteArrayResource buildEycaCsv(List<EycaDataExportViewEntity> exportViewEntities) {
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
-        	
-        	//"id","categories","profile_id","vendor","discount_id","eyca_update_id","name","start_date","end_date","name_local","text","text_local","email","phone","web","tags","image","live",
-        	///"location_local_id","street","city","zip","country","region","latitude","longitude","discount_type","referent"
+
         	DateTimeFormatter ddMMyyyy = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         	
         	printerConsumer.apply(printer).accept(eycaDataExportHeaders);
             exportViewEntities.stream()
             .map(r -> new String[]{
+            		r.getDiscountId().toString(),
             		r.getId().toString(),
                     r.getCategories(),
                     Optional.ofNullable(r.getProfileId()).orElse(Long.valueOf(0L)).toString(),
@@ -247,7 +251,9 @@ public class ExportService {
                     r.getRegion(),
                     r.getLatitude(),
                     r.getLongitude(),
+                    r.getSalesChannel().toString(),
                     r.getDiscountType(),
+                    r.getLandingPageReferrer(),
                     Optional.ofNullable(r.getReferent()).orElse(Long.valueOf(0L)).toString(),
                     })
             .forEach(printerConsumer.apply(printer));
@@ -283,7 +289,7 @@ public class ExportService {
 	            return null;
 	        }	
 	        
-	    	//Tutte le agevolazioni (attive E in stato PUBLISHED: => Live=Y),con le sole LENDING PAGE con referent vuoto
+	    	//Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
 	    	List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(exportViewEntities);
 
 	    	//Tutte le agevolazioni che avevano valorizzato il campo eycaUpdateId, precedentemente alla create.
@@ -292,23 +298,24 @@ public class ExportService {
 			//Tutte le agevolazioni che sono andate in Live=N
 			List<DeleteDataExportEyca> entitiesToDeleteOnEyca = getItemsToDeleteOnEyca(exportViewEntities);
 
-	        log.info("EYCA_LOG_CREATE:");
-	        createDiscountsOnEyca(entitiesToCreateOnEyca);
-	            
-	        log.info("EYCA_LOG_UPDATE:");
-		    updateDiscountsOnEyca(entitiesToUpdateOnEyca);
-		    
-		    log.info("EYCA_LOG_DELETE:");
-         	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);
-         	
+//	        log.info("EYCA_LOG_CREATE:");
+//	        createDiscountsOnEyca(entitiesToCreateOnEyca);
+//	            
+//	        log.info("EYCA_LOG_UPDATE:");
+//		    updateDiscountsOnEyca(entitiesToUpdateOnEyca);
+//		    
+//		    log.info("EYCA_LOG_DELETE:");
+//         	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);		    
+            
             List<Attachment> attachments = new ArrayList<>();
             if(exportViewEntities.size() > 0) {
-            	attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
+            	//attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
+            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(exportViewEntities)));
             }
             
-            if(entitiesToCreateOnEyca.size() > 0) {
-            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
-            }
+//            if(entitiesToCreateOnEyca.size() > 0) {
+//            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+//            }
             
             if(entitiesToUpdateOnEyca.size() > 0) {
             	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
@@ -318,8 +325,7 @@ public class ExportService {
             	attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
             }
              
-            String body = "All discounts for Eyca excluding duplicates: "+exportViewEntities.size()
-            			  +"<br /> Discounts to create: "+entitiesToCreateOnEyca.size()
+            String body = "Discounts to create: "+entitiesToCreateOnEyca.size()
             			  +"<br /> Discounts to update: "+entitiesToUpdateOnEyca.size()
             			  +"<br /> Discounts to delete: "+entitiesToDeleteOnEyca.size();
             
@@ -327,6 +333,10 @@ public class ExportService {
             
             emailNotificationFacade.notifyAdminForJobEyca(attachments,body);
             
+            //CGNUtils.writeAttachments(attachments,"c:\\develop\\");
+            
+            System.out.println("Attachments created");
+
             return ResponseEntity.status(HttpStatus.OK).build();
 
         } catch (Exception ex) {
@@ -339,7 +349,6 @@ public class ExportService {
         log.info("sendDiscountsToEyca end success");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-  
     
 //  private List<DataExportEycaWrapper> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 //		return exportViewEntities.stream()
@@ -377,11 +386,9 @@ public class ExportService {
 	private List<DataExportEycaWrapper<DataExportEyca>> getWrappersToCreateOnEyca(
 			List<EycaDataExportViewEntity> exportViewEntities) {
 		
-		return createOnEycaStream(exportViewEntities)
-		.filter(entity->StringUtils.isEmpty(entity.getEycaUpdateId()))
-//        .collect(Collectors.groupingBy(EycaDataExportViewEntity::getDiscountId))
-//        .entrySet().stream()
-//        .map(dataExportEycaConverter::groupedEntityToDto)	            		
+		return exportViewEntities.stream()
+//		return createOnEycaStream(exportViewEntities)
+//		.filter(entity->StringUtils.isEmpty(entity.getEycaUpdateId()))
 		.map(dataExportEycaConverter::toDto)
 		.collect(Collectors.toList());
 	}
@@ -399,29 +406,28 @@ public class ExportService {
     		   );
     }
 	
-	private Stream<EycaDataExportViewEntity> createOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
-		return exportViewEntities.stream().filter(
-		 		e ->
-//1*        					 		e.getLive().equalsIgnoreCase("N") && e.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())
-//			 		||
-                        (LIVE_YES.equalsIgnoreCase(e.getLive())  && !DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType()))
-				|| 
-				(LIVE_YES.equalsIgnoreCase(e.getLive()) && DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType())
-						&& e.getReferent() == null)
-		);
-	}	
+//	private Stream<EycaDataExportViewEntity> createOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
+//		return exportViewEntities.stream().filter(
+//		 		e ->
+////1*        					 		e.getLive().equalsIgnoreCase("N") && e.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())
+////			 		||
+//                        (LIVE_YES.equalsIgnoreCase(e.getLive())  && !DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType()))
+//				|| 
+//				(LIVE_YES.equalsIgnoreCase(e.getLive()) && DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType())
+//						&& e.getReferent() == null)
+//		);
+//	}	
 
     private void createDiscountsOnEyca(List<DataExportEycaWrapper<DataExportEyca>> exportEycaList){
-
-        eycaExportService.authenticateOnEyca();
-
-        log.info("creating new discount on EYCA");
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be created is empty");
             return;
         }
+        
         eycaExportService.authenticateOnEyca();
+        
+        log.info("Creating new discount on EYCA...");
 
         exportEycaList.forEach(exportEycaWrapper -> {
             DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
@@ -430,6 +436,11 @@ public class ExportService {
             ApiResponseEyca response = null;
             try {
                 response = eycaExportService.createDiscount(exportEyca, "json");
+
+                if (Objects.nonNull(response)){
+                	log.info("Create Response:");
+ 	                log.info(response.toString());
+ 	            }                	
                 
                 DiscountEntity entity = discountRepository.findById(exportEycaWrapper.getDiscountID())
                 		.orElseThrow( () -> new CGNException("discountId from Eyca " 
@@ -438,7 +449,9 @@ public class ExportService {
                 if(response !=null &&
                 		response.getApiResponse() != null &&
                 		response.getApiResponse().getData() != null &&
-                		response.getApiResponse().getData().getDiscount() != null){
+                		response.getApiResponse().getData().getDiscount() != null 
+                				&& !response.getApiResponse().getData().getDiscount().isEmpty()){
+                	
                 	entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
                     discountRepository.save(entity);
                 }                
@@ -449,13 +462,14 @@ public class ExportService {
     }
 
     private void updateDiscountsOnEyca(List<DataExportEycaWrapper<UpdateDataExportEyca>> exportEycaList) {
-        log.info("updating old discount on EYCA");
-
-        if (exportEycaList.isEmpty()) {
+        
+    	if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be updated is empty");
             return;
         }
         eycaExportService.authenticateOnEyca();
+        
+        log.info("Updating old discount on EYCA...");
 
         exportEycaList.forEach(exportEycaWrapper -> {  
 	        UpdateDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
@@ -466,9 +480,10 @@ public class ExportService {
 	        	
 	        	response = eycaExportService.updateDiscount(exportEyca, "json");
 	        	
-	            if (Objects.nonNull(response)){
-	                log.info(response.toString());
-	            }
+                if (Objects.nonNull(response)){
+                	log.info("Update Response:");
+ 	                log.info(response.toString());
+ 	            }
 	        }
 	        catch (RestClientException | CGNException e) {
 	            log.info("UPDATE eycaApi.updateDiscount Exception: " + e.getMessage());
@@ -478,9 +493,6 @@ public class ExportService {
 
 
     private void deleteDiscountsOnEyca(List<DeleteDataExportEyca> exportEycaList) {
-        log.info("deleting discount on EYCA");
-//        List<DeleteDataExportEyca> deleteList = exportEycaList.stream()
-//                .map(dataExportEycaConverter::convertToDeleteDataExportEyca).collect(Collectors.toList());
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be deleted is empty");
@@ -488,16 +500,19 @@ public class ExportService {
         }
         eycaExportService.authenticateOnEyca();
 
+        log.info("Deleting discount on EYCA...");
+        
         exportEycaList.forEach(exportEyca -> {
         	
 			log.info("DELETE DeleteDataExportEyca: " + exportEyca.toString());
-            DeleteApiResponseEyca apiResponse = null;
+            DeleteApiResponseEyca response = null;
             try {
-                apiResponse = eycaExportService.deleteDiscount(exportEyca, "json");
+            	response = eycaExportService.deleteDiscount(exportEyca, "json");
                 
-                if (Objects.nonNull(apiResponse)){
-                    log.info(apiResponse.toString());
-                }
+                if (Objects.nonNull(response)){
+                	log.info("Update Response:");
+ 	                log.info(response.toString());
+ 	            }
 
                 String eycaUpdateId = exportEyca.getId();
 	            DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)

@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
@@ -15,12 +15,19 @@ import java.time.LocalDate;
 @Entity
 @Immutable
 @Table(name = "eyca_data_export")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+//@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EycaDataExportViewEntity {
 
-    @Id
+    @Column(name = "discount_id")
+//  @EqualsAndHashCode.Include
+    private Long discountId;
+
+	@Id
     @Column(name = "id")
     private Long id;
+	
+    @Column(name = "state")
+    private String state;
 
     @Column(name = "categories")
     private String categories;
@@ -31,16 +38,12 @@ public class EycaDataExportViewEntity {
     @Column(name = "vendor")
     private String vendor;
 
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "discount_id")
-    @EqualsAndHashCode.Include
-    private Long discountId;
-
     @Column(name = "eyca_update_id")
     @Max(24)
     private String eycaUpdateId;
+    
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -99,8 +102,14 @@ public class EycaDataExportViewEntity {
     @Column(name = "longitude")
     private String longitude;
     
+    @Column(name = "sales_channel")
+    private String salesChannel;
+    
     @Column(name = "discount_type")
     private String discountType;
+    
+    @Column(name = "landing_page_referrer")
+    private String landingPageReferrer;
 
     @Column(name = "referent")
     private Long referent;
@@ -108,13 +117,13 @@ public class EycaDataExportViewEntity {
     @Override
     public String toString() {
         return "EycaDataExportViewEntity{" +
+        		"discountId=" + discountId +
                 "id=" + id +
                 ", categories='" + categories + '\'' +
                 ", profileId=" + profileId +
                 ", vendor='" + vendor + '\'' +
-                ", name='" + name + '\'' +
-                ", discountId=" + discountId +
                 ", eycaUpdateId='" + eycaUpdateId + '\'' +
+                ", name='" + name + '\'' +                
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", nameLocal='" + nameLocal + '\'' +
@@ -134,7 +143,9 @@ public class EycaDataExportViewEntity {
                 ", region='" + region + '\'' +
                 ", latitude='" + latitude + '\'' +
                 ", longitude='" + longitude + '\'' +
+                ", salesChannel='" + salesChannel + '\'' +
                 ", discountType='" + discountType + '\'' +
+                ", landingPageReferrer='" + landingPageReferrer + '\'' +
                 ", referent=" + referent +
                 '}';
     }
