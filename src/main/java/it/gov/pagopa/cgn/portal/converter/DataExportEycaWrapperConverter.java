@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> {
+	
+	@Value("eyca.api.debug")
+	boolean eycaApiDebug;
 
     @Override
     protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDtoFunction() {
@@ -32,15 +36,30 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
 
         Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
                 .map(val -> {
-                    if (ExportService.LIVE_YES.equals(val)) {
-                        if (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
-                            return 0;
-                        } else {
-                            return 1;
+//                	if (eycaApiDebug) {
+//                		return 0;
+//                	}
+//                    if (ExportService.LIVE_YES.equals(val)) {
+//                        if (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
+//                            return 0;
+//                        } else {
+//                            return 1;
+//                        }
+//                    } else {
+//                        return 0;
+//                    }
+                    
+                    int result = 0;
+
+                    if (!eycaApiDebug) {
+                        if (ExportService.LIVE_YES.equals(val)) {
+                            if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+                                result = 1;
+                            }
                         }
-                    } else {
-                        return 0;
                     }
+
+                    return result;                    
                 });
 
         dataExport.setLive(optIntLiveValue.get());
