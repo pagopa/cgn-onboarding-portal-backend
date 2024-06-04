@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> {
 	
-	@Value("eyca.api.debug")
+	@Value("${eyca.api.debug}")
 	boolean eycaApiDebug;
 
     @Override
