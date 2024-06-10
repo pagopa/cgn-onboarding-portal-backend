@@ -1,6 +1,6 @@
-DROP VIEW IF EXISTS eyca_data_export;
+DROP VIEW IF EXISTS old_eyca_data_export;
 
-CREATE VIEW eyca_data_export AS
+CREATE VIEW old_eyca_data_export AS
 SELECT
     row_number() over () as "id",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",

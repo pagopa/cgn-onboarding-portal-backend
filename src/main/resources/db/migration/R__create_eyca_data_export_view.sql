@@ -4,7 +4,7 @@ CREATE VIEW eyca_data_export AS
 SELECT
     distinct on (d.discount_k) "discount_id",						
     row_number() over () as "id",					
-	d.state,
+	d.state as "state",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
     p.profile_k as "profile_id",
 	coalesce(p.name, p.full_name) as "vendor",
@@ -43,7 +43,7 @@ SELECT
     '' as "tags",
     'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
 
-	L.live as live,
+	L.live as "live",
 
     '' as "location_local_id",
     ad.full_address as "street",
@@ -53,7 +53,7 @@ SELECT
     '' as "region",
     '' as "latitude",
     '' as "longitude",
-	p.sales_channel as sales_channel,	
+	p.sales_channel as "sales_channel",
     (
         CASE
             WHEN p.discount_code_type IS NULL THEN 'SHOP'
@@ -62,7 +62,7 @@ SELECT
             WHEN p.discount_code_type = 'BUCKET' THEN 'LIST OF STATIC CODES'
         END
     ) AS "discount_type",
-	d.landing_page_referrer,
+	d.landing_page_referrer as "landing_page_referrer",
     p.referent_fk as "referent"
 FROM
 	(

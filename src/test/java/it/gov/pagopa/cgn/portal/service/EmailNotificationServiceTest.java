@@ -19,6 +19,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,6 +65,7 @@ class EmailNotificationServiceTest extends IntegrationAbstractTest {
                 .subject("test")
                 .body("test")
                 .failureMessage("test")
+                .attachments(Optional.of(new ArrayList<EmailParams.Attachment>()))
                 .build();
 
         argument = ArgumentCaptor.forClass(NotificationEntity.class);

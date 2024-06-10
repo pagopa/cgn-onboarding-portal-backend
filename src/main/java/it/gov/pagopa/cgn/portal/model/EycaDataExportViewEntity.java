@@ -15,11 +15,9 @@ import java.time.LocalDate;
 @Entity
 @Immutable
 @Table(name = "eyca_data_export")
-//@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class EycaDataExportViewEntity {
 
     @Column(name = "discount_id")
-//  @EqualsAndHashCode.Include
     private Long discountId;
 
 	@Id
@@ -118,8 +116,9 @@ public class EycaDataExportViewEntity {
     public String toString() {
         return "EycaDataExportViewEntity{" +
         		"discountId=" + discountId +
-                "id=" + id +
-                ", categories='" + categories + '\'' +
+                ", id=" + id +
+                ", state='" + state + '\'' +
+                ", categories='" + categories + '\'' +               
                 ", profileId=" + profileId +
                 ", vendor='" + vendor + '\'' +
                 ", eycaUpdateId='" + eycaUpdateId + '\'' +

@@ -169,6 +169,7 @@ public class ExportService {
                     .map(r -> new String[]{
                     		r.getDiscountId().toString(),                    		
                     		r.getId().toString(),
+                            r.getState(),
                             r.getCategories(),
                             r.getVendor(),
                             r.getName(),
@@ -226,6 +227,7 @@ public class ExportService {
             .map(r -> new String[]{
             		r.getDiscountId().toString(),
             		r.getId().toString(),
+                    r.getState(),
                     r.getCategories(),
                     Optional.ofNullable(r.getProfileId()).orElse(Long.valueOf(0L)).toString(),
                     r.getVendor(),
@@ -251,7 +253,7 @@ public class ExportService {
                     r.getRegion(),
                     r.getLatitude(),
                     r.getLongitude(),
-                    r.getSalesChannel().toString(),
+                    r.getSalesChannel(),
                     r.getDiscountType(),
                     r.getLandingPageReferrer(),
                     Optional.ofNullable(r.getReferent()).orElse(Long.valueOf(0L)).toString(),
@@ -276,7 +278,7 @@ public class ExportService {
 	        Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
 	        if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
 	            log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
-	            return null;
+	            return ResponseEntity.status(HttpStatus.OK).body("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
 	        }
 	
 	        log.info("sendDiscountsToEyca start");
@@ -286,7 +288,7 @@ public class ExportService {
 
 	        if (exportViewEntities.isEmpty()) {
 	            log.info("No EYCA data to export");
-	            return null;
+                return ResponseEntity.status(HttpStatus.OK).body("No EYCA data to export");
 	        }	
 	        
 	    	//Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
@@ -298,17 +300,17 @@ public class ExportService {
 			//Tutte le agevolazioni che sono andate in Live=N
 			List<DeleteDataExportEyca> entitiesToDeleteOnEyca = getItemsToDeleteOnEyca(exportViewEntities);
 
-//	        log.info("EYCA_LOG_CREATE:");
-//	        createDiscountsOnEyca(entitiesToCreateOnEyca);
-//	            
-//	        log.info("EYCA_LOG_UPDATE:");
-//		    updateDiscountsOnEyca(entitiesToUpdateOnEyca);
-//		    
-//		    log.info("EYCA_LOG_DELETE:");
-//         	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);		    
+	        log.info("EYCA_LOG_CREATE:");
+	        createDiscountsOnEyca(entitiesToCreateOnEyca);
+
+	        log.info("EYCA_LOG_UPDATE:");
+	        updateDiscountsOnEyca(entitiesToUpdateOnEyca);
+
+	        log.info("EYCA_LOG_DELETE:");
+         	deleteDiscountsOnEyca(entitiesToDeleteOnEyca);
             
             List<Attachment> attachments = new ArrayList<>();
-            if(exportViewEntities.size() > 0) {
+            if(!exportViewEntities.isEmpty()) {
             	//attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
             	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(exportViewEntities)));
             }
@@ -317,11 +319,11 @@ public class ExportService {
 //            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
 //            }
             
-            if(entitiesToUpdateOnEyca.size() > 0) {
+            if(!entitiesToUpdateOnEyca.isEmpty()) {
             	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
             }
             
-            if(entitiesToDeleteOnEyca.size() > 0) {
+            if(!entitiesToDeleteOnEyca.isEmpty()) {
             	attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
             }
              

@@ -596,6 +596,38 @@ public class TestUtils {
     	});
     }
 
+    public static List<EycaDataExportViewEntity> getEycaDataExportForCreate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+       return List.of(entity_0);
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportForUpdate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("1234");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+        return List.of(entity_0);
+    }
+
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);

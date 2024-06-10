@@ -36,7 +36,6 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.nimbusds.jose.util.StandardCharset;
 
@@ -106,16 +105,12 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     @Test
     void sendCreateEycaDiscounts_OK(){
         initMockitoPreconditions();
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
-        discountEntity.setEycaUpdateId("650054665");
-        Mockito.when(discountRepository.findByEycaUpdateId("650054665")).thenReturn(Optional.of(discountEntity));
 
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
@@ -127,15 +122,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     void sendUpdateEycaDiscountsListEmpty_OK(){
         initMockitoPreconditions();
 
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
-        discountEntity.setEycaUpdateId("650054665");
-        Mockito.when(discountRepository.findByEycaUpdateId("650054665")).thenReturn(Optional.of(discountEntity));
-
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
-
-        List<EycaDataExportViewEntity> eycaDataExportViewEntityList =
-                TestUtils.getEycaDataExportViewEntityList().stream().filter(e -> e.getEycaUpdateId()!=null).collect(Collectors.toList());
-        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(eycaDataExportViewEntityList);
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForUpdate());
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
@@ -148,11 +135,11 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void sendCreateEycaDiscountsListEmpty_OK(){
+    void sendEycaDiscountsListEmpty_OK(){
         initMockitoPreconditions();
 
-        List<EycaDataExportViewEntity> eycaDataExportViewEntityList =
-                TestUtils.getEycaDataExportViewEntityList().stream().filter(e -> e.getEycaUpdateId()==null).collect(Collectors.toList());
+        List<EycaDataExportViewEntity> eycaDataExportViewEntityList = Collections.emptyList();
+
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(eycaDataExportViewEntityList);
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
@@ -164,7 +151,6 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
-
 
     @Test
     void sendCreateEycaDiscountsPartialResponse0_OK(){
@@ -255,7 +241,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreement);
         discountEntity2.setEycaUpdateId("ce00958999596");
-        Mockito.when(discountRepository.findByEycaUpdateId("ce00958999596")).thenReturn(Optional.of(discountEntity1));
+        Mockito.when(discountRepository.findByEycaUpdateId("ce00958999596")).thenReturn(Optional.of(discountEntity2));
 
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
 
@@ -321,7 +307,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
 
     @Test
-    void sendCreateEycaDiscountsResponseNull_OK(){
+    void sendCreateEycaDiscountsResponse_OK(){
         initMockitoPreconditions();
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
@@ -344,20 +330,20 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void sendCreateEycaDiscountsDataNull_OK(){
+    void sendCreateEycaDiscountsData_OK(){
         initMockitoPreconditions();
 
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(new ArrayList<>());
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
-        Assertions.assertNull(response);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
 
 
     @Test
-    void listViewEntityEmptyReturn_NUll(){
+    void listViewEntityEmptyReturn_OK(){
         initMockitoPreconditions();
 
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
@@ -366,7 +352,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
-        Assertions.assertNull(response);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
 
@@ -417,8 +403,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
-        Assertions.assertNull(response);
-
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
@@ -427,7 +412,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         ResponseEntity<String> response = exportService.sendDiscountsToEyca();
 
-        Assertions.assertNull(response);
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
 

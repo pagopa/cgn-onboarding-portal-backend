@@ -2,9 +2,9 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
+import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -37,7 +37,7 @@ public class UpdateDataExportEycaWrapperConverter extends AbstractConverter<Eyca
         updateDataExportEyca.setEmail(entity.getEmail());
         //updateDataExportEyca.setFiles(entity.getFiles());
         updateDataExportEyca.setName(entity.getName());
-        updateDataExportEyca.setLive(getLiveValue(entity));
+        updateDataExportEyca.setLive(entity.getLive().equals(ExportService.LIVE_YES) ? 1 : 0);
         updateDataExportEyca.setPhone(entity.getPhone());
         updateDataExportEyca.setNameLocal(entity.getNameLocal());
         //updateDataExportEyca.setPlusCategories(entity.getPlusCategories());
@@ -53,21 +53,4 @@ public class UpdateDataExportEycaWrapperConverter extends AbstractConverter<Eyca
 
         return dto;
     };
-
-	private Integer getLiveValue(EycaDataExportViewEntity viewEntity) {
-		ProfileEntity profileEntity = profile.findById(viewEntity.getProfileId()).get();
-		
-//		if((SalesChannelEnum.BOTH.equals(profileEntity.getSalesChannel()) 
-//				|| SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) &&  
-//				(viewEntity.getDiscountType() == null //SHOP
-//				 || (viewEntity.getDiscountType()).equals(DiscountCodeTypeEnum.STATIC))
-//				 || (viewEntity.getDiscountType()).equals(DiscountCodeTypeEnum.LANDINGPAGE)) {
-//				return Integer.valueOf(1);
-//		}
-		if(SalesChannelEnum.ONLINE.equals(profileEntity.getSalesChannel()) 
-				&& DiscountCodeTypeEnum.BUCKET.equals(DiscountCodeTypeEnum.valueOf(viewEntity.getDiscountType()))) {
-			return Integer.valueOf(0);
-		}
-		return Integer.valueOf(1);
-	}
 }

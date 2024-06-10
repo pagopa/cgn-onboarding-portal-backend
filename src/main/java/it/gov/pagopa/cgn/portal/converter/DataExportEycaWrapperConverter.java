@@ -62,7 +62,7 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
                     return result;                    
                 });
 
-        dataExport.setLive(optIntLiveValue.get());
+        dataExport.setLive(optIntLiveValue.orElse(0));
         dataExport.setEmail(entity.getEmail());
         dataExport.setLocalId(entity.getLocationLocalId());
         dataExport.setPhone(entity.getPhone());
