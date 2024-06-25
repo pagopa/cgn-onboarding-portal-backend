@@ -87,7 +87,20 @@ WITH merchant AS (SELECT a.agreement_k,
            AND d.start_date >= CURRENT_DATE - INTERVAL '15 days'
            AND d.end_date >= CURRENT_DATE
          GROUP BY d.agreement_fk
-     )
+     ),
+
+	new_discounts_count AS (
+	   SELECT d.agreement_fk,
+	   count(*) as number_of_new_discounts
+		FROM discount d
+                  JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
+         WHERE d.state = 'PUBLISHED'
+           AND d.start_date <= CURRENT_DATE
+           AND d.start_date >= CURRENT_DATE - INTERVAL '15 days'
+           AND d.end_date >= CURRENT_DATE
+         GROUP BY d.agreement_fk
+	)
+	
 SELECT m.id,
        m.name,
        CASE
@@ -96,6 +109,7 @@ SELECT m.id,
            ELSE FALSE
            END								    AS new_discounts,
        nd.categories_with_new_discounts,
+	   z.number_of_new_discounts,
        m.product_categories,
        m.searchable_name,
        m.banking_services,
@@ -121,6 +135,7 @@ FROM merchant_without_address m
          JOIN profile p on m.id = p.agreement_fk
          LEFT JOIN address a ON p.profile_k = a.profile_fk
          LEFT JOIN agreements_with_new_discounts nd ON nd.agreement_fk = m.id
+		 LEFT JOIN new_discounts_count z ON z.agreement_fk = m.id
 ORDER BY new_discounts DESC, name ASC;
 
 CREATE UNIQUE INDEX offline_merchant_id_unique_idx ON offline_merchant (id, address_id);
