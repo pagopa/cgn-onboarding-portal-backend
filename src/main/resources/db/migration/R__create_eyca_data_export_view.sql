@@ -7,7 +7,7 @@ SELECT
 	d.state as "state",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
     p.profile_k as "profile_id",
-	coalesce(p.name, p.full_name) as "vendor",
+	COALESCE(NULLIF(p.name,''), NULLIF(p.full_name,'')) AS vendor,
     d.eyca_update_id AS "eyca_update_id",
     d.name_en as "name",
     d.start_date as "start_date",
