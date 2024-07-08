@@ -109,7 +109,7 @@ FROM
     LEFT JOIN address ad ON ad.profile_fk = p.profile_k
 WHERE
 d.visible_on_eyca = true
-AND L.live = 'Y' 
+AND (l.live = 'Y' OR (l.live = 'N' AND d.eyca_update_id IS NOT NULL))
 AND L.discount_id = d.discount_k
 AND (
     (p.sales_channel = 'OFFLINE' AND p.discount_code_type IS NULL)
