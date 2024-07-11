@@ -22,11 +22,6 @@ public class EycaExportService {
         this.apiClient.setPassword(configProperties.getEycaPassword());
     }
 
-   public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) throws RestClientException {
-       return eycaApi.createDiscount(type, dataExportEyca);
-    }
-
-
     public void authenticateOnEyca() {
         String authResponse = eycaApi.authentication();
 
@@ -39,6 +34,9 @@ public class EycaExportService {
         apiClient.addDefaultCookie("ccdb_session", sessionId);
     }
 
+    public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) throws RestClientException {
+        return eycaApi.createDiscount(type, dataExportEyca);
+    }
 
     public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type) throws RestClientException{
         return eycaApi.updateDiscount(type, updateDataExportEyca);

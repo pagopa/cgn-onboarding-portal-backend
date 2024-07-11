@@ -311,13 +311,12 @@ public class ExportService {
             
             List<Attachment> attachments = new ArrayList<>();
             if(!exportViewEntities.isEmpty()) {
-            	//attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
-            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(exportViewEntities)));
+            	attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
             }
             
-//            if(entitiesToCreateOnEyca.size() > 0) {
-//            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
-//            }
+            if(!entitiesToCreateOnEyca.isEmpty()) {
+            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            }
             
             if(!entitiesToUpdateOnEyca.isEmpty()) {
             	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
@@ -338,17 +337,18 @@ public class ExportService {
             //CGNUtils.writeAttachments(attachments,"c:\\develop\\");
             
             System.out.println("Attachments created");
-
+            
+            log.info("sendDiscountsToEyca end success");
+            
             return ResponseEntity.status(HttpStatus.OK).build();
-
+            
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace())
                     .map(StackTraceElement::toString)
                     .collect(Collectors.joining("\n")));
         }
-    	
-        log.info("sendDiscountsToEyca end success");
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
     
@@ -366,7 +366,6 @@ public class ExportService {
     
     private List<DeleteDataExportEyca> getItemsToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 		return deleteOnEycaStream(exportViewEntities)
-	//1*        			.filter(e -> e.getLive().equalsIgnoreCase("N") && !e.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))        			
 		        .map(this::convertToDeleteDataExportEyca)
 		        .collect(Collectors.toList());		
     }	
@@ -388,9 +387,7 @@ public class ExportService {
 	private List<DataExportEycaWrapper<DataExportEyca>> getWrappersToCreateOnEyca(
 			List<EycaDataExportViewEntity> exportViewEntities) {
 		
-		return exportViewEntities.stream()
-//		return createOnEycaStream(exportViewEntities)
-//		.filter(entity->StringUtils.isEmpty(entity.getEycaUpdateId()))
+		return createOnEycaStream(exportViewEntities)
 		.map(dataExportEycaConverter::toDto)
 		.collect(Collectors.toList());
 	}
@@ -403,22 +400,15 @@ public class ExportService {
     }    
     
     private Stream<EycaDataExportViewEntity> updateOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
-    	return exportViewEntities.stream().filter(
-    			e-> LIVE_YES.equalsIgnoreCase(e.getLive()) && !StringUtils.isEmpty(e.getEycaUpdateId())
-    		   );
+    	return exportViewEntities.stream()
+                .filter(e -> LIVE_YES.equalsIgnoreCase(e.getLive()))
+                .filter(e -> !StringUtils.isEmpty(e.getEycaUpdateId()));
     }
-	
-//	private Stream<EycaDataExportViewEntity> createOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
-//		return exportViewEntities.stream().filter(
-//		 		e ->
-////1*        					 		e.getLive().equalsIgnoreCase("N") && e.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())
-////			 		||
-//                        (LIVE_YES.equalsIgnoreCase(e.getLive())  && !DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType()))
-//				|| 
-//				(LIVE_YES.equalsIgnoreCase(e.getLive()) && DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(e.getDiscountType())
-//						&& e.getReferent() == null)
-//		);
-//	}	
+    private Stream<EycaDataExportViewEntity> createOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
+        return exportViewEntities.stream()
+                .filter(e -> LIVE_YES.equalsIgnoreCase(e.getLive()))
+                .filter(e -> StringUtils.isEmpty(e.getEycaUpdateId()));
+	}
 
     private void createDiscountsOnEyca(List<DataExportEycaWrapper<DataExportEyca>> exportEycaList){
 
