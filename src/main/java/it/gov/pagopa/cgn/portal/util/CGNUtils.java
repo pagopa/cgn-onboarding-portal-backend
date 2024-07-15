@@ -1,11 +1,14 @@
 package it.gov.pagopa.cgn.portal.util;
 
+import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,9 +18,11 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Dimension;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDate;
-import java.util.Iterator;
+import java.util.*;
+
+import com.fasterxml.jackson.databind.*;
 
 public class CGNUtils {
 
@@ -110,5 +115,20 @@ public class CGNUtils {
         }
         throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
+    
+    public static String toJson (Object o) {
+          try {  
+              return new ObjectMapper().writer().writeValueAsString(o);  
+          }  
+          catch (Exception e) {
+        	  return "null";
+          }  
+    }
+    
+	public static void writeAttachments(List<Attachment> attachments, String path) throws IOException {
+		for(Attachment a : attachments) {
+			FileUtils.writeByteArrayToFile(new File(path+a.getAttachmentFilename()), a.getResource().getByteArray());
+		}
+	}
 
 }

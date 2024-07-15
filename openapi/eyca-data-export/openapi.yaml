@@ -89,7 +89,7 @@ paths:
           description: Service unavailable.
 
   /api/delete_discount:
-    delete:
+    post:
       security:
       - Bearer: [ ]
       operationId: deleteDiscount

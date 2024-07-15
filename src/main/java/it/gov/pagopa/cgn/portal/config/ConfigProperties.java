@@ -121,6 +121,8 @@ public class ConfigProperties {
     @Value("${eyca.export.enabled}")
     private Boolean eycaExportEnabled;
 
+    @Value("${eyca.job.mailto}")
+    private String eycaJobMailTo;
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

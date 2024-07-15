@@ -17,8 +17,10 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
@@ -556,6 +558,75 @@ public class TestUtils {
                 getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L, "c49020232220173105078447"));
     }
 
+    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
+    	return CsvUtils.csvToEntityList(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"), 
+    		(_record) -> {
+    			EycaDataExportViewEntity e = new EycaDataExportViewEntity();
+    			
+    			e.setId(Long.valueOf(_record.get("id")));
+    			e.setCategories(_record.get("categories"));
+    			e.setProfileId(Long.valueOf(_record.get("profile_id")));
+    			e.setVendor(_record.get("vendor"));
+    			e.setDiscountId(Long.valueOf(_record.get("discount_id")));
+    			e.setEycaUpdateId(_record.get("eyca_update_id"));
+    			e.setName(_record.get("name"));
+    			e.setStartDate(LocalDate.parse(_record.get("start_date")));
+    			e.setEndDate(LocalDate.parse(_record.get("end_date")));
+    			e.setNameLocal(_record.get("name_local"));
+    			e.setText(_record.get("text"));
+    			e.setTextLocal(_record.get("text_local"));
+    			e.setEmail(_record.get("email"));
+    			e.setPhone(_record.get("phone"));
+    			e.setWeb(_record.get("web"));
+    			e.setTags(_record.get("tags"));
+    			e.setImage(_record.get("image"));
+    			e.setLive(_record.get("live"));
+    			e.setLocationLocalId(_record.get("location_local_id"));
+    			e.setStreet(_record.get("street"));
+    			e.setCity(_record.get("city"));
+    			e.setZip(_record.get("zip"));
+    			e.setCountry(_record.get("country"));
+    			e.setRegion(_record.get("region"));
+    			e.setLatitude(_record.get("latitude"));
+    			e.setLongitude(_record.get("longitude"));
+    			e.setDiscountType(_record.get("discount_type"));
+    			e.setReferent(Long.valueOf(_record.get("referent")));
+    			
+    		return e;
+    	});
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportForCreate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+       return List.of(entity_0);
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportForUpdate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("1234");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+        return List.of(entity_0);
+    }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();

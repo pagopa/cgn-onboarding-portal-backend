@@ -1,13 +1,12 @@
-DROP VIEW IF EXISTS eyca_data_export;
+DROP VIEW IF EXISTS old_eyca_data_export;
 
-CREATE VIEW eyca_data_export AS
+CREATE VIEW old_eyca_data_export AS
 SELECT
-    distinct on (d.discount_k) "discount_id",						
-    row_number() over () as "id",					
-	d.state as "state",
+    row_number() over () as "id",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
     p.profile_k as "profile_id",
-	COALESCE(NULLIF(p.name,''), NULLIF(p.full_name,'')) AS vendor,
+    coalesce(p.full_name, p.name) as "vendor",
+    d.discount_k AS "discount_id",
     d.eyca_update_id AS "eyca_update_id",
     d.name_en as "name",
     d.start_date as "start_date",
@@ -42,9 +41,12 @@ SELECT
     p.website_url as "web",
     '' as "tags",
     'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
-
-	L.live as "live",
-
+    CASE
+        WHEN d.state = 'PUBLISHED'
+        AND d.start_date <= CURRENT_DATE
+        AND d.end_date >= CURRENT_DATE THEN 'Y'
+        ELSE 'N'
+    END as "live",
     '' as "location_local_id",
     ad.full_address as "street",
     '' as "city",
@@ -53,7 +55,6 @@ SELECT
     '' as "region",
     '' as "latitude",
     '' as "longitude",
-	p.sales_channel as "sales_channel",
     (
         CASE
             WHEN p.discount_code_type IS NULL THEN 'SHOP'
@@ -62,20 +63,8 @@ SELECT
             WHEN p.discount_code_type = 'BUCKET' THEN 'LIST OF STATIC CODES'
         END
     ) AS "discount_type",
-	d.landing_page_referrer as "landing_page_referrer",
     p.referent_fk as "referent"
 FROM
-	(
-		SELECT CASE
-			WHEN state = 'PUBLISHED'
-			AND start_date <= CURRENT_DATE
-			AND end_date >= CURRENT_DATE THEN 'Y'
-		ELSE 'N'
-		END as "live",
-		sd.discount_k AS "discount_id"
-		FROM discount sd
-	) as L,	
-
     agreement ag
     INNER JOIN discount d ON d.agreement_fk = ag.agreement_k
     INNER JOIN profile p ON p.agreement_fk = ag.agreement_k
@@ -108,14 +97,23 @@ FROM
     ) as cat ON cat.discount_fk = d.discount_k
     LEFT JOIN address ad ON ad.profile_fk = p.profile_k
 WHERE
-d.visible_on_eyca = true
-AND (l.live = 'Y' OR (l.live = 'N' AND d.eyca_update_id IS NOT NULL))
-AND L.discount_id = d.discount_k
-AND (
-    (p.sales_channel = 'OFFLINE' AND p.discount_code_type IS NULL)
-    OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type IN ('STATIC', 'BUCKET'))
-    OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type = 'LANDINGPAGE' 
-			AND (d.landing_page_referrer IS NULL))
-);
+    (
+        d.visible_on_eyca = true
+        AND d.state = 'PUBLISHED'
+        AND CURRENT_DATE <= d.end_date
+        AND (
+            (
+                p.sales_channel IN ('BOTH', 'OFFLINE')
+                AND (
+                    p.discount_code_type IS NULL
+                    OR p.discount_code_type IN ('STATIC', 'LANDINGPAGE', 'BUCKET')
+                )
+            )
+            OR (
+                p.sales_channel = 'ONLINE'
+                AND (
+                    p.discount_code_type IN ('STATIC', 'LANDINGPAGE', 'BUCKET')
+                )
+            )
+        )
+    );
