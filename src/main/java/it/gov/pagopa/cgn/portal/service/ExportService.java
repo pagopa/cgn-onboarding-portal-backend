@@ -22,10 +22,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 
 import javax.transaction.Transactional;
@@ -44,6 +48,9 @@ import java.util.stream.*;
 @Service
 public class ExportService {
 
+    @Autowired
+    EycaSyncService eycaSyncService;
+
     public static final String LIVE_YES="Y";
     public static final String LIVE_NO="N";
 
@@ -55,14 +62,44 @@ public class ExportService {
     private final EycaExportService eycaExportService;
     private final DataExportEycaWrapperConverter dataExportEycaConverter;
     private final UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter;
-    
-    private EmailNotificationFacade emailNotificationFacade;
+    private final EmailNotificationFacade emailNotificationFacade;
     
     private final String[] eycaDataExportHeaders = new String[] {
-    		"id","categories","profile_id","vendor","discount_id","eyca_update_id","name","start_date","end_date","name_local","text","text_local","email","phone","web","tags","image","live","location_local_id","street","city","zip","country","region","latitude","longitude","discount_type","referent"
+    		"discount_id",
+            "id",
+            "state",
+            "categories",
+            "profile_id",
+            "vendor",
+            "eyca_update_id",
+            "name",
+            "start_date",
+            "end_date",
+            "name_local",
+            "text",
+            "text_local",
+            "email",
+            "phone",
+            "web",
+            "tags",
+            "image",
+            "live",
+            "location_local_id",
+            "street",
+            "city",
+            "zip",
+            "country",
+            "region",
+            "latitude",
+            "longitude",
+            "SalesChannel",
+            "discount_type",
+            "landingPageReferrer",
+            "referent"
     };
 
-    private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
+    private final String[] exportAgreementsHeaders = new String[]{
+            "Stato Convenzione",
             "Ragione sociale",
             "Nome alternativo",
             "Nome alternativo inglese",
@@ -88,9 +125,13 @@ public class ExportService {
             "Id Operatore",
             "Id Agevolazione"};
 
-    private final String[] exportEycaHeaders = new String[]{"LOCAL_ID",
+    private final String[] exportEycaHeaders = new String[]{
+            "DISCOUNT_ID",
+            "LOCAL_ID",
+            "STATE",
             "CATEGORIES",
             "VENDOR",
+            "EYCA_UPDATE_ID",
             "NAME",
             "NAME_LOCAL",
             "TEXT",
@@ -109,7 +150,10 @@ public class ExportService {
             "REGION",
             "GEO - Latitude",
             "GEO - Longitude",
-            "DISCOUNT TYPE"};
+            "SALES CHANNEL",
+            "DISCOUNT TYPE",
+            "LANDING PAGE REFERRER"
+    };
 
 
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
@@ -167,11 +211,12 @@ public class ExportService {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
             exportViewEntities.stream()
                     .map(r -> new String[]{
-                    		r.getDiscountId().toString(),                    		
+                            Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
                     		r.getId().toString(),
                             r.getState(),
                             r.getCategories(),
                             r.getVendor(),
+                            r.getEycaUpdateId(),
                             r.getName(),
                             r.getNameLocal(),
                             r.getText(),
@@ -218,24 +263,23 @@ public class ExportService {
     @Transactional(Transactional.TxType.REQUIRED)
     public ByteArrayResource buildEycaCsv(List<EycaDataExportViewEntity> exportViewEntities) {
         StringWriter writer = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL.withDelimiter(';'))) {
 
         	DateTimeFormatter ddMMyyyy = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         	
         	printerConsumer.apply(printer).accept(eycaDataExportHeaders);
             exportViewEntities.stream()
             .map(r -> new String[]{
-            		r.getDiscountId().toString(),
+                    Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
             		r.getId().toString(),
                     r.getState(),
                     r.getCategories(),
-                    Optional.ofNullable(r.getProfileId()).orElse(Long.valueOf(0L)).toString(),
+                    Optional.ofNullable(r.getProfileId()).orElse(0L).toString(),
                     r.getVendor(),
-                    Optional.ofNullable(r.getDiscountId()).orElse(Long.valueOf(0L)).toString(),
                     r.getEycaUpdateId(),
                     r.getName(),
-                    Optional.ofNullable(r.getStartDate().format(ddMMyyyy)).orElse(""),
-                    Optional.ofNullable(r.getEndDate().format(ddMMyyyy)).orElse(""),
+                    Optional.ofNullable(r.getStartDate()).map( ld -> ld.format(ddMMyyyy)).orElse(""),
+                    Optional.ofNullable(r.getEndDate()).map( ld -> ld.format(ddMMyyyy)).orElse(""),
                     r.getNameLocal(),
                     r.getText(),
                     r.getTextLocal(),
@@ -256,7 +300,7 @@ public class ExportService {
                     r.getSalesChannel(),
                     r.getDiscountType(),
                     r.getLandingPageReferrer(),
-                    Optional.ofNullable(r.getReferent()).orElse(Long.valueOf(0L)).toString(),
+                    Optional.ofNullable(r.getReferent()).orElse(0L).toString(),
                     })
             .forEach(printerConsumer.apply(printer));
 
@@ -270,7 +314,7 @@ public class ExportService {
     }
     
     
-    @Transactional(Transactional.TxType.REQUIRED)
+    @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<String> sendDiscountsToEyca() {
         
     	try {    	
@@ -283,14 +327,15 @@ public class ExportService {
 	
 	        log.info("sendDiscountsToEyca start");
 	        List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
-            //per ovviare al problema delle righe duplicate in vista
-            exportViewEntities = exportViewEntities.stream().distinct().collect(Collectors.toList());
 
 	        if (exportViewEntities.isEmpty()) {
 	            log.info("No EYCA data to export");
                 return ResponseEntity.status(HttpStatus.OK).body("No EYCA data to export");
-	        }	
-	        
+	        }
+
+            List<SearchDataExportEyca> itemsToSearchOnEyca = getItemsToSearchOnEyca(exportViewEntities);
+            eycaSyncService.syncEycaUpdateIdOnEyca(itemsToSearchOnEyca, exportViewEntities);
+
 	    	//Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
 	    	List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(exportViewEntities);
 
@@ -351,23 +396,18 @@ public class ExportService {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-    
-//  private List<DataExportEycaWrapper> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
-//		return exportViewEntities.stream()
-//				.filter(e -> e.getLive().equalsIgnoreCase("N"))
-//	//1*        			.filter(e -> e.getLive().equalsIgnoreCase("N") && !e.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))        			
-////				.filter(e -> !e.getEndDate().isBefore(LocalDate.now().minusDays(1)))
-////              .collect(Collectors.groupingBy(EycaDataExportViewEntity::getDiscountId))
-////              .entrySet().stream()
-////              .map(dataExportEycaConverter::groupedEntityToDto)					
-//		        .map(dataExportEycaConverter::toDto)
-//		        .collect(Collectors.toList());		
-//  }	
-    
+
+    private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+        //Sfrutto lo stream dell'update che verifica la presenza dell'eyca_update_id
+        return updateOnEycaStream(exportViewEntities)
+                .map(this::convertToSearchDataExportEyca)
+                .collect(Collectors.toList());
+    }
+
     private List<DeleteDataExportEyca> getItemsToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 		return deleteOnEycaStream(exportViewEntities)
-		        .map(this::convertToDeleteDataExportEyca)
-		        .collect(Collectors.toList());		
+                .map(this::convertToDeleteDataExportEyca)
+                .collect(Collectors.toList());
     }	
     
     public DeleteDataExportEyca convertToDeleteDataExportEyca(EycaDataExportViewEntity entity) {
@@ -375,6 +415,13 @@ public class ExportService {
         Optional<String> optDiscountId = Optional.ofNullable(entity.getEycaUpdateId());
         deleteDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException("Error during viewEntity to delete conversion, eycaUpdateId is empty")));
         return deleteDataExportEyca;
+    }
+
+    public SearchDataExportEyca convertToSearchDataExportEyca(EycaDataExportViewEntity entity) {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+        Optional<String> optDiscountId = Optional.ofNullable(entity.getEycaUpdateId());
+        searchDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException("Error during viewEntity to search conversion, eycaUpdateId is empty")));
+        return searchDataExportEyca;
     }
 
 	
@@ -517,8 +564,6 @@ public class ExportService {
             }
         });
     }
-
-
 
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]>
             agreementWithProfileAndDiscountToStringArray

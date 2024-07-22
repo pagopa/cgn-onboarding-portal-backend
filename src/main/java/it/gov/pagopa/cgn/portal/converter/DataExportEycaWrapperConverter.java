@@ -34,35 +34,35 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
 
         DataExportEyca dataExport = new DataExportEyca();
 
-        Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
-                .map(val -> {
-//                	if (eycaApiDebug) {
-//                		return 0;
-//                	}
-//                    if (ExportService.LIVE_YES.equals(val)) {
-//                        if (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode())) {
-//                            return 0;
-//                        } else {
-//                            return 1;
+        int result = 0;
+
+        if (!eycaApiDebug) {
+            if (ExportService.LIVE_YES.equals(entity.getLive())) {
+                if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+                    result = 1;
+                }
+            }
+        }
+
+//        Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
+//                .map(val -> {
+//
+//                    int result = 0;
+//
+//                    if (!eycaApiDebug) {
+//                        if (ExportService.LIVE_YES.equals(val)) {
+//                            if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+//                                result = 1;
+//                            }
 //                        }
-//                    } else {
-//                        return 0;
 //                    }
-                    
-                    int result = 0;
+//
+//                    return result;
+//                });
+//      dataExport.setLive(optIntLiveValue.orElse(0));
 
-                    if (!eycaApiDebug) {
-                        if (ExportService.LIVE_YES.equals(val)) {
-                            if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
-                                result = 1;
-                            }
-                        }
-                    }
 
-                    return result;                    
-                });
-
-        dataExport.setLive(optIntLiveValue.orElse(0));
+        dataExport.setLive(result);
         dataExport.setEmail(entity.getEmail());
         dataExport.setLocalId(entity.getLocationLocalId());
         dataExport.setPhone(entity.getPhone());

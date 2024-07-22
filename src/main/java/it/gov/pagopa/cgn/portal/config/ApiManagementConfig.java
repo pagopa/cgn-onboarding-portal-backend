@@ -7,6 +7,8 @@ import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.apimanagement.ApiManagementManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class ApiManagementConfig {
@@ -17,4 +19,15 @@ public class ApiManagementConfig {
         TokenCredential credential = new DefaultAzureCredentialBuilder().authorityHost(profile.getEnvironment().getActiveDirectoryEndpoint()).build();
         return ApiManagementManager.authenticate(credential, profile);
     }
+
+    /*
+    @Bean
+    public PlatformTransactionManager transactionManager() {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(transactionManager.getEntityManagerFactory());
+        transactionManager.setNestedTransactionAllowed(true);
+        System.out.println("XXXXXXXXXXXXXXXXXX ----------- setNestedTransactionAllowed  ----------- XXXXXXXXXXXXXXXXXX");
+        return transactionManager;
+    }
+    */
 }
