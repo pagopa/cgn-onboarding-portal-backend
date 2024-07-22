@@ -19,15 +19,4 @@ public class ApiManagementConfig {
         TokenCredential credential = new DefaultAzureCredentialBuilder().authorityHost(profile.getEnvironment().getActiveDirectoryEndpoint()).build();
         return ApiManagementManager.authenticate(credential, profile);
     }
-
-    /*
-    @Bean
-    public PlatformTransactionManager transactionManager() {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(transactionManager.getEntityManagerFactory());
-        transactionManager.setNestedTransactionAllowed(true);
-        System.out.println("XXXXXXXXXXXXXXXXXX ----------- setNestedTransactionAllowed  ----------- XXXXXXXXXXXXXXXXXX");
-        return transactionManager;
-    }
-    */
 }

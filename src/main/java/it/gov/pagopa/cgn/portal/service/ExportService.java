@@ -48,9 +48,6 @@ import java.util.stream.*;
 @Service
 public class ExportService {
 
-    @Autowired
-    EycaSyncService eycaSyncService;
-
     public static final String LIVE_YES="Y";
     public static final String LIVE_NO="N";
 
@@ -334,7 +331,7 @@ public class ExportService {
 	        }
 
             List<SearchDataExportEyca> itemsToSearchOnEyca = getItemsToSearchOnEyca(exportViewEntities);
-            eycaSyncService.syncEycaUpdateIdOnEyca(itemsToSearchOnEyca, exportViewEntities);
+            syncEycaUpdateIdOnEyca(itemsToSearchOnEyca, exportViewEntities);
 
 	    	//Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
 	    	List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(exportViewEntities);
@@ -384,18 +381,66 @@ public class ExportService {
             System.out.println("Attachments created");
             
             log.info("sendDiscountsToEyca end success");
-            
+
             return ResponseEntity.status(HttpStatus.OK).build();
-            
+
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace())
                     .map(StackTraceElement::toString)
                     .collect(Collectors.joining("\n")));
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void syncEycaUpdateIdOnEyca(List<SearchDataExportEyca> exportEycaList, List<EycaDataExportViewEntity> exportViewEntities){
+
+        if (exportEycaList.isEmpty()) {
+            log.info("No discounts to search");
+            return;
         }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        eycaExportService.authenticateOnEyca();
+
+        log.info("Searching discounts on EYCA...");
+
+        exportEycaList.forEach(exportEyca -> {
+
+            log.info("SEARCH SearchDataExportEyca: " + exportEyca.toString());
+            SearchApiResponseEyca response = null;
+            try {
+                response = eycaExportService.searchDiscount(exportEyca,"json");
+
+                if (Objects.nonNull(response)){
+                    log.info("Search Response:");
+                    log.info(response.toString());
+                }
+
+                //
+                if(response !=null &&
+                        response.getApiResponse() != null &&
+                        response.getApiResponse().getData() != null &&
+                        response.getApiResponse().getData().getDiscounts() != null &&
+                        ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())) {
+
+                    String eycaUpdateId = exportEyca.getId();
+                    DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
+                            .orElseThrow( () -> new CGNException("Discount with EycaUpdateId: "+eycaUpdateId+" from eyca not found on Discount table"));
+
+                    EycaDataExportViewEntity viewItem = exportViewEntities.stream().filter(d -> d.getEycaUpdateId().equals(entity.getEycaUpdateId())).findFirst().get();
+                    entity.setEycaUpdateId(null);
+                    discountRepository.saveAndFlush(entity);
+                    viewItem.setEycaUpdateId(null);
+                }
+            }
+            catch (RestClientException rce) {
+                log.info("SEARCH eycaApi.searchDiscount Exception: " + rce.getMessage());
+            }
+        });
     }
+
 
     private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         //Sfrutto lo stream dell'update che verifica la presenza dell'eyca_update_id
