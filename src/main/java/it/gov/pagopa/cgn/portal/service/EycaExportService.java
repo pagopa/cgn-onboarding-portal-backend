@@ -34,6 +34,10 @@ public class EycaExportService {
         apiClient.addDefaultCookie("ccdb_session", sessionId);
     }
 
+    public SearchApiResponseEyca searchDiscount(SearchDataExportEyca searchDataExportEyca, String type) throws RestClientException {
+        return eycaApi.searchDiscount(type, searchDataExportEyca);
+    }
+
     public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) throws RestClientException {
         return eycaApi.createDiscount(type, dataExportEyca);
     }

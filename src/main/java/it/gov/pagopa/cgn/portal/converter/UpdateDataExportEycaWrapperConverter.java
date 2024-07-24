@@ -37,7 +37,6 @@ public class UpdateDataExportEycaWrapperConverter extends AbstractConverter<Eyca
         updateDataExportEyca.setEmail(entity.getEmail());
         //updateDataExportEyca.setFiles(entity.getFiles());
         updateDataExportEyca.setName(entity.getName());
-//        updateDataExportEyca.setLive(entity.getLive().equals(ExportService.LIVE_YES) ? 1 : 0); LO STATO NON DEVE SUBIRE AGGIORNAMENTI
         updateDataExportEyca.setPhone(entity.getPhone());
         updateDataExportEyca.setNameLocal(entity.getNameLocal());
         //updateDataExportEyca.setPlusCategories(entity.getPlusCategories());
