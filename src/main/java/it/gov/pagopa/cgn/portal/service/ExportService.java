@@ -232,7 +232,7 @@ public class ExportService {
                             r.getRegion(),
                             r.getLatitude(),
                             r.getLongitude(),
-                            r.getSalesChannel().toString(),
+                            r.getSalesChannel(),
                             r.getDiscountType(),
                             r.getLandingPageReferrer(),
                             })
@@ -314,7 +314,7 @@ public class ExportService {
     @org.springframework.transaction.annotation.Transactional
     public ResponseEntity<String> sendDiscountsToEyca() {
         
-    	try {    	
+    	try {
     	    	
 	        Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
 	        if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
@@ -372,13 +372,11 @@ public class ExportService {
             			  +"<br /> Discounts to update: "+entitiesToUpdateOnEyca.size()
             			  +"<br /> Discounts to delete: "+entitiesToDeleteOnEyca.size();
             
-            System.out.println("MAIL-BODY: "+body);
+            log.info("MAIL-BODY: "+body);
             
             emailNotificationFacade.notifyAdminForJobEyca(attachments,body);
             
             //CGNUtils.writeAttachments(attachments,"c:\\develop\\");
-            
-            System.out.println("Attachments created");
             
             log.info("sendDiscountsToEyca end success");
 
@@ -418,11 +416,9 @@ public class ExportService {
                     log.info(response.toString());
                 }
 
-                //
-                if(response !=null &&
-                        response.getApiResponse() != null &&
-                        response.getApiResponse().getData() != null &&
-                        response.getApiResponse().getData().getDiscounts() != null &&
+                if( response.getApiResponse() != null &&
+                    response.getApiResponse().getData() != null &&
+                    response.getApiResponse().getData().getDiscounts() != null &&
                         ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())) {
 
                     String eycaUpdateId = exportEyca.getId();

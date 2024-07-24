@@ -968,6 +968,32 @@ public class TestUtils {
         return updateDiscount;
     }
 
+    /*
+    response.getApiResponse() != null &&
+                    response.getApiResponse().getData() != null &&
+                    response.getApiResponse().getData().getDiscounts() != null &&
+                        ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())
+     */
+    public static SearchApiResponseEyca getSearchApiResponse() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+
+        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
+        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
+        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
+        SearchApiResponseApiResponseDataDiscountsEyca  searchApiResponseApiResponseDataDiscountsEyca = new  SearchApiResponseApiResponseDataDiscountsEyca();
+
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+        items.add(discountItemEyca);
+
+
+        searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
+        searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
+        searchApiResponseApiResponseDataDiscountsEyca.setData(items);
+        searchApiResponseEyca.setApiResponse(searchApiResponseApiResponseEyca);
+        return searchApiResponseEyca;
+    }
 
     public static ApiResponseEyca getApiResponse() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();

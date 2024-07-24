@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> {
-	
+
 	@Value("${eyca.api.debug}")
 	boolean eycaApiDebug;
 
@@ -36,31 +36,11 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
 
         int result = 0;
 
-        if (!eycaApiDebug) {
-            if (ExportService.LIVE_YES.equals(entity.getLive())) {
-                if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
-                    result = 1;
-                }
-            }
+        if (!eycaApiDebug
+                &&  ExportService.LIVE_YES.equals(entity.getLive())
+                &&  ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+                result = 1;
         }
-
-//        Optional<Integer> optIntLiveValue = Optional.ofNullable(entity.getLive())
-//                .map(val -> {
-//
-//                    int result = 0;
-//
-//                    if (!eycaApiDebug) {
-//                        if (ExportService.LIVE_YES.equals(val)) {
-//                            if ( ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
-//                                result = 1;
-//                            }
-//                        }
-//                    }
-//
-//                    return result;
-//                });
-//      dataExport.setLive(optIntLiveValue.orElse(0));
-
 
         dataExport.setLive(result);
         dataExport.setEmail(entity.getEmail());
@@ -82,7 +62,7 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
         }
         dataExport.setImageSourceWeb(entity.getImage());
 
-        DataExportEycaWrapper<DataExportEyca> dto = new DataExportEycaWrapper<DataExportEyca>(dataExport);
+        DataExportEycaWrapper<DataExportEyca> dto = new DataExportEycaWrapper<>(dataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
 
