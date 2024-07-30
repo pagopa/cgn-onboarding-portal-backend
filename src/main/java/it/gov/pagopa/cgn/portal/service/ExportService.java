@@ -309,9 +309,9 @@ public class ExportService {
         }
         return new ByteArrayResource(new byte[] {});
     }
-    
-    
-    @org.springframework.transaction.annotation.Transactional
+
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<String> sendDiscountsToEyca() {
         
     	try {
@@ -392,7 +392,6 @@ public class ExportService {
         }
     }
 
-    @org.springframework.transaction.annotation.Transactional
     public void syncEycaUpdateIdOnEyca(List<SearchDataExportEyca> exportEycaList, List<EycaDataExportViewEntity> exportViewEntities){
 
         if (exportEycaList.isEmpty()) {
