@@ -425,7 +425,7 @@ public class ExportService {
                     DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
                             .orElseThrow( () -> new CGNException("Discount with EycaUpdateId: "+eycaUpdateId+" from eyca not found on Discount table"));
 
-                    EycaDataExportViewEntity viewItem = exportViewEntities.stream().filter(d -> d.getEycaUpdateId().equals(entity.getEycaUpdateId())).findFirst().get();
+                    EycaDataExportViewEntity viewItem = exportViewEntities.stream().filter(d -> entity.getEycaUpdateId().equals(d.getEycaUpdateId())).findFirst().get();
                     entity.setEycaUpdateId(null);
                     discountRepository.saveAndFlush(entity);
                     viewItem.setEycaUpdateId(null);
