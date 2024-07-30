@@ -259,7 +259,7 @@ public class ExportService {
     @Transactional(Transactional.TxType.REQUIRED)
     public ByteArrayResource buildEycaCsv(List<EycaDataExportViewEntity> exportViewEntities) {
         StringWriter writer = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL.withDelimiter(';'))) {
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL.builder().setDelimiter(';').build())) {
 
         	DateTimeFormatter ddMMyyyy = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         	
