@@ -201,8 +201,7 @@ public class ExportService {
     public ResponseEntity<Resource> exportEycaDiscounts() {
         log.info("exportEycaDiscounts start");
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
-        exportViewEntities = exportViewEntities.stream().distinct().collect(Collectors.toList());
-        
+
         StringWriter writer = new StringWriter();
         try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
@@ -357,15 +356,15 @@ public class ExportService {
             }
             
             if(!entitiesToCreateOnEyca.isEmpty()) {
-            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            	attachments.add(new Attachment("createOnEyca.csv", buildEycaCsv(createOnEycaStream(exportViewEntities).toList())));
             }
             
             if(!entitiesToUpdateOnEyca.isEmpty()) {
-            	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            	attachments.add(new Attachment("updateOnEyca.csv", buildEycaCsv(updateOnEycaStream(exportViewEntities).toList())));
             }
             
             if(!entitiesToDeleteOnEyca.isEmpty()) {
-            	attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).collect(Collectors.toList()))));
+            	attachments.add(new Attachment("deleteOnEyca.csv", buildEycaCsv(deleteOnEycaStream(exportViewEntities).toList())));
             }
              
             String body = "Discounts to create: "+entitiesToCreateOnEyca.size()
@@ -375,8 +374,6 @@ public class ExportService {
             log.info("MAIL-BODY: "+body);
             
             emailNotificationFacade.notifyAdminForJobEyca(attachments,body);
-            
-            //CGNUtils.writeAttachments(attachments,"c:\\develop\\");
             
             log.info("sendDiscountsToEyca end success");
 
@@ -441,13 +438,13 @@ public class ExportService {
         //Sfrutto lo stream dell'update che verifica la presenza dell'eyca_update_id
         return updateOnEycaStream(exportViewEntities)
                 .map(this::convertToSearchDataExportEyca)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<DeleteDataExportEyca> getItemsToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 		return deleteOnEycaStream(exportViewEntities)
                 .map(this::convertToDeleteDataExportEyca)
-                .collect(Collectors.toList());
+                .toList();
     }	
     
     public DeleteDataExportEyca convertToDeleteDataExportEyca(EycaDataExportViewEntity entity) {
@@ -468,7 +465,7 @@ public class ExportService {
 	private List<DataExportEycaWrapper<UpdateDataExportEyca>> getWrappersToUpdateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 		return updateOnEycaStream(exportViewEntities)
 		        .map(updateDataExportEycaConverter::toDto)
-		        .collect(Collectors.toList());
+                .toList();
 	}
 
 	private List<DataExportEycaWrapper<DataExportEyca>> getWrappersToCreateOnEyca(
@@ -476,7 +473,7 @@ public class ExportService {
 		
 		return createOnEycaStream(exportViewEntities)
 		.map(dataExportEycaConverter::toDto)
-		.collect(Collectors.toList());
+                .toList();
 	}
 	
 
@@ -678,10 +675,4 @@ public class ExportService {
             log.error(e.getMessage());
         }
     };
-
-    private final Function<String, List<String>> listFromCommaSeparatedString= value-> Optional.ofNullable(value)
-            .map(str -> Arrays.stream(str.split(","))
-                    .map(String::trim)
-                    .collect(Collectors.toList()))
-            .orElse(new ArrayList<>());
 }
