@@ -494,6 +494,26 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
     }
+
+    @Test
+    void Test_SyncEycaUpdateId_OK(){
+        initMockitoPreconditions();
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataListForSync());
+
+        ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
+
+        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
+        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
+        Mockito.when(discountRepository.findByEycaUpdateId(Mockito.anyString())).thenReturn(TestUtils.getDiscountWithEycaUpdateId(agreement));
+
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseWithDataEmptyList();
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString())).thenReturn(searchApiResponseEyca);
+
+        ResponseEntity<String> response = exportService.sendDiscountsToEyca();
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    }
     @Test
     void testBuildCsv() {
     	ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());

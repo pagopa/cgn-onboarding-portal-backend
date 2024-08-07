@@ -557,7 +557,9 @@ public class TestUtils {
         return Arrays.asList(getRealEycaDataExportViewEntity_0(500L, null), getRealEycaDataExportViewEntity_1(501L, null),
                 getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L, "c49020232220173105078447"));
     }
-
+    public static List<EycaDataExportViewEntity> getRealDataListForSync() {
+        return Arrays.asList(getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"));
+    }
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
     	return CsvUtils.csvToEntityList(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"), 
     		(_record) -> {
@@ -995,6 +997,21 @@ public class TestUtils {
         return searchApiResponseEyca;
     }
 
+    public static SearchApiResponseEyca getSearchApiResponseWithDataEmptyList() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+
+        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
+        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
+        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
+        SearchApiResponseApiResponseDataDiscountsEyca  searchApiResponseApiResponseDataDiscountsEyca = new  SearchApiResponseApiResponseDataDiscountsEyca();
+
+        searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
+        searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
+        searchApiResponseApiResponseDataDiscountsEyca.setData(Collections.emptyList());
+        searchApiResponseEyca.setApiResponse(searchApiResponseApiResponseEyca);
+        return searchApiResponseEyca;
+    }
+
     public static ApiResponseEyca getApiResponse() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
 
@@ -1139,6 +1156,12 @@ public class TestUtils {
 
     public static SubscriptionContract createSubscriptionContract() {
         return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
+    }
+
+    public static Optional<DiscountEntity> getDiscountWithEycaUpdateId(AgreementEntity agreement) {
+        DiscountEntity discount = createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount.setEycaUpdateId("c49020231110173105078447");
+        return Optional.of(discount);
     }
 
 
