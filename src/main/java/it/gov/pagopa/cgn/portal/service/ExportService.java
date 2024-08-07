@@ -42,6 +42,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.*;
 
 @Slf4j
@@ -151,6 +152,11 @@ public class ExportService {
             "DISCOUNT TYPE",
             "LANDING PAGE REFERRER"
     };
+    private Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae ->
+            sae.getApiResponse() != null &&
+            sae.getApiResponse().getData() != null &&
+            sae.getApiResponse().getData().getDiscounts() != null &&
+            ObjectUtils.isEmpty(sae.getApiResponse().getData().getDiscounts().getData());
 
 
     public ExportService(AgreementRepository agreementRepository, DiscountRepository discountRepository, EycaDataExportRepository eycaDataExportRepository,
@@ -405,26 +411,32 @@ public class ExportService {
             log.info("SEARCH SearchDataExportEyca: " + exportEyca.toString());
             SearchApiResponseEyca response = null;
             try {
-                response = eycaExportService.searchDiscount(exportEyca,"json");
+                response = eycaExportService.searchDiscount(exportEyca,"json"); //default search, Live=Y
 
                 if (Objects.nonNull(response)){
-                    log.info("Search Response:");
+                    log.info("Default Search Response:");
                     log.info(response.toString());
                 }
 
-                if( response.getApiResponse() != null &&
-                    response.getApiResponse().getData() != null &&
-                    response.getApiResponse().getData().getDiscounts() != null &&
-                        ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())) {
+                if(notExistsOnEycaPraticate.test(response)) {
+                    exportEyca.setLive(0);
+                    response = eycaExportService.searchDiscount(exportEyca, "json"); //search with Live = N
 
-                    String eycaUpdateId = exportEyca.getId();
-                    DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
-                            .orElseThrow( () -> new CGNException("Discount with EycaUpdateId: "+eycaUpdateId+" from eyca not found on Discount table"));
+                    if (Objects.nonNull(response)){
+                        log.info("Search Response with Live = N:");
+                        log.info(response.toString());
+                    }
 
-                    EycaDataExportViewEntity viewItem = exportViewEntities.stream().filter(d -> entity.getEycaUpdateId().equals(d.getEycaUpdateId())).findFirst().get();
-                    entity.setEycaUpdateId(null);
-                    discountRepository.saveAndFlush(entity);
-                    viewItem.setEycaUpdateId(null);
+                    if(notExistsOnEycaPraticate.test(response)) {
+                        String eycaUpdateId = exportEyca.getId();
+                        DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
+                                .orElseThrow( () -> new CGNException("Discount with EycaUpdateId: "+eycaUpdateId+" from eyca not found on Discount table"));
+
+                        EycaDataExportViewEntity viewItem = exportViewEntities.stream().filter(d -> entity.getEycaUpdateId().equals(d.getEycaUpdateId())).findFirst().get();
+                        entity.setEycaUpdateId(null);
+                        discountRepository.saveAndFlush(entity);
+                        viewItem.setEycaUpdateId(null);
+                    }
                 }
             }
             catch (RestClientException rce) {
@@ -458,6 +470,7 @@ public class ExportService {
         SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
         Optional<String> optDiscountId = Optional.ofNullable(entity.getEycaUpdateId());
         searchDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException("Error during viewEntity to search conversion, eycaUpdateId is empty")));
+        searchDataExportEyca.setLive(1);
         return searchDataExportEyca;
     }
 
@@ -586,7 +599,7 @@ public class ExportService {
             	response = eycaExportService.deleteDiscount(exportEyca, "json");
                 
                 if (Objects.nonNull(response)){
-                	log.info("Update Response:");
+                	log.info("Delete Response:");
  	                log.info(response.toString());
  	            }
 
