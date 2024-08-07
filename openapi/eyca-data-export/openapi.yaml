@@ -159,10 +159,12 @@ definitions:
     type: object
     required:
       - id
+      - live
     properties:
       id:
         type: string
-
+      live:
+        type: integer
   DataExport:
     type: object
     required:
