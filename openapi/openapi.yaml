@@ -1414,10 +1414,28 @@ definitions:
       - GENERIC
       - IMAGE_SIZE_EXCEEDED
 
+  ErrorCodeEnum:
+    type: string
+    enum:
+      - CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE
+      - MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED
+
+  ErrorCodeString:
+    type: string
+
+  ErrorCode:
+    type: string
+    description: A payload used for error responses.
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ErrorCodeString'
+      - $ref: '#/definitions/ErrorCodeEnum'
+
 responses:
   InvalidRequest:
     description: Bad request
-    #content: {} #TODO
+    schema:
+        $ref: '#/definitions/ErrorCode'
   Forbidden:
     description: Forbidden
     #content: {} #TODO

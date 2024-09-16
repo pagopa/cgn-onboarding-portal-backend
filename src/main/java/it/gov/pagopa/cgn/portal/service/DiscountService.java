@@ -14,6 +14,8 @@ import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCode;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -449,9 +451,7 @@ public class DiscountService {
                 LocalDate.now());
 
         if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
-            throw new InvalidRequestException("Cannot proceed with the discount because there are already " +
-                    MAX_NUMBER_PUBLISHED_DISCOUNT +
-                    " public ones");
+            throw new InvalidRequestException(ErrorCodeEnum.MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED.getValue());
         }
     }
 
@@ -459,7 +459,7 @@ public class DiscountService {
                                           DiscountEntity discountEntity,
                                           boolean isBucketFileChanged) {
 
-        if (discountEntity.getProducts().size()>2){
+        if (discountEntity.getProducts().size() > 2) {
             throw new InvalidRequestException(
                     "Discount cannot have more than 2 product categories");
         }
@@ -467,7 +467,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
-                    "Discount cannot have empty static code for a profile with discount code type static");
+                    ErrorCodeEnum.CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE.getValue());
         }
 
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&

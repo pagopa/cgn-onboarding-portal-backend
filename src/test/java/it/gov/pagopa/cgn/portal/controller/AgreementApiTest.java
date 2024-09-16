@@ -20,6 +20,7 @@ import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -207,16 +208,34 @@ class AgreementApiTest extends IntegrationAbstractTest {
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
         discountEntity = discountRepository.save(discountEntity);
 
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
-        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
-        agreementEntity = agreementRepository.save(agreementEntity);
+        saveApprovedAgreement(agreementEntity);
 
         this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
                     .andDo(log())
                     .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void PublishDiscount_PublishWithProfileDiscountCodeTypeDifferentFromStatic_BadRequest() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        discountEntity.setStaticCode(null);
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log())
+                .andExpect(content().string(ErrorCodeEnum.CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE.getValue()));
     }
 
     @Test
@@ -234,7 +253,46 @@ class AgreementApiTest extends IntegrationAbstractTest {
 
         this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
                     .andDo(log())
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Cannot proceed with a discount with a not approved agreement"));
+    }
+
+    @Test
+    void PublishDiscount_PublishDiscountMaxPublishedDiscountsReachedDiscount_BadRequest() throws Exception {
+
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        for(int i=0; i<5; i++){
+            // creating discount
+            DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+            discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+            // simulate test passed
+            discountEntity.setState(DiscountStateEnum.PUBLISHED);
+            discountRepository.save(discountEntity);
+        }
+
+        // activate agreement
+        saveApprovedAgreement(agreementEntity);
+
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+
+        this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(ErrorCodeEnum.MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED.getValue()));
     }
 
     @Test
@@ -252,12 +310,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
         discountEntity = discountRepository.save(discountEntity);
 
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
-        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
-        agreementEntity = agreementRepository.save(agreementEntity);
+        saveApprovedAgreement(agreementEntity);
 
         discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
@@ -277,12 +330,8 @@ class AgreementApiTest extends IntegrationAbstractTest {
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
-        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
-        agreementEntity = agreementRepository.save(agreementEntity);
+
+        saveApprovedAgreement(agreementEntity);
 
         // if we don't publish discount we expect an InvalidRequestException
         this.mockMvc.perform(post(TestUtils.getDiscountUnpublishingPath(agreementEntity.getId(),
