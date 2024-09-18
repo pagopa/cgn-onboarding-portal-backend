@@ -272,7 +272,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
             DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
             discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
 
-            // simulate test passed
+            // simulate already published discounts
             discountEntity.setState(DiscountStateEnum.PUBLISHED);
             discountRepository.save(discountEntity);
         }
