@@ -258,7 +258,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void PublishDiscount_PublishDiscountMaxPublishedDiscountsReachedDiscount_BadRequest() throws Exception {
+    void PublishDiscount_ReachedMaxPublishableDiscounts_BadRequest() throws Exception {
 
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
