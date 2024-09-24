@@ -169,7 +169,7 @@ public class TestUtils {
         profileEntity.setTelephoneNumber("12345678");
         profileEntity.setAllNationalAddresses(true);
         profileEntity.setSupportType(SupportTypeEnum.PHONENUMBER);
-        profileEntity.setSupportValue("000000000");
+        profileEntity.setSupportValue("0000000");
         return profileEntity;
     }
 
@@ -217,8 +217,6 @@ public class TestUtils {
         updateProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
         updateProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
         updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
-        updateProfile.setSupportType(SupportType.EMAILADDRESS);
-        updateProfile.setSupportValue("an.email@domain.com");
         updateProfile.setSecondaryReferents(createUpdateReferentList());
 
         return updateProfile;
@@ -262,8 +260,6 @@ public class TestUtils {
         createProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
         createProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
         createProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
-        createProfile.setSupportType(SupportType.EMAILADDRESS);
-        createProfile.setSupportValue("an.email@domain.com");
         createProfile.setSecondaryReferents(createCreateReferentList());
 
         return createProfile;
@@ -352,8 +348,6 @@ public class TestUtils {
         profileDto.setLegalRepresentativeFullName("full name");
         profileDto.setLegalOffice("legal office");
         profileDto.setTelephoneNumber("12345678");
-        profileDto.setSupportType(SupportType.PHONENUMBER);
-        profileDto.setSupportValue("00000000");
         UpdateReferent updateReferent = new UpdateReferent();
         updateReferent.setFirstName("referent_first_name");
         updateReferent.setLastName("referent_last_name");

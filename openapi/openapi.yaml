@@ -634,13 +634,6 @@ definitions:
       imageUrl:
         type: string
 
-  SupportType:
-    type: string
-    enum:
-      - EmailAddress
-      - Website
-      - PhoneNumber
-
   EntityType:
     type: string
     enum:
@@ -662,8 +655,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       fullName:
         type: string
@@ -704,12 +695,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -728,8 +713,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       name:
         type: string
@@ -764,12 +747,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -793,8 +770,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       id:
         type: string
@@ -837,12 +812,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
