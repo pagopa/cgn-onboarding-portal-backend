@@ -239,6 +239,54 @@ class AgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void PublishDiscount_PublishWithProfileDiscountCodeTypeLendingWithoutUrl_BadRequest() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.LANDINGPAGE);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        //I temporarily set the setLandingPageUrl for bypass check and immediately after call save it to null to trigger the same check during the mockMvc
+        discountEntity.setLandingPageUrl("link_fake");
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        discountEntity.setLandingPageUrl(null);
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log())
+                .andExpect(content().string(ErrorCodeEnum.CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE.getValue()));
+    }
+
+    @Test
+    void PublishDiscount_PublishWithProfileDiscountCodeTypeBucketWithBucketLoadInProgress_BadRequest() throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.BUCKET);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        // creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+
+        discountEntity.setLastBucketCodeLoadUid("fake_uid");
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.getDiscountPublishingPath(agreementEntity.getId(), discountEntity.getId())))
+                .andDo(log())
+                .andExpect(content().string(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue()));
+    }
+
+    @Test
     void PublishDiscount_PublishDiscountOfNotApprovedAgreement_BadRequest() throws Exception {
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);

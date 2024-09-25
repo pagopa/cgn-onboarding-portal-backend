@@ -432,7 +432,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
                 (discount.getLastBucketCodeLoad() == null ||
                         bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
-            throw new ConflictErrorException("Cannot proceed with a discount with a bucket load in progress");
+            throw new ConflictErrorException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             throw new InvalidRequestException("Cannot proceed with a discount with a not approved agreement");
@@ -473,7 +473,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
                 (StringUtils.isBlank(discountEntity.getLandingPageUrl()))) {
             throw new InvalidRequestException(
-                    "Discount cannot have empty landing page url for a profile with discount code type landingpage");
+                    ErrorCodeEnum.CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE.getValue());
         }
 
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
