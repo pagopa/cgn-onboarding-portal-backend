@@ -410,7 +410,7 @@ public class DiscountService {
         //perform publishing specific validation
         if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
                 !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot proceed with an online discount that's not passed a test");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST.getValue());
         }
     }
 
@@ -435,13 +435,13 @@ public class DiscountService {
             throw new ConflictErrorException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException("Cannot proceed with a discount with a not approved agreement");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT.getValue());
         }
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot proceed with a suspended discount");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_SUSPENDED_DISCOUNT.getValue());
         }
         if (LocalDate.now().isAfter(discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot proceed with an expired discount");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_EXPIRED_DISCOUNT.getValue());
         }
 
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
@@ -461,7 +461,7 @@ public class DiscountService {
 
         if (discountEntity.getProducts().size() > 2) {
             throw new InvalidRequestException(
-                    "Discount cannot have more than 2 product categories");
+                    ErrorCodeEnum.DISCOUNT_CANNOT_HAVE_MORE_THAN_TWO_CATEGORIES.getValue());
         }
 
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
