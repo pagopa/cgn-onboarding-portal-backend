@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.converter.profile;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -24,17 +23,11 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
     private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
-    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
-
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
-
-        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
-        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
-        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
     }
 
     protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
@@ -48,17 +41,6 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                                                      .map(Map.Entry::getKey)
                                                      .findFirst()
                                                      .orElseThrow();
-
-    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
-            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
-
-    protected Function<SupportType, SupportTypeEnum> toEntitySupportTypeEnum = supportType -> supportTypeMap.entrySet()
-                                                                                                            .stream()
-                                                                                                            .filter(entry -> entry.getValue()
-                                                                                                                                  .equals(supportType))
-                                                                                                            .map(Map.Entry::getKey)
-                                                                                                            .findFirst()
-                                                                                                            .orElseThrow();
 
     protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity) -> {
         if (coordinates != null && coordinates.getLongitude() != null && coordinates.getLatitude() != null) {

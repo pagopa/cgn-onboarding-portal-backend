@@ -634,13 +634,6 @@ definitions:
       imageUrl:
         type: string
 
-  SupportType:
-    type: string
-    enum:
-      - EmailAddress
-      - Website
-      - PhoneNumber
-
   EntityType:
     type: string
     enum:
@@ -662,8 +655,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       fullName:
         type: string
@@ -704,12 +695,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -728,8 +713,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       name:
         type: string
@@ -764,12 +747,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -793,8 +770,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       id:
         type: string
@@ -837,12 +812,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -1414,10 +1383,35 @@ definitions:
       - GENERIC
       - IMAGE_SIZE_EXCEEDED
 
+  ErrorCodeEnum:
+    type: string
+    enum:
+      - CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE
+      - CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE
+      - CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS
+      - CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT
+      - CANNOT_PROCEED_WITH_SUSPENDED_DISCOUNT
+      - CANNOT_PROCEED_WITH_EXPIRED_DISCOUNT
+      - CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST
+      - MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED
+      - DISCOUNT_CANNOT_HAVE_MORE_THAN_TWO_CATEGORIES
+
+  ErrorCodeString:
+    type: string
+
+  ErrorCode:
+    type: string
+    description: A payload used for error responses.
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ErrorCodeString'
+      - $ref: '#/definitions/ErrorCodeEnum'
+
 responses:
   InvalidRequest:
     description: Bad request
-    #content: {} #TODO
+    schema:
+        $ref: '#/definitions/ErrorCode'
   Forbidden:
     description: Forbidden
     #content: {} #TODO

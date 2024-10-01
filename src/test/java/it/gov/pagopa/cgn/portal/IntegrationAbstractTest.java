@@ -389,4 +389,13 @@ public class IntegrationAbstractTest {
         return testObject;
     }
 
+    protected void saveApprovedAgreement(AgreementEntity agreementEntity) {
+        // activate agreement
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementRepository.save(agreementEntity);
+    }
 }

@@ -14,6 +14,8 @@ import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCode;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -408,7 +410,7 @@ public class DiscountService {
         //perform publishing specific validation
         if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
                 !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot proceed with an online discount that's not passed a test");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST.getValue());
         }
     }
 
@@ -430,16 +432,16 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
                 (discount.getLastBucketCodeLoad() == null ||
                         bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
-            throw new ConflictErrorException("Cannot proceed with a discount with a bucket load in progress");
+            throw new ConflictErrorException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException("Cannot proceed with a discount with a not approved agreement");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT.getValue());
         }
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
-            throw new InvalidRequestException("Cannot proceed with a suspended discount");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_SUSPENDED_DISCOUNT.getValue());
         }
         if (LocalDate.now().isAfter(discount.getEndDate())) {
-            throw new InvalidRequestException("Cannot proceed with an expired discount");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_EXPIRED_DISCOUNT.getValue());
         }
 
         checkDiscountRelatedSameAgreement(discount, agreementEntity.getId());
@@ -449,9 +451,7 @@ public class DiscountService {
                 LocalDate.now());
 
         if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
-            throw new InvalidRequestException("Cannot proceed with the discount because there are already " +
-                    MAX_NUMBER_PUBLISHED_DISCOUNT +
-                    " public ones");
+            throw new InvalidRequestException(ErrorCodeEnum.MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED.getValue());
         }
     }
 
@@ -459,21 +459,21 @@ public class DiscountService {
                                           DiscountEntity discountEntity,
                                           boolean isBucketFileChanged) {
 
-        if (discountEntity.getProducts().size()>2){
+        if (discountEntity.getProducts().size() > 2) {
             throw new InvalidRequestException(
-                    "Discount cannot have more than 2 product categories");
+                    ErrorCodeEnum.DISCOUNT_CANNOT_HAVE_MORE_THAN_TWO_CATEGORIES.getValue());
         }
 
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType()) &&
                 StringUtils.isBlank(discountEntity.getStaticCode())) {
             throw new InvalidRequestException(
-                    "Discount cannot have empty static code for a profile with discount code type static");
+                    ErrorCodeEnum.CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE.getValue());
         }
 
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
                 (StringUtils.isBlank(discountEntity.getLandingPageUrl()))) {
             throw new InvalidRequestException(
-                    "Discount cannot have empty landing page url for a profile with discount code type landingpage");
+                    ErrorCodeEnum.CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE.getValue());
         }
 
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
