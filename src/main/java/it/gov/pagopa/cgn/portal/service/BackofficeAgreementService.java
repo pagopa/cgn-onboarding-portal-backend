@@ -13,6 +13,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +74,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity assignAgreement(String agreementId) {
-        var agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         validateForAssignment(agreementEntity);
         agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
         return agreementRepository.save(agreementEntity);
@@ -81,7 +82,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity unassignAgreement(String agreementId) {
-        var agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         validateForUnassignment(agreementEntity);
         agreementEntity.setBackofficeAssignee(null);
         return agreementRepository.save(agreementEntity);
@@ -90,7 +91,7 @@ public class BackofficeAgreementService {
     @Transactional
     public AgreementEntity approveAgreement(String agreementId) {
     	
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
@@ -103,7 +104,7 @@ public class BackofficeAgreementService {
                       .map(DocumentEntity::getDocumentType)
                       .collect(Collectors.toList())
                       .containsAll(manDocs)) {
-            throw new InvalidRequestException("Mandatory documents are missing");
+            throw new InvalidRequestException(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue());
         }
 
         agreementEntity.setRejectReasonMessage(null);
@@ -124,7 +125,7 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
-        var agreementEntity = agreementServiceLight.findById(agreementId);
+        var agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         checkPendingStatus(agreementEntity);
 
         agreementEntity.setRejectReasonMessage(reasonMessage);
@@ -151,22 +152,19 @@ public class BackofficeAgreementService {
         this.azureStorage = azureStorage;
     }
 
-
     private static final String AGREEMENT_LABEL = "Agreement ";
 
     private void validateForUnassignment(AgreementEntity agreementEntity) {
         checkPendingStatus(agreementEntity);
         if (StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
-            throw new InvalidRequestException(AGREEMENT_LABEL + agreementEntity.getId() + " isn't assigned to anymore");
+            throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NO_LONGER_ASSIGNED.getValue());
         }
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
     }
 
     private void checkAgreementIsAssignedToCurrentUser(AgreementEntity agreementEntity) {
         if (!CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-            throw new InvalidRequestException(AGREEMENT_LABEL +
-                                              agreementEntity.getId() +
-                                              " isn't assigned to current user");
+            throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_ASSIGNED_TO_CURRENT_USER.getValue());
         }
     }
 
@@ -174,9 +172,7 @@ public class BackofficeAgreementService {
         checkPendingStatus(agreementEntity);
         if (!StringUtils.isBlank(agreementEntity.getBackofficeAssignee())) {
             if (CGNUtils.getJwtAdminUserName().equals(agreementEntity.getBackofficeAssignee())) {
-                throw new InvalidRequestException(AGREEMENT_LABEL +
-                                                  agreementEntity.getId() +
-                                                  " is already assigned to current user");
+                throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_ALREADY_ASSIGNED_TO_CURRENT_USER.getValue());
             }
             log.info(String.format("User %s is being assigned the agreement %s currently assigned to user %s",
                                    CGNUtils.getJwtAdminUserName(),
@@ -187,10 +183,7 @@ public class BackofficeAgreementService {
 
     private void checkPendingStatus(AgreementEntity agreementEntity) {
         if (!AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
-            throw new InvalidRequestException(AGREEMENT_LABEL +
-                                              agreementEntity.getId() +
-                                              " haven't the state expected. Status found: " +
-                                              agreementEntity.getState());
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_AGREEMENT_NOT_IN_PENDING.getValue());
         }
     }
 }

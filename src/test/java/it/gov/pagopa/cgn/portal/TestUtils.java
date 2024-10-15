@@ -18,6 +18,7 @@ import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
@@ -34,6 +35,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -89,6 +91,14 @@ public class TestUtils {
     public static String getBackofficeDocumentPath(String agreementId) {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
+    public static String getAgreementRequestApprovalPath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/approval";
+    }
+
+    public static String getAgreementRequestAssigneePath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/assignee";
+    }
+
 
     public static String getAuthenticatedHelpPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
@@ -116,6 +126,13 @@ public class TestUtils {
         assigneeOpt.ifPresent(assignee -> path.append("&assignee=").append(assignee));
         return path.toString();
     }
+    public static String getAgreementRequestsDiscountTestingPath(String agreementId, String discountId) {
+        return getDiscountPath(agreementId) + "/" + discountId + "/testing";
+    }
+    public static String getAgreementRequestsDiscountSuspendingPath(String agreementId, String discountId) {
+        return getAgreementRequestsDiscountPath(agreementId, discountId) + "/suspension";
+    }
+
 
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
@@ -133,6 +150,10 @@ public class TestUtils {
                 columnEnum.getValue() +
                 "&sortDirection=" +
                 direction.name();
+    }
+
+    public static String createAgreements() {
+        return AGREEMENTS_CONTROLLER_PATH;
     }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
@@ -962,6 +983,14 @@ public class TestUtils {
         updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
         updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
         return updateDiscount;
+    }
+
+    public static SuspendDiscount suspendableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
+        DiscountConverter discountConverter = new DiscountConverter();
+        Discount discount = discountConverter.toDto(discountEntity);
+        SuspendDiscount suspendDiscount = new SuspendDiscount();
+        suspendDiscount.setReasonMessage("fake reason");
+        return suspendDiscount;
     }
 
     /*
