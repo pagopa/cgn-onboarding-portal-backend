@@ -13,6 +13,7 @@ import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -92,9 +93,7 @@ public class BackofficeAgreementFacade {
         DocumentTypeEnum documentTypeEnum = documentConverter.getBackofficeDocumentTypeEnum(documentType);
         long deleteDocument = documentService.deleteDocument(agreementId, documentTypeEnum);
         if (deleteDocument != 1) {
-            throw new InvalidRequestException(String.format("Document with agreement %s and document type %s not found",
-                                                            agreementId,
-                                                            documentType));
+            throw new InvalidRequestException(ErrorCodeEnum.DOCUMENT_NOT_FOUND.getValue());
         }
         return ResponseEntity.noContent().build();
     }

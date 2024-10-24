@@ -120,7 +120,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
                 } else {
-                    throwInvalidSalesChannel();
+                    throw new InvalidRequestException("SalesChannel is invalid");
                 }
                 break;
             case OFFLINECHANNEL:
@@ -135,7 +135,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                                                               .collect(Collectors.toList()));
                     entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
                 } else {
-                    throwInvalidSalesChannel();
+                    throw new InvalidRequestException("SalesChannel is invalid");
                 }
                 break;
             case BOTHCHANNELS:
@@ -150,7 +150,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
                     entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
                 } else {
-                    throwInvalidSalesChannel();
+                    throw new InvalidRequestException("SalesChannel is invalid");
                 }
                 break;
         }
@@ -161,7 +161,4 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         return Comparator.comparing(AddressEntity::getId);
     }
 
-    private void throwInvalidSalesChannel() {
-        throw new InvalidRequestException("SalesChannel is invalid");
-    }
 }
