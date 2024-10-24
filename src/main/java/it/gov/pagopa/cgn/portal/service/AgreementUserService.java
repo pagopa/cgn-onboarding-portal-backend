@@ -12,10 +12,10 @@ import java.util.UUID;
 @Service
 public class AgreementUserService {
 
-    private final AgreementUserRepository agreementUserRepository;
+    private final AgreementUserRepository userRepository;
 
     public Optional<AgreementUserEntity> findCurrentAgreementUser(String merchantTaxCode) {
-        return agreementUserRepository.findById(merchantTaxCode);
+        return userRepository.findById(merchantTaxCode);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -23,16 +23,16 @@ public class AgreementUserService {
         AgreementUserEntity userEntity = new AgreementUserEntity();
         userEntity.setUserId(merchantTaxCode);
         userEntity.setAgreementId(UUID.randomUUID().toString());
-        return agreementUserRepository.save(userEntity);
+        return userRepository.save(userEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void updateMerchantTaxCode(String agreementId, String newMerchantTaxCode) {
-        agreementUserRepository.updateMerchantTaxCode(agreementId, newMerchantTaxCode);
+        userRepository.updateMerchantTaxCode(agreementId, newMerchantTaxCode);
     }
 
     @Autowired
     public AgreementUserService(AgreementUserRepository userRepository) {
-        this.agreementUserRepository = userRepository;
+        this.userRepository = userRepository;
     }
 }

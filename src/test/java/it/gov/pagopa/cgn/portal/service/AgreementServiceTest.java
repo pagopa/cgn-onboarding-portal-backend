@@ -61,7 +61,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         saveSampleDocuments(agreementEntity);
         Assertions.assertDoesNotThrow(() -> agreementService.requestApproval(agreementEntity.getId()));
-        AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.PENDING, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
         Assertions.assertNull(pendingAgreement.getEndDate());
@@ -81,7 +81,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
 
         saveSampleDocuments(agreementEntity);
         Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
-        AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
         Assertions.assertNull(pendingAgreement.getEndDate());
@@ -102,7 +102,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         Assertions.assertThrows(InvalidRequestException.class, () -> discountService.createDiscount(agreementId, discountEntity));
         Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
-        AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
         Assertions.assertNull(pendingAgreement.getEndDate());
@@ -123,7 +123,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
-        AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
         Assertions.assertNull(pendingAgreement.getEndDate());
@@ -145,7 +145,7 @@ class AgreementServiceTest extends IntegrationAbstractTest {
         DocumentEntity documentEntity = TestUtils.createDocument(agreementEntity, DocumentTypeEnum.AGREEMENT);
         documentRepository.save(documentEntity);
         Assertions.assertThrows(InvalidRequestException.class, () -> agreementService.requestApproval(agreementId));
-        AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
+        AgreementEntity pendingAgreement = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
         Assertions.assertNull(pendingAgreement.getEndDate());

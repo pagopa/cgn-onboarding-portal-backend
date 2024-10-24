@@ -222,7 +222,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
 
         Assertions.assertThrows(InvalidRequestException.class,
                                 () -> backofficeAgreementService.unassignAgreement(agreementId));
-        AgreementEntity agreementEntity = agreementService.findAgreementById(agreementId);
+        AgreementEntity agreementEntity = agreementService.findById(agreementId);
         Assertions.assertTrue(StringUtils.isBlank(agreementEntity.getBackofficeAssignee()));
         Assertions.assertEquals(AgreementStateEnum.PENDING, agreementEntity.getState());
     }
@@ -356,7 +356,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         final String agreementId = agreementEntity.getId();
         Assertions.assertThrows(InvalidRequestException.class,
                                 () -> backofficeAgreementService.approveAgreement(agreementId));
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
 
         Assertions.assertNotEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
@@ -393,7 +393,7 @@ class BackofficeAgreementServiceTest extends IntegrationAbstractTest {
         String reasonMsg = "Reason";
         Assertions.assertThrows(InvalidRequestException.class,
                                 () -> backofficeAgreementService.rejectAgreement(agreementId, reasonMsg));
-        agreementEntity = agreementService.findAgreementById(agreementId);
+        agreementEntity = agreementService.findById(agreementId);
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
         Assertions.assertNull(agreementEntity.getEndDate());

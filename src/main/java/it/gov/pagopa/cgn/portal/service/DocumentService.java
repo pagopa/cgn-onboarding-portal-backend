@@ -78,7 +78,7 @@ public class DocumentService {
                                         DocumentTypeEnum documentType,
                                         InputStream content,
                                         long size) {
-        AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
+        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
         // Delete old document if exists
         long deleted = documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);

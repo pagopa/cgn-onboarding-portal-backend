@@ -176,7 +176,7 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus
             = organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
-            .flatMap(agreementUserEntity -> agreementService.getAgreementById(
+            .flatMap(agreementUserEntity -> agreementService.getById(
                     agreementUserEntity.getAgreementId()))
             .ifPresent(a -> mapStatus.accept(a, organization));
 
