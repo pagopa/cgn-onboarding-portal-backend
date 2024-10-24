@@ -4,7 +4,6 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +17,13 @@ public class AgreementServiceLight {
     protected final AgreementRepository agreementRepository;
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public AgreementEntity findAgreementById(String agreementId) {
-        return  getAgreementById(agreementId)
-                                  .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+    public AgreementEntity findById(String agreementId) {
+        return agreementRepository.findById(agreementId)
+                                  .orElseThrow(() -> new InvalidRequestException("Agreement not found"));
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public Optional<AgreementEntity> getAgreementById(String agreementId) {
+    public Optional<AgreementEntity> getById(String agreementId) {
         return agreementRepository.findById(agreementId);
     }
 

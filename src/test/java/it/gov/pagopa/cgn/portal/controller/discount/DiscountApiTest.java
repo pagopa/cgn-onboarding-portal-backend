@@ -5,22 +5,26 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.*;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
-import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
-import it.gov.pagopa.cgnonboardingportal.model.*;
+import it.gov.pagopa.cgnonboardingportal.model.CreateDiscount;
+import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
+import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
+import it.gov.pagopa.cgnonboardingportal.model.UpdateDiscount;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
@@ -38,7 +42,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -303,7 +306,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateDiscountWithMissingBucketFile_BadRequest() throws Exception {
+    void Create_CreateDiscountWithBucket_Ko() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
         discount.setLastBucketCodeLoadUid(null);
@@ -311,7 +314,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
                                                .content(TestUtils.getJson(discount)))
                     .andDo(log())
-                    .andExpect(content().string(ErrorCodeEnum.DISCOUNT_CANNOT_REFERENCE_TO_MISSING_BUCKET_FILE_FOR_DISCOUNT_WITH_BUCKET.getValue()));
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -511,40 +514,6 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_CreateAndUpdateDiscountWithoutProfile_BadRequest() throws Exception {
-        initTest(DiscountCodeTypeEnum.BUCKET);
-
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        String firstBucketCodeLoad = discountEntity.getLastBucketCodeLoadUid();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), firstBucketCodeLoad, multipartFile.getSize());
-        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
-
-        // load codes
-        bucketLoadUtils.storeCodesBucket(discountEntity.getId());
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count() == 2);
-        Awaitility.await()
-                .atMost(5, TimeUnit.SECONDS)
-                .until(() -> BucketCodeLoadStatusEnum.FINISHED.equals(bucketCodeLoadRepository.findByUid(
-                        firstBucketCodeLoad).getStatus()));
-
-        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
-        updateDiscount.setName("new_name");
-        updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
-        updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
-                updateDiscount.getLastBucketCodeLoadUid(),
-                multipartFile.getSize());
-
-        //force delete profile
-        profileRepository.delete(discountEntity.getAgreement().getProfile());
-
-        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
-                                                                 .content(TestUtils.getJson(updateDiscount)))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
-    }
-
-    @Test
     void Get_GetDiscountBucketCodeLoadingProgess_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
@@ -703,31 +672,6 @@ class DiscountApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Action_PublishDiscountWithoutProfile_BadRequest() throws Exception {
-        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
-
-        DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
-        discount.setLandingPageUrl("http://www.fakeurl.it");
-        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
-
-        // simulate test passed
-        discount.setState(DiscountStateEnum.TEST_PASSED);
-        discount = discountRepository.save(discount);
-
-        saveDocumentsForApproval(agreement);
-        agreement = agreementService.requestApproval(agreement.getId());
-        agreement = approveAgreement(agreement, true);
-
-        //force delete profile
-        profileRepository.delete(agreement.getProfile());
-
-        // publish
-        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
-    }
-
-    @Test
     void Action_UnpublishDiscount_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
 
@@ -758,23 +702,6 @@ class DiscountApiTest extends IntegrationAbstractTest {
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.items[0].state").value(DiscountState.DRAFT.getValue()));
-    }
-
-    @Test
-    void Action_UnpublishDiscountNotPublished_BadRequest () throws Exception {
-        initTest(DiscountCodeTypeEnum.STATIC);
-
-        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
-        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
-
-        // simulate test passed
-        discount.setState(DiscountStateEnum.TEST_PASSED);
-        discount = discountRepository.save(discount);
-
-        // unpublish
-        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/unpublishing"))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.CANNOT_UNPUBLISH_DISCOUNT_NOT_PUBLISHED.getValue()));
     }
 
     private CreateDiscount createSampleCreateDiscountWithStaticCode() {

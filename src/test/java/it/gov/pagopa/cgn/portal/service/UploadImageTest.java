@@ -55,7 +55,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     void UploadImage_UploadImage_Ok() {
         String imageUrl = agreementService.uploadImage(agreementEntity.getId(), multipartFile);
         Assertions.assertNotNull(imageUrl);
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
     }
 
@@ -63,7 +63,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     void UploadImage_UploadImageMultipleTimes_Ok() {
         String imageUrl = agreementService.uploadImage(agreementEntity.getId(), multipartFile);
         Assertions.assertNotNull(imageUrl);
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
         Assertions.assertDoesNotThrow(()-> agreementService.uploadImage(agreementEntity.getId(), multipartFile));
     }
@@ -72,7 +72,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     void UploadImage_UploadImageWithWrongAgreementId_ThrowException() {
         Assertions.assertThrows(InvalidRequestException.class,
                 () ->agreementService.uploadImage("invalidAgreementId", multipartFile));
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertNull(agreementEntity.getImageUrl());
     }
 
@@ -84,7 +84,7 @@ class UploadImageTest extends IntegrationAbstractTest {
 
         String imageUrl = agreementService.uploadImage(agreementEntity.getId(), multipartFile);
         Assertions.assertNotNull(imageUrl);
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity = agreementService.findById(agreementEntity.getId());
         Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());

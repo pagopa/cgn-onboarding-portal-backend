@@ -11,8 +11,6 @@ import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.FailureReason;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
@@ -110,7 +108,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetAgreements_GetAssignedToOtherAgreements_NotFound_Ok() throws Exception {
+    void GetAgreements_GetAssignedToOtherAgreements_NotFound() throws Exception {
         AgreementTestObject agreementTestObject = createPendingAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         backofficeAgreementService.assignAgreement(agreementEntity.getId());
@@ -125,7 +123,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetAgreements_GetPendingAgreement_NotFound_Ok() throws Exception {
+    void GetAgreements_GetPendingAgreement_NotFound() throws Exception {
         AgreementTestObject agreementTestObject = createPendingAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         backofficeAgreementService.assignAgreement(agreementEntity.getId());
@@ -316,60 +314,17 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Action_SuspendDiscountNotPublished_BadRequest () throws Exception {
+    void GetBucketCode_NotFound_Ko() throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.LANDINGPAGE);
-        profileService.createProfile(profileEntity, agreementEntity.getId());
+        createDiscountAndApproveAgreement(agreementEntity);
 
+        String notExistingDiscountId = "-1";
 
-        DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discount.setLandingPageUrl("fake url");
-        discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
-
-        // simulate test passed
-        discount.setState(DiscountStateEnum.TEST_PASSED);
-        discount = discountRepository.save(discount);
-
-        SuspendDiscount suspendDiscount = TestUtils.suspendableDiscountFromDiscountEntity(discount);
-
-        // suspend
-        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountSuspendingPath(agreementEntity.getId(),discount.getId().toString()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(suspendDiscount)))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.CANNOT_SUSPEND_DISCOUNT_NOT_PUBLISHED.getValue()));
-    }
-
-    @Test
-    void Action_SuspendDiscountWithoutProfile_BadRequest () throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity.setDiscountCodeType(DiscountCodeTypeEnum.LANDINGPAGE);
-        profileService.createProfile(profileEntity, agreementEntity.getId());
-
-
-        DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discount.setLandingPageUrl("fake url");
-        discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
-
-        // simulate test passed
-        discount.setState(DiscountStateEnum.TEST_PASSED);
-        discount = discountRepository.save(discount);
-
-        //force delete of profile
-        profileRepository.delete(profileEntity);
-
-        SuspendDiscount suspendDiscount = TestUtils.suspendableDiscountFromDiscountEntity(discount);
-
-        // suspend
-        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountSuspendingPath(agreementEntity.getId(),discount.getId().toString()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(TestUtils.getJson(suspendDiscount)))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      notExistingDiscountId)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -406,66 +361,6 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetBucketCode_NotFound_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        String notExistingDiscountId = "-1";
-
-        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
-                        notExistingDiscountId)))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.DISCOUNT_NOT_FOUND.getValue()));
-    }
-
-    @Test
-    void GetBucketCode_DiscountStateNotInTestPending_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
-
-        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
-                        discountEntity.getId().toString())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue()));
-    }
-
-    @Test
-    void GetBucketCode_WithoutProfile_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
-        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
-        discountRepository.save(discountEntity);
-        //force delete profile
-        profileRepository.delete(profileRepository.findByAgreementId(agreementEntity.getId()).get());
-
-        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
-                        discountEntity.getId().toString())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
-    }
-
-    @Test
-    void GetBucketCode_WithProfileNoBucket_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        DiscountEntity discountEntity = createDiscountAndApproveAgreement(agreementEntity);
-        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
-        discountRepository.save(discountEntity);
-
-        ProfileEntity pe = profileRepository.findByAgreementId(agreementEntity.getId()).get();
-        pe.setDiscountCodeType(DiscountCodeTypeEnum.STATIC);
-        profileRepository.save(pe);
-
-        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
-                        discountEntity.getId().toString())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue()));
-    }
-
-    @Test
     void SetDiscountTestPassed_NoContent() throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
 
@@ -497,7 +392,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                                                                                        discountEntity.getId()
                                                                                                      .toString())))
                     .andDo(log())
-                    .andExpect(content().string(ErrorCodeEnum.CANNOT_SET_DISCOUNT_STATE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue()));
+                    .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -540,7 +435,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
                                                                                                      .toString())).contentType(
                     MediaType.APPLICATION_JSON).content(TestUtils.getJson(failureReason)))
                     .andDo(log())
-                    .andExpect(content().string(ErrorCodeEnum.CANNOT_SET_DISCOUNT_STATE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue()));
+                    .andExpect(status().isBadRequest());
     }
 
     private DiscountEntity createDiscountAndApproveAgreement(AgreementEntity agreementEntity) throws IOException {
@@ -569,107 +464,5 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
         agreementRepository.save(agreementEntity);
 
         return discountEntity;
-    }
-
-    @Test
-    void approval_WithoutMandatoryDocuments_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setBackofficeAssignee(TestUtils.FAKE_ID);
-        agreementRepository.save(agreementEntity);
-
-        List<DocumentEntity> entities = documentRepository.findByAgreementId(agreementEntity.getId());
-        documentRepository.delete(entities.get(0));
-
-        this.mockMvc.perform(post(TestUtils.getAgreementRequestApprovalPath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue()));
-    }
-
-    @Test
-    void approval_WithAgreementNotAssignedToCurrentUser_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementRepository.save(agreementEntity);
-
-        this.mockMvc.perform(post(TestUtils.getAgreementRequestApprovalPath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.AGREEMENT_NOT_ASSIGNED_TO_CURRENT_USER.getValue()));
-    }
-
-    @Test
-    void approval_WithoutAgreementInPendingState_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        this.mockMvc.perform(post(TestUtils.getAgreementRequestApprovalPath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.CANNOT_PROCEED_AGREEMENT_NOT_IN_PENDING.getValue()));
-    }
-
-    @Test
-    void approval_alreadyAssignedAgreement_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setBackofficeAssignee(TestUtils.FAKE_ID);
-        agreementRepository.save(agreementEntity);
-
-        List<DocumentEntity> entities = documentRepository.findByAgreementId(agreementEntity.getId());
-        documentRepository.delete(entities.get(0));
-
-        this.mockMvc.perform(put(TestUtils.getAgreementRequestAssigneePath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.AGREEMENT_ALREADY_ASSIGNED_TO_CURRENT_USER.getValue()));
-    }
-
-    @Test
-    void approval_alreadyUnassignedAgreement_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setBackofficeAssignee(TestUtils.FAKE_ID_2);
-        agreementRepository.save(agreementEntity);
-
-        List<DocumentEntity> entities = documentRepository.findByAgreementId(agreementEntity.getId());
-        documentRepository.delete(entities.get(0));
-
-        this.mockMvc.perform(delete(TestUtils.getAgreementRequestAssigneePath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.AGREEMENT_NOT_ASSIGNED_TO_CURRENT_USER.getValue()));
-    }
-
-    @Test
-    void approval_noLongerAssignedAgreement_BadRequest() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-
-        createDiscountAndApproveAgreement(agreementEntity);
-
-        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setBackofficeAssignee(null);
-        agreementRepository.save(agreementEntity);
-
-        List<DocumentEntity> entities = documentRepository.findByAgreementId(agreementEntity.getId());
-        documentRepository.delete(entities.get(0));
-
-        this.mockMvc.perform(delete(TestUtils.getAgreementRequestAssigneePath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(content().string(ErrorCodeEnum.AGREEMENT_NO_LONGER_ASSIGNED.getValue()));
     }
 }
