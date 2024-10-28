@@ -2,12 +2,14 @@ package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.ImageException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +26,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.databind.*;
 
+@Slf4j
 public class CGNUtils {
 
     private CGNUtils() {
@@ -39,12 +42,11 @@ public class CGNUtils {
             checkIfImageFile(image.getOriginalFilename());
             dimension = getImageDimensions(image.getInputStream());
         } catch (IOException e) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.GENERIC);
+            throw new InternalErrorException(e.getMessage());
         }
         boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight();
         if (!isValid) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION,
-                    "Image must be at least " + minWidth + "x" + minHeight);
+            throw new InvalidRequestException(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());
         }
     }
 
@@ -70,25 +72,27 @@ public class CGNUtils {
                     }
                 }
             }
-            throw new IllegalArgumentException("Can't get dimensions for this image");
+            throw new IOException(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue());
         }
     }
 
     public static void checkIfPdfFile(String fileName) {
         if (fileName == null || !fileName.toLowerCase().endsWith("pdf")) {
-            throw new InvalidRequestException("Invalid file extension. Upload a PDF document.");
+            throw new InvalidRequestException(ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
 
     public static void checkIfCsvFile(String fileName) {
         if (fileName == null || !fileName.toLowerCase().endsWith("csv")) {
-            throw new InvalidRequestException("Invalid file extension. Upload a CSV document.");
+            throw new InvalidRequestException(ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
 
     public static void checkIfImageFile(String fileName) {
-        if (fileName == null || !(fileName.toLowerCase().endsWith("jpg") || fileName.toLowerCase().endsWith("png"))) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.INVALID_IMAGE_TYPE);
+        if (fileName == null || !(fileName.toLowerCase().endsWith("jpeg")
+                                    ||fileName.toLowerCase().endsWith("jpg")
+                                    || fileName.toLowerCase().endsWith("png"))) {
+            throw new InvalidRequestException(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
 

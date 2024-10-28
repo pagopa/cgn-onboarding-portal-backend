@@ -14,7 +14,6 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
-import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -658,7 +657,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         this.mockMvc.perform(multipart(TestUtils.getUploadImagePath(agreementEntity.getId())).file(multipartFile))
                     .andDo(log())
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string(ImageErrorCode.INVALID_IMAGE_TYPE.getValue()));
+                    .andExpect(content().string(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue()));
     }
 
     private void createBlobImage() {

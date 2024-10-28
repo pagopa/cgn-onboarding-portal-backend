@@ -102,7 +102,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -152,7 +152,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -184,7 +184,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -240,7 +240,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -274,7 +274,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -309,7 +309,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -333,7 +333,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 discountEntity.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -417,7 +417,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
         for (var i = 0; i < 5; i++) {
             var bucketCodeLoadUid = TestUtils.generateDiscountBucketCodeUid();
 
-            azureStorage.uploadCsv(multipartFile.getInputStream(), bucketCodeLoadUid, multipartFile.getSize());
+            azureStorage.uploadCsv(multipartFile.getBytes(), bucketCodeLoadUid, multipartFile.getSize());
 
             discountEntity.setLastBucketCodeLoadUid(bucketCodeLoadUid);
             discountRepository.save(discountEntity);

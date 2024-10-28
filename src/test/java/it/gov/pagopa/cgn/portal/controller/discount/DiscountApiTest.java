@@ -187,7 +187,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithBucket_Ok() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discount.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
 
         // upload a csv
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discount.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
 
@@ -318,7 +318,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
     void Create_CreateDiscountWithBucketWithNotExistingBucketLoadFile_Ko() throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
         CreateDiscount discount = createSampleCreateDiscountWithBucket();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), UUID.randomUUID().toString(), multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getBytes(), UUID.randomUUID().toString(), multipartFile.getSize());
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
                                                .content(TestUtils.getJson(discount)))
                     .andDo(log())
@@ -426,7 +426,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
@@ -465,7 +465,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
         String firstBucketCodeLoad = discountEntity.getLastBucketCodeLoadUid();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), firstBucketCodeLoad, multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getBytes(), firstBucketCodeLoad, multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         // load codes
@@ -480,7 +480,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         updateDiscount.setName("new_name");
         updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
         updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                updateDiscount.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
 
@@ -516,7 +516,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
         String firstBucketCodeLoad = discountEntity.getLastBucketCodeLoadUid();
-        azureStorage.uploadCsv(multipartFile.getInputStream(), firstBucketCodeLoad, multipartFile.getSize());
+        azureStorage.uploadCsv(multipartFile.getBytes(), firstBucketCodeLoad, multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         // load codes
@@ -531,7 +531,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         updateDiscount.setName("new_name");
         updateDiscount.setLastBucketCodeLoadUid(TestUtils.generateDiscountBucketCodeUid());
         updateDiscount.setLastBucketCodeLoadFileName("new-codes.csv");
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                 updateDiscount.getLastBucketCodeLoadUid(),
                 multipartFile.getSize());
 
@@ -549,7 +549,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
         initTest(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();

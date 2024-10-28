@@ -15,6 +15,8 @@ import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCode;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -94,50 +96,32 @@ public class DocumentService {
     }
 
     @Transactional
-    public String storeBucket(String agreementId, InputStream inputStream, long size) {
+    public String storeBucket(String agreementId, InputStream inputStream, long size) throws IOException {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new InvalidRequestException(
-                                                               "Profile not found. Bucket not uploadable"));
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         if (!profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)) {
-            throw new InvalidRequestException("Cannot load bucket for Discount Code type not equals to BUCKET");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue());
         }
-        try {
-            byte[] content = inputStream.readAllBytes();
-            long csvRecordCount = countCsvRecord(content);
-            if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
-                throw new InvalidRequestException("Cannot load bucket because number of rows (" +
-                                                  csvRecordCount +
-                                                  ") does not respect minimum bound (" +
-                                                  configProperties.getBucketMinCsvRows() +
-                                                  ") on loaded content of length (" +
-                                                  content.length +
-                                                  ")");
-            }
-            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
-                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-                if (content.length == 0 ||
-                    csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
-                                                     StringUtils.isBlank(line.get(0)))) {
-                    throw new InvalidRequestException(
-                            "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect " +
-                            MAX_ALLOWED_BUCKET_CODE_LENGTH +
-                            " code size");
-                }
-            } catch (IOException e) {
-                throw new CGNException(e.getMessage());
-            }
 
-            String bucketLoadUID = UUID.randomUUID().toString();
-            try (ByteArrayInputStream in = new ByteArrayInputStream(content)) {
-                azureStorage.uploadCsv(in, bucketLoadUID, size);
-            } catch (IOException e) {
-                throw new CGNException(e.getMessage());
-            }
-
-            return bucketLoadUID;
-        } catch (IOException e) {
-            throw new CGNException(e.getMessage());
+        byte[] content = inputStream.readAllBytes();
+        long csvRecordCount = countCsvRecord(content);
+        if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
         }
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (content.length == 0 ||
+                csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
+                                                 StringUtils.isBlank(line.get(0)))) {
+                throw new InvalidRequestException(
+                        ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue());
+            }
+        }
+
+        String bucketLoadUID = UUID.randomUUID().toString();
+        azureStorage.uploadCsv(content, bucketLoadUID, size);
+        
+        return bucketLoadUID;
     }
 
     private long countCsvRecord(byte[] content) {
@@ -204,13 +188,13 @@ public class DocumentService {
             case ADHESION_REQUEST:
                 return renderAdhesionRequestDocument(agreementId);
             default:
-                throw new RuntimeException("Invalid document type: " + documentType);
+                throw new InvalidRequestException(ErrorCodeEnum.DOCUMENT_TYPE_NOT_VALID.getValue());
         }
     }
 
     private ByteArrayOutputStream renderAgreementDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new RuntimeException("no profile"));
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         String docPath = "pdf/pe-agreement-public.html";
 
         Context context = new Context();
@@ -234,11 +218,11 @@ public class DocumentService {
 
     private ByteArrayOutputStream renderAdhesionRequestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new RuntimeException("no profile"));
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         
         if(profileEntity != null && profileEntity.getAgreement() != null 
         		&& profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)) {
-        	throw new CGNException("The adhesion document is not required for PA");
+        	throw new InvalidRequestException(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue());
         }
 
         List<String> addressList = profileEntity.getAddressList()
@@ -327,7 +311,8 @@ public class DocumentService {
 
             renderer.createPDF(outputStream);
         } catch (DocumentException | IOException e) {
-            throw new CGNException("Error in document rendering", e);
+            log.error("Error during Rendering PDF:", e);
+            throw new InvalidRequestException(ErrorCodeEnum.PDF_RENDERING_ERROR.getValue());
         }
 
         return outputStream;

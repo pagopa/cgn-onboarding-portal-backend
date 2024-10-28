@@ -1,12 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
@@ -71,11 +69,13 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity getDiscountById(String agreementId, Long discountId) {
         Optional<DiscountEntity> discountEntityOptional = discountRepository.findById(discountId);
-        if (discountEntityOptional.isEmpty() ||
-                !agreementId.equals(discountEntityOptional.get().getAgreement().getId())) {
-            throw new InvalidRequestException(ErrorCodeEnum.DISCOUNT_NOT_FOUND_OR_INVALID_AGREEMENT.getValue());
+        if (discountEntityOptional.isEmpty()) {
+            throw new InvalidRequestException(ErrorCodeEnum.DISCOUNT_NOT_FOUND.getValue());
         }
-        return discountEntityOptional.get();
+        DiscountEntity entity = discountEntityOptional.get();
+        checkDiscountRelatedSameAgreement(entity,agreementId);
+
+        return entity;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -100,7 +100,7 @@ public class DiscountService {
         if (isChangedBucketLoad &&
                 dbEntity.getLastBucketCodeLoad() != null &&
                 bucketService.isLastBucketLoadStillLoading(dbEntity.getLastBucketCodeLoad().getId())) {
-            throw new ConflictErrorException("Cannot update discount bucket while another bucket processing is running");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING.getValue());
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
@@ -418,7 +418,7 @@ public class DiscountService {
 
         // check sales channel
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
-            throw new ConflictErrorException(ErrorCodeEnum.CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS.getValue());
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS.getValue());
         }
 
         // perform common discount validation to keep entities coherent
@@ -434,7 +434,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
                 (discount.getLastBucketCodeLoad() == null ||
                         bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
-            throw new ConflictErrorException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
         }
         if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT.getValue());

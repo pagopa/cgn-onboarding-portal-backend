@@ -1,10 +1,7 @@
 package it.gov.pagopa.cgn.portal.config;
 
-import it.gov.pagopa.cgn.portal.exception.ConflictErrorException;
-import it.gov.pagopa.cgn.portal.exception.ImageException;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
-import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.client.RestClientException;
 
 @ControllerAdvice
 @Slf4j
@@ -28,30 +25,10 @@ public class AppExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = { InternalErrorException.class })
+    @ExceptionHandler(value = { InternalErrorException.class, RestClientException.class})
     public ResponseEntity<Object> handleInternalErrorException(Exception ex) {
         log.error("InternalErrorException", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(value = { ConflictErrorException.class })
-    public ResponseEntity<Object> handleConflictErrorException(Exception ex) {
-        log.error("ConflictErrorException", ex);
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(value = { ImageException.class, MaxUploadSizeExceededException.class })
-    public ResponseEntity<Object> handleImageError(Exception ex) {
-        log.error("ImageException", ex);
-        String codeError;
-        if (ex instanceof ImageException) {
-            codeError = ((ImageException) ex).getImageErrorCodeDto();
-        } else if (ex instanceof MaxUploadSizeExceededException) {
-            codeError = ImageErrorCode.IMAGE_SIZE_EXCEEDED.getValue();
-        } else {
-            codeError = ImageErrorCode.GENERIC.getValue();
-        }
-        return new ResponseEntity<>(codeError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = { EmptyResultDataAccessException.class })

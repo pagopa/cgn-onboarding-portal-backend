@@ -67,7 +67,7 @@ public class AgreementService extends AgreementServiceLight {
             userAgreement = userAgreementOpt.get();
             // current user has already an agreement. Find it
             agreementEntity = agreementRepository.findById(userAgreement.getAgreementId())
-                    .orElseThrow(() -> new RuntimeException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
+                    .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
         } else {
             userAgreement = userService.create(merchantTaxCode);
             agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType);

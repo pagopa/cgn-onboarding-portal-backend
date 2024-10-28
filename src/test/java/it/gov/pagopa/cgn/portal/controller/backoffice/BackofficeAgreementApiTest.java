@@ -551,7 +551,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();

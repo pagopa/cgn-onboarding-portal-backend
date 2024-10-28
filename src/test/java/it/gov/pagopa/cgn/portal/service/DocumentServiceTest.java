@@ -20,9 +20,11 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -167,7 +169,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     void Upload_UploadBucketWithValidData_Ok() throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = multipartFile.getInputStream().readAllBytes();
+        byte[] content = multipartFile.getBytes();
         String bucketUID = documentService.storeBucket(agreementEntity.getId(),
                                                        multipartFile.getInputStream(),
                                                        multipartFile.getSize());
@@ -182,7 +184,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     void Upload_UploadBucketWithValidData_OkPA() throws IOException {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = multipartFile.getInputStream().readAllBytes();
+        byte[] content = multipartFile.getBytes();
         String bucketUID = documentService.storeBucket(agreementEntity.getId(),
                 multipartFile.getInputStream(),
                 multipartFile.getSize());
@@ -309,11 +311,13 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         DocumentService dsMock = mock(DocumentService.class);
 
         when(dsMock.renderDocument(anyString(), eq(DocumentTypeEnum.ADHESION_REQUEST)))
-                .thenThrow(new CGNException("The adhesion document is not required for PA"));
+                .thenThrow(new InvalidRequestException(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
 
-        CGNException thrown = Assertions.assertThrows(CGNException.class, () -> {
+        InvalidRequestException exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
             documentService.renderDocument(agreementEntityPA.getId(),DocumentTypeEnum.ADHESION_REQUEST);
         });
+
+        Assert.assertTrue(exception.getMessage(),exception.getMessage().equals(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
     }
 
     @Test
@@ -391,7 +395,7 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        azureStorage.uploadCsv(multipartFile.getInputStream(),
+        azureStorage.uploadCsv(multipartFile.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFile.getSize());
 
