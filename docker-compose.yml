@@ -35,7 +35,7 @@ services:
       - pe-net
 
   traefik:
-    image: traefik:v2.0
+    image: traefik:v2.0@sha256:df0671f3cd101dad36b444e0fc586bedc05604ecda10f33b5d1f3487816d8c9f
     command: |-
       --entrypoints.web.address=:80
       --providers.docker=true
@@ -53,7 +53,7 @@ services:
       - "traefik.http.middlewares.app-stripprefix.stripprefix.prefixes=/app"
 
   db:
-    image: 'postgis/postgis:11-2.5'
+    image: 'postgis/postgis:11-2.5@sha256:f479f6c3435ea5d58e85417b43119385b522a37340555146f3d90e92df2f619f'
     container_name: db
     ports:
       - 5432:5432
@@ -65,7 +65,7 @@ services:
 
   azurite:
     container_name: azurite
-    image: mcr.microsoft.com/azure-storage/azurite
+    image: mcr.microsoft.com/azure-storage/azurite@sha256:2628ee10a72833cc344b9d194cd8b245543892b307d16cf26a2cf55a15b816af
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -86,7 +86,7 @@ services:
 
   spid-testenv2:
     container_name: spid-testenv2
-    image: italia/spid-testenv2:latest
+    image: italia/spid-testenv2:latest@sha256:196c9121f6e50d197e251704518ec487c24579f2e3e9c88e7094d9c2ea7c4ded
     restart: unless-stopped
     ports:
       - "8088:8088"
@@ -100,7 +100,7 @@ services:
 
   redis:
     container_name: redis
-    image: wodby/redis:3.2-2.1.5
+    image: wodby/redis:3.2-2.1.5@sha256:09a82ade1f06069201c4d055e7ed759702880e34653222ae677375019e6ebd41
     ports:
       - "6379:6379"
     environment:
