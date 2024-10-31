@@ -39,6 +39,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -122,12 +124,15 @@ public class DocumentService {
             }
         }
 
+        Pattern pDigits = Pattern.compile("[0-9]");
+        Pattern pAlphab = Pattern.compile("[A-Za-z]");
+
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
             if (csvRecordStream.anyMatch(line ->
                     !(StringUtils.isAlphanumeric(line.get(0))
-                            && line.get(0).matches(".*[0-9].*") //at least one digit
-                            && line.get(0).matches(".*[A-Za-z].*") //at least on alphab. char
+                              && pDigits.matcher(line.get(0)).find() //at least one digit
+                              && pAlphab.matcher(line.get(0)).find() //at least on alphab. char
                      )
             )
             ) {
