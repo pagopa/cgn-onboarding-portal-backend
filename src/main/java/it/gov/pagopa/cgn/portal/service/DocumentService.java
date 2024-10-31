@@ -8,6 +8,7 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -19,6 +20,7 @@ import it.gov.pagopa.cgnonboardingportal.model.ErrorCode;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -110,17 +112,33 @@ public class DocumentService {
         }
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-            if (content.length == 0 ||
-                csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
+            if(content.length == 0) {
+                throw new InternalErrorException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+            }
+            if (csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
                                                  StringUtils.isBlank(line.get(0)))) {
                 throw new InvalidRequestException(
                         ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue());
             }
         }
 
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (csvRecordStream.anyMatch(line ->
+                    !(StringUtils.isAlphanumeric(line.get(0))
+                            && line.get(0).matches(".*[0-9].*") //at least one digit
+                            && line.get(0).matches(".*[A-Za-z].*") //at least on alphab. char
+                     )
+            )
+            ) {
+                throw new InvalidRequestException(
+                        ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue());
+            }
+        }
+
         String bucketLoadUID = UUID.randomUUID().toString();
         azureStorage.uploadCsv(content, bucketLoadUID, size);
-        
+
         return bucketLoadUID;
     }
 
