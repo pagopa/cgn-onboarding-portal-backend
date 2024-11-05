@@ -3,12 +3,16 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.converter.DocumentConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import it.gov.pagopa.cgnonboardingportal.model.BucketLoad;
 import it.gov.pagopa.cgnonboardingportal.model.Document;
 import it.gov.pagopa.cgnonboardingportal.model.Documents;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -22,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DocumentFacade {
 
     private final DocumentService documentService;
@@ -60,7 +65,7 @@ public class DocumentFacade {
         try {
             bucketLoadUID = documentService.storeBucket(agreementId, document.getInputStream(), document.getSize());
         } catch (IOException e) {
-            throw new CGNException(e);
+            throw new InternalErrorException(e.getMessage());
         }
         BucketLoad bucketLoad = new BucketLoad();
         bucketLoad.setUid(bucketLoadUID);
