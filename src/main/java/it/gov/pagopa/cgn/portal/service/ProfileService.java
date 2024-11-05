@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,9 +28,9 @@ public class ProfileService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity createProfile(ProfileEntity profileEntity, String agreementId) {
-        AgreementEntity agreement = agreementServiceLight.findById(agreementId);
+        AgreementEntity agreement = agreementServiceLight.findAgreementById(agreementId);
         if (profileRepository.existsProfileEntityByAgreementId(agreementId)) {
-            throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
+            throw new InvalidRequestException(ErrorCodeEnum.PROFILE_ALREADY_EXISTS_FOR_AGREEMENT_PROVIDED.getValue());
         }
         profileEntity.setAgreement(agreement);
         validateProfile(profileEntity);
@@ -38,7 +39,7 @@ public class ProfileService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public Optional<ProfileEntity> getProfile(String agreementId) {
-        return getOptProfileFromAgreementId(agreementId);
+        return profileRepository.findByAgreementId(agreementId);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -82,17 +83,11 @@ public class ProfileService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity getProfileFromAgreementId(String agreementId) {
-        return getOptProfileFromAgreementId(agreementId).orElseThrow(() -> new InvalidRequestException(
-                "Updating profile was not found for agreement " + agreementId));
+        return profileRepository.findByAgreementId(agreementId).orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
     }
 
     private void validateProfile(ProfileEntity profileEntity) {
         ValidationUtils.performConstraintValidation(factory.getValidator(), profileEntity);
-    }
-
-
-    private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
-        return profileRepository.findByAgreementId(agreementId);
     }
 
     private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {
@@ -137,8 +132,6 @@ public class ProfileService {
         updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
         updateSecondaryReferents.accept(dbEntity, toUpdateEntity.getSecondaryReferentList());
         dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
-        dbEntity.setSupportType(toUpdateEntity.getSupportType());
-        dbEntity.setSupportValue(toUpdateEntity.getSupportValue());
         // fullname will never arrive from converted api model
         // we will update it only internally so we have to check that it's not null
         if (toUpdateEntity.getFullName() != null) {

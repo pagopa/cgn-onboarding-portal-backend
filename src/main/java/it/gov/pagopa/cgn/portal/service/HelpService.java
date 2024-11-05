@@ -3,9 +3,12 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.converter.help.HelpCategoryConverter;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.email.HelpRequestParams;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.HelpRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.util.Optional;
 
 
 @Service
+@Slf4j
 public class HelpService {
 
     private EmailNotificationFacade emailNotificationFacade;
@@ -23,7 +27,7 @@ public class HelpService {
     @Transactional
     public void sendHelpMessage(String agreementId, HelpRequest.CategoryEnum helpCategory, Optional<String> topic, String message) {
 
-        ProfileEntity profile = profileService.getProfile(agreementId).orElseThrow(() -> new InvalidRequestException("Profile not found"));
+        ProfileEntity profile = profileService.getProfile(agreementId).orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         HelpRequestParams helpParams = HelpRequestParams.builder()
                 .helpCategory(helpCategoryConverter.helpCategoryFromEnum(helpCategory))
@@ -37,8 +41,8 @@ public class HelpService {
 
         try {
             emailNotificationFacade.notifyDepartmentNewHelpRequest(helpParams);
-        } catch (Exception exc) {
-            throw new RuntimeException("Help request error", exc);
+        } catch (Exception e) {
+            throw new InternalErrorException(e.getMessage());
         }
     }
 

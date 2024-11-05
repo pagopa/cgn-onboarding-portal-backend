@@ -1,21 +1,18 @@
 package it.gov.pagopa.cgn.portal.filestorage;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
-
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import com.azure.storage.common.sas.SasProtocol;
-
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
+import it.gov.pagopa.cgn.portal.model.DocumentEntity;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,14 +21,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.ImageException;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Component
+@Slf4j
 public class AzureStorage {
 
     private final ConfigProperties configProperties;
@@ -75,18 +74,18 @@ public class AzureStorage {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(IOUtils.toByteArray(image.getInputStream()))) {
             blobClient.upload(contentIs, image.getSize(), true);
         } catch (IOException e) {
-            throw new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, e.getMessage());
+            throw new InternalErrorException(e.getMessage());
         }
 
         return configProperties.getImagesContainerName() + "/" + blobName;
     }
 
-    public void uploadCsv(InputStream content, String blobName, long size) {
+    public void uploadCsv(byte[] content, String blobName, long size) {
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
-        try (InputStream contentIs = content) {
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             blobClient.upload(contentIs, size, true);
         } catch (IOException e) {
-            throw new CGNException(e);
+            throw new InternalErrorException(e.getMessage());
         }
     }
 

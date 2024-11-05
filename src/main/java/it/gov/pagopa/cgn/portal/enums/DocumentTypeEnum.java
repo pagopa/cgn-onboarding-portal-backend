@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.enums;
 
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -33,7 +34,7 @@ public enum DocumentTypeEnum {
     public static DocumentTypeEnum fromValue(String value) {
         return Arrays.stream(DocumentTypeEnum.values())
                 .filter(typeEnum -> typeEnum.getCode().equalsIgnoreCase(value)).findFirst()
-                .orElseThrow(()-> new InvalidRequestException("DocumentTypeEnum value not valid"));
+                .orElseThrow(()-> new InvalidRequestException(ErrorCodeEnum.DOCUMENT_TYPE_NOT_VALID.getValue()));
     }
 
 }
