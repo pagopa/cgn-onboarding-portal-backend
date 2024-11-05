@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.email;
 
 import it.gov.pagopa.cgn.portal.model.NotificationEntity;
 import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -67,6 +68,16 @@ public class EmailNotificationService {
             helper.setSubject(emailParams.getSubject());
             helper.setText(emailParams.getBody(), true);
             helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
+            
+            if(emailParams.getAttachments().isPresent()) {
+            	 emailParams.getAttachments().get().forEach(attachment -> {
+            		 try {
+            			 helper.addAttachment(attachment.getAttachmentFilename(), attachment.getResource());
+            		 }catch (MessagingException e) {
+            			 throw new RuntimeException(e);
+					}
+            	 });
+            }
 
             log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
             javaMailSender.send(mimeMessage);

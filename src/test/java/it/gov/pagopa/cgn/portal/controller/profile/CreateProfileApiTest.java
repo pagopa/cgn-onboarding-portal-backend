@@ -252,8 +252,6 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createProfile.setTelephoneNumber("12345678");
         createProfile.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         createProfile.setReferent(createSampleCreateReferent());
-        createProfile.setSupportType(SupportType.PHONENUMBER);
-        createProfile.setSupportValue("00000000");
         return createProfile;
     }
 

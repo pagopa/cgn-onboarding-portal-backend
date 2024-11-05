@@ -72,6 +72,10 @@ public class BackofficeAttributeAuthorityFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
+    	
+    	//workaround fino al rilascio flusso pagopa
+    	organizationWithReferents.setEntityType(organizationWithReferents.getEntityType() == null ? EntityType.PRIVATE : organizationWithReferents.getEntityType());
+    	
         // find agreement for this organization and apply an update consumer
         Optional<AgreementUserEntity> maybeAgreementUserEntity = agreementUserService.findCurrentAgreementUser(organizationWithReferents.getKeyOrganizationFiscalCode());
         if(maybeAgreementUserEntity.isPresent()) {
@@ -172,7 +176,7 @@ public class BackofficeAttributeAuthorityFacade {
 
     private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus
             = organization -> agreementUserService.findCurrentAgreementUser(organization.getKeyOrganizationFiscalCode())
-            .flatMap(agreementUserEntity -> agreementService.getById(
+            .flatMap(agreementUserEntity -> agreementService.getAgreementById(
                     agreementUserEntity.getAgreementId()))
             .ifPresent(a -> mapStatus.accept(a, organization));
 

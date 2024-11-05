@@ -99,7 +99,7 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
         for (var i = 0; i < 5; i++) {
             var bucketCodeLoadUid = TestUtils.generateDiscountBucketCodeUid();
 
-            azureStorage.uploadCsv(multipartFile.getInputStream(), bucketCodeLoadUid, multipartFile.getSize());
+            azureStorage.uploadCsv(multipartFile.getBytes(), bucketCodeLoadUid, multipartFile.getSize());
 
             discountEntity.setLastBucketCodeLoadUid(bucketCodeLoadUid);
             discountRepository.save(discountEntity);

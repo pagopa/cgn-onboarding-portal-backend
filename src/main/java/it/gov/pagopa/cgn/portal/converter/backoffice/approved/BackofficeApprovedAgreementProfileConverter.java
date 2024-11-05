@@ -26,7 +26,6 @@ public class BackofficeApprovedAgreementProfileConverter
    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
-    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
     private static final Map<EntityTypeEnum, EntityType> entityTypeMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
@@ -34,10 +33,6 @@ public class BackofficeApprovedAgreementProfileConverter
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
-
-        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
-        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
-        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
 
         entityTypeMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         entityTypeMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
@@ -47,9 +42,6 @@ public class BackofficeApprovedAgreementProfileConverter
     protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
             = entityEnum -> Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
                                     .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
-
-    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
-            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
     @Override
     protected Function<ProfileEntity, ApprovedAgreementProfile> toDtoFunction() {
@@ -122,8 +114,6 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
         dto.setReferent(toDtoReferent.apply(entity.getReferent()));
         dto.setSalesChannel(salesChannelToDto.apply(entity));
-        dto.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
-        dto.setSupportValue(entity.getSupportValue());
         dto.setEntityType(entityTypeMap.get(entity.getAgreement().getEntityType()));
 
         return dto;
