@@ -85,10 +85,12 @@ public class DiscountService {
 
         DiscountEntity dbEntity = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(dbEntity, agreementId);
-        DiscountCodeTypeEnum profileDiscountType = profileService.getProfile(agreementId)
+
+        ProfileEntity profile = profileService.getProfile(agreementId)
                 .orElseThrow(() -> new InvalidRequestException(
-                        ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()))
-                .getDiscountCodeType();
+                        ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+
+        DiscountCodeTypeEnum profileDiscountType = profile.getDiscountCodeType();
 
         boolean isChangedBucketLoad = DiscountCodeTypeEnum.BUCKET.equals(profileDiscountType) &&
                 ((dbEntity.getLastBucketCodeLoad() == null &&
@@ -101,6 +103,13 @@ public class DiscountService {
                 dbEntity.getLastBucketCodeLoad() != null &&
                 bucketService.isLastBucketLoadStillLoading(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING.getValue());
+        }
+
+        if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())
+                && DiscountCodeTypeEnum.LANDINGPAGE.equals(profileDiscountType)
+                && (!dbEntity.getLandingPageUrl().equals(discountEntity.getLandingPageUrl())
+                        || !dbEntity.getLandingPageReferrer().equals(discountEntity.getLandingPageReferrer()))) {
+            dbEntity.setState(DiscountStateEnum.DRAFT);
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
@@ -134,6 +143,9 @@ public class DiscountService {
 
         discountEntity.setAgreement(agreementEntity);
         discountRepository.save(dbEntity);
+        // refresh materialized views
+        refreshMaterializedViews(profile);
+
         return new CrudDiscountWrapper(dbEntity, profileDiscountType, isChangedBucketLoad);
     }
 

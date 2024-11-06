@@ -587,6 +587,58 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Update_UpdateDiscountToDrafWhenLandingPageUrlChanges_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                URL,
+                REFERRER);
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementRepository.save(agreementEntity);
+
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                "updated_" + URL,
+                REFERRER);
+
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
+                discountEntity.getId(),
+                updatedDiscount).getDiscountEntity();
+
+        Assertions.assertTrue(DiscountStateEnum.DRAFT.equals(dbDiscount.getState()), "check landingpage failed");
+    }
+
+    @Test
+    void Update_UpdateDiscountToDrafWhenReferrerChanges_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                URL,
+                REFERRER);
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementRepository.save(agreementEntity);
+
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                URL,
+                "updated_" + REFERRER);
+
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
+                discountEntity.getId(),
+                updatedDiscount).getDiscountEntity();
+
+        Assertions.assertTrue(DiscountStateEnum.DRAFT.equals(dbDiscount.getState()), "check referrer failed");
+    }
+
+    @Test
     void Update_UpdateDiscountWithBucketCodesWithValidDataWithoutNewBucketLoad_Ok() throws IOException {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.BUCKET);
 
