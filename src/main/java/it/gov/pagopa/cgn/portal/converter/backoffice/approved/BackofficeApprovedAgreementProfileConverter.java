@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
