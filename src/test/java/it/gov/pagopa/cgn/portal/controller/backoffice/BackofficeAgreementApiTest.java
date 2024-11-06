@@ -326,6 +326,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
         discount.setLandingPageUrl("fake url");
+        discount.setLandingPageReferrer("referrer");
         discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
 
         // simulate test passed
@@ -353,6 +354,7 @@ class BackofficeAgreementApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
         discount.setLandingPageUrl("fake url");
+        discount.setLandingPageReferrer("referrer");
         discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
 
         // simulate test passed

@@ -229,6 +229,20 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithLandingPage_DoNotAllowNullReferrer_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                URL,
+                REFERRER);
+        discountEntity.setLandingPageReferrer(null);
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
+
+    }
+
+    @Test
     void Create_CreateDiscountWithLandingPage_Ok() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 
@@ -248,29 +262,6 @@ class DiscountServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(URL, discountEntity.getLandingPageUrl());
         Assertions.assertNotNull(discountEntity.getLandingPageReferrer());
         Assertions.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
-        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
-    }
-
-    @Test
-    void Create_CreateDiscountWithLandingPage_AllowNullReferrer_Ok() {
-        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
-
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
-                URL,
-                REFERRER);
-        discountEntity.setLandingPageReferrer(null);
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
-        Assertions.assertNotNull(discountEntity.getId());
-        Assertions.assertNotNull(discountEntity.getAgreement());
-        Assertions.assertNotNull(discountEntity.getProducts());
-        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
-        Assertions.assertNull(discountEntity.getStaticCode());
-        Assertions.assertNotNull(discountEntity.getLandingPageUrl());
-        Assertions.assertEquals(URL, discountEntity.getLandingPageUrl());
-        Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
