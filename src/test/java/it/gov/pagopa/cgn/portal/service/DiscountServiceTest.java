@@ -229,6 +229,20 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
+    void Create_CreateDiscountWithLandingPage_DoNotAllowNullReferrer_Ko() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                URL,
+                REFERRER);
+        discountEntity.setLandingPageReferrer(null);
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                () -> discountService.createDiscount(AGREEMENT_ID, discountEntity));
+
+    }
+
+    @Test
     void Create_CreateDiscountWithLandingPage_Ok() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
 

@@ -73,7 +73,7 @@ public class DiscountService {
             throw new InvalidRequestException(ErrorCodeEnum.DISCOUNT_NOT_FOUND.getValue());
         }
         DiscountEntity entity = discountEntityOptional.get();
-        checkDiscountRelatedSameAgreement(entity,agreementId);
+        checkDiscountRelatedSameAgreement(entity, agreementId);
 
         return entity;
     }
@@ -108,7 +108,7 @@ public class DiscountService {
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())
                 && DiscountCodeTypeEnum.LANDINGPAGE.equals(profileDiscountType)
                 && (!dbEntity.getLandingPageUrl().equals(discountEntity.getLandingPageUrl())
-                        || !dbEntity.getLandingPageReferrer().equals(discountEntity.getLandingPageReferrer()))) {
+                || !dbEntity.getLandingPageReferrer().equals(discountEntity.getLandingPageReferrer()))) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
         }
 
@@ -194,7 +194,7 @@ public class DiscountService {
         if (LocalDate.now().isAfter(discount.getStartDate())) {
             discount.setStartDate(LocalDate.now());
         }
-        validatePublishingDiscount(agreementEntity, discount,profileEntity);
+        validatePublishingDiscount(agreementEntity, discount, profileEntity);
         discount.setState(DiscountStateEnum.PUBLISHED);
         discount = discountRepository.save(discount);
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
@@ -291,7 +291,7 @@ public class DiscountService {
         discount = discountRepository.save(discount);
 
         // send notification
-        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow( () -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
+        ProfileEntity profileEntity = profileService.getProfile(agreementId).orElseThrow(() -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
         emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity,
                 discount.getName());
     }
@@ -485,7 +485,8 @@ public class DiscountService {
         }
 
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
-                (StringUtils.isBlank(discountEntity.getLandingPageUrl()))) {
+                (StringUtils.isBlank(discountEntity.getLandingPageUrl()) ||
+                        StringUtils.isBlank(discountEntity.getLandingPageReferrer()))) {
             throw new InvalidRequestException(
                     ErrorCodeEnum.CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE.getValue());
         }
