@@ -1,7 +1,6 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
-import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
@@ -60,8 +59,6 @@ public class CreateProfileConverter extends CommonProfileConverter<ProfileEntity
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
         entity.setLegalRepresentativeTaxCode(dto.getLegalRepresentativeTaxCode());
         entity.setTelephoneNumber(dto.getTelephoneNumber());
-        entity.setSupportType(SupportTypeEnum.PHONENUMBER);
-        entity.setSupportValue("0000000");
         return entity;
     };
 

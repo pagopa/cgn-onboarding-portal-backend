@@ -189,8 +189,6 @@ public class TestUtils {
         profileEntity.setDiscountCodeType(discountCodeType);
         profileEntity.setTelephoneNumber("12345678");
         profileEntity.setAllNationalAddresses(true);
-        profileEntity.setSupportType(SupportTypeEnum.PHONENUMBER);
-        profileEntity.setSupportValue("0000000");
         return profileEntity;
     }
 
