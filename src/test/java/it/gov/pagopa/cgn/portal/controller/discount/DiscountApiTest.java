@@ -708,6 +708,7 @@ class DiscountApiTest extends IntegrationAbstractTest {
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
         discount.setLandingPageUrl("http://www.fakeurl.it");
+        discount.setLandingPageReferrer("referrer");
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
 
         // simulate test passed

@@ -319,6 +319,7 @@ class AgreementApiTest extends IntegrationAbstractTest {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         //I temporarily set the setLandingPageUrl for bypass check and immediately after call save it to null to trigger the same check during the mockMvc
         discountEntity.setLandingPageUrl("link_fake");
+        discountEntity.setLandingPageReferrer("referrer");
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         discountEntity.setLandingPageUrl(null);
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
