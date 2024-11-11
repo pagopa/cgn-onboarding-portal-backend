@@ -1,11 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.*;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
