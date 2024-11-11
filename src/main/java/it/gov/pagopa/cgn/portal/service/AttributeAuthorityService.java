@@ -2,12 +2,10 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -18,10 +16,13 @@ public class AttributeAuthorityService {
 
     private final AttributeAuthorityApi attributeAuthorityApi;
 
+    private final DefaultApi defaultAttributeAuthorityApi;
+
     private final ConfigProperties configProperties;
 
-    public AttributeAuthorityService(ConfigProperties configProperties, AttributeAuthorityApi attributeAuthorityApi) {
+    public AttributeAuthorityService(ConfigProperties configProperties, AttributeAuthorityApi attributeAuthorityApi, DefaultApi defaultAttributeAuthorityApi) {
         this.attributeAuthorityApi = attributeAuthorityApi;
+        this.defaultAttributeAuthorityApi = defaultAttributeAuthorityApi;
         this.configProperties = configProperties;
     }
 
@@ -64,4 +65,11 @@ public class AttributeAuthorityService {
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
         return attributeAuthorityApi.deleteReferentWithHttpInfo(keyOrganizationFiscalCode, referentFiscalCode);
     }
+
+    public int countUserOrganizations(String referentFiscalCode) {
+        GetCompaniesBodyAttributeAuthority body = new GetCompaniesBodyAttributeAuthority();
+        body.setFiscalCode(referentFiscalCode);
+        return defaultAttributeAuthorityApi.getUserCompanies(body).size();
+    }
+
 }
