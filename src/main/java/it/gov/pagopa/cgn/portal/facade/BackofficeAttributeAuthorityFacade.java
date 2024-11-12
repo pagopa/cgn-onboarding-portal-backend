@@ -69,7 +69,7 @@ public class BackofficeAttributeAuthorityFacade {
         // check if we have more than 10 companies for each referent
         organizationWithReferents.getReferents().forEach(referentFiscalCode -> {
             if (attributeAuthorityService.countUserOrganizations(referentFiscalCode) > 10)
-                throw new InvalidRequestException("INSERT LABEL HERE CANNOT_BIND_MORE_THAN_10_COMPANIES");
+                throw new InvalidRequestException(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue());
         });
 
         //workaround fino al rilascio flusso pagopa
