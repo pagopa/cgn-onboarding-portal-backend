@@ -11,8 +11,12 @@ WITH merchants AS (
             COALESCE(NULLIF(p.description_en, '-'), p.description) AS description_en
         FROM agreement a
             JOIN profile p ON (p.agreement_fk = a.agreement_k)
+            JOIN discount d ON (d.agreement_fk = a.agreement_k)
         WHERE a.state = 'APPROVED'
             AND a.start_date <= CURRENT_DATE
+            AND d.state = 'PUBLISHED'
+            AND d.start_date <= CURRENT_DATE
+            AND d.end_date >= CURRENT_DATE
     ),
      agreements_with_new_discounts AS (
         SELECT d.agreement_fk
