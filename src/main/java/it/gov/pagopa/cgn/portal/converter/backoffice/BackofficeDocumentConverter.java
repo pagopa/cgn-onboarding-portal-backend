@@ -21,12 +21,12 @@ public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntit
 
     static {
         enumMap.put(DocumentTypeEnum.BACKOFFICE_AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
         backofficeDocumentTypeMap.put(DocumentType.AGREEMENT.getValue(), DocumentTypeEnum.BACKOFFICE_AGREEMENT);
         backofficeDocumentTypeMap.put(
-                DocumentType.ADHESIONREQUEST.getValue(), DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
+                DocumentType.AGREEMENT.getValue(), DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
     }
 
     @Override

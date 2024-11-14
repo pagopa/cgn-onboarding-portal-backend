@@ -21,7 +21,7 @@ public class BackofficeApprovedAgreementConverter
         backofficeEntityTypeEnumMap.put(
                 EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         backofficeEntityTypeEnumMap.put(
-                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
     }
 
     public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {

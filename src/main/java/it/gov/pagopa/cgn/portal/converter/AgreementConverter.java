@@ -19,15 +19,15 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
     private static final Map<EntityTypeEnum, EntityType> entityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
     private static final Map<AgreementStateEnum, AgreementState> enumMap = new EnumMap<>(AgreementStateEnum.class);
     static {
-        enumMap.put(AgreementStateEnum.DRAFT, AgreementState.DRAFTAGREEMENT);
-        enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDINGAGREEMENT);
-        enumMap.put(AgreementStateEnum.APPROVED, AgreementState.APPROVEDAGREEMENT);
-        enumMap.put(AgreementStateEnum.REJECTED, AgreementState.REJECTEDAGREEMENT);
+        enumMap.put(AgreementStateEnum.DRAFT, AgreementState.DRAFT_AGREEMENT);
+        enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDING_AGREEMENT);
+        enumMap.put(AgreementStateEnum.APPROVED, AgreementState.APPROVED_AGREEMENT);
+        enumMap.put(AgreementStateEnum.REJECTED, AgreementState.REJECTED_AGREEMENT);
 
         entityTypeEnumMap.put(
                 EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         entityTypeEnumMap.put(
-                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
     }
 
     @Override
@@ -84,13 +84,13 @@ public class AgreementConverter extends AbstractConverter<AgreementEntity, Agree
 
     protected Function<Agreement, AgreementEntity> toEntityWithStatusFilled = dto -> {
         AgreementEntity entity = new AgreementEntity();
-        if (AgreementState.APPROVEDAGREEMENT.equals(dto.getState())) {
+        if (AgreementState.APPROVED_AGREEMENT.equals(dto.getState())) {
             ApprovedAgreement state = (ApprovedAgreement) dto;
             entity.setStartDate(state.getStartDate());
             entity.setEndDate(state.getEndDate());
             entity.setFirstDiscountPublishingDate(state.getFirstDiscountPublishingDate());
         }
-        if (AgreementState.REJECTEDAGREEMENT.equals(dto.getState())) {
+        if (AgreementState.REJECTED_AGREEMENT.equals(dto.getState())) {
             RejectedAgreement rejectedAgreement = (RejectedAgreement) dto;
             entity.setRejectReasonMessage(rejectedAgreement.getReasonMessage());
         }

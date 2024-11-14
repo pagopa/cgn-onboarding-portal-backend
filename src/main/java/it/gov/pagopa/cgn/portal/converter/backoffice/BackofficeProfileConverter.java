@@ -19,7 +19,7 @@ public class BackofficeProfileConverter extends AbstractConverter<ProfileEntity,
     private static final Map<DocumentTypeEnum, DocumentType> enumMap = new EnumMap<>(DocumentTypeEnum.class);
     static {
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
     }
 
     @Override

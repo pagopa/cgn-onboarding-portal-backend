@@ -20,15 +20,15 @@ public class HelpCategoryConverter {
         switch (category) {
             case ACCESS:
                 return ACCESS;
-            case DATAFILLING:
+            case DATA_FILLING:
                 return DATAFILLING;
             case DISCOUNTS:
                 return DISCOUNTS;
             case DOCUMENTS:
                 return DOCUMENTS;
-            case TECHNICALPROBLEM:
+            case TECHNICAL_PROBLEM:
                 return TECHNICALPROBLEM;
-            case CGNOWNERREPORTING:
+            case CGN_OWNER_REPORTING:
                 return CGNOWNERREPORTING;
             case SUGGESTIONS:
                 return SUGGESTIONS;
@@ -43,15 +43,15 @@ public class HelpCategoryConverter {
         switch (category) {
             case ACCESS:
                 return ACCESS;
-            case DATAFILLING:
+            case DATA_FILLING:
                 return DATAFILLING;
             case DISCOUNTS:
                 return DISCOUNTS;
             case DOCUMENTS:
                 return DOCUMENTS;
-            case TECHNICALPROBLEM:
+            case TECHNICAL_PROBLEM:
                 return TECHNICALPROBLEM;
-            case CGNOWNERREPORTING:
+            case CGN_OWNER_REPORTING:
                 return CGNOWNERREPORTING;
             case SUGGESTIONS:
                 return SUGGESTIONS;

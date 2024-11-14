@@ -38,7 +38,7 @@ public class OrganizationWithReferentsConverter extends AbstractAttributeAuthori
         attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
         attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setInsertedAt(Timestamp.valueOf(backofficeModel.getInsertedAt().atStartOfDay()));
+        attributeAuthorityModel.setInsertedAt(Timestamp.valueOf(backofficeModel.getInsertedAt().atStartOfDay()).toString());
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };

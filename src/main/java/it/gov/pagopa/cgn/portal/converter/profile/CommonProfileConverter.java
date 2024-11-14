@@ -26,7 +26,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
-        discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
+        discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDING_PAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
     }
 
@@ -77,13 +77,13 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         switch (entity.getSalesChannel()) {
             case ONLINE:
                 OnlineChannel onlineChannel = new OnlineChannel();
-                onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+                onlineChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
                 onlineChannel.setWebsiteUrl(entity.getWebsiteUrl());
                 onlineChannel.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 return onlineChannel;
             case OFFLINE:
                 OfflineChannel physicalStoreChannel = new OfflineChannel();
-                physicalStoreChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+                physicalStoreChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
                 physicalStoreChannel.setWebsiteUrl(entity.getWebsiteUrl());
                 physicalStoreChannel.setAddresses(entity.getAddressList()
                                                         .stream()
@@ -94,7 +94,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                 return physicalStoreChannel;
             case BOTH:
                 BothChannels bothChannels = new BothChannels();
-                bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+                bothChannels.setChannelType(SalesChannelType.BOTH_CHANNELS);
                 bothChannels.setWebsiteUrl(entity.getWebsiteUrl());
                 bothChannels.setAddresses(entity.getAddressList()
                                                 .stream()
@@ -113,7 +113,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
     protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
         SalesChannelType channelType = salesChannelDto.getChannelType();
         switch (channelType) {
-            case ONLINECHANNEL:
+            case ONLINE_CHANNEL:
                 if (salesChannelDto instanceof OnlineChannel) {
                     OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.ONLINE);
@@ -123,7 +123,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     throw new InvalidRequestException("SalesChannel is invalid");
                 }
                 break;
-            case OFFLINECHANNEL:
+            case OFFLINE_CHANNEL:
                 if (salesChannelDto instanceof OfflineChannel) {
                     OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
@@ -138,7 +138,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
                     throw new InvalidRequestException("SalesChannel is invalid");
                 }
                 break;
-            case BOTHCHANNELS:
+            case BOTH_CHANNELS:
                 if (salesChannelDto instanceof BothChannels) {
                     BothChannels bothChannels = (BothChannels) salesChannelDto;
                     entity.setSalesChannel(SalesChannelEnum.BOTH);

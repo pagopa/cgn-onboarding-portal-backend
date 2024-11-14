@@ -211,7 +211,6 @@
             <version>4.1.1</version>
             <scope>test</scope>
         </dependency>
-
         <!-- supports old Junit version-->
         <dependency>
             <groupId>org.junit.vintage</groupId>
@@ -242,7 +241,6 @@
             <version>2.0.24</version>
             <scope>test</scope>
         </dependency>
-
         <!-- fix log4j vulnerability-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -263,11 +261,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.3.1</version>
+        </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>

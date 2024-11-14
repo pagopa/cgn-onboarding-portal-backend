@@ -36,16 +36,16 @@ public abstract class CommonDiscountConverter<E, D> extends AbstractConverter<E,
         enumMap.put(DiscountStateEnum.TEST_PASSED, DiscountState.TEST_PASSED);
         enumMap.put(DiscountStateEnum.TEST_FAILED, DiscountState.TEST_FAILED);
 
-        productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
+        productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKING_SERVICES);
         productCategoryEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT,
-                                    ProductCategory.CULTUREANDENTERTAINMENT);
+                                    ProductCategory.CULTURE_AND_ENTERTAINMENT);
         productCategoryEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
         productCategoryEnumMaps.put(ProductCategoryEnum.HOME, ProductCategory.HOME);
-        productCategoryEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOBOFFERS);
+        productCategoryEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOB_OFFERS);
         productCategoryEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
         productCategoryEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
-        productCategoryEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLEMOBILITY);
-        productCategoryEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONYANDINTERNET);
+        productCategoryEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLE_MOBILITY);
+        productCategoryEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONY_AND_INTERNET);
         productCategoryEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
 
         bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.PENDING, BucketCodeLoadStatus.PENDING);
