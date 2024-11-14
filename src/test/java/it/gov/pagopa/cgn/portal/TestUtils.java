@@ -195,7 +195,7 @@ public class TestUtils {
     public static UpdateProfile updatableOnlineProfileFromProfileEntity(ProfileEntity profileEntity,
                                                                         DiscountCodeType discountCodeType) {
         OnlineChannel salesChannel = new OnlineChannel();
-        salesChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        salesChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
         salesChannel.setWebsiteUrl("anurl.com");
         salesChannel.setDiscountCodeType(discountCodeType);
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
@@ -206,7 +206,7 @@ public class TestUtils {
         address.setFullAddress("Via unavia, n.1, 30000, Veneto");
 
         OfflineChannel salesChannel = new OfflineChannel();
-        salesChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        salesChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
         salesChannel.setWebsiteUrl("anurl.com");
         salesChannel.setAddresses(Stream.of(address).collect(Collectors.toList()));
         salesChannel.setAllNationalAddresses(true);
@@ -246,7 +246,7 @@ public class TestUtils {
         address.setFullAddress("Via unavia, n.1, 30000, Veneto");
 
         OfflineChannel salesChannel = new OfflineChannel();
-        salesChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        salesChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
         salesChannel.setWebsiteUrl("anurl.com");
         salesChannel.setAddresses(Stream.of(address).collect(Collectors.toList()));
         salesChannel.setAllNationalAddresses(true);

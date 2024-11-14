@@ -30,7 +30,7 @@ public class BackofficeAgreementConverterTest {
 
         Agreement agreementDto = converter.toDto.apply(agreementEntity);
         Assert.assertTrue(agreementDto instanceof AssignedAgreement);
-        Assert.assertEquals(AgreementState.ASSIGNEDAGREEMENT, agreementDto.getState());
+        Assert.assertEquals(AgreementState.ASSIGNED_AGREEMENT, agreementDto.getState());
 
     }
 
@@ -43,7 +43,7 @@ public class BackofficeAgreementConverterTest {
 
         Agreement agreementDto = converter.toDto.apply(agreementEntity);
         Assert.assertTrue(agreementDto instanceof PendingAgreement);
-        Assert.assertEquals(AgreementState.PENDINGAGREEMENT, agreementDto.getState());
+        Assert.assertEquals(AgreementState.PENDING_AGREEMENT, agreementDto.getState());
 
     }
 

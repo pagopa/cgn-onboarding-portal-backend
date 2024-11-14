@@ -30,7 +30,7 @@ import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.validation.ValidatorFactory;
+import jakarta.validation.ValidatorFactory;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -251,7 +251,7 @@ public class IntegrationAbstractTest {
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
                                                          DiscountCodeTypeEnum discountCodeType,
                                                          int idx, boolean isPA) {
-        EntityType entityType = isPA ? EntityType.PUBLICADMINISTRATION : EntityType.PRIVATE;
+        EntityType entityType = isPA ? EntityType.PUBLIC_ADMINISTRATION : EntityType.PRIVATE;
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx, entityType);
         // creating profile

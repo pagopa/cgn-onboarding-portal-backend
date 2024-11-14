@@ -32,7 +32,7 @@ public class ProductCategoryArrayTypeTest {
     @Test
     public void ProductCategoryArrayType_sqlTypes_IsArray() throws SQLException {
         var productCategoryArrayType = new ProductCategoryArrayType();
-        Assertions.assertEquals(Types.ARRAY, productCategoryArrayType.sqlTypes()[0]);
+        Assertions.assertEquals(Types.ARRAY, productCategoryArrayType.getSqlType());
     }
 
     @Test

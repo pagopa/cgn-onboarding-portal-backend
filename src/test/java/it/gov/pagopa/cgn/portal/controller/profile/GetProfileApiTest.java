@@ -70,7 +70,7 @@ class GetProfileApiTest extends IntegrationAbstractTest {
                 .andDo(log())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINE_CHANNEL.getValue()))
                 .andExpect(jsonPath("$.salesChannel.websiteUrl").value(profileEntity.getWebsiteUrl()))
                 .andExpect(jsonPath("$.salesChannel.discountCodeType").value(DiscountCodeType.STATIC.getValue()))
                 .andExpect(jsonPath("$.id").isNotEmpty())

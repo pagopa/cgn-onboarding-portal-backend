@@ -97,7 +97,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
         OrganizationWithReferentsAndStatus organization1 = createOrganizationWithReferentsAndStatusMock("12345679",
                 "12345679",
                 "org1",
-                "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
+                "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLIC_ADMINISTRATION);
 
         agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType());
 
@@ -118,7 +118,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(log())
                 .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
-                .andExpect(jsonPath("$.items[1].entityType").value(EntityType.PUBLICADMINISTRATION.getValue()));
+                .andExpect(jsonPath("$.items[1].entityType").value(EntityType.PUBLIC_ADMINISTRATION.getValue()));
     }
 
     @Test
@@ -136,7 +136,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
         mockResult.setPec(organization.getPec());
         mockResult.setOrganizationName(organization.getOrganizationName());
         mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Timestamp.valueOf(LocalDateTime.now()));
+        mockResult.setInsertedAt(Timestamp.valueOf(LocalDateTime.now()).toString());
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult)).when(attributeAuthorityServiceMock).upsertOrganization(Mockito.any());
 

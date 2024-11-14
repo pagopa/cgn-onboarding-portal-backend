@@ -34,7 +34,7 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileOnlineWithStaticDiscountTypeDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         OnlineChannel onlineChannel = new OnlineChannel();
-        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         onlineChannel.setDiscountCodeType(DiscountCodeType.STATIC);
         dto.setSalesChannel(onlineChannel);
@@ -50,7 +50,7 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileOnlineWithApiDiscountTypeDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         OnlineChannel onlineChannel = new OnlineChannel();
-        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         onlineChannel.setDiscountCodeType(DiscountCodeType.API);
         dto.setSalesChannel(onlineChannel);
@@ -66,9 +66,9 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileOnlineWithLandingPageDiscountTypeDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         OnlineChannel onlineChannel = new OnlineChannel();
-        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
-        onlineChannel.setDiscountCodeType(DiscountCodeType.LANDINGPAGE);
+        onlineChannel.setDiscountCodeType(DiscountCodeType.LANDING_PAGE);
         dto.setSalesChannel(onlineChannel);
         ProfileEntity profileEntity = updateProfileConverter.toEntity(dto);
 
@@ -82,7 +82,7 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileOfflineDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         OfflineChannel offlineChannel = new OfflineChannel();
-        offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         dto.setSalesChannel(offlineChannel);
@@ -111,7 +111,7 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileBothDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         BothChannels bothChannels = new BothChannels();
-        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setChannelType(SalesChannelType.BOTH_CHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         bothChannels.setDiscountCodeType(DiscountCodeType.API);
@@ -142,7 +142,7 @@ public class UpdateProfileConverterTest {
     public void Convert_ConvertUpdateProfileWithoutCoordinatesBothDTOToEntity_Ok() {
         UpdateProfile dto = TestUtils.createSampleUpdateProfileWithCommonFields();
         BothChannels bothChannels = new BothChannels();
-        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setChannelType(SalesChannelType.BOTH_CHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         bothChannels.getAddresses().forEach(a -> a.setCoordinates(null));

@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+
 
 public abstract class AbstractAttributeAuthorityConverter<A, B> {
 
@@ -46,18 +48,18 @@ public abstract class AbstractAttributeAuthorityConverter<A, B> {
 
     public ResponseEntity<B> fromAttributeAuthorityResponse(ResponseEntity<A> attributeAuthorityResponse) {
         switch (attributeAuthorityResponse.getStatusCode()) {
-            case OK:
-            case NOT_MODIFIED:
+            case HttpStatus.OK:
+            case HttpStatus.NOT_MODIFIED:
                 return ResponseEntity.ok().body(fromAttributeAuthorityModel(attributeAuthorityResponse.getBody()));
-            case INTERNAL_SERVER_ERROR:
-            case NO_CONTENT:
-            case ACCEPTED:
-            case FOUND:
-            case BAD_REQUEST:
-            case UNAUTHORIZED:
-            case FORBIDDEN:
-            case NOT_FOUND:
-            case METHOD_NOT_ALLOWED:
+            case HttpStatus.INTERNAL_SERVER_ERROR:
+            case HttpStatus.NO_CONTENT:
+            case HttpStatus.ACCEPTED:
+            case HttpStatus.FOUND:
+            case HttpStatus.BAD_REQUEST:
+            case HttpStatus.UNAUTHORIZED:
+            case HttpStatus.FORBIDDEN:
+            case HttpStatus.NOT_FOUND:
+            case HttpStatus.METHOD_NOT_ALLOWED:
             default:
                 return ResponseEntity.status(attributeAuthorityResponse.getStatusCode()).build();
         }

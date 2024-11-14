@@ -63,7 +63,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
         profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         OfflineChannel offlineChannel = new OfflineChannel();
-        offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         updateProfile.setSalesChannel(offlineChannel);
@@ -103,7 +103,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
         profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         BothChannels bothChannels = new BothChannels();
-        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setChannelType(SalesChannelType.BOTH_CHANNELS);
         bothChannels.setWebsiteUrl("https://www.pagopa.gov.it/");
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         bothChannels.setDiscountCodeType(DiscountCodeType.STATIC);

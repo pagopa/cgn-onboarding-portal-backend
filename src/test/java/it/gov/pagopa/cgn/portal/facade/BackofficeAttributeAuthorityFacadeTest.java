@@ -20,11 +20,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -99,7 +98,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
         OrganizationWithReferentsAndStatus organization1 = createOrganizationWithReferentsAndStatusMock("12345679",
                                                                                                         "12345679",
                                                                                                         "org1",
-                                                                                                        "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
+                                                                                                        "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLIC_ADMINISTRATION);
 
         List<OrganizationWithReferentsAndStatus> items = new LinkedList<>();
         items.add(organization0);
@@ -166,7 +165,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                = createOrganizationWithReferentsAndStatusMock("abcdef",
                                                                 "abcdef",
                                                                 "org0",
-                                                                "org0@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
+                                                                "org0@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLIC_ADMINISTRATION);
 
 
 
@@ -313,7 +312,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                         anOrganizationName,
                                                                         anOrganizationPec,
                                                                         false,
-                                                                        EntityType.PUBLICADMINISTRATION);
+                                                                        EntityType.PUBLIC_ADMINISTRATION);
         Consumer<UpsertResult> assertionsBlock = (ur) -> {;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
             Assertions.assertNotNull(ur.response.getBody());
@@ -352,7 +351,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                     anOrganizationName,
                                                                     anOrganizationPec,
                                                                     false,
-                                                                    EntityType.PUBLICADMINISTRATION);
+                                                                    EntityType.PUBLIC_ADMINISTRATION);
 
         Consumer<UpsertResult> assertionsBlock = (ur) -> {;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());

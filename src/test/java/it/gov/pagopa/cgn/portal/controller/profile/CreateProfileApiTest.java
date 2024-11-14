@@ -45,7 +45,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                     .andDo(log())
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINE_CHANNEL.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
                     .andExpect(jsonPath("$.name").value(createProfile.getName()))
@@ -73,7 +73,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                     .andDo(log())
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINE_CHANNEL.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
                     .andExpect(jsonPath("$.name").value(createProfile.getName()))
@@ -94,14 +94,14 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @Test
     void Create_CreateOnlineProfileWithLandingPageDiscountType_Ok() throws Exception {
-        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.LANDINGPAGE);
+        CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.LANDING_PAGE);
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
                                               .content(TestUtils.getJson(createProfile)))
                     .andDo(log())
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.ONLINE_CHANNEL.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.fullName").value(createProfile.getFullName()))
                     .andExpect(jsonPath("$.name").value(createProfile.getName()))
@@ -131,7 +131,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
                     .andDo(log())
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINECHANNEL.getValue()))
+                    .andExpect(jsonPath("$.salesChannel.channelType").value(SalesChannelType.OFFLINE_CHANNEL.getValue()))
                     .andExpect(jsonPath("$.salesChannel.allNationalAddresses").value(false))
                     .andExpect(jsonPath("$.salesChannel.addresses").isNotEmpty())
                     .andExpect(jsonPath("$.salesChannel.addresses").isArray())
@@ -202,7 +202,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     private CreateProfile createSampleCreateOnlineProfile(DiscountCodeType discountCodeType) {
         CreateProfile createProfile = createSampleCreateProfile();
         OnlineChannel onlineChannel = new OnlineChannel();
-        onlineChannel.setChannelType(SalesChannelType.ONLINECHANNEL);
+        onlineChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
         onlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         onlineChannel.setDiscountCodeType(discountCodeType);
         createProfile.setSalesChannel(onlineChannel);
@@ -212,7 +212,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     private CreateProfile createSampleCreateOfflineWithoutRequiredAddressesProfile() {
         CreateProfile createProfile = createSampleCreateProfile();
         OfflineChannel offlineChannel = new OfflineChannel();
-        offlineChannel.setChannelType(SalesChannelType.OFFLINECHANNEL);
+        offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
         offlineChannel.setWebsiteUrl("https://www.pagopa.gov.it/");
         offlineChannel.setAllNationalAddresses(false);
         createProfile.setSalesChannel(offlineChannel);
@@ -230,7 +230,7 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     private CreateProfile createSampleCreateBothWithoutRequiredWebsiteUrlProfile() {
         CreateProfile createProfile = createSampleCreateProfile();
         BothChannels bothChannels = new BothChannels();
-        bothChannels.setChannelType(SalesChannelType.BOTHCHANNELS);
+        bothChannels.setChannelType(SalesChannelType.BOTH_CHANNELS);
         bothChannels.setAddresses(TestUtils.createSampleAddressDto());
         createProfile.setSalesChannel(bothChannels);
         return createProfile;

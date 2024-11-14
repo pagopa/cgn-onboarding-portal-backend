@@ -10,7 +10,8 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.persistence.criteria.*;
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -19,29 +20,31 @@ import java.util.Objects;
 public class BackofficeAgreementToValidateSpecification extends CommonBackofficeSpecification<AgreementEntity> {
 
     public BackofficeAgreementToValidateSpecification(BackofficeFilter filter, String currentUser) {
+
         super(filter, currentUser);
     }
 
     @Override
     protected void addFiltersDatePredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+
         addStatusFilter(root, cb, predicateList);
         if (!Objects.isNull(filter.getDateFrom())) {
-            predicateList.add(cb.greaterThanOrEqualTo(getRequestApprovalTimePath(root),
-                    getOffsetDateTimeFromLocalDate(filter.getDateFrom())));
+            predicateList.add(cb.greaterThanOrEqualTo(getRequestApprovalTimePath(root), getOffsetDateTimeFromLocalDate(filter.getDateFrom())));
         }
         if (!Objects.isNull(filter.getDateTo())) {
-            predicateList.add(cb.lessThanOrEqualTo(getRequestApprovalTimePath(root),
-                    getOffsetDateTimeFromLocalDate(filter.getDateTo())));
+            predicateList.add(cb.lessThanOrEqualTo(getRequestApprovalTimePath(root), getOffsetDateTimeFromLocalDate(filter.getDateTo())));
         }
     }
 
     @Override
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+
         predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
     }
 
     @Override
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
+
         Path<OffsetDateTime> dateExpression = getRequestApprovalTimePath(root);
 
         if (filter.getRequestSortColumnEnum() != null) {
@@ -49,42 +52,44 @@ public class BackofficeAgreementToValidateSpecification extends CommonBackoffice
         }
         // order by requestApprovalTime desc
         if (StringUtils.isBlank(currentUser)) {
-            return new OrderImpl(dateExpression, direction.isAscending());
+            return order(dateExpression, cb, direction.isAscending());
         }
-        return new OrderImpl(cb.selectCase()
+
+        Expression<Object> orderExpression = cb.selectCase()
                 // first the agreements assigned to current user
-                .when(cb.equal(getBackofficeAssigneePath(root), currentUser), LocalDate.now().minusYears(10))
+                .when(cb.equal(getBackofficeAssigneePath(root), currentUser), LocalDateTime.now().minusYears(10))
                 // last the agreements assigned to others user
-                .when(cb.isNotNull(getBackofficeAssigneePath(root)), LocalDate.now().plusYears(10))
-                // after agreements assigned to current user, the agreements not assigned
-                .otherwise(dateExpression), direction.isAscending());
+                .when(cb.isNotNull(getBackofficeAssigneePath(root)), LocalDateTime.now().plusYears(10)).otherwise(dateExpression);
+
+        return order(orderExpression, cb, direction.isAscending());
     }
 
     private Order getOrderByFilter(Root<AgreementEntity> root, CriteriaBuilder cb) {
+
         switch (filter.getRequestSortColumnEnum()) {
             case ASSIGNEE:
-                return new OrderImpl(getBackofficeAssigneePath(root), isSortAscending());
+                return order(getBackofficeAssigneePath(root), cb);
             case STATE:
                         /* if order direction is ASC --> first rows with assignee null and then other,
                             otherwise first rows with assignee not null and then others
                          */
-                return new OrderImpl(
-                        cb.selectCase().when(cb.isNull(getBackofficeAssigneePath(root)), 1)
-                                .otherwise(2), isSortAscending());
+                return order(cb.selectCase().when(cb.isNull(getBackofficeAssigneePath(root)), 1).otherwise(2), cb);
             case OPERATOR:
-                return new OrderImpl(getProfileFullNamePath(root), isSortAscending());
+                return order(getProfileFullNamePath(root), cb);
             case REQUEST_DATE:
-                return new OrderImpl(getRequestApprovalTimePath(root), isSortAscending());
+                return order(getRequestApprovalTimePath(root), cb);
         }
         throw new InvalidRequestException("Invalid sort column");
     }
 
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
+
         return root.get("requestApprovalTime");
     }
 
     private void addStatusFilter(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+
         if (StringUtils.isNotEmpty(filter.getAgreementState())) {
             //if assigned, database status is Pending but assignee should be used (if present or else not null)
             if (BackofficeAgreementConverter.isAgreementStateIsAssigned(filter.getAgreementState())) {
@@ -101,6 +106,7 @@ public class BackofficeAgreementToValidateSpecification extends CommonBackoffice
     }
 
     private void addAssigneeFilter(Root<AgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+
         Path<String> backofficeAssigneePath = getBackofficeAssigneePath(root);
         if (AssigneeEnum.ME.equals(filter.getAssignee())) {
             predicateList.add(cb.equal(backofficeAssigneePath, currentUser));
@@ -110,7 +116,20 @@ public class BackofficeAgreementToValidateSpecification extends CommonBackoffice
     }
 
     private Path<String> getBackofficeAssigneePath(Root<AgreementEntity> root) {
+
         return root.get("backofficeAssignee");
+    }
+
+    private <T> Order order(Expression<T> expr, CriteriaBuilder cb) {
+
+        return order(expr, cb, isSortAscending());
+
+    }
+
+    private <T> Order order(Expression<T> expr, CriteriaBuilder cb, boolean ascending) {
+
+        return ascending ? cb.asc(expr) : cb.desc(expr);
+
     }
 
 }
