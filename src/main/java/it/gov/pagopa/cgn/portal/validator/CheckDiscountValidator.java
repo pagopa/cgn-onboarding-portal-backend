@@ -4,8 +4,8 @@ import it.gov.pagopa.cgn.portal.annotation.CheckDiscount;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CheckDiscountValidator implements ConstraintValidator<CheckDiscount, DiscountEntity> {
 

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

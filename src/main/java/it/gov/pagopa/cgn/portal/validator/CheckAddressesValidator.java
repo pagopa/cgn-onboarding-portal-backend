@@ -5,8 +5,8 @@ import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import org.springframework.util.CollectionUtils;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class CheckAddressesValidator implements ConstraintValidator<CheckAddresses, ProfileEntity> {
 

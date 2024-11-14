@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

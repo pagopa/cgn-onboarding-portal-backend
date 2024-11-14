@@ -8,9 +8,8 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.criteria.internal.OrderImpl;
 
-import javax.persistence.criteria.*;
+import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;

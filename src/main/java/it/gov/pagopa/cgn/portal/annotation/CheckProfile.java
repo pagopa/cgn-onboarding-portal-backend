@@ -2,8 +2,8 @@ package it.gov.pagopa.cgn.portal.annotation;
 
 import it.gov.pagopa.cgn.portal.validator.CheckProfileValidator;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 @Documented

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.validation.constraints.Max;
+import jakarta.validation.constraints.Max;
 
 @Getter
 @Setter

@@ -6,13 +6,14 @@ import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -21,8 +22,8 @@ import java.util.List;
 @Entity
 @Table(name = "agreement")
 @Data
-@TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
-@TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
+@Convert(attributeName = "state", converter = PostgreSQLEnumType.class)  // postgress enum type
+@Convert(attributeName = "entityType", converter = PostgreSQLEnumType.class)  // postgress enum type
 public class  AgreementEntity extends BaseEntity {
 
     @Id
@@ -33,7 +34,7 @@ public class  AgreementEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", length = 50)
-    @Type( type = "agreement_state_enum" )
+    @JdbcTypeCode(SqlTypes.ENUM)
     @NotNull
     private AgreementStateEnum state;
 
@@ -84,7 +85,7 @@ public class  AgreementEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", length = 24)
-    @Type( type = "entity_type_enum" )
+    @JdbcTypeCode(SqlTypes.ENUM)
     private EntityTypeEnum entityType;
 
 

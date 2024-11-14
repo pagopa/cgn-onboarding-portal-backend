@@ -5,7 +5,7 @@ import it.gov.pagopa.cgn.portal.repository.AgreementUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
