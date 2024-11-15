@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "document")
 @Data
-@Convert(attributeName = "documentType", converter = PostgreSQLEnumType.class)  // postgress enum type
+
 public class DocumentEntity extends BaseEntity {
 
     @Id
@@ -24,8 +24,7 @@ public class DocumentEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "document_type")
-    @JdbcTypeCode(SqlTypes.ENUM)
-    @NotNull
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)    @NotNull
     private DocumentTypeEnum documentType;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

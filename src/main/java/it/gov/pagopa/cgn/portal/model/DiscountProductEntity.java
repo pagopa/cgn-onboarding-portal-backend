@@ -14,14 +14,13 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "discount_product_category")
 @Data
 @IdClass(DiscountProductKey.class)
-@Convert(attributeName = "productCategory", converter = PostgreSQLEnumType.class)  // postgress enum type
+
 public class DiscountProductEntity extends BaseEntity {
 
     @Id
     @Column(name = "product_category", length = 100)
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ENUM)
-    private ProductCategoryEnum productCategory;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)    private ProductCategoryEnum productCategory;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

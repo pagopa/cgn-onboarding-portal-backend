@@ -39,7 +39,7 @@ public class ApprovedAgreementEntity {
 
     @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ENUM)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private AgreementStateEnum state;
 
     @Column(name = "assignee")
@@ -56,12 +56,13 @@ public class ApprovedAgreementEntity {
 
     @Column(name = "entity_type")
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ENUM)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private EntityTypeEnum entityType;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToOne(mappedBy = "agreement", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agreement_k")
     private ProfileEntity profile;
 }
 

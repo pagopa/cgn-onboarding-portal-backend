@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "discount")
 @Data
-@Convert(attributeName = "state", converter = PostgreSQLEnumType.class) // postgress enum type
+
 @CheckDiscount
 @DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
 public class DiscountEntity extends BaseEntity {
@@ -33,8 +33,7 @@ public class DiscountEntity extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ENUM)
-    @Column(name = "state", length = 50)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)    @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
     @NotNull

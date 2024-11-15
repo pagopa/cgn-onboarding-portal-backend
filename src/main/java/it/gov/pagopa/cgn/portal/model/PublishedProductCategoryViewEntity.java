@@ -18,8 +18,7 @@ public class PublishedProductCategoryViewEntity {
     @Id
     @Column(name = "product_category")
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ENUM)
-    private ProductCategoryEnum productCategory;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)    private ProductCategoryEnum productCategory;
 
     @Column(name = "new_discounts")
     private Integer newDiscounts;
