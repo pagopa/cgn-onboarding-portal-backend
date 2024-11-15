@@ -147,3 +147,5 @@ docker-compose.override.yml
 
 # Ignore bin folder
 bin/
+
+.DS_Store
