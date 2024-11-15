@@ -3,11 +3,12 @@ package it.gov.pagopa.cgn.portal.model;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 import java.time.OffsetDateTime;
 
 @Data
@@ -23,7 +24,7 @@ public class BaseMerchantViewEntity {
     private String name;
 
     @Column(name = "product_categories", columnDefinition = "text[]")
-    @Type(type = "it.gov.pagopa.cgn.portal.type.ProductCategoryArrayType")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ProductCategoryEnum[] productCategories;
 
     @Column(name = "searchable_name")

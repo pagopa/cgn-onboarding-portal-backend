@@ -30,7 +30,7 @@ public class OrganizationWithReferentsAndStatusConverter
         backofficeModel.setOrganizationFiscalCode(attributeAuthorityModel.getOrganizationFiscalCode());
         backofficeModel.setOrganizationName(attributeAuthorityModel.getOrganizationName());
         backofficeModel.setPec(attributeAuthorityModel.getPec());
-        backofficeModel.setInsertedAt(attributeAuthorityModel.getInsertedAt().toLocalDateTime().toLocalDate());
+        backofficeModel.setInsertedAt(Timestamp.valueOf(attributeAuthorityModel.getInsertedAt()).toLocalDateTime().toLocalDate());
         backofficeModel.setReferents(attributeAuthorityModel.getReferents());
         backofficeModel.setStatus(OrganizationStatus.ENABLED);
         return backofficeModel;
@@ -44,7 +44,7 @@ public class OrganizationWithReferentsAndStatusConverter
         attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
         attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setInsertedAt(Timestamp.valueOf(backofficeModel.getInsertedAt().atStartOfDay()));
+        attributeAuthorityModel.setInsertedAt(Timestamp.valueOf(backofficeModel.getInsertedAt().atStartOfDay()).toString());
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };

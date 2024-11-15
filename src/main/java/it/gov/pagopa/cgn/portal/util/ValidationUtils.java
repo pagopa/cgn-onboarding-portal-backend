@@ -4,8 +4,8 @@ import io.jsonwebtoken.lang.Collections;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import java.util.Set;
 import java.util.stream.Collectors;
 

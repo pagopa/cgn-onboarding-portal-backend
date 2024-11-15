@@ -3,9 +3,10 @@ package it.gov.pagopa.cgn.portal.model;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity
@@ -16,7 +17,7 @@ public class PublishedProductCategoryViewEntity {
     @Id
     @Column(name = "product_category")
     @Enumerated(EnumType.STRING)
-    @Type(type = "product_category_enum")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     private ProductCategoryEnum productCategory;
 
     @Column(name = "new_discounts")

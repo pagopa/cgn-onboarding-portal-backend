@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.*;
+import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -81,5 +81,13 @@ public abstract class CommonBackofficeSpecification<T> implements Specification<
 
     protected boolean isSortAscending() {
         return Sort.Direction.ASC.equals(filter.getSortDirection());
+    }
+
+    protected <E> Order order(Expression<E> expr, CriteriaBuilder cb) {
+        return order(expr, cb, isSortAscending());
+    }
+
+    protected <E> Order order(Expression<E> expr, CriteriaBuilder cb, boolean ascending) {
+        return ascending ? cb.asc(expr) : cb.desc(expr);
     }
 }

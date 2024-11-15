@@ -4,7 +4,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import lombok.Data;
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Immutable

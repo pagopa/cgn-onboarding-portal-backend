@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.18</version>
+        <version>3.0.0</version>
     </parent>
 
     <groupId>it.gov.pagopa</groupId>
@@ -17,12 +17,10 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <swagger-annotations-version>1.5.8</swagger-annotations-version>
         <springfox-version>2.10.0</springfox-version>
         <testcontainer-version>1.15.3</testcontainer-version>
 
         <maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
-        <openapi-generator-maven-plugin-version>5.1.0</openapi-generator-maven-plugin-version>
         <spring.profiles.active>dev</spring.profiles.active>
     </properties>
 
@@ -52,11 +50,26 @@
             <artifactId>spring-retry</artifactId>
             <version>1.3.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.3.1</version>
+        </dependency>
         <!-- Swagger/OpenAPI -->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>${swagger-annotations-version}</version>
+            <version>1.5.8</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.25</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>2.2.25</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -308,7 +321,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${openapi-generator-maven-plugin-version}</version>
+                <version>6.3.0</version>
                 <executions>
                     <execution>
                         <id>spring-server</id>
@@ -323,6 +336,9 @@
                             <modelPackage>${project.groupId}.cgnonboardingportal.model</modelPackage>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
                                 <serializableModel>true</serializableModel>
                             </configOptions>
                         </configuration>
@@ -340,6 +356,9 @@
                             <modelPackage>${project.groupId}.cgnonboardingportal.backoffice.model</modelPackage>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
                                 <serializableModel>true</serializableModel>
                             </configOptions>
                         </configuration>
@@ -357,6 +376,9 @@
                             <modelPackage>${project.groupId}.cgnonboardingportal.publicapi.model</modelPackage>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
                                 <serializableModel>true</serializableModel>
                             </configOptions>
                         </configuration>
@@ -378,6 +400,9 @@
                             <library>resttemplate</library>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
                                 <modelPackage>${project.groupId}.cgnonboardingportal.attributeauthority.model
                                 </modelPackage>
                                 <apiPackage>${project.groupId}.cgnonboardingportal.attributeauthority.api</apiPackage>
@@ -406,6 +431,9 @@
                             <library>resttemplate</library>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
                                 <modelPackage>${project.groupId}.cgnonboardingportal.eycadataexport.model
                                 </modelPackage>
                                 <apiPackage>${project.groupId}.cgnonboardingportal.eycadataexport.api</apiPackage>

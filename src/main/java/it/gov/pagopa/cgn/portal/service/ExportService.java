@@ -27,12 +27,10 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

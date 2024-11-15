@@ -13,9 +13,13 @@ import java.util.stream.Stream;
 
 public class ProductCategoryArrayType implements UserType {
 
-    @Override
     public int[] sqlTypes() {
         return new int[]{Types.ARRAY};
+    }
+
+    @Override
+    public int getSqlType() {
+        return Types.ARRAY;
     }
 
     @Override
@@ -34,8 +38,8 @@ public class ProductCategoryArrayType implements UserType {
     }
 
     @Override
-    public ProductCategoryEnum[] nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
-        Array productCategoriesResultSet = rs.getArray(names[0]);
+    public Object nullSafeGet(ResultSet resultSet, int i, SharedSessionContractImplementor sharedSessionContractImplementor, Object o) throws SQLException {
+        Array productCategoriesResultSet = resultSet.getArray(0);
         if (productCategoriesResultSet == null) return new ProductCategoryEnum[]{};
         String[] productCategories = (String[]) productCategoriesResultSet.getArray();
         return Stream.of(productCategories).map(ProductCategoryEnum::valueOf).toArray(ProductCategoryEnum[]::new);

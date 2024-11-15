@@ -5,9 +5,9 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
-import org.hibernate.query.criteria.internal.OrderImpl;
 
-import javax.persistence.criteria.*;
+
+import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -37,21 +37,21 @@ public class BackofficeApprovedAgreementSpecification extends CommonBackofficeSp
     @Override
     protected Order getOrder(Root<ApprovedAgreementEntity> root, CriteriaBuilder cb) {
         if (filter.getApprovedSortColumnEnum() != null) {
-            return getOrderByFilter(root);
+            return getOrderByFilter(root, cb);
         }
-        return new OrderImpl(getLastUpdateDatePath(root), false);
+        return order(getLastUpdateDatePath(root), cb);
     }
 
-    private Order getOrderByFilter(Root<ApprovedAgreementEntity> root) {
+    private Order getOrderByFilter(Root<ApprovedAgreementEntity> root, CriteriaBuilder cb) {
         switch (filter.getApprovedSortColumnEnum()) {
             case OPERATOR:
-                return new OrderImpl(getProfileFullNamePath(root), isSortAscending());
+                return order(getProfileFullNamePath(root), cb);
             case AGREEMENT_DATE:
-                return new OrderImpl(root.get("startDate"), isSortAscending());
+                return order(root.get("startDate"), cb);
             case LAST_MODIFY_DATE:
-                return new OrderImpl(getLastUpdateDatePath(root), isSortAscending());
+                return order(getLastUpdateDatePath(root), cb);
             case PUBLISHED_DISCOUNTS:
-                return new OrderImpl(root.get("publishedDiscounts"), isSortAscending());
+                return order(root.get("publishedDiscounts"), cb);
             default:
                 throw new InvalidRequestException("Invalid sort column");
         }

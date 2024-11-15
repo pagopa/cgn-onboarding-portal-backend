@@ -1,8 +1,11 @@
 package it.gov.pagopa.cgn.portal.config;
 
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+
 import org.apache.http.ssl.TrustStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -38,18 +41,18 @@ public class RestTemplateConfig {
             SSLContext sslContext = null;
             try {
                 sslContext = org.apache.http.ssl.SSLContexts.custom()
-                        .loadTrustMaterial(null, acceptingTrustStrategy)
+                        .loadTrustMaterial(acceptingTrustStrategy)
                         .build();
             } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 throw new RuntimeException(e);
             }
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 
-            CloseableHttpClient httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(csf)
-                    .build();
+            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(csf).build();
 
-            return  new HttpComponentsClientHttpRequestFactory(httpClient);
+            HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager).build();
+
+            return new HttpComponentsClientHttpRequestFactory(httpClient);
         };
     }
 

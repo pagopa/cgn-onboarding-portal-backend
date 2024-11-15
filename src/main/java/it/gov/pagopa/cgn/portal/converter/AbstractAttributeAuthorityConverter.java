@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.converter;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -45,22 +44,9 @@ public abstract class AbstractAttributeAuthorityConverter<A, B> {
     }
 
     public ResponseEntity<B> fromAttributeAuthorityResponse(ResponseEntity<A> attributeAuthorityResponse) {
-        switch (attributeAuthorityResponse.getStatusCode()) {
-            case OK:
-            case NOT_MODIFIED:
+        if (attributeAuthorityResponse.getStatusCode().is2xxSuccessful())
                 return ResponseEntity.ok().body(fromAttributeAuthorityModel(attributeAuthorityResponse.getBody()));
-            case INTERNAL_SERVER_ERROR:
-            case NO_CONTENT:
-            case ACCEPTED:
-            case FOUND:
-            case BAD_REQUEST:
-            case UNAUTHORIZED:
-            case FORBIDDEN:
-            case NOT_FOUND:
-            case METHOD_NOT_ALLOWED:
-            default:
-                return ResponseEntity.status(attributeAuthorityResponse.getStatusCode()).build();
-        }
+        return ResponseEntity.status(attributeAuthorityResponse.getStatusCode()).build();
     }
 
     protected Optional<B> convertFromAttributeAuthorityModel(Optional<A> maybeAttributeAuthorityModel, Function<A, B> function) {

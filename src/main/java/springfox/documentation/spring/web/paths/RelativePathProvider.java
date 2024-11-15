@@ -20,7 +20,7 @@
 package springfox.documentation.spring.web.paths;
 
 import org.apache.http.util.TextUtils;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 public class RelativePathProvider extends DefaultPathProvider {
     public static final String ROOT = "/";

@@ -31,9 +31,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClientException;
 
-import javax.mail.*;
-import javax.mail.Message.RecipientType;
-import javax.mail.internet.*;
+import jakarta.mail.*;
+import jakarta.mail.Message.RecipientType;
+import jakarta.mail.internet.*;
 
 import java.util.*;
 

@@ -3,14 +3,14 @@ package it.gov.pagopa.cgn.portal.model;
 import it.gov.pagopa.cgn.portal.annotation.CheckDiscount;
 import it.gov.pagopa.cgn.portal.annotation.DateBefore;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.*;
-import javax.validation.constraints.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ import java.util.List;
 @Entity
 @Table(name = "discount")
 @Data
-@TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class) // postgress enum type
 @CheckDiscount
 @DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
 public class DiscountEntity extends BaseEntity {
@@ -33,7 +32,7 @@ public class DiscountEntity extends BaseEntity {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Type(type = "discount_state_enum")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "state", length = 50)
     private DiscountStateEnum state;
 
