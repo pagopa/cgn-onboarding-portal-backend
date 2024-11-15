@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.model.ApiTokens;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
-import org.flywaydb.core.api.ErrorCode;
 import org.springframework.stereotype.Service;
 
 

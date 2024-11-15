@@ -3,7 +3,7 @@ package it.gov.pagopa.cgn.portal.enums;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 

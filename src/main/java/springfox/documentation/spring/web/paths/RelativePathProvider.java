@@ -19,9 +19,8 @@
 
 package springfox.documentation.spring.web.paths;
 
+import org.apache.http.util.TextUtils;
 import javax.servlet.ServletContext;
-
-import static com.google.common.base.Strings.*;
 
 public class RelativePathProvider extends DefaultPathProvider {
     public static final String ROOT = "/";
@@ -33,7 +32,7 @@ public class RelativePathProvider extends DefaultPathProvider {
     }
 
     protected String applicationPath() {
-        return isNullOrEmpty(servletContext.getContextPath()) ? ROOT : servletContext.getContextPath();
+        return TextUtils.isEmpty(servletContext.getContextPath()) ? ROOT : servletContext.getContextPath();
     }
 
     @Override
