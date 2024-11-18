@@ -178,7 +178,7 @@ public class ExportService {
         log.info("exportAgreements start");
         List<AgreementEntity> agreementEntities = agreementRepository.findAll();
         StringWriter writer = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL.builder().setDelimiter(';').build())) {
             printerConsumer.apply(printer).accept(exportAgreementsHeaders);
             agreementEntities.stream()
                     .map(expandAgreementToList)
@@ -619,7 +619,7 @@ public class ExportService {
             agreementWithProfileAndDiscountToStringArray
             = (agreement, maybeDiscount) -> new String[]{agreement.getState().getCode(),
             Optional.ofNullable(agreement.getProfile())
-                    .map(ProfileEntity::getFullName).orElse(null),
+                    .map(ProfileEntity::getFullName).orElse(agreement.getOrganizationName()),
             Optional.ofNullable(agreement.getProfile())
                     .map(ProfileEntity::getName).orElse(null),
             Optional.ofNullable(agreement.getProfile())

@@ -62,7 +62,7 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
-    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(), owr.getEntityType());
+    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(), owr.getEntityType(), owr.getOrganizationName());
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
@@ -145,6 +145,7 @@ public class BackofficeAttributeAuthorityFacade {
             p.setFullName(organizationWithReferents.getOrganizationName());
             p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
             p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
+            p.getAgreement().setOrganizationName(organizationWithReferents.getOrganizationName());
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
         });
     };

@@ -78,6 +78,10 @@ public class  AgreementEntity extends BaseEntity {
     @Column(name = "information_last_update_date")
     private LocalDate informationLastUpdateDate;
 
+    @Column(name = "organization_name")
+    private String organizationName;
+
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
