@@ -518,6 +518,8 @@ public class ExportService {
         
         log.info("Creating new discount on EYCA...");
 
+        Map<String,String> toSendWithEmailToEyca = new HashMap<>();
+
         exportEycaList.forEach(exportEycaWrapper -> {
             DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 

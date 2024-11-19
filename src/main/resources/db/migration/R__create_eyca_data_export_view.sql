@@ -116,6 +116,5 @@ AND (
     OR
     (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type IN ('STATIC', 'BUCKET'))
     OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type = 'LANDINGPAGE' 
-			AND (d.landing_page_referrer IS NULL))
+    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type = 'LANDINGPAGE')
 );

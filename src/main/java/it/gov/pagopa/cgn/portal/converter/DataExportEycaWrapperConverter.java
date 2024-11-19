@@ -37,8 +37,11 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
         int result = 0;
 
         if (!eycaApiDebug
-                &&  ExportService.LIVE_YES.equals(entity.getLive())
-                &&  ! (StringUtils.isBlank(entity.getEycaUpdateId()) && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+                && !(DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(entity.getDiscountType())
+                        || DiscountCodeTypeEnum.STATIC.getEycaDataCode().equals(entity.getDiscountType()))
+                && ExportService.LIVE_YES.equals(entity.getLive())
+                && !(StringUtils.isBlank(entity.getEycaUpdateId())
+                && entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
                 result = 1;
         }
 
