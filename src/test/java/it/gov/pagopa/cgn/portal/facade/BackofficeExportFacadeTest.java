@@ -62,8 +62,10 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_PROFILE_WITH_DISCOUNTS_OK() throws IOException {
-        createProfile();
+    void ExportAgreements_DRAFT_WITH_PROFILE_WITH_ORG_NAME_OK() throws IOException {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountService.createDiscount(agreementEntity.getId(), discountEntity1);
@@ -75,7 +77,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(3, CsvUtils.countCsvLines(response.getBody().getInputStream()));
+        Assertions.assertTrue(CsvUtils.checkField("ExampleOrganizationName", response.getBody().getInputStream()));
     }
 
     @Test
