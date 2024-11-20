@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
@@ -24,14 +25,16 @@ import java.util.stream.Stream;
 class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
 
     private AttributeAuthorityApi attributeAuthorityApi;
+    private DefaultApi defaultAttributeAuthorityApi;
 
     private AttributeAuthorityService attributeAuthorityService;
 
     @BeforeEach
     void init() {
         attributeAuthorityApi = Mockito.mock(AttributeAuthorityApi.class);
+        defaultAttributeAuthorityApi = Mockito.mock(DefaultApi.class);
         Mockito.when(attributeAuthorityApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
-        attributeAuthorityService = new AttributeAuthorityService(configProperties, attributeAuthorityApi);
+        attributeAuthorityService = new AttributeAuthorityService(configProperties, attributeAuthorityApi,defaultAttributeAuthorityApi);
     }
 
     @Test
