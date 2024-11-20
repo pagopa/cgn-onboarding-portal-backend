@@ -62,18 +62,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_PROFILE_WITH_ORG_NAME_OK() throws IOException {
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileService.createProfile(profileEntity, agreementEntity.getId());
-
-        DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity1.setName("Discount 1");
-        discountService.createDiscount(agreementEntity.getId(), discountEntity1);
-
-        DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountEntity2.setName("Discount 2");
-        discountService.createDiscount(agreementEntity.getId(), discountEntity2);
-
+    void ExportAgreements_DRAFT_WITHOUT_PROFILE_WITH_ORG_NAME_OK() throws IOException {
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());

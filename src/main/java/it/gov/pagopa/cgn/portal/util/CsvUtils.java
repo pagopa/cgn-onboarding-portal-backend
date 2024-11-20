@@ -36,6 +36,6 @@ public class CsvUtils {
 
     public static boolean checkField(String field, InputStream inputStream) throws IOException {
         Stream<CSVRecord> stream = getCsvRecordStream(inputStream);
-        return stream.anyMatch(line -> line.equals(field));
+        return stream.anyMatch(line -> line.get(0).contains(field));
     }
 }

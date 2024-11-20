@@ -145,9 +145,12 @@ public class BackofficeAttributeAuthorityFacade {
             p.setFullName(organizationWithReferents.getOrganizationName());
             p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
             p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
-            p.getAgreement().setOrganizationName(organizationWithReferents.getOrganizationName());
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
         });
+
+        AgreementEntity agreement = agreementService.findAgreementById(agreementUserEntity.getAgreementId());
+        agreement.setOrganizationName(organizationWithReferents.getOrganizationName());
+        agreementService.updateAgrement(agreement);
     };
 
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {

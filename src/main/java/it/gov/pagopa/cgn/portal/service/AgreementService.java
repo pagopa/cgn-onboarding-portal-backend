@@ -169,5 +169,8 @@ public class AgreementService extends AgreementServiceLight {
     }
 
 
+    public void updateAgrement(AgreementEntity agreement) {
+        agreementRepository.save(agreement);
+    }
 }
 
