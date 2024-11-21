@@ -62,7 +62,7 @@ public class BackofficeAttributeAuthorityFacade {
         return response;
     }
 
-    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(), owr.getEntityType());
+    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(owr.getOrganizationFiscalCode(), owr.getEntityType(), owr.getOrganizationName());
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
@@ -147,6 +147,10 @@ public class BackofficeAttributeAuthorityFacade {
             p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
             profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
         });
+
+        AgreementEntity agreement = agreementService.findAgreementById(agreementUserEntity.getAgreementId());
+        agreement.setOrganizationName(organizationWithReferents.getOrganizationName());
+        agreementService.updateAgrement(agreement);
     };
 
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {

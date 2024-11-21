@@ -59,7 +59,7 @@ public class AgreementService extends AgreementServiceLight {
     }
 
     @Transactional
-    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType) {
+    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType, String organizationName) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
@@ -70,7 +70,7 @@ public class AgreementService extends AgreementServiceLight {
                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
         } else {
             userAgreement = userService.create(merchantTaxCode);
-            agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType);
+            agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType, organizationName);
         }
         return agreementEntity;
     }
@@ -136,8 +136,9 @@ public class AgreementService extends AgreementServiceLight {
         return agreementEntity;
     }
 
-    private AgreementEntity createAgreement(String agreementId, EntityType entityType) {
+    private AgreementEntity createAgreement(String agreementId, EntityType entityType, String organizationName) {
         AgreementEntity agreementEntity = new AgreementEntity();
+        agreementEntity.setOrganizationName(organizationName);
         agreementEntity.setId(agreementId);
         agreementEntity.setState(AgreementStateEnum.DRAFT);
         EntityTypeEnum entityTypeEnum = backofficeAgreementConverter.toEntityEntityTypeEnum(entityType);
@@ -163,5 +164,8 @@ public class AgreementService extends AgreementServiceLight {
     }
 
 
+    public void updateAgrement(AgreementEntity agreement) {
+        agreementRepository.save(agreement);
+    }
 }
 

@@ -27,7 +27,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
     }
 
     private void createProfile() {
@@ -62,7 +62,15 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_PROFILE_WITH_DISCOUNTS_OK() throws IOException {
+    void ExportAgreements_DRAFT_WITHOUT_PROFILE_WITH_ORG_NAME_OK() throws IOException {
+        ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertTrue(CsvUtils.checkField(TestUtils.FAKE_ORGANIZATION_NAME, response.getBody().getInputStream()));
+    }
+
+    @Test
+    void ExportAgreements_DRAFT_WITH_PROFILE_WITHOUT_DISCOUNTS_OK() throws IOException {
         createProfile();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");

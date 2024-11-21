@@ -83,7 +83,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                                     backofficeAgreementConverter);
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
-        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PRIVATE);
+        agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat, EntityType.PRIVATE, TestUtils.FAKE_ORGANIZATION_NAME);
         profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -116,9 +116,9 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                                                                 Mockito.any()))
                .thenReturn(ResponseEntity.ok(organizationsConverter.toAttributeAuthorityModel(organizations)));
 
-        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType());
+        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
-        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType());
+        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
         ResponseEntity<Organizations> organizationsResponse = backofficeAttributeAuthorityFacade.getOrganizations(null,
                                                                                                                   0,
@@ -175,7 +175,7 @@ class BackofficeAttributeAuthorityFacadeTest extends IntegrationAbstractTest {
                     .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
                             org)));
 
-            agreementService.createAgreementIfNotExists(org.getKeyOrganizationFiscalCode(),org.getEntityType());
+            agreementService.createAgreementIfNotExists(org.getKeyOrganizationFiscalCode(),org.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
             ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse
                     = backofficeAttributeAuthorityFacade.getOrganization(org.getKeyOrganizationFiscalCode());

@@ -39,7 +39,7 @@ class UploadImageTest extends IntegrationAbstractTest {
     @BeforeEach
     void init() throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         multipartFile = new MockMultipartFile("fileItem", "test-image.png", "image/png", image);
 
         BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()

@@ -87,8 +87,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
-        agreementEntityPA = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2, EntityType.PUBLICADMINISTRATION);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+        agreementEntityPA = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2, EntityType.PUBLICADMINISTRATION,TestUtils.FAKE_ORGANIZATION_NAME);
 
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
