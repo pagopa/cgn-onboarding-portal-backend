@@ -59,7 +59,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() throws IOException {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
@@ -1135,7 +1135,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
     void Publish_UpdateDiscountNotRelatedToAgreement_ThrowException() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
-        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement", EntityType.PRIVATE);
+        var agreementEntity2 = agreementService.createAgreementIfNotExists("second-agreement", EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
@@ -1791,7 +1791,7 @@ class DiscountServiceTest extends IntegrationAbstractTest {
 
     @Test
     void checkDiscountRelatedSameAgreement_DiscountNotRelatedToSameAgreement_InvalidRequestException() throws IOException {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
 
         final DiscountEntity discountEntity = discountService.createDiscount(agreementEntity.getId(),
                 TestUtils.createSampleDiscountEntity(agreementEntity)).getDiscountEntity();

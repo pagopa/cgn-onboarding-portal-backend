@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.model.*;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType.PRIVATE);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }

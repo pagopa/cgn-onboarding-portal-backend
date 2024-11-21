@@ -104,9 +104,9 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                 "org1",
                 "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
 
-        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType());
+        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
-        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType());
+        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
         OrganizationsAttributeAuthority organizationsAA = new OrganizationsAttributeAuthority();
 

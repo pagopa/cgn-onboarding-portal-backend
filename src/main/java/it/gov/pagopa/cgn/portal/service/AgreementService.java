@@ -59,11 +59,6 @@ public class AgreementService extends AgreementServiceLight {
     }
 
     @Transactional
-    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType) {
-        return createAgreementIfNotExists(merchantTaxCode, entityType, "");
-    }
-
-    @Transactional
     public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType, String organizationName) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;

@@ -27,7 +27,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,"ExampleOrganizationName");
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
     }
 
     private void createProfile() {
@@ -66,7 +66,7 @@ class BackofficeExportFacadeTest extends IntegrationAbstractTest {
         ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        Assertions.assertTrue(CsvUtils.checkField("ExampleOrganizationName", response.getBody().getInputStream()));
+        Assertions.assertTrue(CsvUtils.checkField(TestUtils.FAKE_ORGANIZATION_NAME, response.getBody().getInputStream()));
     }
 
     @Test

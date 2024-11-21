@@ -40,7 +40,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         agreementId = agreementEntity.getId();
     }
 
@@ -298,7 +298,7 @@ class ProfileServiceTest extends IntegrationAbstractTest {
     @Test
     void Update_UpdateProfileWithDocumentUploadedWillDeleteDocuments_Ok() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementId);
