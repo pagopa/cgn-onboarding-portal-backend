@@ -77,7 +77,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     	JavaMailSender javaMailSenderMock = Mockito.mock(JavaMailSender.class);
         Mockito.when(javaMailSenderMock.createMimeMessage()).thenReturn(expectedMimeMessage);
     	
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
 
         eycaDataExportRepository = Mockito.mock(EycaDataExportRepository.class);
         AgreementRepository agreementRepository = Mockito.mock(AgreementRepository.class);

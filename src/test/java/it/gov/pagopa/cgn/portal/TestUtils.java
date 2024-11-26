@@ -56,6 +56,8 @@ public class TestUtils {
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
 
+    public static final String FAKE_ORGANIZATION_NAME = "FAKE_ORGANIZATION_NAME";
+
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
     }

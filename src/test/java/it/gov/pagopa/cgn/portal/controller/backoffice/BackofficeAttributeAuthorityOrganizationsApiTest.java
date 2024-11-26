@@ -4,12 +4,16 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -22,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.util.NestedServletException;
 
 import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
@@ -99,9 +104,9 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                 "org1",
                 "org1@pec.it",OrganizationStatus.DRAFT,EntityType.PUBLICADMINISTRATION);
 
-        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType());
+        agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),organization0.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
-        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType());
+        agreementService.createAgreementIfNotExists(organization1.getKeyOrganizationFiscalCode(),organization1.getEntityType(),TestUtils.FAKE_ORGANIZATION_NAME);
 
         OrganizationsAttributeAuthority organizationsAA = new OrganizationsAttributeAuthority();
 
@@ -165,6 +170,28 @@ class BackofficeAttributeAuthorityOrganizationsApiTest extends IntegrationAbstra
                 .andDo(log())
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void UpsertOrganization_moreThenTenOrganizations_ko() throws Exception {
+        OrganizationWithReferents organization = new OrganizationWithReferents();
+        organization.setKeyOrganizationFiscalCode("00000000000");
+        organization.setOrganizationFiscalCode("00000000000");
+        organization.setOrganizationName("org 1");
+        organization.setPec("org1@pec.it");
+        organization.setEntityType(EntityType.PRIVATE);
+        organization.setReferents(List.of("referents1"));
+
+        Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
+
+        Exception exception = Assertions.assertThrows(NestedServletException.class,
+                () ->         mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
+                                .content(TestUtils.getJson(organization)))
+        );
+
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue(),exception.getCause().getMessage());
+    }
+
+
 
     private OrganizationWithReferentsAndStatus createOrganizationWithReferentsAndStatusMock(String aKeyOrganizationFiscalCode,
                                                                                             String anOrganizationFiscalCode,

@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.util;
 
 import org.apache.commons.csv.*;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -33,4 +34,8 @@ public class CsvUtils {
 		}
 	}
 
+    public static boolean checkField(String field, InputStream inputStream) throws IOException {
+        Stream<CSVRecord> stream = getCsvRecordStream(inputStream);
+        return stream.anyMatch(line -> line.get(0).contains(field));
+    }
 }
