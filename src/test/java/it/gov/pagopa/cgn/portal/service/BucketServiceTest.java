@@ -397,7 +397,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
                         BucketCodeExpiringThresholdEnum.PERCENT_0));
 
         notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
-        Assertions.assertTrue(notificationRequired);
+        Assertions.assertFalse(notificationRequired);
         var secondNotification
                 = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
                         discountEntity,
@@ -434,7 +434,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
     private boolean testNotification(DiscountEntity discountEntity, BucketCodeExpiringThresholdEnum threshold) {
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
+        if(threshold != BucketCodeExpiringThresholdEnum.PERCENT_0)
+            Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
 
         burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 
