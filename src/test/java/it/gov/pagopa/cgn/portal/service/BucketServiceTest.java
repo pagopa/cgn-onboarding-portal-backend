@@ -121,19 +121,17 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes()); // mocked files has 2 codes
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
-        Assertions.assertEquals(bucketCodeLoadEntity.getFileName(), bucketCodeLoadEntity.getFileName());
     }
 
     @Test
-    void PerformBucketCodeStore_Ko() throws IOException {
+    void PerformBucketCodeStore_Ko() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-        // we do not set the bucket load running to force an exception inside performBucketLoad
-        //bucketService.setRunningBucketLoad(discountEntity.getId());
 
+        // we do not set the bucket load running to force an exception inside performBucketLoad
         bucketService.performBucketLoad(discountEntity.getId());
         Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoad().getUid() + ".csv"));
 

@@ -55,7 +55,7 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
-        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
         var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
@@ -65,9 +65,7 @@ public class BucketService {
                     discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
                     emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
                     break;
-                case PERCENT_10:
-                case PERCENT_25:
-                case PERCENT_50:
+                case PERCENT_10, PERCENT_25, PERCENT_50:
                     emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount, t, remainingCodes);
                     break;
             }
@@ -99,7 +97,7 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
-        DiscountEntity discountEntity = discountRepository.getOne(discountId);
+        DiscountEntity discountEntity = discountRepository.getReferenceById(discountId);
         BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
@@ -114,7 +112,7 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
-        DiscountEntity discountEntity = discountRepository.getOne(discountId);
+        DiscountEntity discountEntity = discountRepository.getReferenceById(discountId);
         DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         if (bucketCodeLoadEntity.getStatus().equals(BucketCodeLoadStatusEnum.FAILED)) return;
