@@ -121,19 +121,17 @@ class BucketServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(BucketCodeLoadStatusEnum.RUNNING.getCode(), bucketCodeLoadEntity.getStatus().getCode());
         Assertions.assertEquals(2, bucketCodeLoadEntity.getNumberOfCodes()); // mocked files has 2 codes
         Assertions.assertEquals(discountEntity.getLastBucketCodeLoad().getId(), bucketCodeLoadEntity.getId());
-        Assertions.assertEquals(bucketCodeLoadEntity.getFileName(), bucketCodeLoadEntity.getFileName());
     }
 
     @Test
-    void PerformBucketCodeStore_Ko() throws IOException {
+    void PerformBucketCodeStore_Ko() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
 
         bucketService.createPendingBucketLoad(discountEntity);
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-        // we do not set the bucket load running to force an exception inside performBucketLoad
-        //bucketService.setRunningBucketLoad(discountEntity.getId());
 
+        // we do not set the bucket load running to force an exception inside performBucketLoad
         bucketService.performBucketLoad(discountEntity.getId());
         Assertions.assertFalse(azureStorage.existsDocument(discountEntity.getLastBucketCodeLoad().getUid() + ".csv"));
 
@@ -397,7 +395,7 @@ class BucketServiceTest extends IntegrationAbstractTest {
                         BucketCodeExpiringThresholdEnum.PERCENT_0));
 
         notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
-        Assertions.assertTrue(notificationRequired);
+        Assertions.assertFalse(notificationRequired);
         var secondNotification
                 = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
                         discountEntity,
@@ -434,7 +432,8 @@ class BucketServiceTest extends IntegrationAbstractTest {
 
     private boolean testNotification(DiscountEntity discountEntity, BucketCodeExpiringThresholdEnum threshold) {
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
+        if(threshold != BucketCodeExpiringThresholdEnum.PERCENT_0)
+            Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
 
         burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
 

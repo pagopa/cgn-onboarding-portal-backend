@@ -595,7 +595,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void suspendDiscountIfDiscountBucketCodesAreExpired(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary
-                = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
+                = discountBucketCodeSummaryRepository.getReferenceById(discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         suspendDiscount(discount.getAgreement().getId(),
                 discount.getId(),
