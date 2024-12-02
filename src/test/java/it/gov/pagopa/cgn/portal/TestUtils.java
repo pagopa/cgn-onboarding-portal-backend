@@ -490,6 +490,7 @@ public class TestUtils {
         entity_0.setReferent(1L);
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
 
         return Collections.singletonList(entity_0);
 
@@ -624,6 +625,7 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
        return List.of(entity_0);
     }
 
@@ -640,6 +642,7 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         return List.of(entity_0);
     }
 
@@ -654,6 +657,7 @@ public class TestUtils {
         entity_0.setStreet("address0");
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_0.setDiscountId(1L);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
@@ -666,6 +670,7 @@ public class TestUtils {
         entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive("Y");
         entity_1.setDiscountId(2L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_1.setCountry("italy");
         entity_1.setCity("city");
         entity_1.setStreet("address0");
@@ -682,6 +687,7 @@ public class TestUtils {
         entity_2.setDiscountType("LANDING PAGE");
         entity_2.setLive("Y");
         entity_2.setDiscountId(3L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_2.setCity("city");
         entity_2.setStreet("address0");
         entity_2.setLatitude("48");
@@ -697,6 +703,7 @@ public class TestUtils {
         entity_3.setDiscountType("LANDING PAGE");
         entity_3.setLive("Y");
         entity_3.setDiscountId(4L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_3.setCountry("italy");
         entity_3.setStreet("address0");
         entity_3.setLatitude("48");
@@ -712,6 +719,7 @@ public class TestUtils {
         entity_4.setDiscountType("LANDING PAGE");
         entity_4.setLive("Y");
         entity_4.setDiscountId(5L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_4.setCountry("italy");
         entity_4.setCity("city");
         entity_4.setLatitude("48");
@@ -727,6 +735,7 @@ public class TestUtils {
         entity_5.setDiscountType("LANDING PAGE");
         entity_5.setLive("Y");
         entity_5.setDiscountId(6L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_5.setCountry("italy");
         entity_5.setCity("city");
         entity_5.setStreet("address0");
@@ -770,6 +779,7 @@ public class TestUtils {
         entity_8.setDiscountType("LANDING PAGE");
         entity_8.setLive("y");
         entity_8.setDiscountId(9L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_8.setEycaUpdateId("655464565");
 
         EycaDataExportViewEntity entity_9 = new EycaDataExportViewEntity();
@@ -784,6 +794,7 @@ public class TestUtils {
         entity_9.setLive("N");
         entity_9.setDiscountId(10L);
         entity_9.setEycaUpdateId("650054665");
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_9.setEndDate(LocalDate.now().minusDays(4));
 
         EycaDataExportViewEntity entity_10 = new EycaDataExportViewEntity();
@@ -798,6 +809,7 @@ public class TestUtils {
         entity_10.setDiscountType("LANDING PAGE");
         entity_10.setLive("N");
         entity_10.setDiscountId(10L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_10.setEycaUpdateId("6551114565");
         entity_10.setEndDate(LocalDate.now());
 
@@ -813,6 +825,7 @@ public class TestUtils {
         entity_11.setDiscountType("LANDING PAGE");
         entity_11.setLive("Y");
         entity_11.setDiscountId(11L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_11.setEycaUpdateId("6551114565");
         entity_11.setEndDate(LocalDate.now().plusDays(2));
 
@@ -893,6 +906,7 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("N");
         entity_0.setDiscountId(6L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_0.setEycaUpdateId("ce00958658596");
         entity_0.setEndDate(LocalDate.now());
 
@@ -907,6 +921,7 @@ public class TestUtils {
         entity_1.setLive(null);
         entity_1.setEndDate(LocalDate.now());
         entity_1.setDiscountId(7L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_1.setEycaUpdateId("ce00957778596");
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
@@ -920,6 +935,7 @@ public class TestUtils {
         entity_2.setLive("N");
         entity_2.setEndDate(LocalDate.now().minusDays(2));
         entity_2.setDiscountId(8L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_2.setEycaUpdateId("ce00958999596");
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
@@ -933,7 +949,7 @@ public class TestUtils {
         entity_3.setLive("N");
         entity_3.setEndDate(LocalDate.now().minusDays(2));
         entity_3.setDiscountId(8L);
-
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
         return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
 
     }

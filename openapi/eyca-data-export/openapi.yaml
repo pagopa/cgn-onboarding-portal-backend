@@ -59,6 +59,41 @@ paths:
         '500':
           description: Service unavailable.
 
+  /api/list_discount:
+    post:
+      security:
+        - Bearer: [ ]
+      operationId: listDiscount
+      tags:
+        - Eyca
+      summary: return list of discounts with paging
+      description: return list of discounts with paging
+      parameters:
+        - in: body
+          name: page
+          description: number of pages returned
+          required: true
+          type: integer
+        - in: body
+          name: rows
+          description: number of rows returned, max 10000
+          required: true
+          type: integer
+        - in: body
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: List of discounts returned
+          schema:
+            $ref: "#/definitions/ListApiResponse"
+        '404':
+          description: Not found.
+        '500':
+          description: Service unavailable.
+
   /api/create_discount:
     post:
       security:
@@ -332,6 +367,32 @@ definitions:
                   count:
                     type: integer
 
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+          code:
+            type: integer
+            example: 1
+
+  ListApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: object
+            properties:
+              discount:
+                type: array
+                items:
+                  $ref: "#/definitions/DiscountItem"
           error:
             type: integer
             example: 0

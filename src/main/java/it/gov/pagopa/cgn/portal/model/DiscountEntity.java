@@ -107,6 +107,10 @@ public class DiscountEntity extends BaseEntity {
     @Column(name = "landing_page_url", length = 500)
     private String landingPageUrl;
 
+    @Size(max = 500)
+    @Column(name = "eyca_landing_page_url", length = 500)
+    private String eycaLandingPageUrl;
+
     @Size(max = 100)
     @Column(name = "landing_page_referrer", length = 100)
     private String landingPageReferrer;

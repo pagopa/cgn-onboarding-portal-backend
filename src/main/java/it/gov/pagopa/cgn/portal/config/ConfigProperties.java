@@ -124,6 +124,9 @@ public class ConfigProperties {
     @Value("${eyca.job.mailto}")
     private String eycaJobMailTo;
 
+    @Value("${eyca.admin.mailto}")
+    private String eycaAdminMailTo;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }

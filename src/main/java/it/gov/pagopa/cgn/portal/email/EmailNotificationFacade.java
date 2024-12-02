@@ -279,10 +279,13 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
-    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage, List<Attachment> attachments) {
-        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage, Optional.of(attachments));
+    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage) {
+        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage, Optional.empty());
     }
-    
+    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage, List<Attachment> attachments) {
+        return createEmailParams(mailTo, subject, body, failureMessage, Collections.emptyList());
+    }
+
     private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
         return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage, Optional.empty());
     }
@@ -332,6 +335,23 @@ public class EmailNotificationFacade {
         		failureMessage, attachments);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
+
+    public void notifyEycaAdminForStaticCodes(String body) {
+        String subject = "Sending the opportunities for Static Code " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
+        String failureMessage = "It is not possible to send the email to Eyca admin";
+        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")), subject, body,
+                failureMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyEycaAdminForLandingPage(String body) {
+        String subject = "Sending the opportunities for Landing Page " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
+        String failureMessage = "It is not possible to send the email to Eyca admin";
+        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")), subject, body,
+                failureMessage);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
 
     private String getTemplateHtml(TemplateEmail template) {
         return getTemplateHtml(template, new Context());

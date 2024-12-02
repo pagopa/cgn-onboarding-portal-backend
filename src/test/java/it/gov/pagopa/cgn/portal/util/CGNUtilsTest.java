@@ -13,7 +13,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 @RunWith(SpringRunner.class)
 public class CGNUtilsTest {
@@ -21,7 +23,13 @@ public class CGNUtilsTest {
 
     @Test
     public void ValidateImage_ValidateInvalidImage_InvalidRequestException() {
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", new byte[10]);
+        byte[] array = null;
+        try {
+            array = new FileInputStream("C:\\develop\\SamplePNGImage_10mbmb.png").readAllBytes();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", array);
 
         Exception exception =  Assert.assertThrows(InternalErrorException.class,
                 () -> CGNUtils.validateImage(multipartFile,800, 600));

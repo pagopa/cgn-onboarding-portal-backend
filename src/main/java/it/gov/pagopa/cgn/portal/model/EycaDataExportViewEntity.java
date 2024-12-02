@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
 
+import lombok.ToString;
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
@@ -11,6 +12,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Max;
 import java.time.LocalDate;
 
+@ToString
 @Data
 @Entity
 @Immutable
@@ -105,48 +107,18 @@ public class EycaDataExportViewEntity {
     
     @Column(name = "discount_type")
     private String discountType;
-    
+
+    @Column(name = "static_code")
+    private String staticCode;
+
+    @Column(name = "landing_page_url")
+    private String landingPageUrl;
+
     @Column(name = "landing_page_referrer")
     private String landingPageReferrer;
 
     @Column(name = "referent")
     private Long referent;
 
-    @Override
-    public String toString() {
-        return "EycaDataExportViewEntity{" +
-        		"discountId=" + discountId +
-                ", id=" + id +
-                ", state='" + state + '\'' +
-                ", categories='" + categories + '\'' +               
-                ", profileId=" + profileId +
-                ", vendor='" + vendor + '\'' +
-                ", eycaUpdateId='" + eycaUpdateId + '\'' +
-                ", name='" + name + '\'' +                
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", nameLocal='" + nameLocal + '\'' +
-                ", text='" + text + '\'' +
-                ", textLocal='" + textLocal + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", web='" + web + '\'' +
-                ", tags='" + tags + '\'' +
-                ", image='" + image + '\'' +
-                ", live='" + live + '\'' +
-                ", locationLocalId='" + locationLocalId + '\'' +
-                ", street='" + street + '\'' +
-                ", city='" + city + '\'' +
-                ", zip='" + zip + '\'' +
-                ", country='" + country + '\'' +
-                ", region='" + region + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", salesChannel='" + salesChannel + '\'' +
-                ", discountType='" + discountType + '\'' +
-                ", landingPageReferrer='" + landingPageReferrer + '\'' +
-                ", referent=" + referent +
-                '}';
-    }
 }
 

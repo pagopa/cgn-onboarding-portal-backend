@@ -68,7 +68,9 @@ public class DataExportEycaWrapperConverter extends AbstractConverter<EycaDataEx
         DataExportEycaWrapper<DataExportEyca> dto = new DataExportEycaWrapper<>(dataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
-
+        dto.setDiscountType(entity.getDiscountType());
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setLandingPageUrl(entity.getLandingPageUrl());
         return dto;
     };
 }
