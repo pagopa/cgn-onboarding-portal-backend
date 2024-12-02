@@ -125,7 +125,7 @@ public class DocumentService {
         }
 
         Pattern pDigits = Pattern.compile("[0-9]");
-        Pattern pAlphab = Pattern.compile("[A-Za-z]");
+        Pattern pAlphab = Pattern.compile("[A-Za-z-]");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
