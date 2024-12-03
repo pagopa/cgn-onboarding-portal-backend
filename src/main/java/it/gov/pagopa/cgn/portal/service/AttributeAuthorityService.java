@@ -5,10 +5,9 @@ import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.*;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.HttpClientErrorException;
 import javax.annotation.PostConstruct;
 import java.util.List;
-
 
 @Service
 public class AttributeAuthorityService {
@@ -19,7 +18,9 @@ public class AttributeAuthorityService {
 
     private final ConfigProperties configProperties;
 
-    public AttributeAuthorityService(ConfigProperties configProperties, AttributeAuthorityApi attributeAuthorityApi, DefaultApi defaultAttributeAuthorityApi) {
+    public AttributeAuthorityService(ConfigProperties configProperties,
+                                     AttributeAuthorityApi attributeAuthorityApi,
+                                     DefaultApi defaultAttributeAuthorityApi) {
         this.attributeAuthorityApi = attributeAuthorityApi;
         this.defaultAttributeAuthorityApi = defaultAttributeAuthorityApi;
         this.configProperties = configProperties;
@@ -58,17 +59,16 @@ public class AttributeAuthorityService {
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
                                                ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
         return attributeAuthorityApi.insertReferentWithHttpInfo(keyOrganizationFiscalCode,
-                referentFiscalCodeAttributeAuthority);
+                                                                referentFiscalCodeAttributeAuthority);
     }
 
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
         return attributeAuthorityApi.deleteReferentWithHttpInfo(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
-    public int countUserOrganizations(String referentFiscalCode) {
+    public int countUserOrganizations(String referentFiscalCode) throws HttpClientErrorException {
         GetCompaniesBodyAttributeAuthority body = new GetCompaniesBodyAttributeAuthority();
         body.setFiscalCode(referentFiscalCode);
         return defaultAttributeAuthorityApi.getUserCompanies(body).size();
     }
-
 }
