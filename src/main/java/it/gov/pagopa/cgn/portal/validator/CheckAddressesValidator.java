@@ -8,11 +8,11 @@ import org.springframework.util.CollectionUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class CheckAddressesValidator implements ConstraintValidator<CheckAddresses, ProfileEntity> {
+public class CheckAddressesValidator
+        implements ConstraintValidator<CheckAddresses, ProfileEntity> {
 
     public boolean isValid(ProfileEntity profileEntity, ConstraintValidatorContext context) {
         return profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) ||
-               profileEntity.getAllNationalAddresses() ||
-               !CollectionUtils.isEmpty(profileEntity.getAddressList());
+               profileEntity.getAllNationalAddresses() || !CollectionUtils.isEmpty(profileEntity.getAddressList());
     }
 }

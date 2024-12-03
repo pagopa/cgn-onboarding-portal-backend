@@ -20,7 +20,8 @@ public enum BackofficeRequestSortColumnEnum {
             return null;
         }
         return Arrays.stream(BackofficeRequestSortColumnEnum.values())
-                .filter(columnEnum -> columnEnum.getValue().equals(value)).findFirst()
-                .orElseThrow(()-> new InvalidRequestException("Sorting column not valid"));
+                     .filter(columnEnum -> columnEnum.getValue().equals(value))
+                     .findFirst()
+                     .orElseThrow(() -> new InvalidRequestException("Sorting column not valid"));
     }
 }

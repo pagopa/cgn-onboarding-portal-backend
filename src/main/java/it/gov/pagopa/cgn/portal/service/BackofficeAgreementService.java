@@ -33,25 +33,33 @@ import java.util.stream.Stream;
 @Slf4j
 public class BackofficeAgreementService {
 
+    private static final String AGREEMENT_LABEL = "Agreement ";
     private final AgreementRepository agreementRepository;
-
     private final AgreementServiceLight agreementServiceLight;
-
     private final DocumentService documentService;
-
     private final EmailNotificationFacade emailNotificationFacade;
-
     private final AzureStorage azureStorage;
-
     private final Collection<DocumentTypeEnum> mandatoryDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
                                                                               DocumentTypeEnum.ADHESION_REQUEST,
                                                                               DocumentTypeEnum.BACKOFFICE_AGREEMENT)
                                                                           .collect(Collectors.toList());
-    
     private final Collection<DocumentTypeEnum> mandatoryPaDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
-                    DocumentTypeEnum.BACKOFFICE_AGREEMENT)
-        .collect(Collectors.toList());
-    
+                                                                                DocumentTypeEnum.BACKOFFICE_AGREEMENT)
+                                                                            .collect(Collectors.toList());
+
+    @Autowired
+    public BackofficeAgreementService(AgreementRepository agreementRepository,
+                                      AgreementServiceLight agreementServiceLight,
+                                      DocumentService documentService,
+                                      EmailNotificationFacade emailNotificationFacade,
+                                      AzureStorage azureStorage) {
+        this.agreementRepository = agreementRepository;
+        this.agreementServiceLight = agreementServiceLight;
+        this.documentService = documentService;
+        this.emailNotificationFacade = emailNotificationFacade;
+        this.azureStorage = azureStorage;
+    }
+
     @Transactional(readOnly = true)
     public Page<AgreementEntity> getAgreements(BackofficeFilter filter) {
 
@@ -90,20 +98,20 @@ public class BackofficeAgreementService {
 
     @Transactional
     public AgreementEntity approveAgreement(String agreementId) {
-    	
+
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         checkPendingStatus(agreementEntity);
         checkAgreementIsAssignedToCurrentUser(agreementEntity);
         List<DocumentEntity> documents = documentService.getAllDocuments(agreementId);
-        
-        Collection<DocumentTypeEnum> manDocs = EntityTypeEnum.PRIVATE.equals(agreementEntity.getEntityType())
-        		? mandatoryDocuments : mandatoryPaDocuments;
-        
-        if (CollectionUtils.isEmpty(documents) ||
-                    !documents.stream()
-                      .map(DocumentEntity::getDocumentType)
-                      .collect(Collectors.toList())
-                      .containsAll(manDocs)) {
+
+        Collection<DocumentTypeEnum> manDocs = EntityTypeEnum.PRIVATE.equals(agreementEntity.getEntityType()) ?
+                                               mandatoryDocuments:
+                                               mandatoryPaDocuments;
+
+        if (CollectionUtils.isEmpty(documents) || !documents.stream()
+                                                            .map(DocumentEntity::getDocumentType)
+                                                            .collect(Collectors.toList())
+                                                            .containsAll(manDocs)) {
             throw new InvalidRequestException(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue());
         }
 
@@ -122,7 +130,6 @@ public class BackofficeAgreementService {
         return agreementEntity;
     }
 
-
     @Transactional
     public AgreementEntity rejectAgreement(String agreementId, String reasonMessage) {
         var agreementEntity = agreementServiceLight.findAgreementById(agreementId);
@@ -138,21 +145,6 @@ public class BackofficeAgreementService {
 
         return agreementEntity;
     }
-
-    @Autowired
-    public BackofficeAgreementService(AgreementRepository agreementRepository,
-                                      AgreementServiceLight agreementServiceLight,
-                                      DocumentService documentService,
-                                      EmailNotificationFacade emailNotificationFacade,
-                                      AzureStorage azureStorage) {
-        this.agreementRepository = agreementRepository;
-        this.agreementServiceLight = agreementServiceLight;
-        this.documentService = documentService;
-        this.emailNotificationFacade = emailNotificationFacade;
-        this.azureStorage = azureStorage;
-    }
-
-    private static final String AGREEMENT_LABEL = "Agreement ";
 
     private void validateForUnassignment(AgreementEntity agreementEntity) {
         checkPendingStatus(agreementEntity);

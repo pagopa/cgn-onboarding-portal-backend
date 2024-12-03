@@ -52,6 +52,29 @@ public class BackofficeAgreementFacade {
     private final AzureStorage azureStorage;
 
 
+    @Autowired
+    public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService,
+                                     BackofficeAgreementConverter agreementConverter,
+                                     BackofficeDocumentConverter documentConverter,
+                                     DocumentService documentService,
+                                     AgreementService agreementService,
+                                     DiscountService discountService,
+                                     BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
+                                     BackofficeApprovedAgreementConverter approvedAgreementConverter,
+                                     AzureStorage azureStorage,
+                                     ApprovedAgreementService approvedAgreementService) {
+        this.backofficeAgreementService = backofficeAgreementService;
+        this.agreementService = agreementService;
+        this.discountService = discountService;
+        this.agreementConverter = agreementConverter;
+        this.documentConverter = documentConverter;
+        this.agreementDetailConverter = agreementDetailConverter;
+        this.approvedAgreementConverter = approvedAgreementConverter;
+        this.documentService = documentService;
+        this.azureStorage = azureStorage;
+        this.approvedAgreementService = approvedAgreementService;
+    }
+
     @Transactional(readOnly = true)  // for converter
     public ResponseEntity<Agreements> getAgreements(BackofficeFilter filter) {
         Page<AgreementEntity> agreements = backofficeAgreementService.getAgreements(filter);
@@ -92,7 +115,7 @@ public class BackofficeAgreementFacade {
     public ResponseEntity<Void> deleteDocument(String agreementId, String documentType) {
         DocumentTypeEnum documentTypeEnum = documentConverter.getBackofficeDocumentTypeEnum(documentType);
         long deleteDocument = documentService.deleteDocument(agreementId, documentTypeEnum);
-        if (deleteDocument != 1) {
+        if (deleteDocument!=1) {
             throw new InvalidRequestException(ErrorCodeEnum.DOCUMENT_NOT_FOUND.getValue());
         }
         return ResponseEntity.noContent().build();
@@ -104,7 +127,6 @@ public class BackofficeAgreementFacade {
                                                                                                                    .isBackoffice());
         return ResponseEntity.ok(new ArrayList<>(documentConverter.toDtoCollection(backofficeDocuments)));
     }
-
 
     public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
         DocumentEntity documentEntity;
@@ -140,28 +162,5 @@ public class BackofficeAgreementFacade {
     public ResponseEntity<Void> setDiscountTestFailed(String agreementId, String discountId, String reasonMessage) {
         discountService.setDiscountTestFailed(agreementId, Long.valueOf(discountId), reasonMessage);
         return ResponseEntity.noContent().build();
-    }
-
-    @Autowired
-    public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService,
-                                     BackofficeAgreementConverter agreementConverter,
-                                     BackofficeDocumentConverter documentConverter,
-                                     DocumentService documentService,
-                                     AgreementService agreementService,
-                                     DiscountService discountService,
-                                     BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
-                                     BackofficeApprovedAgreementConverter approvedAgreementConverter,
-                                     AzureStorage azureStorage,
-                                     ApprovedAgreementService approvedAgreementService) {
-        this.backofficeAgreementService = backofficeAgreementService;
-        this.agreementService = agreementService;
-        this.discountService = discountService;
-        this.agreementConverter = agreementConverter;
-        this.documentConverter = documentConverter;
-        this.agreementDetailConverter = agreementDetailConverter;
-        this.approvedAgreementConverter = approvedAgreementConverter;
-        this.documentService = documentService;
-        this.azureStorage = azureStorage;
-        this.approvedAgreementService = approvedAgreementService;
     }
 }

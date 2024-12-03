@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
+class CheckAvailableDiscountBucketCodesJobTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private CheckAvailableDiscountBucketCodesJob job;
@@ -45,30 +46,35 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Execute_ExecuteJob_SendPercent50Notification() throws IOException {
+    void Execute_ExecuteJob_SendPercent50Notification()
+            throws IOException {
         init();
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
     }
 
     @Test
-    void Execute_ExecuteJob_SendPercent25Notification() throws IOException {
+    void Execute_ExecuteJob_SendPercent25Notification()
+            throws IOException {
         init();
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25);
     }
 
     @Test
-    void Execute_ExecuteJob_SendPercent10Notification() throws IOException {
+    void Execute_ExecuteJob_SendPercent10Notification()
+            throws IOException {
         init();
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
     }
 
     @Test
-    void Execute_ExecuteJob_SendPercent0Notification() throws IOException {
+    void Execute_ExecuteJob_SendPercent0Notification()
+            throws IOException {
         init();
         testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
     }
 
-    private void init() throws IOException {
+    private void init()
+            throws IOException {
         setAdminAuth();
 
         AgreementTestObject testObject = createApprovedAgreement();
@@ -115,6 +121,10 @@ class CheckAvailableDiscountBucketCodesJobTest extends IntegrationAbstractTest {
 
         job.execute(null);
 
-        Awaitility.await().atMost(15, TimeUnit.SECONDS).until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(discountEntity, threshold)) != null);
+        Awaitility.await()
+                  .atMost(15, TimeUnit.SECONDS)
+                  .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                          discountEntity,
+                          threshold))!=null);
     }
 }

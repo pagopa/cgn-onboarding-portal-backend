@@ -14,13 +14,32 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class BackofficeProfileConverter extends AbstractConverter<ProfileEntity, Profile> {
+public class BackofficeProfileConverter
+        extends AbstractConverter<ProfileEntity, Profile> {
 
     private static final Map<DocumentTypeEnum, DocumentType> enumMap = new EnumMap<>(DocumentTypeEnum.class);
+
     static {
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
         enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
     }
+
+    protected Function<ReferentEntity, Referent> toDtoReferent = entity -> {
+        Referent dto = new Referent();
+        dto.setFirstName(entity.getFirstName());
+        dto.setLastName(entity.getLastName());
+        dto.setEmailAddress(entity.getEmailAddress());
+        dto.setTelephoneNumber(entity.getTelephoneNumber());
+        return dto;
+    };
+    protected Function<ProfileEntity, Profile> toDto = entity -> {
+        Profile dto = new Profile();
+        dto.setAgreementId(entity.getAgreement().getId());
+        dto.setId(String.valueOf(entity.getId()));
+        dto.setFullName(entity.getFullName());
+        dto.setReferent(toDtoReferent.apply(entity.getReferent()));
+        return dto;
+    };
 
     @Override
     protected Function<ProfileEntity, Profile> toDtoFunction() {
@@ -31,24 +50,5 @@ public class BackofficeProfileConverter extends AbstractConverter<ProfileEntity,
     protected Function<Profile, ProfileEntity> toEntityFunction() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
-
-    protected Function<ReferentEntity, Referent> toDtoReferent= entity -> {
-        Referent dto = new Referent();
-        dto.setFirstName(entity.getFirstName());
-        dto.setLastName(entity.getLastName());
-        dto.setEmailAddress(entity.getEmailAddress());
-        dto.setTelephoneNumber(entity.getTelephoneNumber());
-        return dto;
-    };
-
-    protected Function<ProfileEntity, Profile> toDto =
-            entity -> {
-                Profile dto = new Profile();
-                dto.setAgreementId(entity.getAgreement().getId());
-                dto.setId(String.valueOf(entity.getId()));
-                dto.setFullName(entity.getFullName());
-                dto.setReferent(toDtoReferent.apply(entity.getReferent()));
-                return dto;
-            };
 
 }

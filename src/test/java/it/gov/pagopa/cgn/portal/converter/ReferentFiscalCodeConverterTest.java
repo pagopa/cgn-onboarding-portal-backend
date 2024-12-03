@@ -19,15 +19,14 @@ public class ReferentFiscalCodeConverterTest {
     public void Convert_ToAttributeAuthorityModel_Ok() {
         ReferentFiscalCode referentFiscalCode = new ReferentFiscalCode();
         referentFiscalCode.setReferentFiscalCode("AAAAAA00A00A000A");
-        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority =
-                referentFiscalCodeConverter.toAttributeAuthorityModel(referentFiscalCode);
+        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority = referentFiscalCodeConverter.toAttributeAuthorityModel(
+                referentFiscalCode);
         commonAssertions(referentFiscalCode, referentFiscalCodeAttributeAuthority);
     }
 
     @Test
     public void Convert_FromAttributeAuthorityModel_Ko() {
-        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority =
-                new ReferentFiscalCodeAttributeAuthority();
+        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority = new ReferentFiscalCodeAttributeAuthority();
         referentFiscalCodeAttributeAuthority.setReferentFiscalCode("AAAAAA00A00A000A");
         Assertions.assertThrows(NotImplementedException.class,
                                 () -> referentFiscalCodeConverter.fromAttributeAuthorityModel(

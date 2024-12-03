@@ -1,6 +1,8 @@
-DROP MATERIALIZED VIEW IF EXISTS offline_merchant;
+DROP
+MATERIALIZED VIEW IF EXISTS offline_merchant;
 
-CREATE MATERIALIZED VIEW offline_merchant AS
+CREATE
+MATERIALIZED VIEW offline_merchant AS
 WITH merchant AS (SELECT a.agreement_k,
                          COALESCE(NULLIF(p.name, ''), p.full_name) AS name
                   FROM agreement a
@@ -94,7 +96,7 @@ SELECT m.id,
            WHEN nd.agreement_fk IS NOT NULL
                THEN TRUE
            ELSE FALSE
-           END								    AS new_discounts,
+           END     AS new_discounts,
        nd.categories_with_new_discounts,
        m.product_categories,
        m.searchable_name,
@@ -112,11 +114,11 @@ SELECT m.id,
            WHEN a.full_address IS NULL AND p.all_national_addresses
                THEN 'Tutti i punti vendita sul territorio nazionale'
            ELSE a.full_address
-           END                           as full_address,
+           END     as full_address,
        a.latitude,
        a.longitude,
-       a.address_k                       AS address_id,
-       now()                             AS last_update
+       a.address_k AS address_id,
+       now()       AS last_update
 FROM merchant_without_address m
          JOIN profile p on m.id = p.agreement_fk
          LEFT JOIN address a ON p.profile_k = a.profile_fk

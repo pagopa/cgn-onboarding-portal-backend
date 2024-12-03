@@ -16,7 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Component
-public class AgreementInterceptor implements HandlerInterceptor {
+public class AgreementInterceptor
+        implements HandlerInterceptor {
 
     @Autowired
     private AgreementUserRepository userRepository;
@@ -26,7 +27,8 @@ public class AgreementInterceptor implements HandlerInterceptor {
 
         String agreementIdParam = getAgreementIdFromParams(request);
         AgreementUserEntity agreementUserEntity = userRepository.findById(getCurrentUserId())
-                .orElseThrow(() -> new InvalidRequestException("Current user doesn't exist"));
+                                                                .orElseThrow(() -> new InvalidRequestException(
+                                                                        "Current user doesn't exist"));
         if (agreementUserEntity.getAgreementId().equals(agreementIdParam)) {
             return true;
         }
@@ -34,7 +36,8 @@ public class AgreementInterceptor implements HandlerInterceptor {
     }
 
     private String getCurrentUserId() {
-        JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext()
+                                                                                              .getAuthentication();
         JwtOperatorUser user = (JwtOperatorUser) authentication.getPrincipal();
         return user.getCompanyTaxCode();
     }

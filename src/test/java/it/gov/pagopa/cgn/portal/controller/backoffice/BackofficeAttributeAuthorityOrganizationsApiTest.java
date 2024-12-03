@@ -4,14 +4,14 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +21,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.NestedServletException;
@@ -35,7 +33,6 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -65,12 +62,10 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
 
     @Autowired
     protected BackofficeAgreementConverter backofficeAgreementConverter;
-
-    @Mock
-    private AttributeAuthorityService attributeAuthorityServiceMock;
-
     @Autowired
     protected MockMvc mockMvc;
+    @Mock
+    private AttributeAuthorityService attributeAuthorityServiceMock;
 
     @PostConstruct
     void setup() {

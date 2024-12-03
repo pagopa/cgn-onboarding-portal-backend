@@ -21,7 +21,8 @@ import java.util.List;
 @Table(name = "profile")
 @Data
 @CheckProfile
-public class ProfileEntity extends BaseEntity {
+public class ProfileEntity
+        extends BaseEntity {
 
     @Id
     @Column(name = "profile_k")
@@ -142,7 +143,7 @@ public class ProfileEntity extends BaseEntity {
 
     public void addAddressList(Collection<AddressEntity> addresses) {
         if (!CollectionUtils.isEmpty(addresses)) {
-            if (this.addressList == null) {
+            if (this.addressList==null) {
                 this.addressList = new ArrayList<>();
             }
             addresses.forEach(a -> {
@@ -159,7 +160,7 @@ public class ProfileEntity extends BaseEntity {
 
     public void addSecondaryReferentsList(Collection<SecondaryReferentEntity> secondaryReferents) {
         if (!CollectionUtils.isEmpty(secondaryReferents)) {
-            if (this.secondaryReferentList == null) {
+            if (this.secondaryReferentList==null) {
                 this.secondaryReferentList = new ArrayList<>();
             }
             secondaryReferents.forEach(sr -> {

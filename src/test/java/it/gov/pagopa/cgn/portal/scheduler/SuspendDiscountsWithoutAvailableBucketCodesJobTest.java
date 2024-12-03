@@ -20,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbstractTest {
+class SuspendDiscountsWithoutAvailableBucketCodesJobTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private SuspendDiscountsWithoutAvailableBucketCodesJob job;
@@ -38,7 +39,8 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
     }
 
     @Test
-    void Execute_ExecuteJob_SuspendDiscountIfGivenDaysPassed() throws IOException {
+    void Execute_ExecuteJob_SuspendDiscountIfGivenDaysPassed()
+            throws IOException {
         init();
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {
             s.setAvailableCodes(1L);
@@ -50,7 +52,8 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
     }
 
     @Test
-    void Execute_ExecuteJob_CheckMaterializedViews() throws IOException {
+    void Execute_ExecuteJob_CheckMaterializedViews()
+            throws IOException {
         init();
 
         // refresh materialized views
@@ -82,7 +85,8 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest extends IntegrationAbst
     }
 
 
-    private void init() throws IOException {
+    private void init()
+            throws IOException {
         setAdminAuth();
 
         AgreementTestObject testObject = createApprovedAgreement();

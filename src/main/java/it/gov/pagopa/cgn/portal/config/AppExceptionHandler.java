@@ -19,25 +19,25 @@ public class AppExceptionHandler {
     @Autowired
     private ConfigProperties configProperties;
 
-    @ExceptionHandler(value = { InvalidRequestException.class, MethodArgumentNotValidException.class })
+    @ExceptionHandler(value = {InvalidRequestException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<Object> handleInvalidRequestException(Exception ex) {
         log.error("InvalidRequestException", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = { InternalErrorException.class, RestClientException.class})
+    @ExceptionHandler(value = {InternalErrorException.class, RestClientException.class})
     public ResponseEntity<Object> handleInternalErrorException(Exception ex) {
         log.error("InternalErrorException", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(value = { EmptyResultDataAccessException.class })
+    @ExceptionHandler(value = {EmptyResultDataAccessException.class})
     public ResponseEntity<Object> handleDataNotFound(Exception ex) {
         log.error("DataNotFound", ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = { SecurityException.class })
+    @ExceptionHandler(value = {SecurityException.class})
     public ResponseEntity<Object> handleForbidden(Exception ex) {
         log.warn("Permission Denied", ex);
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -45,8 +45,9 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<Object> handleException(Exception ex) {
-        String errorMsg = configProperties.isActiveProfileDev() ? ex.getMessage()
-                : configProperties.getExceptionGenericMessage();
+        String errorMsg = configProperties.isActiveProfileDev() ?
+                          ex.getMessage():
+                          configProperties.getExceptionGenericMessage();
         log.error("Uncaught Exception", ex);
         return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
     }

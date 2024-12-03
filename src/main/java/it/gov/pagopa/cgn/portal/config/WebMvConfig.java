@@ -7,14 +7,16 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebMvConfig implements WebMvcConfigurer {
+public class WebMvConfig
+        implements WebMvcConfigurer {
 
     @Autowired
     private AgreementInterceptor interceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(interceptor).addPathPatterns("/agreements/**")
+        registry.addInterceptor(interceptor)
+                .addPathPatterns("/agreements/**")
                 .excludePathPatterns("/agreements") //create agreements API doesn't have parameter
                 .excludePathPatterns("/agreement-requests/**")
                 .excludePathPatterns("/approved-agreements**")

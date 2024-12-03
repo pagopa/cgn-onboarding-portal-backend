@@ -27,7 +27,7 @@ public class UpdateReferentConverterTest {
     @Test
     public void Convert_ConvertReferentDTOToEntity_Ok() {
         UpdateReferent referentDto = createSampleUpdateReferent();
-        ReferentEntity referentEntity  = updateReferentConverter.toEntity(referentDto);
+        ReferentEntity referentEntity = updateReferentConverter.toEntity(referentDto);
         Assert.assertEquals(referentDto.getFirstName(), referentEntity.getFirstName());
         Assert.assertEquals(referentDto.getLastName(), referentEntity.getLastName());
         Assert.assertEquals(referentDto.getEmailAddress(), referentEntity.getEmailAddress());

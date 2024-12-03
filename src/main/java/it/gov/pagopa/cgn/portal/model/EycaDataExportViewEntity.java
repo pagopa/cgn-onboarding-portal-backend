@@ -1,7 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
-
 import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
@@ -20,10 +19,10 @@ public class EycaDataExportViewEntity {
     @Column(name = "discount_id")
     private Long discountId;
 
-	@Id
+    @Id
     @Column(name = "id")
     private Long id;
-	
+
     @Column(name = "state")
     private String state;
 
@@ -39,7 +38,7 @@ public class EycaDataExportViewEntity {
     @Column(name = "eyca_update_id")
     @Max(24)
     private String eycaUpdateId;
-    
+
     @Column(name = "name")
     private String name;
 
@@ -99,13 +98,13 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "longitude")
     private String longitude;
-    
+
     @Column(name = "sales_channel")
     private String salesChannel;
-    
+
     @Column(name = "discount_type")
     private String discountType;
-    
+
     @Column(name = "landing_page_referrer")
     private String landingPageReferrer;
 
@@ -114,39 +113,17 @@ public class EycaDataExportViewEntity {
 
     @Override
     public String toString() {
-        return "EycaDataExportViewEntity{" +
-        		"discountId=" + discountId +
-                ", id=" + id +
-                ", state='" + state + '\'' +
-                ", categories='" + categories + '\'' +               
-                ", profileId=" + profileId +
-                ", vendor='" + vendor + '\'' +
-                ", eycaUpdateId='" + eycaUpdateId + '\'' +
-                ", name='" + name + '\'' +                
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", nameLocal='" + nameLocal + '\'' +
-                ", text='" + text + '\'' +
-                ", textLocal='" + textLocal + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", web='" + web + '\'' +
-                ", tags='" + tags + '\'' +
-                ", image='" + image + '\'' +
-                ", live='" + live + '\'' +
-                ", locationLocalId='" + locationLocalId + '\'' +
-                ", street='" + street + '\'' +
-                ", city='" + city + '\'' +
-                ", zip='" + zip + '\'' +
-                ", country='" + country + '\'' +
-                ", region='" + region + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", salesChannel='" + salesChannel + '\'' +
-                ", discountType='" + discountType + '\'' +
-                ", landingPageReferrer='" + landingPageReferrer + '\'' +
-                ", referent=" + referent +
-                '}';
+        return "EycaDataExportViewEntity{" + "discountId=" + discountId + ", id=" + id + ", state='" + state + '\'' +
+               ", categories='" + categories + '\'' + ", profileId=" + profileId + ", vendor='" + vendor + '\'' +
+               ", eycaUpdateId='" + eycaUpdateId + '\'' + ", name='" + name + '\'' + ", startDate=" + startDate +
+               ", endDate=" + endDate + ", nameLocal='" + nameLocal + '\'' + ", text='" + text + '\'' +
+               ", textLocal='" + textLocal + '\'' + ", email='" + email + '\'' + ", phone='" + phone + '\'' +
+               ", web='" + web + '\'' + ", tags='" + tags + '\'' + ", image='" + image + '\'' + ", live='" + live +
+               '\'' + ", locationLocalId='" + locationLocalId + '\'' + ", street='" + street + '\'' + ", city='" +
+               city + '\'' + ", zip='" + zip + '\'' + ", country='" + country + '\'' + ", region='" + region + '\'' +
+               ", latitude='" + latitude + '\'' + ", longitude='" + longitude + '\'' + ", salesChannel='" +
+               salesChannel + '\'' + ", discountType='" + discountType + '\'' + ", landingPageReferrer='" +
+               landingPageReferrer + '\'' + ", referent=" + referent + '}';
     }
 }
 

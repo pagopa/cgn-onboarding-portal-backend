@@ -22,8 +22,11 @@ import java.util.List;
 @Data
 @TypeDef(name = "discount_state_enum", typeClass = PostgreSQLEnumType.class) // postgress enum type
 @CheckDiscount
-@DateBefore(target = "startDate", compareTo = "endDate", message = "Discount start date must be equal or before end date")
-public class DiscountEntity extends BaseEntity {
+@DateBefore(target = "startDate",
+            compareTo = "endDate",
+            message = "Discount start date must be equal or before end date")
+public class DiscountEntity
+        extends BaseEntity {
 
     @Id
     @Column(name = "discount_k")
@@ -152,7 +155,7 @@ public class DiscountEntity extends BaseEntity {
 
     public void addProductList(Collection<DiscountProductEntity> productList) {
         if (!CollectionUtils.isEmpty(productList)) {
-            if (this.products == null) {
+            if (this.products==null) {
                 this.products = new ArrayList<>();
             }
             productList.forEach(p -> {

@@ -29,7 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
+class BackofficeApprovedAgreementApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,7 +41,8 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetAgreements_GetAgreementsApproved_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApproved_Ok()
+            throws Exception {
         AgreementTestObject agreementTestObject = createApprovedAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
@@ -51,7 +53,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(1)))
                     .andExpect(jsonPath("$.total").value(1))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].agreementId").value(agreementEntity.getId()))
                     .andExpect(jsonPath("$.items[0].publishedDiscounts").value(0))
                     .andExpect(jsonPath("$.items[0].testPending").value(false))
@@ -63,7 +65,8 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetAgreements_GetAgreementsApprovedSortedByOperator_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApprovedSortedByOperator_Ok()
+            throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
         List<AgreementEntity> sortedByOperatorAgreementList = testObjectList.stream()
@@ -80,21 +83,22 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].agreementId").value(sortedByOperatorAgreementList.get(0).getId()))
                     .andExpect(jsonPath("$.items[1].agreementId").value(sortedByOperatorAgreementList.get(1).getId()))
                     .andExpect(jsonPath("$.items[2].agreementId").value(sortedByOperatorAgreementList.get(2).getId()));
     }
 
     @Test
-    void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok()
+            throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
         testObjectList.stream()
-        .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
-        .map(AgreementTestObject::getAgreementEntity)
-        .collect(Collectors.toList());
-        
+                      .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
+                      .map(AgreementTestObject::getAgreementEntity)
+                      .collect(Collectors.toList());
+
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
@@ -104,14 +108,15 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].publishedDiscounts").value(1))
                     .andExpect(jsonPath("$.items[1].publishedDiscounts").value(2))
                     .andExpect(jsonPath("$.items[2].publishedDiscounts").value(3));
     }
 
     @Test
-    void GetAgreements_GetAgreementsApprovedSortedByLastModifyDate_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApprovedSortedByLastModifyDate_Ok()
+            throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
 
@@ -134,7 +139,7 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(numRows)))
                     .andExpect(jsonPath("$.total").value(numRows))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))                    
+                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].agreementId").value(sortedByLastModifyDateAgreementList.get(0)
                                                                                                            .getId()))
                     .andExpect(jsonPath("$.items[1].agreementId").value(sortedByLastModifyDateAgreementList.get(1)
@@ -145,7 +150,8 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
 
 
     @Test
-    void GetAgreements_GetAgreementsApprovedDetails_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApprovedDetails_Ok()
+            throws Exception {
         AgreementTestObject agreementTestObject = createApprovedAgreement();
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         ProfileEntity profileEntity = agreementTestObject.getProfileEntity();
@@ -184,7 +190,8 @@ class BackofficeApprovedAgreementApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void GetAgreements_GetAgreementsApprovedDetailsWithoutExpiredDiscounts_Ok() throws Exception {
+    void GetAgreements_GetAgreementsApprovedDetailsWithoutExpiredDiscounts_Ok()
+            throws Exception {
         AgreementTestObject agreementTestObject = createApprovedAgreement(1, true, true);
         AgreementEntity agreementEntity = agreementTestObject.getAgreementEntity();
         ProfileEntity profileEntity = agreementTestObject.getProfileEntity();

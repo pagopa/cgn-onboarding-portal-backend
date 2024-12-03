@@ -33,7 +33,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(HelpApiTest.IntegrationAbstractTestConfiguration.class)
-class HelpApiTest extends IntegrationAbstractTest {
+class HelpApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private RestTemplate restTemplateMock;
@@ -43,6 +44,79 @@ class HelpApiTest extends IntegrationAbstractTest {
 
     private AgreementEntity agreement;
 
+    @BeforeEach
+    void init() {
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                EntityType.PRIVATE,
+                                                                TestUtils.FAKE_ORGANIZATION_NAME);
+        setOperatorAuth();
+    }
+
+    @Test
+    void Send_SendPublicHelpRequest_Ok()
+            throws Exception {
+
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = TestUtils.createSamplePublicApiHelpRequest();
+
+        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
+        response.setSuccess(true);
+        when(restTemplateMock.postForObject(anyString(),
+                                            any(),
+                                            eq(GoogleRecaptchaResponse.class))).thenReturn(response);
+
+        this.mockMvc.perform(post(TestUtils.PUBLIC_HELP_CONTROLLER_PATH).contentType(MediaType.APPLICATION_JSON)
+                                                                        .content(TestUtils.getJson(helpRequest)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void Send_SendPublicHelpRequestWithInvalidToken_BadRequest()
+            throws Exception {
+
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = TestUtils.createSamplePublicApiHelpRequest();
+
+        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
+        response.setSuccess(false);
+        when(restTemplateMock.postForObject(anyString(),
+                                            any(),
+                                            eq(GoogleRecaptchaResponse.class))).thenReturn(response);
+
+        this.mockMvc.perform(post(TestUtils.PUBLIC_HELP_CONTROLLER_PATH).contentType(MediaType.APPLICATION_JSON)
+                                                                        .content(TestUtils.getJson(helpRequest)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void Send_SendAuthenticatedHelpRequest_Ok()
+            throws Exception {
+
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = TestUtils.createSampleAuthenticatedHelpRequest();
+
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        profileService.createProfile(profileEntity, agreement.getId());
+
+        this.mockMvc.perform(post(TestUtils.getAuthenticatedHelpPath(agreement.getId())).contentType(MediaType.APPLICATION_JSON)
+                                                                                        .content(TestUtils.getJson(
+                                                                                                helpRequest)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void Send_SendAuthenticatedHelpRequest_FailOnMissingProfile()
+            throws Exception {
+
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = TestUtils.createSampleAuthenticatedHelpRequest();
+
+        this.mockMvc.perform(post(TestUtils.getAuthenticatedHelpPath(agreement.getId())).contentType(MediaType.APPLICATION_JSON)
+                                                                                        .content(TestUtils.getJson(
+                                                                                                helpRequest)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
+    }
+
     @TestConfiguration
     static class IntegrationAbstractTestConfiguration {
 
@@ -51,75 +125,5 @@ class HelpApiTest extends IntegrationAbstractTest {
         public RestTemplate getRestTemplateBean() {
             return mock(RestTemplate.class);
         }
-    }
-
-    @BeforeEach
-    void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
-        setOperatorAuth();
-    }
-
-    @Test
-    void Send_SendPublicHelpRequest_Ok() throws Exception {
-
-        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = TestUtils.createSamplePublicApiHelpRequest();
-
-        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
-        response.setSuccess(true);
-        when(restTemplateMock.postForObject(anyString(), any(), eq(GoogleRecaptchaResponse.class))).thenReturn(response);
-
-        this.mockMvc.perform(
-                post(TestUtils.PUBLIC_HELP_CONTROLLER_PATH)
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(helpRequest))
-        )
-                .andDo(log())
-                .andExpect(status().isNoContent());
-    }
-
-
-    @Test
-    void Send_SendPublicHelpRequestWithInvalidToken_BadRequest() throws Exception {
-
-        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = TestUtils.createSamplePublicApiHelpRequest();
-
-        GoogleRecaptchaResponse response = new GoogleRecaptchaResponse();
-        response.setSuccess(false);
-        when(restTemplateMock.postForObject(anyString(), any(), eq(GoogleRecaptchaResponse.class))).thenReturn(response);
-
-        this.mockMvc.perform(
-                post(TestUtils.PUBLIC_HELP_CONTROLLER_PATH)
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(helpRequest))
-        )
-                .andDo(log())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void Send_SendAuthenticatedHelpRequest_Ok() throws Exception {
-
-        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = TestUtils.createSampleAuthenticatedHelpRequest();
-
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
-        profileService.createProfile(profileEntity, agreement.getId());
-
-        this.mockMvc.perform(
-                post(TestUtils.getAuthenticatedHelpPath(agreement.getId()))
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(helpRequest))
-        )
-                .andDo(log())
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void Send_SendAuthenticatedHelpRequest_FailOnMissingProfile() throws Exception {
-
-        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = TestUtils.createSampleAuthenticatedHelpRequest();
-
-        this.mockMvc.perform(
-                post(TestUtils.getAuthenticatedHelpPath(agreement.getId()))
-                        .contentType(MediaType.APPLICATION_JSON).content(TestUtils.getJson(helpRequest))
-        )
-                .andDo(log())
-                .andExpect(status().isBadRequest());
     }
 }

@@ -18,26 +18,8 @@ public class BackofficeApprovedAgreementConverter
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
-        backofficeEntityTypeEnumMap.put(
-                EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
-        backofficeEntityTypeEnumMap.put(
-                EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
-    }
-
-    public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {
-        return Optional.ofNullable(backofficeEntityTypeEnumMap.get(etEnum))
-                .orElseThrow(() -> getInvalidEnumMapping(etEnum.getCode()));
-
-    }
-
-    @Override
-    protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDtoFunction() {
-        return toDto;
-    }
-
-    @Override
-    protected Function<ApprovedAgreement, ApprovedAgreementEntity> toEntityFunction() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
+        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
     }
 
     protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDto = entity -> {
@@ -51,6 +33,22 @@ public class BackofficeApprovedAgreementConverter
         dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
         return dto;
     };
+
+    public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {
+        return Optional.ofNullable(backofficeEntityTypeEnumMap.get(etEnum))
+                       .orElseThrow(() -> getInvalidEnumMapping(etEnum.getCode()));
+
+    }
+
+    @Override
+    protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDtoFunction() {
+        return toDto;
+    }
+
+    @Override
+    protected Function<ApprovedAgreement, ApprovedAgreementEntity> toEntityFunction() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 
     public ApprovedAgreements getApprovedAgreementsFromPage(Page<ApprovedAgreementEntity> agreementEntityPage) {
         Collection<ApprovedAgreement> dtoCollection = toDtoCollection(agreementEntityPage.getContent());

@@ -7,7 +7,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SchedulerRunner implements ApplicationRunner {
+public class SchedulerRunner
+        implements ApplicationRunner {
 
     private final JobScheduler jobScheduler;
 
@@ -18,7 +19,8 @@ public class SchedulerRunner implements ApplicationRunner {
 
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args)
+            throws Exception {
         jobScheduler.scheduleCheckExpiringDiscountsJob();
         jobScheduler.scheduleCheckAvailableDiscountBucketCodesJob();
         jobScheduler.scheduleSuspendDiscountsWithoutAvailableBucketCodesJob();

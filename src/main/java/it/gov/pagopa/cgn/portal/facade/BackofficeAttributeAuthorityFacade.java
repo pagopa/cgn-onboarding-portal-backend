@@ -5,8 +5,11 @@ import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.service.*;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
+import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.AgreementUserService;
+import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
+import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -28,24 +31,101 @@ import java.util.function.Consumer;
 public class BackofficeAttributeAuthorityFacade {
 
     private final AttributeAuthorityService attributeAuthorityService;
-
-    private AgreementService agreementService;
-
-    private AgreementUserService agreementUserService;
-
-    private ProfileService profileService;
-
     private final OrganizationsConverter organizationsConverter;
-
     private final OrganizationWithReferentsConverter organizationWithReferentsConverter;
-
     private final OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
-
     private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
-
     private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
-
     private final BackofficeAgreementConverter agreementConverter;
+    private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
+        switch (agreement.getState()) {
+            case DRAFT, REJECTED:
+                organization.setStatus(OrganizationStatus.DRAFT);
+                break;
+            case PENDING:
+                organization.setStatus(OrganizationStatus.PENDING);
+                break;
+            case APPROVED:
+                organization.setStatus(OrganizationStatus.ACTIVE);
+                break;
+            default:
+                break;
+        }
+
+        organization.setEntityType(BackofficeAgreementConverter.getEntityTypeFromEntityTypeEnum(agreement.getEntityType()));
+    };
+    private AgreementService agreementService;
+    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(
+            owr.getOrganizationFiscalCode(),
+            owr.getEntityType(),
+            owr.getOrganizationName());
+    private AgreementUserService agreementUserService;
+    private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus = organization -> agreementUserService.findCurrentAgreementUser(
+                                                                                                                                   organization.getKeyOrganizationFiscalCode())
+                                                                                                                           .flatMap(
+                                                                                                                                   agreementUserEntity -> agreementService.getAgreementById(
+                                                                                                                                           agreementUserEntity.getAgreementId()))
+                                                                                                                           .ifPresent(
+                                                                                                                                   a -> mapStatus.accept(
+                                                                                                                                           a,
+                                                                                                                                           organization));
+    private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus = response -> {
+        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody()!=null) {
+            mapOrganizationStatus.accept(response.getBody());
+        }
+    };
+    private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus = organizations -> organizations.forEach(
+            mapOrganizationStatus);
+    private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = response -> {
+        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody()!=null) {
+            mapOrganizationsStatus.accept(response.getBody().getItems());
+        }
+    };
+    private ProfileService profileService;
+    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserProfileAndAgreement = (agreementUserEntity, organizationWithReferents) -> {
+        // update AgreementUser if merchant tax code has changed
+        if (!organizationWithReferents.getKeyOrganizationFiscalCode()
+                                      .equals(organizationWithReferents.getOrganizationFiscalCode())) {
+            agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(),
+                                                       organizationWithReferents.getOrganizationFiscalCode());
+        }
+
+        // get and update profile if present
+        profileService.getProfile(agreementUserEntity.getAgreementId()).ifPresent(p -> {
+            p.setFullName(organizationWithReferents.getOrganizationName());
+            p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
+            p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
+            profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
+        });
+
+        AgreementEntity agreement = agreementService.findAgreementById(agreementUserEntity.getAgreementId());
+        agreement.setOrganizationName(organizationWithReferents.getOrganizationName());
+        agreementService.updateAgrement(agreement);
+    };
+
+    @Autowired
+    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
+                                              AgreementService agreementService,
+                                              AgreementUserService agreementUserService,
+                                              ProfileService profileService,
+                                              OrganizationsConverter organizationsConverter,
+                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
+                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
+                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
+                                              ReferentFiscalCodeConverter referentFiscalCodeConverter,
+                                              BackofficeAgreementConverter agreementConverter) {
+
+        this.attributeAuthorityService = attributeAuthorityService;
+        this.agreementService = agreementService;
+        this.agreementUserService = agreementUserService;
+        this.profileService = profileService;
+        this.organizationsConverter = organizationsConverter;
+        this.organizationWithReferentsConverter = organizationWithReferentsConverter;
+        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
+        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
+        this.referentFiscalCodeConverter = referentFiscalCodeConverter;
+        this.agreementConverter = agreementConverter;
+    }
 
     public ResponseEntity<Organizations> getOrganizations(String searchQuery,
                                                           Integer page,
@@ -70,11 +150,6 @@ public class BackofficeAttributeAuthorityFacade {
         getOrganizationAgreementAndMapStatus.accept(response);
         return response;
     }
-
-    private final Consumer<OrganizationWithReferents> createAgreementIfNotExistsConsumer = owr -> agreementService.createAgreementIfNotExists(
-            owr.getOrganizationFiscalCode(),
-            owr.getEntityType(),
-            owr.getOrganizationName());
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
@@ -158,95 +233,6 @@ public class BackofficeAttributeAuthorityFacade {
     private EntityTypeEnum getEntityTypeEnumFromEntityType(EntityType entityType) {
 
         return agreementConverter.toEntityEntityTypeEnum(entityType);
-    }
-
-    private final BiConsumer<AgreementUserEntity, OrganizationWithReferents> updateAgreementUserProfileAndAgreement = (agreementUserEntity, organizationWithReferents) -> {
-        // update AgreementUser if merchant tax code has changed
-        if (!organizationWithReferents.getKeyOrganizationFiscalCode()
-                                      .equals(organizationWithReferents.getOrganizationFiscalCode())) {
-            agreementUserService.updateMerchantTaxCode(agreementUserEntity.getAgreementId(),
-                                                       organizationWithReferents.getOrganizationFiscalCode());
-        }
-
-        // get and update profile if present
-        profileService.getProfile(agreementUserEntity.getAgreementId()).ifPresent(p -> {
-            p.setFullName(organizationWithReferents.getOrganizationName());
-            p.setTaxCodeOrVat(organizationWithReferents.getOrganizationFiscalCode());
-            p.getAgreement().setEntityType(getEntityTypeEnumFromEntityType(organizationWithReferents.getEntityType()));
-            profileService.updateProfile(agreementUserEntity.getAgreementId(), p);
-        });
-
-        AgreementEntity agreement = agreementService.findAgreementById(agreementUserEntity.getAgreementId());
-        agreement.setOrganizationName(organizationWithReferents.getOrganizationName());
-        agreementService.updateAgrement(agreement);
-    };
-
-    private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
-        switch (agreement.getState()) {
-            case DRAFT, REJECTED:
-                organization.setStatus(OrganizationStatus.DRAFT);
-                break;
-            case PENDING:
-                organization.setStatus(OrganizationStatus.PENDING);
-                break;
-            case APPROVED:
-                organization.setStatus(OrganizationStatus.ACTIVE);
-                break;
-            default:
-                break;
-        }
-
-        organization.setEntityType(BackofficeAgreementConverter.getEntityTypeFromEntityTypeEnum(agreement.getEntityType()));
-    };
-
-    private final Consumer<OrganizationWithReferentsAndStatus> mapOrganizationStatus = organization -> agreementUserService.findCurrentAgreementUser(
-                                                                                                                                   organization.getKeyOrganizationFiscalCode())
-                                                                                                                           .flatMap(
-                                                                                                                                   agreementUserEntity -> agreementService.getAgreementById(
-                                                                                                                                           agreementUserEntity.getAgreementId()))
-                                                                                                                           .ifPresent(
-                                                                                                                                   a -> mapStatus.accept(
-                                                                                                                                           a,
-                                                                                                                                           organization));
-
-    private final Consumer<ResponseEntity<OrganizationWithReferentsAndStatus>> getOrganizationAgreementAndMapStatus = response -> {
-        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody()!=null) {
-            mapOrganizationStatus.accept(response.getBody());
-        }
-    };
-
-    private final Consumer<Collection<OrganizationWithReferentsAndStatus>> mapOrganizationsStatus = organizations -> organizations.forEach(
-            mapOrganizationStatus);
-
-    private final Consumer<ResponseEntity<Organizations>> getOrganizationsAgreementAndMapStatus = response -> {
-        if (HttpStatus.OK.equals(response.getStatusCode()) && response.getBody()!=null) {
-            mapOrganizationsStatus.accept(response.getBody().getItems());
-        }
-    };
-
-
-    @Autowired
-    public BackofficeAttributeAuthorityFacade(AttributeAuthorityService attributeAuthorityService,
-                                              AgreementService agreementService,
-                                              AgreementUserService agreementUserService,
-                                              ProfileService profileService,
-                                              OrganizationsConverter organizationsConverter,
-                                              OrganizationWithReferentsConverter organizationWithReferentsConverter,
-                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
-                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
-                                              ReferentFiscalCodeConverter referentFiscalCodeConverter,
-                                              BackofficeAgreementConverter agreementConverter) {
-
-        this.attributeAuthorityService = attributeAuthorityService;
-        this.agreementService = agreementService;
-        this.agreementUserService = agreementUserService;
-        this.profileService = profileService;
-        this.organizationsConverter = organizationsConverter;
-        this.organizationWithReferentsConverter = organizationWithReferentsConverter;
-        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
-        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
-        this.referentFiscalCodeConverter = referentFiscalCodeConverter;
-        this.agreementConverter = agreementConverter;
     }
 
 

@@ -121,7 +121,9 @@ public class ApiTokenServiceTest {
     public void Get_regenerateTokensWithoutProfile_ThrowsException() {
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.toString()));
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID,
+                                                                      ApiTokenTypeEnum.PRIMARY.toString()));
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
@@ -135,7 +137,9 @@ public class ApiTokenServiceTest {
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, ApiTokenTypeEnum.PRIMARY.toString()));
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID,
+                                                                      ApiTokenTypeEnum.PRIMARY.toString()));
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).getTokens(anyString());
@@ -149,7 +153,8 @@ public class ApiTokenServiceTest {
 
         when(profileService.getProfile(TestUtils.FAKE_ID)).thenReturn(Optional.of(pe));
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, "wrong-token-type"));
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> apiTokenService.regenerateToken(TestUtils.FAKE_ID, "wrong-token-type"));
 
         verify(profileService).getProfile(TestUtils.FAKE_ID);
         verify(azureApimClient, never()).regenerateSecondaryKey(anyString());

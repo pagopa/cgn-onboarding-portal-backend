@@ -14,7 +14,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Component
-public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntity, Document> {
+public class BackofficeDocumentConverter
+        extends AbstractConverter<DocumentEntity, Document> {
 
     private static final Map<DocumentTypeEnum, DocumentType> enumMap = new EnumMap<>(DocumentTypeEnum.class);
     private static final Map<String, DocumentTypeEnum> backofficeDocumentTypeMap = new HashMap<>(2);
@@ -25,9 +26,20 @@ public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntit
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
         enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
         backofficeDocumentTypeMap.put(DocumentType.AGREEMENT.getValue(), DocumentTypeEnum.BACKOFFICE_AGREEMENT);
-        backofficeDocumentTypeMap.put(
-                DocumentType.ADHESIONREQUEST.getValue(), DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
+        backofficeDocumentTypeMap.put(DocumentType.ADHESIONREQUEST.getValue(),
+                                      DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
     }
+
+    protected Function<String, DocumentTypeEnum> toBackofficeDocumentTypeEnum = documentTypeDto -> Optional.ofNullable(
+            backofficeDocumentTypeMap.get(documentTypeDto)).orElseThrow(() -> getInvalidEnumMapping(documentTypeDto));
+    protected Function<DocumentEntity, Document> toDto = entity -> {
+        Document dto = new Document();
+        dto.setCreationDate(entity.getInsertedDateTime().toLocalDate());
+        dto.setDocumentType(Optional.ofNullable(enumMap.get(entity.getDocumentType()))
+                                    .orElseThrow(() -> getInvalidEnumMapping(entity.getDocumentType().getCode())));
+        dto.setDocumentUrl(entity.getDocumentUrl());
+        return dto;
+    };
 
     @Override
     protected Function<DocumentEntity, Document> toDtoFunction() {
@@ -42,19 +54,4 @@ public class BackofficeDocumentConverter extends AbstractConverter<DocumentEntit
     public DocumentTypeEnum getBackofficeDocumentTypeEnum(String dtoDocumentType) {
         return toBackofficeDocumentTypeEnum.apply(dtoDocumentType);
     }
-
-    protected Function<String, DocumentTypeEnum> toBackofficeDocumentTypeEnum = documentTypeDto ->
-            Optional.ofNullable(backofficeDocumentTypeMap.get(documentTypeDto))
-            .orElseThrow(() -> getInvalidEnumMapping(documentTypeDto));
-
-    protected Function<DocumentEntity, Document> toDto =
-            entity -> {
-                Document dto = new Document();
-                dto.setCreationDate(entity.getInsertedDateTime().toLocalDate());
-                dto.setDocumentType(
-                        Optional.ofNullable(enumMap.get(entity.getDocumentType()))
-                                .orElseThrow(() -> getInvalidEnumMapping(entity.getDocumentType().getCode())));
-                dto.setDocumentUrl(entity.getDocumentUrl());
-                return dto;
-            };
 }

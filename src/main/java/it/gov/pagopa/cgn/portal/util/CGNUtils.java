@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
@@ -7,7 +8,6 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
-
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -19,12 +19,12 @@ import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
-import java.awt.Dimension;
-import java.io.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
-
-import com.fasterxml.jackson.databind.*;
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 public class CGNUtils {
@@ -50,11 +50,12 @@ public class CGNUtils {
         }
     }
 
-    private static Dimension getImageDimensions(Object input) throws IOException {
+    private static Dimension getImageDimensions(Object input)
+            throws IOException {
 
         try (ImageInputStream stream = ImageIO.createImageInputStream(input)) { // accepts File, InputStream,
-                                                                                // RandomAccessFile
-            if (stream != null) {
+            // RandomAccessFile
+            if (stream!=null) {
                 IIORegistry iioRegistry = IIORegistry.getDefaultInstance();
                 Iterator<ImageReaderSpi> iter = iioRegistry.getServiceProviders(ImageReaderSpi.class, true);
                 while (iter.hasNext()) {
@@ -77,21 +78,20 @@ public class CGNUtils {
     }
 
     public static void checkIfPdfFile(String fileName) {
-        if (fileName == null || !fileName.toLowerCase().endsWith("pdf")) {
+        if (fileName==null || !fileName.toLowerCase().endsWith("pdf")) {
             throw new InvalidRequestException(ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
 
     public static void checkIfCsvFile(String fileName) {
-        if (fileName == null || !fileName.toLowerCase().endsWith("csv")) {
+        if (fileName==null || !fileName.toLowerCase().endsWith("csv")) {
             throw new InvalidRequestException(ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
 
     public static void checkIfImageFile(String fileName) {
-        if (fileName == null || !(fileName.toLowerCase().endsWith("jpeg")
-                                    ||fileName.toLowerCase().endsWith("jpg")
-                                    || fileName.toLowerCase().endsWith("png"))) {
+        if (fileName==null || !(fileName.toLowerCase().endsWith("jpeg") || fileName.toLowerCase().endsWith("jpg") ||
+                                fileName.toLowerCase().endsWith("png"))) {
             throw new InvalidRequestException(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue());
         }
     }
@@ -119,20 +119,20 @@ public class CGNUtils {
         }
         throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
-    
-    public static String toJson (Object o) {
-          try {  
-              return new ObjectMapper().writer().writeValueAsString(o);  
-          }  
-          catch (Exception e) {
-        	  return "null";
-          }  
+
+    public static String toJson(Object o) {
+        try {
+            return new ObjectMapper().writer().writeValueAsString(o);
+        } catch (Exception e) {
+            return "null";
+        }
     }
-    
-	public static void writeAttachments(List<Attachment> attachments, String path) throws IOException {
-		for(Attachment a : attachments) {
-			FileUtils.writeByteArrayToFile(new File(path+a.getAttachmentFilename()), a.getResource().getByteArray());
-		}
-	}
+
+    public static void writeAttachments(List<Attachment> attachments, String path)
+            throws IOException {
+        for (Attachment a : attachments) {
+            FileUtils.writeByteArrayToFile(new File(path + a.getAttachmentFilename()), a.getResource().getByteArray());
+        }
+    }
 
 }

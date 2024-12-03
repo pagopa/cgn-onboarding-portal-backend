@@ -39,90 +39,64 @@ public class ConfigProperties {
 
     @Value("${cgn.storage.document.sas.expiry.time.hours}")
     private Integer sasExpiryTimeHours;
-
-    public String getAzureConnectionString() {
-        return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol + ";AccountName=" + accountName + ";AccountKey="
-                + accountKey + ";BlobEndpoint=" + blobEndpoint + ";";
-
-    }
-
     @Value("${cgn.image.minWidth}")
     private Integer minWidth;
-
     @Value("${cgn.image.minHeight}")
     private Integer minHeight;
-
     @Value("${cgn.pe.discount.bucket.minCsvRows}")
     private Integer bucketMinCsvRows;
-
     @Value("${cgn.email.notification-sender}")
     private String cgnNotificationSender;
-
     @Value("${cgn.email.department-email}")
     private String cgnDepartmentEmail;
-
     @Value("${cgn.email.portal-base-url}")
     private String cgnPortalBaseUrl;
-
     @Value("classpath:images/cgn-logo.png")
     private Resource cgnLogo;
-
     @Value("${cgn.apim.resourceGroup}")
     private String apimResouceGroup;
-
     @Value("${cgn.apim.resource}")
     private String apimResouce;
-
     @Value("${cgn.apim.productId}")
     private String apimProductId;
-
     @Value("${cgn.apim.subscriptionKeyPrefix}")
     private String apimSubscriptionKeyPrefix;
-
     @Value("${cgn.recaptcha.secret-key}")
     private String recaptchaSecretKey;
-
     @Value("${cgn.recaptcha.google-host}")
     private String recaptchaGoogleHost;
-
     @Value("${check.expiring.discounts.job.cron}")
     private String expiringDiscountsJobCronExpression;
-
     @Value("${check.available.discounts.bucket.codes.job.cron}")
     private String availableDiscountBucketCodesJobCronExpression;
-
     @Value("${suspend.discounts.without.available.bucket.codes.job.cron}")
     private String suspendDiscountsWithoutAvailableBucketCodesJobCronExpression;
-
     @Value("${suspend.discounts.without.available.bucket.codes.after.days}")
     private int suspendDiscountsWithoutAvailableBucketCodesAfterDays;
-
     @Value("${send.discounts.to.eyca.job.cron}")
     private String sendDiscountsToEycaJobCronExpression;
-
     @Value("${check.expiring.discounts.job.days}")
     private int expiringDiscountsJobDays;
-
     @Value("${cgn.geolocation.secret-token}")
     private String geolocationToken;
-
     @Value("${cgn.attribute-authority.base-url}")
     private String attributeAuthorityBaseUrl;
-
     @Value("${eyca.export.not.allowed.discount.modes}")
     private String eycaNotAllowedDiscountModes;
-
     @Value("${eyca.export.username}")
     private String eycaUsername;
-
     @Value("${eyca.export.password}")
     private String eycaPassword;
-
     @Value("${eyca.export.enabled}")
     private Boolean eycaExportEnabled;
-
     @Value("${eyca.job.mailto}")
     private String eycaJobMailTo;
+
+    public String getAzureConnectionString() {
+        return "DefaultEndpointsProtocol=" + defaultEndpointsProtocol + ";AccountName=" + accountName + ";AccountKey=" +
+               accountKey + ";BlobEndpoint=" + blobEndpoint + ";";
+
+    }
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());

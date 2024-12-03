@@ -14,8 +14,7 @@ public class JacksonConfiguration {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer trimStringCustomizer() {
         return jacksonObjectMapperBuilder -> {
-            jacksonObjectMapperBuilder.modules(new TrimStringModule())
-                    .findModulesViaServiceLoader(true);
+            jacksonObjectMapperBuilder.modules(new TrimStringModule()).findModulesViaServiceLoader(true);
         };
     }
 

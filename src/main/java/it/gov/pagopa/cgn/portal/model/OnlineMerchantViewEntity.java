@@ -10,7 +10,8 @@ import javax.persistence.*;
 @Immutable
 @Table(name = "online_merchant")
 @Data
-public class OnlineMerchantViewEntity extends BaseMerchantViewEntity {
+public class OnlineMerchantViewEntity
+        extends BaseMerchantViewEntity {
 
     @Column(name = "website_url")
     private String websiteUrl;

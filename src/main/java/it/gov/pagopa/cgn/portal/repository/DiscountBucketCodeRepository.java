@@ -17,10 +17,12 @@ public interface DiscountBucketCodeRepository
 
     List<DiscountBucketCodeEntity> findAllByDiscount(DiscountEntity discount);
 
-    @Query(value = "SELECT COUNT(*) FROM discount_bucket_code WHERE discount_fk=:discount_id AND used=false", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM discount_bucket_code WHERE discount_fk=:discount_id AND used=false",
+           nativeQuery = true)
     long countNotUsedByDiscountId(@Param("discount_id") Long discountId);
 
-    @Query(value = "SELECT * FROM discount_bucket_code WHERE discount_fk=:discount_id AND used=false LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM discount_bucket_code WHERE discount_fk=:discount_id AND used=false LIMIT 1",
+           nativeQuery = true)
     DiscountBucketCodeEntity getOneForDiscount(@Param("discount_id") Long discountId);
 
     @Modifying

@@ -27,7 +27,8 @@ import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class UploadImageTest extends IntegrationAbstractTest {
+class UploadImageTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private ConfigProperties configProperties;
@@ -37,15 +38,16 @@ class UploadImageTest extends IntegrationAbstractTest {
 
 
     @BeforeEach
-    void init() throws IOException {
+    void init()
+            throws IOException {
         byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+        agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                           EntityType.PRIVATE,
+                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         multipartFile = new MockMultipartFile("fileItem", "test-image.png", "image/png", image);
 
-        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getImagesContainerName())
-                .buildClient();
+        BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
+                getAzureConnectionString()).containerName(configProperties.getImagesContainerName()).buildClient();
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
         }
@@ -65,13 +67,13 @@ class UploadImageTest extends IntegrationAbstractTest {
         Assertions.assertNotNull(imageUrl);
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
-        Assertions.assertDoesNotThrow(()-> agreementService.uploadImage(agreementEntity.getId(), multipartFile));
+        Assertions.assertDoesNotThrow(() -> agreementService.uploadImage(agreementEntity.getId(), multipartFile));
     }
 
     @Test
     void UploadImage_UploadImageWithWrongAgreementId_ThrowException() {
         Assertions.assertThrows(InvalidRequestException.class,
-                () ->agreementService.uploadImage("invalidAgreementId", multipartFile));
+                                () -> agreementService.uploadImage("invalidAgreementId", multipartFile));
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertNull(agreementEntity.getImageUrl());
     }

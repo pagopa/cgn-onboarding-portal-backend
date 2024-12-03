@@ -1,11 +1,13 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.*;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+
 import javax.annotation.PostConstruct;
 import java.util.List;
 
@@ -66,7 +68,8 @@ public class AttributeAuthorityService {
         return attributeAuthorityApi.deleteReferentWithHttpInfo(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
-    public int countUserOrganizations(String referentFiscalCode) throws HttpClientErrorException {
+    public int countUserOrganizations(String referentFiscalCode)
+            throws HttpClientErrorException {
         GetCompaniesBodyAttributeAuthority body = new GetCompaniesBodyAttributeAuthority();
         body.setFiscalCode(referentFiscalCode);
         return defaultAttributeAuthorityApi.getUserCompanies(body).size();

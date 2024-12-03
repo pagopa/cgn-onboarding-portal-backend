@@ -15,7 +15,8 @@ import java.util.Optional;
 
 
 @RestController
-public class PublicApiController implements HelpApi {
+public class PublicApiController
+        implements HelpApi {
 
     private HelpCategoryConverter helpCategoryConverter;
     private EmailNotificationFacade emailNotificationFacade;
@@ -23,7 +24,8 @@ public class PublicApiController implements HelpApi {
 
 
     @Autowired
-    public PublicApiController(EmailNotificationFacade emailNotificationFacade, HelpCategoryConverter helpCategoryConverter,
+    public PublicApiController(EmailNotificationFacade emailNotificationFacade,
+                               HelpCategoryConverter helpCategoryConverter,
                                GoogleRecaptchaApi googleRecaptchaApi) {
         this.emailNotificationFacade = emailNotificationFacade;
         this.helpCategoryConverter = helpCategoryConverter;
@@ -38,14 +40,15 @@ public class PublicApiController implements HelpApi {
         }
 
         HelpRequestParams helpParams = HelpRequestParams.builder()
-                .helpCategory(helpCategoryConverter.helpCategoryFromEnum(helpRequest.getCategory()))
-                .topic(Optional.ofNullable(helpRequest.getTopic()))
-                .message(helpRequest.getMessage())
-                .replyToEmailAddress(helpRequest.getEmailAddress())
-                .referentFirstName(helpRequest.getReferentFirstName())
-                .referentLastName(helpRequest.getReferentLastName())
-                .merchantLegalName(helpRequest.getLegalName())
-                .build();
+                                                        .helpCategory(helpCategoryConverter.helpCategoryFromEnum(
+                                                                helpRequest.getCategory()))
+                                                        .topic(Optional.ofNullable(helpRequest.getTopic()))
+                                                        .message(helpRequest.getMessage())
+                                                        .replyToEmailAddress(helpRequest.getEmailAddress())
+                                                        .referentFirstName(helpRequest.getReferentFirstName())
+                                                        .referentLastName(helpRequest.getReferentLastName())
+                                                        .merchantLegalName(helpRequest.getLegalName())
+                                                        .build();
 
         try {
             emailNotificationFacade.notifyDepartmentNewHelpRequest(helpParams);

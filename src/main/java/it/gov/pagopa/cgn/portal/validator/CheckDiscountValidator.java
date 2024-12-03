@@ -7,7 +7,8 @@ import it.gov.pagopa.cgn.portal.util.ValidationUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class CheckDiscountValidator implements ConstraintValidator<CheckDiscount, DiscountEntity> {
+public class CheckDiscountValidator
+        implements ConstraintValidator<CheckDiscount, DiscountEntity> {
 
     public boolean isValid(DiscountEntity discountEntity, ConstraintValidatorContext context) {
         return hasValidConditions(discountEntity) && hasValidDescriptions(discountEntity);

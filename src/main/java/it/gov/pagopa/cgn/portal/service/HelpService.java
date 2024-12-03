@@ -24,33 +24,40 @@ public class HelpService {
     private ProfileService profileService;
     private HelpCategoryConverter helpCategoryConverter;
 
-    @Transactional
-    public void sendHelpMessage(String agreementId, HelpRequest.CategoryEnum helpCategory, Optional<String> topic, String message) {
+    @Autowired
+    public HelpService(ProfileService profileService,
+                       EmailNotificationFacade emailNotificationFacade,
+                       HelpCategoryConverter helpCategoryConverter) {
+        this.profileService = profileService;
+        this.emailNotificationFacade = emailNotificationFacade;
+        this.helpCategoryConverter = helpCategoryConverter;
+    }
 
-        ProfileEntity profile = profileService.getProfile(agreementId).orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+    @Transactional
+    public void sendHelpMessage(String agreementId,
+                                HelpRequest.CategoryEnum helpCategory,
+                                Optional<String> topic,
+                                String message) {
+
+        ProfileEntity profile = profileService.getProfile(agreementId)
+                                              .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         HelpRequestParams helpParams = HelpRequestParams.builder()
-                .helpCategory(helpCategoryConverter.helpCategoryFromEnum(helpCategory))
-                .topic(topic)
-                .message(message)
-                .replyToEmailAddress(profile.getReferent().getEmailAddress())
-                .referentFirstName(profile.getReferent().getFirstName())
-                .referentLastName(profile.getReferent().getLastName())
-                .merchantLegalName(profile.getFullName())
-                .build();
+                                                        .helpCategory(helpCategoryConverter.helpCategoryFromEnum(
+                                                                helpCategory))
+                                                        .topic(topic)
+                                                        .message(message)
+                                                        .replyToEmailAddress(profile.getReferent().getEmailAddress())
+                                                        .referentFirstName(profile.getReferent().getFirstName())
+                                                        .referentLastName(profile.getReferent().getLastName())
+                                                        .merchantLegalName(profile.getFullName())
+                                                        .build();
 
         try {
             emailNotificationFacade.notifyDepartmentNewHelpRequest(helpParams);
         } catch (Exception e) {
             throw new InternalErrorException(e.getMessage());
         }
-    }
-
-    @Autowired
-    public HelpService(ProfileService profileService, EmailNotificationFacade emailNotificationFacade, HelpCategoryConverter helpCategoryConverter) {
-        this.profileService = profileService;
-        this.emailNotificationFacade = emailNotificationFacade;
-        this.helpCategoryConverter = helpCategoryConverter;
     }
 
 }

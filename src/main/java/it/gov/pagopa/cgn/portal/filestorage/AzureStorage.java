@@ -46,13 +46,13 @@ public class AzureStorage {
     @PostConstruct
     protected void init() {
 
-        documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(configProperties.getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName()).buildClient();
+        documentContainerClient = new BlobContainerClientBuilder().connectionString(configProperties.getAzureConnectionString())
+                                                                  .containerName(configProperties.getDocumentsContainerName())
+                                                                  .buildClient();
 
-        imagesContainerClient = new BlobContainerClientBuilder()
-                .connectionString(configProperties.getAzureConnectionString())
-                .containerName(configProperties.getImagesContainerName()).buildClient();
+        imagesContainerClient = new BlobContainerClientBuilder().connectionString(configProperties.getAzureConnectionString())
+                                                                .containerName(configProperties.getImagesContainerName())
+                                                                .buildClient();
     }
 
     public String storeDocument(String agreementId, DocumentTypeEnum documentType, InputStream content, long size) {
@@ -89,7 +89,8 @@ public class AzureStorage {
         }
     }
 
-    public Stream<CSVRecord> readCsvDocument(String blobName) throws IOException {
+    public Stream<CSVRecord> readCsvDocument(String blobName)
+            throws IOException {
         BlobClient blobClient = documentContainerClient.getBlobClient(blobName + ".csv");
         return CsvUtils.getCsvRecordStream(blobClient.openInputStream());
     }
@@ -101,9 +102,12 @@ public class AzureStorage {
 
     public String getDocumentSasFileUrl(String documentUrl) {
         BlobClient blobClient = documentContainerClient.getBlobClient(getBlobName(documentUrl));
-        BlobServiceSasSignatureValues blobServiceSasSignatureValues = new BlobServiceSasSignatureValues(
-                OffsetDateTime.now().plusHours(configProperties.getSasExpiryTimeHours()),
-                new BlobSasPermission().setReadPermission(true)).setProtocol(SasProtocol.HTTPS_ONLY);
+        BlobServiceSasSignatureValues blobServiceSasSignatureValues = new BlobServiceSasSignatureValues(OffsetDateTime.now()
+                                                                                                                      .plusHours(
+                                                                                                                              configProperties.getSasExpiryTimeHours()),
+                                                                                                        new BlobSasPermission().setReadPermission(
+                                                                                                                true)).setProtocol(
+                SasProtocol.HTTPS_ONLY);
         return String.format("%s?%s", blobClient.getBlobUrl(), blobClient.generateSas(blobServiceSasSignatureValues));
 
     }

@@ -19,8 +19,7 @@ import java.util.stream.IntStream;
 public class UpdateProfileConverterTest {
 
 
-    private final UpdateProfileConverter updateProfileConverter
-            = new UpdateProfileConverter(new UpdateReferentConverter());
+    private final UpdateProfileConverter updateProfileConverter = new UpdateProfileConverter(new UpdateReferentConverter());
 
     @Test
     public void Convert_ConvertProfileEntityOfflineToDTO_ThrowUnsupportedException() {

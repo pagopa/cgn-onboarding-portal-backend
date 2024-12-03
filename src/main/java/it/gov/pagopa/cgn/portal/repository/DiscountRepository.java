@@ -8,16 +8,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface DiscountRepository extends JpaRepository<DiscountEntity, Long> {
+public interface DiscountRepository
+        extends JpaRepository<DiscountEntity, Long> {
 
     List<DiscountEntity> findByAgreementId(String agreementId);
-    
+
     Optional<DiscountEntity> findByEycaUpdateId(String eycaUpdateId);
 
     long countByAgreementIdAndState(String agreementId, DiscountStateEnum discountStateEnum);
 
-    long countByAgreementIdAndStateAndEndDateGreaterThan(String agreementId, DiscountStateEnum discountStateEnum, LocalDate aDate);
+    long countByAgreementIdAndStateAndEndDateGreaterThan(String agreementId,
+                                                         DiscountStateEnum discountStateEnum,
+                                                         LocalDate aDate);
 
-    List<DiscountEntity> findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
-            DiscountStateEnum discountStateEnum, LocalDate endDate);
+    List<DiscountEntity> findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(DiscountStateEnum discountStateEnum,
+                                                                                             LocalDate endDate);
 }

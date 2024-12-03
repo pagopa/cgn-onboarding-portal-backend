@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 
-public interface OnlineMerchantRepository extends JpaRepository<OnlineMerchantViewEntity, String> {
+public interface OnlineMerchantRepository
+        extends JpaRepository<OnlineMerchantViewEntity, String> {
 
     @Modifying
     @Transactional

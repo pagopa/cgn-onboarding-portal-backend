@@ -12,7 +12,12 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractConverter<E, D> {
 
+    protected static InvalidRequestException getInvalidEnumMapping(String inputString) {
+        return new InvalidRequestException("Enum mapping not found for " + inputString);
+    }
+
     protected abstract Function<E, D> toDtoFunction();
+
     protected abstract Function<D, E> toEntityFunction();
 
     public Optional<D> toDto(Optional<E> entityOpt) {
@@ -25,8 +30,8 @@ public abstract class AbstractConverter<E, D> {
 
     public Collection<D> toDtoCollection(Collection<E> entityCollection) {
         return CollectionUtils.isEmpty(entityCollection) ?
-                Collections.emptyList() :
-                entityCollection.stream().map(toDtoFunction()).collect(Collectors.toList());
+               Collections.emptyList():
+               entityCollection.stream().map(toDtoFunction()).collect(Collectors.toList());
     }
 
     public Optional<E> toEntity(Optional<D> dtoOpt) {
@@ -39,20 +44,16 @@ public abstract class AbstractConverter<E, D> {
 
     public Collection<E> toEntityCollection(Collection<D> dtoCollection) {
         return CollectionUtils.isEmpty(dtoCollection) ?
-                Collections.emptyList() :
-                dtoCollection.stream().map(toEntityFunction()).collect(Collectors.toList());
+               Collections.emptyList():
+               dtoCollection.stream().map(toEntityFunction()).collect(Collectors.toList());
     }
 
     protected Optional<D> convertToDto(Optional<E> entityOpt, Function<E, D> function) {
-        return entityOpt.isEmpty() ? Optional.empty() : Optional.of(function.apply(entityOpt.get()));
+        return entityOpt.isEmpty() ? Optional.empty():Optional.of(function.apply(entityOpt.get()));
     }
 
     protected Optional<E> convertToEntity(Optional<D> entityOpt, Function<D, E> function) {
-        return entityOpt.isEmpty() ? Optional.empty() : Optional.of(function.apply(entityOpt.get()));
-    }
-
-    protected static InvalidRequestException getInvalidEnumMapping(String inputString) {
-        return new InvalidRequestException("Enum mapping not found for " + inputString);
+        return entityOpt.isEmpty() ? Optional.empty():Optional.of(function.apply(entityOpt.get()));
     }
 
 }

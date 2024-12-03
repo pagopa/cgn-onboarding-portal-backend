@@ -6,7 +6,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
@@ -26,11 +27,11 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        System.out.println("isDev="+isDev());
-        return isDev() ? builder.requestFactory(getFactorySupplierForDisableSSL()).build() : builder.build();
+        System.out.println("isDev=" + isDev());
+        return isDev() ? builder.requestFactory(getFactorySupplierForDisableSSL()).build():builder.build();
     }
 
-    private Supplier<ClientHttpRequestFactory> getFactorySupplierForDisableSSL(){
+    private Supplier<ClientHttpRequestFactory> getFactorySupplierForDisableSSL() {
         return () -> {
 
             TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
@@ -38,18 +39,16 @@ public class RestTemplateConfig {
             SSLContext sslContext = null;
             try {
                 sslContext = org.apache.http.ssl.SSLContexts.custom()
-                        .loadTrustMaterial(null, acceptingTrustStrategy)
-                        .build();
+                                                            .loadTrustMaterial(null, acceptingTrustStrategy)
+                                                            .build();
             } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
                 throw new RuntimeException(e);
             }
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 
-            CloseableHttpClient httpClient = HttpClients.custom()
-                    .setSSLSocketFactory(csf)
-                    .build();
+            CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
 
-            return  new HttpComponentsClientHttpRequestFactory(httpClient);
+            return new HttpComponentsClientHttpRequestFactory(httpClient);
         };
     }
 

@@ -26,20 +26,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
 import javax.transaction.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class ProfileFacadeTest extends IntegrationAbstractTest {
-
-    private ProfileFacade profileFacade;
-
-    private AgreementEntity agreementEntity;
-    private ProfileEntity profileEntity;
+class ProfileFacadeTest
+        extends IntegrationAbstractTest {
 
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
     private static final String REFERRER = "referrer";
+    private ProfileFacade profileFacade;
+    private AgreementEntity agreementEntity;
+    private ProfileEntity profileEntity;
 
     @BeforeEach
     void init() {
@@ -54,8 +54,10 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
                                           updateProfileConverter,
                                           profileConverter,
                                           discountService);
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
-        profileEntity = TestUtils.createProfileEntityWithSecondaryEntityReferentList(agreementEntity)    ;
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                      EntityType.PRIVATE,
+                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
+        profileEntity = TestUtils.createProfileEntityWithSecondaryEntityReferentList(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
@@ -198,14 +200,14 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
     @Test
     @Transactional
-    void Get_Profile_Expect_OK(){
+    void Get_Profile_Expect_OK() {
         var agreementId = agreementEntity.getId();
 
         UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
-                DiscountCodeType.STATIC);
+                                                                                        DiscountCodeType.STATIC);
         profileFacade.updateProfile(agreementId, updateProfile);
 
-        ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
+        ResponseEntity<Profile> response = profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Profile profile = response.getBody();
         Assertions.assertNotNull(profile.getSecondaryReferents());
@@ -214,14 +216,17 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
     @Test
     @Transactional
-    void Get_Profile_Expect_Not_Found(){
-        ResponseEntity<Profile> response =  profileFacade.getProfile(TestUtils.FAKE_ID_2);
+    void Get_Profile_Expect_Not_Found() {
+        ResponseEntity<Profile> response = profileFacade.getProfile(TestUtils.FAKE_ID_2);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
+
     @Test
     @Transactional
-    void Create_Profile_Expect_OK(){
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+    void Create_Profile_Expect_OK() {
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+                                                                                      EntityType.PRIVATE,
+                                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
 
         var agreementId = agreementEntity.getId();
 
@@ -229,7 +234,7 @@ class ProfileFacadeTest extends IntegrationAbstractTest {
 
         profileFacade.createProfile(agreementId, createProfile);
 
-        ResponseEntity<Profile> response =  profileFacade.getProfile(agreementId);
+        ResponseEntity<Profile> response = profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Profile profile = response.getBody();
         Assertions.assertNotNull(profile.getSecondaryReferents());
