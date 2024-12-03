@@ -40,5 +40,4 @@ import java.lang.annotation.Target;
 @Target(value = {java.lang.annotation.ElementType.TYPE})
 @Documented
 @Import(Swagger2DocumentationWebMvcConfiguration.class)
-public @interface EnableSwagger2 {
-}
+public @interface EnableSwagger2 {}

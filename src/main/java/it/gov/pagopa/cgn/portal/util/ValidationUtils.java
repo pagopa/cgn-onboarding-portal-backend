@@ -17,15 +17,14 @@ public class ValidationUtils {
         Set<ConstraintViolation<Object>> validationResults = validator.validate(entity);
         if (!Collections.isEmpty(validationResults)) {
             throw new InvalidRequestException(validationResults.stream()
-                                                               .map(e -> e.getPropertyPath().toString() +
-                                                                         "|" +
+                                                               .map(e -> e.getPropertyPath().toString() + "|" +
                                                                          e.getMessage())
                                                                .collect(Collectors.joining("\n")));
         }
     }
 
     public static boolean isNullOrEmptyOrBlank(String s) {
-        return s == null || s.isEmpty() || s.isBlank();
+        return s==null || s.isEmpty() || s.isBlank();
     }
 
 }

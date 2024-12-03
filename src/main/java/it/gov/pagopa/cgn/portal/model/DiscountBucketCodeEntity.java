@@ -1,25 +1,27 @@
 package it.gov.pagopa.cgn.portal.model;
 
-import java.io.Serializable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode.Exclude;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.EqualsAndHashCode.Exclude;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "discount_bucket_code")
 @Data
-public class DiscountBucketCodeEntity implements Serializable {
+public class DiscountBucketCodeEntity
+        implements Serializable {
 
     @Id
     @Column(name = "bucket_code_k")
-    @SequenceGenerator(name = "discount_bucket_code_k_seq", sequenceName = "discount_bucket_code_k_seq", allocationSize = 1)
+    @SequenceGenerator(name = "discount_bucket_code_k_seq",
+                       sequenceName = "discount_bucket_code_k_seq",
+                       allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "discount_bucket_code_k_seq")
     @Exclude
     @ToString.Exclude
@@ -48,8 +50,9 @@ public class DiscountBucketCodeEntity implements Serializable {
     public DiscountBucketCodeEntity() {
     }
 
-    public DiscountBucketCodeEntity(@NotNull @NotBlank @Size(max = 20) String code, DiscountEntity discount,
-            Long bucketCodeLoadId) {
+    public DiscountBucketCodeEntity(@NotNull @NotBlank @Size(max = 20) String code,
+                                    DiscountEntity discount,
+                                    Long bucketCodeLoadId) {
         this.code = code;
         this.discount = discount;
         this.bucketCodeLoadId = bucketCodeLoadId;

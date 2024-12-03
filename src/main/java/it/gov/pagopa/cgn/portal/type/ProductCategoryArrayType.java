@@ -11,7 +11,8 @@ import java.sql.*;
 import java.util.stream.Stream;
 
 
-public class ProductCategoryArrayType implements UserType {
+public class ProductCategoryArrayType
+        implements UserType {
 
     @Override
     public int[] sqlTypes() {
@@ -24,30 +25,38 @@ public class ProductCategoryArrayType implements UserType {
     }
 
     @Override
-    public boolean equals(Object o, Object o1) throws HibernateException {
+    public boolean equals(Object o, Object o1)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 
     @Override
-    public int hashCode(Object o) throws HibernateException {
+    public int hashCode(Object o)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 
     @Override
-    public ProductCategoryEnum[] nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner) throws HibernateException, SQLException {
+    public ProductCategoryEnum[] nullSafeGet(ResultSet rs,
+                                             String[] names,
+                                             SharedSessionContractImplementor session,
+                                             Object owner)
+            throws HibernateException, SQLException {
         Array productCategoriesResultSet = rs.getArray(names[0]);
-        if (productCategoriesResultSet == null) return new ProductCategoryEnum[]{};
+        if (productCategoriesResultSet==null) return new ProductCategoryEnum[]{};
         String[] productCategories = (String[]) productCategoriesResultSet.getArray();
         return Stream.of(productCategories).map(ProductCategoryEnum::valueOf).toArray(ProductCategoryEnum[]::new);
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session) throws HibernateException, SQLException {
+    public void nullSafeSet(PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
+            throws HibernateException, SQLException {
         throw new NotImplementedException();
     }
 
     @Override
-    public Object deepCopy(Object o) throws HibernateException {
+    public Object deepCopy(Object o)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 
@@ -57,17 +66,20 @@ public class ProductCategoryArrayType implements UserType {
     }
 
     @Override
-    public Serializable disassemble(Object o) throws HibernateException {
+    public Serializable disassemble(Object o)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 
     @Override
-    public Object assemble(Serializable serializable, Object o) throws HibernateException {
+    public Object assemble(Serializable serializable, Object o)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 
     @Override
-    public Object replace(Object o, Object o1, Object o2) throws HibernateException {
+    public Object replace(Object o, Object o1, Object o2)
+            throws HibernateException {
         throw new NotImplementedException();
     }
 

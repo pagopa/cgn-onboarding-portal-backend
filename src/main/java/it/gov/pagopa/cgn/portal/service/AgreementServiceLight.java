@@ -17,10 +17,14 @@ public class AgreementServiceLight {
 
     protected final AgreementRepository agreementRepository;
 
+    @Autowired
+    public AgreementServiceLight(AgreementRepository agreementRepository) {
+        this.agreementRepository = agreementRepository;
+    }
+
     @Transactional(Transactional.TxType.REQUIRED)
     public AgreementEntity findAgreementById(String agreementId) {
-        return  getAgreementById(agreementId)
-                                  .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+        return getAgreementById(agreementId).orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -49,10 +53,5 @@ public class AgreementServiceLight {
         agreement.setRejectReasonMessage(null);
         agreement.setBackofficeAssignee(null);
         return agreementRepository.save(agreement);
-    }
-
-    @Autowired
-    public AgreementServiceLight(AgreementRepository agreementRepository) {
-        this.agreementRepository = agreementRepository;
     }
 }

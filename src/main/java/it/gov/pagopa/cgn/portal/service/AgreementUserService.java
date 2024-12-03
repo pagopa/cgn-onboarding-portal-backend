@@ -14,6 +14,11 @@ public class AgreementUserService {
 
     private final AgreementUserRepository agreementUserRepository;
 
+    @Autowired
+    public AgreementUserService(AgreementUserRepository userRepository) {
+        this.agreementUserRepository = userRepository;
+    }
+
     public Optional<AgreementUserEntity> findCurrentAgreementUser(String merchantTaxCode) {
         return agreementUserRepository.findById(merchantTaxCode);
     }
@@ -29,10 +34,5 @@ public class AgreementUserService {
     @Transactional(Transactional.TxType.REQUIRED)
     public void updateMerchantTaxCode(String agreementId, String newMerchantTaxCode) {
         agreementUserRepository.updateMerchantTaxCode(agreementId, newMerchantTaxCode);
-    }
-
-    @Autowired
-    public AgreementUserService(AgreementUserRepository userRepository) {
-        this.agreementUserRepository = userRepository;
     }
 }

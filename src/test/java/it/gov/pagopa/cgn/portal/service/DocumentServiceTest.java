@@ -10,7 +10,6 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
@@ -43,14 +42,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.eq;
 
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class DocumentServiceTest extends IntegrationAbstractTest {
+class DocumentServiceTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private DocumentService documentService;
@@ -75,7 +75,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     private MockMultipartFile multipartFile;
 
     @BeforeEach
-    void init() throws IOException {
+    void init()
+            throws IOException {
 
         documentContainerClient = new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
                                                                   .containerName(configProperties.getDocumentsContainerName())
@@ -87,8 +88,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
-        agreementEntityPA = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2, EntityType.PUBLICADMINISTRATION,TestUtils.FAKE_ORGANIZATION_NAME);
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                      EntityType.PRIVATE,
+                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
+        agreementEntityPA = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+                                                                        EntityType.PUBLICADMINISTRATION,
+                                                                        TestUtils.FAKE_ORGANIZATION_NAME);
 
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
@@ -146,7 +151,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Upload_UploadDocumentWithValidData_Ok() throws IOException {
+    void Upload_UploadDocumentWithValidData_Ok()
+            throws IOException {
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
         DocumentEntity documentEntity = documentService.storeDocument(agreementEntity.getId(),
@@ -158,16 +164,15 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
         Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
 
-        BlobClient client = documentContainerClient.getBlobClient(agreementEntity.getId() +
-                                                                  "/" +
-                                                                  DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() +
-                                                                  ".pdf");
+        BlobClient client = documentContainerClient.getBlobClient(
+                agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
 
         Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
     }
 
     @Test
-    void Upload_UploadBucketWithValidData_Ok() throws IOException {
+    void Upload_UploadBucketWithValidData_Ok()
+            throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         byte[] content = multipartFile.getBytes();
@@ -183,13 +188,14 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Upload_UploadBucketWithValidData_OkPA() throws IOException {
+    void Upload_UploadBucketWithValidData_OkPA()
+            throws IOException {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
         byte[] content = multipartFile.getBytes();
         String bucketUID = documentService.storeBucket(agreementEntityPA.getId(),
-                multipartFile.getInputStream(),
-                multipartFile.getSize());
+                                                       multipartFile.getInputStream(),
+                                                       multipartFile.getSize());
 
         Assertions.assertNotNull(bucketUID);
 
@@ -205,10 +211,13 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InternalErrorException.class,
-                                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
+
     @Test
     void Upload_UploadBucketWithInvalidData_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
@@ -217,9 +226,11 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InternalErrorException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
 
     @Test
@@ -230,9 +241,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -243,9 +257,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -256,9 +273,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -269,9 +289,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -283,9 +306,12 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementId, in, content.length));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in,
+                                                                                        content.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -298,19 +324,29 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         byte[] contentNoAlphanum = "AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementEntity.getId(), new ByteArrayInputStream(contentOnlyChars), contentOnlyChars.length));
+                                                      () -> documentService.storeBucket(agreementEntity.getId(),
+                                                                                        new ByteArrayInputStream(
+                                                                                                contentOnlyChars),
+                                                                                        contentOnlyChars.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
+                                exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementEntity.getId(), new ByteArrayInputStream(contentOnlyNum), contentOnlyNum.length));
+                                            () -> documentService.storeBucket(agreementEntity.getId(),
+                                                                              new ByteArrayInputStream(contentOnlyNum),
+                                                                              contentOnlyNum.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
+                                exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                () -> documentService.storeBucket(agreementEntity.getId(), new ByteArrayInputStream(contentNoAlphanum), contentNoAlphanum.length));
+                                            () -> documentService.storeBucket(agreementEntity.getId(),
+                                                                              new ByteArrayInputStream(contentNoAlphanum),
+                                                                              contentNoAlphanum.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),exception.getMessage());
+        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
+                                exception.getMessage());
 
     }
 
@@ -321,8 +357,9 @@ class DocumentServiceTest extends IntegrationAbstractTest {
         //bucket csv without header
         byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
 
-        Assertions.assertDoesNotThrow(
-                () -> documentService.storeBucket(agreementEntity.getId(), new ByteArrayInputStream(contentCharsAndNum), contentCharsAndNum.length));
+        Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementEntity.getId(),
+                                                                        new ByteArrayInputStream(contentCharsAndNum),
+                                                                        contentCharsAndNum.length));
     }
 
     @Test
@@ -347,7 +384,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAgreementDocument_Ok() throws Exception {
+    void Get_GenerateAgreementDocument_Ok()
+            throws Exception {
         PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
                                                                              DocumentTypeEnum.AGREEMENT).toByteArray());
 
@@ -362,9 +400,10 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAgreementDocument_OkPA() throws Exception {
+    void Get_GenerateAgreementDocument_OkPA()
+            throws Exception {
         PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntityPA.getId(),
-                DocumentTypeEnum.AGREEMENT).toByteArray());
+                                                                             DocumentTypeEnum.AGREEMENT).toByteArray());
 
         PDFTextStripper stripper = new PDFTextStripper();
         String actual = stripper.getText(document);
@@ -377,7 +416,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestDocument_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestDocument_Ok()
+            throws IOException {
 
         PDDocument document = PDDocument.load(documentService.renderDocument(agreementEntity.getId(),
                                                                              DocumentTypeEnum.ADHESION_REQUEST)
@@ -390,21 +430,26 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestDocument_koPA() throws IOException {
+    void Get_GenerateAdhesionRequestDocument_koPA()
+            throws IOException {
         DocumentService dsMock = mock(DocumentService.class);
 
-        when(dsMock.renderDocument(anyString(), eq(DocumentTypeEnum.ADHESION_REQUEST)))
-                .thenThrow(new InvalidRequestException(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
+        when(dsMock.renderDocument(anyString(),
+                                   eq(DocumentTypeEnum.ADHESION_REQUEST))).thenThrow(new InvalidRequestException(
+                ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
 
         InvalidRequestException exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
-            documentService.renderDocument(agreementEntityPA.getId(),DocumentTypeEnum.ADHESION_REQUEST);
+            documentService.renderDocument(agreementEntityPA.getId(), DocumentTypeEnum.ADHESION_REQUEST);
         });
 
-        Assert.assertTrue(exception.getMessage(),exception.getMessage().equals(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
+        Assert.assertTrue(exception.getMessage(),
+                          exception.getMessage()
+                                   .equals(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Offline_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Offline_Ok()
+            throws IOException {
         setProfileSalesChannel(SalesChannelEnum.OFFLINE);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -421,7 +466,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_StaticCode_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_StaticCode_Ok()
+            throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -438,7 +484,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_API_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_API_Ok()
+            throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.API);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -455,7 +502,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_LandingPage_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_LandingPage_Ok()
+            throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
@@ -474,7 +522,8 @@ class DocumentServiceTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Bucket_Ok() throws IOException {
+    void Get_GenerateAdhesionRequestWithEmptyDiscountValuesDocument_Bucket_Ok()
+            throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);

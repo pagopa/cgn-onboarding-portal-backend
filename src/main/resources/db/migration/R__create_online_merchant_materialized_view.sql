@@ -1,6 +1,8 @@
-DROP MATERIALIZED VIEW IF EXISTS online_merchant;
+DROP
+MATERIALIZED VIEW IF EXISTS online_merchant;
 
-CREATE MATERIALIZED VIEW online_merchant AS
+CREATE
+MATERIALIZED VIEW online_merchant AS
 WITH merchant AS (SELECT a.agreement_k,
                          COALESCE(NULLIF(p.name, ''), p.full_name) AS name,
                          p.website_url,

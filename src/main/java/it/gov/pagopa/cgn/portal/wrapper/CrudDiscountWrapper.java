@@ -19,8 +19,9 @@ public class CrudDiscountWrapper {
         this.profileDiscountCodeType = profileDiscountCodeType;
     }
 
-    public CrudDiscountWrapper(DiscountEntity discountEntity, DiscountCodeTypeEnum profileDiscountCodeType,
-            boolean isChangedBucketLoad) {
+    public CrudDiscountWrapper(DiscountEntity discountEntity,
+                               DiscountCodeTypeEnum profileDiscountCodeType,
+                               boolean isChangedBucketLoad) {
         this.discountEntity = discountEntity;
         this.profileDiscountCodeType = profileDiscountCodeType;
         this.isChangedBucketLoad = isChangedBucketLoad;

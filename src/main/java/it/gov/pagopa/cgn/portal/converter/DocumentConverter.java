@@ -13,8 +13,25 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class DocumentConverter extends AbstractConverter<DocumentEntity, Document> {
+public class DocumentConverter
+        extends AbstractConverter<DocumentEntity, Document> {
 
+
+    protected Function<DocumentEntity, Document> toDto = entity -> {
+        Document dto = new Document();
+        dto.setDocumentType(entity.getDocumentType().getCode().toLowerCase());
+        dto.setDocumentUrl(entity.getDocumentUrl());
+        dto.setDocumentTimestamp(entity.getInsertedDateTime());
+        return dto;
+    };
+    protected Function<List<DocumentEntity>, Documents> toDocumentsDto = documentEntities -> {
+        List<Document> documentList = CollectionUtils.isEmpty(documentEntities) ?
+                                      Collections.emptyList():
+                                      documentEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
+        Documents documents = new Documents();
+        documents.setItems(documentList);
+        return documents;
+    };
 
     @Override
     protected Function<DocumentEntity, Document> toDtoFunction() {
@@ -26,26 +43,8 @@ public class DocumentConverter extends AbstractConverter<DocumentEntity, Documen
         throw new NotImplementedException("Conversion impossible");
     }
 
-    protected Function<DocumentEntity, Document> toDto =
-            entity -> {
-                Document dto = new Document();
-                dto.setDocumentType(entity.getDocumentType().getCode().toLowerCase());
-                dto.setDocumentUrl(entity.getDocumentUrl());
-                dto.setDocumentTimestamp(entity.getInsertedDateTime());
-                return dto;
-            };
-
-
     public Documents getDocumentsDtoFromDocumentEntityList(List<DocumentEntity> documentEntityList) {
         return toDocumentsDto.apply(documentEntityList);
     }
-
-    protected Function<List<DocumentEntity>, Documents> toDocumentsDto = documentEntities -> {
-        List<Document> documentList = CollectionUtils.isEmpty(documentEntities) ?
-                Collections.emptyList() : documentEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
-        Documents documents = new Documents();
-        documents.setItems(documentList);
-        return documents;
-    };
 
 }

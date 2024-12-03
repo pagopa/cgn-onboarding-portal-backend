@@ -17,7 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class CommonBackofficeSpecification<T> implements Specification<T> {
+public abstract class CommonBackofficeSpecification<T>
+        implements Specification<T> {
 
     protected final Sort.Direction direction;
     protected final BackofficeFilter filter;
@@ -30,17 +31,15 @@ public abstract class CommonBackofficeSpecification<T> implements Specification<
     }
 
     public Pageable getPage() {
-        if (filter.getPageSize() == null) {
+        if (filter.getPageSize()==null) {
             return PageRequest.of(0, 20);
         }
         return PageRequest.of(filter.getPage(), filter.getPageSize());
     }
 
-    protected abstract void addFiltersDatePredicate(
-            Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
+    protected abstract void addFiltersDatePredicate(Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
 
-    protected abstract void addStaticFiltersPredicate(
-            Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
+    protected abstract void addStaticFiltersPredicate(Root<T> root, CriteriaBuilder cb, List<Predicate> predicateList);
 
     protected abstract Order getOrder(Root<T> root, CriteriaBuilder cb);
 
@@ -57,7 +56,7 @@ public abstract class CommonBackofficeSpecification<T> implements Specification<
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotEmpty(filter.getProfileFullName())) {
             predicateList.add(cb.like(cb.upper(getProfileFullNamePath(root)),
-                    toFullLikeUpperCaseString(filter.getProfileFullName())));
+                                      toFullLikeUpperCaseString(filter.getProfileFullName())));
         }
         addFiltersDatePredicate(root, cb, predicateList);
         return predicateList;

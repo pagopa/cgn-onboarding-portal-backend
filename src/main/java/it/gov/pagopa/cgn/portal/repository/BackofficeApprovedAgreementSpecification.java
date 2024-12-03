@@ -13,14 +13,17 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class BackofficeApprovedAgreementSpecification extends CommonBackofficeSpecification<ApprovedAgreementEntity> {
+public class BackofficeApprovedAgreementSpecification
+        extends CommonBackofficeSpecification<ApprovedAgreementEntity> {
 
     public BackofficeApprovedAgreementSpecification(BackofficeFilter filter, String currentUser) {
         super(filter, currentUser);
     }
 
     @Override
-    protected void addFiltersDatePredicate(Root<ApprovedAgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+    protected void addFiltersDatePredicate(Root<ApprovedAgreementEntity> root,
+                                           CriteriaBuilder cb,
+                                           List<Predicate> predicateList) {
         if (!Objects.isNull(filter.getDateFrom())) {
             predicateList.add(cb.greaterThanOrEqualTo(getLastUpdateDatePath(root), filter.getDateFrom()));
         }
@@ -30,13 +33,15 @@ public class BackofficeApprovedAgreementSpecification extends CommonBackofficeSp
     }
 
     @Override
-    protected void addStaticFiltersPredicate(Root<ApprovedAgreementEntity> root, CriteriaBuilder cb, List<Predicate> predicateList) {
+    protected void addStaticFiltersPredicate(Root<ApprovedAgreementEntity> root,
+                                             CriteriaBuilder cb,
+                                             List<Predicate> predicateList) {
         predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.APPROVED));
     }
 
     @Override
     protected Order getOrder(Root<ApprovedAgreementEntity> root, CriteriaBuilder cb) {
-        if (filter.getApprovedSortColumnEnum() != null) {
+        if (filter.getApprovedSortColumnEnum()!=null) {
             return getOrderByFilter(root);
         }
         return new OrderImpl(getLastUpdateDatePath(root), false);

@@ -20,7 +20,8 @@ import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class CheckExpiringDiscountsJobTest extends IntegrationAbstractTest {
+class CheckExpiringDiscountsJobTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private CheckExpiringDiscountsJob job;
@@ -68,7 +69,8 @@ class CheckExpiringDiscountsJobTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Scheduler_ScheduleCheckExpiringDiscountsJob_JobScheduled() throws SchedulerException {
+    void Scheduler_ScheduleCheckExpiringDiscountsJob_JobScheduled()
+            throws SchedulerException {
         jobScheduler.scheduleCheckExpiringDiscountsJob();
         List<? extends Trigger> triggersOfJob = quartzScheduler.getTriggersOfJob(JobKey.jobKey("check-expiring",
                                                                                                "discounts"));

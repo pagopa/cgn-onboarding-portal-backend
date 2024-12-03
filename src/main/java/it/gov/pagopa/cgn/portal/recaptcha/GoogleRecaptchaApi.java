@@ -31,10 +31,9 @@ public class GoogleRecaptchaApi {
         GoogleRecaptchaResponse response = restTemplate.postForObject(
                 configProperties.getRecaptchaGoogleHost() + "/recaptcha/api/siteverify",
                 new HttpEntity<>(map, headers),
-                GoogleRecaptchaResponse.class
-        );
+                GoogleRecaptchaResponse.class);
 
-        return response != null && response.isSuccess();
+        return response!=null && response.isSuccess();
     }
 
 }

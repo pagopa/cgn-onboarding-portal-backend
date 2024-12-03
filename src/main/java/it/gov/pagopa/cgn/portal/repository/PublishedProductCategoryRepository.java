@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import javax.transaction.Transactional;
 
-public interface PublishedProductCategoryRepository extends JpaRepository<PublishedProductCategoryViewEntity, ProductCategoryEnum> {
+public interface PublishedProductCategoryRepository
+        extends JpaRepository<PublishedProductCategoryViewEntity, ProductCategoryEnum> {
 
     @Modifying
     @Transactional

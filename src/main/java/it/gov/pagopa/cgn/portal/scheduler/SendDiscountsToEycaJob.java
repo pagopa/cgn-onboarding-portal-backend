@@ -12,21 +12,21 @@ import java.time.Instant;
 
 @Component
 @Slf4j
-public class SendDiscountsToEycaJob implements Job {
-
-    private final ExportService exportService;
+public class SendDiscountsToEycaJob
+        implements Job {
 
     private static final String JOB_LOG_NAME = "Send Discounts to EYCA Job ";
+    private final ExportService exportService;
 
 
     @Autowired
-    public SendDiscountsToEycaJob(ExportService exportService){
+    public SendDiscountsToEycaJob(ExportService exportService) {
         this.exportService = exportService;
     }
 
 
     @Override
-	public void execute(JobExecutionContext context) {
+    public void execute(JobExecutionContext context) {
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();

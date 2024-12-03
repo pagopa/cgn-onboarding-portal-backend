@@ -27,6 +27,19 @@ public class ProfileFacade {
     private final ProfileConverter profileConverter;
     private final DiscountService discountService;
 
+    @Autowired
+    public ProfileFacade(ProfileService profileService,
+                         CreateProfileConverter createProfileConverter,
+                         UpdateProfileConverter updateProfileConverter,
+                         ProfileConverter profileConverter,
+                         DiscountService discountService) {
+        this.profileService = profileService;
+        this.createProfileConverter = createProfileConverter;
+        this.updateProfileConverter = updateProfileConverter;
+        this.profileConverter = profileConverter;
+        this.discountService = discountService;
+    }
+
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Profile> createProfile(String agreementId, CreateProfile createRegistryDto) {
         ProfileEntity profileEntity = createProfileConverter.toEntity(createRegistryDto);
@@ -46,7 +59,8 @@ public class ProfileFacade {
         ProfileEntity profileEntity = updateProfileConverter.toEntity(updateProfile);
         ProfileEntity dbProfile = profileService.getProfileFromAgreementId(agreementId);
         if (!profileEntity.getSalesChannel().equals(dbProfile.getSalesChannel()) ||
-            (profileEntity.getDiscountCodeType() != null && !profileEntity.getDiscountCodeType().equals(dbProfile.getDiscountCodeType()))) {
+            (profileEntity.getDiscountCodeType()!=null &&
+             !profileEntity.getDiscountCodeType().equals(dbProfile.getDiscountCodeType()))) {
             // if sales channel or discount code type are changed we should unpublish all the discount of this profile
             discountService.getDiscounts(agreementId)
                            .stream()
@@ -57,18 +71,5 @@ public class ProfileFacade {
         }
         profileEntity = profileService.updateProfile(agreementId, profileEntity);
         return ResponseEntity.ok(profileConverter.toDto(profileEntity));
-    }
-
-    @Autowired
-    public ProfileFacade(ProfileService profileService,
-                         CreateProfileConverter createProfileConverter,
-                         UpdateProfileConverter updateProfileConverter,
-                         ProfileConverter profileConverter,
-                         DiscountService discountService) {
-        this.profileService = profileService;
-        this.createProfileConverter = createProfileConverter;
-        this.updateProfileConverter = updateProfileConverter;
-        this.profileConverter = profileConverter;
-        this.discountService = discountService;
     }
 }

@@ -14,9 +14,15 @@ import java.time.LocalDate;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class BackofficeApprovedAgreementController implements ApprovedAgreementsApi {
+public class BackofficeApprovedAgreementController
+        implements ApprovedAgreementsApi {
 
     private final BackofficeAgreementFacade backofficeAgreementFacade;
+
+    @Autowired
+    public BackofficeApprovedAgreementController(BackofficeAgreementFacade backofficeAgreementFacade) {
+        this.backofficeAgreementFacade = backofficeAgreementFacade;
+    }
 
     @Override
     public ResponseEntity<ApprovedAgreementDetail> getApprovedAgreement(String agreementId) {
@@ -24,17 +30,21 @@ public class BackofficeApprovedAgreementController implements ApprovedAgreements
     }
 
     @Override
-    public ResponseEntity<ApprovedAgreements> getApprovedAgreements(
-            String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,Integer pageSize, Integer page,
-            String sortColumn, String sortDirection) {
+    public ResponseEntity<ApprovedAgreements> getApprovedAgreements(String profileFullName,
+                                                                    LocalDate requestDateFrom,
+                                                                    LocalDate requestDateTo,
+                                                                    Integer pageSize,
+                                                                    Integer page,
+                                                                    String sortColumn,
+                                                                    String sortDirection) {
 
-        BackofficeFilter filter = BackofficeFilter.getApprovedFilter(
-                profileFullName, requestDateFrom, requestDateTo, pageSize, page, sortColumn, sortDirection);
+        BackofficeFilter filter = BackofficeFilter.getApprovedFilter(profileFullName,
+                                                                     requestDateFrom,
+                                                                     requestDateTo,
+                                                                     pageSize,
+                                                                     page,
+                                                                     sortColumn,
+                                                                     sortDirection);
         return backofficeAgreementFacade.getApprovedAgreements(filter);
-    }
-
-    @Autowired
-    public BackofficeApprovedAgreementController(BackofficeAgreementFacade backofficeAgreementFacade) {
-        this.backofficeAgreementFacade = backofficeAgreementFacade;
     }
 }

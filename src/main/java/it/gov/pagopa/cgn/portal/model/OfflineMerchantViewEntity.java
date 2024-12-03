@@ -11,7 +11,8 @@ import javax.persistence.Table;
 @Immutable
 @Table(name = "offline_merchant")
 @Data
-public class OfflineMerchantViewEntity extends BaseMerchantViewEntity {
+public class OfflineMerchantViewEntity
+        extends BaseMerchantViewEntity {
 
     @Column(name = "full_address")
     private String fullAddress;

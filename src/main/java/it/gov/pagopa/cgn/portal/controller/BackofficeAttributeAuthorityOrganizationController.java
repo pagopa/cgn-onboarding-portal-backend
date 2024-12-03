@@ -13,7 +13,8 @@ import java.util.List;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class BackofficeAttributeAuthorityOrganizationController implements OrganizationApi {
+public class BackofficeAttributeAuthorityOrganizationController
+        implements OrganizationApi {
 
     private final BackofficeAttributeAuthorityFacade backofficeAttributeAuthorityFacade;
 

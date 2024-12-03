@@ -28,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class DocumentApiTest extends IntegrationAbstractTest {
+class DocumentApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -44,10 +45,9 @@ class DocumentApiTest extends IntegrationAbstractTest {
     @BeforeEach
     void before() {
 
-        documentContainerClient = new BlobContainerClientBuilder()
-                .connectionString(getAzureConnectionString())
-                .containerName(configProperties.getDocumentsContainerName())
-                .buildClient();
+        documentContainerClient = new BlobContainerClientBuilder().connectionString(getAzureConnectionString())
+                                                                  .containerName(configProperties.getDocumentsContainerName())
+                                                                  .buildClient();
 
         if (!documentContainerClient.exists()) {
             documentContainerClient.create();
@@ -57,69 +57,83 @@ class DocumentApiTest extends IntegrationAbstractTest {
 
 
     @Test
-    void GetDocuments_GetDocuments_Ok() throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+    void GetDocuments_GetDocuments_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
         documentService.storeDocument(agreementEntity.getId(),
-                DocumentTypeEnum.AGREEMENT, new ByteArrayInputStream(content), content.length);
+                                      DocumentTypeEnum.AGREEMENT,
+                                      new ByteArrayInputStream(content),
+                                      content.length);
 
-        this.mockMvc.perform(
-                get(TestUtils.getDocumentPath(agreementEntity.getId())))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].documentType").value("agreement"))
-                .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].documentTimestamp").isNotEmpty());
+        this.mockMvc.perform(get(TestUtils.getDocumentPath(agreementEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.items").isNotEmpty())
+                    .andExpect(jsonPath("$.items[0].documentType").value("agreement"))
+                    .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty())
+                    .andExpect(jsonPath("$.items[0].documentTimestamp").isNotEmpty());
     }
 
     @Test
-    void UploadDocument_UploadDocumentWithValidDocumentType_Ok() throws Exception {
+    void UploadDocument_UploadDocumentWithValidDocumentType_Ok()
+            throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
-        MockMultipartFile multipartFile = new MockMultipartFile("document", "document.pdf", "multipart/form-data", content);
-        this.mockMvc.perform(
-                multipart(TestUtils.getDocumentPath(agreementEntity.getId()) + "/" +
-                        DocumentTypeEnum.AGREEMENT.getCode()
-                ).file(multipartFile))
-                .andDo(log())
-                .andExpect(status().isOk());
+        MockMultipartFile multipartFile = new MockMultipartFile("document",
+                                                                "document.pdf",
+                                                                "multipart/form-data",
+                                                                content);
+        this.mockMvc.perform(multipart(
+                TestUtils.getDocumentPath(agreementEntity.getId()) + "/" + DocumentTypeEnum.AGREEMENT.getCode()).file(
+                multipartFile)).andDo(log()).andExpect(status().isOk());
     }
 
     @Test
-    void UploadDocument_UploadDocumentWithInvalidDocumentType_Ok() throws Exception {
+    void UploadDocument_UploadDocumentWithInvalidDocumentType_Ok()
+            throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         byte[] content = "pdf-document".getBytes(StandardCharsets.UTF_8);
 
-        MockMultipartFile multipartFile = new MockMultipartFile("document", "document.pdf", "multipart/form-data", content);
-        this.mockMvc.perform(
-                multipart(TestUtils.getDocumentPath(agreementEntity.getId()) + "/invalidType"
-                ).file(multipartFile))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+        MockMultipartFile multipartFile = new MockMultipartFile("document",
+                                                                "document.pdf",
+                                                                "multipart/form-data",
+                                                                content);
+        this.mockMvc.perform(multipart(TestUtils.getDocumentPath(agreementEntity.getId()) + "/invalidType").file(
+                multipartFile)).andDo(log()).andExpect(status().isBadRequest());
     }
 
     @Test
-    void DeleteDocument_DeleteDocumentWithValidDocumentType_Ok() throws Exception {
+    void DeleteDocument_DeleteDocumentWithValidDocumentType_Ok()
+            throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
-        this.mockMvc.perform(
-                delete(TestUtils.getDocumentPath(agreementEntity.getId()) + "/" +
-                        DocumentTypeEnum.AGREEMENT.getCode()))
-                .andDo(log())
-                .andExpect(status().isNoContent());
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        this.mockMvc.perform(delete(
+                    TestUtils.getDocumentPath(agreementEntity.getId()) + "/" + DocumentTypeEnum.AGREEMENT.getCode()))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
     }
 
     @Test
-    void DeleteDocument_DeleteDocumentWithInvalidDocumentType_Ok() throws Exception {
+    void DeleteDocument_DeleteDocumentWithInvalidDocumentType_Ok()
+            throws Exception {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
-        this.mockMvc.perform(
-                delete(TestUtils.getDocumentPath(agreementEntity.getId()) + "/invalidType"))
-                .andDo(log())
-                .andExpect(status().isBadRequest());
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        this.mockMvc.perform(delete(TestUtils.getDocumentPath(agreementEntity.getId()) + "/invalidType"))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest());
     }
 }

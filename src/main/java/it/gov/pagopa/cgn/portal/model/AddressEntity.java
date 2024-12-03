@@ -12,15 +12,13 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "address")
 @Data
-public class AddressEntity extends BaseEntity {
+public class AddressEntity
+        extends BaseEntity {
 
     @Id
     @Column(name = "address_k")
-    @SequenceGenerator(name="address_address_k_seq",
-            sequenceName="address_address_k_seq",
-            allocationSize=1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="address_address_k_seq")
+    @SequenceGenerator(name = "address_address_k_seq", sequenceName = "address_address_k_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "address_address_k_seq")
     private Long id;
 
     @NotNull

@@ -9,17 +9,9 @@ import java.sql.Timestamp;
 import java.util.function.Function;
 
 @Component
-public class OrganizationWithReferentsConverter extends AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> {
-
-    @Override
-    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModelFunction() {
-        return fromAttributeAuthorityModel;
-    }
-
-    @Override
-    protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
-        return toAttributeAuthorityModel;
-    }
+public class OrganizationWithReferentsConverter
+        extends
+        AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> {
 
     protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
         OrganizationWithReferents backofficeModel = new OrganizationWithReferents();
@@ -31,7 +23,6 @@ public class OrganizationWithReferentsConverter extends AbstractAttributeAuthori
         backofficeModel.setReferents(attributeAuthorityModel.getReferents());
         return backofficeModel;
     };
-
     protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
         OrganizationWithReferentsAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsAttributeAuthority();
         attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
@@ -42,6 +33,16 @@ public class OrganizationWithReferentsConverter extends AbstractAttributeAuthori
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };
+
+    @Override
+    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModelFunction() {
+        return fromAttributeAuthorityModel;
+    }
+
+    @Override
+    protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
+        return toAttributeAuthorityModel;
+    }
 
 
 }

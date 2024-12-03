@@ -1,21 +1,20 @@
 package it.gov.pagopa.cgn.portal.repository.custom;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.List;
-
-import javax.transaction.Transactional;
-
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
+import javax.transaction.Transactional;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 @Transactional
-public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCodeRepositoryCustom {
+public class DiscountBucketCodeRepositoryCustomImpl
+        implements DiscountBucketCodeRepositoryCustom {
 
     @Autowired
     private JdbcTemplate template;
@@ -28,7 +27,8 @@ public class DiscountBucketCodeRepositoryCustomImpl implements DiscountBucketCod
                 new BatchPreparedStatementSetter() {
 
                     @Override
-                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    public void setValues(PreparedStatement ps, int i)
+                            throws SQLException {
                         DiscountBucketCodeEntity toInsert = entities.get(i);
                         ps.setString(1, toInsert.getCode());
                         ps.setBoolean(2, toInsert.getIsUsed());

@@ -1,11 +1,11 @@
 package it.gov.pagopa.cgn.portal.util;
 
+import it.gov.pagopa.cgn.portal.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import it.gov.pagopa.cgn.portal.service.BucketService;
 
 @Slf4j
 @Component

@@ -12,8 +12,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum ApiTokenTypeEnum {
 
-    PRIMARY("primary"),
-    SECONDARY("secondary");
+    PRIMARY("primary"), SECONDARY("secondary");
 
     private final String code;
 
@@ -23,8 +22,9 @@ public enum ApiTokenTypeEnum {
             throw new InvalidRequestException("Invalid token type parameter: " + value);
         }
         return Arrays.stream(ApiTokenTypeEnum.values())
-                .filter(apiTokenTypeEnum -> apiTokenTypeEnum.getCode().equals(value)).findFirst()
-                .orElseThrow(()-> new InvalidRequestException("Invalid token type parameter: " + value));
+                     .filter(apiTokenTypeEnum -> apiTokenTypeEnum.getCode().equals(value))
+                     .findFirst()
+                     .orElseThrow(() -> new InvalidRequestException("Invalid token type parameter: " + value));
     }
 
 }

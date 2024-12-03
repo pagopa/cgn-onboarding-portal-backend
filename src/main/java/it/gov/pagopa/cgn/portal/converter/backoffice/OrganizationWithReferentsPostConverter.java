@@ -9,7 +9,22 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-public class OrganizationWithReferentsPostConverter extends AbstractAttributeAuthorityConverter<OrganizationWithReferentsPostAttributeAuthority, OrganizationWithReferents> {
+public class OrganizationWithReferentsPostConverter
+        extends
+        AbstractAttributeAuthorityConverter<OrganizationWithReferentsPostAttributeAuthority, OrganizationWithReferents> {
+
+    protected Function<OrganizationWithReferentsPostAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
+        throw new NotImplementedException();
+    };
+    protected Function<OrganizationWithReferents, OrganizationWithReferentsPostAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
+        OrganizationWithReferentsPostAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsPostAttributeAuthority();
+        attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
+        attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
+        attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
+        attributeAuthorityModel.setPec(backofficeModel.getPec());
+        attributeAuthorityModel.setReferents(backofficeModel.getReferents());
+        return attributeAuthorityModel;
+    };
 
     @Override
     protected Function<OrganizationWithReferentsPostAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModelFunction() {
@@ -20,20 +35,6 @@ public class OrganizationWithReferentsPostConverter extends AbstractAttributeAut
     protected Function<OrganizationWithReferents, OrganizationWithReferentsPostAttributeAuthority> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
-
-    protected Function<OrganizationWithReferentsPostAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
-        throw new NotImplementedException();
-    };
-
-    protected Function<OrganizationWithReferents, OrganizationWithReferentsPostAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
-        OrganizationWithReferentsPostAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsPostAttributeAuthority();
-        attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
-        attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
-        attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
-        attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setReferents(backofficeModel.getReferents());
-        return attributeAuthorityModel;
-    };
 
 
 }

@@ -26,7 +26,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class AgreementService extends AgreementServiceLight {
+public class AgreementService
+        extends AgreementServiceLight {
 
 
     private final AgreementUserService userService;
@@ -44,22 +45,45 @@ public class AgreementService extends AgreementServiceLight {
     private final BackofficeAgreementConverter backofficeAgreementConverter;
 
     private final ConfigProperties configProperties;
-    
+
+    @Autowired
+    public AgreementService(AgreementRepository agreementRepository,
+                            AgreementUserService userService,
+                            ProfileService profileService,
+                            DiscountService discountService,
+                            DocumentService documentService,
+                            AzureStorage azureStorage,
+                            EmailNotificationFacade emailNotificationFacade,
+                            BackofficeAgreementConverter backofficeAgreementConverter,
+                            ConfigProperties configProperties) {
+        super(agreementRepository);
+        this.userService = userService;
+        this.profileService = profileService;
+        this.discountService = discountService;
+        this.documentService = documentService;
+        this.azureStorage = azureStorage;
+        this.emailNotificationFacade = emailNotificationFacade;
+        this.backofficeAgreementConverter = backofficeAgreementConverter;
+        this.configProperties = configProperties;
+    }
+
     @Transactional
-    public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode){
+    public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode) {
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
         if (userAgreementOpt.isPresent()) {
             userAgreement = userAgreementOpt.get();
             return agreementRepository.findById(userAgreement.getAgreementId())
-                    .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
-        }  else {
+                                      .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+        } else {
             throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue());
         }
     }
 
     @Transactional
-    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode, EntityType entityType, String organizationName) {
+    public AgreementEntity createAgreementIfNotExists(String merchantTaxCode,
+                                                      EntityType entityType,
+                                                      String organizationName) {
         AgreementEntity agreementEntity;
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
@@ -67,7 +91,7 @@ public class AgreementService extends AgreementServiceLight {
             userAgreement = userAgreementOpt.get();
             // current user has already an agreement. Find it
             agreementEntity = agreementRepository.findById(userAgreement.getAgreementId())
-                    .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
+                                                 .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
         } else {
             userAgreement = userService.create(merchantTaxCode);
             agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType, organizationName);
@@ -80,7 +104,7 @@ public class AgreementService extends AgreementServiceLight {
         AgreementEntity agreementEntity = findAgreementById(agreementId);
 
         ProfileEntity profile = profileService.getProfile(agreementId)
-                .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+                                              .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         List<DiscountEntity> discounts = discountService.getDiscounts(agreementId);
         if (CollectionUtils.isEmpty(discounts) && EntityTypeEnum.PRIVATE.equals(agreementEntity.getEntityType())) {
             throw new InvalidRequestException(ErrorCodeEnum.DISCOUNT_NOT_FOUND.getValue());
@@ -89,7 +113,7 @@ public class AgreementService extends AgreementServiceLight {
 
         int nrDocs = agreementEntity.getEntityType().getNrDocs();
 
-        if (documents == null || documents.size() != nrDocs) {
+        if (documents==null || documents.size()!=nrDocs) {
             throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_APPROVABLE_FOR_WRONG_MANDATORY_DOCUMENTS.getValue());
         }
         agreementEntity.setState(AgreementStateEnum.PENDING);
@@ -124,14 +148,15 @@ public class AgreementService extends AgreementServiceLight {
         AgreementEntity agreementEntity = findAgreementById(agreementId);
         List<DiscountEntity> discounts = agreementEntity.getDiscountList();
         if (!CollectionUtils.isEmpty(discounts)) {
-            discounts = discounts.stream()
-                    .filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
-                            && LocalDate.now().isBefore(d.getEndDate().plusDays(1))) // not expired
-                    .collect(Collectors.toList());
+            discounts = discounts.stream().filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
+                                                       && LocalDate.now()
+                                                                   .isBefore(d.getEndDate().plusDays(1))) // not expired
+                                 .collect(Collectors.toList());
             agreementEntity.setDiscountList(discounts);
         }
         agreementEntity.setDocumentList(documentService.getAllDocuments(agreementId,
-                documentEntity -> documentEntity.getDocumentType().isBackoffice()));
+                                                                        documentEntity -> documentEntity.getDocumentType()
+                                                                                                        .isBackoffice()));
 
         return agreementEntity;
     }
@@ -145,24 +170,6 @@ public class AgreementService extends AgreementServiceLight {
         agreementEntity.setEntityType(entityTypeEnum);
         return agreementRepository.save(agreementEntity);
     }
-
-    @Autowired
-    public AgreementService(AgreementRepository agreementRepository, AgreementUserService userService,
-                            ProfileService profileService, DiscountService discountService,
-                            DocumentService documentService, AzureStorage azureStorage,
-                            EmailNotificationFacade emailNotificationFacade,
-                            BackofficeAgreementConverter backofficeAgreementConverter, ConfigProperties configProperties) {
-        super(agreementRepository);
-        this.userService = userService;
-        this.profileService = profileService;
-        this.discountService = discountService;
-        this.documentService = documentService;
-        this.azureStorage = azureStorage;
-        this.emailNotificationFacade = emailNotificationFacade;
-        this.backofficeAgreementConverter = backofficeAgreementConverter;
-        this.configProperties = configProperties;
-    }
-
 
     public void updateAgrement(AgreementEntity agreement) {
         agreementRepository.save(agreement);

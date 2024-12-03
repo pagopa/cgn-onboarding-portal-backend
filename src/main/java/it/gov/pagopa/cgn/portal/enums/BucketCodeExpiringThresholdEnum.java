@@ -7,10 +7,7 @@ import lombok.Getter;
 @Getter
 public enum BucketCodeExpiringThresholdEnum {
 
-    PERCENT_0(0),
-    PERCENT_10(10),
-    PERCENT_25(25),
-    PERCENT_50(50);
+    PERCENT_0(0), PERCENT_10(10), PERCENT_25(25), PERCENT_50(50);
 
     private final int value;
 

@@ -11,8 +11,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 
 @SpringBootTest
-@ActiveProfiles({ "dev" })
-public class AppExceptionHandlerTest extends IntegrationAbstractTest {
+@ActiveProfiles({"dev"})
+public class AppExceptionHandlerTest
+        extends IntegrationAbstractTest {
 
     @Test
     public void TestInternalError_ThrowGenericException() {

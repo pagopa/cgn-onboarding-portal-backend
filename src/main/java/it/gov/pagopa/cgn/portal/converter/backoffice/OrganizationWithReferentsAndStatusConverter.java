@@ -11,20 +11,10 @@ import java.util.function.Function;
 
 @Component
 public class OrganizationWithReferentsAndStatusConverter
-        extends AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus> {
+        extends
+        AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus> {
 
-    @Override
-    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus> fromAttributeAuthorityModelFunction() {
-        return fromAttributeAuthorityModel;
-    }
-
-    @Override
-    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
-        return toAttributeAuthorityModel;
-    }
-
-    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus>
-            fromAttributeAuthorityModel = attributeAuthorityModel -> {
+    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus> fromAttributeAuthorityModel = attributeAuthorityModel -> {
         OrganizationWithReferentsAndStatus backofficeModel = new OrganizationWithReferentsAndStatus();
         backofficeModel.setKeyOrganizationFiscalCode(attributeAuthorityModel.getKeyOrganizationFiscalCode());
         backofficeModel.setOrganizationFiscalCode(attributeAuthorityModel.getOrganizationFiscalCode());
@@ -35,11 +25,8 @@ public class OrganizationWithReferentsAndStatusConverter
         backofficeModel.setStatus(OrganizationStatus.ENABLED);
         return backofficeModel;
     };
-
-    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferentsAttributeAuthority>
-            toAttributeAuthorityModel = backofficeModel -> {
-        OrganizationWithReferentsAttributeAuthority attributeAuthorityModel =
-                new OrganizationWithReferentsAttributeAuthority();
+    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
+        OrganizationWithReferentsAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsAttributeAuthority();
         attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
@@ -48,6 +35,16 @@ public class OrganizationWithReferentsAndStatusConverter
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };
+
+    @Override
+    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferentsAndStatus> fromAttributeAuthorityModelFunction() {
+        return fromAttributeAuthorityModel;
+    }
+
+    @Override
+    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
+        return toAttributeAuthorityModel;
+    }
 
 
 }

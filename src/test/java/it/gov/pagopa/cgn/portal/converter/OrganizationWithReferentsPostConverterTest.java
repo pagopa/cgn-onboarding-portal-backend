@@ -28,9 +28,11 @@ public class OrganizationWithReferentsPostConverterTest {
         organizationWithReferents.setOrganizationFiscalCode("12345678");
         organizationWithReferents.setPec("12345678@pec.it");
         organizationWithReferents.setInsertedAt(LocalDate.now());
-        organizationWithReferents.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B").collect(Collectors.toList()));
+        organizationWithReferents.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B")
+                                                     .collect(Collectors.toList()));
         organizationWithReferents.setEntityType(EntityType.PRIVATE);
-        OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority = organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents);
+        OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority = organizationWithReferentsPostConverter.toAttributeAuthorityModel(
+                organizationWithReferents);
         commonAssertions(organizationWithReferents, organizationWithReferentsAttributeAuthority);
     }
 
@@ -41,16 +43,24 @@ public class OrganizationWithReferentsPostConverterTest {
         organizationWithReferentsPostAttributeAuthority.setKeyOrganizationFiscalCode("12345678");
         organizationWithReferentsPostAttributeAuthority.setOrganizationFiscalCode("12345678");
         organizationWithReferentsPostAttributeAuthority.setPec("12345678@pec.it");
-        organizationWithReferentsPostAttributeAuthority.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B").collect(Collectors.toList()));
-        Assertions.assertThrows(NotImplementedException.class, () -> organizationWithReferentsPostConverter.fromAttributeAuthorityModel(organizationWithReferentsPostAttributeAuthority));
+        organizationWithReferentsPostAttributeAuthority.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B")
+                                                                           .collect(Collectors.toList()));
+        Assertions.assertThrows(NotImplementedException.class,
+                                () -> organizationWithReferentsPostConverter.fromAttributeAuthorityModel(
+                                        organizationWithReferentsPostAttributeAuthority));
     }
 
-    private void commonAssertions(OrganizationWithReferents organizationWithReferents, OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
-        Assert.assertEquals(organizationWithReferents.getOrganizationName(), organizationWithReferentsAttributeAuthority.getOrganizationName());
-        Assert.assertEquals(organizationWithReferents.getOrganizationFiscalCode(), organizationWithReferentsAttributeAuthority.getOrganizationFiscalCode());
-        Assert.assertEquals(organizationWithReferents.getKeyOrganizationFiscalCode(), organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode());
+    private void commonAssertions(OrganizationWithReferents organizationWithReferents,
+                                  OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
+        Assert.assertEquals(organizationWithReferents.getOrganizationName(),
+                            organizationWithReferentsAttributeAuthority.getOrganizationName());
+        Assert.assertEquals(organizationWithReferents.getOrganizationFiscalCode(),
+                            organizationWithReferentsAttributeAuthority.getOrganizationFiscalCode());
+        Assert.assertEquals(organizationWithReferents.getKeyOrganizationFiscalCode(),
+                            organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode());
         Assert.assertEquals(organizationWithReferents.getPec(), organizationWithReferentsAttributeAuthority.getPec());
-        Assert.assertEquals(organizationWithReferents.getReferents(), organizationWithReferentsAttributeAuthority.getReferents());
+        Assert.assertEquals(organizationWithReferents.getReferents(),
+                            organizationWithReferentsAttributeAuthority.getReferents());
         Assert.assertNotNull(organizationWithReferents.getEntityType());
     }
 

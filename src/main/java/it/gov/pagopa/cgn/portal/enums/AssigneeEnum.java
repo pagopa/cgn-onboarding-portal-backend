@@ -20,7 +20,8 @@ public enum AssigneeEnum {
             return null;
         }
         return Arrays.stream(AssigneeEnum.values())
-                .filter(assigneeEnum -> assigneeEnum.getCode().equals(value)).findFirst()
-                .orElseThrow(()-> new InvalidRequestException("Assignee value not valid"));
+                     .filter(assigneeEnum -> assigneeEnum.getCode().equals(value))
+                     .findFirst()
+                     .orElseThrow(() -> new InvalidRequestException("Assignee value not valid"));
     }
 }

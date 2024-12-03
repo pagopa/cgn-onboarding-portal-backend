@@ -14,16 +14,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AppServerControllerTest extends IntegrationAbstractTest {
+class AppServerControllerTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void Get_GetWithoutAuth_ok() throws Exception {
-        this.mockMvc.perform(
-                get("/").contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isNoContent());
+    void Get_GetWithoutAuth_ok()
+            throws Exception {
+        this.mockMvc.perform(get("/").contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
     }
 }

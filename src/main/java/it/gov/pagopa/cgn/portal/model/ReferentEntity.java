@@ -14,15 +14,13 @@ import javax.validation.constraints.Size;
 @Table(name = "referent")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
-public class ReferentEntity extends BaseEntity {
+public class ReferentEntity
+        extends BaseEntity {
 
     @Id
     @Column(name = "referent_k")
-    @SequenceGenerator(name="referent_referent_k_seq",
-            sequenceName="referent_referent_k_seq",
-            allocationSize=1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,
-            generator="referent_referent_k_seq")
+    @SequenceGenerator(name = "referent_referent_k_seq", sequenceName = "referent_referent_k_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "referent_referent_k_seq")
     private Long id;
 
     @NotNull
