@@ -54,7 +54,7 @@ public class IntegrationAbstractTest {
 
     protected static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("11-2.5")
+        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("16-master")
                 .withDatabaseName(
                         "integration-tests-db")
                 .withUsername("admin")
