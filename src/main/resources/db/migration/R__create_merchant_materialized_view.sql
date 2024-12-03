@@ -43,7 +43,7 @@ SELECT m.agreement_k           AS id,
            END                 AS new_discounts,
        now()                   AS last_update
 FROM merchants m
-         LEFT JOIN agreements_with_new_discounts awnd ON awnd.agreement_fk = m.agreement_k
+    LEFT JOIN agreements_with_new_discounts awnd ON awnd.agreement_fk = m.agreement_k
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 ORDER BY new_discounts DESC, name ASC;
 

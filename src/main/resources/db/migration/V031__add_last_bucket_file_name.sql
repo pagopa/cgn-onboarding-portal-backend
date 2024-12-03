@@ -1,6 +1,5 @@
 ALTER TABLE discount
-DROP
-COLUMN last_bucket_code_file_uid;
+    DROP COLUMN last_bucket_code_file_uid;
 
 ALTER TABLE discount
     ADD COLUMN last_bucket_code_load_id BIGINT;
@@ -24,10 +23,8 @@ ALTER TABLE discount_bucket_code
     ALTER COLUMN discount_fk DROP NOT NULL;
 
 ALTER TABLE discount_bucket_code
-DROP
-CONSTRAINT discount_bucket_code_fk,
+    DROP CONSTRAINT discount_bucket_code_fk,
     ADD CONSTRAINT discount_bucket_code_fk
         FOREIGN KEY (discount_fk)
             REFERENCES DISCOUNT (discount_k)
-            ON DELETE
-SET NULL;
+            ON DELETE SET NULL;

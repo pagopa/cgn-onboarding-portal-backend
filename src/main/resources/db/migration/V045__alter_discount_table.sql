@@ -1,4 +1,3 @@
-ALTER TABLE discount
-    ADD COLUMN eyca_update_id VARCHAR(24);
+ALTER TABLE discount ADD COLUMN eyca_update_id VARCHAR(24);
 
 

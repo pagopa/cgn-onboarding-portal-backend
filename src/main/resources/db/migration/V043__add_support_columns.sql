@@ -9,8 +9,7 @@ CREATE TYPE support_type_enum AS ENUM ('EMAILADDRESS', 'PHONENUMBER','WEBSITE');
 CREATE CAST (character varying AS support_type_enum) WITH INOUT AS ASSIGNMENT;
 
 ALTER TABLE profile
-ALTER
-COLUMN support_type TYPE support_type_enum
+    ALTER COLUMN support_type TYPE support_type_enum
         using support_type::support_type_enum
 
 
