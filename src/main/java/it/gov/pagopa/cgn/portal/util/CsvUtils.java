@@ -15,32 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CsvUtils {
-
-    public static void main (String[] args) {
-        try {
-            InputStream inputStream = new FileInputStream("c:\\develop\\LISTA CODICI GNV__3invio.csv");
-            byte[] content = inputStream.readAllBytes();
-            Pattern pDigits = Pattern.compile("[0-9]");
-            Pattern pAlphab = Pattern.compile("[A-Za-z]");
-
-            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
-                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-                AtomicInteger currentRow = new AtomicInteger(1);
-                csvRecordStream.forEach(line -> {
-                    if (!(StringUtils.isAlphanumeric(line.get(0)) && pDigits.matcher(line.get(0)).find()
-                            && pAlphab.matcher(line.get(0)).find())) {
-                        System.out.println(currentRow.get() + " " + line.get(0));
-                    }
-                    currentRow.incrementAndGet();
-                });
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 	private CsvUtils() {
 	}
 

@@ -23,13 +23,7 @@ public class CGNUtilsTest {
 
     @Test
     public void ValidateImage_ValidateInvalidImage_InvalidRequestException() {
-        byte[] array = null;
-        try {
-            array = new FileInputStream("C:\\develop\\SamplePNGImage_10mbmb.png").readAllBytes();
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", array);
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", new byte[10]);
 
         Exception exception =  Assert.assertThrows(InternalErrorException.class,
                 () -> CGNUtils.validateImage(multipartFile,800, 600));
