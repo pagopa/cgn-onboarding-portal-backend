@@ -55,6 +55,8 @@ public class TestUtils {
 
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
+    public static final String FAKE_OID_1 = "c75020241204020019952562";
+    public static final String FAKE_OID_2 = "c28020241204020019770616";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -606,8 +608,12 @@ public class TestUtils {
     			e.setLatitude(_record.get("latitude"));
     			e.setLongitude(_record.get("longitude"));
     			e.setDiscountType(_record.get("discount_type"));
-    			e.setReferent(Long.valueOf(_record.get("referent")));
-    			
+                e.setStaticCode(_record.get("static_code"));
+                e.setLandingPageUrl(_record.get("landing_page_url"));
+                e.setLandingPageReferrer(_record.get("landing_page_referrer"));
+                e.setReferent(Long.valueOf(_record.get("referent")));
+                e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
+
     		return e;
     	});
     }
@@ -1201,6 +1207,23 @@ public class TestUtils {
         return Optional.of(discount);
     }
 
+    public static ListApiResponseEyca getListApiResponseEyca() {
+        ListApiResponseEyca response = new ListApiResponseEyca();
+        ListApiResponseApiResponseEyca listApiResponseApiResponseEyca = new ListApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> itemsFromEyca = new ArrayList<>();
+        DiscountItemEyca item1 = new DiscountItemEyca();
+        item1.setId(FAKE_OID_1);
+        DiscountItemEyca item2 = new DiscountItemEyca();
+        item2.setId(FAKE_OID_2);
+        itemsFromEyca.add(item1);
+        itemsFromEyca.add(item2);
+        apiResponseApiResponseDataEyca.setDiscount(itemsFromEyca);
+        listApiResponseApiResponseEyca.setData(apiResponseApiResponseDataEyca);
+        response.setApiResponse(listApiResponseApiResponseEyca);
+        return response;
+    }
+
 
     public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
         private String primaryKey;
@@ -1370,9 +1393,5 @@ public class TestUtils {
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
                 .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
-    }
-
-    public static void printMvcResponse(ResultActions resultActions) throws UnsupportedEncodingException {
-        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
     }
 }

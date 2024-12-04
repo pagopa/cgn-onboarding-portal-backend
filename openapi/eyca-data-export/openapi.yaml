@@ -70,27 +70,21 @@ paths:
       description: return list of discounts with paging
       parameters:
         - in: body
-          name: page
-          description: number of pages returned
-          required: true
-          type: integer
-        - in: body
-          name: rows
-          description: number of rows returned, max 10000
-          required: true
-          type: integer
-        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ListDataExport"
+        - in: query
           name: type
           description: type text or json
           required: false
           type: string
       responses:
         '200':
-          description: List of discounts returned
+          description: Discounts found.
           schema:
             $ref: "#/definitions/ListApiResponse"
         '404':
-          description: Not found.
+          description: Discounts not found.
         '500':
           description: Service unavailable.
 
@@ -187,9 +181,17 @@ produces:
   - application/json
 parameters: null
 
-
 definitions:
-
+  ListDataExport:
+    type: object
+    required:
+      - page
+      - rows
+    properties:
+      page:
+        type: integer
+      rows:
+        type: integer
   SearchDataExport:
     type: object
     required:

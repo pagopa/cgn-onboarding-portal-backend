@@ -56,6 +56,10 @@ public class EycaExportService {
         return response;
     }
 
+    public ListApiResponseEyca listDiscounts (ListDataExportEyca listDataExportEyca, String type) {
+        return eycaApi.listDiscount(type, listDataExportEyca);
+    }
+
     public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type) throws RestClientException {
         return eycaApi.createDiscount(type, dataExportEyca);
     }

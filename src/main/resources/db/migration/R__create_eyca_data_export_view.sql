@@ -60,8 +60,8 @@ SELECT
     ) AS "discount_type",
     d.static_code as "static_code",
     d.landing_page_url as "landing_page_url",
-    d.eyca_landing_page_url as "eyca_landing_page_url",
     d.landing_page_referrer as "landing_page_referrer",
+    d.eyca_landing_page_url as "eyca_landing_page_url",
     p.referent_fk as "referent"
 FROM
 	(

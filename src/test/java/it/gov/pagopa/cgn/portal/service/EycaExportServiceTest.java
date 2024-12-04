@@ -39,6 +39,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.internet.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.nimbusds.jose.util.StandardCharset;
 
@@ -533,4 +534,17 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     	Assert.assertFalse(resource.getByteArray().length == 0);
     }
 
+    @Test
+    void testSyncOnEyca_AddItemsToDeleteOnCCDB_ok() {
+        Mockito.doNothing().when(eycaExportService).authenticateOnEyca();
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(),Mockito.any(),Mockito.any(Boolean.class))).thenReturn(TestUtils.getSearchApiResponse());
+
+        Mockito.when(eycaExportService.listDiscounts(Mockito.any(),Mockito.any())).thenReturn(TestUtils.getListApiResponseEyca());
+
+        List<EycaDataExportViewEntity> entityList = TestUtils.getEycaDataExportViewEntityListFromCSV();
+        exportService.syncEycaUpdateIdOnEyca(entityList);
+
+        Assertions.assertEquals(ExportService.LIVE_NO, entityList.stream().filter(d -> TestUtils.FAKE_OID_1.equals(d.getEycaUpdateId())).findAny().get().getLive());
+        Assertions.assertEquals(ExportService.LIVE_NO, entityList.stream().filter(d -> TestUtils.FAKE_OID_2.equals(d.getEycaUpdateId())).findAny().get().getLive());
+    }
 }

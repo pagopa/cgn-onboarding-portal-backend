@@ -120,5 +120,7 @@ public class EycaDataExportViewEntity {
     @Column(name = "referent")
     private Long referent;
 
+    @Column(name = "eyca_landing_page_url")
+    private String eycaLandingPageUrl;
 }
 
