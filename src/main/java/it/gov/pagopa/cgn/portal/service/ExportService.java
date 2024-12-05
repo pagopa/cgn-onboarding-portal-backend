@@ -1,10 +1,9 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.converter.DataExportEycaWrapperConverter;
-import it.gov.pagopa.cgn.portal.converter.UpdateDataExportEycaWrapperConverter;
+import it.gov.pagopa.cgn.portal.converter.*;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
+import it.gov.pagopa.cgn.portal.email.*;
 import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -31,8 +30,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.io.StringWriter;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,8 +40,9 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.*;
+
+import static java.util.stream.Collectors.joining;
 
 @Slf4j
 @Service
@@ -50,6 +50,7 @@ public class ExportService {
 
     public static final String LIVE_YES = "Y";
     public static final String LIVE_NO = "N";
+    public static final String JSON = "json";
 
     private final AgreementRepository agreementRepository;
     private final DiscountRepository discountRepository;
@@ -90,8 +91,11 @@ public class ExportService {
                                                                 "longitude",
                                                                 "SalesChannel",
                                                                 "discount_type",
-                                                                "landingPageReferrer",
-                                                                "referent"};
+                                                                "static_code",
+                                                                "landing_page_url",
+                                                                "landing_page_referrer",
+                                                                "referent",
+                                                                "eyca_landing_page_url"};
 
     private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
                                                                   "Ragione sociale",
@@ -116,6 +120,7 @@ public class ExportService {
                                                                   "Codice statico",
                                                                   "Landing page",
                                                                   "Referer",
+                                                                  "Eyca Landing page",
                                                                   "Id Operatore",
                                                                   "Id Agevolazione"};
 
@@ -145,64 +150,10 @@ public class ExportService {
                                                             "GEO - Longitude",
                                                             "SALES CHANNEL",
                                                             "DISCOUNT TYPE",
-                                                            "LANDING PAGE REFERRER"};
-    private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> agreementWithProfileAndDiscountToStringArray = (agreement, maybeDiscount) -> new String[]{
-            agreement.getState().getCode(),
-            Optional.ofNullable(agreement.getProfile())
-                    .map(ProfileEntity::getFullName).orElse(agreement.getOrganizationName()),
-            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getName).orElse(null),
-            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getNameEn).orElse(null),
-            Optional.ofNullable(agreement.getProfile())
-                    .map(ProfileEntity::getSalesChannel)
-                    .map(SalesChannelEnum::getCode).orElse(null),
-            Optional.ofNullable(agreement.getProfile())
-                    .map(ProfileEntity::getDiscountCodeType)
-                    .map(DiscountCodeTypeEnum::getCode).orElse(null),
-            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getWebsiteUrl).orElse(null),
-            maybeDiscount.map(DiscountEntity::getName).orElse(null),
-            maybeDiscount.map(DiscountEntity::getNameEn).orElse(null),
-            maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
-            maybeDiscount.map(DiscountEntity::getDescriptionEn).orElse(null),
-            maybeDiscount.map(DiscountEntity::getDiscountValue).map(Objects::toString).orElse(null),
-            maybeDiscount.map(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()) &&
-                                   d.getEndDate().compareTo(LocalDate.now()) < 0 ? "EXPIRED":d.getState())
-                         .map(Objects::toString).orElse(null),
-            maybeDiscount.map(DiscountEntity::getStartDate).map(Objects::toString).orElse(null),
-            maybeDiscount.map(DiscountEntity::getEndDate).map(Objects::toString).orElse(null),
-            maybeDiscount.map(DiscountEntity::getVisibleOnEyca).map(Objects::toString).orElse(null),
-            maybeDiscount.map(DiscountEntity::getCondition).orElse(null),
-            maybeDiscount.map(DiscountEntity::getConditionEn).orElse(null),
-            maybeDiscount.map(DiscountEntity::getDiscountUrl).orElse(null),
-            maybeDiscount.map(DiscountEntity::getProducts)
-                         .map(l -> l.stream()
-                                    .map(e -> e.getProductCategory().getDescription())
-                                    .collect(Collectors.joining(", "))).orElse(null),
-            maybeDiscount.map(DiscountEntity::getStaticCode).orElse(null),
-            maybeDiscount.map(DiscountEntity::getLandingPageUrl).orElse(null),
-            maybeDiscount.map(DiscountEntity::getLandingPageReferrer).orElse(null),
-            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getId).map(Objects::toString).orElse(null),
-            maybeDiscount.map(DiscountEntity::getId).map(Objects::toString).orElse(null)};
-    private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
-        List<String[]> agreementRows = agreement.getDiscountList()
-                                                .stream()
-                                                .map(d -> agreementWithProfileAndDiscountToStringArray.apply(agreement,
-                                                                                                             Optional.of(
-                                                                                                                     d)))
-                                                .collect(Collectors.toList());
-
-        if (agreementRows.isEmpty()) {
-            agreementRows.add(agreementWithProfileAndDiscountToStringArray.apply(agreement, Optional.empty()));
-        }
-
-        return agreementRows;
-    };
-    private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
-        try {
-            printer.printRecord(row);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    };
+                                                            "STATIC_CODE",
+                                                            "LANDING_PAGE_URL",
+                                                            "LANDING PAGE REFERRER",
+                                                            "EYCA_LANDING_PAGE_URL",};
     private Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae -> sae.getApiResponse()!=null &&
                                                                                sae.getApiResponse().getData()!=null &&
                                                                                sae.getApiResponse()
@@ -212,6 +163,7 @@ public class ExportService {
                                                                                                       .getData()
                                                                                                       .getDiscounts()
                                                                                                       .getData());
+
 
     public ExportService(AgreementRepository agreementRepository,
                          DiscountRepository discountRepository,
@@ -254,9 +206,7 @@ public class ExportService {
                                  .body(new ByteArrayResource(export));
         } catch (Exception ex) {
             log.error("exportAgreements end failure: " + ex.getMessage());
-            log.error(Arrays.stream(ex.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .collect(Collectors.joining("\n")));
+            log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -296,7 +246,10 @@ public class ExportService {
                                                      r.getLongitude(),
                                                      r.getSalesChannel(),
                                                      r.getDiscountType(),
-                                                     r.getLandingPageReferrer(),})
+                                                     r.getStaticCode(),
+                                                     r.getLandingPageUrl(),
+                                                     r.getLandingPageReferrer(),
+                                                     r.getEycaLandingPageUrl()})
                               .forEach(printerConsumer.apply(printer));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
@@ -311,9 +264,7 @@ public class ExportService {
                                  .body(new ByteArrayResource(export));
         } catch (Exception ex) {
             log.error("exportEycaDiscounts end failure: " + ex.getMessage());
-            log.error(Arrays.stream(ex.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .collect(Collectors.joining("\n")));
+            log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
@@ -358,8 +309,11 @@ public class ExportService {
                                                      r.getLongitude(),
                                                      r.getSalesChannel(),
                                                      r.getDiscountType(),
+                                                     r.getStaticCode(),
+                                                     r.getLandingPageUrl(),
                                                      r.getLandingPageReferrer(),
-                                                     Optional.ofNullable(r.getReferent()).orElse(0L).toString(),})
+                                                     Optional.ofNullable(r.getReferent()).orElse(0L).toString(),
+                                                     r.getEycaLandingPageUrl()})
                               .forEach(printerConsumer.apply(printer));
 
 
@@ -371,16 +325,15 @@ public class ExportService {
         return new ByteArrayResource(new byte[]{});
     }
 
+
     @Transactional(Transactional.TxType.REQUIRED)
-    public ResponseEntity<String> sendDiscountsToEyca() {
+    public void sendDiscountsToEyca() {
 
         try {
 
             Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
             if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
                 log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
-                return ResponseEntity.status(HttpStatus.OK)
-                                     .body("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
             }
 
             log.info("sendDiscountsToEyca start");
@@ -388,11 +341,9 @@ public class ExportService {
 
             if (exportViewEntities.isEmpty()) {
                 log.info("No EYCA data to export");
-                return ResponseEntity.status(HttpStatus.OK).body("No EYCA data to export");
             }
 
-            List<SearchDataExportEyca> itemsToSearchOnEyca = getItemsToSearchOnEyca(exportViewEntities);
-            syncEycaUpdateIdOnEyca(itemsToSearchOnEyca, exportViewEntities);
+            syncEycaUpdateIdOnEyca(exportViewEntities);
 
             //Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
             List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(
@@ -434,84 +385,216 @@ public class ExportService {
                                                buildEycaCsv(deleteOnEycaStream(exportViewEntities).toList())));
             }
 
-            String body = "Discounts to create: " + entitiesToCreateOnEyca.size() + "<br /> Discounts to update: " +
-                          entitiesToUpdateOnEyca.size() + "<br /> Discounts to delete: " +
-                          entitiesToDeleteOnEyca.size();
+            String bodyForAdminForJobEyca =
+                    "Discounts to create: " + entitiesToCreateOnEyca.size() + "<br /> Discounts to update: " +
+                    entitiesToUpdateOnEyca.size() + "<br /> Discounts to delete: " + entitiesToDeleteOnEyca.size();
 
-            log.info("MAIL-BODY: " + body);
-
-            emailNotificationFacade.notifyAdminForJobEyca(attachments, body);
-
+            log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + bodyForAdminForJobEyca);
+            emailNotificationFacade.notifyAdminForJobEyca(attachments, bodyForAdminForJobEyca);
             log.info("sendDiscountsToEyca end success");
 
-            return ResponseEntity.status(HttpStatus.OK).build();
+            if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty()) {
 
+                List<String[]> rowScCreate = getListForStaticCode(entitiesToCreateOnEyca);
+                List<String[]> rowLpCreate = getListForLandingPage(entitiesToCreateOnEyca);
+                rowScCreate.addAll(rowLpCreate);
+
+                List<String[]> rowScUpdate = getListForStaticCode(entitiesToUpdateOnEyca);
+                List<String[]> rowLpUpdate = getListForLandingPage(entitiesToUpdateOnEyca);
+                rowScUpdate.addAll(rowLpUpdate);
+
+                String bodyEycaAdmin = createBody(rowScCreate, rowScUpdate);
+
+                log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
+                emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
+                ;
+                log.info("notifyEycaAdmin end success");
+
+            }
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
-            log.error(Arrays.stream(ex.getStackTrace())
-                            .map(StackTraceElement::toString)
-                            .collect(Collectors.joining("\n")));
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
     }
 
-    public void syncEycaUpdateIdOnEyca(List<SearchDataExportEyca> exportEycaList,
-                                       List<EycaDataExportViewEntity> exportViewEntities) {
+    private <T> List<String[]> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca) {
+        return entitiesForEyca.stream()
+                              .filter(dew -> DiscountCodeTypeEnum.STATIC.getEycaDataCode()
+                                                                        .equals(dew.getDiscountType()))
+                              .map(dew -> new String[]{dew.getEycaUpdateId(),
+                                                       dew.getVendor(),
+                                                       dew.getStaticCode(),
+                                                       dew.getLimitOfUse(),
+                                                       dew.getStartDate(),
+                                                       dew.getEndDate()})
+                              .toList();
+    }
+
+    private <T> List<String[]> getListForLandingPage(List<DataExportEycaWrapper<T>> entitiesForEyca) {
+        return entitiesForEyca.stream()
+                              .filter(dew -> DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode()
+                                                                             .equals(dew.getDiscountType()))
+                              .map(dew -> new String[]{dew.getEycaUpdateId(),
+                                                       dew.getVendor(),
+                                                       dew.getEycaLandingPageUrl(),
+                                                       dew.getLimitOfUse(),
+                                                       dew.getStartDate(),
+                                                       dew.getEndDate()})
+                              .toList();
+    }
+
+    private String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate) {
+        String bodyTemplate =
+                "Hi all, herewith we send you the list of discounts and related references:" + "<br><br />%s<br />%s";
+
+        String tableTitle = "<b><u>%s:</u></b><br><br />%s";
+
+        String[] header = new String[]{"Discount ID(OID)",
+                                       "Discount Provider",
+                                       "Generic Code/URL",
+                                       "Limit of use",
+                                       "Valid from",
+                                       "Valid until"};
+        String tableAndTitleCreate = "";
+        String tableAndTitleUpdate = "";
+        if (rowsForCreate!=null && !rowsForCreate.isEmpty()) {
+            rowsForCreate.add(0, header);
+            String table = generateTable(rowsForCreate);
+            tableAndTitleCreate = String.format(tableTitle, "Created on EYCA (with live=0):", table);
+        }
+        if (rowsForUpdate!=null && !rowsForUpdate.isEmpty()) {
+            rowsForUpdate.add(0, header);
+            String table = generateTable(rowsForUpdate);
+            tableAndTitleUpdate = String.format(tableTitle, "To update on EYCA:", table);
+        }
+
+        return String.format(bodyTemplate, tableAndTitleCreate, tableAndTitleUpdate);
+    }
+
+    public static String generateTable(List<String[]> data) {
+        if (data==null || data.isEmpty()) {
+            return "";
+        }
+
+        // max lengh foreach columns
+        int columnCount = data.get(0).length;
+        int[] columnWidths = IntStream.range(0, columnCount)
+                                      .map(col -> data.stream().mapToInt(row -> row[col].length()).max().orElse(0))
+                                      .toArray();
+
+        // generate table
+        StringBuilder table = new StringBuilder();
+        for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
+            String[] row = data.get(rowIndex);
+
+            // Crea la riga formattata
+            StringBuilder formattedRow = new StringBuilder("|");
+            for (int i = 0; i < row.length; i++) {
+                formattedRow.append(" ").append(String.format("%-" + columnWidths[i] + "s", row[i])).append(" |");
+            }
+            table.append(formattedRow).append("\n");
+
+            if (rowIndex==0) {
+                table.append("|");
+                for (int width : columnWidths) {
+                    table.append("-".repeat(width + 2)).append("|");
+                }
+                table.append("\n");
+            }
+        }
+
+        return table.toString();
+    }
+
+    public void syncEycaUpdateIdOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+
+        List<SearchDataExportEyca> exportEycaList = getItemsToSearchOnEyca(exportViewEntities);
 
         if (exportEycaList.isEmpty()) {
-            log.info("No discounts to search");
+            log.info("No discounts to search for sync eycaUpdateId");
             return;
         }
 
         eycaExportService.authenticateOnEyca();
 
-        log.info("Searching discounts on EYCA...");
+        log.info("Searching discounts on EYCA for sync eycaUpdateId...");
 
         exportEycaList.forEach(exportEyca -> {
 
             log.info("SEARCH SearchDataExportEyca: " + exportEyca.toString());
             SearchApiResponseEyca response = null;
             try {
-                response = eycaExportService.searchDiscount(exportEyca, "json"); //default search, Live=Y
+                if (notExistsDiscountOnEyca(exportEyca)) {
+                    String eycaUpdateId = exportEyca.getId();
+                    DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
+                                                              .orElseThrow(() -> new CGNException(
+                                                                      "Discount with EycaUpdateId: " + eycaUpdateId +
+                                                                      " from eyca not found on Discount table"));
 
-                if (Objects.nonNull(response)) {
-                    log.info("Default Search Response:");
-                    log.info(response.toString());
-                }
-
-                if (notExistsOnEycaPraticate.test(response)) {
-                    exportEyca.setLive(0);
-                    response = eycaExportService.searchDiscount(exportEyca, "json"); //search with Live = N
-
-                    if (Objects.nonNull(response)) {
-                        log.info("Search Response with Live = N:");
-                        log.info(response.toString());
-                    }
-
-                    if (notExistsOnEycaPraticate.test(response)) {
-                        String eycaUpdateId = exportEyca.getId();
-                        DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
-                                                                  .orElseThrow(() -> new CGNException(
-                                                                          "Discount with EycaUpdateId: " +
-                                                                          eycaUpdateId +
-                                                                          " from eyca not found on Discount table"));
-
-                        EycaDataExportViewEntity viewItem = exportViewEntities.stream()
-                                                                              .filter(d -> entity.getEycaUpdateId()
-                                                                                                 .equals(d.getEycaUpdateId()))
-                                                                              .findFirst()
-                                                                              .get();
-                        entity.setEycaUpdateId(null);
-                        discountRepository.saveAndFlush(entity);
-                        viewItem.setEycaUpdateId(null);
-                    }
+                    //remove eycaUpdateId from db and from item with same eycaUpdateId on memory
+                    EycaDataExportViewEntity viewItem = exportViewEntities.stream()
+                                                                          .filter(d -> entity.getEycaUpdateId()
+                                                                                             .equals(d.getEycaUpdateId()))
+                                                                          .findFirst()
+                                                                          .get();
+                    entity.setEycaUpdateId(null);
+                    discountRepository.saveAndFlush(entity);
+                    viewItem.setEycaUpdateId(null);
                 }
             } catch (RestClientException rce) {
                 log.info("SEARCH eycaApi.searchDiscount Exception: " + rce.getMessage());
             }
         });
+
+        log.info("Verifying that discounts to delete on Eyca...");
+
+        /*
+            IMPORTANT: foreach iod present on eyca, verify presence on discounts table. If not, builds simple viewEntity just for delete on CCDB
+            Delete not occur here but after this sync, the viewEntity is only inserted on the exportViewEntities as to be deleted
+        */
+        List<String> iodListOnEyca = getOidListOnEyca();
+        iodListOnEyca.forEach(oid -> {
+            if (discountRepository.findByEycaUpdateId(oid).isEmpty()) {
+                EycaDataExportViewEntity entityToDelete = new EycaDataExportViewEntity();
+                entityToDelete.setEycaUpdateId(oid);
+                entityToDelete.setLive(LIVE_NO);
+                exportViewEntities.add(entityToDelete);
+            }
+        });
+
+
     }
+
+    public List<String> getOidListOnEyca() {
+        final ListDataExportEyca listDataExportEyca = new ListDataExportEyca();
+        listDataExportEyca.setPage(1);
+        listDataExportEyca.setRows(1000);
+        ListApiResponseEyca response = eycaExportService.listDiscounts(listDataExportEyca, JSON);
+        if (response!=null && response.getApiResponse()!=null && response.getApiResponse().getData()!=null &&
+            response.getApiResponse().getData().getDiscount()!=null &&
+            !response.getApiResponse().getData().getDiscount().isEmpty()) {
+
+            List<String> oidList = response.getApiResponse()
+                                           .getData()
+                                           .getDiscount()
+                                           .stream()
+                                           .map(DiscountItemEyca::getId)
+                                           .collect(Collectors.toList());
+            if (!oidList.isEmpty()) {
+                log.info(oidList.toString());
+            }
+            return oidList;
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    boolean notExistsDiscountOnEyca(SearchDataExportEyca exportEyca)
+            throws RestClientException {
+        return notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, false)) &&
+               notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, true));
+    }
+
 
     private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         //Sfrutto lo stream dell'update che verifica la presenza dell'eyca_update_id
@@ -539,6 +622,7 @@ public class ExportService {
         return searchDataExportEyca;
     }
 
+
     private List<DataExportEycaWrapper<UpdateDataExportEyca>> getWrappersToUpdateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         return updateOnEycaStream(exportViewEntities).map(updateDataExportEycaConverter::toDto).toList();
     }
@@ -547,6 +631,7 @@ public class ExportService {
 
         return createOnEycaStream(exportViewEntities).map(dataExportEycaConverter::toDto).toList();
     }
+
 
     private Stream<EycaDataExportViewEntity> deleteOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
         return exportViewEntities.stream()
@@ -583,7 +668,7 @@ public class ExportService {
             log.info("CREATE DataExportEyca: " + CGNUtils.toJson(exportEyca));
             ApiResponseEyca response = null;
             try {
-                response = eycaExportService.createDiscount(exportEyca, "json");
+                response = eycaExportService.createDiscount(exportEyca, JSON);
 
                 if (Objects.nonNull(response)) {
                     log.info("Create Response:");
@@ -625,7 +710,7 @@ public class ExportService {
             ApiResponseEyca response = null;
             try {
 
-                response = eycaExportService.updateDiscount(exportEyca, "json");
+                response = eycaExportService.updateDiscount(exportEyca, JSON);
 
                 if (Objects.nonNull(response)) {
                     log.info("Update Response:");
@@ -636,6 +721,7 @@ public class ExportService {
             }
         });
     }
+
 
     private void deleteDiscountsOnEyca(List<DeleteDataExportEyca> exportEycaList) {
 
@@ -652,7 +738,7 @@ public class ExportService {
             log.info("DELETE DeleteDataExportEyca: " + exportEyca.toString());
             DeleteApiResponseEyca response = null;
             try {
-                response = eycaExportService.deleteDiscount(exportEyca, "json");
+                response = eycaExportService.deleteDiscount(exportEyca, JSON);
 
                 if (Objects.nonNull(response)) {
                     log.info("Delete Response:");
@@ -671,4 +757,64 @@ public class ExportService {
             }
         });
     }
+
+    private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> agreementWithProfileAndDiscountToStringArray = (agreement, maybeDiscount) -> new String[]{
+            agreement.getState().getCode(),
+            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getFullName).orElse(agreement.getOrganizationName()),
+            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getName).orElse(null),
+            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getNameEn).orElse(null),
+            Optional.ofNullable(agreement.getProfile())
+                    .map(ProfileEntity::getSalesChannel)
+                    .map(SalesChannelEnum::getCode).orElse(null),
+            Optional.ofNullable(agreement.getProfile())
+                    .map(ProfileEntity::getDiscountCodeType)
+                    .map(DiscountCodeTypeEnum::getCode).orElse(null),
+            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getWebsiteUrl).orElse(null),
+            maybeDiscount.map(DiscountEntity::getName).orElse(null),
+            maybeDiscount.map(DiscountEntity::getNameEn).orElse(null),
+            maybeDiscount.map(DiscountEntity::getDescription).orElse(null),
+            maybeDiscount.map(DiscountEntity::getDescriptionEn).orElse(null),
+            maybeDiscount.map(DiscountEntity::getDiscountValue).map(Objects::toString).orElse(null),
+            maybeDiscount.map(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()) &&
+                                   d.getEndDate().compareTo(LocalDate.now()) < 0 ? "EXPIRED":d.getState())
+                         .map(Objects::toString).orElse(null),
+            maybeDiscount.map(DiscountEntity::getStartDate).map(Objects::toString).orElse(null),
+            maybeDiscount.map(DiscountEntity::getEndDate).map(Objects::toString).orElse(null),
+            maybeDiscount.map(DiscountEntity::getVisibleOnEyca).map(Objects::toString).orElse(null),
+            maybeDiscount.map(DiscountEntity::getCondition).orElse(null),
+            maybeDiscount.map(DiscountEntity::getConditionEn).orElse(null),
+            maybeDiscount.map(DiscountEntity::getDiscountUrl).orElse(null),
+            maybeDiscount.map(DiscountEntity::getProducts)
+                         .map(l -> l.stream()
+                                    .map(e -> e.getProductCategory().getDescription())
+                                    .collect(joining(", "))).orElse(null),
+            maybeDiscount.map(DiscountEntity::getStaticCode).orElse(null),
+            maybeDiscount.map(DiscountEntity::getLandingPageUrl).orElse(null),
+            maybeDiscount.map(DiscountEntity::getLandingPageReferrer).orElse(null),
+            maybeDiscount.map(DiscountEntity::getEycaLandingPageUrl).orElse(null),
+            Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getId).map(Objects::toString).orElse(null),
+            maybeDiscount.map(DiscountEntity::getId).map(Objects::toString).orElse(null)};
+
+    private final Function<AgreementEntity, List<String[]>> expandAgreementToList = agreement -> {
+        List<String[]> agreementRows = agreement.getDiscountList()
+                                                .stream()
+                                                .map(d -> agreementWithProfileAndDiscountToStringArray.apply(agreement,
+                                                                                                             Optional.of(
+                                                                                                                     d)))
+                                                .collect(Collectors.toList());
+
+        if (agreementRows.isEmpty()) {
+            agreementRows.add(agreementWithProfileAndDiscountToStringArray.apply(agreement, Optional.empty()));
+        }
+
+        return agreementRows;
+    };
+
+    private final Function<CSVPrinter, Consumer<String[]>> printerConsumer = printer -> row -> {
+        try {
+            printer.printRecord(row);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    };
 }

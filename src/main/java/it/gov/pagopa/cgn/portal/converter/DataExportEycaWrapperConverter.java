@@ -10,7 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,15 +22,28 @@ public class DataExportEycaWrapperConverter
 
     @Value("${eyca.api.debug}")
     boolean eycaApiDebug;
+
+    @Override
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDtoFunction() {
+        return toDto;
+    }
+
+    @Override
+    protected Function<DataExportEycaWrapper<DataExportEyca>, EycaDataExportViewEntity> toEntityFunction() {
+        return null;
+    }
+
     protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDto = entity -> {
 
         DataExportEyca dataExport = new DataExportEyca();
 
         int result = 0;
 
-        if (!eycaApiDebug && ExportService.LIVE_YES.equals(entity.getLive()) &&
-            !(StringUtils.isBlank(entity.getEycaUpdateId()) &&
-              entity.getDiscountType().equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
+        if (!eycaApiDebug && !(DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(entity.getDiscountType()) ||
+                               DiscountCodeTypeEnum.STATIC.getEycaDataCode().equals(entity.getDiscountType())) &&
+            ExportService.LIVE_YES.equals(entity.getLive()) && !(StringUtils.isBlank(entity.getEycaUpdateId()) &&
+                                                                 entity.getDiscountType()
+                                                                       .equals(DiscountCodeTypeEnum.BUCKET.getEycaDataCode()))) {
             result = 1;
         }
 
@@ -53,17 +68,13 @@ public class DataExportEycaWrapperConverter
         DataExportEycaWrapper<DataExportEyca> dto = new DataExportEycaWrapper<>(dataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
-
+        dto.setDiscountType(entity.getDiscountType());
+        dto.setVendor(entity.getVendor());
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setLimitOfUse("No Limit");
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         return dto;
     };
-
-    @Override
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDtoFunction() {
-        return toDto;
-    }
-
-    @Override
-    protected Function<DataExportEycaWrapper<DataExportEyca>, EycaDataExportViewEntity> toEntityFunction() {
-        return null;
-    }
 }

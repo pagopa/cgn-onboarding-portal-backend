@@ -59,6 +59,35 @@ paths:
         '500':
           description: Service unavailable.
 
+  /api/list_discount:
+    post:
+      security:
+        - Bearer: [ ]
+      operationId: listDiscount
+      tags:
+        - Eyca
+      summary: return list of discounts with paging
+      description: return list of discounts with paging
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ListDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discounts found.
+          schema:
+            $ref: "#/definitions/ListApiResponse"
+        '404':
+          description: Discounts not found.
+        '500':
+          description: Service unavailable.
+
   /api/create_discount:
     post:
       security:
@@ -120,10 +149,10 @@ paths:
   /api/delete_discount:
     post:
       security:
-      - Bearer: [ ]
+        - Bearer: [ ]
       operationId: deleteDiscount
       tags:
-      - Eyca
+        - Eyca
       summary: delete a discount.
       description: delete a discount.
       parameters:
@@ -152,9 +181,17 @@ produces:
   - application/json
 parameters: null
 
-
 definitions:
-
+  ListDataExport:
+    type: object
+    required:
+      - page
+      - rows
+    properties:
+      page:
+        type: integer
+      rows:
+        type: integer
   SearchDataExport:
     type: object
     required:
@@ -258,7 +295,7 @@ definitions:
   DeleteDataExport:
     type: object
     required:
-        - id
+      - id
     properties:
       id:
         type: string
@@ -283,8 +320,8 @@ definitions:
           data:
             properties:
               discount:
-               type: array
-               items:
+                type: array
+                items:
                   $ref: "#/definitions/DiscountItem"
           error:
             type: integer
@@ -332,6 +369,32 @@ definitions:
                   count:
                     type: integer
 
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+          code:
+            type: integer
+            example: 1
+
+  ListApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: object
+            properties:
+              discount:
+                type: array
+                items:
+                  $ref: "#/definitions/DiscountItem"
           error:
             type: integer
             example: 0

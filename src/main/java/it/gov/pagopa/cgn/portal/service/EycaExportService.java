@@ -6,9 +6,13 @@ import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
+import java.util.Objects;
+
+@Slf4j
 @Service
 public class EycaExportService {
 
@@ -34,9 +38,26 @@ public class EycaExportService {
         apiClient.addDefaultCookie("ccdb_session", sessionId);
     }
 
-    public SearchApiResponseEyca searchDiscount(SearchDataExportEyca searchDataExportEyca, String type)
+    public SearchApiResponseEyca searchDiscount(SearchDataExportEyca searchDataExportEyca, String type, boolean liveN)
             throws RestClientException {
-        return eycaApi.searchDiscount(type, searchDataExportEyca);
+        if (liveN) {
+            searchDataExportEyca.setLive(0);
+            log.info("Search Response with Live = N:");
+        } else {
+            log.info("Search Response with Live = S");
+        }
+        SearchApiResponseEyca response = null;
+        response = eycaApi.searchDiscount(type, searchDataExportEyca);
+
+        if (Objects.nonNull(response)) {
+            log.info(response.toString());
+        }
+
+        return response;
+    }
+
+    public ListApiResponseEyca listDiscounts(ListDataExportEyca listDataExportEyca, String type) {
+        return eycaApi.listDiscount(type, listDataExportEyca);
     }
 
     public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type)
