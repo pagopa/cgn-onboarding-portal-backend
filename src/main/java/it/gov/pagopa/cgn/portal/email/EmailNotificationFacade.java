@@ -336,22 +336,13 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyEycaAdminForStaticCodes(String body) {
-        String subject = "Sending the opportunities for Static Code " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
+    public void notifyEycaAdmin(String body) {
+        String subject = "Discounts for Generic Code/URLs " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
         String failureMessage = "It is not possible to send the email to Eyca admin";
         EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")), subject, body,
                 failureMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
-
-    public void notifyEycaAdminForLandingPage(String body) {
-        String subject = "Sending the opportunities for Landing Page " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
-        String failureMessage = "It is not possible to send the email to Eyca admin";
-        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")), subject, body,
-                failureMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
-    }
-
 
     private String getTemplateHtml(TemplateEmail template) {
         return getTemplateHtml(template, new Context());

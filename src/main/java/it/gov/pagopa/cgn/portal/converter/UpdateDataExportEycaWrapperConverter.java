@@ -8,9 +8,11 @@ import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
 
 @Service
@@ -49,6 +51,12 @@ public class UpdateDataExportEycaWrapperConverter extends AbstractConverter<Eyca
         DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<UpdateDataExportEyca>(updateDataExportEyca);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
+        dto.setVendor(entity.getVendor());
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setLimitOfUse("No Limit");
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
 
         return dto;
     };

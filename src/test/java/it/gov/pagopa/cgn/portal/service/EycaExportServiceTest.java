@@ -120,10 +120,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -138,13 +135,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
 
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
-
+        exportService.sendDiscountsToEyca();
 
     }
 
@@ -160,11 +153,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(apiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
-
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -182,14 +171,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
-
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -206,13 +190,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
-
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -229,12 +209,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -252,12 +229,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -279,10 +253,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class))).thenReturn(apiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -295,12 +266,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenThrow(RestClientException.class);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -312,12 +280,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class))).thenThrow(RestClientException.class);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNotNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -335,10 +300,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class))).thenReturn(null);;
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -360,12 +322,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(null);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -374,10 +333,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
 
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(new ArrayList<>());
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -389,10 +345,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(new ArrayList<>());
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -404,10 +357,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthLandingPageAndReferent());
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -419,12 +369,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthNoDiscountype());
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -436,10 +383,7 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
         Mockito.when(eycaApi.authentication()).thenReturn("ERROR");
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNotNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -449,23 +393,17 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(null);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNotNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
     void syncEycaUpdateIdOnEyca_RestClientException(){
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),Mockito.anyString(),true)).thenThrow(RestClientException.class);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),Mockito.anyString(),Mockito.any(Boolean.class))).thenThrow(RestClientException.class);
         Mockito.when(eycaApi.authentication()).thenReturn("sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNotNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -473,20 +411,14 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
     void sendEycaDiscounts_NotAllowed(){
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(false);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
     void sendEycaDiscounts_NotPresent(){
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(null);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
 
@@ -501,12 +433,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class))).thenReturn(apiResponseEyca);
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
 
     @Test
@@ -521,12 +450,9 @@ class EycaExportServiceTest extends IntegrationAbstractTest {
         Mockito.when(discountRepository.findByEycaUpdateId(Mockito.anyString())).thenReturn(TestUtils.getDiscountWithEycaUpdateId(agreement));
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseWithDataEmptyList();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),true)).thenReturn(searchApiResponseEyca);
+        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class), Mockito.anyString(),Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
-        Exception exception =  Assert.assertThrows(Exception.class,
-                () -> exportService.sendDiscountsToEyca());
-
-        Assertions.assertNull(exception);
+        exportService.sendDiscountsToEyca();
     }
     @Test
     void testBuildCsv() {

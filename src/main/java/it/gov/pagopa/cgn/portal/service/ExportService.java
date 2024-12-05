@@ -97,7 +97,8 @@ public class ExportService {
             "static_code",
             "landing_page_url",
             "landing_page_referrer",
-            "referent"
+            "referent",
+            "eyca_landing_page_url"
     };
 
     private final String[] exportAgreementsHeaders = new String[]{
@@ -124,6 +125,7 @@ public class ExportService {
             "Codice statico",
             "Landing page",
             "Referer",
+            "Eyca Landing page",
             "Id Operatore",
             "Id Agevolazione"};
 
@@ -156,7 +158,8 @@ public class ExportService {
             "DISCOUNT TYPE",
             "STATIC_CODE",
             "LANDING_PAGE_URL",
-            "LANDING PAGE REFERRER"
+            "LANDING PAGE REFERRER",
+            "EYCA_LANDING_PAGE_URL",
     };
     private Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae ->
             sae.getApiResponse() != null &&
@@ -248,6 +251,7 @@ public class ExportService {
                             r.getStaticCode(),
                             r.getLandingPageUrl(),
                             r.getLandingPageReferrer(),
+                            r.getEycaLandingPageUrl()
                             })
                     .forEach(printerConsumer.apply(printer));
 
@@ -313,6 +317,7 @@ public class ExportService {
                     r.getLandingPageUrl(),
                     r.getLandingPageReferrer(),
                     Optional.ofNullable(r.getReferent()).orElse(0L).toString(),
+                    r.getEycaLandingPageUrl()
                     })
             .forEach(printerConsumer.apply(printer));
 
@@ -392,19 +397,17 @@ public class ExportService {
 
                 List<String[]> rowScCreate = getListForStaticCode(entitiesToCreateOnEyca);
                 List<String[]> rowLpCreate = getListForLandingPage(entitiesToCreateOnEyca);
+                rowScCreate.addAll(rowLpCreate);
 
                 List<String[]> rowScUpdate = getListForStaticCode(entitiesToUpdateOnEyca);
                 List<String[]> rowLpUpdate = getListForLandingPage(entitiesToUpdateOnEyca);
+                rowScUpdate.addAll(rowLpUpdate);
 
-                String bodyEycaAdmin = createBody(rowScCreate,rowScUpdate, STATIC_CODE);
-                log.info("MAIL-BODY-SC-EYCA: "+bodyEycaAdmin);
-                emailNotificationFacade.notifyEycaAdminForStaticCodes(bodyEycaAdmin);
-                log.info("notifyEycaAdminForStaticCodes for Static Code end success");
+                String bodyEycaAdmin = createBody(rowScCreate,rowScUpdate);
 
-                bodyEycaAdmin = createBody(rowLpCreate, rowLpUpdate, LANDING_PAGE);
-                log.info("MAIL-BODY-LP-EYCA: "+bodyEycaAdmin);
-                emailNotificationFacade.notifyEycaAdminForLandingPage(bodyEycaAdmin);
-                log.info("notifyEycaAdminForLandingPage for Landing Page end success");
+                log.info("MAIL-BODY-ADMIN-EYCA: "+bodyEycaAdmin);
+                emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);;
+                log.info("notifyEycaAdmin end success");
 
             }
         } catch (Exception ex) {
@@ -418,53 +421,76 @@ public class ExportService {
     private <T> List<String[]> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca) {
         return entitiesForEyca.stream()
                 .filter(dew -> DiscountCodeTypeEnum.STATIC.getEycaDataCode().equals(dew.getDiscountType()))
-                .map(dew -> new String[]{dew.getEycaUpdateId(), dew.getStaticCode()}).toList();
+                .map(dew -> new String[]{dew.getEycaUpdateId(),dew.getVendor(),dew.getStaticCode(),dew.getLimitOfUse(),dew.getStartDate(),dew.getEndDate()}).toList();
     }
 
     private <T> List<String[]> getListForLandingPage(List<DataExportEycaWrapper<T>> entitiesForEyca) {
         return entitiesForEyca.stream()
                 .filter(dew -> DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode().equals(dew.getDiscountType()))
-                .map(dew -> new String[]{dew.getEycaUpdateId(), dew.getLandingPageUrl()}).toList();
+                .map(dew -> new String[]{dew.getEycaUpdateId(),dew.getVendor(),dew.getEycaLandingPageUrl(),dew.getLimitOfUse(),dew.getStartDate(),dew.getEndDate()}).toList();
     }
 
-    private String createBody(List<String[]> rowsForCreate,List<String[]> rowsForUpdate, String codeType) {
-       String bodyTemplate = "Hi all, herewith we send you the list of discounts and related references:"
-                +"<br><br />"
-                +"<b><u>List of discounts with %s:</u></b>"
-                +"<br><br /> %s";
-       rowsForCreate.add(0, new String[]{"OID", codeType});
-       rowsForUpdate.add(0, new String[]{"OID", codeType});
+    private String createBody(List<String[]> rowsForCreate,List<String[]> rowsForUpdate) {
+        String bodyTemplate = "Hi all, herewith we send you the list of discounts and related references:"
+                +"<br><br />%s<br />%s";
 
-       final int maxColOid = getMaxColLength(rowsForCreate,0);
-       final int maxColCodeType = getMaxColLength(rowsForCreate,1);
+        String tableTitle = "<b><u>%s:</u></b><br><br />%s";
 
-       String fRowHeaderCr = getFormattedRowHeader(rowsForCreate, maxColOid, maxColCodeType);
-       String fRowsCr = getFormattedRows(rowsForCreate, maxColOid, maxColCodeType);
+        String[] header = new String[]{"Discount ID(OID)", "Discount Provider", "Generic Code/URL", "Limit of use", "Valid from", "Valid until"};
+        String tableAndTitleCreate = "";
+        String tableAndTitleUpdate = "";
+        if(rowsForCreate != null && !rowsForCreate.isEmpty()) {
+            rowsForCreate.add(0, header);
+            String table = generateTable(rowsForCreate);
+            tableAndTitleCreate = String.format(tableTitle,"Created on EYCA (with live=0):", table);
+        }
+        if(rowsForUpdate != null && !rowsForUpdate.isEmpty()) {
+            rowsForUpdate.add(0, header);
+            String table = generateTable(rowsForUpdate);
+            tableAndTitleUpdate = String.format(tableTitle,"To update on EYCA:", table);
+        }
 
-       String fRowHeaderUp = getFormattedRowHeader(rowsForUpdate, maxColOid, maxColCodeType);
-       String fRowsUp = getFormattedRows(rowsForUpdate, maxColOid, maxColCodeType);
-
-        String tableContent = Stream.of(
-                        !rowsForCreate.isEmpty() ? fRowHeaderCr+fRowsCr : null,
-                        !rowsForUpdate.isEmpty() ? fRowHeaderUp+fRowsUp : null
-                )
-                .filter(Objects::nonNull)
-                .collect(joining("<br />"));
-
-        return String.format(bodyTemplate,codeType,tableContent);
+        return String.format(bodyTemplate,tableAndTitleCreate,tableAndTitleUpdate);
     }
 
-    private String getFormattedRows(List<String[]> rowsForCreate, int maxColOid, int maxColCodeType) {
-        return rowsForCreate.stream().skip(1).map((r) -> String.format("s%-" + maxColOid + "s%-" + maxColCodeType + "s <br><br />", r[0], r[1]))
-                .collect(joining());
-    }
+    public static String generateTable(List<String[]> data) {
+        if (data == null || data.isEmpty()) {
+            return "";
+        }
 
-    private String getFormattedRowHeader(List<String[]> rows, int maxColOid, int maxColCodeType) {
-        return String.format("<b>%-" + maxColOid + "s%-" + maxColCodeType + "s </b> <br><br />", rows.get(0)[0], rows.get(0)[1]);
-    }
+        // max lengh foreach columns
+        int columnCount = data.get(0).length;
+        int[] columnWidths = IntStream.range(0, columnCount)
+                .map(col -> data.stream()
+                        .mapToInt(row -> row[col].length())
+                        .max()
+                        .orElse(0))
+                .toArray();
 
-    private static int getMaxColLength(List<String[]> rows, int col) {
-        return rows.stream().mapToInt(r -> r[col].length()).max().orElse(0) + 2;
+        // generate table
+        StringBuilder table = new StringBuilder();
+        for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
+            String[] row = data.get(rowIndex);
+
+            // Crea la riga formattata
+            StringBuilder formattedRow = new StringBuilder("|");
+            for (int i = 0; i < row.length; i++) {
+                formattedRow.append(" ")
+                        .append(String.format("%-" + columnWidths[i] + "s", row[i]))
+                        .append(" |");
+            }
+            table.append(formattedRow).append("\n");
+
+            if (rowIndex == 0) {
+                table.append("|");
+                for (int width : columnWidths) {
+                    table.append("-".repeat(width + 2)).append("|");
+                }
+                table.append("\n");
+            }
+        }
+
+        return table.toString();
     }
 
     public void syncEycaUpdateIdOnEyca(List<EycaDataExportViewEntity> exportViewEntities){
@@ -760,6 +786,8 @@ public class ExportService {
             maybeDiscount.map(DiscountEntity::getLandingPageUrl).orElse(
                     null),
             maybeDiscount.map(DiscountEntity::getLandingPageReferrer).orElse(
+                    null),
+            maybeDiscount.map(DiscountEntity::getEycaLandingPageUrl).orElse(
                     null),
             Optional.ofNullable(agreement.getProfile()).map(ProfileEntity::getId)
                     .map(Objects::toString).orElse(null),

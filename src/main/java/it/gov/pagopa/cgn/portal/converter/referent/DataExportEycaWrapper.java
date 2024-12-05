@@ -23,7 +23,15 @@ public class DataExportEycaWrapper<T>{
     @JsonIgnore
     private String staticCode;
     @JsonIgnore
-    private String landingPageUrl;
+    private String eycaLandingPageUrl;
+    @JsonIgnore
+    private String vendor;
+    @JsonIgnore
+    private String limitOfUse;
+    @JsonIgnore
+    private String startDate;
+    @JsonIgnore
+    private String endDate;
 
     @ToString.Exclude
     private T dataExportEyca;
