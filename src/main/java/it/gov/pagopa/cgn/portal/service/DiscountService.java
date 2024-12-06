@@ -78,6 +78,7 @@ public class DiscountService {
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
         dbEntity.setVisibleOnEyca(toUpdateEntity.getVisibleOnEyca());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
+        dbEntity.setEycaLandingPageUrl(toUpdateEntity.getEycaLandingPageUrl());
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
         dbEntity.setLastBucketCodeLoadUid(toUpdateEntity.getLastBucketCodeLoadUid());
         dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
