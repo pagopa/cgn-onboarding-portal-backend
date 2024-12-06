@@ -70,8 +70,8 @@ public class DataExportEycaWrapperConverter
         dto.setDiscountID(entity.getDiscountId());
         dto.setDiscountType(entity.getDiscountType());
         dto.setVendor(entity.getVendor());
-        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
-        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
         dto.setLimitOfUse("No Limit");
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());

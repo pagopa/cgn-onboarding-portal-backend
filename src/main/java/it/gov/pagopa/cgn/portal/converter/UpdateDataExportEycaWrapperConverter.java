@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Function;
 
 @Service
@@ -54,8 +55,8 @@ public class UpdateDataExportEycaWrapperConverter
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
         dto.setVendor(entity.getVendor());
-        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
-        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
         dto.setLimitOfUse("No Limit");
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());

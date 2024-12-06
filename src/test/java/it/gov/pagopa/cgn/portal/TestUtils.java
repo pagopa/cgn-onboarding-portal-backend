@@ -24,18 +24,15 @@ import it.gov.pagopa.cgnonboardingportal.model.*;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.ResultActions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1042,7 +1039,7 @@ public class TestUtils {
         return suspendDiscount;
     }
 
-    public static SearchApiResponseEyca getSearchApiResponse() {
+    public static SearchApiResponseEyca getSearchApiResponseEyca() {
         SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
         SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
         SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
@@ -1050,9 +1047,8 @@ public class TestUtils {
 
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
-        discountItemEyca.setId("75894754th8t72vb93");
+        discountItemEyca.setId(FAKE_OID_1);
         items.add(discountItemEyca);
-
 
         searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
         searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
@@ -1082,7 +1078,7 @@ public class TestUtils {
         ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
-        discountItemEyca.setId("75894754th8t72vb93");
+        discountItemEyca.setId(FAKE_OID_1);
 
         items.add(discountItemEyca);
         apiResponseDataEyca.setDiscount(items);
@@ -1403,6 +1399,11 @@ public class TestUtils {
                 return null;
             }
         };
+    }
+
+    public static SearchDataExportEyca createEmptySearchDataExportEyca() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+        return searchDataExportEyca;
     }
 
     public static void setOperatorAuth() {

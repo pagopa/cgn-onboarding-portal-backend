@@ -7,20 +7,17 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.*;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClientException;
@@ -38,8 +33,9 @@ import javax.mail.*;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.nimbusds.jose.util.StandardCharset;
 
@@ -49,9 +45,10 @@ class EycaExportServiceTest
         extends IntegrationAbstractTest {
 
 
-    private EycaApi eycaApi;
+    private EycaApi eycaApiMock;
     private EycaDataExportRepository eycaDataExportRepository;
     private ExportService exportService;
+    private EycaExportService eycaExportServiceMock;
     private EycaExportService eycaExportService;
 
     private ConfigProperties configProperties;
@@ -89,21 +86,24 @@ class EycaExportServiceTest
         discountRepository = Mockito.mock(DiscountRepository.class);
 
         configProperties = Mockito.mock(ConfigProperties.class);
-        eycaApi = Mockito.mock(EycaApi.class);
-        Mockito.when(eycaApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
+        eycaApiMock = Mockito.mock(EycaApi.class);
+        Mockito.when(eycaApiMock.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
+
+        eycaExportService = new EycaExportService(eycaApiMock,configProperties);
+
 
         DataExportEycaWrapperConverter dataExportEycaConverter = new DataExportEycaWrapperConverter();
         UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter = new UpdateDataExportEycaWrapperConverter();
 
         EmailNotificationFacade emailNotificationFacade = Mockito.mock(EmailNotificationFacade.class);
 
-        eycaExportService = Mockito.mock(EycaExportService.class);
+        eycaExportServiceMock = Mockito.mock(EycaExportService.class);
 
         exportService = new ExportService(agreementRepository,
                                           discountRepository,
                                           eycaDataExportRepository,
                                           configProperties,
-                                          eycaExportService,
+                                          eycaExportServiceMock,
                                           dataExportEycaConverter,
                                           updateDataExportEycaConverter,
                                           emailNotificationFacade);
@@ -114,7 +114,7 @@ class EycaExportServiceTest
     private void initMockitoPreconditions() {
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
-        Mockito.when(eycaApi.authentication())
+        Mockito.when(eycaApiMock.authentication())
                .thenReturn(
                        "sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
     }
@@ -127,7 +127,7 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
         exportService.sendDiscountsToEyca();
@@ -141,12 +141,12 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
 
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -164,7 +164,7 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
         exportService.sendDiscountsToEyca();
@@ -181,13 +181,13 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getIncompleteApiResponse_0();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -204,13 +204,13 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getIncompleteApiResponse_1();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -227,13 +227,13 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getIncompleteApiResponse_2();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -251,13 +251,13 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -282,7 +282,7 @@ class EycaExportServiceTest
 
         DeleteApiResponseEyca apiResponseEyca = TestUtils.getDeleteApiResponse();
 
-        Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
+        Mockito.when(eycaApiMock.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
         exportService.sendDiscountsToEyca();
@@ -294,14 +294,14 @@ class EycaExportServiceTest
         initMockitoPreconditions();
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getRealDataList());
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenThrow(RestClientException.class);
         ;
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenThrow(RestClientException.class);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -315,11 +315,11 @@ class EycaExportServiceTest
         Mockito.when(eycaDataExportRepository.findAll())
                .thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
 
-        Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
+        Mockito.when(eycaApiMock.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
                .thenThrow(RestClientException.class);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -340,7 +340,7 @@ class EycaExportServiceTest
         Mockito.when(eycaDataExportRepository.findAll())
                .thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
 
-        Mockito.when(eycaApi.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
+        Mockito.when(eycaApiMock.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
                .thenReturn(null);
         ;
 
@@ -363,12 +363,12 @@ class EycaExportServiceTest
         Mockito.when(discountRepository.findByEycaUpdateId("c34020231110173110208108"))
                .thenReturn(Optional.of(discountEntity));
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(null);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class))).thenReturn(null);
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(null);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -416,8 +416,8 @@ class EycaExportServiceTest
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getListWIthNoDiscountype());
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -431,7 +431,7 @@ class EycaExportServiceTest
 
         Mockito.when(configProperties.getEycaNotAllowedDiscountModes()).thenReturn("mode0, mode1, mode2");
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
-        Mockito.when(eycaApi.authentication()).thenReturn("ERROR");
+        Mockito.when(eycaApiMock.authentication()).thenReturn("ERROR");
 
         exportService.sendDiscountsToEyca();
     }
@@ -450,10 +450,10 @@ class EycaExportServiceTest
     void syncEycaUpdateIdOnEyca_RestClientException() {
         Mockito.when(configProperties.getEycaExportEnabled()).thenReturn(true);
         Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenThrow(RestClientException.class);
-        Mockito.when(eycaApi.authentication())
+        Mockito.when(eycaApiMock.authentication())
                .thenReturn(
                        "sessionId:057c086f78cb1464c086e2cfa848cfa9a0cbfff4397452d9676e66ca8783587ab306a8e7f2bcb857c1062ab51484bcffdd6589c42e3aa373bdc76cc3ec03de86");
 
@@ -483,13 +483,13 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
 
-        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponse();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -503,15 +503,15 @@ class EycaExportServiceTest
 
         ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
 
-        Mockito.when(eycaApi.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
+        Mockito.when(eycaApiMock.createDiscount(Mockito.anyString(), Mockito.any(DataExportEyca.class)))
                .thenReturn(apiResponseEyca);
-        Mockito.when(eycaApi.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
+        Mockito.when(eycaApiMock.updateDiscount(Mockito.anyString(), Mockito.any(UpdateDataExportEyca.class)))
                .thenReturn(apiResponseEyca);
         Mockito.when(discountRepository.findByEycaUpdateId(Mockito.anyString()))
                .thenReturn(TestUtils.getDiscountWithEycaUpdateId(agreement));
 
         SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseWithDataEmptyList();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
                                                       Mockito.anyString(),
                                                       Mockito.any(Boolean.class))).thenReturn(searchApiResponseEyca);
 
@@ -526,11 +526,11 @@ class EycaExportServiceTest
 
     @Test
     void testSyncOnEyca_AddItemsToDeleteOnCCDB_ok() {
-        Mockito.doNothing().when(eycaExportService).authenticateOnEyca();
-        Mockito.when(eycaExportService.searchDiscount(Mockito.any(), Mockito.any(), Mockito.any(Boolean.class)))
-               .thenReturn(TestUtils.getSearchApiResponse());
+        Mockito.doNothing().when(eycaExportServiceMock).authenticateOnEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(), Mockito.any(), Mockito.any(Boolean.class)))
+               .thenReturn(TestUtils.getSearchApiResponseEyca());
 
-        Mockito.when(eycaExportService.listDiscounts(Mockito.any(), Mockito.any()))
+        Mockito.when(eycaExportServiceMock.listDiscounts(Mockito.any(), Mockito.any()))
                .thenReturn(TestUtils.getListApiResponseEyca());
 
         List<EycaDataExportViewEntity> entityList = TestUtils.getEycaDataExportViewEntityListFromCSV();
@@ -548,5 +548,93 @@ class EycaExportServiceTest
                                           .findAny()
                                           .get()
                                           .getLive());
+    }
+
+    @Test
+    void testSearchDiscount_LiveN_false() {
+        SearchApiResponseEyca resp = TestUtils.getSearchApiResponseEyca();
+        resp.getApiResponse().getData().getDiscounts().getData().get(0).setLive(1);
+
+        Mockito.when(eycaApiMock.searchDiscount(Mockito.any(), Mockito.any()))
+               .thenReturn(resp);
+
+        SearchApiResponseEyca response = eycaExportService.searchDiscount(TestUtils.createEmptySearchDataExportEyca(),"json",false);
+
+        Assertions.assertEquals(ExportService.LIVE_YES_INT,
+                                response.getApiResponse().getData().getDiscounts().getData().get(0)
+                                          .getLive());
+
+    }
+
+    @Test
+    void testSearchDiscount_LiveN_true() {
+        SearchApiResponseEyca resp = TestUtils.getSearchApiResponseEyca();
+        resp.getApiResponse().getData().getDiscounts().getData().get(0).setLive(0);
+
+        Mockito.when(eycaApiMock.searchDiscount(Mockito.any(), Mockito.any()))
+               .thenReturn(resp);
+
+        SearchApiResponseEyca response = eycaExportService.searchDiscount(TestUtils.createEmptySearchDataExportEyca(),"json",true);
+
+        Assertions.assertEquals(ExportService.LIVE_NO_INT,
+                                response.getApiResponse().getData().getDiscounts().getData().get(0)
+                                        .getLive());
+
+    }
+
+    @Test
+    void testCreateBodyAll_Ok() {
+        List<String[]> rowsForCreate = new ArrayList<>();
+        rowsForCreate.add( new String[]{TestUtils.FAKE_OID_1,
+                                        "Amazon",
+                                        "CYBERMONDAY24",
+                                        "No limit",
+                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
+                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+
+        List<String[]> rowsForUpdate = new ArrayList<>();
+
+        rowsForUpdate.add( new String[]{TestUtils.FAKE_OID_2,
+                                        "Uci Cinemas",
+                                        "CHRISTMAS24",
+                                        "No limit",
+                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
+                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+
+        String body = exportService.createBody(rowsForCreate,rowsForUpdate);
+
+        Assert.assertTrue(body.contains("Created") && body.contains("update"));
+    }
+
+    @Test
+    void testCreateBodyOneOfOrNothing_Ok() {
+        List<String[]> rowsForCreate = new ArrayList<>();
+        rowsForCreate.add( new String[]{TestUtils.FAKE_OID_1,
+                                        "Amazon",
+                                        "CYBERMONDAY24",
+                                        "No limit",
+                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
+                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+
+        String body = exportService.createBody(rowsForCreate,Collections.emptyList());
+
+        Assert.assertTrue(body.contains("Created") && !body.contains("update"));
+
+        List<String[]> rowsForUpdate = new ArrayList<>();
+
+        rowsForUpdate.add( new String[]{TestUtils.FAKE_OID_2,
+                                        "Uci Cinemas",
+                                        "CHRISTMAS24",
+                                        "No limit",
+                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
+                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+
+        body = exportService.createBody(Collections.emptyList(),rowsForUpdate);
+
+        Assert.assertTrue(!body.contains("Created") && body.contains("update"));
+
+        body = exportService.createBody(Collections.emptyList(),Collections.emptyList());
+
+        Assert.assertTrue(!body.contains("Created") && !body.contains("update"));
     }
 }

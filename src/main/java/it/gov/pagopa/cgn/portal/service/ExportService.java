@@ -50,6 +50,8 @@ public class ExportService {
 
     public static final String LIVE_YES = "Y";
     public static final String LIVE_NO = "N";
+    public static final Integer LIVE_YES_INT = Integer.valueOf(1);
+    public static final Integer LIVE_NO_INT = Integer.valueOf(0);
     public static final String JSON = "json";
 
     private final AgreementRepository agreementRepository;
@@ -407,7 +409,6 @@ public class ExportService {
 
                 log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
                 emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
-                ;
                 log.info("notifyEycaAdmin end success");
 
             }
@@ -443,11 +444,11 @@ public class ExportService {
                               .toList();
     }
 
-    private String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate) {
+    public String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate) {
         String bodyTemplate =
-                "Hi all, herewith we send you the list of discounts and related references:" + "<br><br />%s<br />%s";
+                "Hi all, herewith we send you the list of discounts and related references:" + "<br /><br />%s<br />%s";
 
-        String tableTitle = "<b><u>%s:</u></b><br><br />%s";
+        String tableTitle = "<b><u>%s</u></b><br><br />%s";
 
         String[] header = new String[]{"Discount ID(OID)",
                                        "Discount Provider",
@@ -487,19 +488,19 @@ public class ExportService {
         for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
             String[] row = data.get(rowIndex);
 
-            // Crea la riga formattata
+            // Create formatted row
             StringBuilder formattedRow = new StringBuilder("|");
             for (int i = 0; i < row.length; i++) {
-                formattedRow.append(" ").append(String.format("%-" + columnWidths[i] + "s", row[i])).append(" |");
+                formattedRow.append(" ").append(String.format("%%-%ss".formatted(columnWidths[i]), row[i])).append(" |");
             }
-            table.append(formattedRow).append("\n");
+            table.append(formattedRow).append("<br />");
 
             if (rowIndex==0) {
                 table.append("|");
                 for (int width : columnWidths) {
                     table.append("-".repeat(width + 2)).append("|");
                 }
-                table.append("\n");
+                table.append("<br />");
             }
         }
 

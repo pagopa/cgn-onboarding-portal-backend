@@ -371,7 +371,7 @@ public class EmailNotificationFacade {
 
     public void notifyEycaAdmin(String body) {
         String subject = "Discounts for Generic Code/URLs " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"));
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH));
         String failureMessage = "It is not possible to send the email to Eyca admin";
         EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")),
                                                     subject,

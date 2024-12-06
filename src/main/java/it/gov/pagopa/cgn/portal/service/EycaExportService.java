@@ -44,6 +44,7 @@ public class EycaExportService {
             searchDataExportEyca.setLive(0);
             log.info("Search Response with Live = N:");
         } else {
+            searchDataExportEyca.setLive(1);
             log.info("Search Response with Live = S");
         }
         SearchApiResponseEyca response = null;
