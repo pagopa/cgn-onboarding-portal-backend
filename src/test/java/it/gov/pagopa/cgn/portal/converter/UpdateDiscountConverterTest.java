@@ -33,6 +33,7 @@ public class UpdateDiscountConverterTest {
         Assert.assertEquals(discountEntity.getStaticCode(), updateDiscountDTO.getStaticCode());
         Assert.assertEquals(discountEntity.getVisibleOnEyca(), updateDiscountDTO.getVisibleOnEyca());
         Assert.assertEquals(discountEntity.getLandingPageUrl(), updateDiscountDTO.getLandingPageUrl());
+        Assert.assertEquals(discountEntity.getEycaLandingPageUrl(), updateDiscountDTO.getEycaLandingPageUrl());
         Assert.assertEquals(discountEntity.getLandingPageReferrer(), updateDiscountDTO.getLandingPageReferrer());
         Assert.assertEquals(discountEntity.getLastBucketCodeLoadUid(), updateDiscountDTO.getLastBucketCodeLoadUid());
         Assert.assertEquals(discountEntity.getLastBucketCodeLoadFileName(),

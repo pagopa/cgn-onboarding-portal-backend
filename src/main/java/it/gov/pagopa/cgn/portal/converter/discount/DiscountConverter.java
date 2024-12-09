@@ -35,6 +35,7 @@ public class DiscountConverter
         dto.setStaticCode(entity.getStaticCode());
         dto.setVisibleOnEyca(entity.getVisibleOnEyca());
         dto.setLandingPageUrl(entity.getLandingPageUrl());
+        dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setLandingPageReferrer(entity.getLandingPageReferrer());
         dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
