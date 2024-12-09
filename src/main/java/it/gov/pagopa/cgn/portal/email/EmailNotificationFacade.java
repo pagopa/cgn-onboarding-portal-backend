@@ -278,7 +278,13 @@ public class EmailNotificationFacade {
                                           String body,
                                           String failureMessage,
                                           List<Attachment> attachments) {
-        return createEmailParams(mailTo, subject, body, failureMessage, Collections.emptyList());
+        return createEmailParams(mailTo,
+                                 Optional.empty(),
+                                 Optional.empty(),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.of(attachments));
     }
 
     private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
