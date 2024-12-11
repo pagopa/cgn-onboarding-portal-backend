@@ -207,6 +207,14 @@ public class DiscountService {
         }
 
         discountEntity.setAgreement(agreementEntity);
+
+        if(DiscountCodeTypeEnum.STATIC.equals(profileDiscountType) || DiscountCodeTypeEnum.LANDINGPAGE.equals(profileDiscountType)) {
+            if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(discountEntity.getStaticCode()))
+                || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(discountEntity.getEycaLandingPageUrl()))) {
+                dbEntity.setEycaEmailUpdateRequired(true);
+            }
+        }
+
         discountRepository.save(dbEntity);
         // refresh materialized views
         refreshMaterializedViews(profile);
@@ -571,6 +579,7 @@ public class DiscountService {
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             discountEntity.setVisibleOnEyca(true);
             discountEntity.setStaticCode(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);

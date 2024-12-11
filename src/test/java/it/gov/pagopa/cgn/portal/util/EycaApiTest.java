@@ -90,12 +90,8 @@ public class EycaApiTest {
     @Test
     @Ignore
     public void testCallListApiEyca_ok() {
-        final ListDataExportEyca listDataExportEyca = new ListDataExportEyca();
-        listDataExportEyca.setPage(1);
-        listDataExportEyca.setRows(1000);
-
         eycaExportService.authenticateOnEyca();
-        ListApiResponseEyca lare = eycaExportService.listDiscounts(listDataExportEyca, "json");
+        ListApiResponseEyca lare = eycaExportService.listDiscounts(1,1000, "json");
         Assert.assertNotNull(lare.getApiResponse().getData().getDiscount());
     }
 }

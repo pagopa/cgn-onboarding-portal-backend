@@ -119,6 +119,10 @@ public class DiscountEntity
     private String landingPageReferrer;
 
     @NotNull
+    @Column(name = "eyca_email_update_required")
+    private Boolean eycaEmailUpdateRequired = false;
+
+    @NotNull
     @Column(name = "visible_on_eyca")
     private Boolean visibleOnEyca = false;
 

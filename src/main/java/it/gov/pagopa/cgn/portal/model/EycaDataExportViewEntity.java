@@ -122,4 +122,7 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "eyca_landing_page_url")
     private String eycaLandingPageUrl;
+
+    @Column(name = "eyca_email_update_required")
+    private Boolean eycaEmailUpdateRequired;
 }

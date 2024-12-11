@@ -75,6 +75,7 @@ public class DataExportEycaWrapperConverter
         dto.setLimitOfUse("No Limit");
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
+        dto.setEycaEmailUpdateRequired(entity.getEycaEmailUpdateRequired());
         return dto;
     };
 }

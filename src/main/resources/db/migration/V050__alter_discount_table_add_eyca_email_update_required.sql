@@ -1,0 +1,1 @@
+ALTER TABLE discount ADD COLUMN eyca_email_update_required BOOLEAN NOT NULL DEFAULT FALSE

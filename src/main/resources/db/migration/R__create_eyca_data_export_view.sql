@@ -62,6 +62,7 @@ SELECT
     d.landing_page_url as "landing_page_url",
     d.landing_page_referrer as "landing_page_referrer",
     d.eyca_landing_page_url as "eyca_landing_page_url",
+    d.eyca_email_update_required as "eyca_email_update_required",
     p.referent_fk as "referent"
 FROM
 	(

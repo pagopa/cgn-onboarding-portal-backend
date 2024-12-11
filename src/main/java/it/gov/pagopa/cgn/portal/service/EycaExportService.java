@@ -57,7 +57,10 @@ public class EycaExportService {
         return response;
     }
 
-    public ListApiResponseEyca listDiscounts(ListDataExportEyca listDataExportEyca, String type) {
+    public ListApiResponseEyca listDiscounts(Integer page , Integer rows, String type) {
+        ListDataExportEyca listDataExportEyca = new ListDataExportEyca();
+        listDataExportEyca.setPage(page);
+        listDataExportEyca.setRows(rows);
         return eycaApi.listDiscount(type, listDataExportEyca);
     }
 

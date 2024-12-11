@@ -530,7 +530,7 @@ class EycaExportServiceTest
         Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(), Mockito.any(), Mockito.any(Boolean.class)))
                .thenReturn(TestUtils.getSearchApiResponseEyca());
 
-        Mockito.when(eycaExportServiceMock.listDiscounts(Mockito.any(), Mockito.any()))
+        Mockito.when(eycaExportServiceMock.listDiscounts(Mockito.any(), Mockito.any(),Mockito.any()))
                .thenReturn(TestUtils.getListApiResponseEyca());
 
         List<EycaDataExportViewEntity> entityList = TestUtils.getEycaDataExportViewEntityListFromCSV();
