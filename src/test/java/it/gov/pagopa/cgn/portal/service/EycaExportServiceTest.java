@@ -91,7 +91,6 @@ class EycaExportServiceTest
 
         eycaExportService = new EycaExportService(eycaApiMock,configProperties);
 
-
         DataExportEycaWrapperConverter dataExportEycaConverter = new DataExportEycaWrapperConverter();
         UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter = new UpdateDataExportEycaWrapperConverter();
 
@@ -603,7 +602,7 @@ class EycaExportServiceTest
 
         String body = exportService.createBody(rowsForCreate,rowsForUpdate);
 
-        Assert.assertTrue(body.contains("Created") && body.contains("update"));
+        Assertions.assertTrue(body.contains("Created") && body.contains("update"));
     }
 
     @Test
@@ -618,7 +617,7 @@ class EycaExportServiceTest
 
         String body = exportService.createBody(rowsForCreate,Collections.emptyList());
 
-        Assert.assertTrue(body.contains("Created") && !body.contains("update"));
+        Assertions.assertTrue(body.contains("Created") && !body.contains("update"));
 
         List<String[]> rowsForUpdate = new ArrayList<>();
 
@@ -636,5 +635,12 @@ class EycaExportServiceTest
         body = exportService.createBody(Collections.emptyList(),Collections.emptyList());
 
         Assert.assertTrue(!body.contains("Created") && !body.contains("update"));
+    }
+
+    @Test
+    void testSendEmailToEyca() {
+        initMockitoPreconditions();
+
+        exportService.sendDiscountsToEyca();
     }
 }

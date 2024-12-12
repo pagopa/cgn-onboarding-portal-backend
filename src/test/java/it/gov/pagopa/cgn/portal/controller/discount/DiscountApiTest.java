@@ -369,6 +369,7 @@ class DiscountApiTest
         updateDiscount.setName("new_name");
         updateDiscount.setStaticCode("new_static_code");
         updateDiscount.setDiscountUrl("https://anotherurl.com");
+
         this.mockMvc.perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
                                                                        .content(TestUtils.getJson(updateDiscount)))
                     .andDo(log())

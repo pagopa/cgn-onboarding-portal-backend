@@ -50,8 +50,8 @@ public class ExportService {
 
     public static final String LIVE_YES = "Y";
     public static final String LIVE_NO = "N";
-    public static final Integer LIVE_YES_INT = Integer.valueOf(1);
-    public static final Integer LIVE_NO_INT = Integer.valueOf(0);
+    public static final Integer LIVE_YES_INT = 1;
+    public static final Integer LIVE_NO_INT = 0;
     public static final String JSON = "json";
 
     private final AgreementRepository agreementRepository;
@@ -410,7 +410,7 @@ public class ExportService {
                 log.info("notifyEycaAdmin end success");
 
                 entitiesToUpdateOnEyca.stream()
-                                      .filter(DataExportEycaWrapper::getEycaEmailUpdateRequired)
+                                      .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
                                       .forEach(row -> {
                                           Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
                                                   row.getEycaUpdateId());
@@ -420,7 +420,7 @@ public class ExportService {
                                               discountRepository.save(dbEntity);
                                           } else {
                                               log.info(
-                                                      "EycaEmailUpdateRequired not setted to false, discount not found with eyca_update_id: " +
+                                                      "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
                                                       row.getEycaUpdateId());
                                           }
                                       });
@@ -437,7 +437,7 @@ public class ExportService {
         return entitiesForEyca.stream()
                               .filter(dew -> DiscountCodeTypeEnum.STATIC.getEycaDataCode()
                                                                         .equals(dew.getDiscountType()) &&
-                                             dew.getEycaEmailUpdateRequired()==eycaEmailUpdateRequired)
+                                             eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
                               .map(dew -> new String[]{dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getStaticCode(),
@@ -452,7 +452,7 @@ public class ExportService {
         return entitiesForEyca.stream()
                               .filter(dew -> DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode()
                                                                              .equals(dew.getDiscountType()) &&
-                                             dew.getEycaEmailUpdateRequired()==eycaEmailUpdateRequired)
+                                             eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
                               .map(dew -> new String[]{dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getEycaLandingPageUrl(),

@@ -490,7 +490,8 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
         entity_0.setLandingPageUrl("LANDING PAGE URL");
-
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return Collections.singletonList(entity_0);
 
     }
@@ -545,9 +546,9 @@ public class TestUtils {
         entity_1.setName("Giovani2030");
         entity_1.setNameLocal("Giovani2030");
         entity_1.setText(
-                "GIOVANI2030 is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
+                "is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
         entity_1.setTextLocal(
-                "GIOVANI2030 Ã¨ la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+                "la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
         entity_1.setStartDate(LocalDate.of(2023, 4, 17));
         entity_1.setEndDate(LocalDate.of(2023, 12, 31));
         entity_1.setEmail("");
@@ -619,7 +620,7 @@ public class TestUtils {
                                             e.setLandingPageReferrer(_record.get("landing_page_referrer"));
                                             e.setReferent(Long.valueOf(_record.get("referent")));
                                             e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
-
+                                            e.setEycaEmailUpdateRequired(Boolean.valueOf(_record.get("eyca_email_update_required")));
                                             return e;
                                         });
     }
@@ -638,6 +639,8 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
         entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return List.of(entity_0);
     }
 
@@ -655,6 +658,8 @@ public class TestUtils {
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
         entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return List.of(entity_0);
     }
 
@@ -670,6 +675,8 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         entity_0.setDiscountId(1L);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
@@ -682,12 +689,14 @@ public class TestUtils {
         entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive("Y");
         entity_1.setDiscountId(2L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_1.setLandingPageUrl("LANDING PAGE URL");
+        entity_1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_1.setCountry("italy");
         entity_1.setCity("city");
         entity_1.setStreet("address0");
         entity_1.setLatitude("48");
         entity_1.setLongitude("12");
+        entity_1.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(1L);
@@ -699,11 +708,13 @@ public class TestUtils {
         entity_2.setDiscountType("LANDING PAGE");
         entity_2.setLive("Y");
         entity_2.setDiscountId(3L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_2.setLandingPageUrl("LANDING PAGE URL");
+        entity_2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_2.setCity("city");
         entity_2.setStreet("address0");
         entity_2.setLatitude("48");
         entity_2.setLongitude("12");
+        entity_2.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(1L);
@@ -715,11 +726,13 @@ public class TestUtils {
         entity_3.setDiscountType("LANDING PAGE");
         entity_3.setLive("Y");
         entity_3.setDiscountId(4L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_3.setLandingPageUrl("LANDING PAGE URL");
+        entity_3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_3.setCountry("italy");
         entity_3.setStreet("address0");
         entity_3.setLatitude("48");
         entity_3.setLongitude("12");
+        entity_3.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_4 = new EycaDataExportViewEntity();
         entity_4.setId(1L);
@@ -731,11 +744,13 @@ public class TestUtils {
         entity_4.setDiscountType("LANDING PAGE");
         entity_4.setLive("Y");
         entity_4.setDiscountId(5L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_4.setLandingPageUrl("LANDING PAGE URL");
+        entity_4.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_4.setCountry("italy");
         entity_4.setCity("city");
         entity_4.setLatitude("48");
         entity_4.setLongitude("12");
+        entity_4.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_5 = new EycaDataExportViewEntity();
         entity_5.setId(1L);
@@ -745,14 +760,16 @@ public class TestUtils {
         entity_5.setName("name_0");
         entity_5.setNameLocal("name_local_0");
         entity_5.setDiscountType("LANDING PAGE");
+        entity_5.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_5.setLive("Y");
         entity_5.setDiscountId(6L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_5.setLandingPageUrl("LANDING PAGE URL");
         entity_5.setCountry("italy");
         entity_5.setCity("city");
         entity_5.setStreet("address0");
         entity_5.setLongitude("12");
         entity_5.setTags("tag1, tag2");
+        entity_5.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_6 = new EycaDataExportViewEntity();
         entity_6.setId(1L);
@@ -791,8 +808,10 @@ public class TestUtils {
         entity_8.setDiscountType("LANDING PAGE");
         entity_8.setLive("y");
         entity_8.setDiscountId(9L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_8.setLandingPageUrl("LANDING PAGE URL");
+        entity_8.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_8.setEycaUpdateId("655464565");
+        entity_8.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_9 = new EycaDataExportViewEntity();
         entity_9.setId(1L);
@@ -806,9 +825,10 @@ public class TestUtils {
         entity_9.setLive("N");
         entity_9.setDiscountId(10L);
         entity_9.setEycaUpdateId("650054665");
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_9.setLandingPageUrl("LANDING PAGE URL");
+        entity_9.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_9.setEndDate(LocalDate.now().minusDays(4));
-
+        entity_9.setEycaEmailUpdateRequired(true);
         EycaDataExportViewEntity entity_10 = new EycaDataExportViewEntity();
 
         entity_10.setId(1L);
@@ -821,10 +841,11 @@ public class TestUtils {
         entity_10.setDiscountType("LANDING PAGE");
         entity_10.setLive("N");
         entity_10.setDiscountId(10L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_10.setLandingPageUrl("LANDING PAGE URL");
+        entity_10.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_10.setEycaUpdateId("6551114565");
         entity_10.setEndDate(LocalDate.now());
-
+        entity_10.setEycaEmailUpdateRequired(true);
         EycaDataExportViewEntity entity_11 = new EycaDataExportViewEntity();
 
         entity_11.setId(1L);
@@ -837,7 +858,8 @@ public class TestUtils {
         entity_11.setDiscountType("LANDING PAGE");
         entity_11.setLive("Y");
         entity_11.setDiscountId(11L);
-        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_11.setLandingPageUrl("LANDING PAGE URL");
+        entity_11.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_11.setEycaUpdateId("6551114565");
         entity_11.setEndDate(LocalDate.now().plusDays(2));
 
@@ -937,6 +959,7 @@ public class TestUtils {
         entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_0.setEycaUpdateId("ce00958658596");
         entity_0.setEndDate(LocalDate.now());
+        entity_0.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(2L);
@@ -952,6 +975,7 @@ public class TestUtils {
         entity_1.setLandingPageUrl("LANDING PAGE URL");
         entity_1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_1.setEycaUpdateId("ce00957778596");
+        entity_1.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(1L);
@@ -967,6 +991,7 @@ public class TestUtils {
         entity_2.setLandingPageUrl("LANDING PAGE URL");
         entity_2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_2.setEycaUpdateId("ce00958999596");
+        entity_2.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(1L);
@@ -981,6 +1006,8 @@ public class TestUtils {
         entity_3.setDiscountId(8L);
         entity_3.setLandingPageUrl("LANDING PAGE URL");
         entity_3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_3.setEycaEmailUpdateRequired(true);
+
         return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
 
     }
@@ -1028,6 +1055,7 @@ public class TestUtils {
         updateDiscount.setProductCategories(discount.getProductCategories());
         updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
         updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
+
         return updateDiscount;
     }
 
