@@ -541,6 +541,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
@@ -551,6 +552,7 @@ public class DiscountService {
         // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
