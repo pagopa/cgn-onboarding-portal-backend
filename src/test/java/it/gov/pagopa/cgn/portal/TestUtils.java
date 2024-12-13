@@ -405,6 +405,7 @@ public class TestUtils {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(staticCode);
         discountEntity.setLandingPageUrl(null);
+        discountEntity.setEycaLandingPageUrl(null);
         discountEntity.setLandingPageReferrer(null);
         discountEntity.setDiscountUrl("https://anurl.com");
         return discountEntity;
@@ -412,10 +413,12 @@ public class TestUtils {
 
     public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement,
                                                                            String url,
+                                                                           String eycaUrl,
                                                                            String referrer) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
         discountEntity.setLandingPageUrl(url);
+        discountEntity.setEycaLandingPageUrl(eycaUrl);
         discountEntity.setLandingPageReferrer(referrer);
         return discountEntity;
     }

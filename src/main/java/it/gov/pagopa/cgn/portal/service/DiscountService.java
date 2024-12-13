@@ -62,6 +62,10 @@ public class DiscountService {
         }
     };
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
+        if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode()))
+            || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
+            dbEntity.setEycaEmailUpdateRequired(true);
+        }
         dbEntity.setName(toUpdateEntity.getName());
         dbEntity.setNameEn(toUpdateEntity.getNameEn());
         dbEntity.setNameDe(toUpdateEntity.getNameDe());
@@ -207,13 +211,6 @@ public class DiscountService {
         }
 
         discountEntity.setAgreement(agreementEntity);
-
-        if(DiscountCodeTypeEnum.STATIC.equals(profileDiscountType) || DiscountCodeTypeEnum.LANDINGPAGE.equals(profileDiscountType)) {
-            if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(discountEntity.getStaticCode()))
-                || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(discountEntity.getEycaLandingPageUrl()))) {
-                dbEntity.setEycaEmailUpdateRequired(true);
-            }
-        }
 
         discountRepository.save(dbEntity);
         // refresh materialized views
