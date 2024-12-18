@@ -38,9 +38,7 @@ SELECT
     p.website_url as "web",
     '' as "tags",
     'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
-
-	L.live as "live",
-
+	l.live as "live",
     '' as "location_local_id",
     ad.full_address as "street",
     '' as "city",
@@ -64,7 +62,7 @@ SELECT
     d.eyca_landing_page_url as "eyca_landing_page_url",
     d.eyca_email_update_required as "eyca_email_update_required",
     p.referent_fk as "referent"
-FROM
+	FROM
 	(
 		SELECT CASE
 			WHEN state = 'PUBLISHED'
@@ -109,12 +107,13 @@ FROM
     LEFT JOIN address ad ON ad.profile_fk = p.profile_k
 WHERE
 d.visible_on_eyca = true
-AND (l.live = 'Y' OR (l.live = 'N' AND d.eyca_update_id IS NOT NULL))
-AND L.discount_id = d.discount_k
+AND (l.live = 'Y'
+	OR (l.live = 'N'
+		AND d.eyca_update_id IS NOT NULL))
+AND l.discount_id = d.discount_k
 AND (
-    (p.sales_channel = 'OFFLINE' AND p.discount_code_type IS NULL)
+    sales_channel ='OFFLINE'
     OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type IN ('STATIC', 'BUCKET'))
-    OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type = 'LANDINGPAGE')
-);
+    (p.sales_channel IN ('ONLINE', 'BOTH')
+		AND p.discount_code_type IN ('STATIC', 'BUCKET','LANDINGPAGE'))
+)

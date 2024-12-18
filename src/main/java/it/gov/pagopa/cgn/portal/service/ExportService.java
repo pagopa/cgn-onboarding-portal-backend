@@ -513,7 +513,7 @@ public class ExportService {
         data.stream()
             .skip(1)
             .forEach(row -> html.append("<tr>")
-                                .append(Stream.of(row).map(cell -> html.append("<td>").append(cell).append("</td>")))
+                                .append(Stream.of(row).map(cell -> "<td>"+cell+"</td>").collect(joining()))
                                 .append("</tr>"));
         html.append("</tbody>");
         html.append("</table>");
