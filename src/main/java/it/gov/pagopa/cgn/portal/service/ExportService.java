@@ -571,7 +571,7 @@ public class ExportService {
         */
         List<String> iodListOnEyca = getOidListOnEyca(response);
         iodListOnEyca.forEach(oid -> {
-            if (discountRepository.findByEycaUpdateId(oid).isPresent()) {
+            if (discountRepository.findByEycaUpdateId(oid).isEmpty()) {
                 EycaDataExportViewEntity entityToDelete = new EycaDataExportViewEntity();
                 entityToDelete.setEycaUpdateId(oid);
                 entityToDelete.setLive(LIVE_NO);
