@@ -537,25 +537,6 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /export/send-eyca-discounts:
-    post:
-      tags:
-        - exports
-      summary: Send eyca discounts to EYCA via client
-      operationId: sendEycaDiscounts
-      responses:
-        200:
-          description: Send eyca discounts to EYCA via client
-          schema:
-            type: string
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
-
 consumes:
   - application/json
 
@@ -1043,6 +1024,9 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
