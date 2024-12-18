@@ -80,6 +80,7 @@ public class BackofficeApprovedDiscountConverter
             dto.setStaticCode(entity.getStaticCode());
             dto.setLandingPageUrl(entity.getLandingPageUrl());
             dto.setLandingPageReferrer(entity.getLandingPageReferrer());
+            dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         }
 
         return dto;

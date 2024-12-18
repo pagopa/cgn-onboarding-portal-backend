@@ -21,13 +21,12 @@ import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.ResultActions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -40,16 +39,27 @@ import java.util.stream.Stream;
 public class TestUtils {
 
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements"; // needed to bypass interceptor
+
+    private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
+
     public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
+
     public static final String AGREEMENT_APPROVED_CONTROLLER_PATH = "/approved-agreements/";
+
     public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
+
     public static final String GEOLOCATION_PATH = "/geolocation-token";
+
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
+
     public static final String FAKE_ORGANIZATION_NAME = "FAKE_ORGANIZATION_NAME";
-    private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
-    public static String API_TOKEN_PRIMARY_KEY = "primary-key-001";
-    public static String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
+
+    public static final String API_TOKEN_PRIMARY_KEY = "primary-key-001";
+    public static final String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
+
+    public static final String FAKE_OID_1 = "c75020241204020019952562";
+    public static final String FAKE_OID_2 = "c28020241204020019770616";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -95,6 +105,7 @@ public class TestUtils {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/assignee";
     }
 
+
     public static String getAuthenticatedHelpPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
@@ -129,6 +140,7 @@ public class TestUtils {
     public static String getAgreementRequestsDiscountSuspendingPath(String agreementId, String discountId) {
         return getAgreementRequestsDiscountPath(agreementId, discountId) + "/suspension";
     }
+
 
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
@@ -243,6 +255,7 @@ public class TestUtils {
         return createProfileFromProfileEntity(profileEntity, salesChannel);
     }
 
+
     public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity, SalesChannel salesChannel) {
         CreateReferent referent = new CreateReferent();
         referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
@@ -271,6 +284,7 @@ public class TestUtils {
 
         return createProfile;
     }
+
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
@@ -391,6 +405,7 @@ public class TestUtils {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(staticCode);
         discountEntity.setLandingPageUrl(null);
+        discountEntity.setEycaLandingPageUrl(null);
         discountEntity.setLandingPageReferrer(null);
         discountEntity.setDiscountUrl("https://anurl.com");
         return discountEntity;
@@ -398,10 +413,12 @@ public class TestUtils {
 
     public static DiscountEntity createSampleDiscountEntityWithLandingPage(AgreementEntity agreement,
                                                                            String url,
+                                                                           String eycaUrl,
                                                                            String referrer) {
         DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
         discountEntity.setStaticCode(null);
         discountEntity.setLandingPageUrl(url);
+        discountEntity.setEycaLandingPageUrl(eycaUrl);
         discountEntity.setLandingPageReferrer(referrer);
         return discountEntity;
     }
@@ -475,10 +492,13 @@ public class TestUtils {
         entity_0.setReferent(1L);
         entity_0.setLive("Y");
         entity_0.setDiscountId(7L);
-
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return Collections.singletonList(entity_0);
 
     }
+
 
     private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
@@ -516,6 +536,7 @@ public class TestUtils {
         return entity_0;
     }
 
+
     private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(26L);
@@ -528,9 +549,9 @@ public class TestUtils {
         entity_1.setName("Giovani2030");
         entity_1.setNameLocal("Giovani2030");
         entity_1.setText(
-                "GIOVANI2030 is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
+                "is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
         entity_1.setTextLocal(
-                "GIOVANI2030 Ã¨ la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+                "la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
         entity_1.setStartDate(LocalDate.of(2023, 4, 17));
         entity_1.setEndDate(LocalDate.of(2023, 12, 31));
         entity_1.setEmail("");
@@ -552,6 +573,7 @@ public class TestUtils {
 
         return entity_1;
     }
+
 
     public static List<EycaDataExportViewEntity> getRealDataList() {
         return Arrays.asList(getRealEycaDataExportViewEntity_0(500L, null),
@@ -596,8 +618,12 @@ public class TestUtils {
                                             e.setLatitude(_record.get("latitude"));
                                             e.setLongitude(_record.get("longitude"));
                                             e.setDiscountType(_record.get("discount_type"));
+                                            e.setStaticCode(_record.get("static_code"));
+                                            e.setLandingPageUrl(_record.get("landing_page_url"));
+                                            e.setLandingPageReferrer(_record.get("landing_page_referrer"));
                                             e.setReferent(Long.valueOf(_record.get("referent")));
-
+                                            e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
+                                            e.setEycaEmailUpdateRequired(Boolean.valueOf(_record.get("eyca_email_update_required")));
                                             return e;
                                         });
     }
@@ -615,6 +641,9 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return List.of(entity_0);
     }
 
@@ -631,6 +660,9 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
         entity_0.setDiscountId(1L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         return List.of(entity_0);
     }
 
@@ -645,6 +677,9 @@ public class TestUtils {
         entity_0.setStreet("address0");
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("Y");
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_0.setEycaEmailUpdateRequired(true);
         entity_0.setDiscountId(1L);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
@@ -657,11 +692,14 @@ public class TestUtils {
         entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive("Y");
         entity_1.setDiscountId(2L);
+        entity_1.setLandingPageUrl("LANDING PAGE URL");
+        entity_1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_1.setCountry("italy");
         entity_1.setCity("city");
         entity_1.setStreet("address0");
         entity_1.setLatitude("48");
         entity_1.setLongitude("12");
+        entity_1.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(1L);
@@ -673,10 +711,13 @@ public class TestUtils {
         entity_2.setDiscountType("LANDING PAGE");
         entity_2.setLive("Y");
         entity_2.setDiscountId(3L);
+        entity_2.setLandingPageUrl("LANDING PAGE URL");
+        entity_2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_2.setCity("city");
         entity_2.setStreet("address0");
         entity_2.setLatitude("48");
         entity_2.setLongitude("12");
+        entity_2.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(1L);
@@ -688,10 +729,13 @@ public class TestUtils {
         entity_3.setDiscountType("LANDING PAGE");
         entity_3.setLive("Y");
         entity_3.setDiscountId(4L);
+        entity_3.setLandingPageUrl("LANDING PAGE URL");
+        entity_3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_3.setCountry("italy");
         entity_3.setStreet("address0");
         entity_3.setLatitude("48");
         entity_3.setLongitude("12");
+        entity_3.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_4 = new EycaDataExportViewEntity();
         entity_4.setId(1L);
@@ -703,10 +747,13 @@ public class TestUtils {
         entity_4.setDiscountType("LANDING PAGE");
         entity_4.setLive("Y");
         entity_4.setDiscountId(5L);
+        entity_4.setLandingPageUrl("LANDING PAGE URL");
+        entity_4.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_4.setCountry("italy");
         entity_4.setCity("city");
         entity_4.setLatitude("48");
         entity_4.setLongitude("12");
+        entity_4.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_5 = new EycaDataExportViewEntity();
         entity_5.setId(1L);
@@ -716,13 +763,16 @@ public class TestUtils {
         entity_5.setName("name_0");
         entity_5.setNameLocal("name_local_0");
         entity_5.setDiscountType("LANDING PAGE");
+        entity_5.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_5.setLive("Y");
         entity_5.setDiscountId(6L);
+        entity_5.setLandingPageUrl("LANDING PAGE URL");
         entity_5.setCountry("italy");
         entity_5.setCity("city");
         entity_5.setStreet("address0");
         entity_5.setLongitude("12");
         entity_5.setTags("tag1, tag2");
+        entity_5.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_6 = new EycaDataExportViewEntity();
         entity_6.setId(1L);
@@ -761,7 +811,10 @@ public class TestUtils {
         entity_8.setDiscountType("LANDING PAGE");
         entity_8.setLive("y");
         entity_8.setDiscountId(9L);
+        entity_8.setLandingPageUrl("LANDING PAGE URL");
+        entity_8.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_8.setEycaUpdateId("655464565");
+        entity_8.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_9 = new EycaDataExportViewEntity();
         entity_9.setId(1L);
@@ -775,8 +828,10 @@ public class TestUtils {
         entity_9.setLive("N");
         entity_9.setDiscountId(10L);
         entity_9.setEycaUpdateId("650054665");
+        entity_9.setLandingPageUrl("LANDING PAGE URL");
+        entity_9.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_9.setEndDate(LocalDate.now().minusDays(4));
-
+        entity_9.setEycaEmailUpdateRequired(true);
         EycaDataExportViewEntity entity_10 = new EycaDataExportViewEntity();
 
         entity_10.setId(1L);
@@ -789,9 +844,11 @@ public class TestUtils {
         entity_10.setDiscountType("LANDING PAGE");
         entity_10.setLive("N");
         entity_10.setDiscountId(10L);
+        entity_10.setLandingPageUrl("LANDING PAGE URL");
+        entity_10.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_10.setEycaUpdateId("6551114565");
         entity_10.setEndDate(LocalDate.now());
-
+        entity_10.setEycaEmailUpdateRequired(true);
         EycaDataExportViewEntity entity_11 = new EycaDataExportViewEntity();
 
         entity_11.setId(1L);
@@ -804,6 +861,8 @@ public class TestUtils {
         entity_11.setDiscountType("LANDING PAGE");
         entity_11.setLive("Y");
         entity_11.setDiscountId(11L);
+        entity_11.setLandingPageUrl("LANDING PAGE URL");
+        entity_11.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_11.setEycaUpdateId("6551114565");
         entity_11.setEndDate(LocalDate.now().plusDays(2));
 
@@ -886,6 +945,7 @@ public class TestUtils {
                              entity_16);
     }
 
+
     public static List<EycaDataExportViewEntity> getTobeDeletedEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(1L);
@@ -898,8 +958,11 @@ public class TestUtils {
         entity_0.setDiscountType("LANDING PAGE");
         entity_0.setLive("N");
         entity_0.setDiscountId(6L);
+        entity_0.setLandingPageUrl("LANDING PAGE URL");
+        entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_0.setEycaUpdateId("ce00958658596");
         entity_0.setEndDate(LocalDate.now());
+        entity_0.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(2L);
@@ -912,7 +975,10 @@ public class TestUtils {
         entity_1.setLive(null);
         entity_1.setEndDate(LocalDate.now());
         entity_1.setDiscountId(7L);
+        entity_1.setLandingPageUrl("LANDING PAGE URL");
+        entity_1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_1.setEycaUpdateId("ce00957778596");
+        entity_1.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_2 = new EycaDataExportViewEntity();
         entity_2.setId(1L);
@@ -925,7 +991,10 @@ public class TestUtils {
         entity_2.setLive("N");
         entity_2.setEndDate(LocalDate.now().minusDays(2));
         entity_2.setDiscountId(8L);
+        entity_2.setLandingPageUrl("LANDING PAGE URL");
+        entity_2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_2.setEycaUpdateId("ce00958999596");
+        entity_2.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity_3 = new EycaDataExportViewEntity();
         entity_3.setId(1L);
@@ -938,6 +1007,9 @@ public class TestUtils {
         entity_3.setLive("N");
         entity_3.setEndDate(LocalDate.now().minusDays(2));
         entity_3.setDiscountId(8L);
+        entity_3.setLandingPageUrl("LANDING PAGE URL");
+        entity_3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity_3.setEycaEmailUpdateRequired(true);
 
         return Arrays.asList(entity_0, entity_1, entity_2, entity_3);
 
@@ -958,6 +1030,7 @@ public class TestUtils {
 
         return Collections.singletonList(entity_0);
     }
+
 
     public static String generateDiscountBucketCodeUid() {
         return UUID.randomUUID().toString();
@@ -981,9 +1054,11 @@ public class TestUtils {
         updateDiscount.setStaticCode(discount.getStaticCode());
         updateDiscount.setLandingPageUrl(discount.getLandingPageUrl());
         updateDiscount.setLandingPageReferrer(discount.getLandingPageReferrer());
+        updateDiscount.setEycaLandingPageUrl(discount.getEycaLandingPageUrl());
         updateDiscount.setProductCategories(discount.getProductCategories());
         updateDiscount.setLastBucketCodeLoadUid(discount.getLastBucketCodeLoadUid());
         updateDiscount.setLastBucketCodeLoadFileName(discount.getLastBucketCodeLoadFileName());
+
         return updateDiscount;
     }
 
@@ -995,15 +1070,7 @@ public class TestUtils {
         return suspendDiscount;
     }
 
-    /*
-    response.getApiResponse() != null &&
-                    response.getApiResponse().getData() != null &&
-                    response.getApiResponse().getData().getDiscounts() != null &&
-                        ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())
-     */
-    public static SearchApiResponseEyca getSearchApiResponse() {
-        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
-
+    public static SearchApiResponseEyca getSearchApiResponseEyca() {
         SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
         SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
         SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
@@ -1011,9 +1078,8 @@ public class TestUtils {
 
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
-        discountItemEyca.setId("75894754th8t72vb93");
+        discountItemEyca.setId(FAKE_OID_1);
         items.add(discountItemEyca);
-
 
         searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
         searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
@@ -1023,7 +1089,6 @@ public class TestUtils {
     }
 
     public static SearchApiResponseEyca getSearchApiResponseWithDataEmptyList() {
-        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
 
         SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
         SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
@@ -1044,7 +1109,7 @@ public class TestUtils {
         ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
-        discountItemEyca.setId("75894754th8t72vb93");
+        discountItemEyca.setId(FAKE_OID_1);
 
         items.add(discountItemEyca);
         apiResponseDataEyca.setDiscount(items);
@@ -1077,6 +1142,7 @@ public class TestUtils {
 
         return apiResponseEyca;
     }
+
 
     public static DeleteApiResponseEyca getDeleteApiResponse() {
         DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
@@ -1156,6 +1222,7 @@ public class TestUtils {
 
     }
 
+
     public static String getJson(Object obj)
             throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -1163,6 +1230,7 @@ public class TestUtils {
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper.writeValueAsString(obj);
     }
+
 
     public static ApiTokens createSampleApiTokens() {
         ApiTokens at = new ApiTokens();
@@ -1185,60 +1253,23 @@ public class TestUtils {
         return Optional.of(discount);
     }
 
-    public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
-        return new HttpResponse(null) {
-            @Override
-            public int getStatusCode() {
-                return statusCode;
-            }
-
-            @Override
-            public String getHeaderValue(String s) {
-                return null;
-            }
-
-            @Override
-            public HttpHeaders getHeaders() {
-                return null;
-            }
-
-            @Override
-            public Flux<ByteBuffer> getBody() {
-                return null;
-            }
-
-            @Override
-            public Mono<byte[]> getBodyAsByteArray() {
-                return null;
-            }
-
-            @Override
-            public Mono<String> getBodyAsString() {
-                return null;
-            }
-
-            @Override
-            public Mono<String> getBodyAsString(Charset charset) {
-                return null;
-            }
-        };
+    public static ListApiResponseEyca getListApiResponseEyca() {
+        ListApiResponseEyca response = new ListApiResponseEyca();
+        ListApiResponseApiResponseEyca listApiResponseApiResponseEyca = new ListApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> itemsFromEyca = new ArrayList<>();
+        DiscountItemEyca item1 = new DiscountItemEyca();
+        item1.setId(FAKE_OID_1);
+        DiscountItemEyca item2 = new DiscountItemEyca();
+        item2.setId(FAKE_OID_2);
+        itemsFromEyca.add(item1);
+        itemsFromEyca.add(item2);
+        apiResponseApiResponseDataEyca.setDiscount(itemsFromEyca);
+        listApiResponseApiResponseEyca.setData(apiResponseApiResponseDataEyca);
+        response.setApiResponse(listApiResponseApiResponseEyca);
+        return response;
     }
 
-    public static void setOperatorAuth() {
-        SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
-                                                                                               TestUtils.FAKE_ID)));
-    }
-
-    public static void setAdminAuth() {
-        SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
-    }
-
-    public static void printMvcResponse(ResultActions resultActions)
-            throws UnsupportedEncodingException {
-        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
-    }
 
     public static class SubscriptionKeysContractTestData
             implements SubscriptionKeysContract {
@@ -1360,5 +1391,60 @@ public class TestUtils {
         public SubscriptionContractInner innerModel() {
             return null;
         }
+    }
+
+    public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
+        return new HttpResponse(null) {
+            @Override
+            public int getStatusCode() {
+                return statusCode;
+            }
+
+            @Override
+            public String getHeaderValue(String s) {
+                return null;
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return null;
+            }
+
+            @Override
+            public Flux<ByteBuffer> getBody() {
+                return null;
+            }
+
+            @Override
+            public Mono<byte[]> getBodyAsByteArray() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString(Charset charset) {
+                return null;
+            }
+        };
+    }
+
+    public static SearchDataExportEyca createEmptySearchDataExportEyca() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+        return searchDataExportEyca;
+    }
+
+    public static void setOperatorAuth() {
+        SecurityContextHolder.getContext()
+                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                                                                                               TestUtils.FAKE_ID)));
+    }
+
+    public static void setAdminAuth() {
+        SecurityContextHolder.getContext()
+                             .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
     }
 }

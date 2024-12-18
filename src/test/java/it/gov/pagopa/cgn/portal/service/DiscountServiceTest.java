@@ -40,6 +40,7 @@ class DiscountServiceTest
 
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
+    private static final String EYCA_URL = "www.eycalandingpage.com";
     private static final String REFERRER = "referrer";
     private static String AGREEMENT_ID;
 
@@ -225,6 +226,7 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity.setLandingPageUrl(null);
 
@@ -239,6 +241,7 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity.setLandingPageReferrer(null);
 
@@ -253,6 +256,7 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         Assertions.assertNotNull(discountEntity.getId());
@@ -265,6 +269,8 @@ class DiscountServiceTest
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNotNull(discountEntity.getLandingPageUrl());
         Assertions.assertEquals(URL, discountEntity.getLandingPageUrl());
+        Assertions.assertEquals(EYCA_URL, discountEntity.getEycaLandingPageUrl());
+        Assertions.assertEquals(discountEntity.getEycaEmailUpdateRequired(),false);
         Assertions.assertNotNull(discountEntity.getLandingPageReferrer());
         Assertions.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
@@ -543,11 +549,13 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
 
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                              "updated_" + URL,
+                                                                                             "updated_" + EYCA_URL,
                                                                                              "updated_" + REFERRER);
         updatedDiscount.setName("updated_name");
         updatedDiscount.setDescription("updated_description");
@@ -579,9 +587,11 @@ class DiscountServiceTest
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
         Assertions.assertNull(updatedDiscount.getStaticCode());
         Assertions.assertEquals(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
+        Assertions.assertEquals(updatedDiscount.getEycaLandingPageUrl(), dbDiscount.getEycaLandingPageUrl());
         Assertions.assertEquals(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
         Assertions.assertTrue(updatedDiscount.getVisibleOnEyca());
         Assertions.assertTrue(dbDiscount.getVisibleOnEyca());
+        Assertions.assertTrue(dbDiscount.getEycaEmailUpdateRequired());
     }
 
     @Test
@@ -590,6 +600,7 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
 
@@ -601,13 +612,14 @@ class DiscountServiceTest
 
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                              "updated_" + URL,
+                                                                                             "updated_" + EYCA_URL,
                                                                                              REFERRER);
 
         DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
                                                                    discountEntity.getId(),
                                                                    updatedDiscount).getDiscountEntity();
 
-        Assertions.assertTrue(DiscountStateEnum.DRAFT.equals(dbDiscount.getState()), "check landingpage failed");
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState(), "check landingpage failed");
     }
 
     @Test
@@ -616,6 +628,7 @@ class DiscountServiceTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
 
@@ -627,6 +640,7 @@ class DiscountServiceTest
 
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                              URL,
+                                                                                             EYCA_URL,
                                                                                              "updated_" + REFERRER);
 
         DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),

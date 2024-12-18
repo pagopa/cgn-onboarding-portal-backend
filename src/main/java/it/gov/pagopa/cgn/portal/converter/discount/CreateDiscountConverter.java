@@ -28,6 +28,7 @@ public class CreateDiscountConverter
         entity.setStaticCode(createDiscountDTO.getStaticCode());
         entity.setVisibleOnEyca(createDiscountDTO.getVisibleOnEyca());
         entity.setLandingPageUrl(createDiscountDTO.getLandingPageUrl());
+        entity.setEycaLandingPageUrl(createDiscountDTO.getEycaLandingPageUrl());
         entity.setLandingPageReferrer(createDiscountDTO.getLandingPageReferrer());
         entity.setCondition(createDiscountDTO.getCondition());
         entity.setConditionEn(createDiscountDTO.getConditionEn());

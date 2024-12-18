@@ -15,6 +15,8 @@ public class DiscountConverterTest {
 
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
+
+    private static final String EYCA_URL = "www.eycalandingpage.com";
     private static final String REFERRER = "referrer";
     private final DiscountConverter discountConverter = new DiscountConverter();
 
@@ -44,12 +46,14 @@ public class DiscountConverterTest {
         AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
                                                                                             URL,
+                                                                                            EYCA_URL,
                                                                                             REFERRER);
         Discount dto = discountConverter.toDto(discountEntity);
 
         checkCommonDiscountEntityToDTOAssertions(discountEntity, dto);
         Assert.assertNull(dto.getStaticCode());
         Assert.assertEquals(URL, dto.getLandingPageUrl());
+        Assert.assertEquals(EYCA_URL, dto.getEycaLandingPageUrl());
         Assert.assertEquals(REFERRER, dto.getLandingPageReferrer());
     }
 
