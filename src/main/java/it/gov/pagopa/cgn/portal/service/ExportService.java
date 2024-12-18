@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -47,6 +48,12 @@ import static java.util.stream.Collectors.joining;
 @Slf4j
 @Service
 public class ExportService {
+
+    /*
+    This is a security flag for avoid potential delete of items on CCDB production on eyca during integration tests
+     */
+    @Value("${eyca.api.delete.debug}")
+    boolean eycaApiDeleteDebug;
 
     public static final String LIVE_YES = "Y";
     public static final String LIVE_NO = "N";
@@ -754,7 +761,9 @@ public class ExportService {
             log.info("DELETE DeleteDataExportEyca: " + exportEyca.toString());
             DeleteApiResponseEyca response = null;
             try {
-                response = eycaExportService.deleteDiscount(exportEyca, JSON);
+                if(!eycaApiDeleteDebug) {
+                    response = eycaExportService.deleteDiscount(exportEyca, JSON);
+                }
 
                 if (Objects.nonNull(response)) {
                     log.info("Delete Response:");
