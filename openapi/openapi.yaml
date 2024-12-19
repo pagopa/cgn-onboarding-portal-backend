@@ -1047,6 +1047,9 @@ definitions:
       visibleOnEyca:
         type: boolean
         default: false
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1122,6 +1125,9 @@ definitions:
       visibleOnEyca:
         type: boolean
         default: false
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1222,6 +1228,9 @@ definitions:
       suspendedReasonMessage:
         type: string
         maxLength: 250
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
