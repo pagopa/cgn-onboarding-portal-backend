@@ -67,7 +67,7 @@ public class ProfileFacade {
                            .filter(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()))
                            .forEach(d -> discountService.suspendDiscount(agreementId,
                                                                          d.getId(),
-                                                                         "La modalità di riconoscimento o il canale di vendita sono cambiati."));
+                                                                         "Hai cambiato la modalità di riconoscimento delle tue opportunità. Per riattivare l'opportunità, aggiorna i dati richiesti dalla nuova opportunità."));
         }
         profileEntity = profileService.updateProfile(agreementId, profileEntity);
         return ResponseEntity.ok(profileConverter.toDto(profileEntity));
