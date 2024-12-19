@@ -6,9 +6,9 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,37 +16,24 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class EmailNotificationFacade {
 
-    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
     private final TemplateEngine htmlTemplateEngine;
+
     private final EmailNotificationService emailNotificationService;
+
     private final ConfigProperties configProperties;
 
+    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
 
-    @Autowired
-    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
-                                   EmailNotificationService emailNotificationService,
-                                   ConfigProperties configProperties) {
-        this.htmlTemplateEngine = htmlTemplateEngine;
-        this.emailNotificationService = emailNotificationService;
-        this.configProperties = configProperties;
-    }
-
-    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
-                                                                    BucketCodeExpiringThresholdEnum threshold) {
-        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
-    }
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
@@ -224,6 +211,11 @@ public class EmailNotificationFacade {
         }
     }
 
+    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
+                                                                    BucketCodeExpiringThresholdEnum threshold) {
+        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
+    }
+
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
                                                           BucketCodeExpiringThresholdEnum threshold,
                                                           Long remainingCodes) {
@@ -260,6 +252,25 @@ public class EmailNotificationFacade {
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+    }
+
+    @Autowired
+    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
+                                   EmailNotificationService emailNotificationService,
+                                   ConfigProperties configProperties) {
+        this.htmlTemplateEngine = htmlTemplateEngine;
+        this.emailNotificationService = emailNotificationService;
+        this.configProperties = configProperties;
+    }
+
+    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage) {
+        return createEmailParams(mailTo,
+                                 Optional.empty(),
+                                 Optional.empty(),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.empty());
     }
 
     private EmailParams createEmailParams(List<String> mailTo,
@@ -361,6 +372,17 @@ public class EmailNotificationFacade {
                                                     body,
                                                     failureMessage,
                                                     attachments);
+        emailNotificationService.sendAsyncMessage(emailParams);
+    }
+
+    public void notifyEycaAdmin(String body) {
+        String subject = "Discounts for Generic Code/URLs " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH));
+        String failureMessage = "It is not possible to send the email to Eyca admin";
+        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")),
+                                                    subject,
+                                                    body,
+                                                    failureMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
