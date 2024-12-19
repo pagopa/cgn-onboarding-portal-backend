@@ -26,7 +26,7 @@ public abstract class CommonBackofficeDiscountConverter<E, D>
     }
 
     protected BiFunction<DiscountStateEnum, LocalDate, DiscountState> toDtoEnum = (entityEnum, endDate) -> {
-        if (LocalDate.now().isAfter(endDate)) {
+        if (!LocalDate.now().isBefore(endDate)) {
             return DiscountState.EXPIRED;
         }
         return Optional.ofNullable(discountStateEnum.get(entityEnum))
