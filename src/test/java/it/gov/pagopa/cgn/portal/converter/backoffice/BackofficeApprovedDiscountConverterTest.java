@@ -12,6 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
+
 @RunWith(SpringRunner.class)
 public class BackofficeApprovedDiscountConverterTest {
 
@@ -41,6 +43,19 @@ public class BackofficeApprovedDiscountConverterTest {
         Assert.assertNotNull(discountDto);
         Assert.assertEquals(DiscountState.PUBLISHED, discountDto.getState());
         Assert.assertNull(discountDto.getStaticCode());
+    }
+
+    @Test
+    public void ToDto_PublishedDiscountToDtoWithCurrentEndDate_ok() {
+        BackofficeApprovedDiscountConverter converter = getBackofficeAgreementConverter();
+        AgreementEntity agreement = TestUtils.createSampleAgreementEntityWithCommonFields();
+        DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
+        discount.setEndDate(LocalDate.now());
+        discount.setState(DiscountStateEnum.PUBLISHED);
+
+        ApprovedAgreementDiscount discountDto = converter.toDto(discount);
+        Assert.assertNotNull(discountDto);
+        Assert.assertEquals(DiscountState.EXPIRED, discountDto.getState());
     }
 
     private BackofficeApprovedDiscountConverter getBackofficeAgreementConverter() {
