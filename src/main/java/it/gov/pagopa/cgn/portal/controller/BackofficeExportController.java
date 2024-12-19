@@ -31,8 +31,4 @@ public class BackofficeExportController
         return backofficeExportFacade.exportEycaDiscounts();
     }
 
-    @Override
-    public ResponseEntity<String> sendEycaDiscounts() {
-        return backofficeExportFacade.sendDiscountsToEyca();
-    }
 }
