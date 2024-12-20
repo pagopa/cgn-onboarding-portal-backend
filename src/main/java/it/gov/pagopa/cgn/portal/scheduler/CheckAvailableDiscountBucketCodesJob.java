@@ -17,7 +17,8 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CheckAvailableDiscountBucketCodesJob implements Job {
+public class CheckAvailableDiscountBucketCodesJob
+        implements Job {
 
     private static final String JOB_LOG_NAME = "Available Discounts Buckets Codes Notification Job ";
 
@@ -25,7 +26,8 @@ public class CheckAvailableDiscountBucketCodesJob implements Job {
     private final BucketService bucketService;
 
     @Autowired
-    public CheckAvailableDiscountBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository, BucketService bucketService) {
+    public CheckAvailableDiscountBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
+                                                BucketService bucketService) {
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.bucketService = bucketService;
     }
@@ -38,7 +40,8 @@ public class CheckAvailableDiscountBucketCodesJob implements Job {
         List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedByExpiredAtIsNullAndAvailableCodesGreaterThanZero();
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
-            log.info("Found " + discountBucketCodeSummaryList.size() + " not expired discount bucket code summaries to check");
+            log.info("Found " + discountBucketCodeSummaryList.size() +
+                     " not expired discount bucket code summaries to check");
             discountBucketCodeSummaryList.forEach(bucketService::checkDiscountBucketCodeSummaryExpirationAndSendNotification);
         }
 

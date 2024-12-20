@@ -12,6 +12,15 @@ import java.util.function.Function;
 public class ReferentFiscalCodeConverter
         extends AbstractAttributeAuthorityConverter<ReferentFiscalCodeAttributeAuthority, ReferentFiscalCode> {
 
+    protected Function<ReferentFiscalCodeAttributeAuthority, ReferentFiscalCode> fromAttributeAuthorityModel = attributeAuthorityModel -> {
+        throw new NotImplementedException();
+    };
+    protected Function<ReferentFiscalCode, ReferentFiscalCodeAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
+        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority = new ReferentFiscalCodeAttributeAuthority();
+        referentFiscalCodeAttributeAuthority.setReferentFiscalCode(backofficeModel.getReferentFiscalCode());
+        return referentFiscalCodeAttributeAuthority;
+    };
+
     @Override
     protected Function<ReferentFiscalCodeAttributeAuthority, ReferentFiscalCode> fromAttributeAuthorityModelFunction() {
         return fromAttributeAuthorityModel;
@@ -21,19 +30,6 @@ public class ReferentFiscalCodeConverter
     protected Function<ReferentFiscalCode, ReferentFiscalCodeAttributeAuthority> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
-
-    protected Function<ReferentFiscalCodeAttributeAuthority, ReferentFiscalCode> fromAttributeAuthorityModel =
-            attributeAuthorityModel -> {
-                throw new NotImplementedException();
-            };
-
-    protected Function<ReferentFiscalCode, ReferentFiscalCodeAttributeAuthority> toAttributeAuthorityModel =
-            backofficeModel -> {
-                ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority =
-                        new ReferentFiscalCodeAttributeAuthority();
-                referentFiscalCodeAttributeAuthority.setReferentFiscalCode(backofficeModel.getReferentFiscalCode());
-                return referentFiscalCodeAttributeAuthority;
-            };
 
 
 }

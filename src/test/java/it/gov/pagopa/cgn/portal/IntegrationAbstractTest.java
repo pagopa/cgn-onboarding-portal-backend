@@ -25,10 +25,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgisContainerProvider;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.validation.ValidatorFactory;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,156 +43,73 @@ import java.util.stream.Stream;
 @Slf4j
 public class IntegrationAbstractTest {
 
+    @Autowired
+    protected DiscountRepository discountRepository;
+    @Autowired
+    protected DiscountBucketCodeRepository discountBucketCodeRepository;
+    @Autowired
+    protected BucketCodeLoadRepository bucketCodeLoadRepository;
+    @Autowired
+    protected AgreementRepository agreementRepository;
+    @Autowired
+    protected ProfileRepository profileRepository;
+    @Autowired
+    protected AgreementUserRepository userRepository;
+    @Autowired
+    protected AgreementUserRepository agreementUserRepository;
+    @Autowired
+    protected DocumentRepository documentRepository;
+    @Autowired
+    protected DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
+    @Autowired
+    protected OfflineMerchantRepository offlineMerchantRepository;
+    @Autowired
+    protected OnlineMerchantRepository onlineMerchantRepository;
+    @Autowired
+    protected PublishedProductCategoryRepository publishedProductCategoryRepository;
+    @Autowired
+    protected NotificationRepository notificationRepository;
+    @Autowired
+    protected TestReferentRepository testReferentRepository;
+    @Autowired
+    protected AddressRepository addressRepository;
+    @Autowired
+    protected SecondaryReferentRepository secondaryReferentRepository;
+    @Autowired
+    protected DocumentService documentService;
+    @Autowired
+    protected AgreementService agreementService;
+    @Autowired
+    protected AgreementServiceLight agreementServiceLight;
+    @Autowired
+    protected AgreementUserService agreementUserService;
+    @Autowired
+    protected ProfileService profileService;
+    @Autowired
+    protected DiscountService discountService;
+    @Autowired
+    protected BucketService bucketService;
+    @Autowired
+    protected BackofficeAgreementService backofficeAgreementService;
+    @Autowired
+    protected ApprovedAgreementService approvedAgreementService;
+    @Autowired
+    protected ConfigProperties configProperties;
+    @Autowired
+    protected BackofficeExportFacade backofficeExportFacade;
+    @Autowired
+    protected ValidatorFactory factory;
+
     @SuppressWarnings("secrets:S6338")
     protected String getAzureConnectionString() {
         return "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;" +
                "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;" +
-               "BlobEndpoint=http://127.0.0.1:" +
-               Initializer.azurite.getMappedPort(10000) +
-               "/devstoreaccount1;";
+               "BlobEndpoint=http://127.0.0.1:" + Initializer.azurite.getMappedPort(10000) + "/devstoreaccount1;";
     }
-
-    protected static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-
-        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("11-2.5")
-                                                                                 .withDatabaseName(
-                                                                                         "integration-tests-db")
-                                                                                 .withUsername("admin")
-                                                                                 .withPassword("admin");
-
-        public static GenericContainer<?> azurite = new GenericContainer<>(DockerImageName.parse(
-                "mcr.microsoft.com/azure-storage/azurite:3.11.0")).withExposedPorts(10000);
-
-        public static GenericContainer<?> greenMailContainer = new GenericContainer<>(DockerImageName.parse(
-                "greenmail/standalone:1.6.3")).withExposedPorts(3025)
-                                              // override timeout to 5 seconds
-                                              .withEnv("GREENMAIL_OPTS",
-                                                       "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
-
-        private static void startContainers() {
-            Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
-        }
-
-        private static Map<String, String> createConnectionConfiguration() {
-            return Map.of("spring.datasource.url",
-                          postgres.getJdbcUrl(),
-                          "spring.datasource.username",
-                          postgres.getUsername(),
-                          "spring.datasource.password",
-                          postgres.getPassword(),
-                          "cgn.pe.storage.azure.blob-endpoint",
-                          "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1",
-                          "spring.mail.host",
-                          greenMailContainer.getHost(),
-                          "spring.mail.port",
-                          String.valueOf(greenMailContainer.getFirstMappedPort()));
-        }
-
-        @Override
-        public void initialize(ConfigurableApplicationContext applicationContext) {
-            startContainers();
-            ConfigurableEnvironment environment = applicationContext.getEnvironment();
-            MapPropertySource testcontainers = new MapPropertySource("testcontainers",
-                                                                     (Map) createConnectionConfiguration());
-            environment.getPropertySources().addFirst(testcontainers);
-        }
-    }
-
-    @Getter
-    @Setter
-    protected class AgreementTestObject {
-        private AgreementEntity agreementEntity;
-        private List<DiscountEntity> discountEntityList;
-        private List<DocumentEntity> documentEntityList;
-        private ProfileEntity profileEntity;
-    }
-
-    @Autowired
-    protected DiscountRepository discountRepository;
-
-    @Autowired
-    protected DiscountBucketCodeRepository discountBucketCodeRepository;
-
-    @Autowired
-    protected BucketCodeLoadRepository bucketCodeLoadRepository;
-
-    @Autowired
-    protected AgreementRepository agreementRepository;
-
-    @Autowired
-    protected ProfileRepository profileRepository;
-
-    @Autowired
-    protected AgreementUserRepository userRepository;
-
-    @Autowired
-    protected AgreementUserRepository agreementUserRepository;
-
-    @Autowired
-    protected DocumentRepository documentRepository;
-
-    @Autowired
-    protected DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
-
-    @Autowired
-    protected OfflineMerchantRepository offlineMerchantRepository;
-
-    @Autowired
-    protected OnlineMerchantRepository onlineMerchantRepository;
-
-    @Autowired
-    protected PublishedProductCategoryRepository publishedProductCategoryRepository;
-
-    @Autowired
-    protected NotificationRepository notificationRepository;
-
-    @Autowired
-    protected TestReferentRepository testReferentRepository;
-
-    @Autowired
-    protected AddressRepository addressRepository;
-
-    @Autowired
-    protected SecondaryReferentRepository secondaryReferentRepository;
-
-    @Autowired
-    protected DocumentService documentService;
-
-    @Autowired
-    protected AgreementService agreementService;
-
-    @Autowired
-    protected AgreementServiceLight agreementServiceLight;
-
-    @Autowired
-    protected AgreementUserService agreementUserService;
-
-    @Autowired
-    protected ProfileService profileService;
-
-    @Autowired
-    protected DiscountService discountService;
-
-    @Autowired
-    protected BucketService bucketService;
-
-    @Autowired
-    protected BackofficeAgreementService backofficeAgreementService;
-
-    @Autowired
-    protected ApprovedAgreementService approvedAgreementService;
-
-    @Autowired
-    protected ConfigProperties configProperties;
-
-    @Autowired
-    protected BackofficeExportFacade backofficeExportFacade;
-
-    @Autowired
-    protected ValidatorFactory factory;
 
     @AfterEach
-    protected void cleanAll() throws InterruptedException {
+    protected void cleanAll()
+            throws InterruptedException {
         documentRepository.deleteAll();
         documentRepository.flush();
         discountBucketCodeRepository.deleteAll();
@@ -227,27 +147,28 @@ public class IntegrationAbstractTest {
 
     protected List<AgreementTestObject> createMultiplePendingAgreement(int numberToCreate) {
         List<AgreementTestObject> testObjectList = new ArrayList<>(numberToCreate);
-        IntStream.range(0, numberToCreate)
-                 .forEach(idx ->{
-                         boolean isPA = idx  > numberToCreate/2;
-                         testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE,
-                                                                           DiscountCodeTypeEnum.STATIC,
-                                                                           idx, isPA));
-                 });
+        IntStream.range(0, numberToCreate).forEach(idx -> {
+            boolean isPA = idx > numberToCreate / 2;
+            testObjectList.add(createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, idx, isPA));
+        });
         return testObjectList;
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
-                                                         DiscountCodeTypeEnum discountCodeType, boolean isPA) {
+                                                         DiscountCodeTypeEnum discountCodeType,
+                                                         boolean isPA) {
         return createPendingAgreement(salesChannel, discountCodeType, 1, isPA);
     }
 
     protected AgreementTestObject createPendingAgreement(SalesChannelEnum salesChannel,
                                                          DiscountCodeTypeEnum discountCodeType,
-                                                         int idx, boolean isPA) {
-        EntityType entityType = isPA? EntityType.PUBLICADMINISTRATION : EntityType.PRIVATE;
+                                                         int idx,
+                                                         boolean isPA) {
+        EntityType entityType = isPA ? EntityType.PUBLICADMINISTRATION:EntityType.PRIVATE;
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx, entityType);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx,
+                                                                                           entityType,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity,
                                                                           salesChannel,
@@ -260,7 +181,9 @@ public class IntegrationAbstractTest {
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         List<DiscountEntity> discountEntities = new ArrayList<>();
         discountEntities.add(discountEntity);
-        List<DocumentEntity> documentEntityList = isPA ? saveSamplePaDocuments(agreementEntity) : saveSampleDocuments(agreementEntity);
+        List<DocumentEntity> documentEntityList = isPA ?
+                                                  saveSamplePaDocuments(agreementEntity):
+                                                  saveSampleDocuments(agreementEntity);
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         return createAgreementTestObject(agreementEntity, profileEntity, discountEntities, documentEntityList);
     }
@@ -287,8 +210,9 @@ public class IntegrationAbstractTest {
 
     protected AgreementTestObject createApprovedAgreement(int idx, boolean publishDiscounts, boolean expireDiscount) {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID +idx,
-                 EntityType.PRIVATE);
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
         // creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity.setFullName(profileEntity.getFullName() + idx);
@@ -389,4 +313,71 @@ public class IntegrationAbstractTest {
         return testObject;
     }
 
+    protected void saveApprovedAgreement(AgreementEntity agreementEntity) {
+        // activate agreement
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.APPROVED);
+        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
+        agreementRepository.save(agreementEntity);
+    }
+
+    protected static class Initializer
+            implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+        public static GenericContainer<?> azurite = new GenericContainer<>(DockerImageName.parse(
+                "mcr.microsoft.com/azure-storage/azurite:3.33.0")).withExposedPorts(10000)
+                                                                  .waitingFor(new WaitAllStrategy().withStrategy(Wait.forListeningPort())
+                                                                                                   .withStartupTimeout(
+                                                                                                           Duration.ofSeconds(
+                                                                                                                   60)));
+        public static GenericContainer<?> greenMailContainer = new GenericContainer<>(DockerImageName.parse(
+                "greenmail/standalone:1.6.3")).withExposedPorts(3025)
+                                              // override timeout to 5 seconds
+                                              .withEnv("GREENMAIL_OPTS",
+                                                       "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
+        static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("16-master")
+                                                                                 .withDatabaseName(
+                                                                                         "integration-tests-db")
+                                                                                 .withUsername("admin")
+                                                                                 .withPassword("admin");
+
+        private static void startContainers() {
+            Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
+        }
+
+        private static Map<String, String> createConnectionConfiguration() {
+            return Map.of("spring.datasource.url",
+                          postgres.getJdbcUrl(),
+                          "spring.datasource.username",
+                          postgres.getUsername(),
+                          "spring.datasource.password",
+                          postgres.getPassword(),
+                          "cgn.pe.storage.azure.blob-endpoint",
+                          "http://127.0.0.1:" + azurite.getMappedPort(10000) + "/devstoreaccount1",
+                          "spring.mail.host",
+                          greenMailContainer.getHost(),
+                          "spring.mail.port",
+                          String.valueOf(greenMailContainer.getFirstMappedPort()));
+        }
+
+        @Override
+        public void initialize(ConfigurableApplicationContext applicationContext) {
+            startContainers();
+            ConfigurableEnvironment environment = applicationContext.getEnvironment();
+            MapPropertySource testcontainers = new MapPropertySource("testcontainers",
+                                                                     (Map) createConnectionConfiguration());
+            environment.getPropertySources().addFirst(testcontainers);
+        }
+    }
+
+    @Getter
+    @Setter
+    protected class AgreementTestObject {
+        private AgreementEntity agreementEntity;
+        private List<DiscountEntity> discountEntityList;
+        private List<DocumentEntity> documentEntityList;
+        private ProfileEntity profileEntity;
+    }
 }

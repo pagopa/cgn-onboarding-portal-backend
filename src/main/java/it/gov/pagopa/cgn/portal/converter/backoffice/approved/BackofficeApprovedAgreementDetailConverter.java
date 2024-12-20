@@ -13,17 +13,25 @@ import java.util.List;
 import java.util.function.Function;
 
 @Component
-public class BackofficeApprovedAgreementDetailConverter extends AbstractConverter<AgreementEntity, ApprovedAgreementDetail> {
+public class BackofficeApprovedAgreementDetailConverter
+        extends AbstractConverter<AgreementEntity, ApprovedAgreementDetail> {
 
     private BackofficeApprovedDiscountConverter discountConverter;
     private BackofficeDocumentConverter documentConverter;
     private BackofficeApprovedAgreementProfileConverter profileConverter;
-
+    protected Function<AgreementEntity, ApprovedAgreementDetail> toDto = entity -> {
+        ApprovedAgreementDetail dto = new ApprovedAgreementDetail();
+        dto.setAgreementId(entity.getId());
+        dto.setDiscounts((List<ApprovedAgreementDiscount>) discountConverter.toDtoCollection(entity.getDiscountList()));
+        dto.setDocuments((List<Document>) documentConverter.toDtoCollection(entity.getDocumentList()));
+        dto.setProfile(profileConverter.toDto(entity.getProfile()));
+        return dto;
+    };
 
     @Autowired
-    public BackofficeApprovedAgreementDetailConverter(
-            BackofficeApprovedDiscountConverter discountConverter, BackofficeDocumentConverter documentConverter,
-            BackofficeApprovedAgreementProfileConverter profileConverter) {
+    public BackofficeApprovedAgreementDetailConverter(BackofficeApprovedDiscountConverter discountConverter,
+                                                      BackofficeDocumentConverter documentConverter,
+                                                      BackofficeApprovedAgreementProfileConverter profileConverter) {
 
         this.discountConverter = discountConverter;
         this.documentConverter = documentConverter;
@@ -39,14 +47,4 @@ public class BackofficeApprovedAgreementDetailConverter extends AbstractConverte
     protected Function<ApprovedAgreementDetail, AgreementEntity> toEntityFunction() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
-
-    protected Function<AgreementEntity, ApprovedAgreementDetail> toDto =
-            entity -> {
-                ApprovedAgreementDetail dto = new ApprovedAgreementDetail();
-                dto.setAgreementId(entity.getId());
-                dto.setDiscounts((List<ApprovedAgreementDiscount>) discountConverter.toDtoCollection(entity.getDiscountList()));
-                dto.setDocuments((List<Document>) documentConverter.toDtoCollection(entity.getDocumentList()));
-                dto.setProfile(profileConverter.toDto(entity.getProfile()));
-                return dto;
-            };
 }

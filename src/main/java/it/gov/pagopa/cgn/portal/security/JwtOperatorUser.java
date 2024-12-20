@@ -5,15 +5,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Getter
-public class JwtOperatorUser implements JwtUser {
+public class JwtOperatorUser
+        implements JwtUser {
 
     private final String userTaxCode;
     private final String companyTaxCode;
 
-    public JwtOperatorUser(
-            String userTaxCode,
-            String companyTaxCode
-    ) {
+    public JwtOperatorUser(String userTaxCode, String companyTaxCode) {
         this.userTaxCode = userTaxCode;
         this.companyTaxCode = companyTaxCode;
     }

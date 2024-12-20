@@ -12,7 +12,8 @@ import javax.validation.constraints.Size;
 @Entity
 @Table(name = "agreement_user")
 @Data
-public class AgreementUserEntity extends BaseEntity {
+public class AgreementUserEntity
+        extends BaseEntity {
 
     @Id
     @NotBlank

@@ -30,6 +30,64 @@ paths:
         '500':
           description: Service unavailable.
 
+  /api/search_discount:
+    post:
+      security:
+        - Bearer: [ ]
+      operationId: searchDiscount
+      tags:
+        - Eyca
+      summary: Search a discount.
+      description: Search a discount.
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/SearchDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discount found.
+          schema:
+            $ref: "#/definitions/SearchApiResponse"
+        '404':
+          description: Discount not found.
+        '500':
+          description: Service unavailable.
+
+  /api/list_discount:
+    post:
+      security:
+        - Bearer: [ ]
+      operationId: listDiscount
+      tags:
+        - Eyca
+      summary: return list of discounts with paging
+      description: return list of discounts with paging
+      parameters:
+        - in: body
+          name: body
+          schema:
+            $ref: "#/definitions/ListDataExport"
+        - in: query
+          name: type
+          description: type text or json
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Discounts found.
+          schema:
+            $ref: "#/definitions/ListApiResponse"
+        '404':
+          description: Discounts not found.
+        '500':
+          description: Service unavailable.
+
   /api/create_discount:
     post:
       security:
@@ -89,7 +147,7 @@ paths:
           description: Service unavailable.
 
   /api/delete_discount:
-    delete:
+    post:
       security:
       - Bearer: [ ]
       operationId: deleteDiscount
@@ -125,6 +183,27 @@ parameters: null
 
 
 definitions:
+
+  ListDataExport:
+    type: object
+    required:
+      - page
+      - rows
+    properties:
+      page:
+        type: integer
+      rows:
+        type: integer
+  SearchDataExport:
+    type: object
+    required:
+      - id
+      - live
+    properties:
+      id:
+        type: string
+      live:
+        type: integer
   DataExport:
     type: object
     required:
@@ -208,8 +287,6 @@ definitions:
         type: array
         items:
           type: string
-      live:
-        type: integer
       image_source__file:
         type: string
       files:
@@ -257,6 +334,81 @@ definitions:
           text:
             type: string
             example: "OK"
+
+  SearchApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: object
+            properties:
+              discounts:
+                type: object
+                properties:
+                  CCDB:
+                    type: object
+                    properties:
+                      pageNumber:
+                        type: integer
+                      rowsTotal:
+                        type: integer
+                      rowsReturned:
+                        type: integer
+                      rowsPerPage:
+                        type: integer
+                      pagesTotal:
+                        type: integer
+                      offset:
+                        type: integer
+                  realCount:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/definitions/DiscountItem"
+                  count:
+                    type: integer
+
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+          code:
+            type: integer
+            example: 1
+
+  ListApiResponse:
+    type: object
+    properties:
+      api_response:
+        type: object
+        properties:
+          data:
+            type: object
+            properties:
+              discount:
+                type: array
+                items:
+                  $ref: "#/definitions/DiscountItem"
+          error:
+            type: integer
+            example: 0
+          http_status:
+            type: integer
+            example: 200
+          text:
+            type: string
+            example: "OK"
+          code:
+            type: integer
+            example: 1
 
   DeleteApiResponse:
     type: object

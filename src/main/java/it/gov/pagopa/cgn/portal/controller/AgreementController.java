@@ -20,7 +20,8 @@ import java.util.Optional;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_MERCHANT')")
-public class AgreementController implements AgreementsApi {
+public class AgreementController
+        implements AgreementsApi {
 
     private final ProfileFacade profileFacade;
     private final DiscountFacade discountFacade;
@@ -28,6 +29,21 @@ public class AgreementController implements AgreementsApi {
     private final AgreementFacade agreementFacade;
     private final ApiTokenService apiTokenService;
     private final HelpService helpService;
+
+    @Autowired
+    public AgreementController(AgreementFacade agreementFacade,
+                               DocumentFacade documentFacade,
+                               ProfileFacade profileFacade,
+                               DiscountFacade discountFacade,
+                               ApiTokenService apiTokenService,
+                               HelpService helpService) {
+        this.agreementFacade = agreementFacade;
+        this.profileFacade = profileFacade;
+        this.discountFacade = discountFacade;
+        this.documentFacade = documentFacade;
+        this.apiTokenService = apiTokenService;
+        this.helpService = helpService;
+    }
 
     @Override
     public ResponseEntity<Agreement> createAgreement() {
@@ -154,20 +170,5 @@ public class AgreementController implements AgreementsApi {
     public ResponseEntity<DiscountBucketCodeLoadingProgess> getDiscountBucketCodeLoadingProgess(String agreementId,
                                                                                                 String discountId) {
         return ResponseEntity.ok(discountFacade.getDiscountBucketCodeLoadingProgess(agreementId, discountId));
-    }
-
-    @Autowired
-    public AgreementController(AgreementFacade agreementFacade,
-                               DocumentFacade documentFacade,
-                               ProfileFacade profileFacade,
-                               DiscountFacade discountFacade,
-                               ApiTokenService apiTokenService,
-                               HelpService helpService) {
-        this.agreementFacade = agreementFacade;
-        this.profileFacade = profileFacade;
-        this.discountFacade = discountFacade;
-        this.documentFacade = documentFacade;
-        this.apiTokenService = apiTokenService;
-        this.helpService = helpService;
     }
 }

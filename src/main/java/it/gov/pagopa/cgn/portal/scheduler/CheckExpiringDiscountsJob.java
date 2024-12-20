@@ -20,7 +20,8 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CheckExpiringDiscountsJob implements Job {
+public class CheckExpiringDiscountsJob
+        implements Job {
 
     private static final String JOB_LOG_NAME = "Expiring Discounts Notification Job ";
 
@@ -29,7 +30,8 @@ public class CheckExpiringDiscountsJob implements Job {
     private final ConfigProperties configProperties;
 
     @Autowired
-    public CheckExpiringDiscountsJob(DiscountService discountService, DiscountRepository discountRepository,
+    public CheckExpiringDiscountsJob(DiscountService discountService,
+                                     DiscountRepository discountRepository,
                                      ConfigProperties configProperties) {
         this.discountService = discountService;
         this.discountRepository = discountRepository;
@@ -41,10 +43,9 @@ public class CheckExpiringDiscountsJob implements Job {
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountEntity> discountList =
-                discountRepository.findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
-                        DiscountStateEnum.PUBLISHED,
-                        LocalDate.now().plusDays(configProperties.getExpiringDiscountsJobDays()));
+        List<DiscountEntity> discountList = discountRepository.findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
+                DiscountStateEnum.PUBLISHED,
+                LocalDate.now().plusDays(configProperties.getExpiringDiscountsJobDays()));
 
         if (!CollectionUtils.isEmpty(discountList)) {
             log.info("Found " + discountList.size() + " discounts to notify");

@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.converter.profile;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -19,49 +18,32 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, D> {
+public abstract class CommonProfileConverter<E, D>
+        extends AbstractConverter<E, D> {
 
     private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
-
-    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
 
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.STATIC, DiscountCodeType.STATIC);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
-
-        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
-        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
-        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
     }
 
-    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
-            = entityEnum -> Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
-                                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
+    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum -> Optional.ofNullable(
+            discountCodeTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
 
-    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum
-            = discountCodeType -> discountCodeTypeMap.entrySet()
-                                                     .stream()
-                                                     .filter(entry -> entry.getValue().equals(discountCodeType))
-                                                     .map(Map.Entry::getKey)
-                                                     .findFirst()
-                                                     .orElseThrow();
-
-    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
-            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
-
-    protected Function<SupportType, SupportTypeEnum> toEntitySupportTypeEnum = supportType -> supportTypeMap.entrySet()
-                                                                                                            .stream()
-                                                                                                            .filter(entry -> entry.getValue()
-                                                                                                                                  .equals(supportType))
-                                                                                                            .map(Map.Entry::getKey)
-                                                                                                            .findFirst()
-                                                                                                            .orElseThrow();
+    protected Function<DiscountCodeType, DiscountCodeTypeEnum> toEntityDiscountCodeTypeEnum = discountCodeType -> discountCodeTypeMap.entrySet()
+                                                                                                                                     .stream()
+                                                                                                                                     .filter(entry -> entry.getValue()
+                                                                                                                                                           .equals(discountCodeType))
+                                                                                                                                     .map(Map.Entry::getKey)
+                                                                                                                                     .findFirst()
+                                                                                                                                     .orElseThrow();
 
     protected BiConsumer<Coordinates, AddressEntity> setCoordinatesFromDto = (coordinates, addressEntity) -> {
-        if (coordinates != null && coordinates.getLongitude() != null && coordinates.getLatitude() != null) {
+        if (coordinates!=null && coordinates.getLongitude()!=null && coordinates.getLatitude()!=null) {
             addressEntity.setLongitude(coordinates.getLongitude().doubleValue());
             addressEntity.setLatitude(coordinates.getLatitude().doubleValue());
         }
@@ -69,7 +51,7 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
 
     protected Function<AddressEntity, Coordinates> getCoordinatesFromEntity = addressEntity -> {
         Coordinates coordinates = new Coordinates();
-        if (addressEntity.getLongitude() != null && addressEntity.getLatitude() != null) {
+        if (addressEntity.getLongitude()!=null && addressEntity.getLatitude()!=null) {
             coordinates.setLatitude(BigDecimal.valueOf(addressEntity.getLatitude()));
             coordinates.setLongitude(BigDecimal.valueOf(addressEntity.getLongitude()));
         }
@@ -83,14 +65,57 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
         setCoordinatesFromDto.accept(addressDto.getCoordinates(), entity);
         return entity;
     };
-
+    protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
+        SalesChannelType channelType = salesChannelDto.getChannelType();
+        switch (channelType) {
+            case ONLINECHANNEL:
+                if (salesChannelDto instanceof OnlineChannel) {
+                    OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
+                    entity.setSalesChannel(SalesChannelEnum.ONLINE);
+                    entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
+                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
+                } else {
+                    throw new InvalidRequestException("SalesChannel is invalid");
+                }
+                break;
+            case OFFLINECHANNEL:
+                if (salesChannelDto instanceof OfflineChannel) {
+                    OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
+                    entity.setSalesChannel(SalesChannelEnum.OFFLINE);
+                    entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
+                    // addressList must be not empty
+                    entity.setAddressList(physicalStoreChannel.getAddresses()
+                                                              .stream()
+                                                              .map(address -> addressToEntity.apply(address, entity))
+                                                              .collect(Collectors.toList()));
+                    entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
+                } else {
+                    throw new InvalidRequestException("SalesChannel is invalid");
+                }
+                break;
+            case BOTHCHANNELS:
+                if (salesChannelDto instanceof BothChannels) {
+                    BothChannels bothChannels = (BothChannels) salesChannelDto;
+                    entity.setSalesChannel(SalesChannelEnum.BOTH);
+                    entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
+                    entity.setAddressList(bothChannels.getAddresses()
+                                                      .stream()
+                                                      .map(address -> addressToEntity.apply(address, entity))
+                                                      .collect(Collectors.toList()));
+                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
+                    entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
+                } else {
+                    throw new InvalidRequestException("SalesChannel is invalid");
+                }
+                break;
+        }
+    };
     protected Function<AddressEntity, Address> addressToDto = entity -> {
         Address dto = new Address();
         dto.setFullAddress(entity.getFullAddress());
         dto.setCoordinates(getCoordinatesFromEntity.apply(entity));
         return dto;
     };
-
     protected Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
         switch (entity.getSalesChannel()) {
             case ONLINE:
@@ -128,58 +153,8 @@ public abstract class CommonProfileConverter<E, D> extends AbstractConverter<E, 
 
     };
 
-    protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
-        SalesChannelType channelType = salesChannelDto.getChannelType();
-        switch (channelType) {
-            case ONLINECHANNEL:
-                if (salesChannelDto instanceof OnlineChannel) {
-                    OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
-                    entity.setSalesChannel(SalesChannelEnum.ONLINE);
-                    entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
-                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
-                } else {
-                    throwInvalidSalesChannel();
-                }
-                break;
-            case OFFLINECHANNEL:
-                if (salesChannelDto instanceof OfflineChannel) {
-                    OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
-                    entity.setSalesChannel(SalesChannelEnum.OFFLINE);
-                    entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
-                    // addressList must be not empty
-                    entity.setAddressList(physicalStoreChannel.getAddresses()
-                                                              .stream()
-                                                              .map(address -> addressToEntity.apply(address, entity))
-                                                              .collect(Collectors.toList()));
-                    entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
-                } else {
-                    throwInvalidSalesChannel();
-                }
-                break;
-            case BOTHCHANNELS:
-                if (salesChannelDto instanceof BothChannels) {
-                    BothChannels bothChannels = (BothChannels) salesChannelDto;
-                    entity.setSalesChannel(SalesChannelEnum.BOTH);
-                    entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
-                    entity.setAddressList(bothChannels.getAddresses()
-                                                      .stream()
-                                                      .map(address -> addressToEntity.apply(address, entity))
-                                                      .collect(Collectors.toList()));
-                    entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
-                    entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
-                } else {
-                    throwInvalidSalesChannel();
-                }
-                break;
-        }
-    };
-
-
     private Comparator<AddressEntity> getAddressComparator() {
         return Comparator.comparing(AddressEntity::getId);
     }
 
-    private void throwInvalidSalesChannel() {
-        throw new InvalidRequestException("SalesChannel is invalid");
-    }
 }

@@ -24,6 +24,19 @@ public class DiscountFacade {
     private final UpdateDiscountConverter updateDiscountConverter;
     private final BucketLoadUtils bucketLoadUtils;
 
+    @Autowired
+    public DiscountFacade(DiscountService discountService,
+                          CreateDiscountConverter createDiscountConverter,
+                          DiscountConverter discountConverter,
+                          UpdateDiscountConverter updateDiscountConverter,
+                          BucketLoadUtils bucketLoadUtils) {
+        this.discountService = discountService;
+        this.createDiscountConverter = createDiscountConverter;
+        this.discountConverter = discountConverter;
+        this.updateDiscountConverter = updateDiscountConverter;
+        this.bucketLoadUtils = bucketLoadUtils;
+    }
+
     public ResponseEntity<Discount> createDiscount(String agreementId, CreateDiscount createDiscountDto) {
         DiscountEntity discountEntity = createDiscountConverter.toEntity(createDiscountDto);
         CrudDiscountWrapper wrapper = discountService.createDiscount(agreementId, discountEntity);
@@ -78,18 +91,5 @@ public class DiscountFacade {
 
     public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {
         return discountService.getDiscountBucketCodeLoadingProgess(agreementId, Long.valueOf(discountId));
-    }
-
-    @Autowired
-    public DiscountFacade(DiscountService discountService,
-                          CreateDiscountConverter createDiscountConverter,
-                          DiscountConverter discountConverter,
-                          UpdateDiscountConverter updateDiscountConverter,
-                          BucketLoadUtils bucketLoadUtils) {
-        this.discountService = discountService;
-        this.createDiscountConverter = createDiscountConverter;
-        this.discountConverter = discountConverter;
-        this.updateDiscountConverter = updateDiscountConverter;
-        this.bucketLoadUtils = bucketLoadUtils;
     }
 }

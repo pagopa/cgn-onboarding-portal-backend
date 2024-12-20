@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class UpdateProfileApiTest extends IntegrationAbstractTest {
+class UpdateProfileApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,27 +40,32 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType.PRIVATE);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                EntityType.PRIVATE,
+                                                                TestUtils.FAKE_ORGANIZATION_NAME);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }
 
     @Test
-    void Update_UpdateProfileWithInvalidAgreementId_Forbidden() throws Exception {
+    void Update_UpdateProfileWithInvalidAgreementId_Forbidden()
+            throws Exception {
         this.mockMvc.perform(get(TestUtils.getProfilePath("invalid")).contentType(MediaType.APPLICATION_JSON))
                     .andDo(log())
                     .andExpect(status().isForbidden());
     }
 
     @Test
-    void Update_UpdateProfileNotExists_NotFound() throws Exception {
+    void Update_UpdateProfileNotExists_NotFound()
+            throws Exception {
         this.mockMvc.perform(get(profilePath).contentType(MediaType.APPLICATION_JSON))
                     .andDo(log())
                     .andExpect(status().isNotFound());
     }
 
     @Test
-    void Update_UpdateOnlineProfileToOffline_Ok() throws Exception {
+    void Update_UpdateOnlineProfileToOffline_Ok()
+            throws Exception {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
@@ -98,7 +105,8 @@ class UpdateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Update_UpdateOnlineProfileToBoth_Ok() throws Exception {
+    void Update_UpdateOnlineProfileToBoth_Ok()
+            throws Exception {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileEntity = profileService.createProfile(profileEntity, agreement.getId());
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();

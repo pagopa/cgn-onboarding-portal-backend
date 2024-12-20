@@ -13,30 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, Discount> {
-
-    @Override
-    protected Function<DiscountEntity, Discount> toDtoFunction() {
-        return toDto;
-    }
-
-    @Override
-    protected Function<Discount, DiscountEntity> toEntityFunction() {
-        return toEntity;
-    }
-
-    public Discounts getDiscountsDtoFromDiscountEntityList(List<DiscountEntity> discountEntityList) {
-        return toDiscountsDto.apply(discountEntityList);
-    }
-
-    protected Function<List<DiscountEntity>, Discounts> toDiscountsDto = discountEntities -> {
-        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities)
-                                      ? Collections.emptyList()
-                                      : discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
-        Discounts discounts = new Discounts();
-        discounts.setItems(discountList);
-        return discounts;
-    };
+public class DiscountConverter
+        extends CommonDiscountConverter<DiscountEntity, Discount> {
 
     protected Function<DiscountEntity, Discount> toDto = entity -> {
         Discount dto = new Discount();
@@ -64,7 +42,7 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         dto.setSuspendedReasonMessage(entity.getSuspendedReasonMessage());
         dto.setDiscountUrl(entity.getDiscountUrl());
         dto.setTestFailureReason(entity.getTestFailureReason());
-        if (entity.getLastBucketCodeLoad() != null) {
+        if (entity.getLastBucketCodeLoad()!=null) {
             dto.setLastBucketCodeLoadUid(entity.getLastBucketCodeLoad().getUid());
             dto.setLastBucketCodeLoadFileName(entity.getLastBucketCodeLoad().getFileName());
             dto.setLastBucketCodeLoadStatus(toBucketCodeLoadStatusDtoEnum.apply(entity.getLastBucketCodeLoad()
@@ -72,9 +50,30 @@ public class DiscountConverter extends CommonDiscountConverter<DiscountEntity, D
         }
         return dto;
     };
-
+    protected Function<List<DiscountEntity>, Discounts> toDiscountsDto = discountEntities -> {
+        List<Discount> discountList = CollectionUtils.isEmpty(discountEntities) ?
+                                      Collections.emptyList():
+                                      discountEntities.stream().map(toDtoFunction()).collect(Collectors.toList());
+        Discounts discounts = new Discounts();
+        discounts.setItems(discountList);
+        return discounts;
+    };
     protected Function<Discount, DiscountEntity> toEntity = dto -> {
         throw new UnsupportedOperationException("Not implemented yet");
     };
+
+    @Override
+    protected Function<DiscountEntity, Discount> toDtoFunction() {
+        return toDto;
+    }
+
+    @Override
+    protected Function<Discount, DiscountEntity> toEntityFunction() {
+        return toEntity;
+    }
+
+    public Discounts getDiscountsDtoFromDiscountEntityList(List<DiscountEntity> discountEntityList) {
+        return toDiscountsDto.apply(discountEntityList);
+    }
 
 }

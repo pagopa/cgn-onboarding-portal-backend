@@ -19,7 +19,8 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SuspendDiscountsWithoutAvailableBucketCodesJob implements Job {
+public class SuspendDiscountsWithoutAvailableBucketCodesJob
+        implements Job {
 
     private static final String JOB_LOG_NAME = "Suspend Discounts Without Available Bucket Codes Job";
 
@@ -42,15 +43,13 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob implements Job {
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList =
-                discountBucketCodeSummaryRepository.findAllPublishedByExpiredAtLessThanEqualAndAvailableCodesGreaterZero(
-                        OffsetDateTime.now().minusDays(
-                                configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()
-                        )
-                );
+        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedByExpiredAtLessThanEqualAndAvailableCodesGreaterZero(
+                OffsetDateTime.now()
+                              .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
-            log.info("Found " + discountBucketCodeSummaryList.size() + " expired discount bucket code summaries to check");
+            log.info("Found " + discountBucketCodeSummaryList.size() +
+                     " expired discount bucket code summaries to check");
             discountBucketCodeSummaryList.forEach(discountService::suspendDiscountIfDiscountBucketCodesAreExpired);
         }
 

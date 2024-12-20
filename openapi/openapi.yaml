@@ -634,13 +634,6 @@ definitions:
       imageUrl:
         type: string
 
-  SupportType:
-    type: string
-    enum:
-      - EmailAddress
-      - Website
-      - PhoneNumber
-
   EntityType:
     type: string
     enum:
@@ -662,8 +655,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       fullName:
         type: string
@@ -704,12 +695,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -728,8 +713,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       name:
         type: string
@@ -764,12 +747,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -793,8 +770,6 @@ definitions:
       - description_en
       - description_de
       - salesChannel
-      - supportType
-      - supportValue
     properties:
       id:
         type: string
@@ -837,12 +812,6 @@ definitions:
         type: string
       salesChannel:
         $ref: '#/definitions/SalesChannel'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       secondaryReferents:
         type: array
         items:
@@ -1078,6 +1047,9 @@ definitions:
       visibleOnEyca:
         type: boolean
         default: false
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1153,6 +1125,9 @@ definitions:
       visibleOnEyca:
         type: boolean
         default: false
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1253,6 +1228,9 @@ definitions:
       suspendedReasonMessage:
         type: string
         maxLength: 250
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500
@@ -1414,10 +1392,73 @@ definitions:
       - GENERIC
       - IMAGE_SIZE_EXCEEDED
 
+  ErrorCodeEnum:
+    type: string
+    enum:
+      - CANNOT_HAVE_EMPTY_STATIC_CODE_FOR_PROFILE_WITH_STATIC_CODE
+      - CANNOT_HAVE_EMPTY_LANDING_PAGE_URL_FOR_PROFILE_LANDING_PAGE
+      - CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS
+      - CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT
+      - CANNOT_PROCEED_WITH_SUSPENDED_DISCOUNT
+      - CANNOT_PROCEED_WITH_EXPIRED_DISCOUNT
+      - CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST
+      - MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED
+      - DISCOUNT_CANNOT_HAVE_MORE_THAN_TWO_CATEGORIES
+      - AGREEMENT_NOT_APPROVABLE_FOR_WRONG_MANDATORY_DOCUMENTS
+      - AGREEMENT_NOT_FOUND
+      - DISCOUNT_NOT_FOUND
+      - PROFILE_NOT_FOUND
+      - DOCUMENT_NOT_FOUND
+      - DOCUMENT_TYPE_NOT_VALID
+      - DISCOUNT_NOT_RELATED_TO_AGREEMENT_PROVIDED
+      - CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS
+      - CANNOT_UNPUBLISH_DISCOUNT_NOT_PUBLISHED
+      - CANNOT_SUSPEND_DISCOUNT_NOT_PUBLISHED
+      - DISCOUNT_CANNOT_REFERENCE_TO_MISSING_BUCKET_FILE_FOR_DISCOUNT_WITH_BUCKET
+      - CANNOT_SET_DISCOUNT_STATE_FOR_DISCOUNT_NOT_IN_TEST_PENDING
+      - CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING
+      - CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET
+      - CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET
+      - MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED
+      - BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR
+      - CANNOT_PROCEED_AGREEMENT_NOT_IN_PENDING
+      - AGREEMENT_NOT_ASSIGNED_TO_CURRENT_USER
+      - MANDATORY_DOCUMENT_ARE_MISSING
+      - AGREEMENT_ALREADY_ASSIGNED_TO_CURRENT_USER
+      - AGREEMENT_NO_LONGER_ASSIGNED
+      - AGREEMENT_USER_NOT_FOUND
+      - CANNOT_RETRIEVE_TOKEN_FOR_PROFILE_NOT_API
+      - TOKEN_PARAMETER_NOT_VALID
+      - PDF_NAME_OR_EXTENSION_NOT_VALID
+      - PDF_RENDERING_ERROR
+      - CSV_NAME_OR_EXTENSION_NOT_VALID
+      - CSV_DATA_NOT_VALID
+      - IMAGE_DATA_NOT_VALID
+      - IMAGE_NAME_OR_EXTENSION_NOT_VALID
+      - IMAGE_DIMENSION_NOT_VALID
+      - IMAGE_AZURE_UPLOAD_ERROR
+      - ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA
+      - CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING
+      - CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND
+      - PROFILE_ALREADY_EXISTS_FOR_AGREEMENT_PROVIDED
+      - CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS
+
+  ErrorCodeString:
+    type: string
+
+  ErrorCode:
+    type: string
+    description: A payload used for error responses.
+    x-one-of: true
+    allOf:
+      - $ref: '#/definitions/ErrorCodeString'
+      - $ref: '#/definitions/ErrorCodeEnum'
+
 responses:
   InvalidRequest:
     description: Bad request
-    #content: {} #TODO
+    schema:
+        $ref: '#/definitions/ErrorCode'
   Forbidden:
     description: Forbidden
     #content: {} #TODO

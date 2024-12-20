@@ -3,7 +3,7 @@ package it.gov.pagopa.cgn.portal.enums;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
@@ -12,8 +12,7 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum ApiTokenTypeEnum {
 
-    PRIMARY("primary"),
-    SECONDARY("secondary");
+    PRIMARY("primary"), SECONDARY("secondary");
 
     private final String code;
 
@@ -23,8 +22,9 @@ public enum ApiTokenTypeEnum {
             throw new InvalidRequestException("Invalid token type parameter: " + value);
         }
         return Arrays.stream(ApiTokenTypeEnum.values())
-                .filter(apiTokenTypeEnum -> apiTokenTypeEnum.getCode().equals(value)).findFirst()
-                .orElseThrow(()-> new InvalidRequestException("Invalid token type parameter: " + value));
+                     .filter(apiTokenTypeEnum -> apiTokenTypeEnum.getCode().equals(value))
+                     .findFirst()
+                     .orElseThrow(() -> new InvalidRequestException("Invalid token type parameter: " + value));
     }
 
 }

@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -24,12 +25,67 @@ public class ProfileService {
     private final AgreementServiceLight agreementServiceLight;
     private final ProfileRepository profileRepository;
     private final DocumentService documentService;
+    private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {
+        dbEntity.setFirstName(toUpdateEntity.getFirstName());
+        dbEntity.setLastName(toUpdateEntity.getLastName());
+        dbEntity.setEmailAddress(toUpdateEntity.getEmailAddress());
+        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+        dbEntity.setRole(toUpdateEntity.getRole());
+    };
+    private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
+        if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
+            profileEntity.removeAllAddress();
+        }
+        profileEntity.addAddressList(addressesList);
+    };
+    private final BiConsumer<ProfileEntity, List<SecondaryReferentEntity>> updateSecondaryReferents = (profileEntity, secondaryReferentList) -> {
+        if (!CollectionUtils.isEmpty(profileEntity.getSecondaryReferentList())) {
+            profileEntity.removeAllSecondaryReferents();
+        }
+        profileEntity.addSecondaryReferentsList(secondaryReferentList);
+    };
+    private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
+        dbEntity.setName(toUpdateEntity.getName());
+        dbEntity.setNameEn(toUpdateEntity.getNameEn());
+        dbEntity.setNameDe(toUpdateEntity.getNameDe());
+        dbEntity.setDescription(toUpdateEntity.getDescription());
+        dbEntity.setDescriptionEn(toUpdateEntity.getDescriptionEn());
+        dbEntity.setDescriptionDe(toUpdateEntity.getDescriptionDe());
+        dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
+        dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
+        dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());
+        dbEntity.setLegalRepresentativeTaxCode(toUpdateEntity.getLegalRepresentativeTaxCode());
+        dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
+        dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
+        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
+        dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
+        updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
+        updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
+        updateSecondaryReferents.accept(dbEntity, toUpdateEntity.getSecondaryReferentList());
+        dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
+        // fullname will never arrive from converted api model
+        // we will update it only internally so we have to check that it's not null
+        if (toUpdateEntity.getFullName()!=null) {
+            dbEntity.setFullName(toUpdateEntity.getFullName());
+        }
+    };
+
+    @Autowired
+    public ProfileService(ValidatorFactory factory,
+                          ProfileRepository profileRepository,
+                          AgreementServiceLight agreementServiceLight,
+                          DocumentService documentService) {
+        this.factory = factory;
+        this.profileRepository = profileRepository;
+        this.agreementServiceLight = agreementServiceLight;
+        this.documentService = documentService;
+    }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity createProfile(ProfileEntity profileEntity, String agreementId) {
-        AgreementEntity agreement = agreementServiceLight.findById(agreementId);
+        AgreementEntity agreement = agreementServiceLight.findAgreementById(agreementId);
         if (profileRepository.existsProfileEntityByAgreementId(agreementId)) {
-            throw new InvalidRequestException("A registry already exist for the agreement: " + agreementId);
+            throw new InvalidRequestException(ErrorCodeEnum.PROFILE_ALREADY_EXISTS_FOR_AGREEMENT_PROVIDED.getValue());
         }
         profileEntity.setAgreement(agreement);
         validateProfile(profileEntity);
@@ -38,7 +94,7 @@ public class ProfileService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public Optional<ProfileEntity> getProfile(String agreementId) {
-        return getOptProfileFromAgreementId(agreementId);
+        return profileRepository.findByAgreementId(agreementId);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -59,8 +115,8 @@ public class ProfileService {
             documentService.resetAllDocuments(agreementId);
         }
         // fix for misalignments with addresses
-        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) && profileEntity.getAddressList().isEmpty()
-                && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
+        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) &&
+            profileEntity.getAddressList().isEmpty() && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
             profileEntity.setAllNationalAddresses(true);
         }
         validateProfile(profileEntity);
@@ -68,82 +124,14 @@ public class ProfileService {
         return profileRepository.save(profileEntity);
     }
 
-
-    @Autowired
-    public ProfileService(ValidatorFactory factory,
-                          ProfileRepository profileRepository,
-                          AgreementServiceLight agreementServiceLight,
-                          DocumentService documentService) {
-        this.factory = factory;
-        this.profileRepository = profileRepository;
-        this.agreementServiceLight = agreementServiceLight;
-        this.documentService = documentService;
-    }
-
     @Transactional(Transactional.TxType.REQUIRED)
     public ProfileEntity getProfileFromAgreementId(String agreementId) {
-        return getOptProfileFromAgreementId(agreementId).orElseThrow(() -> new InvalidRequestException(
-                "Updating profile was not found for agreement " + agreementId));
+        return profileRepository.findByAgreementId(agreementId)
+                                .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
     }
 
     private void validateProfile(ProfileEntity profileEntity) {
         ValidationUtils.performConstraintValidation(factory.getValidator(), profileEntity);
     }
-
-
-    private Optional<ProfileEntity> getOptProfileFromAgreementId(String agreementId) {
-        return profileRepository.findByAgreementId(agreementId);
-    }
-
-    private final BiConsumer<ReferentEntity, ReferentEntity> updateReferent = (toUpdateEntity, dbEntity) -> {
-        dbEntity.setFirstName(toUpdateEntity.getFirstName());
-        dbEntity.setLastName(toUpdateEntity.getLastName());
-        dbEntity.setEmailAddress(toUpdateEntity.getEmailAddress());
-        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
-        dbEntity.setRole(toUpdateEntity.getRole());
-    };
-
-    private final BiConsumer<ProfileEntity, List<AddressEntity>> updateAddress = (profileEntity, addressesList) -> {
-        if (!CollectionUtils.isEmpty(profileEntity.getAddressList())) {
-            profileEntity.removeAllAddress();
-        }
-        profileEntity.addAddressList(addressesList);
-    };
-
-    private final BiConsumer<ProfileEntity, List<SecondaryReferentEntity>> updateSecondaryReferents = (profileEntity, secondaryReferentList) -> {
-        if (!CollectionUtils.isEmpty(profileEntity.getSecondaryReferentList())) {
-            profileEntity.removeAllSecondaryReferents();
-        }
-        profileEntity.addSecondaryReferentsList(secondaryReferentList);
-    };
-
-
-    private final BiConsumer<ProfileEntity, ProfileEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
-        dbEntity.setName(toUpdateEntity.getName());
-        dbEntity.setNameEn(toUpdateEntity.getNameEn());
-        dbEntity.setNameDe(toUpdateEntity.getNameDe());
-        dbEntity.setDescription(toUpdateEntity.getDescription());
-        dbEntity.setDescriptionEn(toUpdateEntity.getDescriptionEn());
-        dbEntity.setDescriptionDe(toUpdateEntity.getDescriptionDe());
-        dbEntity.setPecAddress(toUpdateEntity.getPecAddress());
-        dbEntity.setSalesChannel(toUpdateEntity.getSalesChannel());
-        dbEntity.setLegalOffice(toUpdateEntity.getLegalOffice());
-        dbEntity.setLegalRepresentativeTaxCode(toUpdateEntity.getLegalRepresentativeTaxCode());
-        dbEntity.setLegalRepresentativeFullName(toUpdateEntity.getLegalRepresentativeFullName());
-        dbEntity.setDiscountCodeType(toUpdateEntity.getDiscountCodeType());
-        dbEntity.setTelephoneNumber(toUpdateEntity.getTelephoneNumber());
-        dbEntity.setAllNationalAddresses(toUpdateEntity.getAllNationalAddresses());
-        updateReferent.accept(toUpdateEntity.getReferent(), dbEntity.getReferent());
-        updateAddress.accept(dbEntity, toUpdateEntity.getAddressList());
-        updateSecondaryReferents.accept(dbEntity, toUpdateEntity.getSecondaryReferentList());
-        dbEntity.setWebsiteUrl(toUpdateEntity.getWebsiteUrl());
-        dbEntity.setSupportType(toUpdateEntity.getSupportType());
-        dbEntity.setSupportValue(toUpdateEntity.getSupportValue());
-        // fullname will never arrive from converted api model
-        // we will update it only internally so we have to check that it's not null
-        if (toUpdateEntity.getFullName() != null) {
-            dbEntity.setFullName(toUpdateEntity.getFullName());
-        }
-    };
 
 }

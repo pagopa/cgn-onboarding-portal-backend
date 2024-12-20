@@ -1,6 +1,6 @@
 package it.gov.pagopa.cgn.portal.exception;
 
-import it.gov.pagopa.cgnonboardingportal.model.ImageErrorCode;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -32,27 +32,21 @@ public class ExceptionTest {
     }
 
     @Test
-    public void ImageExceptionConstructor_ConstructorWithImageErrorCodeEnum_Ok() {
-        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION);
-        Assertions.assertEquals(ImageErrorCode.INVALID_DIMENSION.getValue(), imageException.getImageErrorCodeDto());
-        Assertions.assertEquals(ImageException.ImageErrorCodeEnum.INVALID_DIMENSION.getDefaultErrorMsg(), imageException.getMessage());
+    public void InvalidRequestExceptionConstructor_ConstructorWithImageDimensionNotValid_Ok() {
+        InvalidRequestException irException = new InvalidRequestException(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());
+        Assertions.assertEquals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue(), irException.getMessage());
     }
 
     @Test
-    public void ImageExceptionConstructor_ConstructorWithImageErrorCodeEnumAndMessage_Ok() {
-        String customMsg = "an error";
-        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, customMsg);
-        Assertions.assertEquals(ImageErrorCode.GENERIC.getValue(), imageException.getImageErrorCodeDto());
-        Assertions.assertEquals(customMsg, imageException.getMessage());
+    public void InvalidRequestExceptionConstructor_ConstructorWithImageDataNotValid_Ok() {
+        InvalidRequestException irException = new InvalidRequestException(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue());
+        Assertions.assertEquals(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue(), irException.getMessage());
     }
 
     @Test
     public void ImageException_ImageExceptionToStringContainsCodeAndMessage_Ok() {
-        String customMsg = "an error";
-        ImageException imageException = new ImageException(ImageException.ImageErrorCodeEnum.GENERIC, customMsg);
-        Assertions.assertTrue(imageException.toString().contains(ImageErrorCode.GENERIC.getValue()));
-        Assertions.assertTrue(imageException.toString().contains(customMsg));
-
+        InvalidRequestException irException = new InvalidRequestException(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue());
+        Assertions.assertTrue(irException.toString().contains(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue()));
     }
 
 }

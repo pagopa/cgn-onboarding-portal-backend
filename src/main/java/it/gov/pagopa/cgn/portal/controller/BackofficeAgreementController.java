@@ -16,9 +16,15 @@ import java.util.List;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class BackofficeAgreementController implements AgreementRequestsApi {
+public class BackofficeAgreementController
+        implements AgreementRequestsApi {
 
     private final BackofficeAgreementFacade agreementFacade;
+
+    @Autowired
+    public BackofficeAgreementController(BackofficeAgreementFacade agreementFacade) {
+        this.agreementFacade = agreementFacade;
+    }
 
     @Override
     public ResponseEntity<Agreements> getAgreements(String states,
@@ -99,11 +105,6 @@ public class BackofficeAgreementController implements AgreementRequestsApi {
                                                       String discountId,
                                                       FailureReason failureReason) {
         return agreementFacade.setDiscountTestFailed(agreementId, discountId, failureReason.getReasonMessage());
-    }
-
-    @Autowired
-    public BackofficeAgreementController(BackofficeAgreementFacade agreementFacade) {
-        this.agreementFacade = agreementFacade;
     }
 
 }

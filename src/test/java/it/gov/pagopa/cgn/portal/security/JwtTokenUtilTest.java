@@ -38,8 +38,7 @@ public class JwtTokenUtilTest {
     public void GetUserDetails_InvalidRole_ThrowSecurityException() {
         String token = createOperatorToken();
         JwtTokenUtil jwtTokenUtil = new JwtTokenUtil();
-        Assert.assertThrows(SecurityException.class,
-                () ->jwtTokenUtil.getUserDetails(token, "Invalid"));
+        Assert.assertThrows(SecurityException.class, () -> jwtTokenUtil.getUserDetails(token, "Invalid"));
 
     }
 
@@ -68,7 +67,8 @@ public class JwtTokenUtilTest {
         JwtUser jwtUser = jwtTokenUtil.getUserDetails(token, CgnUserRoleEnum.ADMIN.getCode());
         Assert.assertTrue(jwtUser instanceof JwtAdminUser);
         JwtAdminUser adminUser = (JwtAdminUser) jwtUser;
-        Assert.assertEquals(CLAIM_KEY_ADMIN_NAME_EXAMPLE + " " + CLAIM_KEY_ADMIN_FAMILY_NAME_EXAMPLE, adminUser.getUserFullName());
+        Assert.assertEquals(CLAIM_KEY_ADMIN_NAME_EXAMPLE + " " + CLAIM_KEY_ADMIN_FAMILY_NAME_EXAMPLE,
+                            adminUser.getUserFullName());
 
     }
 
@@ -101,15 +101,17 @@ public class JwtTokenUtilTest {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary(SECRET_KEY);
         Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
-        JwtBuilder builder = Jwts.builder().setId("id")
-                .setIssuedAt(new Date())
-                .setSubject("subject")
-                .setIssuer("issuer")
-                .setExpiration(java.util.Date.from(LocalDateTime.now().plusMonths(1)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()))
-                .setClaims(claimsMap)
-                .signWith(signatureAlgorithm, signingKey);
+        JwtBuilder builder = Jwts.builder()
+                                 .setId("id")
+                                 .setIssuedAt(new Date())
+                                 .setSubject("subject")
+                                 .setIssuer("issuer")
+                                 .setExpiration(java.util.Date.from(LocalDateTime.now()
+                                                                                 .plusMonths(1)
+                                                                                 .atZone(ZoneId.systemDefault())
+                                                                                 .toInstant()))
+                                 .setClaims(claimsMap)
+                                 .signWith(signatureAlgorithm, signingKey);
         return builder.compact();
     }
 }

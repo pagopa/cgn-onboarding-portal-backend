@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class BackofficeAttributeAuthorityOrganizationApiTest extends IntegrationAbstractTest {
+class BackofficeAttributeAuthorityOrganizationApiTest
+        extends IntegrationAbstractTest {
 
     private BackofficeAttributeAuthorityFacade backofficeAttributeAuthorityFacade;
 
@@ -33,29 +34,33 @@ class BackofficeAttributeAuthorityOrganizationApiTest extends IntegrationAbstrac
     @BeforeEach
     void beforeEach() {
         backofficeAttributeAuthorityFacade = Mockito.mock(BackofficeAttributeAuthorityFacade.class);
-        backofficeAttributeAuthorityOrganizationController =
-                new BackofficeAttributeAuthorityOrganizationController(backofficeAttributeAuthorityFacade);
+        backofficeAttributeAuthorityOrganizationController = new BackofficeAttributeAuthorityOrganizationController(
+                backofficeAttributeAuthorityFacade);
         mockMvc = MockMvcBuilders.standaloneSetup(backofficeAttributeAuthorityOrganizationController).build();
         setAdminAuth();
     }
 
     @Test
-    void GetOrganization_Ok() throws Exception {
+    void GetOrganization_Ok()
+            throws Exception {
         mockMvc.perform(get("/organization/1234567890")).andDo(log()).andExpect(status().isOk());
     }
 
     @Test
-    void DeleteOrganization_Ok() throws Exception {
+    void DeleteOrganization_Ok()
+            throws Exception {
         mockMvc.perform(delete("/organization/1234567890")).andDo(log()).andExpect(status().isOk());
     }
 
     @Test
-    void GetReferents_Ok() throws Exception {
+    void GetReferents_Ok()
+            throws Exception {
         mockMvc.perform(get("/organization/1234567890/referents")).andDo(log()).andExpect(status().isOk());
     }
 
     @Test
-    void InsertReferent_Ok() throws Exception {
+    void InsertReferent_Ok()
+            throws Exception {
         ReferentFiscalCode referentFiscalCode = new ReferentFiscalCode();
         referentFiscalCode.setReferentFiscalCode("AAAAAA00A00A000A");
         mockMvc.perform(post("/organization/1234567890/referents").contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +70,8 @@ class BackofficeAttributeAuthorityOrganizationApiTest extends IntegrationAbstrac
     }
 
     @Test
-    void DeleteReferent_Ok() throws Exception {
+    void DeleteReferent_Ok()
+            throws Exception {
         mockMvc.perform(delete("/organization/1234567890/referents/AAAAAA00A00A000A"))
                .andDo(log())
                .andExpect(status().isOk());

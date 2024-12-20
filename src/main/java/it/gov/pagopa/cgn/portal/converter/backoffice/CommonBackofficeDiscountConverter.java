@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-public abstract class CommonBackofficeDiscountConverter<E, D> extends AbstractConverter<E, D> {
+public abstract class CommonBackofficeDiscountConverter<E, D>
+        extends AbstractConverter<E, D> {
 
-    protected static final Map<DiscountStateEnum, DiscountState> discountStateEnum
-            = new EnumMap<>(DiscountStateEnum.class);
+    protected static final Map<DiscountStateEnum, DiscountState> discountStateEnum = new EnumMap<>(DiscountStateEnum.class);
 
     static {
         discountStateEnum.put(DiscountStateEnum.DRAFT, DiscountState.DRAFT);
@@ -26,7 +26,7 @@ public abstract class CommonBackofficeDiscountConverter<E, D> extends AbstractCo
     }
 
     protected BiFunction<DiscountStateEnum, LocalDate, DiscountState> toDtoEnum = (entityEnum, endDate) -> {
-        if (LocalDate.now().isAfter(endDate)) {
+        if (!LocalDate.now().isBefore(endDate)) {
             return DiscountState.EXPIRED;
         }
         return Optional.ofNullable(discountStateEnum.get(entityEnum))

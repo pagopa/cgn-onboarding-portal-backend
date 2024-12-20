@@ -34,7 +34,12 @@ public class BucketService {
     private final AzureStorage azureStorage;
     private final EmailNotificationFacade emailNotificationFacade;
 
-    public BucketService(DiscountBucketCodeRepository discountBucketCodeRepository, DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository, BucketCodeLoadRepository bucketCodeLoadRepository, DiscountRepository discountRepository, EmailNotificationFacade emailNotificationFacade, AzureStorage azureStorage) {
+    public BucketService(DiscountBucketCodeRepository discountBucketCodeRepository,
+                         DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
+                         BucketCodeLoadRepository bucketCodeLoadRepository,
+                         DiscountRepository discountRepository,
+                         EmailNotificationFacade emailNotificationFacade,
+                         AzureStorage azureStorage) {
         this.discountBucketCodeRepository = discountBucketCodeRepository;
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.bucketCodeLoadRepository = bucketCodeLoadRepository;
@@ -49,31 +54,40 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void prepareDiscountBucketCodeSummary(DiscountEntity discount) {
-        DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findById(discount.getId()).orElse(new DiscountBucketCodeSummaryEntity(discount));
+        DiscountBucketCodeSummaryEntity bucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findById(discount.getId())
+                                                                                                     .orElse(new DiscountBucketCodeSummaryEntity(
+                                                                                                             discount));
         discountBucketCodeSummaryRepository.save(bucketCodeSummaryEntity);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
-        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getOne(discountBucketCodeSummaryEntity.getId());
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
+                discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
-        var remainingPercent = Math.floor(remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
-        var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values()).sorted().filter(t -> remainingPercent <= t.getValue()).findFirst().map(t -> {
-            switch (t) {
-                case PERCENT_0:
-                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
-                    discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
-                    discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
-                    break;
-                case PERCENT_10:
-                case PERCENT_25:
-                case PERCENT_50:
-                    emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount, t, remainingCodes);
-                    break;
-            }
-            return true;
-        });
+        var remainingPercent = Math.floor(
+                remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
+        var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
+                                         .sorted()
+                                         .filter(t -> remainingPercent <= t.getValue())
+                                         .findFirst()
+                                         .map(t -> {
+                                             if (t==BucketCodeExpiringThresholdEnum.PERCENT_0) {
+                                                 discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+                                                 emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(
+                                                         discount);
+                                             } else {
+                                                 emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(
+                                                         discount,
+                                                         t,
+                                                         remainingCodes);
+                                             }
+                                             return true;
+                                         });
+        // update available codes
+        discountBucketCodeSummary.setAvailableCodes(remainingCodes);
+        discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
         return notificationRequired.orElse(false);
     }
 
@@ -92,12 +106,13 @@ public class BucketService {
     }
 
     public boolean isLastBucketLoadStillLoading(Long bucketLoadId) {
-        return !List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED).contains(bucketCodeLoadRepository.findById(bucketLoadId).orElseThrow().getStatus());
+        return !List.of(BucketCodeLoadStatusEnum.FAILED, BucketCodeLoadStatusEnum.FINISHED)
+                    .contains(bucketCodeLoadRepository.findById(bucketLoadId).orElseThrow().getStatus());
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void setRunningBucketLoad(Long discountId) {
-        DiscountEntity discountEntity = discountRepository.getOne(discountId);
+        DiscountEntity discountEntity = discountRepository.getReferenceById(discountId);
         BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
@@ -112,14 +127,18 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void performBucketLoad(Long discountId) {
-        DiscountEntity discountEntity = discountRepository.getOne(discountId);
-        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        DiscountEntity discountEntity = discountRepository.getReferenceById(discountId);
+        DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(
+                discountEntity);
         BucketCodeLoadEntity bucketCodeLoadEntity = discountEntity.getLastBucketCodeLoad();
         if (bucketCodeLoadEntity.getStatus().equals(BucketCodeLoadStatusEnum.FAILED)) return;
 
         try {
             Stream<CSVRecord> csvStream = azureStorage.readCsvDocument(bucketCodeLoadEntity.getUid());
-            Spliterator<DiscountBucketCodeEntity> split = csvStream.map(csvRecord -> new DiscountBucketCodeEntity(csvRecord.get(0), discountEntity, bucketCodeLoadEntity.getId())).spliterator();
+            Spliterator<DiscountBucketCodeEntity> split = csvStream.map(csvRecord -> new DiscountBucketCodeEntity(
+                    csvRecord.get(0),
+                    discountEntity,
+                    bucketCodeLoadEntity.getId())).spliterator();
 
             int chunkSize = 5000;
             while (true) {
@@ -147,7 +166,7 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteBucketCodes(Long discountId) {
-        if (discountId != null) {
+        if (discountId!=null) {
             discountBucketCodeRepository.deleteByDiscountId(discountId);
             bucketCodeLoadRepository.deleteByDiscountId(discountId);
             discountBucketCodeSummaryRepository.deleteByDiscountId(discountId);
@@ -155,6 +174,8 @@ public class BucketService {
     }
 
     public Long countLoadedCodes(DiscountEntity discountEntity) {
-        return discountBucketCodeRepository.countByDiscountAndBucketCodeLoadId(discountEntity, discountEntity.getLastBucketCodeLoad().getId());
+        return discountBucketCodeRepository.countByDiscountAndBucketCodeLoadId(discountEntity,
+                                                                               discountEntity.getLastBucketCodeLoad()
+                                                                                             .getId());
     }
 }

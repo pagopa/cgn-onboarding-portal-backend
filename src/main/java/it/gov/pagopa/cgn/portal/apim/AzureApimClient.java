@@ -24,11 +24,10 @@ public class AzureApimClient {
         Subscriptions subscriptionApi = manager.subscriptions();
 
         try {
-            SubscriptionKeysContract subscriptionKeys = subscriptionApi.listSecrets(
-                    configProperties.getApimResouceGroup(),
-                    configProperties.getApimResouce(),
-                    getApimSubscriptionKey(merchantTaxCode)
-            );
+            SubscriptionKeysContract subscriptionKeys = subscriptionApi.listSecrets(configProperties.getApimResouceGroup(),
+                                                                                    configProperties.getApimResouce(),
+                                                                                    getApimSubscriptionKey(
+                                                                                            merchantTaxCode));
 
             ApiTokens tokens = new ApiTokens();
             tokens.setPrimaryToken(subscriptionKeys.primaryKey());
@@ -37,7 +36,7 @@ public class AzureApimClient {
             return tokens;
 
         } catch (ManagementException exc) {
-            if (exc.getResponse().getStatusCode() == 404) {
+            if (exc.getResponse().getStatusCode()==404) {
                 return createSubscription(merchantTaxCode);
             }
             throw exc;
@@ -46,28 +45,33 @@ public class AzureApimClient {
 
     public void regeneratePrimaryKey(String merchantTaxCode) {
         Subscriptions subscriptionApi = manager.subscriptions();
-        subscriptionApi.regeneratePrimaryKey(configProperties.getApimResouceGroup(), configProperties.getApimResouce(), getApimSubscriptionKey(merchantTaxCode));
+        subscriptionApi.regeneratePrimaryKey(configProperties.getApimResouceGroup(),
+                                             configProperties.getApimResouce(),
+                                             getApimSubscriptionKey(merchantTaxCode));
     }
 
     public void regenerateSecondaryKey(String merchantTaxCode) {
         Subscriptions subscriptionApi = manager.subscriptions();
-        subscriptionApi.regenerateSecondaryKey(configProperties.getApimResouceGroup(), configProperties.getApimResouce(), getApimSubscriptionKey(merchantTaxCode));
+        subscriptionApi.regenerateSecondaryKey(configProperties.getApimResouceGroup(),
+                                               configProperties.getApimResouce(),
+                                               getApimSubscriptionKey(merchantTaxCode));
     }
 
     private ApiTokens createSubscription(String merchantTaxCode) {
         Subscriptions subscriptionApi = manager.subscriptions();
 
-        SubscriptionCreateParameters subscriptionCreateParameters = new SubscriptionCreateParameters()
-                .withScope("/products/" + configProperties.getApimProductId())
-                .withState(SubscriptionState.ACTIVE)
-                .withDisplayName(getApimSubscriptionKey(merchantTaxCode));
+        SubscriptionCreateParameters subscriptionCreateParameters = new SubscriptionCreateParameters().withScope(
+                                                                                                              "/products/" + configProperties.getApimProductId())
+                                                                                                      .withState(
+                                                                                                              SubscriptionState.ACTIVE)
+                                                                                                      .withDisplayName(
+                                                                                                              getApimSubscriptionKey(
+                                                                                                                      merchantTaxCode));
 
-        SubscriptionContract subscription = subscriptionApi.createOrUpdate(
-                configProperties.getApimResouceGroup(),
-                configProperties.getApimResouce(),
-                getApimSubscriptionKey(merchantTaxCode),
-                subscriptionCreateParameters
-        );
+        SubscriptionContract subscription = subscriptionApi.createOrUpdate(configProperties.getApimResouceGroup(),
+                                                                           configProperties.getApimResouce(),
+                                                                           getApimSubscriptionKey(merchantTaxCode),
+                                                                           subscriptionCreateParameters);
 
         ApiTokens tokens = new ApiTokens();
         tokens.setPrimaryToken(subscription.primaryKey());

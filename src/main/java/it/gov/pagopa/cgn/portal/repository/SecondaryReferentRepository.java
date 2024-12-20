@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface SecondaryReferentRepository extends JpaRepository<SecondaryReferentEntity,Long> {
+public interface SecondaryReferentRepository
+        extends JpaRepository<SecondaryReferentEntity, Long> {
     List<SecondaryReferentEntity> findByProfileId(Long profileId);
 
 }

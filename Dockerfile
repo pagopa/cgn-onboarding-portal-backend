@@ -1,10 +1,10 @@
-FROM eclipse-temurin:17.0.9_9-jre-alpine as builder
+FROM eclipse-temurin:17.0.9_9-jre-alpine@sha256:aa5fc621cc5eebbf90b815973e95ca800cfcab671fdd7918a3a5c9c770bb804a as builder
 
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE}  application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-FROM eclipse-temurin:17.0.9_9-jre-alpine
+FROM eclipse-temurin:17.0.9_9-jre-alpine@sha256:aa5fc621cc5eebbf90b815973e95ca800cfcab671fdd7918a3a5c9c770bb804a
 
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th xmlns="http://www.w3.org/1999/html">
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns:th>
 
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
@@ -148,7 +148,7 @@
         .list-address ul {
             list-style-type: none;
         }
-    
+
     </style>
 </head>
 
@@ -217,8 +217,9 @@
     come descritti nei seguenti punti (da compilarsi obbligatoriamente ad eccezione del punto 3): </p>
 <ol class="ol">
     <li>NOME OPERATORE COME VISUALIZZATO IN APP DAI BENEFICIARI:
-    <div class="mt box"><span th:text="${merchant_name}"></span></div>
-        <div class="page-break"></div></li>
+        <div class="mt box"><span th:text="${merchant_name}"></span></div>
+        <div class="page-break"></div>
+    </li>
     <li class="mt" th:each="discount : ${discounts}">ESPLICAZIONE SPECIFICA:
         <ol class="ol">
             <li>DELL’OGGETTO, DEI CONTENUTI E DELLA DURATA DELLA OPPORTUNITA’/AGEVOLAZIONE PROPOSTA;
@@ -243,36 +244,40 @@
                     <br/>
                 </div>
             </li>
-            
+
             <li>DEI TERMINI E CONDIZIONI DI ACCESSIBILITA’ ED USO DELLA AGEVOLAZIONE PER I BENEFICIARI;
                 <div class="mt box"><span th:text="${discount.condition}"></span></div>
                 <br/>
             </li>
             <li>DELLA MODALITÀ DI RICONOSCIMENTO PRESCELTA TRA QUELLE INDICATE NELLA DOCUMENTAZIONE TECNICA
-                (accesso fisico ai locali, accesso via web tramite landing page, accesso tramite web con codice statico etc.)
+                (accesso fisico ai locali, accesso via web tramite landing page, accesso tramite web con codice statico
+                etc.)
                 <div class="mt box"><span th:text="${discount.modeValue}"></span></div>
                 <br/>
             </li>
 
         </ol>
     </li>
-<li class="mt">INDIRIZZO FISICO DEI LOCALI DI VENDITA COME DISLOCATI SUL TERRITORIO NAZIONALE ED ORARI ORDINARI DI APERTURA (se prescelta la modalità di riconoscimento della agevolazione tramite accesso fisico ai locali di vendita)
+    <li class="mt">INDIRIZZO FISICO DEI LOCALI DI VENDITA COME DISLOCATI SUL TERRITORIO NAZIONALE ED ORARI ORDINARI DI
+        APERTURA (se prescelta la modalità di riconoscimento della agevolazione tramite accesso fisico ai locali di
+        vendita)
 
-<div class="list-address">
-    <ul th:each="item : ${merchant_address_list}">
-        <li><span th:text="${item}"></span></li>
-    </ul>
-</div>
-</li>
+        <div class="list-address">
+            <ul th:each="item : ${merchant_address_list}">
+                <li><span th:text="${item}"></span></li>
+            </ul>
+        </div>
+    </li>
     <li class="mt">SITO WEB E/O SITO E-COMMERCE DELL’OPERATORE:</li>
-<div class="mt box"><span th:text="${merchant_website}"></span></div>
-<!--this div for e-commerce-->
+    <div class="mt box"><span th:text="${merchant_website}"></span></div>
+    <!--this div for e-commerce-->
 </ol>
 <div class="page-break"></div>
 
 <!-- Third page -->
 <h1 class="title text-center text-uppercase">Indica</h1>
-<p>inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento di convenzionamento e/o all’attuazione
+<p>inoltre per eventuali interlocuzioni informative e/o tecniche funzionali al procedimento di convenzionamento e/o
+    all’attuazione
     della convenzione i seguenti indirizzi di contatto operativo:<br/>
     Nome e cognome del referente: <span th:text="${referent_fullname}"></span><br/>
     Ruolo all’interno dell’azienda: <span th:text="${referent_role}"></span><br/>
@@ -280,106 +285,160 @@
     Tel: <span th:text="${referent_telephone_nr}"></span></p>
 <h1 class="title text-center text-uppercase">INFORMATIVA PRIVACY</h1>
 <p>Il Dipartimento informa che, ai sensi degli artt. 13 e 14 del Regolamento europeo generale sulla protezione dei dati,
-    n. 2016/679 (“Regolamento” o “GDPR”) e del D.lgs n. 196/03 e ss.m.i. (“Codice Privacy”), che i dati personali forniti
-    dall’Operatore con il presente documento verranno trattati in conformità con le disposizioni del Codice della Privacy
+    n. 2016/679 (“Regolamento” o “GDPR”) e del D.lgs n. 196/03 e ss.m.i. (“Codice Privacy”), che i dati personali
+    forniti
+    dall’Operatore con il presente documento verranno trattati in conformità con le disposizioni del Codice della
+    Privacy
     e del Regolamento.
 </p>
 <span class="list-title">Titolare del Trattamento</span>
-<p>Il Titolare del trattamento è il Dipartimento per le politiche giovanili e il Servizio civile universale, Via della Ferratella
-    in Laterano, 51 – 00184 Roma – Italia, nella persona del Capo del Dipartimento pro-tempore domiciliato per la carica presso
+<p>Il Titolare del trattamento è il Dipartimento per le politiche giovanili e il Servizio civile universale, Via della
+    Ferratella
+    in Laterano, 51 – 00184 Roma – Italia, nella persona del Capo del Dipartimento pro-tempore domiciliato per la carica
+    presso
     la predetta sede (dpo@serviziocivile.it).
 </p>
 <span class="list-title">Data protection officer (DPO) o Responsabile Protezione Dati (RPD)</span>
-<p>Il Dipartimento ha nominato un proprio Responsabile della Protezione dei dati, ai sensi dell’art. 37 del Regolamento, che può essere
+<p>Il Dipartimento ha nominato un proprio Responsabile della Protezione dei dati, ai sensi dell’art. 37 del Regolamento,
+    che può essere
     contattato ai seguenti recapiti: PEC rpd@pec.governo.it; e-mail responsabileprotezionedatipcm@governo.it.
 </p>
 <span class="list-title">Categorie di dati trattati</span>
-<p>Nei limiti delle finalità e delle modalità descritte nella presente informativa, potranno essere trattate le seguenti categorie di dati:
+<p>Nei limiti delle finalità e delle modalità descritte nella presente informativa, potranno essere trattate le seguenti
+    categorie di dati:
 <ul class="dashed">
     <li>dati identificativi comuni (nome, cognome, luogo e data di nascita, codice fiscale);</li>
-    <li>dati relativi all’attività commerciale e/o alla posizione lavorativa svolta (denominazione della società/ditta individuale,
-        indirizzo dei locali);</li>
+    <li>dati relativi all’attività commerciale e/o alla posizione lavorativa svolta (denominazione della società/ditta
+        individuale,
+        indirizzo dei locali);
+    </li>
     <li>dati di contatto (numero di telefono, indirizzo e-mail, PEC, fax).</li>
 </ul>
 </p>
 <span class="list-title">Modalità di trattamento</span>
-<p>Per trattamento si intende qualunque operazione applicata, con o senza l’ausilio di processi automatizzati, ai dati personali.<br/>
-    Il trattamento avverrà mediante strumenti elettronici in modo da garantire la sicurezza e la riservatezza dei dati stessi
-    ed è finalizzato a consentire lo svolgimento dei rapporti tra le parti ed in particolare per l’attuazione della Convenzione
+<p>Per trattamento si intende qualunque operazione applicata, con o senza l’ausilio di processi automatizzati, ai dati
+    personali.<br/>
+    Il trattamento avverrà mediante strumenti elettronici in modo da garantire la sicurezza e la riservatezza dei dati
+    stessi
+    ed è finalizzato a consentire lo svolgimento dei rapporti tra le parti ed in particolare per l’attuazione della
+    Convenzione
     per le finalità indicate di seguito.
 </p>
 <span class="list-title">Finalità e base giuridica del trattamento</span>
 <ul>
     <li>Il trattamento è necessario ai fini della stipula e dell’esecuzione di un contratto, o dell’esecuzione di misure
-        precontrattuali adottate su richiesta dell’interessato (art. 6, comma 1, lettera b) del Regolamento e sul consenso dell’Operatore
-        che richiede volontariamente di partecipare all’iniziativa (art. 6, comma 1, lett. a) del Regolamento);</li>
-    <li>Il trattamento è necessario per adempiere obblighi giuridici a cui è soggetto il Titolare del trattamento, ad esempio
-        adempimento di obblighi di legge (contabili, fiscali), regolamento e contratto, esecuzione di provvedimenti dell’autorità
-        giudiziaria o amministrativa (art. 6, comma 1, lettera c) del Regolamento);</li>
-    <li>Il trattamento è necessario per lo svolgimento dei compiti istituzionali attribuiti al Titolare del trattamento sulla base
-        dell’art. 1, comma 413,  legge 27 dicembre 2019, n. 160 (come attuato dal decreto del Ministro per le politiche giovanili
-        e lo sport del 27 febbraio 2020), e dunque per l’esecuzione di un compito di interesse pubblico, previsto dalla legge,
-        o connesso all’esercizio di pubblici poteri di cui è investito il Titolare del trattamento, in particolare con riferimento
-        all’attuazione dell’iniziativa Carta Giovani Nazionale (art. 6, comma 1, lettera e) del Regolamento).</li>
+        precontrattuali adottate su richiesta dell’interessato (art. 6, comma 1, lettera b) del Regolamento e sul
+        consenso dell’Operatore
+        che richiede volontariamente di partecipare all’iniziativa (art. 6, comma 1, lett. a) del Regolamento);
+    </li>
+    <li>Il trattamento è necessario per adempiere obblighi giuridici a cui è soggetto il Titolare del trattamento, ad
+        esempio
+        adempimento di obblighi di legge (contabili, fiscali), regolamento e contratto, esecuzione di provvedimenti
+        dell’autorità
+        giudiziaria o amministrativa (art. 6, comma 1, lettera c) del Regolamento);
+    </li>
+    <li>Il trattamento è necessario per lo svolgimento dei compiti istituzionali attribuiti al Titolare del trattamento
+        sulla base
+        dell’art. 1, comma 413, legge 27 dicembre 2019, n. 160 (come attuato dal decreto del Ministro per le politiche
+        giovanili
+        e lo sport del 27 febbraio 2020), e dunque per l’esecuzione di un compito di interesse pubblico, previsto dalla
+        legge,
+        o connesso all’esercizio di pubblici poteri di cui è investito il Titolare del trattamento, in particolare con
+        riferimento
+        all’attuazione dell’iniziativa Carta Giovani Nazionale (art. 6, comma 1, lettera e) del Regolamento).
+    </li>
 </ul>
-<p>I dati personali degli Interessati possono essere utilizzati dal Titolare in giudizio o nelle fasi propedeutiche alla sua
+<p>I dati personali degli Interessati possono essere utilizzati dal Titolare in giudizio o nelle fasi propedeutiche alla
+    sua
     eventuale instaurazione per la difesa da abusi perpetrati dagli Interessati.<br/>
-    Gli Interessati possono ottenere chiarimenti sulla finalità della raccolta dei dati o su quali dati siano effettivamente
+    Gli Interessati possono ottenere chiarimenti sulla finalità della raccolta dei dati o su quali dati siano
+    effettivamente
     acquisiti, contattando il Titolare.<br/>
     Il trattamento è necessario per le seguenti finalità:
-    <ol>
-    <li>creazione del profilo Operatore nel portale dedicato ed inserimento dello stesso nell’elenco pubblicato nell’APP IO e sui
-        siti web dedicati alla CGN e al circuito EYCA;</li>
-    <li>esecuzione di ogni altro obbligo derivante dai contratti stipulati con il Dipartimento e/o con i suoi partner per l’attuazione
-        della CGN;</li>
-    <li>adempimento di obblighi previsti dalla legge, da regolamenti o dalla normativa comunitaria vigente pro-tempore;</li>
-    <li>svolgimento mediante sistemi anche automatizzati di comunicazione, delle seguenti attività: 1. indagini volte a rilevare
-        il grado di soddisfazione sulla CGN; 2. informazione istituzionale, comunicazione di nuove iniziative del Dipartimento e
-        di eventuali enti terzi nell’ambito delle attività istituzionali del Dipartimento; 3. comunicazione dei dati personali
-    ad altre Amministrazioni pubbliche ed eventuali Società terze al fine di consentire all’Operatore di ricevere da queste, mediante
-        l’utilizzo dei medesimi sistemi di comunicazione, informazioni o richieste di partecipazione ad indagini statistiche relative
-        ad attività svolte o da svolgere dal Dipartimento.</li>
+<ol>
+    <li>creazione del profilo Operatore nel portale dedicato ed inserimento dello stesso nell’elenco pubblicato nell’APP
+        IO e sui
+        siti web dedicati alla CGN e al circuito EYCA;
+    </li>
+    <li>esecuzione di ogni altro obbligo derivante dai contratti stipulati con il Dipartimento e/o con i suoi partner
+        per l’attuazione
+        della CGN;
+    </li>
+    <li>adempimento di obblighi previsti dalla legge, da regolamenti o dalla normativa comunitaria vigente
+        pro-tempore;
+    </li>
+    <li>svolgimento mediante sistemi anche automatizzati di comunicazione, delle seguenti attività: 1. indagini volte a
+        rilevare
+        il grado di soddisfazione sulla CGN; 2. informazione istituzionale, comunicazione di nuove iniziative del
+        Dipartimento e
+        di eventuali enti terzi nell’ambito delle attività istituzionali del Dipartimento; 3. comunicazione dei dati
+        personali
+        ad altre Amministrazioni pubbliche ed eventuali Società terze al fine di consentire all’Operatore di ricevere da
+        queste, mediante
+        l’utilizzo dei medesimi sistemi di comunicazione, informazioni o richieste di partecipazione ad indagini
+        statistiche relative
+        ad attività svolte o da svolgere dal Dipartimento.
+    </li>
 </ol>
-   </p>
+</p>
 <span class="list-title">Categorie di soggetti ai quali i dati personali possono essere comunicati</span>
 <p>Il Titolare potrà comunicare, per il perseguimento delle finalità sopra indicate, alcuni dati personali anche a:
 <ul>
-<li>
-    ai soggetti cui la comunicazione dei dati debba essere effettuata in adempimento di un obbligo previsto dalla legge, da un regolamento o
-    dalla normativa comunitaria, ovvero per adempiere ad un ordine dell’Autorità Giudiziaria;</li>
-    <li>ai soggetti designati dal Titolare, in qualità di Responsabili, ovvero alle persone autorizzate al trattamento dei dati personali che
-    operano sotto l’autorità diretta del titolare o del responsabile;</li>
-    <li>ad altri eventuali soggetti terzi, nei casi espressamente previsti dalla legge, ovvero ancora se la comunicazione si renderà necessaria
-    per la tutela dell’Agenzia in sede giudiziaria, nel rispetto delle vigenti disposizioni in materia di protezione dei dati personali</li>
+    <li>
+        ai soggetti cui la comunicazione dei dati debba essere effettuata in adempimento di un obbligo previsto dalla
+        legge, da un regolamento o
+        dalla normativa comunitaria, ovvero per adempiere ad un ordine dell’Autorità Giudiziaria;
+    </li>
+    <li>ai soggetti designati dal Titolare, in qualità di Responsabili, ovvero alle persone autorizzate al trattamento
+        dei dati personali che
+        operano sotto l’autorità diretta del titolare o del responsabile;
+    </li>
+    <li>ad altri eventuali soggetti terzi, nei casi espressamente previsti dalla legge, ovvero ancora se la
+        comunicazione si renderà necessaria
+        per la tutela dell’Agenzia in sede giudiziaria, nel rispetto delle vigenti disposizioni in materia di protezione
+        dei dati personali
+    </li>
 </ul>
 </p>
 <span class="list-title">Trasferimento dati fuori dall’UE</span>
-<p>Alcuni dei fornitori terzi che PagoPA S.p.A. utilizza per il progetto IO risiedono negli USA. PagoPA S.p.A. ha concluso con tali
-    fornitori accordi di servizio ai sensi dell’art. 28 del Regolamento. Tutti i fornitori sono conformi al Regolamento e, in assenza
+<p>Alcuni dei fornitori terzi che PagoPA S.p.A. utilizza per il progetto IO risiedono negli USA. PagoPA S.p.A. ha
+    concluso con tali
+    fornitori accordi di servizio ai sensi dell’art. 28 del Regolamento. Tutti i fornitori sono conformi al Regolamento
+    e, in assenza
     di altre misure di garanzia previste dal Regolamento, sono state concluse le Clausole Contrattuali Standard
-    della Commissione Europea per garantire adeguati livelli di tutela. La lista dei fornitori coinvolti nel Progetto IO, comprensiva
-    dei dati trattati e delle garanzie per gli eventuali trasferimenti all’estero, e copia della documentazione contrattuale, è
+    della Commissione Europea per garantire adeguati livelli di tutela. La lista dei fornitori coinvolti nel Progetto
+    IO, comprensiva
+    dei dati trattati e delle garanzie per gli eventuali trasferimenti all’estero, e copia della documentazione
+    contrattuale, è
     disponibile all’indirizzo https://io.italia.it/app-content/fornitori.
 </p>
 <span class="list-title">Tempi di conservazione dei dati</span>
-<p>I dati personali raccolti saranno trattati per la durata dell’adesione da parte dell’Operatore, e successivamente conservati per
-    un periodo di tempo non superiore a 10 anni, al fine di consentire al Titolare o ai suoi aventi causa di difendersi da eventuali
+<p>I dati personali raccolti saranno trattati per la durata dell’adesione da parte dell’Operatore, e successivamente
+    conservati per
+    un periodo di tempo non superiore a 10 anni, al fine di consentire al Titolare o ai suoi aventi causa di difendersi
+    da eventuali
     pretese o esercitare i propri diritti o per assolvere ad obblighi di legge.
     Per maggiori informazioni è possibile scrivere al Titolare.
 </p>
 <span class="list-title">Diritti degli interessati</span>
-<p>Gli interessati hanno il diritto di ottenere dal Dipartimento per le Politiche Giovanili e il Servizio Civile Universale, nei casi
-    previsti dal Regolamento, l’accesso ai propri dati personali, la rettifica o la cancellazione degli stessi o la limitazione del
+<p>Gli interessati hanno il diritto di ottenere dal Dipartimento per le Politiche Giovanili e il Servizio Civile
+    Universale, nei casi
+    previsti dal Regolamento, l’accesso ai propri dati personali, la rettifica o la cancellazione degli stessi o la
+    limitazione del
     trattamento che li riguarda, o di opporsi al trattamento, secondo quanto previsto dal Regolamento.
     Le relative istanze vanno presentate al Titolare del trattamento dei dati.<br/>
-    Il Consenso al trattamento può essere revocato in ogni momento mediante comunicazione scritta o via email al Titolare. La revoca
-    del consenso non pregiudica il trattamento effettuato prima della revoca, che resta valido e legittimo a tutti gli effetti.
+    Il Consenso al trattamento può essere revocato in ogni momento mediante comunicazione scritta o via email al
+    Titolare. La revoca
+    del consenso non pregiudica il trattamento effettuato prima della revoca, che resta valido e legittimo a tutti gli
+    effetti.
 </p>
 
 
 <span class="list-title">Diritti di reclamo</span>
-<p>Gli Interessati che ritengano che il trattamento dei dati personali a loro riferiti, effettuato dal Titolare del trattamento,
-    avvenga in violazione di quanto previsto dal Regolamento, hanno il diritto di proporre reclamo al Garante, come previsto
+<p>Gli Interessati che ritengano che il trattamento dei dati personali a loro riferiti, effettuato dal Titolare del
+    trattamento,
+    avvenga in violazione di quanto previsto dal Regolamento, hanno il diritto di proporre reclamo al Garante, come
+    previsto
     dall’art. 77 del Regolamento stesso, o di adire le opportune sedi giudiziarie (art. 79 del Regolamento)</p>.
 
 <p>Luogo ................ data <span th:text="${current_date}"></span></p>

@@ -11,7 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class AgreementUserServiceTest extends IntegrationAbstractTest {
+class AgreementUserServiceTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private AgreementUserService userService;
