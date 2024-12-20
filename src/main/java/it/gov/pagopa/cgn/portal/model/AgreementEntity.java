@@ -23,7 +23,8 @@ import java.util.List;
 @Data
 @TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 @TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
-public class  AgreementEntity extends BaseEntity {
+public class AgreementEntity
+        extends BaseEntity {
 
     @Id
     @NotNull
@@ -33,7 +34,7 @@ public class  AgreementEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", length = 50)
-    @Type( type = "agreement_state_enum" )
+    @Type(type = "agreement_state_enum")
     @NotNull
     private AgreementStateEnum state;
 
@@ -78,13 +79,17 @@ public class  AgreementEntity extends BaseEntity {
     @Column(name = "information_last_update_date")
     private LocalDate informationLastUpdateDate;
 
+    @Column(name = "organization_name")
+    private String organizationName;
+
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", length = 24)
-    @Type( type = "entity_type_enum" )
+    @Type(type = "entity_type_enum")
     private EntityTypeEnum entityType;
 
 

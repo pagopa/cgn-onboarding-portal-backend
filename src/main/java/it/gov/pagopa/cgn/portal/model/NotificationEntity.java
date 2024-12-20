@@ -15,7 +15,8 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "notification")
 @Data
-public class NotificationEntity implements Serializable {
+public class NotificationEntity
+        implements Serializable {
 
     @Id
     @NotNull

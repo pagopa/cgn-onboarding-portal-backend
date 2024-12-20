@@ -4,6 +4,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class CreateProfileApiTest extends IntegrationAbstractTest {
+class CreateProfileApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,13 +33,16 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
 
     @BeforeEach
     void init() {
-        AgreementEntity agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType.PRIVATE);
+        AgreementEntity agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                EntityType.PRIVATE,
+                                                                                TestUtils.FAKE_ORGANIZATION_NAME);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
     }
 
     @Test
-    void Create_CreateOnlineProfileWithApiDiscountType_Ok() throws Exception {
+    void Create_CreateOnlineProfileWithApiDiscountType_Ok()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +70,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateOnlineProfileWithStaticDiscountType_Ok() throws Exception {
+    void Create_CreateOnlineProfileWithStaticDiscountType_Ok()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.STATIC);
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +99,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateOnlineProfileWithLandingPageDiscountType_Ok() throws Exception {
+    void Create_CreateOnlineProfileWithLandingPageDiscountType_Ok()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.LANDINGPAGE);
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +128,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateOfflineProfile_Ok() throws Exception {
+    void Create_CreateOfflineProfile_Ok()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOffline();
         OfflineChannel offlineChannel = (OfflineChannel) createProfile.getSalesChannel();
         Address firstAddress = offlineChannel.getAddresses().get(0);
@@ -160,7 +168,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateIncompleteOnlineProfile_BadRequest() throws Exception {
+    void Create_CreateIncompleteOnlineProfile_BadRequest()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
         // set to null required field websiteUrl
         OnlineChannel onlineChannel = (OnlineChannel) createProfile.getSalesChannel();
@@ -174,7 +183,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateIncompleteBothProfile_BadRequest() throws Exception {
+    void Create_CreateIncompleteBothProfile_BadRequest()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateBothWithoutRequiredWebsiteUrlProfile();
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +195,8 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
     }
 
     @Test
-    void Create_CreateProfileMultipleTimes_BadRequest() throws Exception {
+    void Create_CreateProfileMultipleTimes_BadRequest()
+            throws Exception {
         CreateProfile createProfile = createSampleCreateOnlineProfile(DiscountCodeType.API);
 
         this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
@@ -252,8 +263,6 @@ class CreateProfileApiTest extends IntegrationAbstractTest {
         createProfile.setTelephoneNumber("12345678");
         createProfile.setLegalRepresentativeTaxCode("abcdeghilmnopqrs");
         createProfile.setReferent(createSampleCreateReferent());
-        createProfile.setSupportType(SupportType.PHONENUMBER);
-        createProfile.setSupportValue("00000000");
         return createProfile;
     }
 

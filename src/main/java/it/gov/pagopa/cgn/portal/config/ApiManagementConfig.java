@@ -14,7 +14,9 @@ public class ApiManagementConfig {
     @Bean
     public ApiManagementManager apiManagementManager() {
         AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
-        TokenCredential credential = new DefaultAzureCredentialBuilder().authorityHost(profile.getEnvironment().getActiveDirectoryEndpoint()).build();
+        TokenCredential credential = new DefaultAzureCredentialBuilder().authorityHost(profile.getEnvironment()
+                                                                                              .getActiveDirectoryEndpoint())
+                                                                        .build();
         return ApiManagementManager.authenticate(credential, profile);
     }
 }

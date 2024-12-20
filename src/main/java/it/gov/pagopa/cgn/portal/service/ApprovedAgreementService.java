@@ -15,17 +15,17 @@ public class ApprovedAgreementService {
 
     private final ApprovedAgreementRepository approvedAgreementRepository;
 
-    @Transactional(readOnly = true)
-    public Page<ApprovedAgreementEntity> getApprovedAgreements(BackofficeFilter filter) {
-
-        BackofficeApprovedAgreementSpecification spec =
-                new BackofficeApprovedAgreementSpecification(filter, CGNUtils.getJwtAdminUserName());
-        return approvedAgreementRepository.findAll(spec, spec.getPage());
-    }
-
     @Autowired
     public ApprovedAgreementService(ApprovedAgreementRepository approvedAgreementRepository) {
         this.approvedAgreementRepository = approvedAgreementRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ApprovedAgreementEntity> getApprovedAgreements(BackofficeFilter filter) {
+
+        BackofficeApprovedAgreementSpecification spec = new BackofficeApprovedAgreementSpecification(filter,
+                                                                                                     CGNUtils.getJwtAdminUserName());
+        return approvedAgreementRepository.findAll(spec, spec.getPage());
     }
 
 }

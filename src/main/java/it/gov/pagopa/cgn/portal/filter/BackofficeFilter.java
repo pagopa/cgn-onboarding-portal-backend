@@ -14,7 +14,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-public class BackofficeFilter implements Serializable {
+public class BackofficeFilter
+        implements Serializable {
 
     private String agreementState;
 
@@ -37,35 +38,45 @@ public class BackofficeFilter implements Serializable {
     private Sort.Direction sortDirection;
 
 
-    public static BackofficeFilter getRequestFilter(
-            String state, String profileFullName, String assignee, LocalDate startDateFrom, LocalDate startDateTo,
-            Integer pageSize, Integer page, String sortColumn, String sortDirection) {
+    public static BackofficeFilter getRequestFilter(String state,
+                                                    String profileFullName,
+                                                    String assignee,
+                                                    LocalDate startDateFrom,
+                                                    LocalDate startDateTo,
+                                                    Integer pageSize,
+                                                    Integer page,
+                                                    String sortColumn,
+                                                    String sortDirection) {
 
         return BackofficeFilter.builder()
-                .agreementState(state)
-                .profileFullName(profileFullName)
-                .assignee(AssigneeEnum.fromValue(assignee))
-                .dateFrom(startDateFrom)
-                .dateTo(startDateTo)
-                .page(page)
-                .pageSize(pageSize)
-                .requestSortColumnEnum(BackofficeRequestSortColumnEnum.fromValue(sortColumn))
-                .sortDirection(Sort.Direction.valueOf(sortDirection))
-                .build();
+                               .agreementState(state)
+                               .profileFullName(profileFullName)
+                               .assignee(AssigneeEnum.fromValue(assignee))
+                               .dateFrom(startDateFrom)
+                               .dateTo(startDateTo)
+                               .page(page)
+                               .pageSize(pageSize)
+                               .requestSortColumnEnum(BackofficeRequestSortColumnEnum.fromValue(sortColumn))
+                               .sortDirection(Sort.Direction.valueOf(sortDirection))
+                               .build();
     }
 
-    public static BackofficeFilter getApprovedFilter(
-            String profileFullName, LocalDate requestDateFrom, LocalDate requestDateTo,Integer pageSize, Integer page,
-            String sortColumn, String sortDirection) {
+    public static BackofficeFilter getApprovedFilter(String profileFullName,
+                                                     LocalDate requestDateFrom,
+                                                     LocalDate requestDateTo,
+                                                     Integer pageSize,
+                                                     Integer page,
+                                                     String sortColumn,
+                                                     String sortDirection) {
         return BackofficeFilter.builder()
-                .profileFullName(profileFullName)
-                .dateFrom(requestDateFrom)
-                .dateTo(requestDateTo)
-                .page(page)
-                .pageSize(pageSize)
-                .approvedSortColumnEnum(BackofficeApprovedSortColumnEnum.fromValue(sortColumn))
-                .sortDirection(Sort.Direction.valueOf(sortDirection))
-                .build();
+                               .profileFullName(profileFullName)
+                               .dateFrom(requestDateFrom)
+                               .dateTo(requestDateTo)
+                               .page(page)
+                               .pageSize(pageSize)
+                               .approvedSortColumnEnum(BackofficeApprovedSortColumnEnum.fromValue(sortColumn))
+                               .sortDirection(Sort.Direction.valueOf(sortDirection))
+                               .build();
     }
 
 }

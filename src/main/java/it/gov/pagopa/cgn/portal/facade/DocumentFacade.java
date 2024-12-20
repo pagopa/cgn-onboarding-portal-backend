@@ -3,12 +3,14 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.converter.DocumentConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import it.gov.pagopa.cgnonboardingportal.model.BucketLoad;
 import it.gov.pagopa.cgnonboardingportal.model.Document;
 import it.gov.pagopa.cgnonboardingportal.model.Documents;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -22,18 +24,32 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@Slf4j
 public class DocumentFacade {
 
     private final DocumentService documentService;
     private final DocumentConverter documentConverter;
     private final AzureStorage azureStorage;
 
-    public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
-        byte[] document = documentService
-                .renderDocument(agreementId, DocumentTypeEnum.fromValue(documentType.toUpperCase())).toByteArray();
+    @Autowired
+    public DocumentFacade(DocumentService documentService,
+                          DocumentConverter documentConverter,
+                          AzureStorage azureStorage) {
+        this.documentService = documentService;
+        this.documentConverter = documentConverter;
+        this.azureStorage = azureStorage;
+    }
 
-        return ResponseEntity.ok().contentLength(document.length).contentType(MediaType.APPLICATION_PDF)
-                .cacheControl(CacheControl.noCache().mustRevalidate()).body(new ByteArrayResource(document));
+    public ResponseEntity<Resource> getDocumentTemplate(String agreementId, String documentType) {
+        byte[] document = documentService.renderDocument(agreementId,
+                                                         DocumentTypeEnum.fromValue(documentType.toUpperCase()))
+                                         .toByteArray();
+
+        return ResponseEntity.ok()
+                             .contentLength(document.length)
+                             .contentType(MediaType.APPLICATION_PDF)
+                             .cacheControl(CacheControl.noCache().mustRevalidate())
+                             .body(new ByteArrayResource(document));
     }
 
     public ResponseEntity<Documents> getDocuments(String agreementId) {
@@ -46,8 +62,10 @@ public class DocumentFacade {
     public ResponseEntity<Document> uploadDocument(String agreementId, String documentType, MultipartFile document) {
         DocumentEntity documentEntity;
         try {
-            documentEntity = documentService.storeDocument(agreementId, DocumentTypeEnum.fromValue(documentType),
-                    document.getInputStream(), document.getSize());
+            documentEntity = documentService.storeDocument(agreementId,
+                                                           DocumentTypeEnum.fromValue(documentType),
+                                                           document.getInputStream(),
+                                                           document.getSize());
         } catch (IOException e) {
             throw new CGNException(e);
         }
@@ -60,7 +78,7 @@ public class DocumentFacade {
         try {
             bucketLoadUID = documentService.storeBucket(agreementId, document.getInputStream(), document.getSize());
         } catch (IOException e) {
-            throw new CGNException(e);
+            throw new InternalErrorException(e.getMessage());
         }
         BucketLoad bucketLoad = new BucketLoad();
         bucketLoad.setUid(bucketLoadUID);
@@ -69,14 +87,6 @@ public class DocumentFacade {
 
     public long deleteDocument(String agreementId, String documentType) {
         return documentService.deleteDocument(agreementId, DocumentTypeEnum.fromValue(documentType));
-    }
-
-    @Autowired
-    public DocumentFacade(DocumentService documentService, DocumentConverter documentConverter,
-            AzureStorage azureStorage) {
-        this.documentService = documentService;
-        this.documentConverter = documentConverter;
-        this.azureStorage = azureStorage;
     }
 
 }

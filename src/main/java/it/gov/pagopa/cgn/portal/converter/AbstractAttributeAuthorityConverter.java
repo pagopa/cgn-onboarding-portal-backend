@@ -26,8 +26,10 @@ public abstract class AbstractAttributeAuthorityConverter<A, B> {
 
     public Collection<B> fromAttributeAuthorityModelCollection(Collection<A> attributeAuthorityModelCollection) {
         return CollectionUtils.isEmpty(attributeAuthorityModelCollection) ?
-                Collections.emptyList() :
-                attributeAuthorityModelCollection.stream().map(fromAttributeAuthorityModelFunction()).collect(Collectors.toList());
+               Collections.emptyList():
+               attributeAuthorityModelCollection.stream()
+                                                .map(fromAttributeAuthorityModelFunction())
+                                                .collect(Collectors.toList());
     }
 
     public Optional<A> toAttributeAuthorityModel(Optional<B> maybeBackofficeModel) {
@@ -40,8 +42,8 @@ public abstract class AbstractAttributeAuthorityConverter<A, B> {
 
     public Collection<A> toAttributeAuthorityModelCollection(Collection<B> backofficeModelCollection) {
         return CollectionUtils.isEmpty(backofficeModelCollection) ?
-                Collections.emptyList() :
-                backofficeModelCollection.stream().map(toAttributeAuthorityModelFunction()).collect(Collectors.toList());
+               Collections.emptyList():
+               backofficeModelCollection.stream().map(toAttributeAuthorityModelFunction()).collect(Collectors.toList());
     }
 
     public ResponseEntity<B> fromAttributeAuthorityResponse(ResponseEntity<A> attributeAuthorityResponse) {
@@ -63,12 +65,18 @@ public abstract class AbstractAttributeAuthorityConverter<A, B> {
         }
     }
 
-    protected Optional<B> convertFromAttributeAuthorityModel(Optional<A> maybeAttributeAuthorityModel, Function<A, B> function) {
-        return maybeAttributeAuthorityModel.isEmpty() ? Optional.empty() : Optional.of(function.apply(maybeAttributeAuthorityModel.get()));
+    protected Optional<B> convertFromAttributeAuthorityModel(Optional<A> maybeAttributeAuthorityModel,
+                                                             Function<A, B> function) {
+        return maybeAttributeAuthorityModel.isEmpty() ?
+               Optional.empty():
+               Optional.of(function.apply(maybeAttributeAuthorityModel.get()));
     }
 
-    protected Optional<A> convertToAttributeAuthorityModel(Optional<B> maybeAttributeAuthorityModel, Function<B, A> function) {
-        return maybeAttributeAuthorityModel.isEmpty() ? Optional.empty() : Optional.of(function.apply(maybeAttributeAuthorityModel.get()));
+    protected Optional<A> convertToAttributeAuthorityModel(Optional<B> maybeAttributeAuthorityModel,
+                                                           Function<B, A> function) {
+        return maybeAttributeAuthorityModel.isEmpty() ?
+               Optional.empty():
+               Optional.of(function.apply(maybeAttributeAuthorityModel.get()));
     }
 
 }

@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
+class BackofficeApprovedAgreementServiceTest
+        extends IntegrationAbstractTest {
 
     @BeforeEach
     void beforeEach() {
@@ -132,12 +133,12 @@ class BackofficeApprovedAgreementServiceTest extends IntegrationAbstractTest {
         Assertions.assertEquals(2, approvedAgreement.getDiscountList().size());
         Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList()
                                                                         .stream()
-                                                                        .filter(d -> d.getState() ==
+                                                                        .filter(d -> d.getState()==
                                                                                      DiscountStateEnum.PUBLISHED)
                                                                         .collect(Collectors.toList())));
         Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList()
                                                                         .stream()
-                                                                        .filter(d -> d.getState() ==
+                                                                        .filter(d -> d.getState()==
                                                                                      DiscountStateEnum.SUSPENDED)
                                                                         .collect(Collectors.toList())));
 

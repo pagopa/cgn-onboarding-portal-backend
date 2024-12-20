@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.SupportTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
@@ -23,10 +22,9 @@ import java.util.stream.Collectors;
 public class BackofficeApprovedAgreementProfileConverter
         extends AbstractConverter<ProfileEntity, ApprovedAgreementProfile> {
 
-   private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
+    private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
 
-    private static final Map<SupportTypeEnum, SupportType> supportTypeMap = new EnumMap<>(SupportTypeEnum.class);
     private static final Map<EntityTypeEnum, EntityType> entityTypeMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
@@ -35,32 +33,13 @@ public class BackofficeApprovedAgreementProfileConverter
         discountCodeTypeMap.put(DiscountCodeTypeEnum.LANDINGPAGE, DiscountCodeType.LANDINGPAGE);
         discountCodeTypeMap.put(DiscountCodeTypeEnum.BUCKET, DiscountCodeType.BUCKET);
 
-        supportTypeMap.put(SupportTypeEnum.EMAILADDRESS, SupportType.EMAILADDRESS);
-        supportTypeMap.put(SupportTypeEnum.PHONENUMBER, SupportType.PHONENUMBER);
-        supportTypeMap.put(SupportTypeEnum.WEBSITE, SupportType.WEBSITE);
-
         entityTypeMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         entityTypeMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
 
     }
 
-    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum
-            = entityEnum -> Optional.ofNullable(discountCodeTypeMap.get(entityEnum))
-                                    .orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
-
-    protected Function<SupportTypeEnum, SupportType> toDtoSupportTypeEnum = entityEnum -> Optional.ofNullable(
-            supportTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
-
-    @Override
-    protected Function<ProfileEntity, ApprovedAgreementProfile> toDtoFunction() {
-        return toDto;
-    }
-
-    @Override
-    protected Function<ApprovedAgreementProfile, ProfileEntity> toEntityFunction() {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
+    protected Function<DiscountCodeTypeEnum, DiscountCodeType> toDtoDiscountCodeTypeEnum = entityEnum -> Optional.ofNullable(
+            discountCodeTypeMap.get(entityEnum)).orElseThrow(() -> getInvalidEnumMapping(entityEnum.getCode()));
     protected Function<ReferentEntity, ApprovedAgreementReferent> toDtoReferent = entity -> {
         ApprovedAgreementReferent dto = new ApprovedAgreementReferent();
         dto.setFirstName(entity.getFirstName());
@@ -70,11 +49,9 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setRole(entity.getRole());
         return dto;
     };
-
     protected Function<List<AddressEntity>, List<String>> addressToDto = entityList -> entityList.stream()
                                                                                                  .map(AddressEntity::getFullAddress)
                                                                                                  .collect(Collectors.toList());
-
     protected Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
         switch (entity.getSalesChannel()) {
             case ONLINE:
@@ -100,7 +77,6 @@ public class BackofficeApprovedAgreementProfileConverter
                 throw new IllegalArgumentException("Sales Channel not mapped");
         }
     };
-
     protected Function<ProfileEntity, ApprovedAgreementProfile> toDto = entity -> {
         ApprovedAgreementProfile dto = new ApprovedAgreementProfile();
         dto.setName(entity.getName());
@@ -111,7 +87,7 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setDescriptionDe(entity.getDescriptionDe());
         dto.setImageUrl(entity.getAgreement().getImageUrl());
         OffsetDateTime updateDateTime;
-        updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();
+        updateDateTime = entity.getUpdateTime()!=null ? entity.getUpdateTime():entity.getInsertTime();
         dto.setLastUpateDate(LocalDate.from(updateDateTime));
         dto.setFullName(entity.getFullName());
         dto.setTaxCodeOrVat(entity.getTaxCodeOrVat());
@@ -122,10 +98,18 @@ public class BackofficeApprovedAgreementProfileConverter
         dto.setLegalRepresentativeTaxCode(entity.getLegalRepresentativeTaxCode());
         dto.setReferent(toDtoReferent.apply(entity.getReferent()));
         dto.setSalesChannel(salesChannelToDto.apply(entity));
-        dto.setSupportType(toDtoSupportTypeEnum.apply(entity.getSupportType()));
-        dto.setSupportValue(entity.getSupportValue());
         dto.setEntityType(entityTypeMap.get(entity.getAgreement().getEntityType()));
 
         return dto;
     };
+
+    @Override
+    protected Function<ProfileEntity, ApprovedAgreementProfile> toDtoFunction() {
+        return toDto;
+    }
+
+    @Override
+    protected Function<ApprovedAgreementProfile, ProfileEntity> toEntityFunction() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }

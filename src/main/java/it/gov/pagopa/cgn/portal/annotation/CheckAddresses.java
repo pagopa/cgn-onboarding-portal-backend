@@ -1,14 +1,10 @@
 package it.gov.pagopa.cgn.portal.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
+import it.gov.pagopa.cgn.portal.validator.CheckAddressesValidator;
+
 import javax.validation.Constraint;
 import javax.validation.Payload;
-
-import it.gov.pagopa.cgn.portal.validator.CheckAddressesValidator;
+import java.lang.annotation.*;
 
 @Documented
 @Target(ElementType.TYPE)

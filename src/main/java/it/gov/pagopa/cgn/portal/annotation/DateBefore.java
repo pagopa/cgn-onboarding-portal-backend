@@ -1,26 +1,24 @@
 package it.gov.pagopa.cgn.portal.annotation;
 
- import java.lang.annotation.Documented;
- import java.lang.annotation.Retention;
- import java.lang.annotation.Target;
- import java.lang.annotation.ElementType;
- import java.lang.annotation.RetentionPolicy;
- import javax.validation.Constraint;
- import javax.validation.Payload;
 import it.gov.pagopa.cgn.portal.validator.DateBeforeValidator;
 
- @Documented
- @Target(ElementType.TYPE)
- @Retention(RetentionPolicy.RUNTIME)
- @Constraint(validatedBy = {DateBeforeValidator.class})
- public @interface DateBefore {
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.*;
 
-     String message() default "Date must be before compareTo field date";
+@Documented
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy = {DateBeforeValidator.class})
+public @interface DateBefore {
 
-     Class<?>[] groups() default {};
+    String message() default "Date must be before compareTo field date";
 
-     Class<? extends Payload>[] payload() default {};
+    Class<?>[] groups() default {};
 
-     String target() default "";
-     String compareTo() default "";
- }
+    Class<? extends Payload>[] payload() default {};
+
+    String target() default "";
+
+    String compareTo() default "";
+}

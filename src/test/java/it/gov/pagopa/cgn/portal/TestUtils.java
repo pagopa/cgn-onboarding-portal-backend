@@ -17,6 +17,8 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.data.domain.Sort;
@@ -38,19 +40,16 @@ import java.util.stream.Stream;
 public class TestUtils {
 
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements"; // needed to bypass interceptor
-
-    private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
-
     public static final String AGREEMENT_REQUESTS_CONTROLLER_PATH = "/agreement-requests/";
-
     public static final String AGREEMENT_APPROVED_CONTROLLER_PATH = "/approved-agreements/";
-
     public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
-
     public static final String GEOLOCATION_PATH = "/geolocation-token";
-
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
+    public static final String FAKE_ORGANIZATION_NAME = "FAKE_ORGANIZATION_NAME";
+    private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
+    public static String API_TOKEN_PRIMARY_KEY = "primary-key-001";
+    public static String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -88,6 +87,14 @@ public class TestUtils {
         return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/documents";
     }
 
+    public static String getAgreementRequestApprovalPath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/approval";
+    }
+
+    public static String getAgreementRequestAssigneePath(String agreementId) {
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + agreementId + "/assignee";
+    }
+
     public static String getAuthenticatedHelpPath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/help";
     }
@@ -115,22 +122,28 @@ public class TestUtils {
         return path.toString();
     }
 
+    public static String getAgreementRequestsDiscountTestingPath(String agreementId, String discountId) {
+        return getDiscountPath(agreementId) + "/" + discountId + "/testing";
+    }
+
+    public static String getAgreementRequestsDiscountSuspendingPath(String agreementId, String discountId) {
+        return getAgreementRequestsDiscountPath(agreementId, discountId) + "/suspension";
+    }
+
     public static String getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
-        return AGREEMENT_REQUESTS_CONTROLLER_PATH +
-                "?sortColumn=" +
-                columnEnum.getValue() +
-                "&sortDirection=" +
-                direction.name();
+        return AGREEMENT_REQUESTS_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection=" +
+               direction.name();
     }
 
     public static String getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum columnEnum,
                                                               Sort.Direction direction) {
-        return AGREEMENT_APPROVED_CONTROLLER_PATH +
-                "?sortColumn=" +
-                columnEnum.getValue() +
-                "&sortDirection=" +
-                direction.name();
+        return AGREEMENT_APPROVED_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection=" +
+               direction.name();
+    }
+
+    public static String createAgreements() {
+        return AGREEMENTS_CONTROLLER_PATH;
     }
 
     public static ReferentEntity createSampleReferent(ProfileEntity profileEntity) {
@@ -166,8 +179,6 @@ public class TestUtils {
         profileEntity.setDiscountCodeType(discountCodeType);
         profileEntity.setTelephoneNumber("12345678");
         profileEntity.setAllNationalAddresses(true);
-        profileEntity.setSupportType(SupportTypeEnum.PHONENUMBER);
-        profileEntity.setSupportValue("000000000");
         return profileEntity;
     }
 
@@ -215,8 +226,6 @@ public class TestUtils {
         updateProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
         updateProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
         updateProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
-        updateProfile.setSupportType(SupportType.EMAILADDRESS);
-        updateProfile.setSupportValue("an.email@domain.com");
         updateProfile.setSecondaryReferents(createUpdateReferentList());
 
         return updateProfile;
@@ -234,9 +243,7 @@ public class TestUtils {
         return createProfileFromProfileEntity(profileEntity, salesChannel);
     }
 
-
-    public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity,
-                                                               SalesChannel salesChannel) {
+    public static CreateProfile createProfileFromProfileEntity(ProfileEntity profileEntity, SalesChannel salesChannel) {
         CreateReferent referent = new CreateReferent();
         referent.setEmailAddress(profileEntity.getReferent().getEmailAddress());
         referent.setFirstName(profileEntity.getReferent().getFirstName());
@@ -260,13 +267,10 @@ public class TestUtils {
         createProfile.setTelephoneNumber(profileEntity.getTelephoneNumber());
         createProfile.setLegalRepresentativeFullName(profileEntity.getLegalRepresentativeFullName());
         createProfile.setLegalRepresentativeTaxCode(profileEntity.getLegalRepresentativeTaxCode());
-        createProfile.setSupportType(SupportType.EMAILADDRESS);
-        createProfile.setSupportValue("an.email@domain.com");
         createProfile.setSecondaryReferents(createCreateReferentList());
 
         return createProfile;
     }
-
 
     public static List<AddressEntity> createSampleAddress(ProfileEntity profileEntity) {
         AddressEntity addressEntity = new AddressEntity();
@@ -350,8 +354,6 @@ public class TestUtils {
         profileDto.setLegalRepresentativeFullName("full name");
         profileDto.setLegalOffice("legal office");
         profileDto.setTelephoneNumber("12345678");
-        profileDto.setSupportType(SupportType.PHONENUMBER);
-        profileDto.setSupportValue("00000000");
         UpdateReferent updateReferent = new UpdateReferent();
         updateReferent.setFirstName("referent_first_name");
         updateReferent.setLastName("referent_last_name");
@@ -364,8 +366,7 @@ public class TestUtils {
     }
 
     public static it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest createSamplePublicApiHelpRequest() {
-        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest
-                = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
+        it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest();
         helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest.CategoryEnum.ACCESS);
         helpRequest.setTopic("a topic");
         helpRequest.setMessage("I need help");
@@ -378,8 +379,7 @@ public class TestUtils {
     }
 
     public static it.gov.pagopa.cgnonboardingportal.model.HelpRequest createSampleAuthenticatedHelpRequest() {
-        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest
-                = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
+        it.gov.pagopa.cgnonboardingportal.model.HelpRequest helpRequest = new it.gov.pagopa.cgnonboardingportal.model.HelpRequest();
         helpRequest.setCategory(it.gov.pagopa.cgnonboardingportal.model.HelpRequest.CategoryEnum.ACCESS);
         helpRequest.setTopic("a topic");
         helpRequest.setMessage("I need help");
@@ -480,7 +480,6 @@ public class TestUtils {
 
     }
 
-
     private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_0(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
         entity_0.setId(40L);
@@ -493,14 +492,16 @@ public class TestUtils {
         entity_0.setName("-");
         entity_0.setNameLocal("OpportunitÃ  di Stage con Milano Premier Padel P1");
         entity_0.setText("- - - - To access the discount, show your EYCA card at the point of sale.");
-        entity_0.setTextLocal("Durante l'evento,allo stand del Ministro per lo Sport e i Giovani,Ã¨ possibile presentare il proprio CV per uno stage di 6 mesi nell'organizzazione di eventi sportivi internazionali.E' previsto un rimborso spese mensile di â‚¬400 per 20 ore a settimana. - Necessaria l'iscrizione a un corso di laurea specialistica,master o dottorato,oltre a un eccellente livello di inglese. Requisiti e ulteriori informazioni al link. - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+        entity_0.setTextLocal(
+                "Durante l'evento,allo stand del Ministro per lo Sport e i Giovani,Ã¨ possibile presentare il proprio CV per uno stage di 6 mesi nell'organizzazione di eventi sportivi internazionali.E' previsto un rimborso spese mensile di â‚¬400 per 20 ore a settimana. - Necessaria l'iscrizione a un corso di laurea specialistica,master o dottorato,oltre a un eccellente livello di inglese. Requisiti e ulteriori informazioni al link. - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
         entity_0.setStartDate(LocalDate.of(2023, 11, 29));
         entity_0.setEndDate(LocalDate.of(2023, 12, 10));
         entity_0.setEmail("");
         entity_0.setPhone("");
         entity_0.setWeb(null);
         entity_0.setTags("");
-        entity_0.setImage("https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+        entity_0.setImage(
+                "https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
         entity_0.setLocationLocalId("");
         entity_0.setStreet(null);
         entity_0.setCity("");
@@ -515,7 +516,6 @@ public class TestUtils {
         return entity_0;
     }
 
-
     private static EycaDataExportViewEntity getRealEycaDataExportViewEntity_1(Long discountId, String eycaUpdateId) {
         EycaDataExportViewEntity entity_1 = new EycaDataExportViewEntity();
         entity_1.setId(26L);
@@ -527,15 +527,18 @@ public class TestUtils {
         entity_1.setVendor("Dipartimento per le Politiche giovanili e il Servizio civile universale");
         entity_1.setName("Giovani2030");
         entity_1.setNameLocal("Giovani2030");
-        entity_1.setText("GIOVANI2030 is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
-        entity_1.setTextLocal("GIOVANI2030 Ã¨ la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
+        entity_1.setText(
+                "GIOVANI2030 is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
+        entity_1.setTextLocal(
+                "GIOVANI2030 Ã¨ la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
         entity_1.setStartDate(LocalDate.of(2023, 4, 17));
         entity_1.setEndDate(LocalDate.of(2023, 12, 31));
         entity_1.setEmail("");
         entity_1.setPhone("");
         entity_1.setWeb(null);
         entity_1.setTags("");
-        entity_1.setImage("https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+        entity_1.setImage(
+                "https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
         entity_1.setLocationLocalId("");
         entity_1.setStreet(null);
         entity_1.setCity("");
@@ -550,12 +553,86 @@ public class TestUtils {
         return entity_1;
     }
 
-
     public static List<EycaDataExportViewEntity> getRealDataList() {
-        return Arrays.asList(getRealEycaDataExportViewEntity_0(500L, null), getRealEycaDataExportViewEntity_1(501L, null),
-                getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"), getRealEycaDataExportViewEntity_1(503L, "c49020232220173105078447"));
+        return Arrays.asList(getRealEycaDataExportViewEntity_0(500L, null),
+                             getRealEycaDataExportViewEntity_1(501L, null),
+                             getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"),
+                             getRealEycaDataExportViewEntity_1(503L, "c49020232220173105078447"));
     }
 
+    public static List<EycaDataExportViewEntity> getRealDataListForSync() {
+        return Arrays.asList(getRealEycaDataExportViewEntity_0(502L, "c49020231110173105078447"));
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
+        return CsvUtils.csvToEntityList(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"),
+                                        (_record) -> {
+                                            EycaDataExportViewEntity e = new EycaDataExportViewEntity();
+
+                                            e.setId(Long.valueOf(_record.get("id")));
+                                            e.setCategories(_record.get("categories"));
+                                            e.setProfileId(Long.valueOf(_record.get("profile_id")));
+                                            e.setVendor(_record.get("vendor"));
+                                            e.setDiscountId(Long.valueOf(_record.get("discount_id")));
+                                            e.setEycaUpdateId(_record.get("eyca_update_id"));
+                                            e.setName(_record.get("name"));
+                                            e.setStartDate(LocalDate.parse(_record.get("start_date")));
+                                            e.setEndDate(LocalDate.parse(_record.get("end_date")));
+                                            e.setNameLocal(_record.get("name_local"));
+                                            e.setText(_record.get("text"));
+                                            e.setTextLocal(_record.get("text_local"));
+                                            e.setEmail(_record.get("email"));
+                                            e.setPhone(_record.get("phone"));
+                                            e.setWeb(_record.get("web"));
+                                            e.setTags(_record.get("tags"));
+                                            e.setImage(_record.get("image"));
+                                            e.setLive(_record.get("live"));
+                                            e.setLocationLocalId(_record.get("location_local_id"));
+                                            e.setStreet(_record.get("street"));
+                                            e.setCity(_record.get("city"));
+                                            e.setZip(_record.get("zip"));
+                                            e.setCountry(_record.get("country"));
+                                            e.setRegion(_record.get("region"));
+                                            e.setLatitude(_record.get("latitude"));
+                                            e.setLongitude(_record.get("longitude"));
+                                            e.setDiscountType(_record.get("discount_type"));
+                                            e.setReferent(Long.valueOf(_record.get("referent")));
+
+                                            return e;
+                                        });
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportForCreate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+        return List.of(entity_0);
+    }
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportForUpdate() {
+        EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
+        entity_0.setId(1L);
+        entity_0.setCategories("products");
+        entity_0.setEycaUpdateId("1234");
+        entity_0.setProfileId(1L);
+        entity_0.setVendor("vendor_0");
+        entity_0.setName("name_0");
+        entity_0.setNameLocal("name_local_0");
+        entity_0.setStreet("address0");
+        entity_0.setDiscountType("LANDING PAGE");
+        entity_0.setLive("Y");
+        entity_0.setDiscountId(1L);
+        return List.of(entity_0);
+    }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
@@ -790,10 +867,24 @@ public class TestUtils {
         entity_16.setDiscountId(16L);
 
 
-        return Arrays.asList(entity_0, entity_1, entity_2, entity_3, entity_4, entity_5, entity_6,
-                entity_7, entity_8, entity_9, entity_10, entity_11, entity_12, entity_13, entity_14, entity_15, entity_16);
+        return Arrays.asList(entity_0,
+                             entity_1,
+                             entity_2,
+                             entity_3,
+                             entity_4,
+                             entity_5,
+                             entity_6,
+                             entity_7,
+                             entity_8,
+                             entity_9,
+                             entity_10,
+                             entity_11,
+                             entity_12,
+                             entity_13,
+                             entity_14,
+                             entity_15,
+                             entity_16);
     }
-
 
     public static List<EycaDataExportViewEntity> getTobeDeletedEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity_0 = new EycaDataExportViewEntity();
@@ -868,7 +959,6 @@ public class TestUtils {
         return Collections.singletonList(entity_0);
     }
 
-
     public static String generateDiscountBucketCodeUid() {
         return UUID.randomUUID().toString();
     }
@@ -897,6 +987,55 @@ public class TestUtils {
         return updateDiscount;
     }
 
+    public static SuspendDiscount suspendableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
+        DiscountConverter discountConverter = new DiscountConverter();
+        Discount discount = discountConverter.toDto(discountEntity);
+        SuspendDiscount suspendDiscount = new SuspendDiscount();
+        suspendDiscount.setReasonMessage("fake reason");
+        return suspendDiscount;
+    }
+
+    /*
+    response.getApiResponse() != null &&
+                    response.getApiResponse().getData() != null &&
+                    response.getApiResponse().getData().getDiscounts() != null &&
+                        ObjectUtils.isEmpty(response.getApiResponse().getData().getDiscounts().getData())
+     */
+    public static SearchApiResponseEyca getSearchApiResponse() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+
+        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
+        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
+        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
+        SearchApiResponseApiResponseDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchApiResponseApiResponseDataDiscountsEyca();
+
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId("75894754th8t72vb93");
+        items.add(discountItemEyca);
+
+
+        searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
+        searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
+        searchApiResponseApiResponseDataDiscountsEyca.setData(items);
+        searchApiResponseEyca.setApiResponse(searchApiResponseApiResponseEyca);
+        return searchApiResponseEyca;
+    }
+
+    public static SearchApiResponseEyca getSearchApiResponseWithDataEmptyList() {
+        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+
+        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
+        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
+        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
+        SearchApiResponseApiResponseDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchApiResponseApiResponseDataDiscountsEyca();
+
+        searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
+        searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
+        searchApiResponseApiResponseDataDiscountsEyca.setData(Collections.emptyList());
+        searchApiResponseEyca.setApiResponse(searchApiResponseApiResponseEyca);
+        return searchApiResponseEyca;
+    }
 
     public static ApiResponseEyca getApiResponse() {
         ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
@@ -938,7 +1077,6 @@ public class TestUtils {
 
         return apiResponseEyca;
     }
-
 
     public static DeleteApiResponseEyca getDeleteApiResponse() {
         DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
@@ -1018,16 +1156,13 @@ public class TestUtils {
 
     }
 
-
-    public static String getJson(Object obj) throws JsonProcessingException {
+    public static String getJson(Object obj)
+            throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return mapper.writeValueAsString(obj);
     }
-
-    public static String API_TOKEN_PRIMARY_KEY = "primary-key-001";
-    public static String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
 
     public static ApiTokens createSampleApiTokens() {
         ApiTokens at = new ApiTokens();
@@ -1044,8 +1179,69 @@ public class TestUtils {
         return new SubscriptionContractTestData(API_TOKEN_PRIMARY_KEY, API_TOKEN_SECONDARY_KEY);
     }
 
+    public static Optional<DiscountEntity> getDiscountWithEycaUpdateId(AgreementEntity agreement) {
+        DiscountEntity discount = createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount.setEycaUpdateId("c49020231110173105078447");
+        return Optional.of(discount);
+    }
 
-    public static class SubscriptionKeysContractTestData implements SubscriptionKeysContract {
+    public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
+        return new HttpResponse(null) {
+            @Override
+            public int getStatusCode() {
+                return statusCode;
+            }
+
+            @Override
+            public String getHeaderValue(String s) {
+                return null;
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return null;
+            }
+
+            @Override
+            public Flux<ByteBuffer> getBody() {
+                return null;
+            }
+
+            @Override
+            public Mono<byte[]> getBodyAsByteArray() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString() {
+                return null;
+            }
+
+            @Override
+            public Mono<String> getBodyAsString(Charset charset) {
+                return null;
+            }
+        };
+    }
+
+    public static void setOperatorAuth() {
+        SecurityContextHolder.getContext()
+                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                                                                                               TestUtils.FAKE_ID)));
+    }
+
+    public static void setAdminAuth() {
+        SecurityContextHolder.getContext()
+                             .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+    }
+
+    public static void printMvcResponse(ResultActions resultActions)
+            throws UnsupportedEncodingException {
+        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
+    }
+
+    public static class SubscriptionKeysContractTestData
+            implements SubscriptionKeysContract {
         private String primaryKey;
         private String secondaryKey;
 
@@ -1070,7 +1266,8 @@ public class TestUtils {
         }
     }
 
-    public static class SubscriptionContractTestData implements SubscriptionContract {
+    public static class SubscriptionContractTestData
+            implements SubscriptionContract {
         private String primaryKey;
         private String secondaryKey;
 
@@ -1163,59 +1360,5 @@ public class TestUtils {
         public SubscriptionContractInner innerModel() {
             return null;
         }
-    }
-
-    public static HttpResponse createEmptyApimHttpResponse(int statusCode) {
-        return new HttpResponse(null) {
-            @Override
-            public int getStatusCode() {
-                return statusCode;
-            }
-
-            @Override
-            public String getHeaderValue(String s) {
-                return null;
-            }
-
-            @Override
-            public HttpHeaders getHeaders() {
-                return null;
-            }
-
-            @Override
-            public Flux<ByteBuffer> getBody() {
-                return null;
-            }
-
-            @Override
-            public Mono<byte[]> getBodyAsByteArray() {
-                return null;
-            }
-
-            @Override
-            public Mono<String> getBodyAsString() {
-                return null;
-            }
-
-            @Override
-            public Mono<String> getBodyAsString(Charset charset) {
-                return null;
-            }
-        };
-    }
-
-    public static void setOperatorAuth() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
-                        TestUtils.FAKE_ID)));
-    }
-
-    public static void setAdminAuth() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
-    }
-
-    public static void printMvcResponse(ResultActions resultActions) throws UnsupportedEncodingException {
-        System.out.println(resultActions.andReturn().getResponse().getContentAsString());
     }
 }

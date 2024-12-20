@@ -23,5 +23,6 @@ public interface DiscountBucketCodeSummaryRepository
     List<DiscountBucketCodeSummaryEntity> findAllPublishedByExpiredAtIsNullAndAvailableCodesGreaterThanZero();
 
     @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt <=  ?1 and bs.availableCodes > 0 and d.state = 'PUBLISHED'")
-    List<DiscountBucketCodeSummaryEntity> findAllPublishedByExpiredAtLessThanEqualAndAvailableCodesGreaterZero(OffsetDateTime thresholdDatetime);
+    List<DiscountBucketCodeSummaryEntity> findAllPublishedByExpiredAtLessThanEqualAndAvailableCodesGreaterZero(
+            OffsetDateTime thresholdDatetime);
 }

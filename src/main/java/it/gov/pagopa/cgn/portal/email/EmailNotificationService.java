@@ -41,14 +41,15 @@ public class EmailNotificationService {
         });
     }
 
-    public void sendSyncMessage(EmailParams emailParams) throws MessagingException {
+    public void sendSyncMessage(EmailParams emailParams)
+            throws MessagingException {
         sendSyncMessage(emailParams, null);
     }
 
-    public void sendSyncMessage(EmailParams emailParams, String trackingKey) throws MessagingException {
+    public void sendSyncMessage(EmailParams emailParams, String trackingKey)
+            throws MessagingException {
 
-        if (notificationAlreadySent(trackingKey))
-            return;
+        if (notificationAlreadySent(trackingKey)) return;
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
@@ -68,7 +69,17 @@ public class EmailNotificationService {
             helper.setText(emailParams.getBody(), true);
             helper.addInline(emailParams.getLogoName(), emailParams.getLogo());
 
-            log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString() : emailParams.toLightString());
+            if (emailParams.getAttachments().isPresent()) {
+                emailParams.getAttachments().get().forEach(attachment -> {
+                    try {
+                        helper.addAttachment(attachment.getAttachmentFilename(), attachment.getResource());
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+            log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString():emailParams.toLightString());
             javaMailSender.send(mimeMessage);
             trackNotification(trackingKey);
         } catch (Exception e) {
@@ -93,11 +104,11 @@ public class EmailNotificationService {
      * @param errorMessage a message that indicates any error occurred
      */
     private void trackNotification(String trackingKey, String errorMessage) {
-        if (trackingKey != null) {
+        if (trackingKey!=null) {
             // if a key has been given we check if a notification exists
             // this is useful to update a notification that had an error
             var notification = findNotification(trackingKey);
-            if (notification == null) {
+            if (notification==null) {
                 // if no notification is found create a new Notification
                 notification = new NotificationEntity(trackingKey);
             }
@@ -115,10 +126,10 @@ public class EmailNotificationService {
      * @return boolean
      */
     private boolean notificationAlreadySent(String trackingKey) {
-        if (trackingKey != null) {
+        if (trackingKey!=null) {
             // if a key has been given we check if a notification exist
             var notification = findNotification(trackingKey);
-            return notification != null && notification.getErrorMessage() == null;
+            return notification!=null && notification.getErrorMessage()==null;
         }
         return false;
     }

@@ -17,7 +17,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-class GeolocationTokenApiTest extends IntegrationAbstractTest {
+class GeolocationTokenApiTest
+        extends IntegrationAbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -26,12 +27,12 @@ class GeolocationTokenApiTest extends IntegrationAbstractTest {
     private ConfigProperties configProperties;
 
     @Test
-    void GetToken_GetToken_Ok() throws Exception {
-        this.mockMvc.perform(
-                get(TestUtils.GEOLOCATION_PATH).contentType(MediaType.APPLICATION_JSON))
-                .andDo(log())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.token").value(configProperties.getGeolocationToken()));
+    void GetToken_GetToken_Ok()
+            throws Exception {
+        this.mockMvc.perform(get(TestUtils.GEOLOCATION_PATH).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.token").isNotEmpty())
+                    .andExpect(jsonPath("$.token").value(configProperties.getGeolocationToken()));
     }
 }

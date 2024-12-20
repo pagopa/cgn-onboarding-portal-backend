@@ -537,25 +537,6 @@ paths:
         404:
           $ref: '#/responses/NotFound'
 
-  /export/send-eyca-discounts:
-    post:
-      tags:
-        - exports
-      summary: Send eyca discounts to EYCA via client
-      operationId: sendEycaDiscounts
-      responses:
-        200:
-          description: Send eyca discounts to EYCA via client
-          schema:
-            type: string
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
-
 consumes:
   - application/json
 
@@ -829,13 +810,6 @@ definitions:
       referent:
         $ref: '#/definitions/Referent'
 
-  SupportType:
-    type: string
-    enum:
-      - EmailAddress
-      - Website
-      - PhoneNumber
-
   ApprovedAgreementProfile:
     type: object
     required:
@@ -853,8 +827,6 @@ definitions:
       - legalRepresentativeFullName
       - legalRepresentativeTaxCode
       - referent
-      - supportType
-      - supportValue
     properties:
       name:
         type: string
@@ -902,12 +874,6 @@ definitions:
         maxLength: 20
       referent:
         $ref: '#/definitions/ApprovedAgreementReferent'
-      supportType:
-        $ref: '#/definitions/SupportType'
-      supportValue:
-        type: string
-        minLength: 5
-        maxLength: 500
       entityType:
         $ref: '#/definitions/EntityType'
 
@@ -1058,6 +1024,9 @@ definitions:
       staticCode:
         type: string
         maxLength: 100
+      eycaLandingPageUrl:
+        type: string
+        maxLength: 500
       landingPageUrl:
         type: string
         maxLength: 500

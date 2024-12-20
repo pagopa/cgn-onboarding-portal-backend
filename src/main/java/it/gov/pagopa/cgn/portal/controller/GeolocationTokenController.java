@@ -8,19 +8,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class GeolocationTokenController implements GeolocationTokenApi {
+public class GeolocationTokenController
+        implements GeolocationTokenApi {
 
     private final ConfigProperties configProperties;
+
+    @Autowired
+    public GeolocationTokenController(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
 
     @Override
     public ResponseEntity<GeolocationToken> getGeolocationToken() {
         var geolocationToken = new GeolocationToken();
         geolocationToken.setToken(configProperties.getGeolocationToken());
         return ResponseEntity.ok(geolocationToken);
-    }
-
-    @Autowired
-    public GeolocationTokenController(ConfigProperties configProperties) {
-        this.configProperties = configProperties;
     }
 }

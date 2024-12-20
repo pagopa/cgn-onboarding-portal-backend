@@ -6,7 +6,8 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 @EqualsAndHashCode
-public class DiscountProductKey implements Serializable {
+public class DiscountProductKey
+        implements Serializable {
 
     private ProductCategoryEnum productCategory;
 

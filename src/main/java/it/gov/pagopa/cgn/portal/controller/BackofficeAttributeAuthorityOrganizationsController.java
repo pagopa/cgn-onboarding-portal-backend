@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class BackofficeAttributeAuthorityOrganizationsController implements OrganizationsApi {
+public class BackofficeAttributeAuthorityOrganizationsController
+        implements OrganizationsApi {
 
     private final BackofficeAttributeAuthorityFacade backofficeAttributeAuthorityFacade;
 
@@ -22,7 +23,11 @@ public class BackofficeAttributeAuthorityOrganizationsController implements Orga
     }
 
     @Override
-    public ResponseEntity<Organizations> getOrganizations(String searchQuery, Integer page, Integer pageSize, String sortBy, String sortDirection) {
+    public ResponseEntity<Organizations> getOrganizations(String searchQuery,
+                                                          Integer page,
+                                                          Integer pageSize,
+                                                          String sortBy,
+                                                          String sortDirection) {
         return backofficeAttributeAuthorityFacade.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection);
     }
 

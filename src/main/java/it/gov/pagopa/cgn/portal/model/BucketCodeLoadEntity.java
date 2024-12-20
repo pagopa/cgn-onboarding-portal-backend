@@ -1,21 +1,21 @@
 package it.gov.pagopa.cgn.portal.model;
 
-import java.util.UUID;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import lombok.Data;
+import lombok.EqualsAndHashCode.Exclude;
+import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
-import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
-import lombok.Data;
-import lombok.ToString;
-import lombok.EqualsAndHashCode.Exclude;
+import java.util.UUID;
 
 @Entity
-@Table(name = "bucket_code_load", uniqueConstraints = @UniqueConstraint(columnNames = { "uid" }))
+@Table(name = "bucket_code_load", uniqueConstraints = @UniqueConstraint(columnNames = {"uid"}))
 @Data
-public class BucketCodeLoadEntity extends BaseEntity {
+public class BucketCodeLoadEntity
+        extends BaseEntity {
 
     @Id
     @Column(name = "bucket_code_load_k")

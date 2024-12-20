@@ -26,6 +26,12 @@ public class AgreementFacade {
     private final AgreementService agreementService;
     private final AgreementConverter agreementConverter;
 
+    @Autowired
+    public AgreementFacade(AgreementService agreementService, AgreementConverter agreementConverter) {
+        this.agreementService = agreementService;
+        this.agreementConverter = agreementConverter;
+    }
+
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
         AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
@@ -46,26 +52,20 @@ public class AgreementFacade {
         return ResponseEntity.ok(uploadedImage);
     }
 
-    @Autowired
-    public AgreementFacade(AgreementService agreementService, AgreementConverter agreementConverter) {
-        this.agreementService = agreementService;
-        this.agreementConverter = agreementConverter;
-    }
-
     private List<CompletedStep> getCompletedSteps(AgreementEntity agreementEntity) {
-        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())
-                || AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
+        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState()) ||
+            AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
             return Arrays.asList(CompletedStep.values());
         }
         List<CompletedStep> steps = new ArrayList<>();
-        if (agreementEntity.getProfile() != null) {
+        if (agreementEntity.getProfile()!=null) {
             steps.add(CompletedStep.PROFILE);
         }
         if (!CollectionUtils.isEmpty(agreementEntity.getDiscountList())) {
             steps.add(CompletedStep.DISCOUNT);
         }
-        if (!CollectionUtils.isEmpty(agreementEntity.getDocumentList())
-                && agreementEntity.getDocumentList().size() >= DocumentTypeEnum.getNumberOfDocumentProfile()) {
+        if (!CollectionUtils.isEmpty(agreementEntity.getDocumentList()) &&
+            agreementEntity.getDocumentList().size() >= DocumentTypeEnum.getNumberOfDocumentProfile()) {
             steps.add(CompletedStep.DOCUMENT);
         }
         return steps;

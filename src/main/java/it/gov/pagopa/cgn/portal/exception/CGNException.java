@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.exception;
 
-public class CGNException extends RuntimeException {
+public class CGNException
+        extends RuntimeException {
 
     public CGNException(Throwable cause) {
         super(cause);

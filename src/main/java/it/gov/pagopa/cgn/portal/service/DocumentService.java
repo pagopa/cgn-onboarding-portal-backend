@@ -5,9 +5,10 @@ import com.lowagie.text.pdf.BaseFont;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -15,6 +16,7 @@ import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
 import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +46,7 @@ import java.util.stream.Stream;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DocumentService {
 
+    private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
     private final DocumentRepository documentRepository;
     private final ProfileRepository profileRepository;
     private final DiscountRepository discountRepository;
@@ -51,7 +55,21 @@ public class DocumentService {
     private final TemplateEngine templateEngine;
     private final ConfigProperties configProperties;
 
-    private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
+    public DocumentService(DocumentRepository documentRepository,
+                           ProfileRepository profileRepository,
+                           DiscountRepository discountRepository,
+                           AgreementServiceLight agreementServiceLight,
+                           AzureStorage azureStorage,
+                           TemplateEngine templateEngine,
+                           ConfigProperties configProperties) {
+        this.documentRepository = documentRepository;
+        this.profileRepository = profileRepository;
+        this.discountRepository = discountRepository;
+        this.agreementServiceLight = agreementServiceLight;
+        this.azureStorage = azureStorage;
+        this.templateEngine = templateEngine;
+        this.configProperties = configProperties;
+    }
 
     public List<DocumentEntity> getPrioritizedDocuments(String agreementId) {
         return filterDocumentsByPriority(documentRepository.findByAgreementId(agreementId));
@@ -78,7 +96,7 @@ public class DocumentService {
                                         DocumentTypeEnum documentType,
                                         InputStream content,
                                         long size) {
-        AgreementEntity agreementEntity = agreementServiceLight.findById(agreementId);
+        AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         String url = azureStorage.storeDocument(agreementId, documentType, content, size);
         // Delete old document if exists
         long deleted = documentRepository.deleteByAgreementIdAndDocumentType(agreementId, documentType);
@@ -94,50 +112,46 @@ public class DocumentService {
     }
 
     @Transactional
-    public String storeBucket(String agreementId, InputStream inputStream, long size) {
+    public String storeBucket(String agreementId, InputStream inputStream, long size)
+            throws IOException {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new InvalidRequestException(
-                                                               "Profile not found. Bucket not uploadable"));
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         if (!profileEntity.getDiscountCodeType().equals(DiscountCodeTypeEnum.BUCKET)) {
-            throw new InvalidRequestException("Cannot load bucket for Discount Code type not equals to BUCKET");
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue());
         }
-        try {
-            byte[] content = inputStream.readAllBytes();
-            long csvRecordCount = countCsvRecord(content);
-            if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
-                throw new InvalidRequestException("Cannot load bucket because number of rows (" +
-                                                  csvRecordCount +
-                                                  ") does not respect minimum bound (" +
-                                                  configProperties.getBucketMinCsvRows() +
-                                                  ") on loaded content of length (" +
-                                                  content.length +
-                                                  ")");
-            }
-            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
-                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-                if (content.length == 0 ||
-                    csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
-                                                     StringUtils.isBlank(line.get(0)))) {
-                    throw new InvalidRequestException(
-                            "Cannot load bucket because of empty file or number of rows does not respect minimum or one or more codes do not respect " +
-                            MAX_ALLOWED_BUCKET_CODE_LENGTH +
-                            " code size");
-                }
-            } catch (IOException e) {
-                throw new CGNException(e.getMessage());
-            }
 
-            String bucketLoadUID = UUID.randomUUID().toString();
-            try (ByteArrayInputStream in = new ByteArrayInputStream(content)) {
-                azureStorage.uploadCsv(in, bucketLoadUID, size);
-            } catch (IOException e) {
-                throw new CGNException(e.getMessage());
-            }
-
-            return bucketLoadUID;
-        } catch (IOException e) {
-            throw new CGNException(e.getMessage());
+        byte[] content = inputStream.readAllBytes();
+        long csvRecordCount = countCsvRecord(content);
+        if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
         }
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (content.length==0) {
+                throw new InternalErrorException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+            }
+            if (csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
+                                                 StringUtils.isBlank(line.get(0)))) {
+                throw new InvalidRequestException(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue());
+            }
+        }
+
+        Pattern pDigits = Pattern.compile("[0-9]");
+        Pattern pAlphab = Pattern.compile("[-A-Za-z]");
+
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (csvRecordStream.anyMatch(line -> !(pDigits.matcher(line.get(0)).find() //at least one digit
+                                                   && pAlphab.matcher(line.get(0)).find() //at least on alphab. char
+            ))) {
+                throw new InvalidRequestException(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue());
+            }
+        }
+
+        String bucketLoadUID = UUID.randomUUID().toString();
+        azureStorage.uploadCsv(content, bucketLoadUID, size);
+
+        return bucketLoadUID;
     }
 
     private long countCsvRecord(byte[] content) {
@@ -204,25 +218,25 @@ public class DocumentService {
             case ADHESION_REQUEST:
                 return renderAdhesionRequestDocument(agreementId);
             default:
-                throw new RuntimeException("Invalid document type: " + documentType);
+                throw new InvalidRequestException(ErrorCodeEnum.DOCUMENT_TYPE_NOT_VALID.getValue());
         }
     }
 
     private ByteArrayOutputStream renderAgreementDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new RuntimeException("no profile"));
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
         String docPath = "pdf/pe-agreement-public.html";
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
         context.setVariable("merchant_tax_code", profileEntity.getTaxCodeOrVat());
-        if(profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PRIVATE)) {
-        	docPath = "pdf/pe-agreement.html";
-	        context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
-	        context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
-	        context.setVariable("legal_office", profileEntity.getLegalOffice());
-	        context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
-            context.setVariable("pec_address", profileEntity.getPecAddress());	        
+        if (profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PRIVATE)) {
+            docPath = "pdf/pe-agreement.html";
+            context.setVariable("legal_representative_fullname", profileEntity.getLegalRepresentativeFullName());
+            context.setVariable("legal_representative_fiscal_code", profileEntity.getLegalRepresentativeTaxCode());
+            context.setVariable("legal_office", profileEntity.getLegalOffice());
+            context.setVariable("telephone_nr", profileEntity.getTelephoneNumber());
+            context.setVariable("pec_address", profileEntity.getPecAddress());
         }
         context.setVariable("department_reference_email", "cartagiovaninazionale@governo.it");
         context.setVariable("department_pec_address", "giovanieserviziocivile@pec.governo.it");
@@ -234,11 +248,11 @@ public class DocumentService {
 
     private ByteArrayOutputStream renderAdhesionRequestDocument(String agreementId) {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
-                                                       .orElseThrow(() -> new RuntimeException("no profile"));
-        
-        if(profileEntity != null && profileEntity.getAgreement() != null 
-        		&& profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)) {
-        	throw new CGNException("The adhesion document is not required for PA");
+                                                       .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+
+        if (profileEntity!=null && profileEntity.getAgreement()!=null &&
+            profileEntity.getAgreement().getEntityType().equals(EntityTypeEnum.PUBLIC_ADMINISTRATION)) {
+            throw new InvalidRequestException(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue());
         }
 
         List<String> addressList = profileEntity.getAddressList()
@@ -271,9 +285,8 @@ public class DocumentService {
             }
         }
 
-        String merchantName = profileEntity.getName() == null ||
-                              profileEntity.getName().isEmpty() ||
-                              profileEntity.getName().isBlank() ? profileEntity.getFullName() : profileEntity.getName();
+        String merchantName = profileEntity.getName()==null || profileEntity.getName().isEmpty() ||
+                              profileEntity.getName().isBlank() ? profileEntity.getFullName():profileEntity.getName();
 
         Context context = new Context();
         context.setVariable("legal_name", profileEntity.getFullName());
@@ -327,26 +340,11 @@ public class DocumentService {
 
             renderer.createPDF(outputStream);
         } catch (DocumentException | IOException e) {
-            throw new CGNException("Error in document rendering", e);
+            log.error("Error during Rendering PDF:", e);
+            throw new InvalidRequestException(ErrorCodeEnum.PDF_RENDERING_ERROR.getValue());
         }
 
         return outputStream;
-    }
-
-    public DocumentService(DocumentRepository documentRepository,
-                           ProfileRepository profileRepository,
-                           DiscountRepository discountRepository,
-                           AgreementServiceLight agreementServiceLight,
-                           AzureStorage azureStorage,
-                           TemplateEngine templateEngine,
-                           ConfigProperties configProperties) {
-        this.documentRepository = documentRepository;
-        this.profileRepository = profileRepository;
-        this.discountRepository = discountRepository;
-        this.agreementServiceLight = agreementServiceLight;
-        this.azureStorage = azureStorage;
-        this.templateEngine = templateEngine;
-        this.configProperties = configProperties;
     }
 
     private static class RenderableDiscount {
@@ -368,7 +366,7 @@ public class DocumentService {
 
             discount.name = entity.getName();
             discount.validityPeriod = entity.getStartDate() + " - \n" + entity.getEndDate();
-            discount.discountValue = entity.getDiscountValue() != null ? "" + entity.getDiscountValue() + "% " : "";
+            discount.discountValue = entity.getDiscountValue()!=null ? "" + entity.getDiscountValue() + "% ":"";
             discount.condition = entity.getCondition();
             discount.modeValue = Stream.of(entity.getStaticCode(), entity.getLandingPageUrl())
                                        .filter(Objects::nonNull)

@@ -16,6 +16,20 @@ public class OrganizationsConverter
         extends AbstractAttributeAuthorityConverter<OrganizationsAttributeAuthority, Organizations> {
 
     private OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
+    protected Function<OrganizationsAttributeAuthority, Organizations> fromAttributeAuthorityModel = attributeAuthorityModel -> {
+        Organizations backofficeModel = new Organizations();
+        backofficeModel.setItems((List<OrganizationWithReferentsAndStatus>) organizationWithReferentsAndStatusConverter.fromAttributeAuthorityModelCollection(
+                attributeAuthorityModel.getItems()));
+        backofficeModel.setCount(attributeAuthorityModel.getCount());
+        return backofficeModel;
+    };
+    protected Function<Organizations, OrganizationsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
+        OrganizationsAttributeAuthority attributeAuthorityModel = new OrganizationsAttributeAuthority();
+        attributeAuthorityModel.setCount(backofficeModel.getCount());
+        attributeAuthorityModel.setItems((List<OrganizationWithReferentsAttributeAuthority>) organizationWithReferentsAndStatusConverter.toAttributeAuthorityModelCollection(
+                backofficeModel.getItems()));
+        return attributeAuthorityModel;
+    };
 
     @Autowired
     public OrganizationsConverter(OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter) {
@@ -31,23 +45,6 @@ public class OrganizationsConverter
     protected Function<Organizations, OrganizationsAttributeAuthority> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
-
-    protected Function<OrganizationsAttributeAuthority, Organizations> fromAttributeAuthorityModel =
-            attributeAuthorityModel -> {
-                Organizations backofficeModel = new Organizations();
-                backofficeModel.setItems((List<OrganizationWithReferentsAndStatus>) organizationWithReferentsAndStatusConverter.fromAttributeAuthorityModelCollection(
-                        attributeAuthorityModel.getItems()));
-                backofficeModel.setCount(attributeAuthorityModel.getCount());
-                return backofficeModel;
-            };
-
-    protected Function<Organizations, OrganizationsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
-        OrganizationsAttributeAuthority attributeAuthorityModel = new OrganizationsAttributeAuthority();
-        attributeAuthorityModel.setCount(backofficeModel.getCount());
-        attributeAuthorityModel.setItems((List<OrganizationWithReferentsAttributeAuthority>) organizationWithReferentsAndStatusConverter.toAttributeAuthorityModelCollection(
-                backofficeModel.getItems()));
-        return attributeAuthorityModel;
-    };
 
 
 }

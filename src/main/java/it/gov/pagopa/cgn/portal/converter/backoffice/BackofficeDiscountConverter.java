@@ -7,7 +7,17 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-public class BackofficeDiscountConverter extends CommonBackofficeDiscountConverter<DiscountEntity, Discount> {
+public class BackofficeDiscountConverter
+        extends CommonBackofficeDiscountConverter<DiscountEntity, Discount> {
+
+    protected Function<DiscountEntity, Discount> toDto = entity -> {
+        Discount dto = new Discount();
+        dto.setId(String.valueOf(entity.getId()));
+        dto.setName(entity.getName());
+        dto.setAgreementId(entity.getAgreement().getId());
+        dto.setState(discountStateEnum.get(entity.getState()));
+        return dto;
+    };
 
     @Override
     protected Function<DiscountEntity, Discount> toDtoFunction() {
@@ -18,14 +28,4 @@ public class BackofficeDiscountConverter extends CommonBackofficeDiscountConvert
     protected Function<Discount, DiscountEntity> toEntityFunction() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
-
-    protected Function<DiscountEntity, Discount> toDto =
-            entity -> {
-                Discount dto = new Discount();
-                dto.setId(String.valueOf(entity.getId()));
-                dto.setName(entity.getName());
-                dto.setAgreementId(entity.getAgreement().getId());
-                dto.setState(discountStateEnum.get(entity.getState()));
-                return dto;
-            };
 }

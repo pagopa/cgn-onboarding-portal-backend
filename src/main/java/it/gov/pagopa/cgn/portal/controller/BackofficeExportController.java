@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @PreAuthorize("hasRole('ROLE_ADMIN')")
-public class BackofficeExportController implements ExportApi {
+public class BackofficeExportController
+        implements ExportApi {
 
     private final BackofficeExportFacade backofficeExportFacade;
 
@@ -30,8 +31,4 @@ public class BackofficeExportController implements ExportApi {
         return backofficeExportFacade.exportEycaDiscounts();
     }
 
-   @Override
-    public ResponseEntity<String> sendEycaDiscounts() {
-        return backofficeExportFacade.sendDiscountsToEyca();
-    }
 }

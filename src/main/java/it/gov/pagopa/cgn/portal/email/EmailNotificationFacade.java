@@ -1,13 +1,14 @@
 package it.gov.pagopa.cgn.portal.email;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,9 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -24,22 +28,32 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EmailNotificationFacade {
 
+    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
     private final TemplateEngine htmlTemplateEngine;
-
     private final EmailNotificationService emailNotificationService;
-
     private final ConfigProperties configProperties;
 
-    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
 
+    @Autowired
+    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
+                                   EmailNotificationService emailNotificationService,
+                                   ConfigProperties configProperties) {
+        this.htmlTemplateEngine = htmlTemplateEngine;
+        this.emailNotificationService = emailNotificationService;
+        this.configProperties = configProperties;
+    }
+
+    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
+                                                                    BucketCodeExpiringThresholdEnum threshold) {
+        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
+    }
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("merchant_fullname", merchantFullName);
-        final String errorMessage = "Failed to send New Agreement Request notification from " +
-                                    merchantFullName +
-                                    " to department";
+        final String errorMessage =
+                "Failed to send New Agreement Request notification from " + merchantFullName + " to department";
         String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
         var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
@@ -51,9 +65,8 @@ public class EmailNotificationFacade {
         context.setVariable("operator_name", merchantFullName);
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable("discount_type", discountType);
-        final String errorMessage = "Failed to send test request notification from " +
-                                    merchantFullName +
-                                    " to department";
+        final String errorMessage =
+                "Failed to send test request notification from " + merchantFullName + " to department";
         String body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_REQUEST, context);
         var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
@@ -73,9 +86,7 @@ public class EmailNotificationFacade {
             var secondaryReferents = retrieveSecondaryRecipients(profile);
 
             String body = getTemplateHtml(template);
-            var emailParams = createEmailParams(referentEmail,
-                    secondaryReferents,
-                    subject, body, errorMessage);
+            var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
             emailNotificationService.sendAsyncMessage(emailParams);
         } catch (Exception e) {
             log.error(errorMessage, e);
@@ -119,15 +130,14 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
-    public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) throws MessagingException {
-        var subject = "[Carta Giovani Nazionale] Nuova richiesta di supporto da " +
-                      helpRequestParams.getMerchantLegalName();
+    public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams)
+            throws MessagingException {
+        var subject =
+                "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
         var context = new Context();
 
         var categoryAndTopic = helpRequestParams.getTopic()
@@ -162,9 +172,7 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
@@ -178,9 +186,7 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
@@ -195,9 +201,7 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
@@ -212,19 +216,12 @@ public class EmailNotificationFacade {
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail,
-                    secondaryReferents,
-                    subject, body, null);
+            var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, null);
             emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
             // in this case exception will be propagated
             throw new CGNException(e);
         }
-    }
-
-    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
-                                                                    BucketCodeExpiringThresholdEnum threshold) {
-        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
     }
 
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
@@ -243,9 +240,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
 
@@ -259,54 +254,114 @@ public class EmailNotificationFacade {
 
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
         final String errorMessage = "Failed to send Discount Bucket Codes Expired notification to: " + referentEmail;
-        final String trackingKey = createTrackingKeyForExpirationNotification(discount, BucketCodeExpiringThresholdEnum.PERCENT_0);
+        final String trackingKey = createTrackingKeyForExpirationNotification(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail,
-                secondaryReferents,
-                subject, body, errorMessage);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
     }
 
-    @Autowired
-    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
-                                   EmailNotificationService emailNotificationService,
-                                   ConfigProperties configProperties) {
-        this.htmlTemplateEngine = htmlTemplateEngine;
-        this.emailNotificationService = emailNotificationService;
-        this.configProperties = configProperties;
+    private EmailParams createEmailParams(List<String> mailTo,
+                                          String subject,
+                                          String body,
+                                          String failureMessage,
+                                          List<Attachment> attachments) {
+        return createEmailParams(mailTo,
+                                 Optional.empty(),
+                                 Optional.empty(),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.of(attachments));
     }
 
     private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.empty(), Optional.empty(), subject, body, failureMessage);
+        return createEmailParams(mailTo,
+                                 Optional.empty(),
+                                 Optional.empty(),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.empty());
     }
 
-    private EmailParams createEmailParams(String mailTo, List<String> secondaryMailToList, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.of(secondaryMailToList), Optional.empty(), subject, body, failureMessage);
+    private EmailParams createEmailParams(String mailTo,
+                                          List<String> secondaryMailToList,
+                                          String subject,
+                                          String body,
+                                          String failureMessage) {
+        return createEmailParams(mailTo,
+                                 Optional.of(secondaryMailToList),
+                                 Optional.empty(),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.empty());
     }
 
-    private EmailParams createEmailParams(String mailTo, String replyToOpt, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo, Optional.empty(), Optional.of(replyToOpt), subject, body, failureMessage);
+    private EmailParams createEmailParams(String mailTo,
+                                          String replyToOpt,
+                                          String subject,
+                                          String body,
+                                          String failureMessage) {
+        return createEmailParams(mailTo,
+                                 Optional.empty(),
+                                 Optional.of(replyToOpt),
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 Optional.empty());
     }
 
+
+    private EmailParams createEmailParams(List<String> mailTo,
+                                          Optional<List<String>> ccList,
+                                          Optional<String> replyToOpt,
+                                          String subject,
+                                          String body,
+                                          String failureMessage,
+                                          Optional<List<Attachment>> attachments) {
+        return EmailParams.builder()
+                          .mailFrom(configProperties.getCgnNotificationSender())
+                          .logoName("cgn-logo.png")
+                          .logo(configProperties.getCgnLogo())
+                          .mailToList(mailTo)
+                          .mailCCList(ccList)
+                          .replyToOpt(replyToOpt)
+                          .subject(subject)
+                          .body(body)
+                          .failureMessage(failureMessage)
+                          .attachments(attachments)
+                          .build();
+    }
 
     private EmailParams createEmailParams(String mailTo,
                                           Optional<List<String>> ccList,
                                           Optional<String> replyToOpt,
                                           String subject,
                                           String body,
-                                          String failureMessage) {
-        return EmailParams.builder()
-                          .mailFrom(configProperties.getCgnNotificationSender())
-                          .logoName("cgn-logo.png")
-                          .logo(configProperties.getCgnLogo())
-                          .mailToList(Collections.singletonList(mailTo))
-                          .mailCCList(ccList)
-                          .replyToOpt(replyToOpt)
-                          .subject(subject)
-                          .body(body)
-                          .failureMessage(failureMessage)
-                          .build();
+                                          String failureMessage,
+                                          Optional<List<Attachment>> attachments) {
+        return createEmailParams(Collections.singletonList(mailTo),
+                                 ccList,
+                                 replyToOpt,
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 attachments);
+    }
+
+    public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
+        String subject = "Eyca job launch summary attachments of: " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String failureMessage = "It is not possible to send the email with the job summary attacchments.";
+        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaJobMailTo().split(";")),
+                                                    subject,
+                                                    body,
+                                                    failureMessage,
+                                                    attachments);
+        emailNotificationService.sendAsyncMessage(emailParams);
     }
 
     private String getTemplateHtml(TemplateEmail template) {
@@ -319,16 +374,17 @@ public class EmailNotificationFacade {
 
     private List<String> retrieveSecondaryRecipients(ProfileEntity profileEntity) {
         List<String> secondaryReferents = Optional.ofNullable(profileEntity.getSecondaryReferentList())
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(SecondaryReferentEntity::getEmailAddress)
-                .collect(Collectors.toList());
+                                                  .orElse(Collections.emptyList())
+                                                  .stream()
+                                                  .map(SecondaryReferentEntity::getEmailAddress)
+                                                  .collect(Collectors.toList());
         secondaryReferents.addAll(Collections.singletonList(configProperties.getCgnDepartmentEmail()));
 
         return secondaryReferents;
     }
 
-    private static class InvalidValueException extends RuntimeException {
+    private static class InvalidValueException
+            extends RuntimeException {
         public InvalidValueException(String message) {
             super(message);
         }

@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
@@ -21,17 +22,22 @@ import java.util.stream.Stream;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
+class AttributeAuthorityServiceTest
+        extends IntegrationAbstractTest {
 
     private AttributeAuthorityApi attributeAuthorityApi;
+    private DefaultApi defaultAttributeAuthorityApi;
 
     private AttributeAuthorityService attributeAuthorityService;
 
     @BeforeEach
     void init() {
         attributeAuthorityApi = Mockito.mock(AttributeAuthorityApi.class);
+        defaultAttributeAuthorityApi = Mockito.mock(DefaultApi.class);
         Mockito.when(attributeAuthorityApi.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
-        attributeAuthorityService = new AttributeAuthorityService(configProperties, attributeAuthorityApi);
+        attributeAuthorityService = new AttributeAuthorityService(configProperties,
+                                                                  attributeAuthorityApi,
+                                                                  defaultAttributeAuthorityApi);
     }
 
     @Test
@@ -42,12 +48,11 @@ class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
                                                                         Mockito.any(),
                                                                         Mockito.any()))
                .thenReturn(ResponseEntity.ok(Mockito.mock(OrganizationsAttributeAuthority.class)));
-        ResponseEntity<OrganizationsAttributeAuthority> response =
-                attributeAuthorityService.getOrganizations(Mockito.any(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),
-                                                           Mockito.any());
+        ResponseEntity<OrganizationsAttributeAuthority> response = attributeAuthorityService.getOrganizations(Mockito.any(),
+                                                                                                              Mockito.any(),
+                                                                                                              Mockito.any(),
+                                                                                                              Mockito.any(),
+                                                                                                              Mockito.any());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -55,8 +60,8 @@ class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
     void UpsertOrganization_Ok() {
         Mockito.when(attributeAuthorityApi.upsertOrganizationWithHttpInfo(Mockito.any()))
                .thenReturn(ResponseEntity.ok(Mockito.mock(OrganizationWithReferentsAttributeAuthority.class)));
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
-                attributeAuthorityService.upsertOrganization(Mockito.any());
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = attributeAuthorityService.upsertOrganization(
+                Mockito.any());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -64,8 +69,8 @@ class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
     void GetOrganization_Ok() {
         Mockito.when(attributeAuthorityApi.getOrganizationWithHttpInfo(Mockito.any()))
                .thenReturn(ResponseEntity.ok(Mockito.mock(OrganizationWithReferentsAttributeAuthority.class)));
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
-                attributeAuthorityService.getOrganization("1234567890");
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = attributeAuthorityService.getOrganization(
+                "1234567890");
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
@@ -89,11 +94,10 @@ class AttributeAuthorityServiceTest extends IntegrationAbstractTest {
     void InsertReferent_Ok() {
         Mockito.when(attributeAuthorityApi.insertReferentWithHttpInfo(Mockito.any(), Mockito.any()))
                .thenReturn(ResponseEntity.noContent().build());
-        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority =
-                new ReferentFiscalCodeAttributeAuthority();
+        ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority = new ReferentFiscalCodeAttributeAuthority();
         referentFiscalCodeAttributeAuthority.setReferentFiscalCode("AAAAAA00A00A000A");
-        ResponseEntity<Void> response =
-                attributeAuthorityService.insertReferent("1234567890", referentFiscalCodeAttributeAuthority);
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("1234567890",
+                                                                                 referentFiscalCodeAttributeAuthority);
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 

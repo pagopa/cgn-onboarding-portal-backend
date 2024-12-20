@@ -19,7 +19,7 @@ public class JwtTokenUtil {
 
     public JwtUser getUserDetails(String token, String cgnRole) {
 
-        if (token == null) {
+        if (token==null) {
             return null;
         }
 
@@ -30,8 +30,7 @@ public class JwtTokenUtil {
             final String companyTaxCode = companyMap.get(CLAIM_KEY_COMPANY_MERCHANT_TAX_CODE);
             return new JwtOperatorUser(claims.get(CLAIM_KEY_MERCHANT_USER_TAX_CODE, String.class), companyTaxCode);
         } else if (cgnRole.equals(CgnUserRoleEnum.ADMIN.getCode())) {
-            return new JwtAdminUser(claims.get(CLAIM_KEY_ADMIN_NAME, String.class) +
-                                    " " +
+            return new JwtAdminUser(claims.get(CLAIM_KEY_ADMIN_NAME, String.class) + " " +
                                     claims.get(CLAIM_KEY_ADMIN_FAMILY_NAME, String.class));
         } else {
             throw new SecurityException("Invalid role value: " + cgnRole);

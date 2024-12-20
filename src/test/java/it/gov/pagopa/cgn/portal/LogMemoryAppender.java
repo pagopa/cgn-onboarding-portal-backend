@@ -9,24 +9,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class LogMemoryAppender extends ListAppender<ILoggingEvent> {
+public class LogMemoryAppender
+        extends ListAppender<ILoggingEvent> {
     public void reset() {
         this.list.clear();
     }
 
     public boolean contains(String string, Level level) {
         return this.list.stream()
-                .anyMatch(event -> (event.getMessage().contains(string)
-                        || event.getThrowableProxy().getMessage().contains(string))
-                        && event.getLevel().equals(level));
+                        .anyMatch(event -> (event.getMessage().contains(string) ||
+                                            event.getThrowableProxy().getMessage().contains(string)) &&
+                                           event.getLevel().equals(level));
     }
 
     public List<ILoggingEvent> search(String string, Level level) {
         return this.list.stream()
-                .filter(event -> (event.getMessage().contains(string)
-                        || event.getThrowableProxy().getMessage().contains(string))
-                        && event.getLevel().equals(level))
-                .collect(Collectors.toList());
+                        .filter(event -> (event.getMessage().contains(string) ||
+                                          event.getThrowableProxy().getMessage().contains(string)) &&
+                                         event.getLevel().equals(level))
+                        .collect(Collectors.toList());
     }
 
     public List<ILoggingEvent> getLoggedEvents() {

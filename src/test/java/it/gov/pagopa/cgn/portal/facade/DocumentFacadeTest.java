@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class DocumentFacadeTest {
         DocumentFacade documentFacade = new DocumentFacade(documentService, null, null);
         String documentTypeCode = DocumentTypeEnum.AGREEMENT.getCode();
         Assert.assertThrows(CGNException.class,
-                () -> documentFacade.uploadDocument("fake_agreement", documentTypeCode, multipartFile));
+                            () -> documentFacade.uploadDocument("fake_agreement", documentTypeCode, multipartFile));
 
     }
 
@@ -39,7 +40,8 @@ public class DocumentFacadeTest {
             throws IOException {
         when(multipartFile.getInputStream()).thenThrow(new IOException());
         DocumentFacade documentFacade = new DocumentFacade(documentService, null, null);
-        Assert.assertThrows(CGNException.class, () -> documentFacade.uploadBucket("fake_agreement", multipartFile));
+        Assert.assertThrows(InternalErrorException.class,
+                            () -> documentFacade.uploadBucket("fake_agreement", multipartFile));
 
     }
 

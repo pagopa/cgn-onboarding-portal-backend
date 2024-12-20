@@ -24,8 +24,7 @@ public class BackofficeApprovedDiscountConverter
         extends CommonBackofficeDiscountConverter<DiscountEntity, ApprovedAgreementDiscount> {
 
 
-    private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps
-            = new EnumMap<>(ProductCategoryEnum.class);
+    private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
 
     static {
         productEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
@@ -40,26 +39,16 @@ public class BackofficeApprovedDiscountConverter
         productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
     }
 
-    @Override
-    protected Function<DiscountEntity, ApprovedAgreementDiscount> toDtoFunction() {
-        return toDto;
-    }
-
-    @Override
-    protected Function<ApprovedAgreementDiscount, DiscountEntity> toEntityFunction() {
-        throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    protected Function<ProductCategoryEnum, ProductCategory> toProductDtoEnum
-            = productCategoryEnum -> Optional.ofNullable(productEnumMaps.get(productCategoryEnum))
-                                             .orElseThrow(() -> getInvalidEnumMapping(productCategoryEnum.name()));
-
-    protected Function<List<DiscountProductEntity>, List<ProductCategory>> toProductDtoListEnum
-            = discountProductsEntity -> discountProductsEntity.stream()
-                                                              .map(discountProductEntity -> toProductDtoEnum.apply(
-                                                                      discountProductEntity.getProductCategory()))
-                                                              .collect(Collectors.toList());
-
+    protected Function<ProductCategoryEnum, ProductCategory> toProductDtoEnum = productCategoryEnum -> Optional.ofNullable(
+                                                                                                                       productEnumMaps.get(productCategoryEnum))
+                                                                                                               .orElseThrow(
+                                                                                                                       () -> getInvalidEnumMapping(
+                                                                                                                               productCategoryEnum.name()));
+    protected Function<List<DiscountProductEntity>, List<ProductCategory>> toProductDtoListEnum = discountProductsEntity -> discountProductsEntity.stream()
+                                                                                                                                                  .map(discountProductEntity -> toProductDtoEnum.apply(
+                                                                                                                                                          discountProductEntity.getProductCategory()))
+                                                                                                                                                  .collect(
+                                                                                                                                                          Collectors.toList());
     protected Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
         ApprovedAgreementDiscount dto = new ApprovedAgreementDiscount();
         dto.setId(String.valueOf(entity.getId()));
@@ -79,7 +68,7 @@ public class BackofficeApprovedDiscountConverter
         dto.setVisibleOnEyca(entity.getVisibleOnEyca());
 
         OffsetDateTime updateDateTime;
-        updateDateTime = entity.getUpdateTime() != null ? entity.getUpdateTime() : entity.getInsertTime();
+        updateDateTime = entity.getUpdateTime()!=null ? entity.getUpdateTime():entity.getInsertTime();
         dto.setLastUpateDate(LocalDate.from(updateDateTime));
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
         dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
@@ -95,4 +84,14 @@ public class BackofficeApprovedDiscountConverter
 
         return dto;
     };
+
+    @Override
+    protected Function<DiscountEntity, ApprovedAgreementDiscount> toDtoFunction() {
+        return toDto;
+    }
+
+    @Override
+    protected Function<ApprovedAgreementDiscount, DiscountEntity> toEntityFunction() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
