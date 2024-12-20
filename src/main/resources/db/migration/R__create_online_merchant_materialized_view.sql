@@ -72,6 +72,7 @@ WITH merchant AS (SELECT a.agreement_k,
                                        FROM discount d
                                                 JOIN discount_product_category pc ON (d.discount_k = pc.discount_fk)
                                        WHERE d.state = 'PUBLISHED'
+		                                 AND d.start_date <= CURRENT_DATE
                                          AND d.start_date >= CURRENT_DATE - INTERVAL '15 days'
                                          AND d.end_date >= CURRENT_DATE
                                        GROUP BY d.agreement_fk),
