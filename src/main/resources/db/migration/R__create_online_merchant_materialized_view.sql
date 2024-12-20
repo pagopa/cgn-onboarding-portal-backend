@@ -1,6 +1,8 @@
-DROP MATERIALIZED VIEW IF EXISTS online_merchant;
+DROP
+MATERIALIZED VIEW IF EXISTS online_merchant;
 
-CREATE MATERIALIZED VIEW online_merchant AS
+CREATE
+MATERIALIZED VIEW online_merchant AS
 WITH merchant AS (SELECT a.agreement_k,
                          COALESCE(NULLIF(p.name, ''), p.full_name) AS name,
                          p.website_url,
@@ -83,7 +85,6 @@ WITH merchant AS (SELECT a.agreement_k,
 		 AND d.end_date >= CURRENT_DATE
 		GROUP BY d.agreement_fk
 	)
-	                                        
 SELECT m.agreement_k                        AS id,
        m.name,
        m.website_url,
@@ -94,7 +95,7 @@ SELECT m.agreement_k                        AS id,
            ELSE FALSE
            END                              AS new_discounts,
        a.categories_with_new_discounts,
-       b.number_of_new_discounts,
+       ndc.number_of_new_discounts,
        array_agg(m.product_category)        AS product_categories,
        lower(m.name)                        AS searchable_name,
        bool_or(m.banking_services)          AS banking_services,
@@ -110,7 +111,7 @@ SELECT m.agreement_k                        AS id,
        now()                                AS last_update
 FROM merchant_with_categories m
          LEFT JOIN agreements_with_new_discounts a ON a.agreement_fk = m.agreement_k
-         LEFT JOIN new_discounts_count b ON b.agreement_fk = m.agreement_k
+         LEFT JOIN new_discounts_count ndc ON ndc.agreement_fk = m.agreement_k
 GROUP BY 1, 2, 3, 4, 5, 6, 7
 ORDER BY new_discounts DESC, name ASC;
 
