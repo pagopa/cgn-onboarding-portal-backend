@@ -73,11 +73,7 @@ public class BucketService {
                                          .filter(t -> remainingPercent <= t.getValue())
                                          .findFirst()
                                          .map(t -> {
-                                             if (t==BucketCodeExpiringThresholdEnum.PERCENT_0) {
-                                                 discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
-                                                 emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(
-                                                         discount);
-                                             } else {
+                                             if (t!=BucketCodeExpiringThresholdEnum.PERCENT_0) {
                                                  emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(
                                                          discount,
                                                          t,
@@ -85,7 +81,13 @@ public class BucketService {
                                              }
                                              return true;
                                          });
-        // update available codes
+        // update bucket summary
+        if (remainingCodes <= 0) {
+            // we send here the 0% email notification to be sure that we send it when there are no more codes
+            // because calculating the percent with Math.floor could round to 0% a small amount of codes
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
+            discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+        }
         discountBucketCodeSummary.setAvailableCodes(remainingCodes);
         discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
         return notificationRequired.orElse(false);
