@@ -19,10 +19,10 @@ public interface DiscountBucketCodeSummaryRepository
     @Query(value = "delete from discount_bucket_code_summary where discount_fk=:discount_id", nativeQuery = true)
     void deleteByDiscountId(@Param("discount_id") Long discountId);
 
-    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt is null and bs.availableCodes > 0 and d.state = 'PUBLISHED'")
-    List<DiscountBucketCodeSummaryEntity> findAllPublishedByExpiredAtIsNullAndAvailableCodesGreaterThanZero();
+    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt is null and d.state = 'PUBLISHED'")
+    List<DiscountBucketCodeSummaryEntity> findAllPublishedNotExpired();
 
-    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt <=  ?1 and bs.availableCodes > 0 and d.state = 'PUBLISHED'")
-    List<DiscountBucketCodeSummaryEntity> findAllPublishedByExpiredAtLessThanEqualAndAvailableCodesGreaterZero(
+    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt <=  ?1 and d.state = 'PUBLISHED'")
+    List<DiscountBucketCodeSummaryEntity> findAllPublishedAndExpired(
             OffsetDateTime thresholdDatetime);
 }
