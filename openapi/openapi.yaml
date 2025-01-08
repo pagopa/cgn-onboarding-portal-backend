@@ -815,7 +815,7 @@ definitions:
       secondaryReferents:
         type: array
         items:
-         $ref: '#/definitions/Referent'
+          $ref: '#/definitions/Referent'
 
   Referent:
     type: object
@@ -1458,7 +1458,7 @@ responses:
   InvalidRequest:
     description: Bad request
     schema:
-        $ref: '#/definitions/ErrorCode'
+      $ref: '#/definitions/ErrorCode'
   Forbidden:
     description: Forbidden
     #content: {} #TODO

@@ -110,9 +110,17 @@ public class DiscountEntity
     @Column(name = "landing_page_url", length = 500)
     private String landingPageUrl;
 
+    @Size(max = 500)
+    @Column(name = "eyca_landing_page_url", length = 500)
+    private String eycaLandingPageUrl;
+
     @Size(max = 100)
     @Column(name = "landing_page_referrer", length = 100)
     private String landingPageReferrer;
+
+    @NotNull
+    @Column(name = "eyca_email_update_required")
+    private Boolean eycaEmailUpdateRequired = false;
 
     @NotNull
     @Column(name = "visible_on_eyca")

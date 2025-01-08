@@ -62,6 +62,10 @@ public class DiscountService {
         }
     };
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
+        if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode()))
+            || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
+            dbEntity.setEycaEmailUpdateRequired(true);
+        }
         dbEntity.setName(toUpdateEntity.getName());
         dbEntity.setNameEn(toUpdateEntity.getNameEn());
         dbEntity.setNameDe(toUpdateEntity.getNameDe());
@@ -78,6 +82,7 @@ public class DiscountService {
         dbEntity.setStaticCode(toUpdateEntity.getStaticCode());
         dbEntity.setVisibleOnEyca(toUpdateEntity.getVisibleOnEyca());
         dbEntity.setLandingPageUrl(toUpdateEntity.getLandingPageUrl());
+        dbEntity.setEycaLandingPageUrl(toUpdateEntity.getEycaLandingPageUrl());
         dbEntity.setLandingPageReferrer(toUpdateEntity.getLandingPageReferrer());
         dbEntity.setLastBucketCodeLoadUid(toUpdateEntity.getLastBucketCodeLoadUid());
         dbEntity.setLastBucketCodeLoadFileName(toUpdateEntity.getLastBucketCodeLoadFileName());
@@ -206,6 +211,7 @@ public class DiscountService {
         }
 
         discountEntity.setAgreement(agreementEntity);
+
         discountRepository.save(dbEntity);
         // refresh materialized views
         refreshMaterializedViews(profile);
@@ -532,6 +538,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
@@ -542,6 +549,7 @@ public class DiscountService {
         // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);
@@ -570,6 +578,7 @@ public class DiscountService {
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             discountEntity.setVisibleOnEyca(true);
             discountEntity.setStaticCode(null);
+            discountEntity.setEycaLandingPageUrl(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
