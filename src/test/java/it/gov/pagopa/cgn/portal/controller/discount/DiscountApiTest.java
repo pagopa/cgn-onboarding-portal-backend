@@ -5,28 +5,29 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
-import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -85,9 +87,7 @@ class DiscountApiTest
 
     void initTest(DiscountCodeTypeEnum discountCodeType)
             throws IOException {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
-                                                                EntityType.PRIVATE,
-                                                                TestUtils.FAKE_ORGANIZATION_NAME);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement,
                                                                           SalesChannelEnum.ONLINE,
                                                                           discountCodeType);
@@ -126,6 +126,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                     .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl()))
@@ -183,6 +184,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                     .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
@@ -212,6 +214,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
@@ -251,6 +254,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(discount.getLastBucketCodeLoadFileName()))
@@ -356,18 +360,19 @@ class DiscountApiTest
     }
 
     @Test
-    void Update_CreateAndUpdateDiscount_Ok()
+    void Update_CreateAndUpdateDiscountWithStatic_Ok()
             throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
 
-        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
-        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
-        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discount);
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setStaticCode("new_static_code");
         updateDiscount.setDiscountUrl("https://anotherurl.com");
-        this.mockMvc.perform(put(discountPath + "/" + discount.getId()).contentType(MediaType.APPLICATION_JSON)
+
+        this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
                                                                        .content(TestUtils.getJson(updateDiscount)))
                     .andDo(log())
                     .andExpect(status().isOk())
@@ -384,11 +389,16 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(updateDiscount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(updateDiscount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.creationDate").value(updateDiscount.getStartDate().toString()))
                     .andExpect(jsonPath("$.discountUrl").value(updateDiscount.getDiscountUrl()))
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+
+        Optional<DiscountEntity> entityOpt = discountRepository.findById(discountEntity.getId());
+        Assertions.assertTrue(entityOpt.isPresent());
+        Assertions.assertEquals(entityOpt.get().getEycaEmailUpdateRequired(),true);
     }
 
     @Test
@@ -398,13 +408,17 @@ class DiscountApiTest
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreement,
                                                                                             "url",
+                                                                                            "eyca_url",
                                                                                             "referrer");
+
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
         updateDiscount.setLandingPageUrl("new_url");
+        updateDiscount.setEycaLandingPageUrl("new_eyca_url");
         updateDiscount.setLandingPageReferrer("new_referrer");
+
         this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
                                                                              .content(TestUtils.getJson(updateDiscount)))
                     .andDo(log())
@@ -424,11 +438,17 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.staticCode").isEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").isNotEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").isNotEmpty())
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").value(updateDiscount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
                     .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
-                    .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
+                    .andExpect(jsonPath("$.creationDate").value(updateDiscount.getStartDate().toString()))
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+
+        Optional<DiscountEntity> entityOpt = discountRepository.findById(discountEntity.getId());
+        Assertions.assertTrue(entityOpt.isPresent());
+        Assertions.assertEquals(entityOpt.get().getEycaEmailUpdateRequired(),true);
     }
 
     @Test
@@ -462,6 +482,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").isEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").isEmpty())
                     .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
@@ -514,6 +535,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").isEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.eycaLandingPageUrl").isEmpty())
                     .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(updateDiscount.getLastBucketCodeLoadFileName()))

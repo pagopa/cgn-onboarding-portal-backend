@@ -25,11 +25,4 @@ public class BackofficeExportFacade {
     public ResponseEntity<Resource> exportEycaDiscounts() {
         return exportService.exportEycaDiscounts();
     }
-
-    //TO BE EVALUATED
-    @Transactional(Transactional.TxType.REQUIRED)
-    public ResponseEntity<String> sendDiscountsToEyca() {
-        return exportService.sendDiscountsToEyca();
-    }
-
 }

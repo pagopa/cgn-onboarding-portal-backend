@@ -3,19 +3,18 @@ package it.gov.pagopa.cgn.portal.util;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CsvUtils {
-
     private CsvUtils() {
     }
 
@@ -27,6 +26,12 @@ public class CsvUtils {
     public static Stream<CSVRecord> getCsvRecordStream(InputStream content)
             throws IOException {
         return CSVFormat.EXCEL.parse(new InputStreamReader(content)).stream();
+    }
+
+    public static boolean checkField(String field, InputStream inputStream)
+            throws IOException {
+        Stream<CSVRecord> stream = getCsvRecordStream(inputStream);
+        return stream.anyMatch(line -> line.get(0).contains(field));
     }
 
     public static <E> List<E> csvToEntityList(InputStream is,
@@ -44,9 +49,4 @@ public class CsvUtils {
         }
     }
 
-    public static boolean checkField(String field, InputStream inputStream)
-            throws IOException {
-        Stream<CSVRecord> stream = getCsvRecordStream(inputStream);
-        return stream.anyMatch(line -> line.get(0).contains(field));
-    }
 }

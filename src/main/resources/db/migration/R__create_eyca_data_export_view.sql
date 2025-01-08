@@ -2,8 +2,8 @@ DROP VIEW IF EXISTS eyca_data_export;
 
 CREATE VIEW eyca_data_export AS
 SELECT
-    distinct on (d.discount_k) "discount_id",						
-    row_number() over () as "id",					
+    distinct on (d.discount_k) "discount_id",
+    row_number() over () as "id",
 	d.state as "state",
     REPLACE(REPLACE(cat.categories :: text, '{', ''), '}', '') as "categories",
     p.profile_k as "profile_id",
@@ -20,8 +20,6 @@ SELECT
         (
             CASE
                 WHEN p.discount_code_type IS NULL THEN 'To access the discount, show your EYCA card at the point of sale.'
-                WHEN p.discount_code_type = 'STATIC' THEN 'To access the discount, use the code ' || d.static_code
-                WHEN p.discount_code_type = 'LANDINGPAGE' THEN 'To access the discount, use the link ' || d.landing_page_url
             END
         )
     ) as "text",
@@ -32,8 +30,6 @@ SELECT
         (
             CASE
                 WHEN p.discount_code_type IS NULL THEN 'Per accedere all''agevolazione, mostra la tua carta EYCA presso il punto vendita.'
-                WHEN p.discount_code_type = 'STATIC' THEN 'Per accedere all''agevolazione, usa il codice ' || d.static_code
-                WHEN p.discount_code_type = 'LANDINGPAGE' THEN 'Per accedere all''agevolazione, vai al link ' || d.landing_page_url
             END
         )
     ) as "text_local",
@@ -42,9 +38,7 @@ SELECT
     p.website_url as "web",
     '' as "tags",
     'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
-
-	L.live as "live",
-
+	l.live as "live",
     '' as "location_local_id",
     ad.full_address as "street",
     '' as "city",
@@ -62,9 +56,13 @@ SELECT
             WHEN p.discount_code_type = 'BUCKET' THEN 'LIST OF STATIC CODES'
         END
     ) AS "discount_type",
-	d.landing_page_referrer as "landing_page_referrer",
+    d.static_code as "static_code",
+    d.landing_page_url as "landing_page_url",
+    d.landing_page_referrer as "landing_page_referrer",
+    d.eyca_landing_page_url as "eyca_landing_page_url",
+    d.eyca_email_update_required as "eyca_email_update_required",
     p.referent_fk as "referent"
-FROM
+	FROM
 	(
 		SELECT CASE
 			WHEN state = 'PUBLISHED'
@@ -74,7 +72,7 @@ FROM
 		END as "live",
 		sd.discount_k AS "discount_id"
 		FROM discount sd
-	) as L,	
+	) as L,
 
     agreement ag
     INNER JOIN discount d ON d.agreement_fk = ag.agreement_k
@@ -109,13 +107,13 @@ FROM
     LEFT JOIN address ad ON ad.profile_fk = p.profile_k
 WHERE
 d.visible_on_eyca = true
-AND (l.live = 'Y' OR (l.live = 'N' AND d.eyca_update_id IS NOT NULL))
-AND L.discount_id = d.discount_k
+AND (l.live = 'Y'
+	OR (l.live = 'N'
+		AND d.eyca_update_id IS NOT NULL))
+AND l.discount_id = d.discount_k
 AND (
-    (p.sales_channel = 'OFFLINE' AND p.discount_code_type IS NULL)
+    sales_channel ='OFFLINE'
     OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type IN ('STATIC', 'BUCKET'))
-    OR
-    (p.sales_channel IN ('ONLINE', 'BOTH') AND p.discount_code_type = 'LANDINGPAGE' 
-			AND (d.landing_page_referrer IS NULL))
-);
+    (p.sales_channel IN ('ONLINE', 'BOTH')
+		AND p.discount_code_type IN ('STATIC', 'BUCKET','LANDINGPAGE'))
+)

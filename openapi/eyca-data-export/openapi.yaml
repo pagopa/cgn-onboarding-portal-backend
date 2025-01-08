@@ -149,10 +149,10 @@ paths:
   /api/delete_discount:
     post:
       security:
-      - Bearer: [ ]
+        - Bearer: [ ]
       operationId: deleteDiscount
       tags:
-      - Eyca
+        - Eyca
       summary: delete a discount.
       description: delete a discount.
       parameters:
@@ -181,9 +181,7 @@ produces:
   - application/json
 parameters: null
 
-
 definitions:
-
   ListDataExport:
     type: object
     required:
@@ -297,7 +295,7 @@ definitions:
   DeleteDataExport:
     type: object
     required:
-        - id
+      - id
     properties:
       id:
         type: string
@@ -322,8 +320,8 @@ definitions:
           data:
             properties:
               discount:
-               type: array
-               items:
+                type: array
+                items:
                   $ref: "#/definitions/DiscountItem"
           error:
             type: integer
