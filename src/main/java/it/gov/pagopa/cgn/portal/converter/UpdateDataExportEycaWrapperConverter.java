@@ -50,6 +50,7 @@ public class UpdateDataExportEycaWrapperConverter
         updateDataExportEyca.setVendor(entity.getVendor());
         updateDataExportEyca.setWeb(entity.getWeb());
         updateDataExportEyca.setText(entity.getText());
+        updateDataExportEyca.setTextLocal(entity.getTextLocal());
 
         DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<UpdateDataExportEyca>(
                 updateDataExportEyca);

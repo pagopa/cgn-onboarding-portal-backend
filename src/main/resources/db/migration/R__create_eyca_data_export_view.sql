@@ -115,5 +115,9 @@ AND (
     sales_channel ='OFFLINE'
     OR
     (p.sales_channel IN ('ONLINE', 'BOTH')
-		AND p.discount_code_type IN ('STATIC', 'BUCKET','LANDINGPAGE'))
+		AND (
+            p.discount_code_type IN ('STATIC', 'BUCKET')
+            OR
+            (p.discount_code_type = 'LANDINGPAGE' AND d.eyca_landing_page_url IS NOT NULL)
+        ))
 )
