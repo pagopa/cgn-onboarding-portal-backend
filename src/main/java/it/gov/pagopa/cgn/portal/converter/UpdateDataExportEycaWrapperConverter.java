@@ -40,19 +40,15 @@ public class UpdateDataExportEycaWrapperConverter
         UpdateDataExportEyca updateDataExportEyca = new UpdateDataExportEyca();
         updateDataExportEyca.setId(entity.getEycaUpdateId());
         updateDataExportEyca.setEmail(entity.getEmail());
-        //updateDataExportEyca.setFiles(entity.getFiles());
         updateDataExportEyca.setName(entity.getName());
         updateDataExportEyca.setPhone(entity.getPhone());
         updateDataExportEyca.setNameLocal(entity.getNameLocal());
-        //updateDataExportEyca.setPlusCategories(entity.getPlusCategories());
-        //updateDataExportEyca.setImageSourceFile(entity.getImageSourceFile());
-        //updateDataExportEyca.setPlusTags(entity.getPlusTags());
         updateDataExportEyca.setVendor(entity.getVendor());
         updateDataExportEyca.setWeb(entity.getWeb());
         updateDataExportEyca.setText(entity.getText());
         updateDataExportEyca.setTextLocal(entity.getTextLocal());
 
-        DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<UpdateDataExportEyca>(
+        DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<>(
                 updateDataExportEyca);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
