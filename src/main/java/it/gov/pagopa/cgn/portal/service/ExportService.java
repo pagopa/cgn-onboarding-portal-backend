@@ -598,7 +598,8 @@ public class ExportService {
                                            .getDiscount()
                                            .stream()
                                            .map(DiscountItemEyca::getId)
-                                           .collect(Collectors.toList());
+                                           .toList();
+
             if (!oidList.isEmpty()) {
                 log.info(oidList.toString());
             }
