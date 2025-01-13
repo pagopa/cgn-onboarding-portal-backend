@@ -407,28 +407,35 @@ public class ExportService {
                 List<String[]> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
                 rowsToUpdate.addAll(getListForLandingPage(entitiesToUpdateOnEyca, true));
 
-                String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate);
+                if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty()) {
 
-                log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
-                emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
-                log.info("notifyEycaAdmin end success");
+                    String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate);
 
-                entitiesToUpdateOnEyca.stream()
-                                      .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
-                                      .forEach(row -> {
-                                          Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
-                                                  row.getEycaUpdateId());
-                                          if (dbEntityOpt.isPresent()) {
-                                              DiscountEntity dbEntity = dbEntityOpt.get();
-                                              dbEntity.setEycaEmailUpdateRequired(false);
-                                              discountRepository.save(dbEntity);
-                                          } else {
-                                              log.info(
-                                                      "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
-                                                      row.getEycaUpdateId());
-                                          }
-                                      });
+                    log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
+                    emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
+                    log.info("notifyEycaAdmin end success");
 
+                    entitiesToUpdateOnEyca
+                    .stream()
+                    .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
+                    .forEach(row -> {
+                        Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
+                               row.getEycaUpdateId());
+                        if (dbEntityOpt.isPresent()) {
+                           DiscountEntity dbEntity = dbEntityOpt.get();
+                           dbEntity.setEycaEmailUpdateRequired(false);
+                           discountRepository.save(dbEntity);
+                        } else {
+                           log.info(
+                                   "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
+                                row.getEycaUpdateId());
+                          }
+                      });
+                }
+            }
+            else {
+                log.info("MAIL-BODY-ADMIN-EYCA: no data to send");
+                log.info("notifyEycaAdmin not sended");
             }
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
