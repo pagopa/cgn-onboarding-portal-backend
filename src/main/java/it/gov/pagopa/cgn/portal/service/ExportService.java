@@ -163,7 +163,7 @@ public class ExportService {
                                                             "LANDING_PAGE_URL",
                                                             "LANDING PAGE REFERRER",
                                                             "EYCA_LANDING_PAGE_URL",};
-    private Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae -> sae.getApiResponse()!=null &&
+    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae -> sae.getApiResponse()!=null &&
                                                                                sae.getApiResponse().getData()!=null &&
                                                                                sae.getApiResponse()
                                                                                   .getData()
@@ -230,7 +230,7 @@ public class ExportService {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
             exportViewEntities.stream()
                               .map(r -> new String[]{Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
-                                                     r.getId().toString(),
+                                                     Optional.ofNullable(r.getId()).orElse(0L).toString(),
                                                      r.getState(),
                                                      r.getCategories(),
                                                      r.getVendor(),
@@ -288,7 +288,7 @@ public class ExportService {
             printerConsumer.apply(printer).accept(eycaDataExportHeaders);
             exportViewEntities.stream()
                               .map(r -> new String[]{Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
-                                                     r.getId().toString(),
+                                                     Optional.ofNullable(r.getId()).orElse(0L).toString(),
                                                      r.getState(),
                                                      r.getCategories(),
                                                      Optional.ofNullable(r.getProfileId()).orElse(0L).toString(),
@@ -354,15 +354,12 @@ public class ExportService {
 
             syncEycaUpdateIdOnEyca(exportViewEntities);
 
-            //Tutte le agevolazioni da creare su eyca secondo le condizioni imposte sulla view
             List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(
                     exportViewEntities);
 
-            //Tutte le agevolazioni che avevano valorizzato il campo eycaUpdateId, precedentemente alla create.
             List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca = getWrappersToUpdateOnEyca(
                     exportViewEntities);
 
-            //Tutte le agevolazioni che sono andate in Live=N
             List<DeleteDataExportEyca> entitiesToDeleteOnEyca = getItemsToDeleteOnEyca(exportViewEntities);
 
             log.info("EYCA_LOG_CREATE:");
@@ -410,28 +407,35 @@ public class ExportService {
                 List<String[]> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
                 rowsToUpdate.addAll(getListForLandingPage(entitiesToUpdateOnEyca, true));
 
-                String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate);
+                if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty()) {
 
-                log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
-                emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
-                log.info("notifyEycaAdmin end success");
+                    String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate);
 
-                entitiesToUpdateOnEyca.stream()
-                                      .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
-                                      .forEach(row -> {
-                                          Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
-                                                  row.getEycaUpdateId());
-                                          if (dbEntityOpt.isPresent()) {
-                                              DiscountEntity dbEntity = dbEntityOpt.get();
-                                              dbEntity.setEycaEmailUpdateRequired(false);
-                                              discountRepository.save(dbEntity);
-                                          } else {
-                                              log.info(
-                                                      "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
-                                                      row.getEycaUpdateId());
-                                          }
-                                      });
+                    log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
+                    emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
+                    log.info("notifyEycaAdmin end success");
 
+                    entitiesToUpdateOnEyca
+                    .stream()
+                    .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
+                    .forEach(row -> {
+                        Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
+                               row.getEycaUpdateId());
+                        if (dbEntityOpt.isPresent()) {
+                           DiscountEntity dbEntity = dbEntityOpt.get();
+                           dbEntity.setEycaEmailUpdateRequired(false);
+                           discountRepository.save(dbEntity);
+                        } else {
+                           log.info(
+                                   "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
+                                row.getEycaUpdateId());
+                          }
+                      });
+                }
+            }
+            else {
+                log.info("MAIL-BODY-ADMIN-EYCA: no data to send");
+                log.info("notifyEycaAdmin not sended");
             }
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
@@ -558,7 +562,7 @@ public class ExportService {
                                                                           .filter(d -> entity.getEycaUpdateId()
                                                                                              .equals(d.getEycaUpdateId()))
                                                                           .findFirst()
-                                                                          .get();
+                                                                          .orElseThrow();
                     entity.setEycaUpdateId(null);
                     discountRepository.saveAndFlush(entity);
                     viewItem.setEycaUpdateId(null);
@@ -573,7 +577,7 @@ public class ExportService {
         log.info("Verifying that discounts to delete on Eyca...");
 
         /*
-            IMPORTANT: foreach iod present on eyca, verify presence on discounts table. If not, builds simple viewEntity just for delete on CCDB
+            IMPORTANT: foreach iod present on eyca, verify presence on discounts table. If not, builds simple viewEntity just for delete on CCDB.
             Delete not occur here but after this sync, the viewEntity is only inserted on the exportViewEntities as to be deleted
         */
         List<String> iodListOnEyca = getOidListOnEyca(response);
@@ -581,6 +585,7 @@ public class ExportService {
             if (discountRepository.findByEycaUpdateId(oid).isEmpty()) {
                 EycaDataExportViewEntity entityToDelete = new EycaDataExportViewEntity();
                 entityToDelete.setEycaUpdateId(oid);
+                entityToDelete.setId(0L);
                 entityToDelete.setLive(LIVE_NO);
                 exportViewEntities.add(entityToDelete);
             }
@@ -600,7 +605,8 @@ public class ExportService {
                                            .getDiscount()
                                            .stream()
                                            .map(DiscountItemEyca::getId)
-                                           .collect(Collectors.toList());
+                                           .toList();
+
             if (!oidList.isEmpty()) {
                 log.info(oidList.toString());
             }
@@ -618,7 +624,6 @@ public class ExportService {
 
 
     private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
-        //Sfrutto lo stream dell'update che verifica la presenza dell'eyca_update_id
         return updateOnEycaStream(exportViewEntities).map(this::convertToSearchDataExportEyca).toList();
     }
 
@@ -707,7 +712,6 @@ public class ExportService {
 
                     entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
                     discountRepository.save(entity);
-                    //sync item on memory for send mail to eyca
                     exportEycaWrapper.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
                 }
             } catch (RestClientException | CGNException e) {
