@@ -61,6 +61,10 @@ public class EmailNotificationService {
                 helper.setCc(emailParams.getMailCCList().orElseThrow().toArray(new String[0]));
             }
 
+            if (emailParams.getMailBCCList().isPresent()) {
+                helper.setBcc(emailParams.getMailBCCList().orElseThrow().toArray(new String[0]));
+            }
+
             if (emailParams.getReplyToOpt().isPresent()) {
                 helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
             }

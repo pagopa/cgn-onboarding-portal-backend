@@ -18,6 +18,7 @@ public class EmailParams {
     private final String mailFrom;
     private final List<String> mailToList;
     private final Optional<List<String>> mailCCList;
+    private final Optional<List<String>> mailBCCList;
     private final Optional<String> replyToOpt;
     private final String subject;
     private final String body;
@@ -28,8 +29,10 @@ public class EmailParams {
 
     public String toLightString() {
         return "EmailParams{" + "mailFrom='" + mailFrom + '\'' + ", mailToList=" + mailToList + ", mailCCList=" +
-               mailCCList + ", subject='" + subject + '\'' + '}';
+               mailCCList + ", mailBCCList=" + mailBCCList + ", subject='" + subject + '\'' + '}';
     }
+
+
 
     @Getter
     @AllArgsConstructor
