@@ -82,8 +82,7 @@ class EmailNotificationServiceTest
     }
 
     @Test
-    void EmailNotificationService_sendSyncMessage_NoNotificationTracking_Ko()
-            throws MessagingException {
+    void EmailNotificationService_sendSyncMessage_NoNotificationTracking_Ko() {
         String anErrorMessage = "An error";
         Mockito.doThrow(new RuntimeException(anErrorMessage)).when(javaMailSenderMock).send(expectedMimeMessage);
         Assertions.assertThrows(RuntimeException.class, () -> {
