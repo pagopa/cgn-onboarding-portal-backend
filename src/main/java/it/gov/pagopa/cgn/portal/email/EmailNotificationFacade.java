@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EmailNotificationFacade {
 
+    public static final String FAILURE_REASON = "failure_reason";
     private final TemplateEngine htmlTemplateEngine;
 
     private final EmailNotificationService emailNotificationService;
@@ -181,7 +182,7 @@ public class EmailNotificationFacade {
         var subject = "[Carta Giovani Nazionale] Il test non è stato superato";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
-        context.setVariable("suspension_message", reasonMessage);
+        context.setVariable(FAILURE_REASON, reasonMessage);
         var referentEmail = profile.getReferent().getEmailAddress();
         final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
 
