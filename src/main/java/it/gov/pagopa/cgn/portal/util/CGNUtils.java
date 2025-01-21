@@ -20,6 +20,8 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -38,16 +40,23 @@ public class CGNUtils {
 
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
         Dimension dimension;
+        double MBSize;
         try {
             checkIfImageFile(image.getOriginalFilename());
             dimension = getImageDimensions(image.getInputStream());
+            MBSize = getImageMBSize(image);
         } catch (IOException e) {
             throw new InternalErrorException(e.getMessage());
         }
-        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight();
+        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight() && MBSize < 5;
+
         if (!isValid) {
             throw new InvalidRequestException(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());
         }
+    }
+
+    private static double getImageMBSize(MultipartFile image) {
+        return image.getSize() / (1024.0 * 1024.0);
     }
 
     private static Dimension getImageDimensions(Object input)
@@ -135,4 +144,17 @@ public class CGNUtils {
         }
     }
 
+    public static byte[] getFakeImage(int width, int height)
+            throws IOException {
+        BufferedImage largeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        Graphics2D g2d = largeImage.createGraphics();
+        g2d.setColor(Color.BLUE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(largeImage, "jpeg", baos);
+        return baos.toByteArray();
+    }
 }
