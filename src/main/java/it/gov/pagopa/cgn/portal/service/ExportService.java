@@ -432,10 +432,10 @@ public class ExportService {
                           }
                       });
                 }
-            }
-            else {
-                log.info("MAIL-BODY-ADMIN-EYCA: no data to send");
-                log.info("notifyEycaAdmin not sended");
+                else {
+                    log.info("MAIL-BODY-ADMIN-EYCA: no data to send");
+                    log.info("notifyEycaAdmin not sended");
+                }
             }
         } catch (Exception ex) {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
