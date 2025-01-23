@@ -62,6 +62,7 @@ class EmailNotificationServiceTest
                                  .logo(logo)
                                  .mailToList(List.of(new String[]{"test@test.test"}))
                                  .mailCCList(Optional.of(List.of(new String[]{"test@test.test"})))
+                                 .mailBCCList(Optional.of(List.of(new String[]{"test@test.test"})))
                                  .replyToOpt(Optional.of("test@test.test"))
                                  .subject("test")
                                  .body("test")
@@ -81,8 +82,7 @@ class EmailNotificationServiceTest
     }
 
     @Test
-    void EmailNotificationService_sendSyncMessage_NoNotificationTracking_Ko()
-            throws MessagingException {
+    void EmailNotificationService_sendSyncMessage_NoNotificationTracking_Ko() {
         String anErrorMessage = "An error";
         Mockito.doThrow(new RuntimeException(anErrorMessage)).when(javaMailSenderMock).send(expectedMimeMessage);
         Assertions.assertThrows(RuntimeException.class, () -> {

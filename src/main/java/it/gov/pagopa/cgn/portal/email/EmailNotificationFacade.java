@@ -264,9 +264,10 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
-    private EmailParams createEmailParams(List<String> mailTo, String subject, String body, String failureMessage) {
+    private EmailParams createEmailParams(List<String> mailTo, List<String> mailBcc, String subject, String body, String failureMessage) {
         return createEmailParams(mailTo,
                                  Optional.empty(),
+                                 Optional.of(mailBcc),
                                  Optional.empty(),
                                  subject,
                                  body,
@@ -282,6 +283,7 @@ public class EmailNotificationFacade {
         return createEmailParams(mailTo,
                                  Optional.empty(),
                                  Optional.empty(),
+                                 Optional.empty(),
                                  subject,
                                  body,
                                  failureMessage,
@@ -290,6 +292,7 @@ public class EmailNotificationFacade {
 
     private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
         return createEmailParams(mailTo,
+                                 Optional.empty(),
                                  Optional.empty(),
                                  Optional.empty(),
                                  subject,
@@ -306,6 +309,7 @@ public class EmailNotificationFacade {
         return createEmailParams(mailTo,
                                  Optional.of(secondaryMailToList),
                                  Optional.empty(),
+                                 Optional.empty(),
                                  subject,
                                  body,
                                  failureMessage,
@@ -319,6 +323,7 @@ public class EmailNotificationFacade {
                                           String failureMessage) {
         return createEmailParams(mailTo,
                                  Optional.empty(),
+                                 Optional.empty(),
                                  Optional.of(replyToOpt),
                                  subject,
                                  body,
@@ -326,9 +331,27 @@ public class EmailNotificationFacade {
                                  Optional.empty());
     }
 
+    private EmailParams createEmailParams(String mailTo,
+                                          Optional<List<String>> ccList,
+                                          Optional<List<String>> bccList,
+                                          Optional<String> replyToOpt,
+                                          String subject,
+                                          String body,
+                                          String failureMessage,
+                                          Optional<List<Attachment>> attachments) {
+        return createEmailParams(Collections.singletonList(mailTo),
+                                 ccList,
+                                 bccList,
+                                 replyToOpt,
+                                 subject,
+                                 body,
+                                 failureMessage,
+                                 attachments);
+    }
 
     private EmailParams createEmailParams(List<String> mailTo,
                                           Optional<List<String>> ccList,
+                                          Optional<List<String>> bccList,
                                           Optional<String> replyToOpt,
                                           String subject,
                                           String body,
@@ -340,6 +363,7 @@ public class EmailNotificationFacade {
                           .logo(configProperties.getCgnLogo())
                           .mailToList(mailTo)
                           .mailCCList(ccList)
+                          .mailBCCList(bccList)
                           .replyToOpt(replyToOpt)
                           .subject(subject)
                           .body(body)
@@ -348,21 +372,6 @@ public class EmailNotificationFacade {
                           .build();
     }
 
-    private EmailParams createEmailParams(String mailTo,
-                                          Optional<List<String>> ccList,
-                                          Optional<String> replyToOpt,
-                                          String subject,
-                                          String body,
-                                          String failureMessage,
-                                          Optional<List<Attachment>> attachments) {
-        return createEmailParams(Collections.singletonList(mailTo),
-                                 ccList,
-                                 replyToOpt,
-                                 subject,
-                                 body,
-                                 failureMessage,
-                                 attachments);
-    }
 
     public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
         String subject = "Eyca job launch summary attachments of: " +
@@ -381,6 +390,7 @@ public class EmailNotificationFacade {
                          LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH));
         String failureMessage = "It is not possible to send the email to Eyca admin";
         EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")),
+                                                    Arrays.asList(configProperties.getEycaJobMailTo().split(";")),
                                                     subject,
                                                     body,
                                                     failureMessage);

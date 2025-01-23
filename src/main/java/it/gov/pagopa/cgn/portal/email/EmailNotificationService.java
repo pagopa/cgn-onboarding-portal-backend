@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.email;
 import it.gov.pagopa.cgn.portal.model.NotificationEntity;
 import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.InvalidFileNameException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -61,6 +62,10 @@ public class EmailNotificationService {
                 helper.setCc(emailParams.getMailCCList().orElseThrow().toArray(new String[0]));
             }
 
+            if (emailParams.getMailBCCList().isPresent()) {
+                helper.setBcc(emailParams.getMailBCCList().orElseThrow().toArray(new String[0]));
+            }
+
             if (emailParams.getReplyToOpt().isPresent()) {
                 helper.setReplyTo(emailParams.getReplyToOpt().orElseThrow());
             }
@@ -74,7 +79,7 @@ public class EmailNotificationService {
                     try {
                         helper.addAttachment(attachment.getAttachmentFilename(), attachment.getResource());
                     } catch (MessagingException e) {
-                        throw new RuntimeException(e);
+                        throw new InvalidFileNameException(attachment.getAttachmentFilename(),e.getMessage());
                     }
                 });
             }

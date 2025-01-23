@@ -29,6 +29,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,6 +53,23 @@ public class EmailNotificationFacadeTest {
     @BeforeEach
     public void init() {
         MockitoAnnotations.openMocks(this);
+    }
+
+
+    @Test
+    public void createEmailParams_shouldUseBccWhenPresent() {
+        String body = "fake body";
+
+        when(configProperties.getEycaAdminMailTo()).thenReturn("eycaMailTo@contoso.com");
+        when(configProperties.getEycaJobMailTo()).thenReturn("eycaJobMailTo@contoso.com");
+
+        emailNotificationFacade.notifyEycaAdmin(body);
+
+        ArgumentCaptor<EmailParams> emailParamsCaptor = ArgumentCaptor.forClass(EmailParams.class);
+
+        verify(emailNotificationService).sendAsyncMessage(emailParamsCaptor.capture());
+
+        assertNotNull(emailParamsCaptor.getValue().getMailBCCList());
     }
     @Test
     public void notifyMerchantDiscountTestFailed_shouldFillTemplateWithContextValues() {
