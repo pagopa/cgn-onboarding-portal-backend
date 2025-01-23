@@ -75,11 +75,11 @@ public class EmailNotificationFacadeTest {
     public void notifyMerchantDiscountTestFailed_shouldFillTemplateWithContextValues() {
 
         String discountName = "Sconto Speciale";
-        String reasonMessage = "Il test non è stato superato per errore tecnico.";
+        String reasonMessage = "Il test è fallito per errore tecnico.";
 
         String simulatedHtmlBody = "<html><body><p>il team di CGN ha effettuato i test tecnici sull’agevolazione Sconto Speciale, secondo la modalità di" +
                                    "riconoscimento che avete scelto.</p><p>Purtroppo l’esito è negativo con la seguente motivazione: " +
-                                   "Il test non è stato superato per errore tecnico.</p></body></html>";
+                                   "Il test è fallito per errore tecnico.</p></body></html>";
 
         when(htmlTemplateEngine.process(anyString(), any(Context.class))).thenReturn(simulatedHtmlBody);
         ProfileEntity pe = new ProfileEntity();
