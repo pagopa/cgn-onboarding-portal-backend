@@ -149,7 +149,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountSuspended(ProfileEntity profile, String discountName, String suspensionMessage) {
-        var subject = "[Carta Giovani Nazionale] Agevolazione sospesa";
+        var subject = "[Carta Giovani Nazionale] Opportunità sospesa";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable("suspension_message", suspensionMessage);
@@ -179,7 +179,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountTestFailed(ProfileEntity profile, String discountName, String reasonMessage) {
-        var subject = "[Carta Giovani Nazionale] Il test non è stato superato";
+        var subject = "[Carta Giovani Nazionale] Il test è fallito";
         var context = new Context();
         context.setVariable(CONTEXT_DISCOUNT_NAME, discountName);
         context.setVariable(FAILURE_REASON, reasonMessage);
