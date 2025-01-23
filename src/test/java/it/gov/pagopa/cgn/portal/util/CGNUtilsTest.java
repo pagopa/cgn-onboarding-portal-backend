@@ -98,6 +98,21 @@ public class CGNUtilsTest {
     }
 
     @Test
+    public void ValidateImageFile_ValidateImageFileWithWeightGreatherThenFiveMB_InvalidRequestException()  throws IOException {
+
+        //just over 5MB
+        byte[] image = CGNUtils.getFakeImage(20000,17000);
+
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
+
+        Exception exception = Assert.assertThrows(InvalidRequestException.class,
+                                                  () -> CGNUtils.validateImage(multipartFile, 800, 600));
+
+        Assert.assertTrue(exception.getMessage(),
+                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue()));
+    }
+
+    @Test
     public void ValidatePDFFile_ValidatePDFFileWithInvalidParams_InvalidRequestException() {
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.checkIfPdfFile("filename.png"));
