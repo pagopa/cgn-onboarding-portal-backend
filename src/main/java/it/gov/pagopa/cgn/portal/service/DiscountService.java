@@ -242,6 +242,8 @@ public class DiscountService {
         discount.setState(DiscountStateEnum.TEST_PENDING);
         discount = discountRepository.save(discount);
 
+        agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
+
         emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),
                                                                 discount.getName(),
                                                                 discount.getAgreement()

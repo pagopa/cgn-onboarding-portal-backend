@@ -16,6 +16,7 @@ import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -323,6 +325,36 @@ class AgreementApiTest
                                                                                     discountEntity.getId().toString())))
                     .andDo(log())
                     .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+    }
+
+    @Test
+    void TestDiscount_TestDiscountUpdateInformationLastUpdateDate_Ok()
+            throws Exception {
+        // creating agreement (and user)
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+
+        // creating profile
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+
+        LocalDate ld = profileEntity.getAgreement().getInformationLastUpdateDate();
+
+        //creating discount
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        saveApprovedAgreement(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.getAgreementRequestsDiscountTestingPath(agreementEntity.getId(),
+                                                                                    discountEntity.getId().toString())))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+        Optional<AgreementEntity> entity = agreementRepository.findById(profileEntity.getAgreement().getId());
+        Assertions.assertTrue(entity.isPresent());
+        Assertions.assertNotNull(entity.get().getInformationLastUpdateDate());
     }
 
     @Test
