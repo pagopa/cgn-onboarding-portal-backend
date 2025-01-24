@@ -136,7 +136,7 @@ public class ProfileEntity
     @Size(max = 4)
     @OneToMany(fetch = FetchType.LAZY,
                mappedBy = "profile",
-               cascade = CascadeType.MERGE,
+               cascade = CascadeType.ALL,
                orphanRemoval = true)
     private List<SecondaryReferentEntity> secondaryReferentList;
 

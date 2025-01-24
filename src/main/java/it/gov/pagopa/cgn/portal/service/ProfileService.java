@@ -101,7 +101,19 @@ public class ProfileService {
     public ProfileEntity updateProfile(String agreementId, ProfileEntity newUpdateProfile) {
         ProfileEntity profileEntity = getProfileFromAgreementId(agreementId);
         updateConsumer.accept(newUpdateProfile, profileEntity);
+
+        // fix for misalignments with addresses
+        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) &&
+            profileEntity.getAddressList().isEmpty() && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
+            profileEntity.setAllNationalAddresses(true);
+        }
+
+        validateProfile(profileEntity);
+        profileEntity = profileRepository.save(profileEntity);
+
+        // check agreement
         AgreementEntity agreementEntity = profileEntity.getAgreement();
+
         if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(profileEntity.getAgreement());
         }
@@ -119,9 +131,10 @@ public class ProfileService {
             profileEntity.getAddressList().isEmpty() && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
             profileEntity.setAllNationalAddresses(true);
         }
+
         validateProfile(profileEntity);
 
-        return profileRepository.save(profileEntity);
+        return profileEntity;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
