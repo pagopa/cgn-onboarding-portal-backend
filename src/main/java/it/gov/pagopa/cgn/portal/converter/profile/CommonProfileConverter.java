@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
 import java.math.BigDecimal;
@@ -65,6 +66,7 @@ public abstract class CommonProfileConverter<E, D>
         setCoordinatesFromDto.accept(addressDto.getCoordinates(), entity);
         return entity;
     };
+
     protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
         SalesChannelType channelType = salesChannelDto.getChannelType();
         switch (channelType) {
