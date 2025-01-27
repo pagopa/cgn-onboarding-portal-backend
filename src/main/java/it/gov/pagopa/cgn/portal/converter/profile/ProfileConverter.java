@@ -1,8 +1,8 @@
 package it.gov.pagopa.cgn.portal.converter.profile;
 
 import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.SecondaryReferentConverter;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,11 @@ import java.util.stream.Collectors;
 @Component
 public class ProfileConverter
         extends CommonProfileConverter<ProfileEntity, Profile> {
+
     private ReferentConverter referentConverter;
+
+    private SecondaryReferentConverter secondaryReferentConverter;
+
     protected Function<Profile, ProfileEntity> toEntity = dto -> {
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
@@ -32,8 +36,8 @@ public class ProfileConverter
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                                                 .orElse(Collections.emptyList())
                                                 .stream()
-                                                .map(secondaryReferent -> new SecondaryReferentEntity(this.referentConverter.toEntity(
-                                                        secondaryReferent)))
+                                                .map(secondaryReferent -> this.secondaryReferentConverter.toEntity(
+                                                        secondaryReferent))
                                                 .collect(Collectors.toCollection(ArrayList::new)));
         entity.setTelephoneNumber(dto.getTelephoneNumber());
         entity.setLegalRepresentativeFullName(dto.getLegalRepresentativeFullName());
@@ -54,11 +58,12 @@ public class ProfileConverter
         profile.setDescriptionDe(entity.getDescriptionDe());
         profile.setPecAddress(entity.getPecAddress());
         profile.setReferent(this.referentConverter.toDto(entity.getReferent()));
-        profile.secondaryReferents(Optional.ofNullable(entity.getSecondaryReferentList())
-                                           .orElse(Collections.emptyList())
-                                           .stream()
-                                           .map(secondaryReferent -> this.referentConverter.toDto(secondaryReferent))
-                                           .collect(Collectors.toList()));
+        profile.setSecondaryReferents(Optional.ofNullable(entity.getSecondaryReferentList())
+                                              .orElse(Collections.emptyList())
+                                              .stream()
+                                              .map(secondaryReferent -> this.secondaryReferentConverter.toDto(
+                                                      secondaryReferent))
+                                              .collect(Collectors.toList()));
         profile.setSalesChannel(this.salesChannelToDto.apply(entity));
         profile.setAgreementId(entity.getAgreement().getId());
         profile.setTelephoneNumber(entity.getTelephoneNumber());
@@ -69,8 +74,10 @@ public class ProfileConverter
     };
 
     @Autowired
-    public ProfileConverter(ReferentConverter referentConverter) {
+    public ProfileConverter(ReferentConverter referentConverter,
+                            SecondaryReferentConverter secondaryReferentConverter) {
         this.referentConverter = referentConverter;
+        this.secondaryReferentConverter = secondaryReferentConverter;
     }
 
     protected Function<ProfileEntity, Profile> toDtoFunction() {

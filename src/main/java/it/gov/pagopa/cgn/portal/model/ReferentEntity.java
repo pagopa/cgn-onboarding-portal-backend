@@ -12,7 +12,6 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "referent")
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data
 public class ReferentEntity
         extends BaseEntity {

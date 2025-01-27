@@ -5,9 +5,7 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.profile.CreateProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.ProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.*;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -21,6 +19,7 @@ import it.gov.pagopa.cgnonboardingportal.model.Profile;
 import it.gov.pagopa.cgnonboardingportal.model.UpdateProfile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -47,9 +46,10 @@ class ProfileFacadeTest
         var createReferentConverter = new CreateReferentConverter();
         var updateReferentConverter = new UpdateReferentConverter();
         var referentConverter = new ReferentConverter();
+        var secondaryReferentConverter = new SecondaryReferentConverter();
         var createProfileConverter = new CreateProfileConverter(createReferentConverter);
         var updateProfileConverter = new UpdateProfileConverter(updateReferentConverter);
-        var profileConverter = new ProfileConverter(referentConverter);
+        var profileConverter = new ProfileConverter(referentConverter, secondaryReferentConverter);
         profileFacade = new ProfileFacade(profileService,
                                           createProfileConverter,
                                           updateProfileConverter,
@@ -203,9 +203,9 @@ class ProfileFacadeTest
 
     @Test
     @Transactional
+    @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Get_Profile_Expect_OK() {
         var agreementId = agreementEntity.getId();
-
         UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
                                                                                         DiscountCodeType.STATIC);
         profileFacade.updateProfile(agreementId, updateProfile);
@@ -213,12 +213,11 @@ class ProfileFacadeTest
         ResponseEntity<Profile> response = profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Profile profile = response.getBody();
+        Assertions.assertNotNull(profile);
         Assertions.assertNotNull(profile.getSecondaryReferents());
-
     }
 
     @Test
-    @Transactional
     void Get_Profile_Expect_Not_Found() {
         ResponseEntity<Profile> response = profileFacade.getProfile(TestUtils.FAKE_ID_2);
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -226,23 +225,20 @@ class ProfileFacadeTest
 
     @Test
     @Transactional
+    @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Create_Profile_Expect_OK() {
         AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
                                                                                       EntityType.PRIVATE,
                                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
-
         var agreementId = agreementEntity.getId();
-
         CreateProfile createProfile = TestUtils.offLineProfileFromProfileEntity(profileEntity);
-
         profileFacade.createProfile(agreementId, createProfile);
 
         ResponseEntity<Profile> response = profileFacade.getProfile(agreementId);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Profile profile = response.getBody();
+        Assertions.assertNotNull(profile);
         Assertions.assertNotNull(profile.getSecondaryReferents());
-
     }
-
 
 }

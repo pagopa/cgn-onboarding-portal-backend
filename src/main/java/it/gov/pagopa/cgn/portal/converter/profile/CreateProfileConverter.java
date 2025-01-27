@@ -21,12 +21,18 @@ public class CreateProfileConverter
         extends CommonProfileConverter<ProfileEntity, CreateProfile> {
 
     private CreateReferentConverter createReferentConverter;
-    private final BiFunction<CreateReferent, ProfileEntity, SecondaryReferentEntity> createReferentToSecondaryReferentEntity = (createReferent, profileEntity) -> {
-        ReferentEntity referentEntity = this.createReferentConverter.toEntity(createReferent);
-        SecondaryReferentEntity secondaryReferentEntity = new SecondaryReferentEntity(referentEntity);
-        secondaryReferentEntity.setProfile(profileEntity);
-        return secondaryReferentEntity;
+
+    protected BiFunction<CreateReferent, ProfileEntity, SecondaryReferentEntity> secondaryReferentToEntity = (referentDto, profileEntity) -> {
+        SecondaryReferentEntity entity = new SecondaryReferentEntity();
+        entity.setFirstName(referentDto.getFirstName());
+        entity.setLastName(referentDto.getLastName());
+        entity.setEmailAddress(referentDto.getEmailAddress());
+        entity.setTelephoneNumber(referentDto.getTelephoneNumber());
+        entity.setRole(referentDto.getRole());
+        entity.setProfile(profileEntity);
+        return entity;
     };
+
     protected Function<CreateProfile, ProfileEntity> toEntity = dto -> {
         ProfileEntity entity = new ProfileEntity();
         entity.setFullName(dto.getFullName());
@@ -45,7 +51,7 @@ public class CreateProfileConverter
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                                                 .orElse(Collections.emptyList())
                                                 .stream()
-                                                .map(secondaryReferent -> this.createReferentToSecondaryReferentEntity.apply(
+                                                .map(secondaryReferent -> this.secondaryReferentToEntity.apply(
                                                         secondaryReferent,
                                                         entity))
                                                 .collect(Collectors.toCollection(ArrayList::new)));
