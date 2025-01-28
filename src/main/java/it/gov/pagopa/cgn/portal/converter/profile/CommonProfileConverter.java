@@ -65,6 +65,7 @@ public abstract class CommonProfileConverter<E, D>
         setCoordinatesFromDto.accept(addressDto.getCoordinates(), entity);
         return entity;
     };
+
     protected BiConsumer<SalesChannel, ProfileEntity> salesChannelConsumer = (salesChannelDto, entity) -> {
         SalesChannelType channelType = salesChannelDto.getChannelType();
         switch (channelType) {

@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.TestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -108,8 +109,10 @@ public class IntegrationAbstractTest {
     }
 
     @AfterEach
-    protected void cleanAll()
+    protected void cleanAll(TestInfo testInfo)
             throws InterruptedException {
+        if (testInfo.getTags().contains("SkipCleanup")) return;
+
         documentRepository.deleteAll();
         documentRepository.flush();
         discountBucketCodeRepository.deleteAll();
@@ -118,6 +121,10 @@ public class IntegrationAbstractTest {
         bucketCodeLoadRepository.flush();
         discountRepository.deleteAll();
         discountRepository.flush();
+        secondaryReferentRepository.deleteAll();
+        secondaryReferentRepository.flush();
+        addressRepository.deleteAll();
+        addressRepository.flush();
         profileRepository.deleteAll();
         profileRepository.flush();
         agreementRepository.deleteAll();

@@ -21,10 +21,18 @@ public class UpdateProfileConverter
         extends CommonProfileConverter<ProfileEntity, UpdateProfile> {
 
     private UpdateReferentConverter updateReferentConverter;
-    private final BiFunction<UpdateReferent, ProfileEntity, SecondaryReferentEntity> updateReferentToSecondaryReferentEntity = (updateReferent, profileEntity) -> {
-        ReferentEntity referentEntity = this.updateReferentConverter.toEntity(updateReferent);
-        return new SecondaryReferentEntity(referentEntity);
+
+    protected BiFunction<UpdateReferent, ProfileEntity, SecondaryReferentEntity> secondaryReferentToEntity = (referentDto, profileEntity) -> {
+        SecondaryReferentEntity entity = new SecondaryReferentEntity();
+        entity.setFirstName(referentDto.getFirstName());
+        entity.setLastName(referentDto.getLastName());
+        entity.setEmailAddress(referentDto.getEmailAddress());
+        entity.setTelephoneNumber(referentDto.getTelephoneNumber());
+        entity.setRole(referentDto.getRole());
+        entity.setProfile(profileEntity);
+        return entity;
     };
+
     protected Function<UpdateProfile, ProfileEntity> toEntity = dto -> {
         ProfileEntity entity = new ProfileEntity();
         entity.setName(dto.getName());
@@ -41,7 +49,7 @@ public class UpdateProfileConverter
         entity.setSecondaryReferentList(Optional.ofNullable(dto.getSecondaryReferents())
                                                 .orElse(Collections.emptyList())
                                                 .stream()
-                                                .map(secondaryReferent -> this.updateReferentToSecondaryReferentEntity.apply(
+                                                .map(secondaryReferent -> this.secondaryReferentToEntity.apply(
                                                         secondaryReferent,
                                                         entity))
                                                 .collect(Collectors.toCollection(ArrayList::new)));
