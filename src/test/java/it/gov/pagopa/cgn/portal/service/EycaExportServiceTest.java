@@ -1,4 +1,4 @@
-package it.gov.pagopa.cgn.portal.service;
+package it.gov.pagopa.cgn.portal.service; 
 
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
