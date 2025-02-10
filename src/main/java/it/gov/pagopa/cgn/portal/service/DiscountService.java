@@ -213,6 +213,7 @@ public class DiscountService {
         discountEntity.setAgreement(agreementEntity);
 
         discountRepository.save(dbEntity);
+
         // refresh materialized views
         refreshMaterializedViews(profile);
 
