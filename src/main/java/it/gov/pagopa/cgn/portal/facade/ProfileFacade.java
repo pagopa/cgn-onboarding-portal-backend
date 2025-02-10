@@ -70,6 +70,10 @@ public class ProfileFacade {
                                                                          "Hai cambiato la modalità di riconoscimento delle tue opportunità. Per riattivare l'opportunità, aggiorna i dati richiesti dalla nuova opportunità."));
         }
         profileEntity = profileService.updateProfile(agreementId, profileEntity);
+
+        // refresh views
+        discountService.refreshMaterializedViews(profileEntity);
+
         return ResponseEntity.ok(profileConverter.toDto(profileEntity));
     }
 }

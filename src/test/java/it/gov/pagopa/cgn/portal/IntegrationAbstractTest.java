@@ -344,6 +344,7 @@ public class IntegrationAbstractTest {
                                               // override timeout to 5 seconds
                                               .withEnv("GREENMAIL_OPTS",
                                                        "-Dgreenmail.setup.test.all -Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.startup.timeout=5000");
+
         static JdbcDatabaseContainer<?> postgres = new PostgisContainerProvider().newInstance("16-master")
                                                                                  .withDatabaseName(
                                                                                          "integration-tests-db")

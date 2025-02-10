@@ -126,13 +126,6 @@ public class ProfileService {
             agreementServiceLight.setDraftAgreementFromRejected(agreementEntity);
             documentService.resetAllDocuments(agreementId);
         }
-        // fix for misalignments with addresses
-        if (!profileEntity.getSalesChannel().equals(SalesChannelEnum.ONLINE) &&
-            profileEntity.getAddressList().isEmpty() && Boolean.FALSE.equals(profileEntity.getAllNationalAddresses())) {
-            profileEntity.setAllNationalAddresses(true);
-        }
-
-        validateProfile(profileEntity);
 
         return profileEntity;
     }

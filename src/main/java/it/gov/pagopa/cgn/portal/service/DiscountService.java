@@ -42,6 +42,7 @@ public class DiscountService {
     private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketLoadUtils bucketLoadUtils;
+    private final MerchantRepository merchantRepository;
     private final OfflineMerchantRepository offlineMerchantRepository;
     private final OnlineMerchantRepository onlineMerchantRepository;
     private final PublishedProductCategoryRepository publishedProductCategoryRepository;
@@ -100,6 +101,7 @@ public class DiscountService {
                            DiscountBucketCodeRepository discountBucketCodeRepository,
                            DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
                            BucketLoadUtils bucketLoadUtils,
+                           MerchantRepository merchantRepository,
                            OfflineMerchantRepository offlineMerchantRepository,
                            OnlineMerchantRepository onlineMerchantRepository,
                            PublishedProductCategoryRepository publishedProductCategoryRepository) {
@@ -113,6 +115,7 @@ public class DiscountService {
         this.discountBucketCodeRepository = discountBucketCodeRepository;
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.bucketLoadUtils = bucketLoadUtils;
+        this.merchantRepository = merchantRepository;
         this.offlineMerchantRepository = offlineMerchantRepository;
         this.onlineMerchantRepository = onlineMerchantRepository;
         this.publishedProductCategoryRepository = publishedProductCategoryRepository;
@@ -213,6 +216,7 @@ public class DiscountService {
         discountEntity.setAgreement(agreementEntity);
 
         discountRepository.save(dbEntity);
+
         // refresh materialized views
         refreshMaterializedViews(profile);
 
@@ -386,6 +390,7 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public void refreshMaterializedViews(ProfileEntity profileEntity) {
         publishedProductCategoryRepository.refreshView();
+        merchantRepository.refreshView();
         switch (profileEntity.getSalesChannel()) {
             case ONLINE:
                 onlineMerchantRepository.refreshView();
