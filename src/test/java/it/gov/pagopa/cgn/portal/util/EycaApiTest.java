@@ -44,6 +44,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
                     @MockBean(DocumentRepository.class),
                     @MockBean(EycaDataExportRepository.class),
                     @MockBean(NotificationRepository.class),
+                    @MockBean(MerchantRepository.class),
                     @MockBean(OfflineMerchantRepository.class),
                     @MockBean(OnlineMerchantRepository.class),
                     @MockBean(ProfileRepository.class),
