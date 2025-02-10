@@ -5,6 +5,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.*;
+import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -13,6 +14,7 @@ import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
@@ -22,9 +24,12 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClientException;
@@ -38,6 +43,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.nimbusds.jose.util.StandardCharset;
+import org.thymeleaf.context.Context;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -48,6 +60,7 @@ class EycaExportServiceTest
     private EycaApi eycaApiMock;
     private EycaDataExportRepository eycaDataExportRepository;
     private ExportService exportService;
+    private ExportService exportServiceMock;
     private EycaExportService eycaExportServiceMock;
     private EycaExportService eycaExportService;
 
@@ -93,10 +106,12 @@ class EycaExportServiceTest
 
         DataExportEycaWrapperConverter dataExportEycaConverter = new DataExportEycaWrapperConverter();
         UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter = new UpdateDataExportEycaWrapperConverter();
+        DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter = new DeleteDataExportEycaWrapperConverter();
 
         EmailNotificationFacade emailNotificationFacade = Mockito.mock(EmailNotificationFacade.class);
 
         eycaExportServiceMock = Mockito.mock(EycaExportService.class);
+        exportServiceMock = Mockito.mock(ExportService.class);
 
         exportService = new ExportService(agreementRepository,
                                           discountRepository,
@@ -105,6 +120,7 @@ class EycaExportServiceTest
                                           eycaExportServiceMock,
                                           dataExportEycaConverter,
                                           updateDataExportEycaConverter,
+                                          deleteDataExportEycaConverter,
                                           emailNotificationFacade);
 
     }
@@ -582,7 +598,7 @@ class EycaExportServiceTest
     }
 
     @Test
-    void testCreateBodyAll_Ok() {
+    void testCreateBodyOneOfOrAllOrNothing_Ok() {
         List<String[]> rowsForCreate = new ArrayList<>();
         rowsForCreate.add( new String[]{TestUtils.FAKE_OID_1,
                                         "Amazon",
@@ -591,8 +607,9 @@ class EycaExportServiceTest
                                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
                                         LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
 
-        List<String[]> rowsForUpdate = new ArrayList<>();
+        String bodyC = exportService.createBody(rowsForCreate,Collections.emptyList(), Collections.emptyList());
 
+        List<String[]> rowsForUpdate = new ArrayList<>();
         rowsForUpdate.add( new String[]{TestUtils.FAKE_OID_2,
                                         "Uci Cinemas",
                                         "CHRISTMAS24",
@@ -600,41 +617,48 @@ class EycaExportServiceTest
                                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
                                         LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
 
-        String body = exportService.createBody(rowsForCreate,rowsForUpdate);
+        String bodyU = exportService.createBody(Collections.emptyList(),rowsForUpdate, Collections.emptyList());
 
-        Assertions.assertTrue(body.contains("Created") && body.contains("update"));
+        List<String[]> rowsForDelete = new ArrayList<>();
+        rowsForDelete.add( new String[]{TestUtils.FAKE_OID_3,
+                                        "Uci Cinemas",
+                                        "CHRISTMAS25",
+                                        "No limit",
+                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
+                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+
+        String bodyD = exportService.createBody(Collections.emptyList(),Collections.emptyList(), rowsForDelete);
+
+        //oneof
+        assertTrue(bodyC.contains("Created") && !bodyC.contains("update") && !bodyC.contains("delete"));
+        assertTrue(!bodyU.contains("Created") && bodyU.contains("update") && !bodyU.contains("delete"));
+        assertTrue(!bodyD.contains("Created") && !bodyD.contains("update") && bodyD.contains("delete"));
+
+        //all
+        String bodyA = exportService.createBody(rowsForCreate,rowsForUpdate, rowsForDelete);
+        assertTrue(bodyA.contains("Created") && bodyA.contains("update") && bodyA.contains("delete"));
+
+        //nothing
+        String bodyN = exportService.createBody(Collections.emptyList(),Collections.emptyList(), Collections.emptyList());
+        assertTrue(!bodyN.contains("Created") && !bodyN.contains("update") && !bodyN.contains("delete"));
+
     }
 
     @Test
-    void testCreateBodyOneOfOrNothing_Ok() {
-        List<String[]> rowsForCreate = new ArrayList<>();
-        rowsForCreate.add( new String[]{TestUtils.FAKE_OID_1,
-                                        "Amazon",
-                                        "CYBERMONDAY24",
-                                        "No limit",
-                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
-                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+    void testSendDiscountsToEyca_ExceptionSetsToDeleteFromEycaAdmin() {
 
-        String body = exportService.createBody(rowsForCreate,Collections.emptyList());
+        List<EycaDataExportViewEntity> entities = TestUtils.getTobeDeletedEycaDataExportViewEntityList();
+        List<DataExportEycaWrapper<DeleteDataExportEyca>> wrappers = exportService.getWrappersToDeleteOnEyca(entities);
 
-        Assertions.assertTrue(body.contains("Created") && !body.contains("update"));
+        Mockito.when(eycaDataExportRepository.findAll())
+               .thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
 
-        List<String[]> rowsForUpdate = new ArrayList<>();
+        when(exportServiceMock.getWrappersToDeleteOnEyca(Mockito.any())).thenReturn(wrappers);
 
-        rowsForUpdate.add( new String[]{TestUtils.FAKE_OID_2,
-                                        "Uci Cinemas",
-                                        "CHRISTMAS24",
-                                        "No limit",
-                                        LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH)),
-                                        LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH))});
+        Mockito.when(eycaExportServiceMock.deleteDiscount(Mockito.any(), Mockito.any()))
+               .thenThrow(new RestClientException(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()));
 
-        body = exportService.createBody(Collections.emptyList(),rowsForUpdate);
-
-        Assert.assertTrue(!body.contains("Created") && body.contains("update"));
-
-        body = exportService.createBody(Collections.emptyList(),Collections.emptyList());
-
-        Assert.assertTrue(!body.contains("Created") && !body.contains("update"));
+        exportService.sendDiscountsToEyca();
     }
 
     @Test

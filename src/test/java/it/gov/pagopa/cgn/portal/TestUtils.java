@@ -23,6 +23,7 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,6 +61,7 @@ public class TestUtils {
 
     public static final String FAKE_OID_1 = "c75020241204020019952562";
     public static final String FAKE_OID_2 = "c28020241204020019770616";
+    public static final String FAKE_OID_3 = "c28020241204020019770611";
 
     public static String getProfilePath(String agreementId) {
         return AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH + agreementId + "/profile";
@@ -961,6 +963,7 @@ public class TestUtils {
         entity_0.setLandingPageUrl("LANDING PAGE URL");
         entity_0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
         entity_0.setEycaUpdateId("ce00958658596");
+        entity_0.setStartDate(LocalDate.now().minusDays(10));
         entity_0.setEndDate(LocalDate.now());
         entity_0.setEycaEmailUpdateRequired(true);
 
@@ -973,6 +976,7 @@ public class TestUtils {
         entity_1.setNameLocal("name_local_0");
         entity_1.setDiscountType("LANDING PAGE");
         entity_1.setLive(null);
+        entity_1.setStartDate(LocalDate.now().minusDays(10));
         entity_1.setEndDate(LocalDate.now());
         entity_1.setDiscountId(7L);
         entity_1.setLandingPageUrl("LANDING PAGE URL");
@@ -989,7 +993,8 @@ public class TestUtils {
         entity_2.setNameLocal("name_local_0");
         entity_2.setDiscountType("LANDING PAGE");
         entity_2.setLive("N");
-        entity_2.setEndDate(LocalDate.now().minusDays(2));
+        entity_2.setStartDate(LocalDate.now().minusDays(10));
+        entity_2.setEndDate(LocalDate.now());
         entity_2.setDiscountId(8L);
         entity_2.setLandingPageUrl("LANDING PAGE URL");
         entity_2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
@@ -1005,7 +1010,8 @@ public class TestUtils {
         entity_3.setNameLocal("name_local_0");
         entity_3.setDiscountType("LANDING PAGE");
         entity_3.setLive("N");
-        entity_3.setEndDate(LocalDate.now().minusDays(2));
+        entity_3.setStartDate(LocalDate.now().minusDays(10));
+        entity_3.setEndDate(LocalDate.now());
         entity_3.setDiscountId(8L);
         entity_3.setLandingPageUrl("LANDING PAGE URL");
         entity_3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
@@ -1156,6 +1162,21 @@ public class TestUtils {
 
         return apiResponseEyca;
     }
+
+    public static DeleteApiResponseEyca getDeleteApiResponseInternalServerError() {
+        DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
+
+        DeleteApiResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteApiResponseApiResponseEyca();
+        deleteApiResponseApiResponseEyca.setError(1);
+        deleteApiResponseApiResponseEyca.setCode(4);
+        deleteApiResponseApiResponseEyca.setText(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        deleteApiResponseApiResponseEyca.setData(null);
+        deleteApiResponseApiResponseEyca.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        apiResponseEyca.setApiResponse(deleteApiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
 
     public static List<DocumentEntity> createSamplePaDocumentList(AgreementEntity agreementEntity) {
         List<DocumentEntity> documentList = new ArrayList<>();
