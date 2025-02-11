@@ -69,6 +69,7 @@ public class ExportService {
     private final EycaExportService eycaExportService;
     private final DataExportEycaWrapperConverter dataExportEycaConverter;
     private final UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter;
+    private final DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter;
     private final EmailNotificationFacade emailNotificationFacade;
 
     private final String[] eycaDataExportHeaders = new String[]{"discount_id",
@@ -181,6 +182,7 @@ public class ExportService {
                          EycaExportService eycaExportService,
                          DataExportEycaWrapperConverter dataExportEycaConverter,
                          UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter,
+                         DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter,
                          EmailNotificationFacade emailNotificationFacade) {
         this.agreementRepository = agreementRepository;
         this.discountRepository = discountRepository;
@@ -189,6 +191,7 @@ public class ExportService {
         this.eycaExportService = eycaExportService;
         this.dataExportEycaConverter = dataExportEycaConverter;
         this.updateDataExportEycaConverter = updateDataExportEycaConverter;
+        this.deleteDataExportEycaConverter = deleteDataExportEycaConverter;
         this.emailNotificationFacade = emailNotificationFacade;
     }
 
@@ -360,7 +363,8 @@ public class ExportService {
             List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca = getWrappersToUpdateOnEyca(
                     exportViewEntities);
 
-            List<DeleteDataExportEyca> entitiesToDeleteOnEyca = getItemsToDeleteOnEyca(exportViewEntities);
+            List<DataExportEycaWrapper<DeleteDataExportEyca>> entitiesToDeleteOnEyca = getWrappersToDeleteOnEyca(
+                    exportViewEntities);
 
             log.info("EYCA_LOG_CREATE:");
             createDiscountsOnEyca(entitiesToCreateOnEyca);
@@ -399,7 +403,7 @@ public class ExportService {
             emailNotificationFacade.notifyAdminForJobEyca(attachments, bodyForAdminForJobEyca);
             log.info("sendDiscountsToEyca end success");
 
-            if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty()) {
+            if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty() || !entitiesToDeleteOnEyca.isEmpty()) {
 
                 List<String[]> rowsToCreate = new ArrayList<>(getListForStaticCode(entitiesToCreateOnEyca, false));
                 rowsToCreate.addAll(getListForLandingPage(entitiesToCreateOnEyca, false));
@@ -407,9 +411,15 @@ public class ExportService {
                 List<String[]> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
                 rowsToUpdate.addAll(getListForLandingPage(entitiesToUpdateOnEyca, true));
 
-                if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty()) {
+                //only for those that could not be deleted
+                entitiesToDeleteOnEyca = entitiesToDeleteOnEyca.stream().filter(DataExportEycaWrapper::getToDeleteFromEycaAdmin).toList();
 
-                    String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate);
+                List<String[]> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
+                rowsToDelete.addAll(getListForLandingPage(entitiesToDeleteOnEyca, false));
+
+                if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty() || !rowsToDelete.isEmpty()) {
+
+                    String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate, rowsToDelete);
 
                     log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
                     emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
@@ -473,9 +483,9 @@ public class ExportService {
                               .toList();
     }
 
-    public String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate) {
+    public String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate, List<String[]> rowsForDelete) {
         String bodyTemplate =
-                "Hi all, herewith we send you the list of discounts and related references:" + "<br /><br />%s<br />%s";
+                "Hi all, herewith we send you the list of discounts and related references:" + "<br /><br />%s<br />%s<br />%s";
 
         String tableTitle = "<b><u>%s</u></b><br><br />%s";
 
@@ -487,18 +497,24 @@ public class ExportService {
                                        "Valid until"};
         String tableAndTitleCreate = "";
         String tableAndTitleUpdate = "";
+        String tableAndTitleDelete = "";
         if (rowsForCreate!=null && !rowsForCreate.isEmpty()) {
-            rowsForCreate.add(0, header);
+            rowsForCreate.addFirst(header);
             String table = generateHtmlTable(rowsForCreate);
             tableAndTitleCreate = String.format(tableTitle, "Created on EYCA (with live=0):", table);
         }
         if (rowsForUpdate!=null && !rowsForUpdate.isEmpty()) {
-            rowsForUpdate.add(0, header);
+            rowsForUpdate.addFirst(header);
             String table = generateHtmlTable(rowsForUpdate);
             tableAndTitleUpdate = String.format(tableTitle, "To update on EYCA:", table);
         }
+        if (rowsForDelete!=null && !rowsForDelete.isEmpty()) {
+            rowsForDelete.addFirst(header);
+            String table = generateHtmlTable(rowsForDelete);
+            tableAndTitleDelete = String.format(tableTitle, "To delete on EYCA:", table);
+        }
 
-        return String.format(bodyTemplate, tableAndTitleCreate, tableAndTitleUpdate);
+        return String.format(bodyTemplate, tableAndTitleCreate, tableAndTitleUpdate, tableAndTitleDelete);
     }
 
     public static String generateHtmlTable(List<String[]> data) {
@@ -658,6 +674,10 @@ public class ExportService {
         return createOnEycaStream(exportViewEntities).map(dataExportEycaConverter::toDto).toList();
     }
 
+    public List<DataExportEycaWrapper<DeleteDataExportEyca>> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+
+        return deleteOnEycaStream(exportViewEntities).map(deleteDataExportEycaConverter::toDto).toList();
+    }
 
     private Stream<EycaDataExportViewEntity> deleteOnEycaStream(List<EycaDataExportViewEntity> exportViewEntities) {
         return exportViewEntities.stream()
@@ -750,7 +770,7 @@ public class ExportService {
     }
 
 
-    private void deleteDiscountsOnEyca(List<DeleteDataExportEyca> exportEycaList) {
+    public void deleteDiscountsOnEyca(List<DataExportEycaWrapper<DeleteDataExportEyca>> exportEycaList) {
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be deleted is empty");
@@ -760,7 +780,8 @@ public class ExportService {
 
         log.info("Deleting discount on EYCA...");
 
-        exportEycaList.forEach(exportEyca -> {
+        exportEycaList.forEach(exportEycaWrapper -> {
+            DeleteDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
             log.info("DELETE DeleteDataExportEyca: " + exportEyca.toString());
             DeleteApiResponseEyca response = null;
@@ -783,6 +804,9 @@ public class ExportService {
                 discountRepository.save(entity);
             } catch (RestClientException rce) {
                 log.info("DELETE eycaApi.deleteDiscount Exception: " + rce.getMessage());
+                if(rce.getMessage() != null && rce.getMessage().contains(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())) {
+                    exportEycaWrapper.setToDeleteFromEycaAdmin(true);
+                }
             }
         });
     }

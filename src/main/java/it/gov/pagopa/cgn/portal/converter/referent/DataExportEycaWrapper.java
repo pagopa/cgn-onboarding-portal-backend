@@ -34,6 +34,8 @@ public class DataExportEycaWrapper<T> {
     private String endDate;
     @JsonIgnore
     private Boolean eycaEmailUpdateRequired;
+    @JsonIgnore
+    private Boolean toDeleteFromEycaAdmin;
 
     @ToString.Exclude
     private T dataExportEyca;
