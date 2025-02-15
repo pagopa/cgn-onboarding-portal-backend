@@ -137,14 +137,24 @@ public class DocumentService {
         }
 
         Pattern pDigits = Pattern.compile("[0-9]");
-        Pattern pAlphab = Pattern.compile("[-A-Za-z]");
+        Pattern pAlphab = Pattern.compile("[A-Za-z]");
+        Pattern SpChars = Pattern.compile("^[a-zA-Z0-9-]+$");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
             if (csvRecordStream.anyMatch(line -> !(pDigits.matcher(line.get(0)).find() //at least one digit
-                                                   && pAlphab.matcher(line.get(0)).find() //at least on alphab. char
+                                                            && pAlphab.matcher(line.get(0)).find() //at least on alphab. char
             ))) {
                 throw new InvalidRequestException(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue());
+            }
+        }
+
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (csvRecordStream.anyMatch((line) ->  {
+                return !(SpChars.matcher(line.get(0)).find());
+            })) { //can contains only hypen
+                throw new InvalidRequestException(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue());
             }
         }
 

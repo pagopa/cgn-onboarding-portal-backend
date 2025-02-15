@@ -321,7 +321,7 @@ class DocumentServiceTest
         //bucket csv without header
         byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentNoAlphanum = "AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementEntity.getId(),
@@ -342,10 +342,10 @@ class DocumentServiceTest
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
                                             () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                              new ByteArrayInputStream(contentNoAlphanum),
-                                                                              contentNoAlphanum.length));
+                                                                              new ByteArrayInputStream(contentNotAllowedSpChar),
+                                                                              contentNotAllowedSpChar.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
+        Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
                                 exception.getMessage());
 
     }
