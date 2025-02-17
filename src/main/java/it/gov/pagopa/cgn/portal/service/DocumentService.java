@@ -84,7 +84,7 @@ public class DocumentService {
     public List<DocumentEntity> getAllDocuments(String agreementId, Predicate<DocumentEntity> documentFilter) {
         List<DocumentEntity> documents = documentRepository.findByAgreementId(agreementId);
         if (!CollectionUtils.isEmpty(documents)) {
-            documents = documents.stream().filter(documentFilter).collect(Collectors.toList());
+            documents = documents.stream().filter(documentFilter).toList();
             documents.forEach(azureStorage::setSecureDocumentUrl);
             return documents;
         }
@@ -136,9 +136,9 @@ public class DocumentService {
             }
         }
 
-        Pattern pDigits = Pattern.compile("[0-9]");
+        Pattern pDigits = Pattern.compile("\\d"); //[0-9]
         Pattern pAlphab = Pattern.compile("[A-Za-z]");
-        Pattern SpChars = Pattern.compile("^[a-zA-Z0-9-]+$");
+        Pattern SpChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
