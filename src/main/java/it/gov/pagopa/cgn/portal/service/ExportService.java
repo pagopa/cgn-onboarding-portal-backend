@@ -371,8 +371,7 @@ public class ExportService {
             log.info("EYCA_LOG_DELETE:");
             deleteDiscountsOnEyca(entitiesToDeleteOnEyca);
 
-            List<Attachment> attachments = new ArrayList<>();
-            attachments = createAttachments(exportViewEntities,
+            List<Attachment> attachments = createAttachments(exportViewEntities,
                       entitiesToCreateOnEyca,
                       entitiesToUpdateOnEyca,
                       entitiesToDeleteOnEyca);
