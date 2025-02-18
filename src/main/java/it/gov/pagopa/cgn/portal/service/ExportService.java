@@ -351,10 +351,6 @@ public class ExportService {
             log.info("sendDiscountsToEyca start");
             List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
-            if (exportViewEntities.isEmpty()) {
-                log.info("No EYCA data to export");
-            }
-
             syncEycaUpdateIdOnEyca(exportViewEntities);
 
             List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(
@@ -376,24 +372,10 @@ public class ExportService {
             deleteDiscountsOnEyca(entitiesToDeleteOnEyca);
 
             List<Attachment> attachments = new ArrayList<>();
-            if (!exportViewEntities.isEmpty()) {
-                attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
-            }
-
-            if (!entitiesToCreateOnEyca.isEmpty()) {
-                attachments.add(new Attachment("createOnEyca.csv",
-                                               buildEycaCsv(createOnEycaStream(exportViewEntities).toList())));
-            }
-
-            if (!entitiesToUpdateOnEyca.isEmpty()) {
-                attachments.add(new Attachment("updateOnEyca.csv",
-                                               buildEycaCsv(updateOnEycaStream(exportViewEntities).toList())));
-            }
-
-            if (!entitiesToDeleteOnEyca.isEmpty()) {
-                attachments.add(new Attachment("deleteOnEyca.csv",
-                                               buildEycaCsv(deleteOnEycaStream(exportViewEntities).toList())));
-            }
+            attachments = createAttachments(exportViewEntities,
+                      entitiesToCreateOnEyca,
+                      entitiesToUpdateOnEyca,
+                      entitiesToDeleteOnEyca);
 
             String bodyForAdminForJobEyca =
                     "Discounts to create: " + entitiesToCreateOnEyca.size() + "<br /> Discounts to update: " +
@@ -452,6 +434,34 @@ public class ExportService {
             log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
+    }
+
+    private List<Attachment> createAttachments(List<EycaDataExportViewEntity> exportViewEntities,
+                           List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca,
+                           List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca,
+                           List<DataExportEycaWrapper<DeleteDataExportEyca>> entitiesToDeleteOnEyca) {
+        List<Attachment> attachments = new ArrayList<>();
+
+        if (!exportViewEntities.isEmpty()) {
+            attachments.add(new Attachment("all.csv", buildEycaCsv(exportViewEntities)));
+        }
+
+        if (!entitiesToCreateOnEyca.isEmpty()) {
+            attachments.add(new Attachment("createOnEyca.csv",
+                                           buildEycaCsv(createOnEycaStream(exportViewEntities).toList())));
+        }
+
+        if (!entitiesToUpdateOnEyca.isEmpty()) {
+            attachments.add(new Attachment("updateOnEyca.csv",
+                                           buildEycaCsv(updateOnEycaStream(exportViewEntities).toList())));
+        }
+
+        if (!entitiesToDeleteOnEyca.isEmpty()) {
+            attachments.add(new Attachment("deleteOnEyca.csv",
+                                           buildEycaCsv(deleteOnEycaStream(exportViewEntities).toList())));
+        }
+
+        return attachments;
     }
 
     private <T> List<String[]> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca,
@@ -642,18 +652,6 @@ public class ExportService {
 
     private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         return updateOnEycaStream(exportViewEntities).map(this::convertToSearchDataExportEyca).toList();
-    }
-
-    private List<DeleteDataExportEyca> getItemsToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
-        return deleteOnEycaStream(exportViewEntities).map(this::convertToDeleteDataExportEyca).toList();
-    }
-
-    public DeleteDataExportEyca convertToDeleteDataExportEyca(EycaDataExportViewEntity entity) {
-        DeleteDataExportEyca deleteDataExportEyca = new DeleteDataExportEyca();
-        Optional<String> optDiscountId = Optional.ofNullable(entity.getEycaUpdateId());
-        deleteDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException(
-                "Error during viewEntity to delete conversion, eycaUpdateId is empty")));
-        return deleteDataExportEyca;
     }
 
     public SearchDataExportEyca convertToSearchDataExportEyca(EycaDataExportViewEntity entity) {
