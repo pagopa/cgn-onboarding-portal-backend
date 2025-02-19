@@ -10,6 +10,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "discount_bucket_code")
@@ -36,6 +38,9 @@ public class DiscountBucketCodeEntity
     @NotNull
     @Column(name = "used")
     private Boolean isUsed = false;
+
+    @Column(name = "usage_datetime")
+    private OffsetDateTime usageDatetime;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
