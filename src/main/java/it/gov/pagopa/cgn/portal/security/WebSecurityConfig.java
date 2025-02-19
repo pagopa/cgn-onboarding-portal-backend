@@ -64,7 +64,10 @@ public class WebSecurityConfig
                     .cors()
                     .and()
                     .authorizeRequests()
-                    .antMatchers("/actuator/**", "/help", "/")
+                    .antMatchers(new String[]{"/actuator/**", "/help", "/",
+                                 "/v3/api-docs/**",
+                                 "/swagger-ui/**",
+                                 "/swagger-ui.html"})
                     .permitAll()
                     .anyRequest()
                     .authenticated();
