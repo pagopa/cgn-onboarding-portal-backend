@@ -162,7 +162,7 @@ class DocumentServiceTest
 
         Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
-        Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
+        Assertions.assertFalse(documentEntity.getDocumentUrl().isEmpty());
 
         BlobClient client = documentContainerClient.getBlobClient(
                 agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
@@ -442,9 +442,7 @@ class DocumentServiceTest
             documentService.renderDocument(agreementEntityPA.getId(), DocumentTypeEnum.ADHESION_REQUEST);
         });
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage()
-                                   .equals(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
+        Assertions.assertEquals(exception.getMessage(), ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue());
     }
 
     @Test
@@ -550,7 +548,6 @@ class DocumentServiceTest
         Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
         Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
-        Assertions.assertTrue(actual.contains(""));
         Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription().toLowerCase()));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));

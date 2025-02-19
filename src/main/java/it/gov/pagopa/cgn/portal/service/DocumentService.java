@@ -139,6 +139,7 @@ public class DocumentService {
         Pattern pDigits = Pattern.compile("\\d"); //[0-9]
         Pattern pAlphab = Pattern.compile("[A-Za-z]");
         Pattern SpChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
+        Pattern anyNotNumOrChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
@@ -151,10 +152,15 @@ public class DocumentService {
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-            if (csvRecordStream.anyMatch((line) ->  {
-                return !(SpChars.matcher(line.get(0)).find());
-            })) { //can contains only hypen
+            if (csvRecordStream.anyMatch(line -> !(SpChars.matcher(line.get(0)).find()))) { //can contains only hypen
                 throw new InvalidRequestException(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue());
+            }
+        }
+
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+            if (csvRecordStream.anyMatch(line -> !(anyNotNumOrChars.matcher(line.get(0)).find()))) { //can contains only hypen
+                throw new InvalidRequestException(ErrorCodeEnum.ONE_OR_MORE_CODES_ARE_NOT_VALID.getValue());
             }
         }
 
@@ -203,7 +209,7 @@ public class DocumentService {
         return Arrays.stream(DocumentTypeEnum.Type.values())
                      .map(type -> filterDocumentsByPriorityAndType(type, documentEntityList))
                      .filter(t -> !Objects.isNull(t))
-                     .collect(Collectors.toList());
+                .toList();
     }
 
     private DocumentEntity filterDocumentsByPriorityAndType(DocumentTypeEnum.Type typeEnum,
@@ -268,12 +274,12 @@ public class DocumentService {
         List<String> addressList = profileEntity.getAddressList()
                                                 .stream()
                                                 .map(AddressEntity::getFullAddress)
-                                                .collect(Collectors.toList());
+                                           .toList();
 
         List<DiscountEntity> discounts = discountRepository.findByAgreementId(agreementId);
         List<RenderableDiscount> renderableDiscounts = discounts.stream()
                                                                 .map(RenderableDiscount::fromEntity)
-                                                                .collect(Collectors.toList());
+                                                                .toList();
 
         String discountMode = null;
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {

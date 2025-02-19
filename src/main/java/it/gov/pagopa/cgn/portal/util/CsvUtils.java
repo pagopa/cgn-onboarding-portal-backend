@@ -47,9 +47,8 @@ public class CsvUtils {
         }
     }
 
-    /*
+/*
         VALIDATE CSV BUCKET
-
 
     private static long countCsvRecord(byte[] content) {
         long recordCount = 0;
@@ -62,7 +61,10 @@ public class CsvUtils {
     }
 
     public static void main (String[] args) {
-        try (InputStream inputStream = new FileInputStream("c:\\develop\\test-buckets\\Vouchers_Data_CGN Avvento-2024-KO.csv")){
+        String path = "c:\\develop\\test-buckets\\";
+        String fileName = "ALL-KO-data-1739964881841";
+        String ext = ".csv";
+        try (InputStream inputStream = new FileInputStream(path+fileName+ext)){
             byte[] content = inputStream.readAllBytes();
             long csvRecordCount = countCsvRecord(content);
             if (csvRecordCount < 10000) {
@@ -85,35 +87,36 @@ public class CsvUtils {
 
             Pattern pDigits = Pattern.compile("\\d"); //[0-9]
             Pattern pAlphab = Pattern.compile("[A-Za-z]");
-            Pattern SpChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
+            Pattern SpChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$"); //^(?=.*\d)[a-zA-Z0-9][-a-zA-Z0-9]+$
 
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
 
-                AtomicInteger currentRow = new AtomicInteger(1);
+                AtomicInteger invalidCodes = new AtomicInteger(0);
+                AtomicInteger cursorRow = new AtomicInteger(0);
                 csvRecordStream.forEach(line -> {
+                    cursorRow.incrementAndGet();
                     if (line.get(0).length() > 20 ||
                         StringUtils.isBlank(line.get(0))) {
-                        System.out.println(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue()+" "+ currentRow.get() + " " + line.get(0));
-                        currentRow.incrementAndGet();
+                        //System.out.println(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue()+" "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
                         return;
                     }
 
                     if(!(pDigits.matcher(line.get(0)).find() //at least one digit
                          && pAlphab.matcher(line.get(0)).find())) { //at least on alphab. char)
-                        System.out.println(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue()+ " "+ currentRow.get() + " " + line.get(0));
-                        currentRow.incrementAndGet();
+                        //System.out.println(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue()+ " "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
                         return;
                     }
 
                     if(!(SpChars.matcher(line.get(0)).find())) {
-                        System.out.println(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue()+" "+ currentRow.get() + " " + line.get(0));
-                        currentRow.incrementAndGet();
-                        return;
+                        //System.out.println(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue()+" "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
                     }
-
-
                 });
+                System.out.println("Total codes:"+ cursorRow.get());
+                System.out.println("Total invalid codes:"+ invalidCodes.get());
             }
 
         } catch (FileNotFoundException e) {
@@ -122,6 +125,5 @@ public class CsvUtils {
             e.printStackTrace();
         }
     }
-    */
-
+ */
 }
