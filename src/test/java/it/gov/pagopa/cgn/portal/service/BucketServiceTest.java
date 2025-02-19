@@ -182,6 +182,10 @@ class BucketServiceTest
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
         Assertions.assertFalse(codes.isEmpty());
+        codes.forEach(codeEntity -> {
+            Assertions.assertFalse((boolean) codeEntity.getIsUsed());
+            Assertions.assertNull(codeEntity.getUsageDatetime());
+        });
     }
 
     @Test

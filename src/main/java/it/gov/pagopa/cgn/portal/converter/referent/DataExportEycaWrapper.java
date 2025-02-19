@@ -35,7 +35,7 @@ public class DataExportEycaWrapper<T> {
     @JsonIgnore
     private Boolean eycaEmailUpdateRequired;
     @JsonIgnore
-    private Boolean toDeleteFromEycaAdmin;
+    private Boolean toDeleteFromEycaAdmin = false;
 
     @ToString.Exclude
     private T dataExportEyca;
