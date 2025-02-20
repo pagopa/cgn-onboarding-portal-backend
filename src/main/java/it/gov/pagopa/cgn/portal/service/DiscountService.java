@@ -316,6 +316,9 @@ public class DiscountService {
 
         DiscountEntity discount = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
+        if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
+            return discount; // already suspended
+        }
         if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_SUSPEND_DISCOUNT_NOT_PUBLISHED.getValue());
         }
