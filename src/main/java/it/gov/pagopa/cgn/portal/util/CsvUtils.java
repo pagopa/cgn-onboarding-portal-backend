@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.util;
 
 
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -43,7 +44,7 @@ public class CsvUtils {
                                             .parse(new InputStreamReader(is));
             return cp.getRecords().stream().map(toEntityFunction).collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("CSV data is failed to parse: " + e.getMessage());
+            throw new CGNException("CSV data is failed to parse: " + e.getMessage());
         }
     }
 
@@ -87,7 +88,7 @@ public class CsvUtils {
 
             Pattern pDigits = Pattern.compile("\\d"); //[0-9]
             Pattern pAlphab = Pattern.compile("[A-Za-z]");
-            Pattern SpChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$"); //^(?=.*\d)[a-zA-Z0-9][-a-zA-Z0-9]+$
+            Pattern spChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$"); //^(?=.*\d)[a-zA-Z0-9][-a-zA-Z0-9]+$
 
             try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
                 Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);

@@ -24,7 +24,6 @@ import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -323,26 +322,30 @@ class DocumentServiceTest
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
 
+        String agreementId = agreementEntity.getId();
+        ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
+        ByteArrayInputStream bisOn = new ByteArrayInputStream(contentOnlyNum);
+        ByteArrayInputStream bisNaSc = new ByteArrayInputStream(contentNotAllowedSpChar);
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                                        new ByteArrayInputStream(
-                                                                                                contentOnlyChars),
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        bisOc,
                                                                                         contentOnlyChars.length));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                              new ByteArrayInputStream(contentOnlyNum),
+                                            () -> documentService.storeBucket(agreementId,
+                                                                              bisOn,
                                                                               contentOnlyNum.length));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                              new ByteArrayInputStream(contentNotAllowedSpChar),
+                                            () -> documentService.storeBucket(agreementId,
+                                                                              bisNaSc,
                                                                               contentNotAllowedSpChar.length));
 
         Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
@@ -430,16 +433,16 @@ class DocumentServiceTest
     }
 
     @Test
-    void Get_GenerateAdhesionRequestDocument_koPA()
-            throws IOException {
+    void Get_GenerateAdhesionRequestDocument_koPA() {
         DocumentService dsMock = mock(DocumentService.class);
 
         when(dsMock.renderDocument(anyString(),
                                    eq(DocumentTypeEnum.ADHESION_REQUEST))).thenThrow(new InvalidRequestException(
                 ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
 
+        String agreementId = agreementEntityPA.getId();
         InvalidRequestException exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
-            documentService.renderDocument(agreementEntityPA.getId(), DocumentTypeEnum.ADHESION_REQUEST);
+            documentService.renderDocument(agreementId, DocumentTypeEnum.ADHESION_REQUEST);
         });
 
         Assertions.assertEquals(exception.getMessage(), ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue());

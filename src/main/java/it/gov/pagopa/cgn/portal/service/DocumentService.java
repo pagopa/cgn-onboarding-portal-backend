@@ -138,7 +138,7 @@ public class DocumentService {
 
         Pattern pDigits = Pattern.compile("\\d"); //[0-9]
         Pattern pAlphab = Pattern.compile("[A-Za-z]");
-        Pattern SpChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
+        Pattern spChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
         Pattern anyNotNumOrChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
@@ -152,7 +152,7 @@ public class DocumentService {
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-            if (csvRecordStream.anyMatch(line -> !(SpChars.matcher(line.get(0)).find()))) { //can contains only hypen
+            if (csvRecordStream.anyMatch(line -> !(spChars.matcher(line.get(0)).find()))) { //can contains only hypen
                 throw new InvalidRequestException(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue());
             }
         }
