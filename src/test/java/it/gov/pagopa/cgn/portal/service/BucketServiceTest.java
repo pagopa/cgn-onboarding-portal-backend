@@ -8,24 +8,40 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
+import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Awaitility;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -420,6 +436,81 @@ class BucketServiceTest
         Assertions.assertNotNull(secondNotification);
         Assertions.assertEquals(firstNotification, secondNotification);
     }
+
+    @Test
+    @Disabled
+    void checkDiscountBucket_loadingCsvBucket ()
+            throws IOException {
+
+        String path = "c:\\develop\\test-buckets\\";
+        String fileName = "ALL-KO-data-1739964881841";
+        String ext = ".csv";
+        try (InputStream inputStream = new FileInputStream(path + fileName + ext)) {
+            byte[] content = inputStream.readAllBytes();
+            long csvRecordCount = countCsvRecord(content);
+            if (csvRecordCount < 10000) {
+                throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
+            }
+            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+                if (content.length==0) {
+                    throw new InternalErrorException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+                }
+                AtomicInteger currentRow = new AtomicInteger(1);
+                csvRecordStream.forEach(line -> {
+                    if (line.get(0).length() > 20 || StringUtils.isBlank(line.get(0))) {
+                        System.out.println(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue() + " " +
+                                           currentRow.get() + " " + line.get(0));
+                    }
+                    currentRow.incrementAndGet();
+                });
+            }
+
+            Pattern pDigits = Pattern.compile("\\d"); //[0-9]
+            Pattern pAlphab = Pattern.compile("[A-Za-z]");
+            Pattern spChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$"); //^(?=.*\d)[a-zA-Z0-9][-a-zA-Z0-9]+$
+
+            try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+                Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
+
+                AtomicInteger invalidCodes = new AtomicInteger(0);
+                AtomicInteger cursorRow = new AtomicInteger(0);
+                csvRecordStream.forEach(line -> {
+                    cursorRow.incrementAndGet();
+                    if (line.get(0).length() > 20 || StringUtils.isBlank(line.get(0))) {
+                        //System.out.println(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue()+" "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
+                        return;
+                    }
+
+                    if (!(pDigits.matcher(line.get(0)).find() //at least one digit
+                          && pAlphab.matcher(line.get(0)).find())) { //at least on alphab. char)
+                        //System.out.println(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue()+ " "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
+                        return;
+                    }
+
+                    if (!(spChars.matcher(line.get(0)).find())) {
+                        //System.out.println(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue()+" "+ cursorRow.get() + " " + line.get(0));
+                        invalidCodes.incrementAndGet();
+                    }
+                });
+                System.out.println("Total codes:" + cursorRow.get());
+                System.out.println("Total invalid codes:" + invalidCodes.get());
+            }
+        }
+    }
+
+    private long countCsvRecord(byte[] content) {
+        long recordCount = 0;
+        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
+            recordCount = CsvUtils.countCsvLines(contentIs);
+        } catch (IOException e) {
+            throw new CGNException(e.getMessage());
+        }
+        return recordCount;
+    }
+
 
     private DiscountEntity setupDiscount()
             throws IOException {
