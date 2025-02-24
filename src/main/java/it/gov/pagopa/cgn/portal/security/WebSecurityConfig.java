@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.security;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -15,7 +16,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 
 @Configuration
@@ -23,6 +26,9 @@ import java.util.Collections;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig
         extends WebSecurityConfigurerAdapter {
+
+    @Value("${spring.profiles.active:Unknown}")
+    private String activeProfile;    
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -64,7 +70,7 @@ public class WebSecurityConfig
                     .cors()
                     .and()
                     .authorizeRequests()
-                    .antMatchers("/actuator/**", "/help", "/")
+                    .antMatchers(getAntMatchers())
                     .permitAll()
                     .anyRequest()
                     .authenticated();
@@ -73,5 +79,11 @@ public class WebSecurityConfig
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity.headers().cacheControl();
+    }
+
+    private String[] getAntMatchers() {
+        return ("dev".equals(activeProfile) ?
+                                    List.of("/actuator/**", "/help", "/","/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html")
+                                    : List.of("/actuator/**", "/help", "/")).toArray(String[]::new);
     }
 }
