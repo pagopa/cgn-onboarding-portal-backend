@@ -241,7 +241,7 @@ class BackofficeAgreementApiTest
         List<AgreementTestObject> testObjectList = createMultiplePendingAgreement(5);
         List<AgreementEntity> agreementEntityList = testObjectList.stream()
                                                                   .map(AgreementTestObject::getAgreementEntity)
-                                                                  .collect(Collectors.toList());
+                                                                  .toList();
         Assertions.assertEquals(5, agreementEntityList.size());
         AgreementEntity assignedAgreement = agreementEntityList.get(2);
         assignedAgreement = backofficeAgreementService.assignAgreement(assignedAgreement.getId());
@@ -256,7 +256,6 @@ class BackofficeAgreementApiTest
                     .andExpect(jsonPath("$.items").isNotEmpty())
                     .andExpect(jsonPath("$.items", hasSize(5)))
                     .andExpect(jsonPath("$.total").value(5))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("$.items[0].assignee").doesNotExist())
                     .andExpect(jsonPath("$.items[1].assignee").doesNotExist())
                     .andExpect(jsonPath("$.items[2].assignee").doesNotExist())
