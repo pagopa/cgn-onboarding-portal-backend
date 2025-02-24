@@ -24,7 +24,6 @@ import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -162,7 +161,7 @@ class DocumentServiceTest
 
         Assertions.assertEquals(agreementEntity.getId(), documentEntity.getAgreement().getId());
         Assertions.assertEquals(DocumentTypeEnum.AGREEMENT, documentEntity.getDocumentType());
-        Assertions.assertTrue(documentEntity.getDocumentUrl().length() > 0);
+        Assertions.assertFalse(documentEntity.getDocumentUrl().isEmpty());
 
         BlobClient client = documentContainerClient.getBlobClient(
                 agreementEntity.getId() + "/" + DocumentTypeEnum.AGREEMENT.getCode().toLowerCase() + ".pdf");
@@ -321,31 +320,35 @@ class DocumentServiceTest
         //bucket csv without header
         byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentNoAlphanum = "AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+
+        String agreementId = agreementEntity.getId();
+        ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
+        ByteArrayInputStream bisOn = new ByteArrayInputStream(contentOnlyNum);
+        ByteArrayInputStream bisNaSc = new ByteArrayInputStream(contentNotAllowedSpChar);
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                                        new ByteArrayInputStream(
-                                                                                                contentOnlyChars),
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        bisOc,
                                                                                         contentOnlyChars.length));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                              new ByteArrayInputStream(contentOnlyNum),
+                                            () -> documentService.storeBucket(agreementId,
+                                                                              bisOn,
                                                                               contentOnlyNum.length));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
-                                                                              new ByteArrayInputStream(contentNoAlphanum),
-                                                                              contentNoAlphanum.length));
+                                            () -> documentService.storeBucket(agreementId,
+                                                                              bisNaSc,
+                                                                              contentNotAllowedSpChar.length));
 
-        Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
+        Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
                                 exception.getMessage());
 
     }
@@ -430,21 +433,19 @@ class DocumentServiceTest
     }
 
     @Test
-    void Get_GenerateAdhesionRequestDocument_koPA()
-            throws IOException {
+    void Get_GenerateAdhesionRequestDocument_koPA() {
         DocumentService dsMock = mock(DocumentService.class);
 
         when(dsMock.renderDocument(anyString(),
                                    eq(DocumentTypeEnum.ADHESION_REQUEST))).thenThrow(new InvalidRequestException(
                 ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
 
+        String agreementId = agreementEntityPA.getId();
         InvalidRequestException exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
-            documentService.renderDocument(agreementEntityPA.getId(), DocumentTypeEnum.ADHESION_REQUEST);
+            documentService.renderDocument(agreementId, DocumentTypeEnum.ADHESION_REQUEST);
         });
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage()
-                                   .equals(ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue()));
+        Assertions.assertEquals(exception.getMessage(), ErrorCodeEnum.ADHESION_DOCUMENT_NOT_REQUIRED_FOR_PA.getValue());
     }
 
     @Test
@@ -550,7 +551,6 @@ class DocumentServiceTest
         Assertions.assertTrue(actual.contains("ADESIONE AL PROGETTO CARTA GIOVANI NAZIONALE"));
         Assertions.assertTrue(actual.contains("FULL_NAME"));
         Assertions.assertTrue(actual.contains("address@pagopa.it"));
-        Assertions.assertTrue(actual.contains(""));
         Assertions.assertTrue(actual.contains(ProductCategoryEnum.SPORTS.getDescription().toLowerCase()));
         Assertions.assertTrue(actual.contains("https://www.pagopa.gov.it/"));
         Assertions.assertTrue(actual.contains("CEO"));

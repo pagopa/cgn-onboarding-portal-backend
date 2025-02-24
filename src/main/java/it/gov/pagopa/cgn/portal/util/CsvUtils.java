@@ -1,16 +1,15 @@
 package it.gov.pagopa.cgn.portal.util;
 
+
+import it.gov.pagopa.cgn.portal.exception.CGNException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,8 +44,7 @@ public class CsvUtils {
                                             .parse(new InputStreamReader(is));
             return cp.getRecords().stream().map(toEntityFunction).collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("CSV data is failed to parse: " + e.getMessage());
+            throw new CGNException("CSV data is failed to parse: " + e.getMessage());
         }
     }
-
 }
