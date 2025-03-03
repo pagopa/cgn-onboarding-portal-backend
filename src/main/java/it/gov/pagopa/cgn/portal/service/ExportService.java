@@ -407,7 +407,7 @@ public class ExportService {
                 //only for those that could not be deleted
                 entitiesToDeleteOnEyca = entitiesToDeleteOnEyca.stream().filter(
                         row -> Boolean.TRUE.equals(row.getToDeleteFromEycaAdmin())
-                               && (!row.getStartDate().equals("N/A") || !row.getEndDate().equals("N/A"))).toList();
+                               && !row.getStartDate().equals("N/A") && !row.getEndDate().equals("N/A")).toList();
 
                 List<String[]> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
                 rowsToDelete.addAll(getListForLandingPage(entitiesToDeleteOnEyca, false));
