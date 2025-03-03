@@ -362,6 +362,18 @@ public class ExportService {
             List<DataExportEycaWrapper<DeleteDataExportEyca>> entitiesToDeleteOnEyca = getWrappersToDeleteOnEyca(
                     exportViewEntities);
 
+            List<DataExportEycaWrapper<DeleteDataExportEyca>> listOpWithErr = entitiesToDeleteOnEyca.stream().filter(
+                    row -> row.getStartDate().equals("N/A") || row.getEndDate().equals("N/A")
+            ).toList();
+
+            if(!listOpWithErr.isEmpty()) {
+                DataExportEycaWrapper<DeleteDataExportEyca> deew = listOpWithErr.getFirst();
+                String err = "Errore su opportunità: "+deew.getVendor()+" "+deew.getDiscountID()+" "+deew.getEycaUpdateId();
+                log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + err);
+                emailNotificationFacade.notifyAdminForJobEyca(Collections.emptyList(), err);
+            }
+
+
             log.info("EYCA_LOG_CREATE:");
             createDiscountsOnEyca(entitiesToCreateOnEyca);
 
@@ -394,7 +406,8 @@ public class ExportService {
 
                 //only for those that could not be deleted
                 entitiesToDeleteOnEyca = entitiesToDeleteOnEyca.stream().filter(
-                        row -> Boolean.TRUE.equals(row.getToDeleteFromEycaAdmin())).toList();
+                        row -> Boolean.TRUE.equals(row.getToDeleteFromEycaAdmin())
+                               && (!row.getStartDate().equals("N/A") || !row.getEndDate().equals("N/A"))).toList();
 
                 List<String[]> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
                 rowsToDelete.addAll(getListForLandingPage(entitiesToDeleteOnEyca, false));
