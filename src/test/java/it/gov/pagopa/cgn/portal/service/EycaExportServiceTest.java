@@ -645,6 +645,25 @@ class EycaExportServiceTest
     }
 
     @Test
+    void sendDeleteEycaDiscountsWithNADate_KO() {
+        initMockitoPreconditions();
+
+        List<EycaDataExportViewEntity> entities = TestUtils.getTobeDeletedEycaDataExportViewEntityList();
+        entities.getFirst().setEndDate(null);
+        entities.getFirst().setStartDate(null);
+
+        Mockito.when(eycaDataExportRepository.findAll())
+               .thenReturn(entities);
+
+        DeleteApiResponseEyca apiResponseEyca = TestUtils.getDeleteApiResponse();
+
+        Mockito.when(eycaApiMock.deleteDiscount(Mockito.anyString(), Mockito.any(DeleteDataExportEyca.class)))
+               .thenReturn(apiResponseEyca);
+
+        exportService.sendDiscountsToEyca();
+    }
+
+    @Test
     void testSendDiscountsToEyca_ExceptionSetsToDeleteFromEycaAdmin() {
 
         List<EycaDataExportViewEntity> entities = TestUtils.getTobeDeletedEycaDataExportViewEntityList();
