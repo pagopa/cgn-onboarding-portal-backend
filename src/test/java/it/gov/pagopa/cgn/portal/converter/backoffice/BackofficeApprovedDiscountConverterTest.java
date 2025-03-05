@@ -18,7 +18,7 @@ import java.time.LocalDate;
 public class BackofficeApprovedDiscountConverterTest {
 
     @Test
-    public void ToDto_DiscountToDto_ok() {
+    public void ToDto_TestDiscountToDto_ok() {
         BackofficeApprovedDiscountConverter converter = getBackofficeAgreementConverter();
         AgreementEntity agreement = TestUtils.createSampleAgreementEntityWithCommonFields();
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
