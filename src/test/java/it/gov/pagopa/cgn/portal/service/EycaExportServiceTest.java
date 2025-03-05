@@ -1,4 +1,4 @@
-package it.gov.pagopa.cgn.portal.service; 
+package it.gov.pagopa.cgn.portal.service;
 
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
@@ -14,18 +14,14 @@ import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
@@ -37,18 +33,13 @@ import org.springframework.web.client.RestClientException;
 import javax.mail.*;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.*;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import com.nimbusds.jose.util.StandardCharset;
-import org.thymeleaf.context.Context;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -679,6 +670,28 @@ class EycaExportServiceTest
 
         exportService.sendDiscountsToEyca();
     }
+
+    @Test
+    void testSendDiscountsToEyca_createItemViewToDeleteFromEycaAdmin() {
+        initMockitoPreconditions();
+
+        List<EycaDataExportViewEntity> entities = TestUtils.getTobeDeletedEycaDataExportViewEntityList();
+        List<DataExportEycaWrapper<DeleteDataExportEyca>> wrappers = exportService.getWrappersToDeleteOnEyca(entities);
+
+        Mockito.when(eycaDataExportRepository.findAll())
+               .thenReturn(new ArrayList<>(TestUtils.getTobeDeletedEycaDataExportViewEntityList()));
+
+        when(exportServiceMock.getWrappersToDeleteOnEyca(Mockito.any())).thenReturn(wrappers);
+
+        Mockito.when(eycaExportServiceMock.listDiscounts(Mockito.any(), Mockito.any(), Mockito.any()))
+               .thenReturn(TestUtils.getListApiResponseEyca());
+
+        Mockito.when(eycaExportServiceMock.deleteDiscount(Mockito.any(), Mockito.any()))
+               .thenThrow(new RestClientException(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase()));
+
+        exportService.sendDiscountsToEyca();
+    }
+
 
     @Test
     void testSendEmailToEyca() {
