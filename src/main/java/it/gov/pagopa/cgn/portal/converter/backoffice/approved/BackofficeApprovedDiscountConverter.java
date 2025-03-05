@@ -5,7 +5,6 @@ import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountProductEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementDiscount;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ProductCategory;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class BackofficeApprovedDiscountConverter
@@ -44,11 +41,12 @@ public class BackofficeApprovedDiscountConverter
                                                                                                                .orElseThrow(
                                                                                                                        () -> getInvalidEnumMapping(
                                                                                                                                productCategoryEnum.name()));
+
     protected Function<List<DiscountProductEntity>, List<ProductCategory>> toProductDtoListEnum = discountProductsEntity -> discountProductsEntity.stream()
                                                                                                                                                   .map(discountProductEntity -> toProductDtoEnum.apply(
                                                                                                                                                           discountProductEntity.getProductCategory()))
-                                                                                                                                                  .collect(
-                                                                                                                                                          Collectors.toList());
+                                                                                                                                                  .toList();
+
     protected Function<DiscountEntity, ApprovedAgreementDiscount> toDto = entity -> {
         ApprovedAgreementDiscount dto = new ApprovedAgreementDiscount();
         dto.setId(String.valueOf(entity.getId()));
@@ -73,15 +71,11 @@ public class BackofficeApprovedDiscountConverter
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
         dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
 
-        if (Stream.of(DiscountState.TEST_PENDING, DiscountState.TEST_PASSED, DiscountState.TEST_FAILED)
-                  .collect(Collectors.toList())
-                  .contains(dto.getState())) {
-            dto.setTestFailureReason(entity.getTestFailureReason());
-            dto.setStaticCode(entity.getStaticCode());
-            dto.setLandingPageUrl(entity.getLandingPageUrl());
-            dto.setLandingPageReferrer(entity.getLandingPageReferrer());
-            dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
-        }
+        dto.setTestFailureReason(entity.getTestFailureReason());
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setLandingPageUrl(entity.getLandingPageUrl());
+        dto.setLandingPageReferrer(entity.getLandingPageReferrer());
+        dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
 
         return dto;
     };
