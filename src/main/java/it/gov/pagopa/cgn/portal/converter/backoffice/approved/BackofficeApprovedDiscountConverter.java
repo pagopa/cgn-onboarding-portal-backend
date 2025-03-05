@@ -73,15 +73,11 @@ public class BackofficeApprovedDiscountConverter
         dto.setProductCategories(toProductDtoListEnum.apply(entity.getProducts()));
         dto.setState(toDtoEnum.apply(entity.getState(), entity.getEndDate()));
 
-        if (Stream.of(DiscountState.TEST_PENDING, DiscountState.TEST_PASSED, DiscountState.TEST_FAILED)
-                  .collect(Collectors.toList())
-                  .contains(dto.getState())) {
-            dto.setTestFailureReason(entity.getTestFailureReason());
-            dto.setStaticCode(entity.getStaticCode());
-            dto.setLandingPageUrl(entity.getLandingPageUrl());
-            dto.setLandingPageReferrer(entity.getLandingPageReferrer());
-            dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
-        }
+        dto.setTestFailureReason(entity.getTestFailureReason());
+        dto.setStaticCode(entity.getStaticCode());
+        dto.setLandingPageUrl(entity.getLandingPageUrl());
+        dto.setLandingPageReferrer(entity.getLandingPageReferrer());
+        dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
 
         return dto;
     };

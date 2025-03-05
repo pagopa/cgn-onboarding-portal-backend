@@ -18,31 +18,21 @@ import java.time.LocalDate;
 public class BackofficeApprovedDiscountConverterTest {
 
     @Test
-    public void ToDto_TestPendingDiscountToDto_ok() {
+    public void ToDto_TestLandingPageAndReferrerDiscountToDto_ok() {
         BackofficeApprovedDiscountConverter converter = getBackofficeAgreementConverter();
         AgreementEntity agreement = TestUtils.createSampleAgreementEntityWithCommonFields();
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
         discount.setStaticCode("acode");
-        discount.setState(DiscountStateEnum.TEST_PENDING);
-
-        ApprovedAgreementDiscount discountDto = converter.toDto(discount);
-        Assert.assertNotNull(discountDto);
-        Assert.assertEquals(DiscountState.TEST_PENDING, discountDto.getState());
-        Assert.assertNotNull(discountDto.getStaticCode());
-    }
-
-    @Test
-    public void ToDto_PublishedDiscountToDto_ok() {
-        BackofficeApprovedDiscountConverter converter = getBackofficeAgreementConverter();
-        AgreementEntity agreement = TestUtils.createSampleAgreementEntityWithCommonFields();
-        DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
-        discount.setStaticCode("acode");
+        discount.setLandingPageUrl("landing page url");
+        discount.setLandingPageReferrer("referrer");
         discount.setState(DiscountStateEnum.PUBLISHED);
 
         ApprovedAgreementDiscount discountDto = converter.toDto(discount);
         Assert.assertNotNull(discountDto);
         Assert.assertEquals(DiscountState.PUBLISHED, discountDto.getState());
-        Assert.assertNull(discountDto.getStaticCode());
+        Assert.assertEquals("landing page url", discountDto.getLandingPageUrl());
+        Assert.assertEquals("referrer", discountDto.getLandingPageReferrer());
+        Assert.assertNotNull(discountDto.getStaticCode());
     }
 
     @Test
