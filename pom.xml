@@ -262,10 +262,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId> 
-		</dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
@@ -476,6 +476,45 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.18.0</version>
+                <executions>
+                    <execution>
+                        <id>set-version</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>set</goal>
+                        </goals>
+                        <configuration>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <newVersion>${newVersion}</newVersion>
+                            <generateBackupPoms>false</generateBackupPoms>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>commit-version</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>commit</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -495,6 +534,27 @@
                 <spring.profiles.active>prod</spring.profiles.active>
             </properties>
         </profile>
-    </profiles>
+        <profile>
+            <id>increment-patch</id>
+            <properties>
+                <newVersion>
+                    ${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}
+                </newVersion>
+            </properties>
+        </profile>
 
+        <profile>
+            <id>increment-minor</id>
+            <properties>
+                <newVersion>${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}.0</newVersion>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>increment-major</id>
+            <properties>
+                <newVersion>${parsedVersion.nextMajorVersion}.0.0</newVersion>
+            </properties>
+        </profile>
+    </profiles>
 </project>
