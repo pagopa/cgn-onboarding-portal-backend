@@ -1,9 +1,11 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.converter.*;
+import it.gov.pagopa.cgn.portal.converter.DataExportEycaWrapperConverter;
+import it.gov.pagopa.cgn.portal.converter.DeleteDataExportEycaWrapperConverter;
+import it.gov.pagopa.cgn.portal.converter.UpdateDataExportEycaWrapperConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.email.*;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.email.EmailParams.Attachment;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -31,8 +33,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.RestClientException;
 
 import javax.transaction.Transactional;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +43,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
@@ -466,8 +469,9 @@ public class ExportService {
     private <T> List<String[]> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca,
                                                     Boolean eycaEmailUpdateRequired) {
         return entitiesForEyca.stream()
-                              .filter(dew -> DiscountCodeTypeEnum.STATIC.getEycaDataCode()
-                                                                        .equals(dew.getDiscountType()) &&
+                              .filter(dew -> (DiscountCodeTypeEnum.STATIC.getEycaDataCode()
+                                                                        .equals(dew.getDiscountType())
+                                                                                || "N/A".equals(dew.getDiscountType()))&&
                                              eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
                               .map(dew -> new String[]{dew.getEycaUpdateId(),
                                                        dew.getVendor(),
@@ -564,7 +568,6 @@ public class ExportService {
 
         if (exportEycaList.isEmpty()) {
             log.info("No discounts to search for sync eycaUpdateId");
-            return;
         }
 
         eycaExportService.authenticateOnEyca();
@@ -588,10 +591,12 @@ public class ExportService {
                                                                           .filter(d -> entity.getEycaUpdateId()
                                                                                              .equals(d.getEycaUpdateId()))
                                                                           .findFirst()
-                                                                          .orElseThrow();
-                    entity.setEycaUpdateId(null);
-                    discountRepository.saveAndFlush(entity);
-                    viewItem.setEycaUpdateId(null);
+                                                                          .orElse(null);
+                    if(viewItem != null) {
+                        entity.setEycaUpdateId(null);
+                        discountRepository.saveAndFlush(entity);
+                        viewItem.setEycaUpdateId(null);
+                    }
                 }
             } catch (RestClientException rce) {
                 log.info("SEARCH eycaApi.searchDiscount Exception: " + rce.getMessage());
@@ -603,16 +608,19 @@ public class ExportService {
         log.info("Verifying that discounts to delete on Eyca...");
 
         /*
-            IMPORTANT: foreach iod present on eyca, verify presence on discounts table. If not, builds simple viewEntity just for delete on CCDB.
+            IMPORTANT: foreach item present on eyca, verify presence on discounts table. If not, builds simple viewEntity just for delete on CCDB.
             Delete not occur here but after this sync, the viewEntity is only inserted on the exportViewEntities as to be deleted
         */
-        List<String> iodListOnEyca = getOidListOnEyca(response);
-        iodListOnEyca.forEach(oid -> {
-            if (discountRepository.findByEycaUpdateId(oid).isEmpty()) {
+
+        List<DiscountItemEyca> discountItemsEyca = getDiscountItemsOnEyca(response);
+        discountItemsEyca.forEach(discountItemEyca -> {
+            if (discountRepository.findByEycaUpdateId(discountItemEyca.getId()).isEmpty()) {
                 EycaDataExportViewEntity entityToDelete = new EycaDataExportViewEntity();
-                entityToDelete.setEycaUpdateId(oid);
+                entityToDelete.setEycaUpdateId(discountItemEyca.getId());
                 entityToDelete.setId(0L);
                 entityToDelete.setLive(LIVE_NO);
+                entityToDelete.setVendor(discountItemEyca.getVendor());
+                entityToDelete.setDiscountType("N/A");
                 exportViewEntities.add(entityToDelete);
             }
         });
@@ -620,23 +628,27 @@ public class ExportService {
 
     }
 
-    public List<String> getOidListOnEyca(ListApiResponseEyca response) {
+    public List<DiscountItemEyca> getDiscountItemsOnEyca(ListApiResponseEyca response) {
 
         if (response!=null && response.getApiResponse()!=null && response.getApiResponse().getData()!=null &&
             response.getApiResponse().getData().getDiscount()!=null &&
             !response.getApiResponse().getData().getDiscount().isEmpty()) {
 
-            List<String> oidList = response.getApiResponse()
+            List<DiscountItemEyca> discountItemsEyca = response.getApiResponse()
                                            .getData()
                                            .getDiscount()
                                            .stream()
-                                           .map(DiscountItemEyca::getId)
                                            .toList();
 
-            if (!oidList.isEmpty()) {
-                log.info(oidList.toString());
+            if (!discountItemsEyca.isEmpty()) {
+                log.info(response.getApiResponse()
+                             .getData()
+                             .getDiscount()
+                             .stream()
+                             .map(DiscountItemEyca::getId)
+                             .toList().toString());
             }
-            return oidList;
+            return discountItemsEyca;
         } else {
             return Collections.emptyList();
         }
@@ -795,11 +807,13 @@ public class ExportService {
 
                 String eycaUpdateId = exportEyca.getId();
                 DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
-                                                          .orElseThrow(() -> new CGNException(
-                                                                  "Discount with EycaUpdateId: " + eycaUpdateId +
-                                                                  " from eyca not found on Discount table"));
-                entity.setEycaUpdateId(null);
-                discountRepository.save(entity);
+                                                          .orElse(null);
+                //the entity can be null for opportunities to be deleted on eyca but not present on CGN.
+                if(entity != null) {
+                    entity.setEycaUpdateId(null);
+                    discountRepository.save(entity);
+                }
+
             } catch (RestClientException rce) {
                 log.info("DELETE eycaApi.deleteDiscount Exception: " + rce.getMessage());
                 if(rce.getMessage() != null && rce.getMessage().contains(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())) {

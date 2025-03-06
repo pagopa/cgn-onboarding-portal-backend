@@ -44,8 +44,15 @@ public class DeleteDataExportEycaWrapperConverter
         DataExportEycaWrapper<DeleteDataExportEyca> dto = new DataExportEycaWrapper<>(deleteDataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setVendor(entity.getVendor());
-        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
-        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
+
+        dto.setStartDate(entity.getStartDate() != null
+                             ? entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH))
+                             : "N/A");
+
+        dto.setEndDate(entity.getEndDate() != null
+                           ? entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH))
+                           : "N/A");
+
         dto.setLimitOfUse("No Limit");
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());

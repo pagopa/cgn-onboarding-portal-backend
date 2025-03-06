@@ -28,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -589,7 +590,12 @@ public class TestUtils {
     }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
-        return CsvUtils.csvToEntityList(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"),
+        return getEycaDataExportViewEntityListFromCSV(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"));
+    }
+
+
+    public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV(InputStream is) {
+        return CsvUtils.csvToEntityList(is,
                                         (_record) -> {
                                             EycaDataExportViewEntity e = new EycaDataExportViewEntity();
 

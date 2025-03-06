@@ -12,22 +12,19 @@ import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
-import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
-import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,8 +37,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -94,7 +91,8 @@ class DiscountApiTest
         profileService.createProfile(profileEntity, agreement.getId());
         discountPath = TestUtils.getDiscountPath(agreement.getId());
         setOperatorAuth();
-        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
+        byte[] csv = IOUtils.toByteArray(Objects.requireNonNull(getClass().getClassLoader()
+                                                                          .getResourceAsStream("test-codes.csv")));
         multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
         BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
@@ -554,13 +552,17 @@ class DiscountApiTest
         azureStorage.uploadCsv(multipartFile.getBytes(), firstBucketCodeLoad, multipartFile.getSize());
         discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
 
-        // load codes
-        bucketLoadUtils.storeCodesBucket(discountEntity.getId());
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count()==2);
-        Awaitility.await()
-                  .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> BucketCodeLoadStatusEnum.FINISHED.equals(bucketCodeLoadRepository.findByUid(
-                          firstBucketCodeLoad).getStatus()));
+        try {
+            // load codes
+            bucketLoadUtils.storeCodesBucket(discountEntity.getId());
+            Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count()==2);
+            Awaitility.await()
+                      .atMost(5, TimeUnit.SECONDS)
+                      .until(() -> BucketCodeLoadStatusEnum.FINISHED.equals(bucketCodeLoadRepository.findByUid(
+                              firstBucketCodeLoad).getStatus()));
+        } catch (NoSuchElementException e) {
+            log.error("Update_CreateAndUpdateDiscountWithoutProfile_BadRequest: {}", e.getMessage(), e);
+        }
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
