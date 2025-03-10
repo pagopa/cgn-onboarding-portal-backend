@@ -21,7 +21,7 @@ import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import it.gov.pagopa.cgnonboardingportal.model.*;
-
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -423,6 +423,7 @@ public class TestUtils {
         discountEntity.setLandingPageUrl(url);
         discountEntity.setEycaLandingPageUrl(eycaUrl);
         discountEntity.setLandingPageReferrer(referrer);
+        discountEntity.setVisibleOnEyca(!StringUtils.isEmpty(eycaUrl));
         return discountEntity;
     }
 
@@ -431,6 +432,14 @@ public class TestUtils {
         discountEntity.setStaticCode(null);
         discountEntity.setLastBucketCodeLoadUid(generateDiscountBucketCodeUid());
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");
+        return discountEntity;
+    }
+
+    public static DiscountEntity createSampleDiscountEntityWithEycaLandingPage(AgreementEntity agreement) {
+        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        discountEntity.setEycaLandingPageUrl("https://www.contoso.com/lpe");
+        discountEntity.setVisibleOnEyca(true);
+
         return discountEntity;
     }
 
@@ -590,50 +599,50 @@ public class TestUtils {
     }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
-        return getEycaDataExportViewEntityListFromCSV(TestUtils.class.getClassLoader().getResourceAsStream("eyca_data_export.csv"));
+        return getEycaDataExportViewEntityListFromCSV(TestUtils.class.getClassLoader()
+                                                                     .getResourceAsStream("eyca_data_export.csv"));
     }
 
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV(InputStream is) {
-        return CsvUtils.csvToEntityList(is,
-                                        (_record) -> {
-                                            EycaDataExportViewEntity e = new EycaDataExportViewEntity();
+        return CsvUtils.csvToEntityList(is, (_record) -> {
+            EycaDataExportViewEntity e = new EycaDataExportViewEntity();
 
-                                            e.setId(Long.valueOf(_record.get("id")));
-                                            e.setCategories(_record.get("categories"));
-                                            e.setProfileId(Long.valueOf(_record.get("profile_id")));
-                                            e.setVendor(_record.get("vendor"));
-                                            e.setDiscountId(Long.valueOf(_record.get("discount_id")));
-                                            e.setEycaUpdateId(_record.get("eyca_update_id"));
-                                            e.setName(_record.get("name"));
-                                            e.setStartDate(LocalDate.parse(_record.get("start_date")));
-                                            e.setEndDate(LocalDate.parse(_record.get("end_date")));
-                                            e.setNameLocal(_record.get("name_local"));
-                                            e.setText(_record.get("text"));
-                                            e.setTextLocal(_record.get("text_local"));
-                                            e.setEmail(_record.get("email"));
-                                            e.setPhone(_record.get("phone"));
-                                            e.setWeb(_record.get("web"));
-                                            e.setTags(_record.get("tags"));
-                                            e.setImage(_record.get("image"));
-                                            e.setLive(_record.get("live"));
-                                            e.setLocationLocalId(_record.get("location_local_id"));
-                                            e.setStreet(_record.get("street"));
-                                            e.setCity(_record.get("city"));
-                                            e.setZip(_record.get("zip"));
-                                            e.setCountry(_record.get("country"));
-                                            e.setRegion(_record.get("region"));
-                                            e.setLatitude(_record.get("latitude"));
-                                            e.setLongitude(_record.get("longitude"));
-                                            e.setDiscountType(_record.get("discount_type"));
-                                            e.setStaticCode(_record.get("static_code"));
-                                            e.setLandingPageUrl(_record.get("landing_page_url"));
-                                            e.setLandingPageReferrer(_record.get("landing_page_referrer"));
-                                            e.setReferent(Long.valueOf(_record.get("referent")));
-                                            e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
-                                            e.setEycaEmailUpdateRequired(Boolean.valueOf(_record.get("eyca_email_update_required")));
-                                            return e;
-                                        });
+            e.setId(Long.valueOf(_record.get("id")));
+            e.setCategories(_record.get("categories"));
+            e.setProfileId(Long.valueOf(_record.get("profile_id")));
+            e.setVendor(_record.get("vendor"));
+            e.setDiscountId(Long.valueOf(_record.get("discount_id")));
+            e.setEycaUpdateId(_record.get("eyca_update_id"));
+            e.setName(_record.get("name"));
+            e.setStartDate(LocalDate.parse(_record.get("start_date")));
+            e.setEndDate(LocalDate.parse(_record.get("end_date")));
+            e.setNameLocal(_record.get("name_local"));
+            e.setText(_record.get("text"));
+            e.setTextLocal(_record.get("text_local"));
+            e.setEmail(_record.get("email"));
+            e.setPhone(_record.get("phone"));
+            e.setWeb(_record.get("web"));
+            e.setTags(_record.get("tags"));
+            e.setImage(_record.get("image"));
+            e.setLive(_record.get("live"));
+            e.setLocationLocalId(_record.get("location_local_id"));
+            e.setStreet(_record.get("street"));
+            e.setCity(_record.get("city"));
+            e.setZip(_record.get("zip"));
+            e.setCountry(_record.get("country"));
+            e.setRegion(_record.get("region"));
+            e.setLatitude(_record.get("latitude"));
+            e.setLongitude(_record.get("longitude"));
+            e.setDiscountType(_record.get("discount_type"));
+            e.setStaticCode(_record.get("static_code"));
+            e.setLandingPageUrl(_record.get("landing_page_url"));
+            e.setLandingPageReferrer(_record.get("landing_page_referrer"));
+            e.setReferent(Long.valueOf(_record.get("referent")));
+            e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
+            e.setEycaEmailUpdateRequired(Boolean.valueOf(_record.get("eyca_email_update_required")));
+            return e;
+        });
     }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportForCreate() {

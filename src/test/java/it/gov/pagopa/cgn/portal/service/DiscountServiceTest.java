@@ -14,7 +14,6 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -41,6 +39,7 @@ class DiscountServiceTest
     private static final String STATIC_CODE = "static_code";
     private static final String URL = "www.landingpage.com";
     private static final String EYCA_URL = "www.eycalandingpage.com";
+    private static final String EYCA_URL_2 = "www.neweycalandingpage.com";
     private static final String REFERRER = "referrer";
     private static String AGREEMENT_ID;
 
@@ -91,9 +90,10 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -108,9 +108,10 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -125,15 +126,17 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNotNull(discountEntity.getStaticCode());
         Assertions.assertEquals(STATIC_CODE, discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNotNull(discountEntity.getDiscountUrl());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -143,19 +146,21 @@ class DiscountServiceTest
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                                                                                            STATIC_CODE);
         discountEntity.setVisibleOnEyca(true);
+        discountEntity.setEycaLandingPageUrl("https://contoso.com/lpe");
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNotNull(discountEntity.getStaticCode());
         Assertions.assertEquals(STATIC_CODE, discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        Assertions.assertTrue(discountEntity.getVisibleOnEyca());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
+        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
     @Test
@@ -168,18 +173,21 @@ class DiscountServiceTest
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                                                                                            STATIC_CODE);
         discountEntity.setVisibleOnEyca(false);
+        discountEntity.setEycaLandingPageUrl(null);
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertTrue(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -263,17 +271,17 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNotNull(discountEntity.getLandingPageUrl());
         Assertions.assertEquals(URL, discountEntity.getLandingPageUrl());
         Assertions.assertEquals(EYCA_URL, discountEntity.getEycaLandingPageUrl());
-        Assertions.assertEquals(discountEntity.getEycaEmailUpdateRequired(),false);
+        Assertions.assertFalse(discountEntity.getEycaEmailUpdateRequired());
         Assertions.assertNotNull(discountEntity.getLandingPageReferrer());
         Assertions.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
-        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+        Assertions.assertTrue(discountEntity.getVisibleOnEyca());
     }
 
     @Test
@@ -290,13 +298,14 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNotNull(discountEntity.getLastBucketCodeLoad().getId());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
     }
 
@@ -315,14 +324,16 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNotNull(discountEntity.getLastBucketCodeLoad().getId());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -336,13 +347,15 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -359,13 +372,15 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -385,14 +400,16 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getStaticCode());
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNull(discountEntity.getLastBucketCodeLoad());
+        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
         Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+
     }
 
     @Test
@@ -417,9 +434,9 @@ class DiscountServiceTest
         Assertions.assertNotNull(discountEntity.getAgreement());
         Assertions.assertNotNull(discountEntity.getProducts());
         Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0));
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().get(0).getDiscount());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
+        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
         Assertions.assertNull(discountEntity.getDiscountValue());
     }
 
@@ -432,8 +449,8 @@ class DiscountServiceTest
         List<DiscountEntity> discounts = discountService.getDiscounts(agreementEntity.getId());
         Assertions.assertNotNull(discounts);
         Assertions.assertFalse(discounts.isEmpty());
-        Assertions.assertNotNull(discounts.get(0));
-        DiscountEntity discountDB = discounts.get(0);
+        Assertions.assertNotNull(discounts.getFirst());
+        DiscountEntity discountDB = discounts.getFirst();
         Assertions.assertEquals(discountEntity.getAgreement().getId(), agreementEntity.getId());
         Assertions.assertEquals(discountEntity.getId(), discountDB.getId());
         Assertions.assertEquals(discountEntity.getName(), discountDB.getName());
@@ -520,7 +537,6 @@ class DiscountServiceTest
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
         updatedDiscount.setStaticCode("update_static_code");
-        updatedDiscount.setVisibleOnEyca(true);
 
         DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
                                                                    discountEntity.getId(),
@@ -534,13 +550,16 @@ class DiscountServiceTest
         Assertions.assertFalse(dbDiscount.getProducts().isEmpty());
         Assertions.assertNotNull(updatedDiscount.getProducts());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
         Assertions.assertEquals(updatedDiscount.getDiscountUrl(), dbDiscount.getDiscountUrl());
-        Assertions.assertTrue(updatedDiscount.getVisibleOnEyca());
-        Assertions.assertTrue(dbDiscount.getVisibleOnEyca());
+        Assertions.assertEquals(updatedDiscount.getEycaLandingPageUrl(), dbDiscount.getEycaLandingPageUrl());
+        Assertions.assertNull(updatedDiscount.getEycaLandingPageUrl());
+        Assertions.assertNull(dbDiscount.getEycaLandingPageUrl());
+        Assertions.assertFalse(updatedDiscount.getVisibleOnEyca());
+        Assertions.assertFalse(dbDiscount.getVisibleOnEyca());
     }
 
     @Test
@@ -567,6 +586,7 @@ class DiscountServiceTest
         productEntity.setDiscount(updatedDiscount);
         updatedDiscount.addProductList(Collections.singletonList(productEntity));
         updatedDiscount.setCondition("update_condition");
+        updatedDiscount.setEycaLandingPageUrl(EYCA_URL_2);
         updatedDiscount.setVisibleOnEyca(true);
 
         DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
@@ -581,16 +601,18 @@ class DiscountServiceTest
         Assertions.assertFalse(dbDiscount.getProducts().isEmpty());
         Assertions.assertNotNull(updatedDiscount.getProducts());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
         Assertions.assertNull(updatedDiscount.getStaticCode());
         Assertions.assertEquals(updatedDiscount.getLandingPageUrl(), dbDiscount.getLandingPageUrl());
         Assertions.assertEquals(updatedDiscount.getEycaLandingPageUrl(), dbDiscount.getEycaLandingPageUrl());
         Assertions.assertEquals(updatedDiscount.getLandingPageReferrer(), dbDiscount.getLandingPageReferrer());
+        Assertions.assertEquals(updatedDiscount.getEycaLandingPageUrl(), dbDiscount.getEycaLandingPageUrl());
         Assertions.assertTrue(updatedDiscount.getVisibleOnEyca());
         Assertions.assertTrue(dbDiscount.getVisibleOnEyca());
+        Assertions.assertNotNull(dbDiscount.getEycaLandingPageUrl());
         Assertions.assertTrue(dbDiscount.getEycaEmailUpdateRequired());
     }
 
@@ -647,7 +669,7 @@ class DiscountServiceTest
                                                                    discountEntity.getId(),
                                                                    updatedDiscount).getDiscountEntity();
 
-        Assertions.assertTrue(DiscountStateEnum.DRAFT.equals(dbDiscount.getState()), "check referrer failed");
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState(), "check referrer failed");
     }
 
     @Test
@@ -689,8 +711,8 @@ class DiscountServiceTest
         Assertions.assertFalse(dbDiscount.getProducts().isEmpty());
         Assertions.assertNotNull(updatedDiscount.getProducts());
         Assertions.assertFalse(updatedDiscount.getProducts().isEmpty());
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
-        Assertions.assertEquals(updatedDiscount.getProducts().get(0), dbDiscount.getProducts().get(0));
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
+        Assertions.assertEquals(updatedDiscount.getProducts().getFirst(), dbDiscount.getProducts().getFirst());
         Assertions.assertEquals(updatedDiscount.getCondition(), dbDiscount.getCondition());
         Assertions.assertEquals(updatedDiscount.getStaticCode(), dbDiscount.getStaticCode());
         Assertions.assertNull(updatedDiscount.getStaticCode());
@@ -735,9 +757,9 @@ class DiscountServiceTest
                                                                                            discountId,
                                                                                            updatedDiscount));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage()
-                                   .equals(ErrorCodeEnum.CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING.getValue()));
+        Assertions.assertEquals(exception.getMessage(),
+                                ErrorCodeEnum.CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING.getValue(),
+                                exception.getMessage());
     }
 
     @Test
@@ -749,10 +771,14 @@ class DiscountServiceTest
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithoutProduct(agreementEntity);
         updatedDiscount.setName("updated_name");
         Long discountId = discountEntity.getId();
-        Assertions.assertThrows(InvalidRequestException.class,
-                                () -> discountService.updateDiscount("invalidAgreementId",
-                                                                     discountId,
-                                                                     updatedDiscount));
+
+
+        Exception exception = Assertions.assertThrows(InvalidRequestException.class,
+                                                      () -> discountService.updateDiscount("invalidAgreementId",
+                                                                                           discountId,
+                                                                                           updatedDiscount));
+
+        Assertions.assertEquals(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue(), exception.getMessage());
     }
 
     @Test
@@ -896,13 +922,13 @@ class DiscountServiceTest
         // await for view to be refreshed
         Awaitility.await()
                   .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+                  .until(() -> !publishedProductCategoryRepository.findAll().isEmpty());
 
         // check that materialized view should contain this discount categories
         var discountProductCategories = dbDiscount.getProducts()
                                                   .stream()
                                                   .map(DiscountProductEntity::getProductCategory)
-                                                  .collect(Collectors.toList());
+                                                  .toList();
         var publishedProductCategories = publishedProductCategoryRepository.findAll();
         Assertions.assertEquals(discountProductCategories.size(), publishedProductCategories.size());
         publishedProductCategories.forEach(c -> {
@@ -938,13 +964,13 @@ class DiscountServiceTest
         // await for view to be refreshed
         Awaitility.await()
                   .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+                  .until(() -> !publishedProductCategoryRepository.findAll().isEmpty());
 
         // check that materialized view should contain this discount categories
         var discountProductCategories = dbDiscount.getProducts()
                                                   .stream()
                                                   .map(DiscountProductEntity::getProductCategory)
-                                                  .collect(Collectors.toList());
+                                                  .toList();
         var publishedProductCategories = publishedProductCategoryRepository.findAll();
         Assertions.assertEquals(discountProductCategories.size(), publishedProductCategories.size());
         publishedProductCategories.forEach(c -> {
@@ -1346,18 +1372,18 @@ class DiscountServiceTest
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !onlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         // unpublish discount
         discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() <= 0);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is not in the view anymore
         onlineMerchantEntities = onlineMerchantRepository.findAll();
@@ -1386,18 +1412,18 @@ class DiscountServiceTest
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !offlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var offlineMerchantEntities = offlineMerchantRepository.findAll();
         Assertions.assertEquals(1, offlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.getFirst().getId());
 
         // unpublish discount
         discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() <= 0);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is not in the view anymore
         offlineMerchantEntities = offlineMerchantRepository.findAll();
@@ -1432,24 +1458,24 @@ class DiscountServiceTest
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !onlineMerchantRepository.findAll().isEmpty());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !offlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         var offlineMerchantEntities = offlineMerchantRepository.findAll();
         Assertions.assertEquals(1, offlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.getFirst().getId());
 
         // unpublish discount
         discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() <= 0);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() <= 0);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().isEmpty());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is not in the view anymore
         onlineMerchantEntities = onlineMerchantRepository.findAll();
@@ -1502,17 +1528,17 @@ class DiscountServiceTest
                                                                               DiscountStateEnum.PUBLISHED));
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> offlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !onlineMerchantRepository.findAll().isEmpty());
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !offlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         var offlineMerchantEntities = offlineMerchantRepository.findAll();
         Assertions.assertEquals(1, offlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.getFirst().getId());
 
         // unpublish discount
         discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
@@ -1526,11 +1552,11 @@ class DiscountServiceTest
         // assert the merchant is still in the view because there is another published discount
         onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         offlineMerchantEntities = offlineMerchantRepository.findAll();
         Assertions.assertEquals(1, offlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), offlineMerchantEntities.getFirst().getId());
     }
 
     @Test
@@ -1561,7 +1587,7 @@ class DiscountServiceTest
         // await for view to be refreshed
         Awaitility.await()
                   .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+                  .until(() -> !publishedProductCategoryRepository.findAll().isEmpty());
 
         // suspend discount
         dbDiscount = discountService.suspendDiscount(agreementEntity.getId(), dbDiscount.getId(), "This a test");
@@ -1570,7 +1596,7 @@ class DiscountServiceTest
         // await for view to be refreshed
         Awaitility.await()
                   .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> publishedProductCategoryRepository.findAll().size() <= 0);
+                  .until(() -> publishedProductCategoryRepository.findAll().isEmpty());
 
         // check that materialized view should NOT contain this discount categories
         // specifically just one unpublished discount should leave an empty view
@@ -1606,7 +1632,7 @@ class DiscountServiceTest
         // await for view to be refreshed
         Awaitility.await()
                   .atMost(5, TimeUnit.SECONDS)
-                  .until(() -> publishedProductCategoryRepository.findAll().size() >= 1);
+                  .until(() -> !publishedProductCategoryRepository.findAll().isEmpty());
 
         // unpublish discount
         dbDiscount = discountService.unpublishDiscount(agreementEntity.getId(), dbDiscount.getId());
@@ -1692,14 +1718,13 @@ class DiscountServiceTest
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-        discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
         saveSampleDocuments(agreementEntity);
         Assertions.assertEquals(2, documentRepository.findByAgreementId(agreementEntity.getId()).size());
 
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntity(agreementEntity);
         updatedDiscount.setName("updated_name");
-        discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount)
-                       .getDiscountEntity();
+        discountService.updateDiscount(agreementEntity.getId(), discountEntity.getId(), updatedDiscount);
 
         Assertions.assertEquals(0, documentRepository.findByAgreementId(agreementEntity.getId()).size());
     }

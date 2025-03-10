@@ -63,8 +63,9 @@ public class DiscountService {
         }
     };
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
-        if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode()))
-            || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
+        if ((dbEntity.getStaticCode()!=null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode())) ||
+            (dbEntity.getEycaLandingPageUrl()!=null &&
+             !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
             dbEntity.setEycaEmailUpdateRequired(true);
         }
         dbEntity.setName(toUpdateEntity.getName());
@@ -443,6 +444,12 @@ public class DiscountService {
     private ProfileEntity validateDiscount(String agreementId,
                                            DiscountEntity discountEntity,
                                            boolean isBucketFileChanged) {
+
+        if (discountEntity.getVisibleOnEyca() && StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()) ||
+            !discountEntity.getVisibleOnEyca() && !StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl())) {
+            throw new InvalidRequestException(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue());
+        }
+
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
@@ -560,6 +567,7 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setEycaLandingPageUrl(null);
+            discountEntity.setVisibleOnEyca(false);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);

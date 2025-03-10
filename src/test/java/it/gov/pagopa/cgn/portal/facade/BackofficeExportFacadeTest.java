@@ -27,6 +27,9 @@ class BackofficeExportFacadeTest
 
     private AgreementEntity agreementEntity;
 
+    private static final String EYCA_URL = "www.eycalandingpage.com/lpe";
+    private static final String EYCA_URL_2 = "www.eycalandingpage.com/Lpe2";
+
     @BeforeEach
     void init() {
         agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
@@ -118,31 +121,30 @@ class BackofficeExportFacadeTest
         Assertions.assertEquals(3, CsvUtils.countCsvLines(response.getBody().getInputStream()));
     }
 
-
     @Test
     void ExportEycaDiscounts_OK()
             throws IOException {
-        createProfile();
 
+        createProfile();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountEntity1.setVisibleOnEyca(true);
+        discountEntity1.setEycaLandingPageUrl(EYCA_URL);
         discountEntity1.setState(DiscountStateEnum.PUBLISHED);
         discountEntity1.setEndDate(LocalDate.now().plusDays(10));
         discountService.createDiscount(agreementEntity.getId(), discountEntity1);
 
         DiscountEntity discountEntity2 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity2.setName("Discount 2");
-        discountEntity2.setVisibleOnEyca(true);
-        discountEntity2.setState(DiscountStateEnum.PUBLISHED);
-        discountEntity2.setEndDate(LocalDate.now().plusDays(10));
+        discountEntity1.setVisibleOnEyca(true);
+        discountEntity1.setEycaLandingPageUrl(EYCA_URL_2);
+        discountEntity1.setState(DiscountStateEnum.PUBLISHED);
+        discountEntity1.setEndDate(LocalDate.now().plusDays(10));
         discountService.createDiscount(agreementEntity.getId(), discountEntity2);
 
-        ResponseEntity<Resource> response = backofficeExportFacade.exportEycaDiscounts();
+        ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(3, CsvUtils.countCsvLines(response.getBody().getInputStream()));
     }
-
-
 }
