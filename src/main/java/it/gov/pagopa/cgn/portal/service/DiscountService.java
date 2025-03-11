@@ -445,13 +445,15 @@ public class DiscountService {
                                            DiscountEntity discountEntity,
                                            boolean isBucketFileChanged) {
 
-        if (discountEntity.getVisibleOnEyca() && StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()) ||
-            !discountEntity.getVisibleOnEyca() && !StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl())) {
+        ProfileEntity profileEntity = profileService.getProfile(agreementId)
+                                                    .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
+            (discountEntity.getVisibleOnEyca() && StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()) ||
+             !discountEntity.getVisibleOnEyca() && !StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()))) {
             throw new InvalidRequestException(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue());
         }
 
-        ProfileEntity profileEntity = profileService.getProfile(agreementId)
-                                                    .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         commonDiscountValidation(profileEntity, discountEntity, isBucketFileChanged);
 
@@ -567,7 +569,6 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setEycaLandingPageUrl(null);
-            discountEntity.setVisibleOnEyca(false);
             discountEntity.setLandingPageReferrer(null);
             discountEntity.setLastBucketCodeLoadUid(null);
             discountEntity.setLastBucketCodeLoadFileName(null);

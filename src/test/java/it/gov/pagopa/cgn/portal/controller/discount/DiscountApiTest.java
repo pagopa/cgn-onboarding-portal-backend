@@ -138,11 +138,11 @@ class DiscountApiTest
     }
 
     @Test
-    void Create_CreateDiscountVisibleOnEycaInconsistentWithURL_BadRequest()
+    void Create_CreateDiscountLandingPageVisibleOnEycaInconsistentWithURL_BadRequest()
             throws Exception {
-        initTest(DiscountCodeTypeEnum.STATIC);
-        CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
-        discount.setEycaLandingPageUrl("https://www.contoso.com/elp");
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
+        discount.setEycaLandingPageUrl("https://www.contoso.com/elp"); //assume visbleOnEyca=false defaulted on entity
 
         this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
                                                .content(TestUtils.getJson(discount)))
@@ -156,6 +156,42 @@ class DiscountApiTest
                                                .content(TestUtils.getJson(discount)))
                     .andDo(log())
                     .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
+
+        discount.setEycaLandingPageUrl("");
+        discount.setVisibleOnEyca(true);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
+    }
+
+    @Test
+    void Create_CreateDiscountLandingPageVisibleOnEycaAndWithURL_OK()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
+        discount.setVisibleOnEyca(true);
+        discount.setEycaLandingPageUrl("https://www.contoso.com/elp");
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+    }
+
+    @Test
+    void Create_CreateDiscountStaticVisibleOnEycaInconsistentWithURL_OK()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+        CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
+        discount.setEycaLandingPageUrl(null);
+        discount.setVisibleOnEyca(true);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test

@@ -146,7 +146,6 @@ class DiscountServiceTest
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                                                                                            STATIC_CODE);
         discountEntity.setVisibleOnEyca(true);
-        discountEntity.setEycaLandingPageUrl("https://contoso.com/lpe");
         discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
         Assertions.assertNotNull(discountEntity.getId());
         Assertions.assertNotNull(discountEntity.getAgreement());
@@ -160,7 +159,7 @@ class DiscountServiceTest
         Assertions.assertNull(discountEntity.getLandingPageUrl());
         Assertions.assertNull(discountEntity.getLandingPageReferrer());
         Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
-        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
+        Assertions.assertTrue(discountEntity.getVisibleOnEyca());
     }
 
     @Test
