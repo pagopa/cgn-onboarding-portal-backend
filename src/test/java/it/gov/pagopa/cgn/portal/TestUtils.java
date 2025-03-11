@@ -604,42 +604,42 @@ public class TestUtils {
 
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV(InputStream is) {
-        return CsvUtils.csvToEntityList(is, record -> {
+        return CsvUtils.csvToEntityList(is, rec -> {
             EycaDataExportViewEntity e = new EycaDataExportViewEntity();
 
-            e.setId(Long.valueOf(record.get("id")));
-            e.setCategories(record.get("categories"));
-            e.setProfileId(Long.valueOf(record.get("profile_id")));
-            e.setVendor(record.get("vendor"));
-            e.setDiscountId(Long.valueOf(record.get("discount_id")));
-            e.setEycaUpdateId(record.get("eyca_update_id"));
-            e.setName(record.get("name"));
-            e.setStartDate(LocalDate.parse(record.get("start_date")));
-            e.setEndDate(LocalDate.parse(record.get("end_date")));
-            e.setNameLocal(record.get("name_local"));
-            e.setText(record.get("text"));
-            e.setTextLocal(record.get("text_local"));
-            e.setEmail(record.get("email"));
-            e.setPhone(record.get("phone"));
-            e.setWeb(record.get("web"));
-            e.setTags(record.get("tags"));
-            e.setImage(record.get("image"));
-            e.setLive(record.get("live"));
-            e.setLocationLocalId(record.get("location_local_id"));
-            e.setStreet(record.get("street"));
-            e.setCity(record.get("city"));
-            e.setZip(record.get("zip"));
-            e.setCountry(record.get("country"));
-            e.setRegion(record.get("region"));
-            e.setLatitude(record.get("latitude"));
-            e.setLongitude(record.get("longitude"));
-            e.setDiscountType(record.get("discount_type"));
-            e.setStaticCode(record.get("static_code"));
-            e.setLandingPageUrl(record.get("landing_page_url"));
-            e.setLandingPageReferrer(record.get("landing_page_referrer"));
-            e.setReferent(Long.valueOf(record.get("referent")));
-            e.setEycaLandingPageUrl(record.get("eyca_landing_page_url"));
-            e.setEycaEmailUpdateRequired(Boolean.valueOf(record.get("eyca_email_update_required")));
+            e.setId(Long.valueOf(rec.get("id")));
+            e.setCategories(rec.get("categories"));
+            e.setProfileId(Long.valueOf(rec.get("profile_id")));
+            e.setVendor(rec.get("vendor"));
+            e.setDiscountId(Long.valueOf(rec.get("discount_id")));
+            e.setEycaUpdateId(rec.get("eyca_update_id"));
+            e.setName(rec.get("name"));
+            e.setStartDate(LocalDate.parse(rec.get("start_date")));
+            e.setEndDate(LocalDate.parse(rec.get("end_date")));
+            e.setNameLocal(rec.get("name_local"));
+            e.setText(rec.get("text"));
+            e.setTextLocal(rec.get("text_local"));
+            e.setEmail(rec.get("email"));
+            e.setPhone(rec.get("phone"));
+            e.setWeb(rec.get("web"));
+            e.setTags(rec.get("tags"));
+            e.setImage(rec.get("image"));
+            e.setLive(rec.get("live"));
+            e.setLocationLocalId(rec.get("location_local_id"));
+            e.setStreet(rec.get("street"));
+            e.setCity(rec.get("city"));
+            e.setZip(rec.get("zip"));
+            e.setCountry(rec.get("country"));
+            e.setRegion(rec.get("region"));
+            e.setLatitude(rec.get("latitude"));
+            e.setLongitude(rec.get("longitude"));
+            e.setDiscountType(rec.get("discount_type"));
+            e.setStaticCode(rec.get("static_code"));
+            e.setLandingPageUrl(rec.get("landing_page_url"));
+            e.setLandingPageReferrer(rec.get("landing_page_referrer"));
+            e.setReferent(Long.valueOf(rec.get("referent")));
+            e.setEycaLandingPageUrl(rec.get("eyca_landing_page_url"));
+            e.setEycaEmailUpdateRequired(Boolean.valueOf(rec.get("eyca_email_update_required")));
             return e;
         });
     }
@@ -1084,7 +1084,7 @@ public class TestUtils {
 
     public static SuspendDiscount suspendableDiscountFromDiscountEntity(DiscountEntity discountEntity) {
         SuspendDiscount suspendDiscount = new SuspendDiscount();
-        suspendDiscount.setReasonMessage("fake reason");
+        suspendDiscount.setReasonMessage(discountEntity.getSuspendedReasonMessage());
         return suspendDiscount;
     }
 
