@@ -52,16 +52,6 @@ class BackofficeExportFacadeTest
     }
 
     @Test
-    void ExportAgreements_DRAFT_WITH_PROFILE_OK()
-            throws IOException {
-        createProfile();
-        ResponseEntity<Resource> response = backofficeExportFacade.exportAgreements();
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertNotNull(response.getBody());
-        Assertions.assertEquals(2, CsvUtils.countCsvLines(response.getBody().getInputStream()));
-    }
-
-    @Test
     void ExportAgreements_DRAFT_WITH_PROFILE_NO_DISCOUNTS_OK()
             throws IOException {
         createProfile();

@@ -462,7 +462,7 @@ class DiscountApiTest
 
         Optional<DiscountEntity> entityOpt = discountRepository.findById(discountEntity.getId());
         Assertions.assertTrue(entityOpt.isPresent());
-        Assertions.assertEquals(entityOpt.get().getEycaEmailUpdateRequired(), true);
+        Assertions.assertEquals(true, entityOpt.get().getEycaEmailUpdateRequired());
     }
 
     @Test
