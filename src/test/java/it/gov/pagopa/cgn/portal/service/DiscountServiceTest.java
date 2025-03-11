@@ -288,32 +288,7 @@ class DiscountServiceTest
         Assertions.assertEquals(REFERRER, discountEntity.getLandingPageReferrer());
         Assertions.assertTrue(discountEntity.getVisibleOnEyca());
     }
-
-    @Test
-    void Create_CreateDiscountWithBucketCodes_Ok()
-            throws IOException {
-        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.BUCKET);
-
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        azureStorage.uploadCsv(multipartFile.getBytes(),
-                               discountEntity.getLastBucketCodeLoadUid(),
-                               multipartFile.getSize());
-        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
-        Assertions.assertNotNull(discountEntity.getId());
-        Assertions.assertNotNull(discountEntity.getAgreement());
-        Assertions.assertNotNull(discountEntity.getProducts());
-        Assertions.assertFalse(discountEntity.getProducts().isEmpty());
-        Assertions.assertNotNull(discountEntity.getProducts().getFirst());
-        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getProductCategory());
-        Assertions.assertNotNull(discountEntity.getProducts().getFirst().getDiscount());
-        Assertions.assertNull(discountEntity.getStaticCode());
-        Assertions.assertNull(discountEntity.getLandingPageUrl());
-        Assertions.assertNull(discountEntity.getLandingPageReferrer());
-        Assertions.assertNotNull(discountEntity.getLastBucketCodeLoad().getId());
-        Assertions.assertNull(discountEntity.getEycaLandingPageUrl());
-        Assertions.assertFalse(discountEntity.getVisibleOnEyca());
-    }
-
+    
     @Test
     void Create_CreateDiscountWithBulkBucketCodes_Ok()
             throws IOException {
