@@ -604,42 +604,42 @@ public class TestUtils {
 
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV(InputStream is) {
-        return CsvUtils.csvToEntityList(is, _record -> {
+        return CsvUtils.csvToEntityList(is, record -> {
             EycaDataExportViewEntity e = new EycaDataExportViewEntity();
 
-            e.setId(Long.valueOf(_record.get("id")));
-            e.setCategories(_record.get("categories"));
-            e.setProfileId(Long.valueOf(_record.get("profile_id")));
-            e.setVendor(_record.get("vendor"));
-            e.setDiscountId(Long.valueOf(_record.get("discount_id")));
-            e.setEycaUpdateId(_record.get("eyca_update_id"));
-            e.setName(_record.get("name"));
-            e.setStartDate(LocalDate.parse(_record.get("start_date")));
-            e.setEndDate(LocalDate.parse(_record.get("end_date")));
-            e.setNameLocal(_record.get("name_local"));
-            e.setText(_record.get("text"));
-            e.setTextLocal(_record.get("text_local"));
-            e.setEmail(_record.get("email"));
-            e.setPhone(_record.get("phone"));
-            e.setWeb(_record.get("web"));
-            e.setTags(_record.get("tags"));
-            e.setImage(_record.get("image"));
-            e.setLive(_record.get("live"));
-            e.setLocationLocalId(_record.get("location_local_id"));
-            e.setStreet(_record.get("street"));
-            e.setCity(_record.get("city"));
-            e.setZip(_record.get("zip"));
-            e.setCountry(_record.get("country"));
-            e.setRegion(_record.get("region"));
-            e.setLatitude(_record.get("latitude"));
-            e.setLongitude(_record.get("longitude"));
-            e.setDiscountType(_record.get("discount_type"));
-            e.setStaticCode(_record.get("static_code"));
-            e.setLandingPageUrl(_record.get("landing_page_url"));
-            e.setLandingPageReferrer(_record.get("landing_page_referrer"));
-            e.setReferent(Long.valueOf(_record.get("referent")));
-            e.setEycaLandingPageUrl(_record.get("eyca_landing_page_url"));
-            e.setEycaEmailUpdateRequired(Boolean.valueOf(_record.get("eyca_email_update_required")));
+            e.setId(Long.valueOf(record.get("id")));
+            e.setCategories(record.get("categories"));
+            e.setProfileId(Long.valueOf(record.get("profile_id")));
+            e.setVendor(record.get("vendor"));
+            e.setDiscountId(Long.valueOf(record.get("discount_id")));
+            e.setEycaUpdateId(record.get("eyca_update_id"));
+            e.setName(record.get("name"));
+            e.setStartDate(LocalDate.parse(record.get("start_date")));
+            e.setEndDate(LocalDate.parse(record.get("end_date")));
+            e.setNameLocal(record.get("name_local"));
+            e.setText(record.get("text"));
+            e.setTextLocal(record.get("text_local"));
+            e.setEmail(record.get("email"));
+            e.setPhone(record.get("phone"));
+            e.setWeb(record.get("web"));
+            e.setTags(record.get("tags"));
+            e.setImage(record.get("image"));
+            e.setLive(record.get("live"));
+            e.setLocationLocalId(record.get("location_local_id"));
+            e.setStreet(record.get("street"));
+            e.setCity(record.get("city"));
+            e.setZip(record.get("zip"));
+            e.setCountry(record.get("country"));
+            e.setRegion(record.get("region"));
+            e.setLatitude(record.get("latitude"));
+            e.setLongitude(record.get("longitude"));
+            e.setDiscountType(record.get("discount_type"));
+            e.setStaticCode(record.get("static_code"));
+            e.setLandingPageUrl(record.get("landing_page_url"));
+            e.setLandingPageReferrer(record.get("landing_page_referrer"));
+            e.setReferent(Long.valueOf(record.get("referent")));
+            e.setEycaLandingPageUrl(record.get("eyca_landing_page_url"));
+            e.setEycaEmailUpdateRequired(Boolean.valueOf(record.get("eyca_email_update_required")));
             return e;
         });
     }
@@ -1218,40 +1218,40 @@ public class TestUtils {
     }
 
     public static List<UpdateReferent> createUpdateReferentList() {
-        UpdateReferent updateReferent_0 = new UpdateReferent();
-        updateReferent_0.setEmailAddress("mail_a.mail@mail.com");
-        updateReferent_0.setFirstName("FIRSTNAME_A");
-        updateReferent_0.setLastName("LASTNAME_A");
-        updateReferent_0.setTelephoneNumber("54654654");
-        updateReferent_0.setRole("ROLE");
+        UpdateReferent updateReferent0 = new UpdateReferent();
+        updateReferent0.setEmailAddress("mail_a.mail@mail.com");
+        updateReferent0.setFirstName("FIRSTNAME_A");
+        updateReferent0.setLastName("LASTNAME_A");
+        updateReferent0.setTelephoneNumber("54654654");
+        updateReferent0.setRole("ROLE");
 
-        UpdateReferent updateReferent_1 = new UpdateReferent();
-        updateReferent_1.setEmailAddress("mail_b.mail@mail.com");
-        updateReferent_1.setFirstName("FIRSTNAME_B");
-        updateReferent_1.setLastName("LASTNAME_B");
-        updateReferent_1.setTelephoneNumber("54654654");
-        updateReferent_1.setRole("ROLE");
+        UpdateReferent updateReferent1 = new UpdateReferent();
+        updateReferent1.setEmailAddress("mail_b.mail@mail.com");
+        updateReferent1.setFirstName("FIRSTNAME_B");
+        updateReferent1.setLastName("LASTNAME_B");
+        updateReferent1.setTelephoneNumber("54654654");
+        updateReferent1.setRole("ROLE");
 
-        return new ArrayList<>(Arrays.asList(updateReferent_0, updateReferent_1));
+        return new ArrayList<>(Arrays.asList(updateReferent0, updateReferent1));
 
     }
 
     public static List<CreateReferent> createCreateReferentList() {
-        CreateReferent createReferent_0 = new CreateReferent();
-        createReferent_0.setEmailAddress("mail_a.mail@mail.com");
-        createReferent_0.setFirstName("FIRSTNAME_A");
-        createReferent_0.setLastName("LASTNAME_A");
-        createReferent_0.setTelephoneNumber("54654654");
-        createReferent_0.setRole("ROLE");
+        CreateReferent createReferent0 = new CreateReferent();
+        createReferent0.setEmailAddress("mail_a.mail@mail.com");
+        createReferent0.setFirstName("FIRSTNAME_A");
+        createReferent0.setLastName("LASTNAME_A");
+        createReferent0.setTelephoneNumber("54654654");
+        createReferent0.setRole("ROLE");
 
-        CreateReferent createReferent_1 = new CreateReferent();
-        createReferent_1.setEmailAddress("mail_b.mail@mail.com");
-        createReferent_1.setFirstName("FIRSTNAME_B");
-        createReferent_1.setLastName("LASTNAME_B");
-        createReferent_1.setTelephoneNumber("54654654");
-        createReferent_1.setRole("ROLE");
+        CreateReferent createReferent1 = new CreateReferent();
+        createReferent1.setEmailAddress("mail_b.mail@mail.com");
+        createReferent1.setFirstName("FIRSTNAME_B");
+        createReferent1.setLastName("LASTNAME_B");
+        createReferent1.setTelephoneNumber("54654654");
+        createReferent1.setRole("ROLE");
 
-        return new ArrayList<>(Arrays.asList(createReferent_0, createReferent_1));
+        return new ArrayList<>(Arrays.asList(createReferent0, createReferent1));
 
     }
 
