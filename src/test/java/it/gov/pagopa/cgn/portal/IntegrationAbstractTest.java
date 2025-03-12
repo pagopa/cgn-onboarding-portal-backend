@@ -171,7 +171,7 @@ public class IntegrationAbstractTest {
                                                          DiscountCodeTypeEnum discountCodeType,
                                                          int idx,
                                                          boolean isPA) {
-        EntityType entityType = isPA ? EntityType.PUBLICADMINISTRATION:EntityType.PRIVATE;
+        EntityType entityType = isPA ? EntityType.PUBLIC_ADMINISTRATION:EntityType.PRIVATE;
         // creating agreement (and user)
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + idx,
                                                                                            entityType,

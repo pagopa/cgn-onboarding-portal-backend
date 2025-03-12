@@ -1,586 +1,606 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
-  version: 1.1.0
   title: EYCA Data Export
-
-host: ccdb.eyca.org
-schemes:
-  - https
-securityDefinitions:
-  basicAuth:
-    type: basic
-
+  version: 1.1.0
+servers:
+  - url: https://ccdb.eyca.org/
 paths:
   /api/auth:
     get:
-      operationId: authentication
       tags:
         - Eyca
       summary: session authentication
+      description: authenticated session
+      operationId: authentication
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not found.
+          content: { }
+        "500":
+          description: Service unavailable.
+          content: { }
       security:
         - basicAuth: [ ]
-      description: authenticated session
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: string
-        '404':
-          description: Not found.
-        '500':
-          description: Service unavailable.
-
   /api/search_discount:
     post:
-      security:
-        - Bearer: [ ]
-      operationId: searchDiscount
       tags:
         - Eyca
       summary: Search a discount.
       description: Search a discount.
+      operationId: searchDiscount
       parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/SearchDataExport"
-        - in: query
-          name: type
+        - name: type
+          in: query
           description: type text or json
-          required: false
-          type: string
-      responses:
-        '200':
-          description: Discount found.
           schema:
-            $ref: "#/definitions/SearchApiResponse"
-        '404':
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchDataExport'
+        required: false
+      responses:
+        "200":
+          description: Discount found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchApiResponse'
+        "404":
           description: Discount not found.
-        '500':
+          content: { }
+        "500":
           description: Service unavailable.
-
-  /api/list_discount:
-    post:
+          content: { }
       security:
         - Bearer: [ ]
-      operationId: listDiscount
+      x-codegen-request-body-name: body
+  /api/list_discount:
+    post:
       tags:
         - Eyca
       summary: return list of discounts with paging
       description: return list of discounts with paging
+      operationId: listDiscount
       parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/ListDataExport"
-        - in: query
-          name: type
+        - name: type
+          in: query
           description: type text or json
-          required: false
-          type: string
-      responses:
-        '200':
-          description: Discounts found.
           schema:
-            $ref: "#/definitions/ListApiResponse"
-        '404':
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListDataExport'
+        required: false
+      responses:
+        "200":
+          description: Discounts found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListApiResponse'
+        "404":
           description: Discounts not found.
-        '500':
+          content: { }
+        "500":
           description: Service unavailable.
-
-  /api/create_discount:
-    post:
+          content: { }
       security:
         - Bearer: [ ]
-      operationId: createDiscount
+      x-codegen-request-body-name: body
+  /api/create_discount:
+    post:
       tags:
         - Eyca
       summary: create a new discount.
       description: Create a new discount.
+      operationId: createDiscount
       parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/DataExport"
-        - in: query
-          name: type
+        - name: type
+          in: query
           description: type text or json
-          required: false
-          type: string
-      responses:
-        '200':
-          description: Discount created.
           schema:
-            $ref: "#/definitions/ApiResponse"
-        '404':
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataExport'
+        required: false
+      responses:
+        "200":
+          description: Discount created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
           description: Not found.
-        '500':
+          content: { }
+        "500":
           description: Service unavailable.
-
-  /api/update_discount:
-    post:
+          content: { }
       security:
         - Bearer: [ ]
-      operationId: updateDiscount
+      x-codegen-request-body-name: body
+  /api/update_discount:
+    post:
       tags:
         - Eyca
       summary: update a discount.
       description: update a new discount.
+      operationId: updateDiscount
       parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/UpdateDataExport"
-        - in: query
-          name: type
+        - name: type
+          in: query
           description: type text or json
-          required: false
-          type: string
-      responses:
-        '200':
-          description: Discount updated.
           schema:
-            $ref: "#/definitions/ApiResponse"
-        '404':
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDataExport'
+        required: false
+      responses:
+        "200":
+          description: Discount updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        "404":
           description: Not found.
-        '500':
+          content: { }
+        "500":
           description: Service unavailable.
-
-  /api/delete_discount:
-    post:
+          content: { }
       security:
         - Bearer: [ ]
-      operationId: deleteDiscount
+      x-codegen-request-body-name: body
+  /api/delete_discount:
+    post:
       tags:
         - Eyca
       summary: delete a discount.
       description: delete a discount.
+      operationId: deleteDiscount
       parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/DeleteDataExport"
-        - in: query
-          name: type
+        - name: type
+          in: query
           description: type text or json
-          required: false
-          type: string
-      responses:
-        '200':
-          description: Discount created.
           schema:
-            $ref: "#/definitions/DeleteApiResponse"
-        '404':
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteDataExport'
+        required: false
+      responses:
+        "200":
+          description: Discount created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteApiResponse'
+        "404":
           description: Not found.
-        '500':
+          content: { }
+        "500":
           description: Service unavailable.
-
-consumes:
-  - application/json
-produces:
-  - application/json
-parameters: null
-
-definitions:
-  ListDataExport:
-    type: object
-    required:
-      - page
-      - rows
-    properties:
-      page:
-        type: integer
-      rows:
-        type: integer
-  SearchDataExport:
-    type: object
-    required:
-      - id
-      - live
-    properties:
-      id:
-        type: string
-      live:
-        type: integer
-  DataExport:
-    type: object
-    required:
-      - vendor
-      - name
-      - text
-    properties:
-      local_id:
-        type: string
-      vendor:
-        type: string
-      name:
-        type: string
-      name_local:
-        type: string
-      text:
-        type: string
-      text_local:
-        type: string
-      +locations:
-        type: array
-        items:
-          $ref: "#/definitions/Location"
-      phone:
-        type: string
-      web:
-        type: string
-      email:
-        type: string
-      +tags:
-        type: array
-        items:
+          content: { }
+      security:
+        - Bearer: [ ]
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    ListDataExport:
+      required:
+        - page
+        - rows
+      type: object
+      properties:
+        page:
+          type: integer
+        rows:
+          type: integer
+    SearchDataExport:
+      required:
+        - id
+        - live
+      type: object
+      properties:
+        id:
           type: string
-      +categories:
-        type: array
-        items:
+        live:
+          type: integer
+    DataExport:
+      required:
+        - name
+        - text
+        - vendor
+      type: object
+      properties:
+        local_id:
           type: string
-      live:
-        type: integer
-      image_source__web:
-        type: string
-      image_source__file:
-        type: string
-      files:
-        type: array
-        items:
-          $ref: "#/definitions/File"
-
-  UpdateDataExport:
-    type: object
-    required:
-      - id
-    properties:
-      id:
-        type: string
-      vendor:
-        type: string
-      name:
-        type: string
-      name_local:
-        type: string
-      text:
-        type: string
-      text_local:
-        type: string
-      +locations:
-        type: array
-        items:
-          $ref: "#/definitions/Location"
-      phone:
-        type: string
-      web:
-        type: string
-      email:
-        type: string
-      +tags:
-        type: array
-        items:
+        vendor:
           type: string
-      +categories:
-        type: array
-        items:
+        name:
           type: string
-      image_source__file:
-        type: string
-      files:
-        type: array
-        items:
-          $ref: "#/definitions/File"
-
-  DeleteDataExport:
-    type: object
-    required:
-      - id
-    properties:
-      id:
-        type: string
-
-  File:
-    type: object
-    properties:
-      name:
-        type: string
-      base64:
-        type: string
-
-  ApiResponse:
-    type: object
-    properties:
-      api_response:
-        type: object
-        properties:
-          code:
-            type: integer
-            example: 1
-          data:
-            properties:
-              discount:
-                type: array
-                items:
-                  $ref: "#/definitions/DiscountItem"
-          error:
-            type: integer
-            example: 0
-          http_status:
-            type: integer
-            example: 200
-          text:
+        name_local:
+          type: string
+        text:
+          type: string
+        text_local:
+          type: string
+        "+locations":
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        phone:
+          type: string
+        web:
+          type: string
+        email:
+          type: string
+        "+tags":
+          type: array
+          items:
             type: string
-            example: "OK"
-
-  SearchApiResponse:
-    type: object
-    properties:
-      api_response:
-        type: object
-        properties:
-          data:
-            type: object
-            properties:
-              discounts:
-                type: object
-                properties:
-                  CCDB:
-                    type: object
-                    properties:
-                      pageNumber:
-                        type: integer
-                      rowsTotal:
-                        type: integer
-                      rowsReturned:
-                        type: integer
-                      rowsPerPage:
-                        type: integer
-                      pagesTotal:
-                        type: integer
-                      offset:
-                        type: integer
-                  realCount:
-                    type: integer
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/definitions/DiscountItem"
-                  count:
-                    type: integer
-
-          error:
-            type: integer
-            example: 0
-          http_status:
-            type: integer
-            example: 200
-          text:
+        "+categories":
+          type: array
+          items:
             type: string
-            example: "OK"
-          code:
-            type: integer
-            example: 1
-
-  ListApiResponse:
-    type: object
-    properties:
-      api_response:
-        type: object
-        properties:
-          data:
-            type: object
-            properties:
-              discount:
-                type: array
-                items:
-                  $ref: "#/definitions/DiscountItem"
-          error:
-            type: integer
-            example: 0
-          http_status:
-            type: integer
-            example: 200
-          text:
-            type: string
-            example: "OK"
-          code:
-            type: integer
-            example: 1
-
-  DeleteApiResponse:
-    type: object
-    properties:
-      api_response:
-        type: object
-        properties:
-          data:
-            type: object
-          error:
-            type: integer
-            example: 0
-          http_status:
-            type: integer
-            example: 200
-          text:
-            type: string
-            example: "OK"
-          code:
-            type: integer
-            example: 1
-
-
-  DiscountItem:
-    type: object
-    properties:
-      categories:
-        type: array
-        items:
-          $ref: "#/definitions/Category"
-      ccdb_id:
-        type: string
-        example: "38905"
-      ccdb_member_id:
-        type: integer
-        example: 20
-      created:
-        type: string
-        example: "2017-08-02 08:41:04"
-      deleted:
-        type: integer
-        example: 0
-      email:
-        type: string
-        example: "suministros@bomarhosteleria.com"
-      id:
-        type: string
-        example: "598190209328fd0739980027"
-      image:
-        type: string
-        example: "https://ccdb.eyca.org/cstatic/lhbophmzefwgqzbpkwrbiopsemgocxqn_1611584193.jpg"
-      international:
-        type: integer
-        example: 0
-      live:
-        type: integer
-        example: 1
-      local_id:
-        type: string
-        example: null
-      member_id:
-        type: string
-        example: "59086ccdbddd883747454dd0"
-      name:
-        type: string
-        example: "10% discount"
-      name_local:
-        type: string
-        example: null
-      online:
-        type: integer
-        example: 0
-      phone:
-        type: string
-        example: "0034927233125"
-      physical:
-        type: integer
-        example: 1
-      tags:
-        type: array
-        items:
+        live:
+          type: integer
+        image_source__web:
           type: string
-      text:
-        type: string
-        example: "10% on all hotel supplies, uniforms, tableware, cuberturias, household items and furniture"
-      text_local:
-        type: string
-        example: "10% de descuentos en suministros de hostelería, uniforme, vajillas, cuberterías, menaje y mobiliario."
-      updated:
-        type: string
-      vendor:
-        type: string
-        example: "Bomar Hostelería"
-      web:
-        type: string
-        example: "http://www.bomarhosteleria.com/"
-
-  Category:
-    type: object
-    properties:
-      ccdb_id:
-        type: string
-        example: "40102"
-      id:
-        type: string
-        example: "SH"
-      name:
-        type: string
-        example: "Shopping"
-
-  LocationData:
-    type: object
-    properties:
-      count:
-        type: integer
-        example: 1
-      data:
-        type: array
-        items:
-          $ref: "#/definitions/Location"
-
-  Location:
-    type: object
-    properties:
-      street:
-        type: string
-        example: "1150"
-      city:
-        type: string
-        example: "Cáceres"
-      country:
-        type: string
-        example: "IT"
-      point_x:
-        type: string
-        example: "-6.38247299"
-      point_y:
-        type: string
-        example: "39.44942093"
-      zip:
-        type: string
-        example: "10195"
-      region:
-        type: string
-        example: "10195"
-
-  Country:
-    type: object
-    properties:
-      ccdb_id:
-        type: integer
-        example: 132
-      id:
-        type: string
-        example: "ES"
-      name:
-        type: string
-        example: "Spain"
-      region:
-        type: string
-        example: "Extremadura"
-
-  GeoData:
-    type: object
-    properties:
-      lat:
-        type: string
-        example: "39.44942093"
-      lng:
-        type: string
-        example: "-6.38247299"
-      point_x:
-        type: string
-        example: "-6.38247299"
-      point_y:
-        type: string
-        example: "39.44942093"
+        image_source__file:
+          type: string
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+    UpdateDataExport:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+        vendor:
+          type: string
+        name:
+          type: string
+        name_local:
+          type: string
+        text:
+          type: string
+        text_local:
+          type: string
+        "+locations":
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        phone:
+          type: string
+        web:
+          type: string
+        email:
+          type: string
+        "+tags":
+          type: array
+          items:
+            type: string
+        "+categories":
+          type: array
+          items:
+            type: string
+        image_source__file:
+          type: string
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/File'
+    DeleteDataExport:
+      required:
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+    File:
+      type: object
+      properties:
+        name:
+          type: string
+        base64:
+          type: string
+    ApiResponse:
+      type: object
+      properties:
+        api_response:
+          type: object
+          properties:
+            code:
+              type: integer
+              example: 1
+            data:
+              type: object
+              properties:
+                discount:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DiscountItem'
+            error:
+              type: integer
+              example: 0
+            http_status:
+              type: integer
+              example: 200
+            text:
+              type: string
+              example: OK
+    SearchApiResponse:
+      type: object
+      properties:
+        api_response:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                discounts:
+                  type: object
+                  properties:
+                    CCDB:
+                      type: object
+                      properties:
+                        pageNumber:
+                          type: integer
+                        rowsTotal:
+                          type: integer
+                        rowsReturned:
+                          type: integer
+                        rowsPerPage:
+                          type: integer
+                        pagesTotal:
+                          type: integer
+                        offset:
+                          type: integer
+                    realCount:
+                      type: integer
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/DiscountItem'
+                    count:
+                      type: integer
+            error:
+              type: integer
+              example: 0
+            http_status:
+              type: integer
+              example: 200
+            text:
+              type: string
+              example: OK
+            code:
+              type: integer
+              example: 1
+    ListApiResponse:
+      type: object
+      properties:
+        api_response:
+          type: object
+          properties:
+            data:
+              type: object
+              properties:
+                discount:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DiscountItem'
+            error:
+              type: integer
+              example: 0
+            http_status:
+              type: integer
+              example: 200
+            text:
+              type: string
+              example: OK
+            code:
+              type: integer
+              example: 1
+    DeleteApiResponse:
+      type: object
+      properties:
+        api_response:
+          type: object
+          properties:
+            data:
+              type: object
+              properties: { }
+            error:
+              type: integer
+              example: 0
+            http_status:
+              type: integer
+              example: 200
+            text:
+              type: string
+              example: OK
+            code:
+              type: integer
+              example: 1
+    DiscountItem:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        ccdb_id:
+          type: string
+          example: "38905"
+        ccdb_member_id:
+          type: integer
+          example: 20
+        created:
+          type: string
+          example: 2017-08-02 08:41:04
+        deleted:
+          type: integer
+          example: 0
+        email:
+          type: string
+          example: suministros@bomarhosteleria.com
+        id:
+          type: string
+          example: 598190209328fd0739980027
+        image:
+          type: string
+          example: https://ccdb.eyca.org/cstatic/lhbophmzefwgqzbpkwrbiopsemgocxqn_1611584193.jpg
+        international:
+          type: integer
+          example: 0
+        live:
+          type: integer
+          example: 1
+        local_id:
+          type: string
+          example: "null"
+        member_id:
+          type: string
+          example: 59086ccdbddd883747454dd0
+        name:
+          type: string
+          example: 10% discount
+        name_local:
+          type: string
+          example: "null"
+        online:
+          type: integer
+          example: 0
+        phone:
+          type: string
+          example: "0034927233125"
+        physical:
+          type: integer
+          example: 1
+        tags:
+          type: array
+          items:
+            type: string
+        text:
+          type: string
+          example: "10% on all hotel supplies, uniforms, tableware, cuberturias, household\
+            \ items and furniture"
+        text_local:
+          type: string
+          example: "10% de descuentos en suministros de hostelería, uniforme, vajillas,\
+            \ cuberterías, menaje y mobiliario."
+        updated:
+          type: string
+        vendor:
+          type: string
+          example: Bomar Hostelería
+        web:
+          type: string
+          example: http://www.bomarhosteleria.com/
+    Category:
+      type: object
+      properties:
+        ccdb_id:
+          type: string
+          example: "40102"
+        id:
+          type: string
+          example: SH
+        name:
+          type: string
+          example: Shopping
+    LocationData:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        street:
+          type: string
+          example: "1150"
+        city:
+          type: string
+          example: Cáceres
+        country:
+          type: string
+          example: IT
+        point_x:
+          type: string
+          example: "-6.38247299"
+        point_y:
+          type: string
+          example: "39.44942093"
+        zip:
+          type: string
+          example: "10195"
+        region:
+          type: string
+          example: "10195"
+    Country:
+      type: object
+      properties:
+        ccdb_id:
+          type: integer
+          example: 132
+        id:
+          type: string
+          example: ES
+        name:
+          type: string
+          example: Spain
+        region:
+          type: string
+          example: Extremadura
+    GeoData:
+      type: object
+      properties:
+        lat:
+          type: string
+          example: "39.44942093"
+        lng:
+          type: string
+          example: "-6.38247299"
+        point_x:
+          type: string
+          example: "-6.38247299"
+        point_y:
+          type: string
+          example: "39.44942093"
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+x-original-swagger-version: "2.0"

@@ -91,7 +91,7 @@ class DocumentServiceTest
                                                                       EntityType.PRIVATE,
                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
         agreementEntityPA = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
-                                                                        EntityType.PUBLICADMINISTRATION,
+                                                                        EntityType.PUBLIC_ADMINISTRATION,
                                                                         TestUtils.FAKE_ORGANIZATION_NAME);
 
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);

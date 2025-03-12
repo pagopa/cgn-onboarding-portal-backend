@@ -19,7 +19,7 @@ public class BackofficeApprovedAgreementConverter
 
     static {
         backofficeEntityTypeEnumMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
-        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
     }
 
     protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDto = entity -> {

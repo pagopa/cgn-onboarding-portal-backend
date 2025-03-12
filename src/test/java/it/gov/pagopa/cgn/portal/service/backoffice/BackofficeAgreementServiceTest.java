@@ -152,7 +152,7 @@ class BackofficeAgreementServiceTest
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         pendingAgreement = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
         BackofficeFilter filter = BackofficeFilter.builder()
-                                                  .agreementState(AgreementState.ASSIGNEDAGREEMENT.getValue())
+                                                  .agreementState(AgreementState.PENDING_AGREEMENT.getValue())
                                                   .build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 public class HelpCategoryConverter {
 
     private static final String ACCESS = "Accesso";
-    private static final String DATAFILLING = "Compilazione Dati";
+    private static final String DATA_FILLING = "Compilazione Dati";
     private static final String DISCOUNTS = "Agevolazioni";
     private static final String DOCUMENTS = "Documenti";
-    private static final String TECHNICALPROBLEM = "Problema Tecnico";
-    private static final String CGNOWNERREPORTING = "Segnalazione Titolare di CGN";
+    private static final String TECHNICAL_PROBLEM = "Problema Tecnico";
+    private static final String CGN_OWNER_REPORTING = "Segnalazione Titolare di CGN";
     private static final String SUGGESTIONS = "Suggerimenti";
     private static final String OTHER = "Altro";
 
@@ -20,16 +20,16 @@ public class HelpCategoryConverter {
         switch (category) {
             case ACCESS:
                 return ACCESS;
-            case DATAFILLING:
-                return DATAFILLING;
+            case DATA_FILLING:
+                return DATA_FILLING;
             case DISCOUNTS:
                 return DISCOUNTS;
             case DOCUMENTS:
                 return DOCUMENTS;
-            case TECHNICALPROBLEM:
-                return TECHNICALPROBLEM;
-            case CGNOWNERREPORTING:
-                return CGNOWNERREPORTING;
+            case TECHNICAL_PROBLEM:
+                return TECHNICAL_PROBLEM;
+            case CGN_OWNER_REPORTING:
+                return CGN_OWNER_REPORTING;
             case SUGGESTIONS:
                 return SUGGESTIONS;
             case OTHER:
@@ -43,16 +43,16 @@ public class HelpCategoryConverter {
         switch (category) {
             case ACCESS:
                 return ACCESS;
-            case DATAFILLING:
-                return DATAFILLING;
+            case DATA_FILLING:
+                return DATA_FILLING;
             case DISCOUNTS:
                 return DISCOUNTS;
             case DOCUMENTS:
                 return DOCUMENTS;
-            case TECHNICALPROBLEM:
-                return TECHNICALPROBLEM;
-            case CGNOWNERREPORTING:
-                return CGNOWNERREPORTING;
+            case TECHNICAL_PROBLEM:
+                return TECHNICAL_PROBLEM;
+            case CGN_OWNER_REPORTING:
+                return CGN_OWNER_REPORTING;
             case SUGGESTIONS:
                 return SUGGESTIONS;
             case OTHER:

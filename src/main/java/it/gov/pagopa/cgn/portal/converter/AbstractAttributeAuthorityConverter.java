@@ -10,7 +10,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-public abstract class AbstractAttributeAuthorityConverter<A, B> {
+public abstract class AbstractAttributeAuthorityConverter<A, B>
+        implements Iso8601TimestampCompatible {
 
     protected abstract Function<A, B> fromAttributeAuthorityModelFunction();
 

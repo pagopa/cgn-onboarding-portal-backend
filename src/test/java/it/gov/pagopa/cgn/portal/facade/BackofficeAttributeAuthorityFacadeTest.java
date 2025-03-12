@@ -106,7 +106,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         "org1",
                                                                                                         "org1@pec.it",
                                                                                                         OrganizationStatus.DRAFT,
-                                                                                                        EntityType.PUBLICADMINISTRATION);
+                                                                                                        EntityType.PUBLIC_ADMINISTRATION);
 
         List<OrganizationWithReferentsAndStatus> items = new LinkedList<>();
         items.add(organization0);
@@ -181,7 +181,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         "org0",
                                                                                                         "org0@pec.it",
                                                                                                         OrganizationStatus.DRAFT,
-                                                                                                        EntityType.PUBLICADMINISTRATION);
+                                                                                                        EntityType.PUBLIC_ADMINISTRATION);
 
 
         Consumer<OrganizationWithReferentsAndStatus> assertions = (org) -> {
@@ -332,7 +332,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      anOrganizationName,
                                                                      anOrganizationPec,
                                                                      false,
-                                                                     EntityType.PUBLICADMINISTRATION);
+                                                                     EntityType.PUBLIC_ADMINISTRATION);
         Consumer<UpsertResult> assertionsBlock = (ur) -> {
             ;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
@@ -372,7 +372,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      anOrganizationName,
                                                                      anOrganizationPec,
                                                                      false,
-                                                                     EntityType.PUBLICADMINISTRATION);
+                                                                     EntityType.PUBLIC_ADMINISTRATION);
 
         Consumer<UpsertResult> assertionsBlock = (ur) -> {
             ;
