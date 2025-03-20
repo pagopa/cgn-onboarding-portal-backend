@@ -340,8 +340,9 @@ public class DiscountService {
     public String getDiscountBucketCode(String agreementId, Long discountId) {
         DiscountEntity discount = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
-        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
-            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue());
+        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState()) &&
+            !DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_TEST_PENDING_OR_NOT_PUBLISHED.getValue());
         }
 
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
