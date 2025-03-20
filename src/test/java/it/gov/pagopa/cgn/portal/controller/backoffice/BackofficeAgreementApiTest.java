@@ -456,7 +456,7 @@ class BackofficeAgreementApiTest
     }
 
     @Test
-    void GetBucketCode_DiscountStateNotInTestPending_BadRequest()
+    void GetBucketCode_DiscountStateNotInTestPendingOrNotPublished_BadRequest()
             throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
                                                                                            EntityType.PRIVATE,
@@ -468,7 +468,25 @@ class BackofficeAgreementApiTest
                                                                                       discountEntity.getId()
                                                                                                     .toString())))
                     .andDo(log())
-                    .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue()));
+                    .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_TEST_PENDING_OR_NOT_PUBLISHED.getValue()));
+
+        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      discountEntity.getId()
+                                                                                                    .toString())))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+        discountEntity.setState(DiscountStateEnum.PUBLISHED);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      discountEntity.getId()
+                                                                                                    .toString())))
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test
