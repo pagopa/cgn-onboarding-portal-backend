@@ -1,9 +1,9 @@
 package it.gov.pagopa.cgn.portal.converter;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -15,7 +15,7 @@ public interface Iso8601TimestampCompatible {
 
 
     static String toISO8601UTCTimestamp(LocalDate ld) {
-        return Objects.nonNull(ld) ? ISO_8601_UTC_FORMATTER.format(Timestamp.valueOf(ld.atStartOfDay()).toInstant()):"";
+        return Objects.nonNull(ld) ? ISO_8601_UTC_FORMATTER.format(ld.atStartOfDay(ZoneOffset.UTC)):"";
     }
 
     static LocalDate toLocalDate(String timestamp) {

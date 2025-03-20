@@ -1421,7 +1421,7 @@ components:
       type: array
       items:
         maxLength: 16
-        minLength: 16
+        minLength: 1
         type: string
     OrganizationStatus:
       type: string
@@ -1587,10 +1587,10 @@ components:
       required: true
   securitySchemes:
     Bearer:
-      type: apiKey
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
       description: JWT Authorization header using the Bearer scheme
-      name: Authorization
-      in: header
     UserRole:
       type: apiKey
       description: Custom header containing requesting user role

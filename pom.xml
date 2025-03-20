@@ -404,6 +404,7 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <serializableModel>true</serializableModel>
                                 <serializationLibrary>jackson</serializationLibrary>
+                                <generateClientAsBean>true</generateClientAsBean>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -433,7 +434,27 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <serializableModel>true</serializableModel>
                                 <serializationLibrary>jackson</serializationLibrary>
+                                <generateClientAsBean>true</generateClientAsBean>
                             </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- workaround: https://stackoverflow.com/questions/73461247/spring-boot-openapi-generator-plugin-creates-unwanted-test-file/73983343 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- remove the unwanted generated testcases by the spring generator of openapi -->
+                                <delete dir="${project.build.directory}/generated-sources/src/test"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
@@ -475,18 +496,6 @@
                         <goals>
                             <goal>parse-version</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/src/main/java</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
