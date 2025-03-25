@@ -72,7 +72,7 @@ public abstract class CommonDiscountConverter<E, D>
                                                                                                                                                   .collect(
                                                                                                                                                           Collectors.toCollection(
                                                                                                                                                                   ArrayList::new));
-    ;
+
 
     protected Function<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> toBucketCodeLoadStatusDtoEnum = bucketCodeLoadStatusEnum -> Optional.ofNullable(
                                                                                                                                                    bucketLoadStatusEnumMap.get(bucketCodeLoadStatusEnum))

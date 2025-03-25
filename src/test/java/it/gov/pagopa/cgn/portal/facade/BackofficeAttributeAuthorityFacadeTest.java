@@ -23,8 +23,8 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SpringBootTest
@@ -438,10 +438,10 @@ class BackofficeAttributeAuthorityFacadeTest
     @Test
     void GetReferents_Ok() {
         Mockito.when(attributeAuthorityService.getReferents(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").collect(Collectors.toList())));
+               .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").toList()));
         ResponseEntity<List<String>> response = backofficeAttributeAuthorityFacade.getReferents("1234567890");
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("AAAAAA00A00A000A", response.getBody().get(0));
+        Assertions.assertEquals("AAAAAA00A00A000A", Objects.requireNonNull(response.getBody()).getFirst());
     }
 
     @Test
