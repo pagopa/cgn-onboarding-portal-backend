@@ -5,7 +5,10 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.enums.*;
+import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
@@ -23,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -38,7 +40,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.stream.Collectors.joining;
+import static it.gov.pagopa.cgn.portal.TestUtils.createSampleDiscountEntityWithEycaLandingPage;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -84,7 +86,9 @@ class DiscountApiTest
 
     void initTest(DiscountCodeTypeEnum discountCodeType)
             throws IOException {
-        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID, EntityType.PRIVATE,TestUtils.FAKE_ORGANIZATION_NAME);
+        agreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                EntityType.PRIVATE,
+                                                                TestUtils.FAKE_ORGANIZATION_NAME);
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement,
                                                                           SalesChannelEnum.ONLINE,
                                                                           discountCodeType);
@@ -124,12 +128,70 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(discount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(discount.getCondition()))
                     .andExpect(jsonPath("$.discountUrl").value(discount.getDiscountUrl()))
                     .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Create_CreateDiscountLandingPageVisibleOnEycaInconsistentWithURL_BadRequest()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
+        discount.setEycaLandingPageUrl("https://www.contoso.com/elp"); //assume visbleOnEyca=false defaulted on entity
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
+
+        discount.setEycaLandingPageUrl(null);
+        discount.setVisibleOnEyca(true);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
+
+        discount.setEycaLandingPageUrl("");
+        discount.setVisibleOnEyca(true);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
+    }
+
+    @Test
+    void Create_CreateDiscountLandingPageVisibleOnEycaAndWithURL_OK()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        CreateDiscount discount = createSampleCreateDiscountWithLandingPage();
+        discount.setVisibleOnEyca(true);
+        discount.setEycaLandingPageUrl("https://www.contoso.com/elp");
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+    }
+
+    @Test
+    void Create_CreateDiscountStaticVisibleOnEycaInconsistentWithURL_OK()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+        CreateDiscount discount = createSampleCreateDiscountWithStaticCode();
+        discount.setEycaLandingPageUrl(null);
+        discount.setVisibleOnEyca(true);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(discount)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test
@@ -182,6 +244,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(discount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(discount.getCondition()))
@@ -212,6 +275,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(discount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
@@ -252,6 +316,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(discount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(discount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(discount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(discount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(discount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(discount.getLastBucketCodeLoadUid()))
@@ -371,7 +436,7 @@ class DiscountApiTest
         updateDiscount.setDiscountUrl("https://anotherurl.com");
 
         this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
-                                                                       .content(TestUtils.getJson(updateDiscount)))
+                                                                             .content(TestUtils.getJson(updateDiscount)))
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -387,6 +452,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.productCategories").isNotEmpty())
                     .andExpect(jsonPath("$.staticCode").value(updateDiscount.getStaticCode()))
                     .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(updateDiscount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(updateDiscount.getEycaLandingPageUrl()))
                     .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
@@ -396,7 +462,7 @@ class DiscountApiTest
 
         Optional<DiscountEntity> entityOpt = discountRepository.findById(discountEntity.getId());
         Assertions.assertTrue(entityOpt.isPresent());
-        Assertions.assertEquals(entityOpt.get().getEycaEmailUpdateRequired(),true);
+        Assertions.assertEquals(true, entityOpt.get().getEycaEmailUpdateRequired());
     }
 
     @Test
@@ -415,6 +481,7 @@ class DiscountApiTest
         updateDiscount.setName("new_name");
         updateDiscount.setLandingPageUrl("new_url");
         updateDiscount.setEycaLandingPageUrl("new_eyca_url");
+        updateDiscount.setVisibleOnEyca(true);
         updateDiscount.setLandingPageReferrer("new_referrer");
 
         this.mockMvc.perform(put(discountPath + "/" + discountEntity.getId()).contentType(MediaType.APPLICATION_JSON)
@@ -438,6 +505,7 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.landingPageUrl").value(updateDiscount.getLandingPageUrl()))
                     .andExpect(jsonPath("$.eycaLandingPageUrl").isNotEmpty())
                     .andExpect(jsonPath("$.eycaLandingPageUrl").value(updateDiscount.getEycaLandingPageUrl()))
+                    .andExpect(jsonPath("$.visibleOnEyca").value(updateDiscount.getVisibleOnEyca()))
                     .andExpect(jsonPath("$.landingPageReferrer").isNotEmpty())
                     .andExpect(jsonPath("$.landingPageReferrer").value(updateDiscount.getLandingPageReferrer()))
                     .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
@@ -446,7 +514,7 @@ class DiscountApiTest
 
         Optional<DiscountEntity> entityOpt = discountRepository.findById(discountEntity.getId());
         Assertions.assertTrue(entityOpt.isPresent());
-        Assertions.assertEquals(entityOpt.get().getEycaEmailUpdateRequired(),true);
+        Assertions.assertEquals(true, entityOpt.get().getEycaEmailUpdateRequired());
     }
 
     @Test
@@ -481,6 +549,8 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.staticCode").isEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").isEmpty())
                     .andExpect(jsonPath("$.eycaLandingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.visibleOnEyca").isBoolean())
+                    .andExpect(jsonPath("$.visibleOnEyca").value(false))
                     .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").isNotEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
@@ -534,12 +604,35 @@ class DiscountApiTest
                     .andExpect(jsonPath("$.staticCode").isEmpty())
                     .andExpect(jsonPath("$.landingPageUrl").isEmpty())
                     .andExpect(jsonPath("$.eycaLandingPageUrl").isEmpty())
+                    .andExpect(jsonPath("$.visibleOnEyca").isBoolean())
+                    .andExpect(jsonPath("$.visibleOnEyca").value(false))
                     .andExpect(jsonPath("$.landingPageReferrer").isEmpty())
                     .andExpect(jsonPath("$.lastBucketCodeLoadUid").value(updateDiscount.getLastBucketCodeLoadUid()))
                     .andExpect(jsonPath("$.lastBucketCodeLoadFileName").value(updateDiscount.getLastBucketCodeLoadFileName()))
                     .andExpect(jsonPath("$.condition").value(updateDiscount.getCondition()))
                     .andExpect(jsonPath("$.creationDate").value(LocalDate.now().toString()))
                     .andExpect(jsonPath("$.suspendedReasonMessage").isEmpty());
+    }
+
+    @Test
+    void Update_CreateAndUpdateDiscountWithVisibleOnEycaInconsistentWithURL_BadRequest()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.LANDINGPAGE);
+        DiscountEntity discountEntity = createSampleDiscountEntityWithEycaLandingPage(agreement);
+        discountEntity.setLandingPageUrl("https://www.contoso.com/lp");
+        discountEntity.setLandingPageReferrer("REFERRER");
+        discountEntity.setEycaLandingPageUrl("https://www.contoso.com/elp");
+
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
+
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
+        updateDiscount.setVisibleOnEyca(true);
+        updateDiscount.setEycaLandingPageUrl(null);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue()));
     }
 
     @Test

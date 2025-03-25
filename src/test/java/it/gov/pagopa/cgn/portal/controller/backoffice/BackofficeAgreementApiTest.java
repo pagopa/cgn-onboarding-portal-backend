@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -153,7 +152,7 @@ class BackofficeAgreementApiTest
                                                                             .sorted(Comparator.comparing(a -> a.getProfileEntity()
                                                                                                                .getFullName()))
                                                                             .map(AgreementTestObject::getAgreementEntity)
-                                                                            .collect(Collectors.toList());
+                                                                            .toList();
         this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum.OPERATOR,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
@@ -181,7 +180,7 @@ class BackofficeAgreementApiTest
                                                                                .sorted(Comparator.comparing(
                                                                                                          AgreementEntity::getRequestApprovalTime)
                                                                                                  .reversed())
-                                                                               .collect(Collectors.toList());
+                                                                               .toList();
 
         this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithSortedColumn(BackofficeRequestSortColumnEnum.REQUEST_DATE,
                                                                                 Sort.Direction.DESC)))
@@ -207,7 +206,7 @@ class BackofficeAgreementApiTest
         List<AgreementTestObject> testObjectList = createMultiplePendingAgreement(5);
         List<AgreementEntity> agreementEntityList = testObjectList.stream()
                                                                   .map(AgreementTestObject::getAgreementEntity)
-                                                                  .collect(Collectors.toList());
+                                                                  .toList();
         Assertions.assertEquals(5, agreementEntityList.size());
         backofficeAgreementService.assignAgreement(agreementEntityList.get(2).getId());
 
@@ -352,6 +351,7 @@ class BackofficeAgreementApiTest
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
         discount.setLandingPageUrl("fake url");
+        discount.setSuspendedReasonMessage("fake message");
         discount.setLandingPageReferrer("referrer");
         discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
 
@@ -385,6 +385,7 @@ class BackofficeAgreementApiTest
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreementEntity);
         discount.setLandingPageUrl("fake url");
         discount.setLandingPageReferrer("referrer");
+        discount.setSuspendedReasonMessage("fake message");
         discount = discountService.createDiscount(agreementEntity.getId(), discount).getDiscountEntity();
 
         // simulate test passed
@@ -430,14 +431,10 @@ class BackofficeAgreementApiTest
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
         Assertions.assertEquals(2, codes.size());
 
-        List<DiscountBucketCodeEntity> usedCodes = codes.stream()
-                                                        .filter(DiscountBucketCodeEntity::getIsUsed)
-                                                        .collect(Collectors.toList());
+        List<DiscountBucketCodeEntity> usedCodes = codes.stream().filter(DiscountBucketCodeEntity::getIsUsed).toList();
         Assertions.assertEquals(1, usedCodes.size());
 
-        List<DiscountBucketCodeEntity> unusedCodes = codes.stream()
-                                                          .filter(c -> !c.getIsUsed())
-                                                          .collect(Collectors.toList());
+        List<DiscountBucketCodeEntity> unusedCodes = codes.stream().filter(c -> !c.getIsUsed()).toList();
         Assertions.assertEquals(1, unusedCodes.size());
     }
 
@@ -459,7 +456,7 @@ class BackofficeAgreementApiTest
     }
 
     @Test
-    void GetBucketCode_DiscountStateNotInTestPending_BadRequest()
+    void GetBucketCode_DiscountStateNotInTestPendingOrNotPublished_BadRequest()
             throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
                                                                                            EntityType.PRIVATE,
@@ -471,7 +468,25 @@ class BackofficeAgreementApiTest
                                                                                       discountEntity.getId()
                                                                                                     .toString())))
                     .andDo(log())
-                    .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue()));
+                    .andExpect(content().string(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_TEST_PENDING_OR_NOT_PUBLISHED.getValue()));
+
+        discountEntity.setState(DiscountStateEnum.TEST_PENDING);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      discountEntity.getId()
+                                                                                                    .toString())))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+        discountEntity.setState(DiscountStateEnum.PUBLISHED);
+        discountRepository.save(discountEntity);
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
+                                                                                      discountEntity.getId()
+                                                                                                    .toString())))
+                    .andDo(log())
+                    .andExpect(status().isOk());
     }
 
     @Test

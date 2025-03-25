@@ -63,8 +63,9 @@ public class DiscountService {
         }
     };
     private final BiConsumer<DiscountEntity, DiscountEntity> updateConsumer = (toUpdateEntity, dbEntity) -> {
-        if( (dbEntity.getStaticCode() != null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode()))
-            || (dbEntity.getEycaLandingPageUrl() != null && !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
+        if ((dbEntity.getStaticCode()!=null && !dbEntity.getStaticCode().equals(toUpdateEntity.getStaticCode())) ||
+            (dbEntity.getEycaLandingPageUrl()!=null &&
+             !dbEntity.getEycaLandingPageUrl().equals(toUpdateEntity.getEycaLandingPageUrl()))) {
             dbEntity.setEycaEmailUpdateRequired(true);
         }
         dbEntity.setName(toUpdateEntity.getName());
@@ -339,8 +340,9 @@ public class DiscountService {
     public String getDiscountBucketCode(String agreementId, Long discountId) {
         DiscountEntity discount = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
-        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
-            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_IN_TEST_PENDING.getValue());
+        if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState()) &&
+            !DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NOT_TEST_PENDING_OR_NOT_PUBLISHED.getValue());
         }
 
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
@@ -443,8 +445,16 @@ public class DiscountService {
     private ProfileEntity validateDiscount(String agreementId,
                                            DiscountEntity discountEntity,
                                            boolean isBucketFileChanged) {
+
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+
+        if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType()) &&
+            (discountEntity.getVisibleOnEyca() && StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()) ||
+             !discountEntity.getVisibleOnEyca() && !StringUtils.isEmpty(discountEntity.getEycaLandingPageUrl()))) {
+            throw new InvalidRequestException(ErrorCodeEnum.VISIBLE_ON_EYCA_NOT_CONSISTENT_WITH_URL.getValue());
+        }
+
 
         commonDiscountValidation(profileEntity, discountEntity, isBucketFileChanged);
 
