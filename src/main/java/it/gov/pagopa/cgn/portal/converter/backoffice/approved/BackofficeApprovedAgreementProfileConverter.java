@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 public class BackofficeApprovedAgreementProfileConverter
@@ -51,7 +50,7 @@ public class BackofficeApprovedAgreementProfileConverter
     };
     protected Function<List<AddressEntity>, List<String>> addressToDto = entityList -> entityList.stream()
                                                                                                  .map(AddressEntity::getFullAddress)
-                                                                                                 .collect(Collectors.toList());
+                                                                                                 .toList();
     protected Function<ProfileEntity, SalesChannel> salesChannelToDto = entity -> {
         switch (entity.getSalesChannel()) {
             case ONLINE:

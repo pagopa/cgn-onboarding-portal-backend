@@ -197,7 +197,7 @@ class BackofficeAgreementServiceTest
         var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementId);
+        profileService.createProfile(profileEntity, agreementId);
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementId, discountEntity);

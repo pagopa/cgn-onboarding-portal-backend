@@ -109,8 +109,7 @@ public class IntegrationAbstractTest {
     }
 
     @AfterEach
-    protected void cleanAll(TestInfo testInfo)
-            throws InterruptedException {
+    void cleanAll(TestInfo testInfo) {
         if (testInfo.getTags().contains("SkipCleanup")) return;
 
         documentRepository.deleteAll();

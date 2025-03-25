@@ -12,10 +12,7 @@ import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
 
 import java.time.LocalDate;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -73,7 +70,9 @@ public abstract class CommonDiscountConverter<E, D>
                                                                                                                                                   .map(discountProductEntity -> toProductDtoEnum.apply(
                                                                                                                                                           discountProductEntity.getProductCategory()))
                                                                                                                                                   .collect(
-                                                                                                                                                          Collectors.toList());
+                                                                                                                                                          Collectors.toCollection(
+                                                                                                                                                                  ArrayList::new));
+    ;
 
     protected Function<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> toBucketCodeLoadStatusDtoEnum = bucketCodeLoadStatusEnum -> Optional.ofNullable(
                                                                                                                                                    bucketLoadStatusEnumMap.get(bucketCodeLoadStatusEnum))
@@ -100,5 +99,6 @@ public abstract class CommonDiscountConverter<E, D>
                                                                                                                                                                              return productEntity;
                                                                                                                                                                          })
                                                                                                                                                                          .collect(
-                                                                                                                                                                                 Collectors.toList());
+                                                                                                                                                                                 Collectors.toCollection(
+                                                                                                                                                                                         ArrayList::new));
 }

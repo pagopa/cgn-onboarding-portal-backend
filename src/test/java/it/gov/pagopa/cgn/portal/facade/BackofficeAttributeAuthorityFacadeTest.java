@@ -184,7 +184,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         EntityType.PUBLIC_ADMINISTRATION);
 
 
-        Consumer<OrganizationWithReferentsAndStatus> assertions = (org) -> {
+        Consumer<OrganizationWithReferentsAndStatus> assertions = org -> {
             Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
                    .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
                            org)));
@@ -333,7 +333,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      anOrganizationPec,
                                                                      false,
                                                                      EntityType.PUBLIC_ADMINISTRATION);
-        Consumer<UpsertResult> assertionsBlock = (ur) -> {
+        Consumer<UpsertResult> assertionsBlock = ur -> {
             ;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
             Assertions.assertNotNull(ur.response.getBody());
@@ -374,8 +374,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      false,
                                                                      EntityType.PUBLIC_ADMINISTRATION);
 
-        Consumer<UpsertResult> assertionsBlock = (ur) -> {
-            ;
+        Consumer<UpsertResult> assertionsBlock = ur -> {
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
             Assertions.assertNotNull(ur.response.getBody());
             Assertions.assertEquals(anOrganizationFiscalCode, ur.response.getBody().getOrganizationFiscalCode());

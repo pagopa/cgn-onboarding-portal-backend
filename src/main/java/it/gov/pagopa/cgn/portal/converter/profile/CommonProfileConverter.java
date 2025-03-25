@@ -16,13 +16,13 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public abstract class CommonProfileConverter<E, D>
         extends AbstractConverter<E, D> {
 
     private static final Map<DiscountCodeTypeEnum, DiscountCodeType> discountCodeTypeMap = new EnumMap<>(
             DiscountCodeTypeEnum.class);
+    public static final String SALES_CHANNEL_IS_INVALID = "SalesChannel is invalid";
 
     static {
         discountCodeTypeMap.put(DiscountCodeTypeEnum.API, DiscountCodeType.API);
@@ -70,43 +70,40 @@ public abstract class CommonProfileConverter<E, D>
         SalesChannelType channelType = salesChannelDto.getChannelType();
         switch (channelType) {
             case ONLINE_CHANNEL:
-                if (salesChannelDto instanceof OnlineChannel) {
-                    OnlineChannel onlineChannel = (OnlineChannel) salesChannelDto;
+                if (salesChannelDto instanceof OnlineChannel onlineChannel) {
                     entity.setSalesChannel(SalesChannelEnum.ONLINE);
                     entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throw new InvalidRequestException(SALES_CHANNEL_IS_INVALID);
                 }
                 break;
             case OFFLINE_CHANNEL:
-                if (salesChannelDto instanceof OfflineChannel) {
-                    OfflineChannel physicalStoreChannel = (OfflineChannel) salesChannelDto;
+                if (salesChannelDto instanceof OfflineChannel physicalStoreChannel) {
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
                     entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
                     // addressList must be not empty
                     entity.setAddressList(physicalStoreChannel.getAddresses()
                                                               .stream()
                                                               .map(address -> addressToEntity.apply(address, entity))
-                                                              .collect(Collectors.toList()));
+                                                              .toList());
                     entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throw new InvalidRequestException(SALES_CHANNEL_IS_INVALID);
                 }
                 break;
             case BOTH_CHANNELS:
-                if (salesChannelDto instanceof BothChannels) {
-                    BothChannels bothChannels = (BothChannels) salesChannelDto;
+                if (salesChannelDto instanceof BothChannels bothChannels) {
                     entity.setSalesChannel(SalesChannelEnum.BOTH);
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
                     entity.setAddressList(bothChannels.getAddresses()
                                                       .stream()
                                                       .map(address -> addressToEntity.apply(address, entity))
-                                                      .collect(Collectors.toList()));
+                                                      .toList());
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(bothChannels.getDiscountCodeType()));
                     entity.setAllNationalAddresses(bothChannels.getAllNationalAddresses());
                 } else {
-                    throw new InvalidRequestException("SalesChannel is invalid");
+                    throw new InvalidRequestException(SALES_CHANNEL_IS_INVALID);
                 }
                 break;
         }
@@ -133,7 +130,7 @@ public abstract class CommonProfileConverter<E, D>
                                                         .stream()
                                                         .sorted(getAddressComparator())
                                                         .map(addressToDto)
-                                                        .collect(Collectors.toList()));
+                                                        .toList());
                 physicalStoreChannel.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return physicalStoreChannel;
             case BOTH:
@@ -144,7 +141,7 @@ public abstract class CommonProfileConverter<E, D>
                                                 .stream()
                                                 .sorted(getAddressComparator())
                                                 .map(addressToDto)
-                                                .collect(Collectors.toList()));
+                                                .toList());
                 bothChannels.setDiscountCodeType(toDtoDiscountCodeTypeEnum.apply(entity.getDiscountCodeType()));
                 bothChannels.setAllNationalAddresses(entity.getAllNationalAddresses());
                 return bothChannels;

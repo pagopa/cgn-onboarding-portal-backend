@@ -31,7 +31,7 @@ public class OpenAPIConfig {
                                             .version("1.0")
                                             .description(
                                                     "Documentazione delle API con autenticazione JWT e custom header"))
-                            .servers(List.of(new Server().url("/")))
+                            .servers(List.of(new Server().url(ROOT)))
                             .addSecurityItem(new SecurityRequirement().addList("Bearer").addList("UserRole"))
                             .components(new Components().addSecuritySchemes("Bearer",
                                                                             new SecurityScheme().type(Type.HTTP)

@@ -4,61 +4,34 @@ package it.gov.pagopa.cgn.portal.converter.help;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 public class HelpCategoryConverter {
 
-    private static final String ACCESS = "Accesso";
-    private static final String DATA_FILLING = "Compilazione Dati";
-    private static final String DISCOUNTS = "Agevolazioni";
-    private static final String DOCUMENTS = "Documenti";
-    private static final String TECHNICAL_PROBLEM = "Problema Tecnico";
-    private static final String CGN_OWNER_REPORTING = "Segnalazione Titolare di CGN";
-    private static final String SUGGESTIONS = "Suggerimenti";
-    private static final String OTHER = "Altro";
-
-    public String helpCategoryFromEnum(it.gov.pagopa.cgnonboardingportal.model.HelpRequest.CategoryEnum category) {
-        switch (category) {
-            case ACCESS:
-                return ACCESS;
-            case DATA_FILLING:
-                return DATA_FILLING;
-            case DISCOUNTS:
-                return DISCOUNTS;
-            case DOCUMENTS:
-                return DOCUMENTS;
-            case TECHNICAL_PROBLEM:
-                return TECHNICAL_PROBLEM;
-            case CGN_OWNER_REPORTING:
-                return CGN_OWNER_REPORTING;
-            case SUGGESTIONS:
-                return SUGGESTIONS;
-            case OTHER:
-                return OTHER;
-            default:
-                throw new InvalidRequestException("Invalid help category: " + category.getValue());
+    private static final Map<String, String> CATEGORY_LOCALIZATION_MAP = Map.of("ACCESS",
+                                                                                "Accesso",
+                                                                                "DATA_FILLING",
+                                                                                "Compilazione Dati",
+                                                                                "DISCOUNTS",
+                                                                                "Agevolazioni",
+                                                                                "DOCUMENTS",
+                                                                                "Documenti",
+                                                                                "TECHNICAL_PROBLEM",
+                                                                                "Problema Tecnico",
+                                                                                "CGN_OWNER_REPORTING",
+                                                                                "Segnalazione Titolare di CGN",
+                                                                                "SUGGESTIONS",
+                                                                                "Suggerimenti",
+                                                                                "OTHER",
+                                                                                "Altro");
+    
+    public String helpCategoryFromEnum(Enum<?> categoryEnum) {
+        String key = categoryEnum.name();
+        String localized = CATEGORY_LOCALIZATION_MAP.get(key);
+        if (localized==null) {
+            throw new InvalidRequestException("Invalid help category: " + key);
         }
-    }
-
-    public String helpCategoryFromEnum(it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest.CategoryEnum category) {
-        switch (category) {
-            case ACCESS:
-                return ACCESS;
-            case DATA_FILLING:
-                return DATA_FILLING;
-            case DISCOUNTS:
-                return DISCOUNTS;
-            case DOCUMENTS:
-                return DOCUMENTS;
-            case TECHNICAL_PROBLEM:
-                return TECHNICAL_PROBLEM;
-            case CGN_OWNER_REPORTING:
-                return CGN_OWNER_REPORTING;
-            case SUGGESTIONS:
-                return SUGGESTIONS;
-            case OTHER:
-                return OTHER;
-            default:
-                throw new InvalidRequestException("Invalid help category: " + category.getValue());
-        }
+        return localized;
     }
 }

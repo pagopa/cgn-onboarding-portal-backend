@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class BackofficeAgreementConverter
         extends AbstractConverter<AgreementEntity, Agreement> {
 
-    private static final Map<String, AgreementStateEnum> enumMap = new HashMap<>(4);
+    private static final Map<String, AgreementStateEnum> enumMap = HashMap.newHashMap(4);
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
 

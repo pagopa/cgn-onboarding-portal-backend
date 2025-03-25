@@ -123,8 +123,6 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .when(attributeAuthorityServiceMock)
                .getOrganizations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
-        //        TestUtils.printMvcResponse(mockMvc.perform(get("/organizations")));
-
         mockMvc.perform(get("/organizations").contentType(MediaType.APPLICATION_JSON))
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andDo(log())
