@@ -131,11 +131,7 @@ public class DiscountService {
         DiscountEntity toReturn = discountRepository.save(discountEntity);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             bucketService.prepareDiscountBucketCodeSummary(toReturn);
-            try {
-                bucketService.createPendingBucketLoad(toReturn);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            bucketService.createPendingBucketLoad(toReturn);
         }
         return new CrudDiscountWrapper(toReturn, profileEntity.getDiscountCodeType());
     }
