@@ -232,7 +232,7 @@ public class ExportService {
         List<EycaDataExportViewEntity> exportViewEntities = eycaDataExportRepository.findAll();
 
         StringWriter writer = new StringWriter();
-        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL)) {
+        try (CSVPrinter printer = new CSVPrinter(writer, CSVFormat.EXCEL.builder().setDelimiter(';').build())) {
             printerConsumer.apply(printer).accept(exportEycaHeaders);
             exportViewEntities.stream()
                               .map(r -> new String[]{Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
@@ -823,7 +823,7 @@ public class ExportService {
             }
         });
     }
-    
+
     private final BiFunction<AgreementEntity, Optional<DiscountEntity>, String[]> agreementWithProfileAndDiscountToStringArray = (agreement, maybeDiscount) -> new String[]{
             agreement.getState().getCode(),
             Optional.ofNullable(agreement.getProfile())
