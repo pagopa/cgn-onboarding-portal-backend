@@ -24,15 +24,15 @@ public class BackofficeApprovedDiscountConverter
     private static final Map<ProductCategoryEnum, ProductCategory> productEnumMaps = new EnumMap<>(ProductCategoryEnum.class);
 
     static {
-        productEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
-        productEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT, ProductCategory.CULTUREANDENTERTAINMENT);
+        productEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKING_SERVICES);
+        productEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT, ProductCategory.CULTURE_AND_ENTERTAINMENT);
         productEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
         productEnumMaps.put(ProductCategoryEnum.HOME, ProductCategory.HOME);
-        productEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOBOFFERS);
+        productEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOB_OFFERS);
         productEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
         productEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
-        productEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLEMOBILITY);
-        productEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONYANDINTERNET);
+        productEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLE_MOBILITY);
+        productEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONY_AND_INTERNET);
         productEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
     }
 

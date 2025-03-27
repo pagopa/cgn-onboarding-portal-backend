@@ -18,17 +18,17 @@ import java.util.function.Function;
 public class BackofficeAgreementConverter
         extends AbstractConverter<AgreementEntity, Agreement> {
 
-    private static final Map<String, AgreementStateEnum> enumMap = new HashMap<>(4);
+    private static final Map<String, AgreementStateEnum> enumMap = HashMap.newHashMap(4);
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
 
     static {
-        enumMap.put(AgreementState.APPROVEDAGREEMENT.getValue(), AgreementStateEnum.APPROVED);
-        enumMap.put(AgreementState.PENDINGAGREEMENT.getValue(), AgreementStateEnum.PENDING);
-        enumMap.put(AgreementState.REJECTEDAGREEMENT.getValue(), AgreementStateEnum.REJECTED);
-        enumMap.put(AgreementState.ASSIGNEDAGREEMENT.getValue(), AgreementStateEnum.PENDING);
+        enumMap.put(AgreementState.APPROVED_AGREEMENT.getValue(), AgreementStateEnum.APPROVED);
+        enumMap.put(AgreementState.PENDING_AGREEMENT.getValue(), AgreementStateEnum.PENDING);
+        enumMap.put(AgreementState.REJECTED_AGREEMENT.getValue(), AgreementStateEnum.REJECTED);
+        enumMap.put(AgreementState.ASSIGNED_AGREEMENT.getValue(), AgreementStateEnum.PENDING);
         backofficeEntityTypeEnumMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
-        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLICADMINISTRATION);
+        backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
     }
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
@@ -36,14 +36,14 @@ public class BackofficeAgreementConverter
         if (entity.getState()==AgreementStateEnum.PENDING) {
             if (StringUtils.isBlank(entity.getBackofficeAssignee())) {
                 dto = new PendingAgreement();
-                dto.setState(AgreementState.PENDINGAGREEMENT);
+                dto.setState(AgreementState.PENDING_AGREEMENT);
             } else {
                 AssignedAgreement assignedAgreement = new AssignedAgreement();
                 Assignee assignee = new Assignee();
                 assignee.setFullName(entity.getBackofficeAssignee());
                 assignedAgreement.setAssignee(assignee);
                 dto = assignedAgreement;
-                dto.setState(AgreementState.ASSIGNEDAGREEMENT);
+                dto.setState(AgreementState.ASSIGNED_AGREEMENT);
             }
         } else {
             throw new CGNException("Enum mapping not found for " + entity.getState());
@@ -78,7 +78,7 @@ public class BackofficeAgreementConverter
     public static boolean isAgreementStateIsAssigned(String statusDtoCode) {
         AgreementStateEnum agreementStateEnum = getAgreementStateEnumFromDtoCode(statusDtoCode);
         return agreementStateEnum.equals(AgreementStateEnum.PENDING) &&
-               AgreementState.ASSIGNEDAGREEMENT.getValue().equals(statusDtoCode);
+               AgreementState.ASSIGNED_AGREEMENT.getValue().equals(statusDtoCode);
     }
 
     public static AgreementStateEnum getAgreementStateEnumFromDtoCode(String statusDtoCode) {

@@ -5,7 +5,6 @@ import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWi
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.util.function.Function;
 
 @Component
@@ -13,13 +12,14 @@ public class OrganizationWithReferentsConverter
         extends
         AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> {
 
+
     protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
         OrganizationWithReferents backofficeModel = new OrganizationWithReferents();
         backofficeModel.setKeyOrganizationFiscalCode(attributeAuthorityModel.getKeyOrganizationFiscalCode());
         backofficeModel.setOrganizationFiscalCode(attributeAuthorityModel.getOrganizationFiscalCode());
         backofficeModel.setOrganizationName(attributeAuthorityModel.getOrganizationName());
         backofficeModel.setPec(attributeAuthorityModel.getPec());
-        backofficeModel.setInsertedAt(attributeAuthorityModel.getInsertedAt().toLocalDateTime().toLocalDate());
+        backofficeModel.setInsertedAt(getLocalDate(attributeAuthorityModel.getInsertedAt()));
         backofficeModel.setReferents(attributeAuthorityModel.getReferents());
         return backofficeModel;
     };
@@ -29,7 +29,7 @@ public class OrganizationWithReferentsConverter
         attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
         attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setInsertedAt(Timestamp.valueOf(backofficeModel.getInsertedAt().atStartOfDay()));
+        attributeAuthorityModel.setInsertedAt(getISO8601UTCTimestamp(backofficeModel.getInsertedAt()));
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };
@@ -43,6 +43,4 @@ public class OrganizationWithReferentsConverter
     protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
-
-
 }

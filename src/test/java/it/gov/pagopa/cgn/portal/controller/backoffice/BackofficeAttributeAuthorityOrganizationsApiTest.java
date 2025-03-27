@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
+import it.gov.pagopa.cgn.portal.converter.Iso8601TimestampCompatible;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -30,9 +31,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.NestedServletException;
 
 import javax.annotation.PostConstruct;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -105,7 +104,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                                                                         "org1",
                                                                                                         "org1@pec.it",
                                                                                                         OrganizationStatus.DRAFT,
-                                                                                                        EntityType.PUBLICADMINISTRATION);
+                                                                                                        EntityType.PUBLIC_ADMINISTRATION);
 
         agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),
                                                     organization0.getEntityType(),
@@ -124,13 +123,11 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .when(attributeAuthorityServiceMock)
                .getOrganizations(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
-        //        TestUtils.printMvcResponse(mockMvc.perform(get("/organizations")));
-
         mockMvc.perform(get("/organizations").contentType(MediaType.APPLICATION_JSON))
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andDo(log())
                .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
-               .andExpect(jsonPath("$.items[1].entityType").value(EntityType.PUBLICADMINISTRATION.getValue()));
+               .andExpect(jsonPath("$.items[1].entityType").value(EntityType.PUBLIC_ADMINISTRATION.getValue()));
     }
 
     @Test
@@ -149,7 +146,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         mockResult.setPec(organization.getPec());
         mockResult.setOrganizationName(organization.getOrganizationName());
         mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Timestamp.valueOf(LocalDateTime.now()));
+        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult))
                .when(attributeAuthorityServiceMock)
@@ -222,7 +219,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         mockResult.setPec(organization.getPec());
         mockResult.setOrganizationName(organization.getOrganizationName());
         mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Timestamp.valueOf(LocalDateTime.now()));
+        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult))
                .when(attributeAuthorityServiceMock)
@@ -257,3 +254,4 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         return organizationWithReferents;
     }
 }
+

@@ -1,17 +1,13 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: CGN Onboarding Portal Public API
   description: Carta Giovani Nazionale Onboarding Portal - Public API
-  version: '0.1.0'
-host: api.cgn.pagopa.it
-basePath: /public/api
-schemes:
-  - https
-
+  version: 0.1.0
+servers:
+  - url: https://api.cgn.pagopa.it/public/api
 tags:
   - name: help
     description: Help
-
 paths:
   /help:
     post:
@@ -19,70 +15,66 @@ paths:
         - help
       summary: Send an help request
       operationId: sendHelpRequest
-      parameters:
-        - in: body
-          description: Help request
-          name: helpRequest
-          required: true
-          schema:
-            $ref: '#/definitions/HelpRequest'
+      requestBody:
+        description: Help request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelpRequest'
+        required: true
       responses:
-        204:
+        "204":
           description: Request Received
-
-consumes:
-  - application/json
-produces:
-  - application/json
-
-definitions:
-  HelpRequest:
-    type: object
-    required:
-      - legalName
-      - referentFirstName
-      - referentLastName
-      - emailAddress
-      - category
-      - message
-      - recaptchaToken
-    properties:
-      legalName:
-        type: string
-      referentFirstName:
-        type: string
-      referentLastName:
-        type: string
-      emailAddress:
-        type: string
-        format: email
-      category:
-        type: string
-        enum:
-          - Access
-          - DataFilling
-          - Discounts
-          - Documents
-          - TechnicalProblem
-          - CgnOwnerReporting
-          - Suggestions
-          - Other
-      topic:
-        type: string
-      message:
-        type: string
-        maxLength: 200
-      recaptchaToken:
-        type: string
-
-
-responses:
-  InvalidRequest:
-    description: Bad request
-    #content: {} #TODO
-  Forbidden:
-    description: Forbidden
-    #content: {} #TODO
-  NotFound:
-    description: Not found
-    #content: {} #TODO
+          content: { }
+      x-codegen-request-body-name: helpRequest
+components:
+  schemas:
+    HelpRequest:
+      required:
+        - category
+        - emailAddress
+        - legalName
+        - message
+        - recaptchaToken
+        - referentFirstName
+        - referentLastName
+      type: object
+      properties:
+        legalName:
+          type: string
+        referentFirstName:
+          type: string
+        referentLastName:
+          type: string
+        emailAddress:
+          type: string
+          format: email
+        category:
+          type: string
+          enum:
+            - Access
+            - DataFilling
+            - Discounts
+            - Documents
+            - TechnicalProblem
+            - CgnOwnerReporting
+            - Suggestions
+            - Other
+        topic:
+          type: string
+        message:
+          maxLength: 200
+          type: string
+        recaptchaToken:
+          type: string
+  responses:
+    InvalidRequest:
+      description: Bad request
+      content: { }
+    Forbidden:
+      description: Forbidden
+      content: { }
+    NotFound:
+      description: Not found
+      content: { }
+x-original-swagger-version: "2.0"

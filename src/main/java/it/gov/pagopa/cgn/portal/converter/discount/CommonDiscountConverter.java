@@ -12,10 +12,7 @@ import it.gov.pagopa.cgnonboardingportal.model.DiscountState;
 import it.gov.pagopa.cgnonboardingportal.model.ProductCategory;
 
 import java.time.LocalDate;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,16 +34,16 @@ public abstract class CommonDiscountConverter<E, D>
         enumMap.put(DiscountStateEnum.TEST_PASSED, DiscountState.TEST_PASSED);
         enumMap.put(DiscountStateEnum.TEST_FAILED, DiscountState.TEST_FAILED);
 
-        productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKINGSERVICES);
+        productCategoryEnumMaps.put(ProductCategoryEnum.BANKING_SERVICES, ProductCategory.BANKING_SERVICES);
         productCategoryEnumMaps.put(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT,
-                                    ProductCategory.CULTUREANDENTERTAINMENT);
+                                    ProductCategory.CULTURE_AND_ENTERTAINMENT);
         productCategoryEnumMaps.put(ProductCategoryEnum.HEALTH, ProductCategory.HEALTH);
         productCategoryEnumMaps.put(ProductCategoryEnum.HOME, ProductCategory.HOME);
-        productCategoryEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOBOFFERS);
+        productCategoryEnumMaps.put(ProductCategoryEnum.JOB_OFFERS, ProductCategory.JOB_OFFERS);
         productCategoryEnumMaps.put(ProductCategoryEnum.LEARNING, ProductCategory.LEARNING);
         productCategoryEnumMaps.put(ProductCategoryEnum.SPORTS, ProductCategory.SPORTS);
-        productCategoryEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLEMOBILITY);
-        productCategoryEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONYANDINTERNET);
+        productCategoryEnumMaps.put(ProductCategoryEnum.SUSTAINABLE_MOBILITY, ProductCategory.SUSTAINABLE_MOBILITY);
+        productCategoryEnumMaps.put(ProductCategoryEnum.TELEPHONY_AND_INTERNET, ProductCategory.TELEPHONY_AND_INTERNET);
         productCategoryEnumMaps.put(ProductCategoryEnum.TRAVELLING, ProductCategory.TRAVELLING);
 
         bucketLoadStatusEnumMap.put(BucketCodeLoadStatusEnum.PENDING, BucketCodeLoadStatus.PENDING);
@@ -73,7 +70,9 @@ public abstract class CommonDiscountConverter<E, D>
                                                                                                                                                   .map(discountProductEntity -> toProductDtoEnum.apply(
                                                                                                                                                           discountProductEntity.getProductCategory()))
                                                                                                                                                   .collect(
-                                                                                                                                                          Collectors.toList());
+                                                                                                                                                          Collectors.toCollection(
+                                                                                                                                                                  ArrayList::new));
+
 
     protected Function<BucketCodeLoadStatusEnum, BucketCodeLoadStatus> toBucketCodeLoadStatusDtoEnum = bucketCodeLoadStatusEnum -> Optional.ofNullable(
                                                                                                                                                    bucketLoadStatusEnumMap.get(bucketCodeLoadStatusEnum))
@@ -100,5 +99,6 @@ public abstract class CommonDiscountConverter<E, D>
                                                                                                                                                                              return productEntity;
                                                                                                                                                                          })
                                                                                                                                                                          .collect(
-                                                                                                                                                                                 Collectors.toList());
+                                                                                                                                                                                 Collectors.toCollection(
+                                                                                                                                                                                         ArrayList::new));
 }

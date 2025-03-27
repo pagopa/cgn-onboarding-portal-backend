@@ -1,12 +1,10 @@
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: CGN Onboarding Portal Backoffice
   description: Carta Giovani Nazionale Onboarding Portal Backoffice
-  version: '0.0.1'
-host: api.cgn.pagopa.it
-basePath: /backoffice/v1
-schemes:
-  - https
+  version: 0.0.1
+servers:
+  - url: https://api.cgn.pagopa.it/backoffice/v1
 security:
   - Bearer: [ ]
     UserRole: [ ]
@@ -17,7 +15,6 @@ tags:
     description: Document
   - name: discount
     description: Discount
-
 paths:
   /agreement-requests:
     get:
@@ -26,48 +23,77 @@ paths:
       summary: Get list of agreements
       operationId: getAgreements
       parameters:
-        - in: query
-          name: states
+        - name: states
+          in: query
           description: Values from `AgreementState`
-          required: false
-          type: string
-        - in: query
-          name: assignee
-          description: Assigned agreement assignee
-          required: false
-          type: string
-          enum:
-            - Me
-            - Others
-        - in: query
-          name: profileFullName
-          description: String to search in profile full name
-          required: false
-          type: string
-        - in: query
-          name: requestDateFrom
-          description: Agreement request date lower bound
-          required: false
-          type: string
-          format: date
-        - in: query
-          name: requestDateTo
-          description: Agreement request date upper bound
-          required: false
-          type: string
-          format: date
-        - $ref: '#/parameters/PageSize'
-        - $ref: '#/parameters/PageNumber'
-        - $ref: '#/parameters/RequestColumnSort'
-        - $ref: '#/parameters/SortDirection'
-      responses:
-        200:
-          description: List of agreements
           schema:
-            $ref: '#/definitions/Agreements'
-        403:
-          $ref: '#/responses/Forbidden'
-
+            type: string
+        - name: assignee
+          in: query
+          description: Assigned agreement assignee
+          schema:
+            type: string
+            enum:
+              - Me
+              - Others
+        - name: profileFullName
+          in: query
+          description: String to search in profile full name
+          schema:
+            type: string
+        - name: requestDateFrom
+          in: query
+          description: Agreement request date lower bound
+          schema:
+            type: string
+            format: date
+        - name: requestDateTo
+          in: query
+          description: Agreement request date upper bound
+          schema:
+            type: string
+            format: date
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 0
+        - name: sortColumn
+          in: query
+          description: Sort by column
+          schema:
+            type: string
+            enum:
+              - Operator
+              - RequestDate
+              - State
+              - Assignee
+        - name: sortDirection
+          in: query
+          description: Sort Direction
+          schema:
+            type: string
+            default: ASC
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: List of agreements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agreements'
+        "403":
+          description: Forbidden
+          content: { }
   /agreement-requests/{agreementId}/assignee:
     put:
       tags:
@@ -75,36 +101,53 @@ paths:
       summary: Assign an agreement to the user
       operationId: assignAgreement
       parameters:
-        - $ref: '#/parameters/AgreementId'
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
-        204:
+        "204":
           description: Agreement assigned to the user
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
     delete:
       tags:
         - agreement
       summary: Unassign an agreement to the user
       operationId: unassignAgreement
       parameters:
-        - $ref: '#/parameters/AgreementId'
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
-        204:
+        "204":
           description: Agreement unassigned to the user
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
   /agreement-requests/{agreementId}/approval:
     post:
       tags:
@@ -112,19 +155,28 @@ paths:
       summary: Approve an agreement
       operationId: approveAgreement
       parameters:
-        - $ref: '#/parameters/AgreementId'
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
       responses:
-        204:
+        "204":
           description: Agreement approved
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
   /agreement-requests/{agreementId}/refusal:
     post:
       tags:
@@ -132,25 +184,36 @@ paths:
       summary: Reject an agreement
       operationId: rejectAgreement
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - in: body
-          description: Agreement refusal
-          name: refusal
+        - name: agreementId
+          in: path
+          description: Agreement id
           required: true
           schema:
-            $ref: '#/definitions/RefuseAgreement'
+            type: string
+      requestBody:
+        description: Agreement refusal
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefuseAgreement'
+        required: true
       responses:
-        204:
+        "204":
           description: Agreement rejected
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
+      x-codegen-request-body-name: refusal
   /agreement-requests/{agreementId}/documents:
     get:
       tags:
@@ -158,64 +221,112 @@ paths:
       summary: Get documents
       operationId: getDocuments
       parameters:
-        - $ref: '#/parameters/AgreementId'
-      responses:
-        200:
-          description: List of documents
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
           schema:
-            $ref: '#/definitions/Documents'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+            type: string
+      responses:
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Documents'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /agreement-requests/{agreementId}/documents/{documentType}:
     post:
       tags:
         - document
       summary: Upload a document
       operationId: uploadDocument
-      consumes:
-        - multipart/form-data
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DocumentType'
-        - in: formData
-          name: document
-          type: file
+        - name: agreementId
+          in: path
+          description: Agreement id
           required: true
-      responses:
-        200:
-          description: Document uploaded
           schema:
-            $ref: '#/definitions/Document'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+            type: string
+        - name: documentType
+          in: path
+          description: Document type
+          required: true
+          schema:
+            type: string
+            enum:
+              - Agreement
+              - AdhesionRequest
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - document
+              type: object
+              properties:
+                document:
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        "200":
+          description: Document uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
     delete:
       tags:
         - document
       summary: Delete a document
       operationId: deleteDocument
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DocumentType'
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+        - name: documentType
+          in: path
+          description: Document type
+          required: true
+          schema:
+            type: string
+            enum:
+              - Agreement
+              - AdhesionRequest
       responses:
-        204:
+        "204":
           description: Document deleted
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /agreement-requests/{agreementId}/discounts/{discountId}/suspension:
     post:
       tags:
@@ -223,26 +334,42 @@ paths:
       summary: Suspend a discount
       operationId: suspendDiscount
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
-        - in: body
-          description: Discount suspension
-          name: suspension
+        - name: agreementId
+          in: path
+          description: Agreement id
           required: true
           schema:
-            $ref: '#/definitions/SuspendDiscount'
+            type: string
+        - name: discountId
+          in: path
+          description: Discount id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Discount suspension
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendDiscount'
+        required: true
       responses:
-        204:
+        "204":
           description: Discount suspended
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
+      x-codegen-request-body-name: suspension
   /agreement-requests/{agreementId}/discounts/{discountId}/bucket-code:
     get:
       tags:
@@ -250,22 +377,37 @@ paths:
       summary: Get a bucket code for discount
       operationId: getDiscountBucketCode
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
-      responses:
-        200:
-          description: A bucket code
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
           schema:
-            $ref: '#/definitions/BucketCode'
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+            type: string
+        - name: discountId
+          in: path
+          description: Discount id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A bucket code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BucketCode'
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
   /agreement-requests/{agreementId}/discounts/{discountId}/test-passed:
     post:
       tags:
@@ -273,20 +415,34 @@ paths:
       summary: Mark as test passed
       operationId: setDiscountTestPassed
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+        - name: discountId
+          in: path
+          description: Discount id
+          required: true
+          schema:
+            type: string
       responses:
-        204:
+        "204":
           description: Test passed
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
   /agreement-requests/{agreementId}/discounts/{discountId}/test-failed:
     post:
       tags:
@@ -294,26 +450,42 @@ paths:
       summary: Mark as test failed with a reason
       operationId: setDiscountTestFailed
       parameters:
-        - $ref: '#/parameters/AgreementId'
-        - $ref: '#/parameters/DiscountId'
-        - in: body
-          description: Failure reason
-          name: failure
+        - name: agreementId
+          in: path
+          description: Agreement id
           required: true
           schema:
-            $ref: '#/definitions/FailureReason'
+            type: string
+        - name: discountId
+          in: path
+          description: Discount id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Failure reason
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FailureReason'
+        required: true
       responses:
-        204:
+        "204":
           description: Test failed
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-        409:
-          $ref: '#/responses/Conflict'
-
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
+      x-codegen-request-body-name: failure
   /approved-agreements:
     get:
       tags:
@@ -321,35 +493,64 @@ paths:
       summary: Get list of approved agreements
       operationId: getApprovedAgreements
       parameters:
-        - in: query
-          name: profileFullName
+        - name: profileFullName
+          in: query
           description: String to search in profile full name
-          required: false
-          type: string
-        - in: query
-          name: lastUpdateDateFrom
-          description: Agreement last update date lower bound
-          required: false
-          type: string
-          format: date
-        - in: query
-          name: lastUpdateDateTo
-          description: Agreement last update date upper bound
-          required: false
-          type: string
-          format: date
-        - $ref: '#/parameters/PageSize'
-        - $ref: '#/parameters/PageNumber'
-        - $ref: '#/parameters/ApprovedColumnSort'
-        - $ref: '#/parameters/SortDirection'
-      responses:
-        200:
-          description: List of approved agreements
           schema:
-            $ref: '#/definitions/ApprovedAgreements'
-        403:
-          $ref: '#/responses/Forbidden'
-
+            type: string
+        - name: lastUpdateDateFrom
+          in: query
+          description: Agreement last update date lower bound
+          schema:
+            type: string
+            format: date
+        - name: lastUpdateDateTo
+          in: query
+          description: Agreement last update date upper bound
+          schema:
+            type: string
+            format: date
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 0
+        - name: sortColumn
+          in: query
+          description: Sort by column
+          schema:
+            type: string
+            enum:
+              - Operator
+              - AgreementDate
+              - LastModifyDate
+              - PublishedDiscounts
+        - name: sortDirection
+          in: query
+          description: Sort Direction
+          schema:
+            type: string
+            default: ASC
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: List of approved agreements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovedAgreements'
+        "403":
+          description: Forbidden
+          content: { }
   /approved-agreements/{agreementId}:
     get:
       tags:
@@ -357,150 +558,258 @@ paths:
       summary: Get approved agreement
       operationId: getApprovedAgreement
       parameters:
-        - $ref: '#/parameters/AgreementId'
-      responses:
-        200:
-          description: Approved agreement
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
           schema:
-            $ref: '#/definitions/ApprovedAgreementDetail'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+            type: string
+      responses:
+        "200":
+          description: Approved agreement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovedAgreementDetail'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /organizations:
     get:
       tags:
         - attributeauthority
-      operationId: getOrganizations
       summary: Get organizations
       description: Get all organizations
+      operationId: getOrganizations
       parameters:
-        - $ref: "#/parameters/SearchQuery"
-        - $ref: "#/parameters/PageNumber"
-        - $ref: "#/parameters/PageSize"
-        - $ref: "#/parameters/SortOrganizationsBy"
-        - $ref: "#/parameters/SortDirection"
-      responses:
-        200:
-          description: List of organizations.
+        - name: searchQuery
+          in: query
+          description: String to search in organization name o fiscal code
           schema:
-            $ref: "#/definitions/Organizations"
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+            maxLength: 100
+            minLength: 1
+            type: string
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 0
+        - name: pageSize
+          in: query
+          description: Page size
+          schema:
+            type: integer
+            default: 20
+        - name: sortBy
+          in: query
+          description: The field to sort by
+          schema:
+            type: string
+            enum:
+              - fiscalCode
+              - name
+              - pec
+              - insertedAt
+        - name: sortDirection
+          in: query
+          description: Sort Direction
+          schema:
+            type: string
+            default: ASC
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: List of organizations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organizations'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
     post:
       tags:
         - attributeauthority
-      operationId: upsertOrganization
       summary: Upsert organization.
       description: Update or insert an organization.
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: "#/definitions/OrganizationWithReferents"
+      operationId: upsertOrganization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationWithReferents'
+        required: false
       responses:
-        200:
+        "200":
           description: Upserted organization.
-          schema:
-            $ref: "#/definitions/OrganizationWithReferents"
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationWithReferents'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+      x-codegen-request-body-name: body
   /organization/{keyOrganizationFiscalCode}:
     get:
       tags:
         - attributeauthority
-      operationId: getOrganization
       summary: Get organization
       description: Get an organization by fiscal code
+      operationId: getOrganization
       parameters:
-        - $ref: "#/parameters/KeyOrganizationFiscalCode"
-      responses:
-        200:
-          description: An organization with referents.
+        - name: keyOrganizationFiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
           schema:
-            $ref: "#/definitions/OrganizationWithReferentsAndStatus"
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+            maxLength: 16
+            minLength: 8
+            type: string
+      responses:
+        "200":
+          description: An organization with referents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationWithReferentsAndStatus'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
     delete:
       tags:
         - attributeauthority
-      operationId: deleteOrganization
       summary: Delete organization.
       description: Delete an organization
+      operationId: deleteOrganization
       parameters:
-        - $ref: "#/parameters/KeyOrganizationFiscalCode"
+        - name: keyOrganizationFiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
+          schema:
+            maxLength: 16
+            minLength: 8
+            type: string
       responses:
-        200:
+        "200":
           description: Deleted.
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /organization/{keyOrganizationFiscalCode}/referents:
     get:
       tags:
         - attributeauthority
-      operationId: getReferents
       summary: Get referents
       description: Get all referents for a organization
+      operationId: getReferents
       parameters:
-        - $ref: "#/parameters/KeyOrganizationFiscalCode"
-      responses:
-        200:
-          description: List of referents.
+        - name: keyOrganizationFiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
           schema:
-            $ref: "#/definitions/Referents"
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+            maxLength: 16
+            minLength: 8
+            type: string
+      responses:
+        "200":
+          description: List of referents.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Referents'
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
     post:
       tags:
         - attributeauthority
-      operationId: insertReferent
       summary: Insert referent.
       description: Insert a referent fiscalcode.
+      operationId: insertReferent
       parameters:
-        - $ref: "#/parameters/KeyOrganizationFiscalCode"
-        - $ref: "#/parameters/ReferentFiscalCodeBody"
+        - name: keyOrganizationFiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
+          schema:
+            maxLength: 16
+            minLength: 8
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReferentFiscalCode'
+        required: true
       responses:
-        200:
+        "200":
           description: Inserted referent.
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+      x-codegen-request-body-name: body
   /organization/{keyOrganizationFiscalCode}/referents/{referentFiscalCode}:
     delete:
       tags:
         - attributeauthority
-      operationId: deleteReferent
       summary: Delete referent.
       description: Delete a referent
+      operationId: deleteReferent
       parameters:
-        - $ref: "#/parameters/KeyOrganizationFiscalCode"
-        - $ref: "#/parameters/ReferentFiscalCode"
+        - name: keyOrganizationFiscalCode
+          in: path
+          description: Organization fiscal code
+          required: true
+          schema:
+            maxLength: 16
+            minLength: 8
+            type: string
+        - name: referentFiscalCode
+          in: path
+          description: Referent fiscal code
+          required: true
+          schema:
+            pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+            type: string
       responses:
-        200:
+        "200":
           description: Deleted.
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /export/agreements:
     get:
       tags:
@@ -508,17 +817,22 @@ paths:
       summary: Download an export of agreements in CSV format
       operationId: exportAgreements
       responses:
-        200:
+        "200":
           description: CSV export of all agreements
-          schema:
-            type: file
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
   /export/eyca-discounts:
     get:
       tags:
@@ -526,802 +840,760 @@ paths:
       summary: Download an export of eyca discounts in CSV format
       operationId: exportEycaDiscounts
       responses:
-        200:
+        "200":
           description: CSV export of all agreements
-          schema:
-            type: file
-        400:
-          $ref: '#/responses/InvalidRequest'
-        403:
-          $ref: '#/responses/Forbidden'
-        404:
-          $ref: '#/responses/NotFound'
-
-consumes:
-  - application/json
-
-produces:
-  - application/json
-
-parameters:
-  AgreementId:
-    name: agreementId
-    in: path
-    description: Agreement id
-    required: true
-    type: string
-  PageSize:
-    name: pageSize
-    in: query
-    description: Page size
-    required: false
-    type: integer
-    default: 20
-  PageNumber:
-    name: page
-    in: query
-    description: Page number
-    required: false
-    type: integer
-    default: 0
-  DiscountId:
-    name: discountId
-    in: path
-    description: Discount id
-    required: true
-    type: string
-  DocumentType:
-    name: documentType
-    in: path
-    description: Document type
-    required: true
-    type: string
-    enum:
-      - Agreement
-      - AdhesionRequest
-  RequestColumnSort:
-    name: sortColumn
-    in: query
-    description: Sort by column
-    required: false
-    type: string
-    enum:
-      - Operator
-      - RequestDate
-      - State
-      - Assignee
-  ApprovedColumnSort:
-    name: sortColumn
-    in: query
-    description: Sort by column
-    required: false
-    type: string
-    enum:
-      - Operator
-      - AgreementDate
-      - LastModifyDate
-      - PublishedDiscounts
-  KeyOrganizationFiscalCode:
-    name: keyOrganizationFiscalCode
-    in: path
-    description: Organization fiscal code
-    required: true
-    type: string
-    minLength: 8
-    maxLength: 16
-  ReferentFiscalCode:
-    in: path
-    name: referentFiscalCode
-    description: Referent fiscal code
-    required: true
-    type: string
-    pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$'
-  ReferentFiscalCodeBody:
-    in: body
-    name: body
-    required: true
-    schema:
-      $ref: "#/definitions/ReferentFiscalCode"
-  SearchQuery:
-    name: searchQuery
-    in: query
-    description: String to search in organization name o fiscal code
-    required: false
-    type: string
-    minLength: 1
-    maxLength: 100
-  SortOrganizationsBy:
-    name: sortBy
-    in: query
-    description: The field to sort by
-    required: false
-    type: string
-    enum:
-      - fiscalCode
-      - name
-      - pec
-      - insertedAt
-  SortDirection:
-    name: sortDirection
-    in: query
-    description: Sort Direction
-    required: false
-    type: string
-    default: ASC
-    enum:
-      - ASC
-      - DESC
-definitions:
-  Agreements:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: array
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+components:
+  schemas:
+    Agreements:
+      required:
+        - items
+      type: object
+      properties:
         items:
-          $ref: '#/definitions/Agreement'
-      total:
-        type: integer
-
-  ApprovedAgreements:
-    type: object
-    required:
-      - items
-    properties:
-      items:
-        type: array
+          type: array
+          items:
+            $ref: '#/components/schemas/Agreement'
+        total:
+          type: integer
+    ApprovedAgreements:
+      required:
+        - items
+      type: object
+      properties:
         items:
-          $ref: '#/definitions/ApprovedAgreement'
-      total:
-        type: integer
-
-  Agreement:
-    type: object
-    discriminator: state
-    required:
-      - id
-      - state
-      - requestDate
-    properties:
-      id:
-        type: string
-      state:
-        $ref: '#/definitions/AgreementState'
-      requestDate:
-        type: string
-        format: date
-      profile:
-        $ref: '#/definitions/Profile'
-      discounts:
-        $ref: '#/definitions/Discounts'
-      documents:
-        $ref: '#/definitions/Documents'
-      entityType:
-        $ref: '#/definitions/EntityType'
-
-
-  PendingAgreement:
-    allOf:
-      - $ref: '#/definitions/Agreement'
-      - type: object
-
-  AssignedAgreement:
-    allOf:
-      - $ref: '#/definitions/Agreement'
-      - type: object
-        required:
-          - assignee
-        properties:
-          assignee:
-            $ref: '#/definitions/Assignee'
-
-  ApprovedAgreement:
-    type: object
-    required:
-      - agreementId
-      - fullName
-      - agreementStartDate
-      - agreementLastUpdateDate
-      - publishedDiscounts
-      - testPending
-    properties:
-      agreementId:
-        type: string
-      fullName:
-        type: string
-      agreementStartDate:
-        type: string
-        format: date
-      agreementLastUpdateDate:
-        type: string
-        format: date
-      publishedDiscounts:
-        type: integer
-        format: int64
-      testPending:
-        type: boolean
-        default: false
-      entityType:
-        $ref: '#/definitions/EntityType'
-
-  ApprovedAgreementDetail:
-    type: object
-    required:
-      - agreementId
-      - profile
-      - documents
-    properties:
-      agreementId:
-        type: string
-      profile:
-        $ref: '#/definitions/ApprovedAgreementProfile'
-      discounts:
-        $ref: '#/definitions/ApprovedAgreementDiscounts'
-      documents:
-        $ref: '#/definitions/Documents'
-
-  AgreementState:
-    type: string
-    enum:
-      - PendingAgreement
-      - AssignedAgreement
-      - ApprovedAgreement
-      - RejectedAgreement
-
-  EntityType:
-    type: string
-    enum:
-      - Private
-      - PublicAdministration
-
-  RefuseAgreement:
-    type: object
-    required:
-      - reasonMessage
-    properties:
-      reasonMessage:
-        type: string
-        maxLength: 500
-
-  Assignee:
-    type: object
-    required:
-      - fullName
-    properties:
-      fullName:
-        type: string
-
-  Profile:
-    type: object
-    required:
-      - id
-      - agreementId
-      - fullName
-      - pecAddress
-      - referent
-    properties:
-      id:
-        type: string
-      agreementId:
-        type: string
-      fullName:
-        type: string
-      referent:
-        $ref: '#/definitions/Referent'
-
-  ApprovedAgreementProfile:
-    type: object
-    required:
-      - description
-      - description_en
-      - description_de
-      - salesChannel
-      - lastUpateDate
-      #tab profilo
-      - fullName
-      - taxCodeOrVat
-      - pecAddress
-      - legalOffice
-      - telephoneNumber
-      - legalRepresentativeFullName
-      - legalRepresentativeTaxCode
-      - referent
-    properties:
-      name:
-        type: string
-      name_en:
-        type: string
-      name_de:
-        type: string
-      description:
-        type: string
-      description_en:
-        type: string
-      description_de:
-        type: string
-      salesChannel:
-        $ref: '#/definitions/SalesChannel'
-      imageUrl:
-        type: string
-      lastUpateDate:
-        type: string
-        format: date
-      #tab profilo
-      fullName:
-        type: string
-      taxCodeOrVat:
-        type: string
-        minLength: 11
-        maxLength: 16
-      pecAddress:
-        type: string
-        format: email
-        minLength: 5
-        maxLength: 100
-      legalOffice:
-        type: string
-        maxLength: 255
-      telephoneNumber:
-        type: string
-        minLength: 4
-        maxLength: 15
-      legalRepresentativeFullName:
-        type: string
-      legalRepresentativeTaxCode:
-        type: string
-        minLength: 4
-        maxLength: 20
-      referent:
-        $ref: '#/definitions/ApprovedAgreementReferent'
-      entityType:
-        $ref: '#/definitions/EntityType'
-
-  Referent:
-    type: object
-    required:
-      - firstName
-      - lastName
-      - emailAddress
-      - telephoneNumber
-    properties:
-      firstName:
-        type: string
-        maxLength: 100
-      lastName:
-        type: string
-        maxLength: 100
-      emailAddress:
-        type: string
-        minLength: 5
-        maxLength: 100
-      telephoneNumber:
-        type: string
-        minLength: 4
-        maxLength: 15
-
-  ApprovedAgreementReferent:
-    type: object
-    required:
-      - firstName
-      - lastName
-      - emailAddress
-      - telephoneNumber
-      - role
-    properties:
-      firstName:
-        type: string
-      lastName:
-        type: string
-      emailAddress:
-        type: string
-        format: email
-        minLength: 5
-        maxLength: 100
-      telephoneNumber:
-        type: string
-        minLength: 4
-        maxLength: 15
-      role:
-        type: string
-        maxLength: 100
-
-  Discounts:
-    type: array
-    items:
-      $ref: '#/definitions/Discount'
-
-  ApprovedAgreementDiscounts:
-    type: array
-    items:
-      $ref: '#/definitions/ApprovedAgreementDiscount'
-
-  Discount:
-    type: object
-    required:
-      - id
-      - agreementId
-      - state
-      - name
-    properties:
-      id:
-        type: string
-      agreementId:
-        type: string
-      state:
-        $ref: '#/definitions/DiscountState'
-      name:
-        type: string
-        maxLength: 100
-      name_en:
-        type: string
-        maxLength: 100
-      name_de:
-        type: string
-        maxLength: 100
-
-  ApprovedAgreementDiscount:
-    type: object
-    required:
-      - id
-      - name
-      - description
-      - startDate
-      - endDate
-      - productCategories
-      - condition
-      - lastUpateDate
-      - state
-      - visibleOnEyca
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-        maxLength: 100
-      name_en:
-        type: string
-        maxLength: 100
-      name_de:
-        type: string
-        maxLength: 100
-      description:
-        type: string
-      description_en:
-        type: string
-      description_de:
-        type: string
-      startDate:
-        type: string
-        format: date
-      endDate:
-        type: string
-        format: date
-      discount:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 99
-      productCategories:
-        type: array
-        items:
-          $ref: '#/definitions/ProductCategory'
-        minItems: 1
-      condition:
-        type: string
-      condition_en:
-        type: string
-      condition_de:
-        type: string
-      lastUpateDate:
-        type: string
-        format: date
-      state:
-        $ref: '#/definitions/DiscountState'
-      discountUrl:
-        type: string
-        maxLength: 500
-      staticCode:
-        type: string
-        maxLength: 100
-      eycaLandingPageUrl:
-        type: string
-        maxLength: 500
-      landingPageUrl:
-        type: string
-        maxLength: 500
-      landingPageReferrer:
-        type: string
-        maxLength: 100
-      testFailureReason:
-        type: string
-        maxLength: 500
-      visibleOnEyca:
-        type: boolean
-        default: false
-
-  DiscountState:
-    type: string
-    enum:
-      - draft
-      - published
-      - suspended
-      - expired
-      - test_pending
-      - test_passed
-      - test_failed
-
-  ProductCategory:
-    type: string
-    enum:
-      - BankingServices
-      - CultureAndEntertainment
-      - Health
-      - Home
-      - JobOffers
-      - Learning
-      - Sports
-      - SustainableMobility
-      - TelephonyAndInternet
-      - Travelling
-
-  SalesChannel:
-    type: object
-    discriminator: channelType
-    required:
-      - channelType
-    properties:
-      channelType:
-        $ref: '#/definitions/SalesChannelType'
-
-  OnlineChannel:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - websiteUrl
-          - discountCodeType
-        properties:
-          websiteUrl:
-            type: string
-          discountCodeType:
-            $ref: '#/definitions/DiscountCodeType'
-
-  OfflineChannel:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - addresses
-        properties:
-          websiteUrl:
-            type: string
-          addresses:
-            type: array
-            items:
-              type: string
-              minLength: 10
-              maxLength: 500
-          allNationalAddresses:
-            type: boolean
-            default: false
-
-  BothChannels:
-    allOf:
-      - $ref: '#/definitions/SalesChannel'
-      - type: object
-        required:
-          - websiteUrl
-          - addresses
-        properties:
-          websiteUrl:
-            type: string
-          addresses:
-            type: array
-            items:
-              type: string
-              minLength: 10
-              maxLength: 500
-          allNationalAddresses:
-            type: boolean
-            default: false
-          discountCodeType:
-            $ref: '#/definitions/DiscountCodeType'
-
-  SalesChannelType:
-    type: string
-    enum:
-      - OnlineChannel
-      - OfflineChannel
-      - BothChannels
-
-  DiscountCodeType:
-    type: string
-    enum:
-      - Static
-      - API
-      - LandingPage
-      - Bucket
-
-  Documents:
-    type: array
-    items:
-      $ref: '#/definitions/Document'
-
-  Document:
-    type: object
-    required:
-      - documentType
-      - documentUrl
-      - creationDate
-    properties:
-      documentType:
-        $ref: '#/definitions/DocumentType'
-      documentUrl:
-        type: string
-      creationDate:
-        type: string
-        format: date
-
-  DocumentType:
-    type: string
-    enum:
-      - Agreement
-      - AdhesionRequest
-
-  SuspendDiscount:
-    type: object
-    required:
-      - reasonMessage
-    properties:
-      reasonMessage:
-        type: string
-        maxLength: 500
-
-  BucketCode:
-    type: object
-    required:
-      - code
-    properties:
-      code:
-        type: string
-
-  FailureReason:
-    type: object
-    required:
-      - reasonMessage
-    properties:
-      reasonMessage:
-        type: string
-        maxLength: 500
-
-  KeyOrganizationFiscalCode:
-    type: object
-    properties:
-      keyOrganizationFiscalCode:
-        type: string
-        minLength: 8
-        maxLength: 16
-    required:
-      - keyOrganizationFiscalCode
-
-  OrganizationFiscalCode:
-    type: object
-    properties:
-      organizationFiscalCode:
-        type: string
-        minLength: 8
-        maxLength: 16
-    required:
-      - organizationFiscalCode
-
-  OrganizationName:
-    type: object
-    properties:
-      organizationName:
-        type: string
-        minLength: 1
-        maxLength: 100
-    required:
-      - organizationName
-
-  ReferentFiscalCode:
-    type: object
-    properties:
-      referentFiscalCode:
-        type: string
-        pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$'
-    required:
-      - referentFiscalCode˙
-
-  Organization:
-    allOf:
-      - $ref: "#/definitions/OrganizationFiscalCode"
-      - $ref: "#/definitions/OrganizationName"
-      - type: object
-        properties:
-          pec:
-            type: string
-            format: email
-            minLength: 5
-            maxLength: 100
-          insertedAt:
-            type: string
-            format: date
-          entityType:
-            $ref: '#/definitions/EntityType'
-        required:
-          - pec
-
-  Referents:
-    type: array
-    items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovedAgreement'
+        total:
+          type: integer
+    Agreement:
+      required:
+        - id
+        - requestDate
+        - state
+      type: object
+      properties:
+        id:
+          type: string
+        state:
+          $ref: '#/components/schemas/AgreementState'
+        requestDate:
+          type: string
+          format: date
+        profile:
+          $ref: '#/components/schemas/Profile'
+        discounts:
+          $ref: '#/components/schemas/Discounts'
+        documents:
+          $ref: '#/components/schemas/Documents'
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+      discriminator:
+        propertyName: state
+    PendingAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - type: object
+    AssignedAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - required:
+            - assignee
+          type: object
+          properties:
+            assignee:
+              $ref: '#/components/schemas/Assignee'
+    ApprovedAgreement:
+      required:
+        - agreementId
+        - agreementLastUpdateDate
+        - agreementStartDate
+        - fullName
+        - publishedDiscounts
+        - testPending
+      type: object
+      properties:
+        agreementId:
+          type: string
+        fullName:
+          type: string
+        agreementStartDate:
+          type: string
+          format: date
+        agreementLastUpdateDate:
+          type: string
+          format: date
+        publishedDiscounts:
+          type: integer
+          format: int64
+        testPending:
+          type: boolean
+          default: false
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+    ApprovedAgreementDetail:
+      required:
+        - agreementId
+        - documents
+        - profile
+      type: object
+      properties:
+        agreementId:
+          type: string
+        profile:
+          $ref: '#/components/schemas/ApprovedAgreementProfile'
+        discounts:
+          $ref: '#/components/schemas/ApprovedAgreementDiscounts'
+        documents:
+          $ref: '#/components/schemas/Documents'
+    AgreementState:
       type: string
-      minLength: 16
-      maxLength: 16
-
-  OrganizationStatus:
-    type: string
-    enum:
-      - Enabled
-      - Draft
-      - Pending
-      - Active
-
-  OrganizationWithReferents:
-    allOf:
-      - $ref: "#/definitions/KeyOrganizationFiscalCode"
-      - $ref: "#/definitions/Organization"
-      - type: object
-        properties:
-          referents:
-            $ref: "#/definitions/Referents"
-        required:
-          - referents
-
-  OrganizationWithReferentsAndStatus:
-    allOf:
-      - $ref: "#/definitions/OrganizationWithReferents"
-      - type: object
-        properties:
-          status:
-            $ref: "#/definitions/OrganizationStatus"
-        required:
-          - status
-
-  Organizations:
-    type: object
-    properties:
+      enum:
+        - PendingAgreement
+        - AssignedAgreement
+        - ApprovedAgreement
+        - RejectedAgreement
+    EntityType:
+      type: string
+      enum:
+        - Private
+        - PublicAdministration
+    RefuseAgreement:
+      required:
+        - reasonMessage
+      type: object
+      properties:
+        reasonMessage:
+          maxLength: 500
+          type: string
+    Assignee:
+      required:
+        - fullName
+      type: object
+      properties:
+        fullName:
+          type: string
+    Profile:
+      required:
+        - agreementId
+        - fullName
+        - id
+        - referent
+      type: object
+      properties:
+        id:
+          type: string
+        agreementId:
+          type: string
+        fullName:
+          type: string
+        referent:
+          $ref: '#/components/schemas/Referent'
+    ApprovedAgreementProfile:
+      required:
+        - description
+        - description_de
+        - description_en
+        - fullName
+        - lastUpateDate
+        - legalOffice
+        - legalRepresentativeFullName
+        - legalRepresentativeTaxCode
+        - pecAddress
+        - referent
+        - salesChannel
+        - taxCodeOrVat
+        - telephoneNumber
+      type: object
+      properties:
+        name:
+          type: string
+        name_en:
+          type: string
+        name_de:
+          type: string
+        description:
+          type: string
+        description_en:
+          type: string
+        description_de:
+          type: string
+        salesChannel:
+          $ref: '#/components/schemas/SalesChannel'
+        imageUrl:
+          type: string
+        lastUpateDate:
+          type: string
+          format: date
+        fullName:
+          type: string
+        taxCodeOrVat:
+          maxLength: 16
+          minLength: 11
+          type: string
+        pecAddress:
+          maxLength: 100
+          minLength: 5
+          type: string
+          format: email
+        legalOffice:
+          maxLength: 255
+          type: string
+        telephoneNumber:
+          maxLength: 15
+          minLength: 4
+          type: string
+        legalRepresentativeFullName:
+          type: string
+        legalRepresentativeTaxCode:
+          maxLength: 20
+          minLength: 4
+          type: string
+        referent:
+          $ref: '#/components/schemas/ApprovedAgreementReferent'
+        entityType:
+          $ref: '#/components/schemas/EntityType'
+    Referent:
+      required:
+        - emailAddress
+        - firstName
+        - lastName
+        - telephoneNumber
+      type: object
+      properties:
+        firstName:
+          maxLength: 100
+          type: string
+        lastName:
+          maxLength: 100
+          type: string
+        emailAddress:
+          maxLength: 100
+          minLength: 5
+          type: string
+        telephoneNumber:
+          maxLength: 15
+          minLength: 4
+          type: string
+    ApprovedAgreementReferent:
+      required:
+        - emailAddress
+        - firstName
+        - lastName
+        - role
+        - telephoneNumber
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emailAddress:
+          maxLength: 100
+          minLength: 5
+          type: string
+          format: email
+        telephoneNumber:
+          maxLength: 15
+          minLength: 4
+          type: string
+        role:
+          maxLength: 100
+          type: string
+    Discounts:
+      type: array
       items:
-        type: array
+        $ref: '#/components/schemas/Discount'
+    ApprovedAgreementDiscounts:
+      type: array
+      items:
+        $ref: '#/components/schemas/ApprovedAgreementDiscount'
+    Discount:
+      required:
+        - agreementId
+        - id
+        - name
+        - state
+      type: object
+      properties:
+        id:
+          type: string
+        agreementId:
+          type: string
+        state:
+          $ref: '#/components/schemas/DiscountState'
+        name:
+          maxLength: 100
+          type: string
+        name_en:
+          maxLength: 100
+          type: string
+        name_de:
+          maxLength: 100
+          type: string
+    ApprovedAgreementDiscount:
+      required:
+        - condition
+        - description
+        - endDate
+        - id
+        - lastUpateDate
+        - name
+        - productCategories
+        - startDate
+        - state
+        - visibleOnEyca
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          maxLength: 100
+          type: string
+        name_en:
+          maxLength: 100
+          type: string
+        name_de:
+          maxLength: 100
+          type: string
+        description:
+          type: string
+        description_en:
+          type: string
+        description_de:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        discount:
+          maximum: 99
+          minimum: 1
+          type: integer
+          format: int32
+        productCategories:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductCategory'
+        condition:
+          type: string
+        condition_en:
+          type: string
+        condition_de:
+          type: string
+        lastUpateDate:
+          type: string
+          format: date
+        state:
+          $ref: '#/components/schemas/DiscountState'
+        discountUrl:
+          maxLength: 500
+          type: string
+        staticCode:
+          maxLength: 100
+          type: string
+        eycaLandingPageUrl:
+          maxLength: 500
+          type: string
+        landingPageUrl:
+          maxLength: 500
+          type: string
+        landingPageReferrer:
+          maxLength: 100
+          type: string
+        testFailureReason:
+          maxLength: 500
+          type: string
+        visibleOnEyca:
+          type: boolean
+          default: false
+    DiscountState:
+      type: string
+      enum:
+        - draft
+        - published
+        - suspended
+        - expired
+        - test_pending
+        - test_passed
+        - test_failed
+    ProductCategory:
+      type: string
+      enum:
+        - BankingServices
+        - CultureAndEntertainment
+        - Health
+        - Home
+        - JobOffers
+        - Learning
+        - Sports
+        - SustainableMobility
+        - TelephonyAndInternet
+        - Travelling
+    SalesChannel:
+      required:
+        - channelType
+      type: object
+      properties:
+        channelType:
+          $ref: '#/components/schemas/SalesChannelType'
+      discriminator:
+        propertyName: channelType
+    OnlineChannel:
+      allOf:
+        - $ref: '#/components/schemas/SalesChannel'
+        - required:
+            - discountCodeType
+            - websiteUrl
+          type: object
+          properties:
+            websiteUrl:
+              type: string
+            discountCodeType:
+              $ref: '#/components/schemas/DiscountCodeType'
+    OfflineChannel:
+      allOf:
+        - $ref: '#/components/schemas/SalesChannel'
+        - required:
+            - addresses
+          type: object
+          properties:
+            websiteUrl:
+              type: string
+            addresses:
+              type: array
+              items:
+                maxLength: 500
+                minLength: 10
+                type: string
+            allNationalAddresses:
+              type: boolean
+              default: false
+    BothChannels:
+      allOf:
+        - $ref: '#/components/schemas/SalesChannel'
+        - required:
+            - addresses
+            - websiteUrl
+          type: object
+          properties:
+            websiteUrl:
+              type: string
+            addresses:
+              type: array
+              items:
+                maxLength: 500
+                minLength: 10
+                type: string
+            allNationalAddresses:
+              type: boolean
+              default: false
+            discountCodeType:
+              $ref: '#/components/schemas/DiscountCodeType'
+    SalesChannelType:
+      type: string
+      enum:
+        - OnlineChannel
+        - OfflineChannel
+        - BothChannels
+    DiscountCodeType:
+      type: string
+      enum:
+        - Static
+        - API
+        - LandingPage
+        - Bucket
+    Documents:
+      type: array
+      items:
+        $ref: '#/components/schemas/Document'
+    Document:
+      required:
+        - creationDate
+        - documentType
+        - documentUrl
+      type: object
+      properties:
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentUrl:
+          type: string
+        creationDate:
+          type: string
+          format: date
+    DocumentType:
+      type: string
+      enum:
+        - Agreement
+        - AdhesionRequest
+    SuspendDiscount:
+      required:
+        - reasonMessage
+      type: object
+      properties:
+        reasonMessage:
+          maxLength: 500
+          type: string
+    BucketCode:
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+    FailureReason:
+      required:
+        - reasonMessage
+      type: object
+      properties:
+        reasonMessage:
+          maxLength: 500
+          type: string
+    KeyOrganizationFiscalCode:
+      required:
+        - keyOrganizationFiscalCode
+      type: object
+      properties:
+        keyOrganizationFiscalCode:
+          maxLength: 16
+          minLength: 8
+          type: string
+    OrganizationFiscalCode:
+      required:
+        - organizationFiscalCode
+      type: object
+      properties:
+        organizationFiscalCode:
+          maxLength: 16
+          minLength: 8
+          type: string
+    OrganizationName:
+      required:
+        - organizationName
+      type: object
+      properties:
+        organizationName:
+          maxLength: 100
+          minLength: 1
+          type: string
+    ReferentFiscalCode:
+      type: object
+      properties:
+        referentFiscalCode:
+          pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+          type: string
+    Organization:
+      allOf:
+        - $ref: '#/components/schemas/OrganizationFiscalCode'
+        - $ref: '#/components/schemas/OrganizationName'
+        - required:
+            - pec
+          type: object
+          properties:
+            pec:
+              maxLength: 100
+              minLength: 5
+              type: string
+              format: email
+            insertedAt:
+              type: string
+              format: date
+            entityType:
+              $ref: '#/components/schemas/EntityType'
+    Referents:
+      type: array
+      items:
+        maxLength: 16
+        minLength: 1
+        type: string
+    OrganizationStatus:
+      type: string
+      enum:
+        - Enabled
+        - Draft
+        - Pending
+        - Active
+    OrganizationWithReferents:
+      allOf:
+        - $ref: '#/components/schemas/KeyOrganizationFiscalCode'
+        - $ref: '#/components/schemas/Organization'
+        - required:
+            - referents
+          type: object
+          properties:
+            referents:
+              $ref: '#/components/schemas/Referents'
+    OrganizationWithReferentsAndStatus:
+      allOf:
+        - $ref: '#/components/schemas/OrganizationWithReferents'
+        - required:
+            - status
+          type: object
+          properties:
+            status:
+              $ref: '#/components/schemas/OrganizationStatus'
+    Organizations:
+      type: object
+      properties:
         items:
-          $ref: "#/definitions/OrganizationWithReferentsAndStatus"
-      count:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationWithReferentsAndStatus'
+        count:
+          type: integer
+  responses:
+    InvalidRequest:
+      description: Bad request
+      content: { }
+    Forbidden:
+      description: Forbidden
+      content: { }
+    NotFound:
+      description: Not found
+      content: { }
+    Conflict:
+      description: Conflict
+      content: { }
+  parameters:
+    AgreementId:
+      name: agreementId
+      in: path
+      description: Agreement id
+      required: true
+      schema:
+        type: string
+    PageSize:
+      name: pageSize
+      in: query
+      description: Page size
+      schema:
         type: integer
-
-
-responses:
-  InvalidRequest:
-    description: Bad request
-    #content: {} #TODO
-  Forbidden:
-    description: Forbidden
-    #content: {} #TODO
-  NotFound:
-    description: Not found
-    #content: {} #TODO
-  Conflict:
-    description: Conflict
-    #content: {} #TODO
-
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    in: header
-    name: Authorization
-    description: JWT Authorization header using the Bearer scheme
-  UserRole:
-    type: apiKey
-    in: header
-    name: X-CGN-USER-ROLE
-    description: Custom header containing requesting user role
+        default: 20
+    PageNumber:
+      name: page
+      in: query
+      description: Page number
+      schema:
+        type: integer
+        default: 0
+    DiscountId:
+      name: discountId
+      in: path
+      description: Discount id
+      required: true
+      schema:
+        type: string
+    DocumentType:
+      name: documentType
+      in: path
+      description: Document type
+      required: true
+      schema:
+        type: string
+        enum:
+          - Agreement
+          - AdhesionRequest
+    RequestColumnSort:
+      name: sortColumn
+      in: query
+      description: Sort by column
+      schema:
+        type: string
+        enum:
+          - Operator
+          - RequestDate
+          - State
+          - Assignee
+    ApprovedColumnSort:
+      name: sortColumn
+      in: query
+      description: Sort by column
+      schema:
+        type: string
+        enum:
+          - Operator
+          - AgreementDate
+          - LastModifyDate
+          - PublishedDiscounts
+    KeyOrganizationFiscalCode:
+      name: keyOrganizationFiscalCode
+      in: path
+      description: Organization fiscal code
+      required: true
+      schema:
+        maxLength: 16
+        minLength: 8
+        type: string
+    ReferentFiscalCode:
+      name: referentFiscalCode
+      in: path
+      description: Referent fiscal code
+      required: true
+      schema:
+        pattern: "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"
+        type: string
+    SearchQuery:
+      name: searchQuery
+      in: query
+      description: String to search in organization name o fiscal code
+      schema:
+        maxLength: 100
+        minLength: 1
+        type: string
+    SortOrganizationsBy:
+      name: sortBy
+      in: query
+      description: The field to sort by
+      schema:
+        type: string
+        enum:
+          - fiscalCode
+          - name
+          - pec
+          - insertedAt
+    SortDirection:
+      name: sortDirection
+      in: query
+      description: Sort Direction
+      schema:
+        type: string
+        default: ASC
+        enum:
+          - ASC
+          - DESC
+  requestBodies:
+    ReferentFiscalCodeBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReferentFiscalCode'
+      required: true
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Authorization header using the Bearer scheme
+    UserRole:
+      type: apiKey
+      description: Custom header containing requesting user role
+      name: X-CGN-USER-ROLE
+      in: header
+x-original-swagger-version: "2.0"

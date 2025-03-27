@@ -18,15 +18,15 @@ public class BackofficeDocumentConverter
         extends AbstractConverter<DocumentEntity, Document> {
 
     private static final Map<DocumentTypeEnum, DocumentType> enumMap = new EnumMap<>(DocumentTypeEnum.class);
-    private static final Map<String, DocumentTypeEnum> backofficeDocumentTypeMap = new HashMap<>(2);
+    private static final Map<String, DocumentTypeEnum> backofficeDocumentTypeMap = HashMap.newHashMap(2);
 
     static {
         enumMap.put(DocumentTypeEnum.BACKOFFICE_AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
         backofficeDocumentTypeMap.put(DocumentType.AGREEMENT.getValue(), DocumentTypeEnum.BACKOFFICE_AGREEMENT);
-        backofficeDocumentTypeMap.put(DocumentType.ADHESIONREQUEST.getValue(),
+        backofficeDocumentTypeMap.put(DocumentType.ADHESION_REQUEST.getValue(),
                                       DocumentTypeEnum.BACKOFFICE_ADHESION_REQUEST);
     }
 

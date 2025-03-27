@@ -21,7 +21,7 @@ public class BackofficeProfileConverter
 
     static {
         enumMap.put(DocumentTypeEnum.AGREEMENT, DocumentType.AGREEMENT);
-        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESIONREQUEST);
+        enumMap.put(DocumentTypeEnum.ADHESION_REQUEST, DocumentType.ADHESION_REQUEST);
     }
 
     protected Function<ReferentEntity, Referent> toDtoReferent = entity -> {

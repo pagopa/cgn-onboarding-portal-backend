@@ -24,14 +24,14 @@ public class AgreementConverterTest {
         agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         Agreement pendingDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, pendingDto);
-        Assert.assertEquals(AgreementState.PENDINGAGREEMENT, pendingDto.getState());
+        Assert.assertEquals(AgreementState.PENDING_AGREEMENT, pendingDto.getState());
     }
 
     @Test
     public void Convert_ConvertPendingAgreementDtoToEntity_Ok() {
         PendingAgreement dto = new PendingAgreement();
         fillAgreementDtoWithCommonFields(dto);
-        dto.setState(AgreementState.PENDINGAGREEMENT);
+        dto.setState(AgreementState.PENDING_AGREEMENT);
         dto.setEntityType(EntityType.PRIVATE);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -45,14 +45,14 @@ public class AgreementConverterTest {
         agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         Agreement draftDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, draftDto);
-        Assert.assertEquals(AgreementState.DRAFTAGREEMENT, draftDto.getState());
+        Assert.assertEquals(AgreementState.DRAFT_AGREEMENT, draftDto.getState());
     }
 
     @Test
     public void Convert_ConvertDraftAgreementDtoToEntity_Ok() {
         DraftAgreement dto = new DraftAgreement();
         fillAgreementDtoWithCommonFields(dto);
-        dto.setState(AgreementState.DRAFTAGREEMENT);
+        dto.setState(AgreementState.DRAFT_AGREEMENT);
         dto.setEntityType(EntityType.PRIVATE);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -66,14 +66,14 @@ public class AgreementConverterTest {
         agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         Agreement rejectedDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, rejectedDto);
-        Assert.assertEquals(AgreementState.REJECTEDAGREEMENT, rejectedDto.getState());
+        Assert.assertEquals(AgreementState.REJECTED_AGREEMENT, rejectedDto.getState());
     }
 
     @Test
     public void Convert_ConvertRejectedAgreementDtoToEntity_Ok() {
         RejectedAgreement dto = new RejectedAgreement();
         fillAgreementDtoWithCommonFields(dto);
-        dto.setState(AgreementState.REJECTEDAGREEMENT);
+        dto.setState(AgreementState.REJECTED_AGREEMENT);
         dto.setEntityType(EntityType.PRIVATE);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
@@ -89,7 +89,7 @@ public class AgreementConverterTest {
         agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         Agreement agreementDto = agreementConverter.toDto(agreementEntity);
         commonAssertionsEntityToDto(agreementEntity, agreementDto);
-        Assert.assertEquals(AgreementState.APPROVEDAGREEMENT, agreementDto.getState());
+        Assert.assertEquals(AgreementState.APPROVED_AGREEMENT, agreementDto.getState());
         Assert.assertTrue(agreementDto instanceof ApprovedAgreement);
         ApprovedAgreement approvedDto = (ApprovedAgreement) agreementDto;
         Assert.assertEquals(agreementEntity.getStartDate(), approvedDto.getStartDate());
@@ -101,7 +101,7 @@ public class AgreementConverterTest {
         ApprovedAgreement dto = new ApprovedAgreement();
         dto.setId("agreement_dto_id");
         dto.setImageUrl("imageURL");
-        dto.setState(AgreementState.APPROVEDAGREEMENT);
+        dto.setState(AgreementState.APPROVED_AGREEMENT);
         dto.setStartDate(LocalDate.now());
         dto.setEndDate(LocalDate.of(2021, 12, 31));
         dto.setEntityType(EntityType.PRIVATE);

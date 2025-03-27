@@ -152,7 +152,7 @@ class BackofficeAgreementServiceTest
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         pendingAgreement = backofficeAgreementService.assignAgreement(pendingAgreement.getId());
         BackofficeFilter filter = BackofficeFilter.builder()
-                                                  .agreementState(AgreementState.ASSIGNEDAGREEMENT.getValue())
+                                                  .agreementState(AgreementState.ASSIGNED_AGREEMENT.getValue())
                                                   .build();
         Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
         Assertions.assertEquals(1L, page.getTotalElements());
@@ -197,7 +197,7 @@ class BackofficeAgreementServiceTest
         var agreementId = agreementEntity.getId();
         //creating profile
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
-        profileEntity = profileService.createProfile(profileEntity, agreementId);
+        profileService.createProfile(profileEntity, agreementId);
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementId, discountEntity);

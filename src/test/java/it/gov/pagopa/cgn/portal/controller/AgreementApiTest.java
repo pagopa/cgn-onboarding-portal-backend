@@ -75,7 +75,7 @@ class AgreementApiTest
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isEmpty())
@@ -95,7 +95,7 @@ class AgreementApiTest
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
@@ -107,10 +107,11 @@ class AgreementApiTest
     @Test
     void GetAgreement_GetAgreementWithoutAgreementUser_BadRequest()
             throws Exception {
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
-                                                                                           EntityType.PRIVATE,
-                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
-        AgreementUserEntity entities = agreementUserRepository.findById(TestUtils.FAKE_ID).get();
+        this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                         EntityType.PRIVATE,
+                                                         TestUtils.FAKE_ORGANIZATION_NAME);
+        AgreementUserEntity entities = agreementUserRepository.findById(TestUtils.FAKE_ID)
+                                                              .orElse(new AgreementUserEntity());
         agreementRepository.deleteById(entities.getAgreementId());
         agreementUserRepository.deleteById(TestUtils.FAKE_ID);
         this.mockMvc.perform(post(TestUtils.createAgreements()))
@@ -133,7 +134,7 @@ class AgreementApiTest
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
@@ -160,7 +161,7 @@ class AgreementApiTest
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFTAGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.imageUrl").isEmpty())
                     .andExpect(jsonPath("$.completedSteps").isArray())
@@ -339,8 +340,6 @@ class AgreementApiTest
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         profileService.createProfile(profileEntity, agreementEntity.getId());
-
-        LocalDate ld = profileEntity.getAgreement().getInformationLastUpdateDate();
 
         //creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
