@@ -33,6 +33,12 @@ public class AgreementConverter
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;
         switch (entity.getState()) {
+            case DRAFT:
+                dto = new DraftAgreement();
+                break;
+            case PENDING:
+                dto = new PendingAgreement();
+                break;
             case APPROVED:
                 ApprovedAgreement approvedAgreement;
                 approvedAgreement = new ApprovedAgreement();

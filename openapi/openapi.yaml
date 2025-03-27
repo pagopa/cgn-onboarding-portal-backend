@@ -854,7 +854,7 @@ components:
         entityType:
           $ref: '#/components/schemas/EntityType'
       discriminator:
-        propertyName: id
+        propertyName: state
     DraftAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
