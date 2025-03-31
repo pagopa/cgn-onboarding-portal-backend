@@ -1698,10 +1698,9 @@ components:
       type: string
     ErrorCode:
       description: A payload used for error responses.
-      allOf:
+      oneOf:
         - $ref: '#/components/schemas/ErrorCodeString'
         - $ref: '#/components/schemas/ErrorCodeEnum'
-      x-one-of: true
   responses:
     InvalidRequest:
       description: Bad request
