@@ -25,9 +25,18 @@ paths:
               oneOf:
                 - $ref: '#/components/schemas/OneIdentityData'
                 - $ref: '#/components/schemas/ActiveDirectoryData'
+              discriminator:
+                propertyName: requestType
+                mapping:
+                  oi: '#/components/schemas/OneIdentityData'
+                  ad: '#/components/schemas/ActiveDirectoryData'
       responses:
         '200':
           description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: string
         '400':
           description: Parameters are not valid
   /help:
@@ -55,6 +64,8 @@ components:
       required:
         - code
         - state
+        - nonce
+        - requestType
       properties:
         code:
           type: string
@@ -62,15 +73,25 @@ components:
         state:
           type: string
           description: state received from One Identity
-
+        nonce:
+          type: string
+          description: random field
+        requestType:
+          type: string
+          description: discriminator field
+    
     ActiveDirectoryData:
       type: object
       required:
-        - pagopa_token
+        - pagopaToken
+        - requestType
       properties:
-        pagopa_token:
+        pagopaToken:
           type: string
           description: Authentication token received from Active Directory
+        requestType:
+          type: string
+          description: discriminator field
 
     HelpRequest:
       required:

@@ -6,17 +6,20 @@ import it.gov.pagopa.cgn.portal.email.HelpRequestParams;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.recaptcha.GoogleRecaptchaApi;
 import it.gov.pagopa.cgnonboardingportal.publicapi.api.HelpApi;
+import it.gov.pagopa.cgnonboardingportal.publicapi.api.SessionApi;
+import it.gov.pagopa.cgnonboardingportal.publicapi.model.CreateJwtSessionTokenRequest;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.HelpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import java.util.Optional;
 
 
 @RestController
 public class PublicApiController
-        implements HelpApi {
+        implements HelpApi, SessionApi {
 
     private HelpCategoryConverter helpCategoryConverter;
     private EmailNotificationFacade emailNotificationFacade;
@@ -30,6 +33,12 @@ public class PublicApiController
         this.emailNotificationFacade = emailNotificationFacade;
         this.helpCategoryConverter = helpCategoryConverter;
         this.googleRecaptchaApi = googleRecaptchaApi;
+    }
+
+
+    @Override
+    public Optional<NativeWebRequest> getRequest() {
+        return HelpApi.super.getRequest();
     }
 
     @Override
@@ -59,4 +68,9 @@ public class PublicApiController
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    public ResponseEntity<String> createJwtSessionToken(CreateJwtSessionTokenRequest createJwtSessionTokenRequest) {
+
+        return ResponseEntity.noContent().build();
+    }
 }
