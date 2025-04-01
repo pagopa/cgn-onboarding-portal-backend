@@ -9,6 +9,27 @@ tags:
   - name: help
     description: Help
 paths:
+  /session:
+    post:
+      summary: creates a user session
+      operationId: createJwtSessionToken
+      description: >
+        This endpoint accepts two alternative forms of data:
+        - OneIdentityData to login from One Identity (code + state)
+        - ActiveDirectoryData to login from Active Directory (pagopa_token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/OneIdentityData'
+                - $ref: '#/components/schemas/ActiveDirectoryData'
+      responses:
+        '200':
+          description: Session created successfully
+        '400':
+          description: Parameters are not valid
   /help:
     post:
       tags:
@@ -29,6 +50,28 @@ paths:
       x-codegen-request-body-name: helpRequest
 components:
   schemas:
+    OneIdentityData:
+      type: object
+      required:
+        - code
+        - state
+      properties:
+        code:
+          type: string
+          description: code received from One Identity
+        state:
+          type: string
+          description: state received from One Identity
+
+    ActiveDirectoryData:
+      type: object
+      required:
+        - pagopa_token
+      properties:
+        pagopa_token:
+          type: string
+          description: Authentication token received from Active Directory
+
     HelpRequest:
       required:
         - category
