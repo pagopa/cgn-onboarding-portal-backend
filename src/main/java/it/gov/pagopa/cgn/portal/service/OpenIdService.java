@@ -27,14 +27,14 @@ public class OpenIdService {
     public void GetToken(String code, String state, String nonce)
             throws URISyntaxException, IOException, ParseException {
         AuthorizationCode authCode = new AuthorizationCode(code);
-        URI callback = new URI("https://" + configProperties.getCgnPortalBaseUrl() + "/session");
+        URI callback = new URI(configProperties.getCgnPortalBaseUrl() + "/session");
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(authCode, callback);
 
         ClientID clientID = new ClientID(configProperties.getOneIdentityId());
         Secret clientSecret = new Secret(configProperties.getOneIdentitySecret());
         ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
 
-        URI tokenEndpoint = new URI("https://" + configProperties.getOneIdentityBaseUrl() + "/token");
+        URI tokenEndpoint = new URI(configProperties.getOneIdentityBaseUrl() + "/token");
         TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
         if (!tokenResponse.indicatesSuccess()) {
