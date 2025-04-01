@@ -21,10 +21,14 @@ import java.net.URISyntaxException;
 @Service
 public class OpenIdService {
 
-    @Autowired
-    private ConfigProperties configProperties;
+    private final ConfigProperties configProperties;
 
-    public void GetToken(String code, String state, String nonce)
+    @Autowired
+    OpenIdService(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
+
+    public String getToken(String code, String state, String nonce)
             throws URISyntaxException, IOException, ParseException {
         AuthorizationCode authCode = new AuthorizationCode(code);
         URI callback = new URI(configProperties.getCgnPortalBaseUrl() + "/session");
@@ -44,5 +48,7 @@ public class OpenIdService {
 
         OIDCTokenResponse successResponse = (OIDCTokenResponse) tokenResponse.toSuccessResponse();
         JWT idToken = successResponse.getOIDCTokens().getIDToken();
+        
+        return idToken.getParsedString();
     }
 }

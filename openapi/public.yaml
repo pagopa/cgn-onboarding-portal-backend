@@ -83,10 +83,10 @@ components:
     ActiveDirectoryData:
       type: object
       required:
-        - pagopaToken
+        - token
         - requestType
       properties:
-        pagopaToken:
+        token:
           type: string
           description: Authentication token received from Active Directory
         requestType:
