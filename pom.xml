@@ -283,6 +283,13 @@
             <version>1.16.0</version>
             <scope>provided</scope>
         </dependency>
+        <!-- OPENID client -->
+        <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+            <version>11.23.1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

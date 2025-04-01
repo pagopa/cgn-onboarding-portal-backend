@@ -61,9 +61,6 @@ public class ConfigProperties {
     @Value("${cgn.email.department-email}")
     private String cgnDepartmentEmail;
 
-    @Value("${cgn.email.portal-base-url}")
-    private String cgnPortalBaseUrl;
-
     @Value("classpath:images/cgn-logo.png")
     private Resource cgnLogo;
 
@@ -126,6 +123,28 @@ public class ConfigProperties {
 
     @Value("${eyca.admin.mailto}")
     private String eycaAdminMailTo;
+
+    // one identity
+    @Value("${cgn-portal.base-url}")
+    private String cgnPortalBaseUrl;
+
+    @Value("${one-identity.base-url}")
+    private String oneIdentityBaseUrl;
+
+    @Value("${one-identity.id}")
+    private String oneIdentityId;
+
+    @Value("${one-identity.secret}")
+    private String oneIdentitySecret;
+
+    @Value("${active-directory.well-known}")
+    private String activeDirectoryWellKnown;
+
+    @Value("${jwt.private-key}")
+    private String jwtPrivateKey;
+
+    @Value("${jwt.public-key}")
+    private String jwtPublicKey;
 
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
