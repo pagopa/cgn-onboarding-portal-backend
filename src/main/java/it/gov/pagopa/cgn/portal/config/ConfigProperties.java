@@ -137,6 +137,9 @@ public class ConfigProperties {
     @Value("${one-identity.secret}")
     private String oneIdentitySecret;
 
+    @Value("${one-identity.well-known}")
+    private String oneIdentityWellKnown;
+
     @Value("${active-directory.well-known}")
     private String activeDirectoryWellKnown;
 
