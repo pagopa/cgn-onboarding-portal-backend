@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
@@ -26,6 +27,13 @@ public class JwtUtils {
         this.configProperties = configProperties;
     }
 
+    /**
+     * Build a signed token with the given claims that expires in 12 hours
+     *
+     * @param claims
+     * @return
+     * @throws GeneralSecurityException
+     */
     public String buildJwtToken(Map<String, String> claims)
             throws GeneralSecurityException {
         Date issuedAt = new Date();
@@ -39,9 +47,21 @@ public class JwtUtils {
                    .compact();
     }
 
-    public boolean validateJwtToken(String token) {
-        // TODO: Implement validation of token signature for request authorization
-        return true;
+    /**
+     * Verify that token is signed correctly and returns claims
+     *
+     * @param token
+     * @return
+     * @throws GeneralSecurityException
+     */
+    public Claims getClaimsFromSignedToken(String token)
+            throws GeneralSecurityException {
+        return (Claims) Jwts.parserBuilder()
+                            .build()
+                            .setSigningKey(loadPublicKey(configProperties.getJwtPublicKey()))
+                            .requireIssuer(configProperties.getCgnPortalBaseUrl())
+                            .parse(token)
+                            .getBody();
     }
 
     private Key loadPrivateKey(String key64)
