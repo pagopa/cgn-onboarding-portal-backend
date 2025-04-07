@@ -31,7 +31,7 @@ public class PublicSessionApiController
     public ResponseEntity<String> createJwtSessionToken(CreateJwtSessionTokenRequest createJwtSessionTokenRequest) {
         try {
             if (createJwtSessionTokenRequest instanceof OneIdentityData oidata) {
-                String token = sessionFacade.getToken(oidata.getCode(), oidata.getState(), oidata.getNonce());
+                String token = sessionFacade.getOperatorToken(oidata.getCode(), oidata.getState(), oidata.getNonce());
                 return ResponseEntity.ok(token);
             }
             if (createJwtSessionTokenRequest instanceof ActiveDirectoryData addata) {

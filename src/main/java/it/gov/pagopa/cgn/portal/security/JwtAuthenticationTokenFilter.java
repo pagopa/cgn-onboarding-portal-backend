@@ -18,13 +18,10 @@ public class JwtAuthenticationTokenFilter
         extends OncePerRequestFilter {
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private JwtUtils jwtUtils;
 
     @Value("${jwt.header}")
     private String tokenHeader;
-
-    @Value("${cgn.role.header}")
-    private String cgnRoleHeader;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -32,12 +29,10 @@ public class JwtAuthenticationTokenFilter
         Optional<String> authToken = Optional.ofNullable(request.getHeader(this.tokenHeader))
                                              .map(t -> t.replace("Bearer ", ""));
 
-        String cgnRole = request.getHeader(this.cgnRoleHeader);
-
         JwtUser userDetails = null;
 
         if (authToken.isPresent()) {
-            userDetails = jwtTokenUtil.getUserDetails(authToken.get(), cgnRole);
+            userDetails = jwtUtils.getUserDetails(authToken.get());
         }
 
         if (userDetails!=null && SecurityContextHolder.getContext().getAuthentication()==null) {

@@ -51,6 +51,11 @@ public class TestUtils {
 
     public static final String GEOLOCATION_PATH = "/geolocation-token";
 
+    public static final String FAKE_FIRST_NAME = "FAKE_FIRST_NAME";
+    public static final String FAKE_LAST_NAME = "FAKE_LAST_NAME";
+    public static final String FAKE_FISCAL_CODE = "FAKE_FISCAL_CODE";
+    public static final String FAKE_ORGANIZATION_FISCAL_CODE = "FAKE_ORGANIZATION_FISCAL_CODE";
+
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
 
@@ -1471,7 +1476,9 @@ public class TestUtils {
 
     public static void setOperatorAuth() {
         SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_FIRST_NAME,
+                                                                                               TestUtils.FAKE_LAST_NAME,
+                                                                                               TestUtils.FAKE_ID,
                                                                                                TestUtils.FAKE_ID)));
     }
 

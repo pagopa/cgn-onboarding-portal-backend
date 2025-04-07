@@ -109,6 +109,18 @@ public class CGNUtils {
         return getJwtOperatorUser().getCompanyTaxCode();
     }
 
+    public static String getJwtOperatorFiscalCode() {
+        return getJwtOperatorUser().getUserTaxCode();
+    }
+
+    public static String getJwtOperatorFirstName() {
+        return getJwtOperatorUser().getUserFirstName();
+    }
+
+    public static String getJwtOperatorLastName() {
+        return getJwtOperatorUser().getUserLastName();
+    }
+
     public static String getJwtAdminUserName() {
         return getJwtAdminUser().getUserFullName();
     }

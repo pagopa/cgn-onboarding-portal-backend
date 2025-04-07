@@ -27,28 +27,22 @@ tags:
     description: API Geolocation Token
   - name: bucket
     description: Bucket Load
+  - name: organizations-data
+    description: Operator's Organizations Data
 paths:
-  /organizations:
-    post:
+  /referent-organizations:
+    get:
       tags:
-        - organizations-tokens
+        - organizations-data
       summary: Get list of operators by referent
       operationId: getOrganizations
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
       responses:
         "200":
           description: Get list of operators by referent
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/Organizations'
         "400":
           description: Session token is not valid
           content:
@@ -1434,6 +1428,31 @@ components:
           type: string
         discountUrl:
           maxLength: 500
+          type: string
+    Organizations:
+      required:
+        - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+    Organization:
+      required:
+        - organization_name
+        - organization_fiscal_code
+        - email
+        - token
+      type: object
+      properties:
+        organization_name:
+          type: string
+        organization_fiscal_code:
+          type: string
+        email:
+          type: string
+        token:
           type: string
     Discounts:
       required:
