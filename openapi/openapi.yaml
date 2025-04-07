@@ -28,6 +28,37 @@ tags:
   - name: bucket
     description: Bucket Load
 paths:
+  /organizations:
+    post:
+      tags:
+        - organizations-tokens
+      summary: Get list of agreement id tokens
+      operationId: getOrganizations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Get list of agreement id tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "400":
+          description: Session token is not valid
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden
+          content: { }
+
   /geolocation-token:
     get:
       tags:

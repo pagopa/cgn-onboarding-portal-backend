@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.CompanyAttributeAuthority;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,10 +14,7 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JwtUtils {
@@ -82,4 +80,19 @@ public class JwtUtils {
         return fact.generatePublic(spec);
     }
 
+    public HashMap<String, String> getClaimsForAttributeAuthorityCompany(CompanyAttributeAuthority company,
+                                                                         String agreementId) {
+        HashMap<String, String> claims = new HashMap<>();
+        //TODO: superset claims from session
+        claims.put("first_name", "from session user");
+        claims.put("last_name", "from session user");
+        claims.put("fiscal_code", "from session user");
+        claims.put("role", "from session user");
+
+        claims.put("pec", company.getPec());
+        claims.put("company_vat", company.getFiscalCode());
+        claims.put("organization_name", company.getOrganizationName());
+        claims.put("agreement_id", agreementId);
+        return claims;
+    }
 }
