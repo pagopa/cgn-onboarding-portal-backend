@@ -32,7 +32,7 @@ paths:
     post:
       tags:
         - organizations-tokens
-      summary: Get list of agreement id tokens
+      summary: Get list of operators by referent
       operationId: getOrganizations
       requestBody:
         required: true
@@ -42,7 +42,7 @@ paths:
               type: string
       responses:
         "200":
-          description: Get list of agreement id tokens
+          description: Get list of operators by referent
           content:
             application/json:
               schema:
