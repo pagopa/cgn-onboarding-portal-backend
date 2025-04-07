@@ -4,13 +4,17 @@ info:
   description: Carta Giovani Nazionale Onboarding Portal - Public API
   version: 0.1.0
 servers:
-  - url: https://api.cgn.pagopa.it/public/api
+  - url: https://api.cgnonboardingportal.pagopa.it/public/v1
 tags:
   - name: help
-    description: Help
+    description: Help request endpoints
+  - name: session
+    description: Session related endpoints
 paths:
   /session:
     post:
+      tags:
+        - session
       summary: creates a user session
       operationId: createJwtSessionToken
       description: >
