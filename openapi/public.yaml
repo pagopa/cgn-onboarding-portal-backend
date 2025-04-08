@@ -74,9 +74,6 @@ components:
         code:
           type: string
           description: code received from One Identity
-        state:
-          type: string
-          description: state received from One Identity
         nonce:
           type: string
           description: random field
@@ -93,6 +90,9 @@ components:
         token:
           type: string
           description: Authentication token received from Active Directory
+        nonce:
+          type: string
+          description: random field
         requestType:
           type: string
           description: discriminator field

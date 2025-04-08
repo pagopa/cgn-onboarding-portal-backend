@@ -30,12 +30,12 @@ public class PublicSessionApiController
     @Override
     public ResponseEntity<String> createJwtSessionToken(CreateJwtSessionTokenRequest createJwtSessionTokenRequest) {
         try {
-            if (createJwtSessionTokenRequest instanceof OneIdentityData oidata) {
-                String token = sessionFacade.getOperatorToken(oidata.getCode(), oidata.getState(), oidata.getNonce());
+            if (createJwtSessionTokenRequest instanceof OneIdentityData oiData) {
+                String token = sessionFacade.getOperatorToken(oiData.getCode(), oiData.getNonce());
                 return ResponseEntity.ok(token);
             }
-            if (createJwtSessionTokenRequest instanceof ActiveDirectoryData addata) {
-                //TODO: next
+            if (createJwtSessionTokenRequest instanceof ActiveDirectoryData adData) {
+                String token = sessionFacade.getAdminToken(adData.getToken(), adData.getNonce());
                 return ResponseEntity.noContent().build();
             }
         } catch (Exception e) {

@@ -31,7 +31,7 @@ public class OneIdentityService {
         this.configProperties = configProperties;
     }
 
-    public OneIdentityUser getOneIdentityUser(String code, String state, String nonce)
+    public OneIdentityUser getOneIdentityUser(String code, String nonce)
             throws URISyntaxException, IOException, ParseException {
         TokenRequest request = getTokenRequest(code);
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());

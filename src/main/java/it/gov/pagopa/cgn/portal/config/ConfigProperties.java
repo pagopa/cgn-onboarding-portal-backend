@@ -143,6 +143,9 @@ public class ConfigProperties {
     @Value("${active-directory.well-known}")
     private String activeDirectoryWellKnown;
 
+    @Value("${active-directory.id}")
+    private String activeDirectoryId;
+
     @Value("${jwt.private-key}")
     private String jwtPrivateKey;
 
