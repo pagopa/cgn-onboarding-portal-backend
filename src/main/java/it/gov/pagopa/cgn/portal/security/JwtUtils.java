@@ -61,12 +61,12 @@ public class JwtUtils {
     public Claims getClaimsFromSignedToken(String token) {
         try {
 
-            return (Claims) Jwts.parserBuilder()
-                                .setSigningKey(loadPublicKey(configProperties.getJwtPublicKey()))
-                                .requireIssuer(configProperties.getCgnPortalBaseUrl())
-                                .build()
-                                .parse(token)
-                                .getBody();
+            return Jwts.parserBuilder()
+                       .setSigningKey(loadPublicKey(configProperties.getJwtPublicKey()))
+                       .requireIssuer(configProperties.getCgnPortalBaseUrl())
+                       .build()
+                       .parseClaimsJws(token)
+                       .getBody();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
