@@ -12,12 +12,14 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 
+@Slf4j
 public class OidcJwtValidation {
 
     private final RestTemplate restTemplate;
@@ -42,6 +44,14 @@ public class OidcJwtValidation {
         Nonce expectedNonce = new Nonce(nonce);
         IDTokenClaimsSet claims = null;
         try {
+            log.warn("######START-DEBUG#####");
+            log.warn(iss.toJSONString());
+            log.warn(clientId.toString());
+            log.warn(jwsAlg.toJSONString());
+            log.warn(jwkSetURI.toString());
+            log.warn(expectedNonce.toJSONString());
+            log.warn(idToken.getParsedString());
+            log.warn("######END-DEBUG#####");
             claims = validator.validate(idToken, expectedNonce);
         } catch (BadJOSEException e) {
             throw new RuntimeException("Invalid signature or data.", e);

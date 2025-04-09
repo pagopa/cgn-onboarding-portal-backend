@@ -36,7 +36,7 @@ public class PublicSessionApiController
             }
             if (createJwtSessionTokenRequest instanceof ActiveDirectoryData adData) {
                 String token = sessionFacade.getAdminToken(adData.getToken(), adData.getNonce());
-                return ResponseEntity.noContent().build();
+                return ResponseEntity.ok(token);
             }
         } catch (Exception e) {
             log.error("get session token failure: " + e.getMessage());
