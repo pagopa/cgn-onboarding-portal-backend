@@ -44,9 +44,9 @@ public class OidcJwtValidation {
         try {
             claims = validator.validate(idToken, expectedNonce);
         } catch (BadJOSEException e) {
-            throw new RuntimeException("Invalid signature or data.");
+            throw new RuntimeException("Invalid signature or data.", e);
         } catch (JOSEException e) {
-            throw new RuntimeException("Internal server error during idToken validation.");
+            throw new RuntimeException("Internal server error during idToken validation.", e);
         }
         return claims;
     }
