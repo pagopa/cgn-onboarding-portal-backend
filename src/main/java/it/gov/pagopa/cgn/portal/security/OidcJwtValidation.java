@@ -44,14 +44,6 @@ public class OidcJwtValidation {
         Nonce expectedNonce = new Nonce(nonce);
         IDTokenClaimsSet claims = null;
         try {
-            log.warn("######START-DEBUG#####");
-            log.warn(iss.toJSONString());
-            log.warn(clientId.toString());
-            log.warn(jwsAlg.toJSONString());
-            log.warn(jwkSetURI.toString());
-            log.warn(expectedNonce.toJSONString());
-            log.warn(idToken.getParsedString());
-            log.warn("######END-DEBUG#####");
             claims = validator.validate(idToken, expectedNonce);
         } catch (BadJOSEException e) {
             throw new RuntimeException("Invalid signature or data.", e);
