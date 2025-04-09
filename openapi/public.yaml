@@ -67,7 +67,6 @@ components:
       type: object
       required:
         - code
-        - state
         - nonce
         - requestType
       properties:
@@ -85,6 +84,7 @@ components:
       type: object
       required:
         - token
+        - nonce
         - requestType
       properties:
         token:
