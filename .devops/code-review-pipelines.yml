@@ -8,7 +8,7 @@
 trigger: none
 
 pool:
-  vmImage: 'ubuntu-20.04'
+  vmImage: 'ubuntu-24.04'
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
