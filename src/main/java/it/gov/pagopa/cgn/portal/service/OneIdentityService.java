@@ -36,7 +36,7 @@ public class OneIdentityService {
         TokenRequest request = getTokenRequest(code);
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
         if (!tokenResponse.indicatesSuccess()) {
-            throw new RuntimeException(
+            throw new ParseException(
                     "Cannot validate OIDC AuthCode: " + tokenResponse.toErrorResponse().toJSONObject().toJSONString());
         }
         OIDCTokenResponse successResponse = (OIDCTokenResponse) tokenResponse.toSuccessResponse();

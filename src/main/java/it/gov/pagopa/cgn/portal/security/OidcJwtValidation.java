@@ -12,12 +12,16 @@ import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Arrays;
+
+import static java.util.stream.Collectors.joining;
 
 @Slf4j
 public class OidcJwtValidation {
@@ -46,9 +50,11 @@ public class OidcJwtValidation {
         try {
             claims = validator.validate(idToken, expectedNonce);
         } catch (BadJOSEException e) {
-            throw new RuntimeException("Invalid signature or data.", e);
+            log.error(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
+            throw new InternalErrorException("Invalid signature or data.");
         } catch (JOSEException e) {
-            throw new RuntimeException("Internal server error during idToken validation.", e);
+            log.error(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
+            throw new InternalErrorException("Internal server error during idToken validation.");
         }
         return claims;
     }

@@ -48,7 +48,7 @@ public class JwtUtils {
                        .compact();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return null;
+            throw new SecurityException(e);
         }
     }
 
@@ -67,9 +67,9 @@ public class JwtUtils {
                        .build()
                        .parseClaimsJws(token)
                        .getBody();
-        } catch (Exception e) {
+        } catch (GeneralSecurityException e) {
             log.error(e.getMessage(), e);
-            return null;
+            throw new SecurityException(e);
         }
     }
 

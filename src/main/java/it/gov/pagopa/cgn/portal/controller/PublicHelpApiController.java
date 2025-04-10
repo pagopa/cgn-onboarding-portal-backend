@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.controller;
 import it.gov.pagopa.cgn.portal.converter.help.HelpCategoryConverter;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.email.HelpRequestParams;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.recaptcha.GoogleRecaptchaApi;
 import it.gov.pagopa.cgnonboardingportal.publicapi.api.HelpApi;
@@ -59,11 +60,10 @@ public class PublicHelpApiController
 
         try {
             emailNotificationFacade.notifyDepartmentNewHelpRequest(helpParams);
+            return ResponseEntity.noContent().build();
+
         } catch (Exception exc) {
-            throw new RuntimeException(exc);
+            throw new InternalErrorException(exc.getMessage());
         }
-
-        return ResponseEntity.noContent().build();
     }
-
 }

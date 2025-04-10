@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.controller;
 
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.facade.SessionFacade;
 import it.gov.pagopa.cgnonboardingportal.publicapi.api.SessionApi;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.ActiveDirectoryData;
@@ -7,7 +8,6 @@ import it.gov.pagopa.cgnonboardingportal.publicapi.model.CreateJwtSessionTokenRe
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.OneIdentityData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,19 +30,18 @@ public class PublicSessionApiController
     @Override
     public ResponseEntity<String> createJwtSessionToken(CreateJwtSessionTokenRequest createJwtSessionTokenRequest) {
         try {
+            String token = null;
             if (createJwtSessionTokenRequest instanceof OneIdentityData oiData) {
-                String token = sessionFacade.getOperatorToken(oiData.getCode(), oiData.getNonce());
-                return ResponseEntity.ok(token);
+                token = sessionFacade.getOperatorToken(oiData.getCode(), oiData.getNonce());
             }
             if (createJwtSessionTokenRequest instanceof ActiveDirectoryData adData) {
-                String token = sessionFacade.getAdminToken(adData.getToken(), adData.getNonce());
-                return ResponseEntity.ok(token);
+                token = sessionFacade.getAdminToken(adData.getToken(), adData.getNonce());
             }
+            return ResponseEntity.ok(token);
         } catch (Exception e) {
-            log.error("get session token failure: " + e.getMessage());
-            log.error(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
-
+            log.error("get session token failure: {}",
+                      Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
+            throw new InternalErrorException(e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
