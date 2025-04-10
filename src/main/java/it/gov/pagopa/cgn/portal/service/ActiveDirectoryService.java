@@ -16,8 +16,12 @@ import java.io.IOException;
 @Service
 public class ActiveDirectoryService {
 
+    private final ConfigProperties configProperties;
+
     @Autowired
-    private ConfigProperties configProperties;
+    public ActiveDirectoryService(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
 
     public ActiveDirectoryUser getActiveDirectoryUser(String token, String nonce)
             throws IOException, java.text.ParseException {

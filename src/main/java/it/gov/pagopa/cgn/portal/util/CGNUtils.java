@@ -40,15 +40,15 @@ public class CGNUtils {
 
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
         Dimension dimension;
-        double MBSize;
+        double mbSize;
         try {
             checkIfImageFile(image.getOriginalFilename());
             dimension = getImageDimensions(image.getInputStream());
-            MBSize = getImageMBSize(image);
+            mbSize = getImageMBSize(image);
         } catch (IOException e) {
             throw new InternalErrorException(e.getMessage());
         }
-        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight() && MBSize < 5;
+        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight() && mbSize < 5;
 
         if (!isValid) {
             throw new InvalidRequestException(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());

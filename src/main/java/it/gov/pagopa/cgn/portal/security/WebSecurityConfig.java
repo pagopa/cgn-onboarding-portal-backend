@@ -29,15 +29,19 @@ public class WebSecurityConfig
     @Value("${spring.profiles.active:Unknown}")
     private String activeProfile;
 
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+
+    private final ConfigProperties configProperties;
+
+    private final JwtAuthenticationTokenFilter jwtAuthTokenFilter;
 
     @Autowired
-    private ConfigProperties configProperties;
-
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() {
-        return new JwtAuthenticationTokenFilter();
+    public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                             ConfigProperties configProperties,
+                             JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.configProperties = configProperties;
+        this.jwtAuthTokenFilter = jwtAuthTokenFilter;
     }
 
     @Bean
@@ -75,7 +79,7 @@ public class WebSecurityConfig
                     .authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
-        httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity.headers().cacheControl();
     }

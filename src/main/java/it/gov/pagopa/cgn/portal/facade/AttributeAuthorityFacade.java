@@ -21,11 +21,15 @@ import java.util.List;
 @Component
 public class AttributeAuthorityFacade {
 
-    @Autowired
-    private AttributeAuthorityService attributeAuthorityService;
+    private final AttributeAuthorityService attributeAuthorityService;
+
+    private final JwtUtils jwtUtils;
 
     @Autowired
-    private JwtUtils jwtUtils;
+    public AttributeAuthorityFacade(JwtUtils jwtUtils, AttributeAuthorityService attributeAuthorityService) {
+        this.jwtUtils = jwtUtils;
+        this.attributeAuthorityService = attributeAuthorityService;
+    }
 
     public ResponseEntity<Organizations> getOrganizations() {
         String operatorFiscalCode = CGNUtils.getJwtOperatorFiscalCode();

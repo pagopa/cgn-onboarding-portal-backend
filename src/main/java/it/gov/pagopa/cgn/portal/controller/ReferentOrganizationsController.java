@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReferentOrganizationsController
         implements ReferentOrganizationsApi {
 
+    private final AttributeAuthorityFacade attributeAuthorityFacade;
+
     @Autowired
-    private AttributeAuthorityFacade attributeAuthorityFacade;
+    public ReferentOrganizationsController(AttributeAuthorityFacade attributeAuthorityFacade) {
+        this.attributeAuthorityFacade = attributeAuthorityFacade;
+    }
 
     @Override
     public ResponseEntity<Organizations> getOrganizations() {
