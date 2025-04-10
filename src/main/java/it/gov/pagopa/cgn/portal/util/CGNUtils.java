@@ -127,16 +127,16 @@ public class CGNUtils {
 
     public static JwtOperatorUser getJwtOperatorUser() {
         JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        if (token.getPrincipal() instanceof JwtOperatorUser) {
-            return (JwtOperatorUser) token.getPrincipal();
+        if (token.getPrincipal() instanceof JwtOperatorUser jwtOperatorUser) {
+            return jwtOperatorUser;
         }
         throw new CGNException("Expected an operator token, but was of type " + token.getPrincipal());
     }
 
     public static JwtAdminUser getJwtAdminUser() {
         JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        if (token.getPrincipal() instanceof JwtAdminUser) {
-            return (JwtAdminUser) token.getPrincipal();
+        if (token.getPrincipal() instanceof JwtAdminUser jwtAdminUser) {
+            return jwtAdminUser;
         }
         throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
