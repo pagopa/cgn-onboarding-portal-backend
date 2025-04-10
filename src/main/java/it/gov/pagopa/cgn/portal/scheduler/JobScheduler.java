@@ -53,6 +53,8 @@ public class JobScheduler {
             scheduler.unscheduleJob(trigger.getKey());
         }
 
+        System.out.println("Scheduling job [" + jobKey.getName() + "] with cron [" + cronExpression + "]");
+
         JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobKey).build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
