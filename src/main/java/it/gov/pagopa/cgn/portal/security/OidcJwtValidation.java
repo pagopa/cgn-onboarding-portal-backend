@@ -61,7 +61,9 @@ public class OidcJwtValidation {
 
     private String getRequest(URI uri) {
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
-        if (!response.getStatusCode().is2xxSuccessful()) throw new RuntimeException("Cannot GET: " + uri);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new InternalErrorException("Cannot GET: " + uri);
+        }
         return response.getBody();
     }
 

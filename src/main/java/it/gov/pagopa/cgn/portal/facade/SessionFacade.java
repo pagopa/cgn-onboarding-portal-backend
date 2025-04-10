@@ -51,12 +51,17 @@ public class SessionFacade {
     }
 
     public String getAdminToken(String token, String nonce)
-            throws Exception {
-        ActiveDirectoryUser activeDirectoryUser = activeDirectoryService.getActiveDirectoryUser(token, nonce);
-        Map<String, String> claims = new HashMap<>();
-        claims.put(JwtClaims.FIRST_NAME.getCode(), activeDirectoryUser.getFirstName());
-        claims.put(JwtClaims.LAST_NAME.getCode(), activeDirectoryUser.getLastName());
-        claims.put(JwtClaims.ROLE.getCode(), CgnUserRoleEnum.ADMIN.getCode());
-        return jwtUtils.buildJwtToken(claims);
+            throws GeneralSecurityException {
+        try {
+            ActiveDirectoryUser activeDirectoryUser = activeDirectoryService.getActiveDirectoryUser(token, nonce);
+            Map<String, String> claims = new HashMap<>();
+            claims.put(JwtClaims.FIRST_NAME.getCode(), activeDirectoryUser.getFirstName());
+            claims.put(JwtClaims.LAST_NAME.getCode(), activeDirectoryUser.getLastName());
+            claims.put(JwtClaims.ROLE.getCode(), CgnUserRoleEnum.ADMIN.getCode());
+            return jwtUtils.buildJwtToken(claims);
+        } catch (IOException | java.text.ParseException e) {
+            log.error(Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
+            throw new GeneralSecurityException(e);
+        }
     }
 }
