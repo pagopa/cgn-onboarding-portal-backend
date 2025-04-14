@@ -58,6 +58,6 @@ public class OneIdentityService {
         AuthorizationCode authCode = new AuthorizationCode(code);
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(authCode, callback);
         ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
-        return new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+        return new TokenRequest(tokenEndpoint, clientAuth, codeGrant, new Scope("openid"));
     }
 }
