@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -19,10 +19,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Collections;
 import java.util.List;
 
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration {
+public class WebSecurityConfig
+        extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.profiles.active:Unknown}")
     private String activeProfile;
@@ -34,9 +36,9 @@ public class SecurityConfiguration {
     private final JwtAuthenticationTokenFilter jwtAuthTokenFilter;
 
     @Autowired
-    public SecurityConfiguration(JwtAuthenticationEntryPoint unauthorizedHandler,
-                                 ConfigProperties configProperties,
-                                 JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
+    public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                             ConfigProperties configProperties,
+                             JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
         this.unauthorizedHandler = unauthorizedHandler;
         this.configProperties = configProperties;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
@@ -54,32 +56,32 @@ public class SecurityConfiguration {
         return source;
     }
 
+    // we suppress "Disabling CSRF protections is security-sensitive"
+    // because JWT token prevents CSRF attack to the portal
     @SuppressWarnings("java:S4502")
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http)
+    @Override
+    protected void configure(HttpSecurity httpSecurity)
             throws Exception {
-        http.csrf()
-            .disable()
-            .exceptionHandling()
-            .authenticationEntryPoint(unauthorizedHandler)
-            .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .cors()
-            .and()
-            .authorizeRequests()
-            .antMatchers(getAntMatchers())
-            .permitAll()
-            .anyRequest()
-            .authenticated();
+        httpSecurity.csrf()
+                    .disable()
+                    .exceptionHandling()
+                    .authenticationEntryPoint(unauthorizedHandler)
+                    .and()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
+                    .cors()
+                    .and()
+                    .authorizeRequests()
+                    .antMatchers(getAntMatchers())
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
-        http.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http.headers().cacheControl();
-
-        return http.build();
+        httpSecurity.headers().cacheControl();
     }
 
     private String[] getAntMatchers() {
