@@ -39,7 +39,14 @@ import java.util.stream.Stream;
 
 public class TestUtils {
 
+    public static final String REFERENT_ORGANIZATIONS_PATH = "/referent-organizations";
+    public static final String SESSION_PATH = "/session";
+    public static final String FAKE_SESSION_OI_TOKEN = "FAKE_SESSION_OI_TOKEN";
+    public static final String FAKE_SESSION_AD_TOKEN = "FAKE_SESSION_AD_TOKEN";
+    public static final String FAKE_ORG_TOKEN = "FAKE_ORG_TOKEN";
+
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements"; // needed to bypass interceptor
+
 
     private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
 
