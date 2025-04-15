@@ -14,6 +14,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 @RunWith(SpringRunner.class)
 @TestPropertySource(locations = {"classpath:application.properties"})
@@ -30,6 +32,11 @@ public class JwtUtilsTest {
     public void GetUserDetails_InvalidRole_ThrowSecurityException() {
         String token = createOperatorSessionToken("invalid_role");
         Assert.assertThrows(SecurityException.class, () -> jwtUtils.getUserDetails(token));
+    }
+
+    @Test
+    public void buildJwtToken_shouldThrowSecurityException_whenSigningFails() {
+        assertThrows(SecurityException.class, () -> jwtUtils.buildJwtToken(null));
     }
 
     @Test

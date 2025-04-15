@@ -193,7 +193,7 @@ class BackofficeExportFacadeTest
     }
 
     @Test
-    void exportEycaDiscounts_whenPrinterFails_thenReturnsInternalServerError() {
+    void exportAgreements_whenPrinterFails_thenReturnsInternalServerError() {
         // Arrange
         ExportService exportService = (ExportService) ReflectionTestUtils.getField(backofficeExportFacade,
                                                                                    "exportService");
@@ -206,6 +206,24 @@ class BackofficeExportFacadeTest
                                                                                .override("printerConsumer",
                                                                                          failingPrinterConsumer)
                                                                                .runAndGet(() -> backofficeExportFacade.exportAgreements());
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
+    void exportEycaDiscounts_whenPrinterFails_thenReturnsInternalServerError() {
+        // Arrange
+        ExportService exportService = (ExportService) ReflectionTestUtils.getField(backofficeExportFacade,
+                                                                                   "exportService");
+
+        Function<CSVPrinter, Consumer<String[]>> failingPrinterConsumer = printer -> row -> {
+            throw new RuntimeException("Simulated printer failure");
+        };
+
+        ResponseEntity<Resource> response = new ReflectiveFieldOverrideRunner().on(exportService)
+                                                                               .override("printerConsumer",
+                                                                                         failingPrinterConsumer)
+                                                                               .runAndGet(() -> backofficeExportFacade.exportEycaDiscounts());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }

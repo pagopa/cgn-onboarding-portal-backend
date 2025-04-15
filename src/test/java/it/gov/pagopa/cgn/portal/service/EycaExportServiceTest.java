@@ -18,11 +18,12 @@ import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
+import it.gov.pagopa.cgn.portal.util.ReflectiveFieldOverrideRunner;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
-import org.junit.Assert;
+import org.apache.commons.csv.CSVPrinter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestClientException;
 
 import javax.mail.Message.RecipientType;
@@ -43,8 +45,11 @@ import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -548,7 +553,26 @@ class EycaExportServiceTest
     @Test
     void testBuildCsv() {
         ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-        Assert.assertFalse(resource.getByteArray().length==0);
+        Assertions.assertNotEquals(0, resource.getByteArray().length);
+    }
+
+    @Test
+    void buildCsv_whenPrinterFails_thenReturnsInternalServerError() {
+        // Arrange
+        ExportService exportService = (ExportService) ReflectionTestUtils.getField(backofficeExportFacade,
+                                                                                   "exportService");
+
+        Function<CSVPrinter, Consumer<String[]>> failingPrinterConsumer = printer -> row -> {
+            throw new RuntimeException("Simulated printer failure");
+        };
+
+        ByteArrayResource response = new ReflectiveFieldOverrideRunner().on(exportService)
+                                                                        .override("printerConsumer",
+                                                                                  failingPrinterConsumer)
+                                                                        .runAndGet(() -> exportService.buildEycaCsv(
+                                                                                TestUtils.getEycaDataExportViewEntityListFromCSV()));
+
+        assertEquals(0, response.getByteArray().length);
     }
 
     @Test
@@ -563,18 +587,18 @@ class EycaExportServiceTest
         List<EycaDataExportViewEntity> entityList = TestUtils.getEycaDataExportViewEntityListFromCSV();
         exportService.syncEycaUpdateIdOnEyca(entityList);
 
-        Assertions.assertEquals(ExportService.LIVE_NO,
-                                entityList.stream()
-                                          .filter(d -> TestUtils.FAKE_OID_1.equals(d.getEycaUpdateId()))
-                                          .findAny()
-                                          .get()
-                                          .getLive());
-        Assertions.assertEquals(ExportService.LIVE_NO,
-                                entityList.stream()
-                                          .filter(d -> TestUtils.FAKE_OID_2.equals(d.getEycaUpdateId()))
-                                          .findAny()
-                                          .get()
-                                          .getLive());
+        assertEquals(ExportService.LIVE_NO,
+                     entityList.stream()
+                               .filter(d -> TestUtils.FAKE_OID_1.equals(d.getEycaUpdateId()))
+                               .findAny()
+                               .get()
+                               .getLive());
+        assertEquals(ExportService.LIVE_NO,
+                     entityList.stream()
+                               .filter(d -> TestUtils.FAKE_OID_2.equals(d.getEycaUpdateId()))
+                               .findAny()
+                               .get()
+                               .getLive());
     }
 
     @Test
@@ -588,8 +612,8 @@ class EycaExportServiceTest
                                                                           "json",
                                                                           false);
 
-        Assertions.assertEquals(ExportService.LIVE_YES_INT,
-                                response.getApiResponse().getData().getDiscounts().getData().get(0).getLive());
+        assertEquals(ExportService.LIVE_YES_INT,
+                     response.getApiResponse().getData().getDiscounts().getData().get(0).getLive());
 
     }
 
@@ -604,8 +628,8 @@ class EycaExportServiceTest
                                                                           "json",
                                                                           true);
 
-        Assertions.assertEquals(ExportService.LIVE_NO_INT,
-                                response.getApiResponse().getData().getDiscounts().getData().get(0).getLive());
+        assertEquals(ExportService.LIVE_NO_INT,
+                     response.getApiResponse().getData().getDiscounts().getData().get(0).getLive());
 
     }
 
