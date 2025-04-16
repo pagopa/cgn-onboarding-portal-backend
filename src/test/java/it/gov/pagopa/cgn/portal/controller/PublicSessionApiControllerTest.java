@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.controller;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.facade.SessionFacade;
+import it.gov.pagopa.cgn.portal.security.OneIdentityUser;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.ActiveDirectoryData;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.CreateJwtSessionTokenRequest;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.OneIdentityData;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -22,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class PublicSessionApiControllerTest
+class PublicSessionApiControllerTest
         extends IntegrationAbstractTest {
 
     @MockBean
@@ -70,5 +72,18 @@ public class PublicSessionApiControllerTest
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(content().string(TestUtils.FAKE_SESSION_AD_TOKEN));
+    }
+
+    @Test
+    void shouldCreateUserAndReturnFields() {
+        String fiscalCode = "RSSMRA80A01H501U";
+        String firstName = "Mario";
+        String lastName = "Rossi";
+
+        OneIdentityUser user = new OneIdentityUser(fiscalCode, firstName, lastName);
+
+        assertEquals(fiscalCode, user.getFiscalCode());
+        assertEquals(firstName, user.getFirstName());
+        assertEquals(lastName, user.getLastName());
     }
 }

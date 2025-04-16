@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockUser(username = "mockUser", roles = {"MERCHANT"})
-public class ReferentOrganizationsControllerTest
+class ReferentOrganizationsControllerTest
         extends IntegrationAbstractTest {
 
     @MockBean

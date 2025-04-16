@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class AttributeAuthorityFacadeTest
+class AttributeAuthorityFacadeTest
         extends IntegrationAbstractTest {
 
     @Mock
