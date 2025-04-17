@@ -19,12 +19,10 @@ import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.repository.EycaDataExportRepository;
 import it.gov.pagopa.cgn.portal.scheduler.SendDiscountsToEycaJob;
-import it.gov.pagopa.cgn.portal.util.ReflectiveFieldOverrideRunner;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
-import org.apache.commons.csv.CSVPrinter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,10 +45,9 @@ import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -597,28 +594,24 @@ class EycaExportServiceTest
     }
 
     @Test
-    void testBuildCsv() {
+    void testBuildCsv_shouldReturnNotEmptyResource() {
         ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-        Assertions.assertNotEquals(0, resource.getByteArray().length);
+        Assertions.assertEquals(104549, resource.getByteArray().length);
     }
 
     @Test
-    void buildCsv_whenPrinterFails_thenReturnsInternalServerError() {
-        // Arrange
+    void buildEycaCsv_shouldHandleExceptionAndReturnEmptyResource() {
         ExportService expService = (ExportService) ReflectionTestUtils.getField(backofficeExportFacade,
                                                                                 "exportService");
+        EycaDataExportViewEntity faultyEntity = mock(EycaDataExportViewEntity.class);
+        when(faultyEntity.getDiscountId()).thenThrow(new RuntimeException("Test exception"));
 
-        Function<CSVPrinter, Consumer<String[]>> failingPrinterConsumer = printer -> row -> {
-            throw new RuntimeException("Simulated printer failure");
-        };
+        List<EycaDataExportViewEntity> list = List.of(faultyEntity);
 
-        ByteArrayResource response = new ReflectiveFieldOverrideRunner().on(expService)
-                                                                        .override("printerConsumer",
-                                                                                  failingPrinterConsumer)
-                                                                        .runAndGet(() -> exportService.buildEycaCsv(
-                                                                                TestUtils.getEycaDataExportViewEntityListFromCSV()));
+        ByteArrayResource result = expService.buildEycaCsv(list);
 
-        assertEquals(104549, response.getByteArray().length);
+        assertNotNull(result);
+        assertEquals(0, result.contentLength());
     }
 
     @Test
