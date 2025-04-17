@@ -4,9 +4,7 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.AttributeAuthorityApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.api.DefaultApi;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +105,39 @@ class AttributeAuthorityServiceTest
                .thenReturn(ResponseEntity.noContent().build());
         ResponseEntity<Void> response = attributeAuthorityService.deleteReferent("1234567890", "AAAAAA00A00A000A");
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void shouldReturnListOfCompanies_givenFiscalCode() {
+        String fiscalCode = "RSSMRA80A01H501U";
+        List<CompanyAttributeAuthority> expectedCompanies = List.of(new CompanyAttributeAuthority().fiscalCode("1"),
+                                                                    new CompanyAttributeAuthority().fiscalCode("2"));
+
+        Mockito.when(defaultAttributeAuthorityApi.getUserCompanies(Mockito.argThat(body -> fiscalCode.equals(body.getFiscalCode()))))
+               .thenReturn(expectedCompanies);
+
+        List<CompanyAttributeAuthority> result = attributeAuthorityService.getAgreementOrganizations(fiscalCode);
+
+        Assertions.assertEquals(expectedCompanies, result);
+        Mockito.verify(defaultAttributeAuthorityApi, Mockito.times(1))
+               .getUserCompanies(Mockito.any(GetCompaniesBodyAttributeAuthority.class));
+    }
+
+    @Test
+    void shouldReturnCorrectOrganizationCount_givenFiscalCode() {
+        String fiscalCode = "RSSMRA80A01H501U";
+        List<CompanyAttributeAuthority> companies = List.of(new CompanyAttributeAuthority(),
+                                                            new CompanyAttributeAuthority(),
+                                                            new CompanyAttributeAuthority());
+
+        Mockito.when(defaultAttributeAuthorityApi.getUserCompanies(Mockito.argThat(body -> fiscalCode.equals(body.getFiscalCode()))))
+               .thenReturn(companies);
+
+        int count = attributeAuthorityService.countUserOrganizations(fiscalCode);
+
+        Assertions.assertEquals(3, count);
+        Mockito.verify(defaultAttributeAuthorityApi, Mockito.times(1))
+               .getUserCompanies(Mockito.any(GetCompaniesBodyAttributeAuthority.class));
     }
 
 }
