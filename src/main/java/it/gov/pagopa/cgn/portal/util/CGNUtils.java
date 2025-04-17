@@ -10,7 +10,6 @@ import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +21,12 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 @Slf4j
 public class CGNUtils {
@@ -149,10 +149,12 @@ public class CGNUtils {
         }
     }
 
-    public static void writeAttachments(List<Attachment> attachments, String path)
+    public static void writeAttachments(List<Attachment> attachments, Function<String, OutputStream> streamProvider)
             throws IOException {
         for (Attachment a : attachments) {
-            FileUtils.writeByteArrayToFile(new File(path + a.getAttachmentFilename()), a.getResource().getByteArray());
+            try (OutputStream os = streamProvider.apply(a.getAttachmentFilename())) {
+                os.write(a.getResource().getByteArray());
+            }
         }
     }
 
