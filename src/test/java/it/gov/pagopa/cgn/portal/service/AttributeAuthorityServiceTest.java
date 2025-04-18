@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SpringBootTest
@@ -83,7 +82,7 @@ class AttributeAuthorityServiceTest
     @Test
     void GetReferents_Ok() {
         Mockito.when(attributeAuthorityApi.getReferentsWithHttpInfo(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").collect(Collectors.toList())));
+               .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").toList()));
         ResponseEntity<List<String>> response = attributeAuthorityService.getReferents(Mockito.any());
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
