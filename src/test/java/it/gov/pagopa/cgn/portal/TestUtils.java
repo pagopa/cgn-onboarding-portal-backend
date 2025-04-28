@@ -39,7 +39,14 @@ import java.util.stream.Stream;
 
 public class TestUtils {
 
+    public static final String REFERENT_ORGANIZATIONS_PATH = "/referent-organizations";
+    public static final String SESSION_PATH = "/session";
+    public static final String FAKE_SESSION_OI_TOKEN = "FAKE_SESSION_OI_TOKEN";
+    public static final String FAKE_SESSION_AD_TOKEN = "FAKE_SESSION_AD_TOKEN";
+    public static final String FAKE_ORG_TOKEN = "FAKE_ORG_TOKEN";
+
     public static final String AGREEMENTS_CONTROLLER_PATH = "/agreements"; // needed to bypass interceptor
+
 
     private static final String AGREEMENTS_CONTROLLER_PATH_PLUS_SLASH = AGREEMENTS_CONTROLLER_PATH + "/";
 
@@ -50,6 +57,11 @@ public class TestUtils {
     public static final String PUBLIC_HELP_CONTROLLER_PATH = "/help";
 
     public static final String GEOLOCATION_PATH = "/geolocation-token";
+
+    public static final String FAKE_FIRST_NAME = "FAKE_FIRST_NAME";
+    public static final String FAKE_LAST_NAME = "FAKE_LAST_NAME";
+    public static final String FAKE_FISCAL_CODE = "FAKE_FISCAL_CODE";
+    public static final String FAKE_ORGANIZATION_FISCAL_CODE = "FAKE_ORGANIZATION_FISCAL_CODE";
 
     public static final String FAKE_ID = "FAKE_ID";
     public static final String FAKE_ID_2 = "FAKE_ID_2";
@@ -1471,7 +1483,9 @@ public class TestUtils {
 
     public static void setOperatorAuth() {
         SecurityContextHolder.getContext()
-                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_ID,
+                             .setAuthentication(new JwtAuthenticationToken(new JwtOperatorUser(TestUtils.FAKE_FIRST_NAME,
+                                                                                               TestUtils.FAKE_LAST_NAME,
+                                                                                               TestUtils.FAKE_ID,
                                                                                                TestUtils.FAKE_ID)));
     }
 

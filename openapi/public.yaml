@@ -4,11 +4,45 @@ info:
   description: Carta Giovani Nazionale Onboarding Portal - Public API
   version: 0.1.0
 servers:
-  - url: https://api.cgn.pagopa.it/public/api
+  - url: https://api.cgnonboardingportal.pagopa.it/public/v1
 tags:
   - name: help
-    description: Help
+    description: Help request endpoints
+  - name: session
+    description: Session related endpoints
 paths:
+  /session:
+    post:
+      tags:
+        - session
+      summary: creates a user session
+      operationId: createJwtSessionToken
+      description: >
+        This endpoint accepts two alternative forms of data:
+        - OneIdentityData to login from One Identity (code + state)
+        - ActiveDirectoryData to login from Active Directory (pagopa_token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/OneIdentityData'
+                - $ref: '#/components/schemas/ActiveDirectoryData'
+              discriminator:
+                propertyName: requestType
+                mapping:
+                  oi: '#/components/schemas/OneIdentityData'
+                  ad: '#/components/schemas/ActiveDirectoryData'
+      responses:
+        '200':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Parameters are not valid
   /help:
     post:
       tags:
@@ -29,6 +63,40 @@ paths:
       x-codegen-request-body-name: helpRequest
 components:
   schemas:
+    OneIdentityData:
+      type: object
+      required:
+        - code
+        - nonce
+        - requestType
+      properties:
+        code:
+          type: string
+          description: code received from One Identity
+        nonce:
+          type: string
+          description: random field
+        requestType:
+          type: string
+          description: discriminator field
+    
+    ActiveDirectoryData:
+      type: object
+      required:
+        - token
+        - nonce
+        - requestType
+      properties:
+        token:
+          type: string
+          description: Authentication token received from Active Directory
+        nonce:
+          type: string
+          description: random field
+        requestType:
+          type: string
+          description: discriminator field
+
     HelpRequest:
       required:
         - category

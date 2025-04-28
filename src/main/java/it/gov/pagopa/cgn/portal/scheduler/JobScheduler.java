@@ -1,12 +1,14 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.stereotype.Service;
 
 import java.util.TimeZone;
 
 @Service
+@Slf4j
 public class JobScheduler {
 
     private static final String DISCOUNTS_JOB_GROUP = "discounts";
@@ -47,11 +49,13 @@ public class JobScheduler {
     }
 
 
-    private void scheduleJob(JobKey jobKey, String cronExpression, Class jobClass)
+    private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)
             throws SchedulerException {
         for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
             scheduler.unscheduleJob(trigger.getKey());
         }
+
+        log.info("Scheduling job [{}] with cron [{}]", jobKey.getName(), cronExpression);
 
         JobDetail job = JobBuilder.newJob(jobClass).withIdentity(jobKey).build();
 

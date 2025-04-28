@@ -10,7 +10,6 @@ import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,11 +21,12 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 @Slf4j
 public class CGNUtils {
@@ -40,15 +40,15 @@ public class CGNUtils {
 
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
         Dimension dimension;
-        double MBSize;
+        double mbSize;
         try {
             checkIfImageFile(image.getOriginalFilename());
             dimension = getImageDimensions(image.getInputStream());
-            MBSize = getImageMBSize(image);
+            mbSize = getImageMBSize(image);
         } catch (IOException e) {
             throw new InternalErrorException(e.getMessage());
         }
-        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight() && MBSize < 5;
+        boolean isValid = minWidth <= dimension.getWidth() && minHeight <= dimension.getHeight() && mbSize < 5;
 
         if (!isValid) {
             throw new InvalidRequestException(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());
@@ -109,22 +109,34 @@ public class CGNUtils {
         return getJwtOperatorUser().getCompanyTaxCode();
     }
 
+    public static String getJwtOperatorFiscalCode() {
+        return getJwtOperatorUser().getUserTaxCode();
+    }
+
+    public static String getJwtOperatorFirstName() {
+        return getJwtOperatorUser().getUserFirstName();
+    }
+
+    public static String getJwtOperatorLastName() {
+        return getJwtOperatorUser().getUserLastName();
+    }
+
     public static String getJwtAdminUserName() {
         return getJwtAdminUser().getUserFullName();
     }
 
     public static JwtOperatorUser getJwtOperatorUser() {
         JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        if (token.getPrincipal() instanceof JwtOperatorUser) {
-            return (JwtOperatorUser) token.getPrincipal();
+        if (token.getPrincipal() instanceof JwtOperatorUser jwtOperatorUser) {
+            return jwtOperatorUser;
         }
         throw new CGNException("Expected an operator token, but was of type " + token.getPrincipal());
     }
 
     public static JwtAdminUser getJwtAdminUser() {
         JwtAuthenticationToken token = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        if (token.getPrincipal() instanceof JwtAdminUser) {
-            return (JwtAdminUser) token.getPrincipal();
+        if (token.getPrincipal() instanceof JwtAdminUser jwtAdminUser) {
+            return jwtAdminUser;
         }
         throw new CGNException("Expected an admin token, but was of type " + token.getPrincipal());
     }
@@ -137,10 +149,12 @@ public class CGNUtils {
         }
     }
 
-    public static void writeAttachments(List<Attachment> attachments, String path)
+    public static void writeAttachments(List<Attachment> attachments, Function<String, OutputStream> streamProvider)
             throws IOException {
         for (Attachment a : attachments) {
-            FileUtils.writeByteArrayToFile(new File(path + a.getAttachmentFilename()), a.getResource().getByteArray());
+            try (OutputStream os = streamProvider.apply(a.getAttachmentFilename())) {
+                os.write(a.getResource().getByteArray());
+            }
         }
     }
 

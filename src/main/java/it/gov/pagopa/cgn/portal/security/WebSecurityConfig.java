@@ -16,7 +16,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,17 +27,21 @@ public class WebSecurityConfig
         extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.profiles.active:Unknown}")
-    private String activeProfile;    
+    private String activeProfile;
+
+    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+
+    private final ConfigProperties configProperties;
+
+    private final JwtAuthenticationTokenFilter jwtAuthTokenFilter;
 
     @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-
-    @Autowired
-    private ConfigProperties configProperties;
-
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() {
-        return new JwtAuthenticationTokenFilter();
+    public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                             ConfigProperties configProperties,
+                             JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.configProperties = configProperties;
+        this.jwtAuthTokenFilter = jwtAuthTokenFilter;
     }
 
     @Bean
@@ -76,14 +79,20 @@ public class WebSecurityConfig
                     .authenticated();
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
-        httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity.headers().cacheControl();
     }
 
     private String[] getAntMatchers() {
         return ("dev".equals(activeProfile) ?
-                                    List.of("/actuator/**", "/help", "/","/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html")
-                                    : List.of("/actuator/**", "/help", "/")).toArray(String[]::new);
+                List.of("/actuator/**",
+                        "/session",
+                        "/help",
+                        "/",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"):
+                List.of("/actuator/**", "/session", "/help", "/")).toArray(String[]::new);
     }
 }

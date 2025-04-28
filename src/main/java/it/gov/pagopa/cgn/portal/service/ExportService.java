@@ -220,7 +220,7 @@ public class ExportService {
                                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                                  .body(new ByteArrayResource(export));
         } catch (Exception ex) {
-            log.error("exportAgreements end failure: " + ex.getMessage());
+            log.error("exportAgreements end failure: {}", ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -278,7 +278,7 @@ public class ExportService {
                                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                                  .body(new ByteArrayResource(export));
         } catch (Exception ex) {
-            log.error("exportEycaDiscounts end failure: " + ex.getMessage());
+            log.error("exportEycaDiscounts end failure: {}", ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -335,7 +335,7 @@ public class ExportService {
             log.info("buildEycaCsv end success");
             return new ByteArrayResource(writer.toString().getBytes(StandardCharsets.UTF_8));
         } catch (Exception ex) {
-            log.error("buildEycaCsv end failure: " + ex.getMessage());
+            log.error("buildEycaCsv end failure: {}", ex.getMessage());
         }
         return new ByteArrayResource(new byte[]{});
     }

@@ -8,10 +8,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 public class JwtOperatorUser
         implements JwtUser {
 
+    private final String userFirstName;
+    private final String userLastName;
     private final String userTaxCode;
     private final String companyTaxCode;
 
-    public JwtOperatorUser(String userTaxCode, String companyTaxCode) {
+    public JwtOperatorUser(String userFirstName, String userLastName, String userTaxCode, String companyTaxCode) {
+        this.userFirstName = userFirstName;
+        this.userLastName = userLastName;
         this.userTaxCode = userTaxCode;
         this.companyTaxCode = companyTaxCode;
     }
