@@ -1,33 +1,43 @@
 package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.email.EmailParams;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
-@RunWith(SpringRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@RunWith(JUnitParamsRunner.class)
 public class CGNUtilsTest {
 
-
     @Test
-    public void ValidateImage_ValidateInvalidImage_InvalidRequestException() {
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", new byte[10]);
+    @Parameters({"2000, 2000", "50, 2000", "2000, 50"})
+    public void validateImage_InvalidDimensions_ThrowsInvalidRequestException(int width, int height)
+            throws IOException {
+        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
+        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
 
-        Exception exception = Assert.assertThrows(InternalErrorException.class,
-                                                  () -> CGNUtils.validateImage(multipartFile, 800, 600));
+        Exception exception = assertThrows(InvalidRequestException.class,
+                                           () -> CGNUtils.validateImage(multipartFile, width, height));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DATA_NOT_VALID.getValue()));
+        assertEquals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue(), exception.getMessage());
+
     }
 
     @Test
@@ -39,47 +49,9 @@ public class CGNUtilsTest {
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.validateImage(multipartFile, 800, 600));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue()));
-    }
-
-    @Test
-    public void ValidateImage_ValidateImageWithTooSmallResolutionParams_InvalidRequestException()
-            throws IOException {
-        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
-
-        Exception exception = Assert.assertThrows(InvalidRequestException.class,
-                                                  () -> CGNUtils.validateImage(multipartFile, 2000, 2000));
-
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue()));
-    }
-
-    @Test
-    public void ValidateImage_ValidateImageWithTheHeightTooSmallResolutionParams_InvalidRequestException()
-            throws IOException {
-        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
-
-        Exception exception = Assert.assertThrows(InvalidRequestException.class,
-                                                  () -> CGNUtils.validateImage(multipartFile, 50, 2000));
-
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue()));
-    }
-
-    @Test
-    public void ValidateImage_ValidateImageWithTheWidthTooSmallResolutionParams_InvalidRequestException()
-            throws IOException {
-        byte[] image = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-image.png"));
-        MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
-
-        Exception exception = Assert.assertThrows(InvalidRequestException.class,
-                                                  () -> CGNUtils.validateImage(multipartFile, 2000, 50));
-
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue());
     }
 
     @Test
@@ -88,28 +60,32 @@ public class CGNUtilsTest {
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.checkIfImageFile("filename.pdf"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue());
 
         exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfImageFile("filename"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue());
     }
 
     @Test
-    public void ValidateImageFile_ValidateImageFileWithWeightGreatherThenFiveMB_InvalidRequestException()  throws IOException {
+    public void ValidateImageFile_ValidateImageFileWithWeightGreatherThenFiveMB_InvalidRequestException()
+            throws IOException {
 
         //just over 5MB
-        byte[] image = CGNUtils.getFakeImage(20000,17000);
+        byte[] image = CGNUtils.getFakeImage(20000, 17000);
 
         MultipartFile multipartFile = new MockMultipartFile("fileItem", "test-image.jpeg", "image/png", image);
 
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.validateImage(multipartFile, 800, 600));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.IMAGE_DIMENSION_NOT_VALID.getValue());
     }
 
     @Test
@@ -117,13 +93,15 @@ public class CGNUtilsTest {
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.checkIfPdfFile("filename.png"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue());
 
         exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfPdfFile("filename"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue());
     }
 
     @Test
@@ -131,14 +109,38 @@ public class CGNUtilsTest {
         Exception exception = Assert.assertThrows(InvalidRequestException.class,
                                                   () -> CGNUtils.checkIfCsvFile("filename.xxx"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue());
 
         exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfCsvFile("filename"));
 
-        Assert.assertTrue(exception.getMessage(),
-                          exception.getMessage().equals(ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue()));
+        Assert.assertEquals(exception.getMessage(),
+                            exception.getMessage(),
+                            ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue());
     }
+
+    @Test
+    public void ValidateImageFile_NullFileName_InvalidRequestException() {
+        Exception exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfImageFile(null));
+
+        Assert.assertEquals(ErrorCodeEnum.IMAGE_NAME_OR_EXTENSION_NOT_VALID.getValue(), exception.getMessage());
+    }
+
+    @Test
+    public void ValidatePDFFile_NullFileName_InvalidRequestException() {
+        Exception exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfPdfFile(null));
+
+        Assert.assertEquals(ErrorCodeEnum.PDF_NAME_OR_EXTENSION_NOT_VALID.getValue(), exception.getMessage());
+    }
+
+    @Test
+    public void ValidateCSVFile_NullFileName_InvalidRequestException() {
+        Exception exception = Assert.assertThrows(InvalidRequestException.class, () -> CGNUtils.checkIfCsvFile(null));
+
+        Assert.assertEquals(ErrorCodeEnum.CSV_NAME_OR_EXTENSION_NOT_VALID.getValue(), exception.getMessage());
+    }
+
 
     @Test
     public void GetJwtToken_GetJwtToken_Ok() {
@@ -148,6 +150,9 @@ public class CGNUtilsTest {
         TestUtils.setOperatorAuth();
         Assert.assertNotNull(CGNUtils.getJwtOperatorUser());
         Assert.assertNotNull(CGNUtils.getJwtOperatorUserId());
+        Assert.assertNotNull(CGNUtils.getJwtOperatorFiscalCode());
+        Assert.assertNotNull(CGNUtils.getJwtOperatorFirstName());
+        Assert.assertNotNull(CGNUtils.getJwtOperatorLastName());
     }
 
     @Test
@@ -161,4 +166,20 @@ public class CGNUtilsTest {
         TestUtils.setOperatorAuth();
         Assert.assertThrows(CGNException.class, CGNUtils::getJwtAdminUserName);
     }
+
+    @Test
+    public void writeAttachmentsToStream_WritesToOutputStream()
+            throws IOException {
+        String fileName = "test.txt";
+        byte[] content = "test content".getBytes(StandardCharsets.UTF_8);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        EmailParams.Attachment attachment = new EmailParams.Attachment(fileName, new ByteArrayResource(content));
+
+        CGNUtils.writeAttachments(List.of(attachment), filename -> outputStream);
+
+        Assert.assertArrayEquals(content, outputStream.toByteArray());
+    }
+
 }

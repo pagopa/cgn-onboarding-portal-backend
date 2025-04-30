@@ -68,6 +68,12 @@ public class AttributeAuthorityService {
         return attributeAuthorityApi.deleteReferentWithHttpInfo(keyOrganizationFiscalCode, referentFiscalCode);
     }
 
+    public List<CompanyAttributeAuthority> getAgreementOrganizations(String referentFiscalCode)
+            throws HttpClientErrorException {
+        return defaultAttributeAuthorityApi.getUserCompanies(new GetCompaniesBodyAttributeAuthority().fiscalCode(
+                referentFiscalCode));
+    }
+
     public int countUserOrganizations(String referentFiscalCode)
             throws HttpClientErrorException {
         GetCompaniesBodyAttributeAuthority body = new GetCompaniesBodyAttributeAuthority();

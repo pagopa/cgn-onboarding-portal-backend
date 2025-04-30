@@ -4,7 +4,7 @@ info:
   description: Carta Giovani Nazionale Onboarding Portal Backoffice
   version: 0.0.1
 servers:
-  - url: https://api.cgn.pagopa.it/backoffice/v1
+  - url: https://api.cgnonboardingportal.pagopa.it/backoffice/v1
 security:
   - Bearer: [ ]
     UserRole: [ ]
