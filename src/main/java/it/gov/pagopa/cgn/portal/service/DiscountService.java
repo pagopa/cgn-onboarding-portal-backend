@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountService {
 
-    public static final String EMPTY_BUCKET_MSG = "Il partner ha terminato i codici";
+    public static final String EMPTY_BUCKET_MSG = "I codici sconto disponibili sono terminati. L'operatore deve caricare una nuova lista di codici per poter procedere";
     private static final int MAX_NUMBER_PUBLISHED_DISCOUNT = 5;
 
     private final DiscountRepository discountRepository;
