@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountService {
 
+    public static final String EMPTY_BUCKET_MSG = "Il partner ha terminato i codici";
     private static final int MAX_NUMBER_PUBLISHED_DISCOUNT = 5;
 
     private final DiscountRepository discountRepository;
@@ -352,10 +353,14 @@ public class DiscountService {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_GET_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue());
         }
 
-        DiscountBucketCodeEntity bucketCodeEntity = discountBucketCodeRepository.getOneForDiscount(discountId);
-        discountBucketCodeRepository.burnDiscountBucketCode(bucketCodeEntity.getId());
+        DiscountBucketCodeEntity discountBucketCodeEntity = discountBucketCodeRepository.getOneForDiscount(discountId);
 
-        return bucketCodeEntity.getCode();
+        if (discountBucketCodeEntity!=null) {
+            discountBucketCodeRepository.burnDiscountBucketCode(discountBucketCodeEntity.getId());
+            return discountBucketCodeEntity.getCode();
+        } else {
+            return EMPTY_BUCKET_MSG;
+        }
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
