@@ -365,6 +365,9 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void setDiscountTestPassed(String agreementId, Long discountId) {
+        // send notification
+        ProfileEntity profileEntity = profileService.getProfile(agreementId)
+                                                    .orElseThrow(() -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
         DiscountEntity discount = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
         if (!DiscountStateEnum.TEST_PENDING.equals(discount.getState())) {
@@ -374,9 +377,6 @@ public class DiscountService {
         discount.setState(DiscountStateEnum.TEST_PASSED);
         discount = discountRepository.save(discount);
 
-        // send notification
-        ProfileEntity profileEntity = profileService.getProfile(agreementId)
-                                                    .orElseThrow(() -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
         emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity, discount.getName());
     }
 
