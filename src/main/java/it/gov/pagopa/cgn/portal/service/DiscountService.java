@@ -358,7 +358,7 @@ public class DiscountService {
             discountBucketCodeRepository.burnDiscountBucketCode(discountBucketCodeEntity.getId());
             return discountBucketCodeEntity.getCode();
         } else {
-            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_CODE_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
         }
     }
 

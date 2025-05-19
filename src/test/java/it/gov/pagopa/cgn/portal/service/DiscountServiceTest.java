@@ -1933,7 +1933,7 @@ class DiscountServiceTest
             discountService.getDiscountBucketCode(agreementEntity.getId(), discountEntityFinal.getId());
         });
 
-        Assertions.assertEquals(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue(),
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_CODE_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue(),
                                 exception.getMessage());
 
     }
