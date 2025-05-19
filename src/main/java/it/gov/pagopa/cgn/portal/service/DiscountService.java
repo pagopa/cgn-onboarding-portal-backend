@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 public class DiscountService {
 
-    public static final String EMPTY_BUCKET_MSG = "I codici sconto disponibili sono terminati. L'operatore deve caricare una nuova lista di codici per poter procedere";
     private static final int MAX_NUMBER_PUBLISHED_DISCOUNT = 5;
 
     private final DiscountRepository discountRepository;
@@ -359,7 +358,7 @@ public class DiscountService {
             discountBucketCodeRepository.burnDiscountBucketCode(discountBucketCodeEntity.getId());
             return discountBucketCodeEntity.getCode();
         } else {
-            return EMPTY_BUCKET_MSG;
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
         }
     }
 

@@ -1907,7 +1907,7 @@ class DiscountServiceTest
     }
 
     @Test
-    void Should_ReturnMessage_When_NoCodesAreAvailable()
+    void Should_ThrowException_When_NoCodesAreAvailable()
             throws IOException {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.BUCKET);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
@@ -1915,7 +1915,7 @@ class DiscountServiceTest
         DiscountProductEntity productEntity0 = new DiscountProductEntity();
         productEntity0.setProductCategory(ProductCategoryEnum.CULTURE_AND_ENTERTAINMENT);
         productEntity0.setDiscount(discountEntity);
-        discountEntity.addProductList(Arrays.asList(productEntity0));
+        discountEntity.addProductList(List.of(productEntity0));
 
         azureStorage.uploadCsv(multipartFileMock.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
@@ -1927,9 +1927,14 @@ class DiscountServiceTest
 
         discountRepository.save(discountEntity);
 
-        String code = discountService.getDiscountBucketCode(agreementEntity.getId(), discountEntity.getId());
+        final DiscountEntity discountEntityFinal = discountEntity;
 
-        Assertions.assertEquals(DiscountService.EMPTY_BUCKET_MSG, code);
+        Exception exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
+            discountService.getDiscountBucketCode(agreementEntity.getId(), discountEntityFinal.getId());
+        });
+
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue(),
+                                exception.getMessage());
+
     }
-
 }
