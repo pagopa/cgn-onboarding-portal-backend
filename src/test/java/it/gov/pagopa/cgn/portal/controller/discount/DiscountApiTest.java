@@ -812,6 +812,24 @@ class DiscountApiTest
     }
 
     @Test
+    void Action_TestDiscount_WithNoBucketCodes_ko()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.BUCKET);
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithBucketCodes(agreement);
+        azureStorage.uploadCsv(multipartFile.getBytes(), discount.getLastBucketCodeLoadUid(), multipartFile.getSize());
+
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/testing"))
+                    .andDo(log())
+                    .andExpect(content().string(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_EMPTY_BUCKET.getValue()));
+    }
+
+    @Test
     void Action_PublishDiscount_Ok()
             throws Exception {
         initTest(DiscountCodeTypeEnum.STATIC);
