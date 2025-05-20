@@ -1248,65 +1248,76 @@ components:
         - TelephonyAndInternet
         - Travelling
     SalesChannel:
+      oneOf:
+        - $ref: '#/components/schemas/OnlineChannel'
+        - $ref: '#/components/schemas/OfflineChannel'
+        - $ref: '#/components/schemas/BothChannels'
+      discriminator:
+        propertyName: channelType
       required:
         - channelType
       type: object
       properties:
         channelType:
           $ref: '#/components/schemas/SalesChannelType'
-      discriminator:
-        propertyName: channelType
     OnlineChannel:
-      allOf:
-        - $ref: '#/components/schemas/SalesChannel'
-        - required:
-            - discountCodeType
-            - websiteUrl
-          type: object
-          properties:
-            websiteUrl:
-              type: string
-            discountCodeType:
-              $ref: '#/components/schemas/DiscountCodeType'
+      type: object
+      required:
+        - channelType
+        - websiteUrl
+        - discountCodeType
+      properties:
+        channelType:
+          $ref: '#/components/schemas/SalesChannelType'
+          const: OnlineChannel
+        websiteUrl:
+          type: string
+        discountCodeType:
+          $ref: '#/components/schemas/DiscountCodeType'
     OfflineChannel:
-      allOf:
-        - $ref: '#/components/schemas/SalesChannel'
-        - required:
-            - addresses
-          type: object
-          properties:
-            websiteUrl:
-              type: string
-            addresses:
-              type: array
-              items:
-                maxLength: 500
-                minLength: 10
-                type: string
-            allNationalAddresses:
-              type: boolean
-              default: false
+      type: object
+      required:
+        - channelType
+        - addresses
+      properties:
+        channelType:
+          $ref: '#/components/schemas/SalesChannelType'
+          const: OfflineChannel
+        websiteUrl:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+            minLength: 10
+            maxLength: 500
+        allNationalAddresses:
+          type: boolean
+          default: false
     BothChannels:
-      allOf:
-        - $ref: '#/components/schemas/SalesChannel'
-        - required:
-            - addresses
-            - websiteUrl
-          type: object
-          properties:
-            websiteUrl:
-              type: string
-            addresses:
-              type: array
-              items:
-                maxLength: 500
-                minLength: 10
-                type: string
-            allNationalAddresses:
-              type: boolean
-              default: false
-            discountCodeType:
-              $ref: '#/components/schemas/DiscountCodeType'
+      type: object
+      required:
+        - channelType
+        - websiteUrl
+        - addresses
+        - discountCodeType
+      properties:
+        channelType:
+          $ref: '#/components/schemas/SalesChannelType'
+          const: BothChannels
+        websiteUrl:
+          type: string
+        addresses:
+          type: array
+          items:
+            type: string
+            minLength: 10
+            maxLength: 500
+        allNationalAddresses:
+          type: boolean
+          default: false
+        discountCodeType:
+          $ref: '#/components/schemas/DiscountCodeType'
     SalesChannelType:
       type: string
       enum:
