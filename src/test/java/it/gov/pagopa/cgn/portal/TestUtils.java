@@ -454,6 +454,18 @@ public class TestUtils {
         return discountEntity;
     }
 
+    public static DiscountBucketCodeEntity createDummyDiscountBucketCodeEntity(DiscountEntity discount, String code) {
+        DiscountBucketCodeEntity discountBucketCodeEntity = new DiscountBucketCodeEntity();
+        discountBucketCodeEntity.setId(1L);
+        discountBucketCodeEntity.setCode(code);
+        discountBucketCodeEntity.setIsUsed(false);
+        discountBucketCodeEntity.setUsageDatetime(null);
+        discountBucketCodeEntity.setDiscount(discount);
+        discountBucketCodeEntity.setBucketCodeLoadId(discount.getLastBucketCodeLoad().getId());
+        return discountBucketCodeEntity;
+    }
+
+
     public static BucketCodeLoadEntity createDummyBucketLoadEntity(Long discountId) {
         BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
         bucketCodeLoadEntity.setId(1L);
