@@ -13,6 +13,7 @@ import java.time.OffsetDateTime;
 @Table(name = "discount_bucket_code_summary")
 @Data
 public class DiscountBucketCodeSummaryEntity
+        extends BaseEntity
         implements Serializable {
 
     @Id

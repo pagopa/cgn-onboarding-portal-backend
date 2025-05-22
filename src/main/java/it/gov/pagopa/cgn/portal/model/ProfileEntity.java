@@ -126,18 +126,12 @@ public class ProfileEntity
     private ReferentEntity referent;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(fetch = FetchType.LAZY,
-               mappedBy = "profile",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addressList;
 
     @EqualsAndHashCode.Exclude
     @Size(max = 4)
-    @OneToMany(fetch = FetchType.LAZY,
-               mappedBy = "profile",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SecondaryReferentEntity> secondaryReferentList;
 
     @Column(name = "all_national_addresses")
@@ -175,15 +169,5 @@ public class ProfileEntity
             });
         }
     }
-
-
-    public OffsetDateTime getInsertTime() {
-        return insertTime;
-    }
-
-    public OffsetDateTime getUpdateTime() {
-        return updateTime;
-    }
-
 }
 
