@@ -35,6 +35,9 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class TestUtils {
@@ -1504,5 +1507,14 @@ public class TestUtils {
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
                              .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+    }
+
+
+    public static <T, R> R callAfter(int seconds, T input, Function<T, R> function)
+            throws InterruptedException, ExecutionException {
+        try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
+            ScheduledFuture<R> future = scheduler.schedule(() -> function.apply(input), seconds, TimeUnit.SECONDS);
+            return future.get();
+        }
     }
 }

@@ -29,7 +29,8 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -1926,7 +1927,7 @@ class DiscountServiceTest
 
     @Test
     void saveEntity_whenEntityExists_shouldUpdateUpdateTime()
-            throws IOException {
+            throws IOException, ExecutionException, InterruptedException {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.BUCKET);
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         uploadCsv(discountEntity);
@@ -1938,16 +1939,13 @@ class DiscountServiceTest
 
         toUpdateEntity.setAvailableCodes(11L);
 
-        sleep();
-
-        toUpdateEntity = discountBucketCodeSummaryRepository.save(toUpdateEntity);
+        toUpdateEntity = TestUtils.callAfter(1, toUpdateEntity, discountBucketCodeSummaryRepository::save);
 
         Assertions.assertNotNull(toUpdateEntity.getInsertTime());
         Assertions.assertNotNull(toUpdateEntity.getUpdateTime());
 
         OffsetDateTime firstUpdateTime = toUpdateEntity.getUpdateTime();
-        sleep();
-        toUpdateEntity = discountBucketCodeSummaryRepository.save(toUpdateEntity);
+        toUpdateEntity = TestUtils.callAfter(1, toUpdateEntity, discountBucketCodeSummaryRepository::save);
 
         Assertions.assertNotEquals(toUpdateEntity.getUpdateTime(), firstUpdateTime);
     }
@@ -1974,14 +1972,6 @@ class DiscountServiceTest
         azureStorage.uploadCsv(multipartFileMock.getBytes(),
                                discountEntity.getLastBucketCodeLoadUid(),
                                multipartFileMock.getSize());
-    }
-
-    private void sleep() {
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }
