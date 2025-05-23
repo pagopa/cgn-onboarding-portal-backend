@@ -9,13 +9,11 @@ import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1915,10 +1913,10 @@ class DiscountServiceTest
 
         discountRepository.save(discountEntity);
 
-        final DiscountEntity discountEntityFinal = discountEntity;
-
+        final String agreementId = agreementEntity.getId();
+        final Long discountId = discountEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class, () -> {
-            discountService.getDiscountBucketCode(agreementEntity.getId(), discountEntityFinal.getId());
+            discountService.getDiscountBucketCode(agreementId, discountId);
         });
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_RETRIEVE_BUCKET_CODE_FROM_DISCOUNT_WITH_EMPTY_BUCKET.getValue(),
@@ -1980,7 +1978,7 @@ class DiscountServiceTest
 
     private void sleep() {
         try {
-            Thread.sleep(1000);
+            TimeUnit.SECONDS.sleep(1);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
