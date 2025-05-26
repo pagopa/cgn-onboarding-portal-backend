@@ -42,12 +42,19 @@ public class JobScheduler {
                     SuspendDiscountsWithoutAvailableBucketCodesJob.class);
     }
 
+    public void scheduleSendWeeklyDiscountBucketCodesSummaryJob()
+            throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("send-weekly-discount-bucket-codes-summary-job", DISCOUNTS_JOB_GROUP);
+        scheduleJob(jobKey,
+                    configProperties.getScheduleSendWeeklyDiscountBucketCodesSummaryJobCronExpression(),
+                    SendWeeklyDiscountBucketCodesSummaryJob.class);
+    }
+
     public void scheduleSendDiscountsToEycaJob()
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("send-discount-to-eyca", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey, configProperties.getSendDiscountsToEycaJobCronExpression(), SendDiscountsToEycaJob.class);
     }
-
 
     private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)
             throws SchedulerException {

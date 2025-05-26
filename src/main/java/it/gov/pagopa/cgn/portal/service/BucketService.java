@@ -61,6 +61,29 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    public void checkWeeklyDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
+                discountBucketCodeSummaryEntity.getId());
+        DiscountEntity discount = discountBucketCodeSummary.getDiscount();
+        var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
+        var remainingPercent = Math.floor(
+                remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
+        
+        //TODO: emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount, t, remainingCodes);
+
+        // update bucket summary
+        if (remainingCodes <= 0) {
+            // we send here the 0% email notification to be sure that we send it when there are no more codes
+            // because calculating the percent with Math.floor could round to 0% a small amount of codes
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
+            discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+        }
+        discountBucketCodeSummary.setAvailableCodes(remainingCodes);
+        discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
+    }
+
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
