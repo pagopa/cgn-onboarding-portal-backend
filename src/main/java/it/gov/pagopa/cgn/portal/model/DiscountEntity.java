@@ -175,13 +175,4 @@ public class DiscountEntity
             });
         }
     }
-
-    public OffsetDateTime getInsertTime() {
-        return insertTime;
-    }
-
-    public OffsetDateTime getUpdateTime() {
-        return updateTime;
-    }
-
 }
