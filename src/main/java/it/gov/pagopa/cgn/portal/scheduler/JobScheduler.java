@@ -34,6 +34,14 @@ public class JobScheduler {
                     CheckAvailableDiscountBucketCodesJob.class);
     }
 
+    public void scheduleLowAvailableDiscountBucketCodesNotificationJob()
+            throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("low-available-codes-notification", DISCOUNTS_JOB_GROUP);
+        scheduleJob(jobKey,
+                    configProperties.getLowDiscountBucketCodesNotificationJobCronExpression(),
+                    SendLowDiscountBucketCodesNotificationJob.class);
+    }
+
     public void scheduleSuspendDiscountsWithoutAvailableBucketCodesJob()
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("suspend-discount-with-expired-bucket", DISCOUNTS_JOB_GROUP);

@@ -61,36 +61,55 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    public void updateDiscountBucketCodeSummary(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
-        var remainingPercent = Math.floor(
-                remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
-        var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
-                                         .sorted()
-                                         .filter(t -> remainingPercent <= t.getValue())
-                                         .findFirst()
-                                         .map(t -> {
-                                             if (t!=BucketCodeExpiringThresholdEnum.PERCENT_0) {
-                                                 emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(
-                                                         discount,
-                                                         t,
-                                                         remainingCodes);
-                                             }
-                                             return true;
-                                         });
-        // update bucket summary
+        discountBucketCodeSummary.setAvailableCodes(remainingCodes);
         if (remainingCodes <= 0) {
-            // we send here the 0% email notification to be sure that we send it when there are no more codes
-            // because calculating the percent with Math.floor could round to 0% a small amount of codes
-            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
             discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
         }
-        discountBucketCodeSummary.setAvailableCodes(remainingCodes);
         discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
-        return notificationRequired.orElse(false);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public boolean checkDiscountBucketCodeSummaryAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
+                discountBucketCodeSummaryEntity.getId());
+        DiscountEntity discount = discountBucketCodeSummary.getDiscount();
+        var totalCodes = discountBucketCodeSummary.getTotalCodes();
+        var remainingCodes = discountBucketCodeSummary.getAvailableCodes();
+        var remainingPercent = Math.floor(Float.valueOf(remainingCodes) / Float.valueOf(totalCodes) * 100);
+
+        // WARNING! Keep checks in ascending order!
+        if (remainingCodes <= 0) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
+            return true;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_10.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_10,
+                                                                              remainingCodes);
+            return true;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_25.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_25,
+                                                                              remainingCodes);
+            return true;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_50.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_50,
+                                                                              remainingCodes);
+            return true;
+        }
+
+        return false;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -155,6 +174,7 @@ public class BucketService {
 
             // update discountBucketCodeSummaryEntity
             var availableCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discountId);
+            discountBucketCodeSummaryEntity.setTotalCodes(availableCodes);
             discountBucketCodeSummaryEntity.setAvailableCodes(availableCodes);
             discountBucketCodeSummaryEntity.setExpiredAt(null);
             discountBucketCodeSummaryRepository.save(discountBucketCodeSummaryEntity);

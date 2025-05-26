@@ -3,12 +3,13 @@ package it.gov.pagopa.cgn.portal.scheduler;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
@@ -25,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-class CheckAvailableDiscountBucketCodesJobTest
+class SendLowDiscountBucketCodesNotificationJobTest
         extends IntegrationAbstractTest {
 
     @Autowired
@@ -45,10 +46,31 @@ class CheckAvailableDiscountBucketCodesJobTest
     }
 
     @Test
-    void Execute_ExecuteJob_UpdateAvailableCodes()
+    void Execute_ExecuteJob_SendPercent50Notification()
             throws IOException {
         init();
-        updateSummary();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent25Notification()
+            throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent10Notification()
+            throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
+    }
+
+    @Test
+    void Execute_ExecuteJob_SendPercent0Notification()
+            throws IOException {
+        init();
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
     }
 
     private void init()
@@ -77,31 +99,23 @@ class CheckAvailableDiscountBucketCodesJobTest
             documentContainerClient.create();
         }
 
+        // simulate bucket summary
         bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-
-        // load 10 codes by uploading 5 times a "2 code" bucket.
-        for (var i = 0; i < 5; i++) {
-            var bucketCodeLoadUid = TestUtils.generateDiscountBucketCodeUid();
-
-            azureStorage.uploadCsv(multipartFile.getBytes(), bucketCodeLoadUid, multipartFile.getSize());
-
-            discountEntity.setLastBucketCodeLoadUid(bucketCodeLoadUid);
-            discountRepository.save(discountEntity);
-
-            bucketService.createPendingBucketLoad(discountEntity);
-            bucketService.setRunningBucketLoad(discountEntity.getId());
-            bucketService.performBucketLoad(discountEntity.getId());
-        }
+        DiscountBucketCodeSummaryEntity summary = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        summary.setTotalCodes(10L);
+        summary.setAvailableCodes(10L);
+        discountBucketCodeSummaryRepository.save(summary);
     }
 
-    private void updateSummary() {
-        burnBucketCodesToLeaveLessThanThresholdCodes(10, BucketCodeExpiringThresholdEnum.PERCENT_50, discountEntity);
+    private void testNotification(BucketCodeExpiringThresholdEnum threshold) {
+        burnSummaryAvailableCodesToLeaveLessThanThresholdCodes(10, threshold, discountEntity);
 
         job.execute(null);
 
         Awaitility.await()
                   .atMost(15, TimeUnit.SECONDS)
-                  .until(() -> discountBucketCodeSummaryRepository.findByDiscount(discountEntity).getAvailableCodes()==
-                               5L);
+                  .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                          discountEntity,
+                          threshold))!=null);
     }
 }

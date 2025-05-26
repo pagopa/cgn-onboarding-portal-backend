@@ -5,8 +5,6 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
-import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
@@ -22,7 +20,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.awaitility.Awaitility;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -33,7 +30,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -194,6 +190,7 @@ class BucketServiceTest
 
         DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(
                 discountEntity);
+        Assertions.assertEquals(2, discountBucketCodeSummaryEntity.getTotalCodes());
         Assertions.assertEquals(2, discountBucketCodeSummaryEntity.getAvailableCodes());
 
         List<DiscountBucketCodeEntity> codes = discountBucketCodeRepository.findAllByDiscount(discountEntity);
@@ -349,15 +346,16 @@ class BucketServiceTest
 
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getAvailableCodes());
+        Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getTotalCodes());
 
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryAndSendNotification(
                 discountBucketCodeSummaryEntity);
         // no notification should be sent because bucket has not been loaded yet
         Assertions.assertFalse(notificationRequired);
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_NotificationNotSent()
+    void CheckDiscountBucketCodeSummaryAndSendNotification_NotificationNotSent()
             throws IOException {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
         discountRepository.save(discountEntity);
@@ -374,7 +372,7 @@ class BucketServiceTest
         Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
 
         var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
+        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryAndSendNotification(
                 discountBucketCodeSummaryEntity);
 
         // no notification should be sent because all codes are available
@@ -382,64 +380,8 @@ class BucketServiceTest
     }
 
     @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent50notificationRequired()
-            throws IOException {
-        var discountEntity = setupDiscount();
-        var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_50);
-        Assertions.assertTrue(notificationRequired);
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent25notificationRequired()
-            throws IOException {
-        var discountEntity = setupDiscount();
-        var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_25);
-        Assertions.assertTrue(notificationRequired);
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent10notificationRequired()
-            throws IOException {
-        var discountEntity = setupDiscount();
-        var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_10);
-        Assertions.assertTrue(notificationRequired);
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_Percent0notificationRequired()
-            throws IOException {
-        var discountEntity = setupDiscount();
-        var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
-        Assertions.assertTrue(notificationRequired);
-        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        Assertions.assertNotNull(discountBucketCodeSummaryEntity.getExpiredAt());
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_NoDoubleNotification()
-            throws IOException {
-        var discountEntity = setupDiscount();
-
-        var notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
-        Assertions.assertTrue(notificationRequired);
-        var firstNotification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                discountEntity,
-                BucketCodeExpiringThresholdEnum.PERCENT_0));
-
-        notificationRequired = testNotification(discountEntity, BucketCodeExpiringThresholdEnum.PERCENT_0);
-        Assertions.assertFalse(notificationRequired);
-        var secondNotification = notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                discountEntity,
-                BucketCodeExpiringThresholdEnum.PERCENT_0));
-
-        Assertions.assertNotNull(firstNotification);
-        Assertions.assertNotNull(secondNotification);
-        Assertions.assertEquals(firstNotification, secondNotification);
-    }
-
-    @Test
     @Disabled
-    void checkDiscountBucket_loadingCsvBucket ()
+    void checkDiscountBucket_loadingCsvBucket()
             throws IOException {
 
         String path = "c:\\develop\\test-buckets\\";
@@ -535,24 +477,5 @@ class BucketServiceTest
         }
 
         return discountEntity;
-    }
-
-    private boolean testNotification(DiscountEntity discountEntity, BucketCodeExpiringThresholdEnum threshold) {
-        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        if (threshold!=BucketCodeExpiringThresholdEnum.PERCENT_0)
-            Assertions.assertEquals(10, discountBucketCodeSummaryEntity.getAvailableCodes());
-
-        burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
-
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryExpirationAndSendNotification(
-                discountBucketCodeSummaryEntity);
-
-        Awaitility.await()
-                  .atMost(15, TimeUnit.SECONDS)
-                  .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                          discountEntity,
-                          threshold))!=null);
-
-        return notificationRequired;
     }
 }
