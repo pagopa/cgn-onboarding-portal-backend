@@ -30,7 +30,7 @@ class SendLowDiscountBucketCodesNotificationJobTest
         extends IntegrationAbstractTest {
 
     @Autowired
-    private CheckAvailableDiscountBucketCodesJob job;
+    private SendLowDiscountBucketCodesNotificationJob job;
 
     @Autowired
     private AzureStorage azureStorage;
@@ -79,7 +79,7 @@ class SendLowDiscountBucketCodesNotificationJobTest
 
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
-        discountEntity = testObject.getDiscountEntityList().get(0);
+        discountEntity = testObject.getDiscountEntityList().getFirst();
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
