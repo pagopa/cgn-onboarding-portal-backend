@@ -19,7 +19,10 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Spliterator;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -116,7 +119,7 @@ public class BucketService {
             log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
         }
 
-        log.info("All bucket codes are available. No notification email sent.");
+        log.info("There are enough bucket codes. No notification email sent.");
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
