@@ -326,7 +326,7 @@ class BucketServiceTest
     }
 
     @Test
-    @Disabled
+    @Disabled("local test")
     void checkDiscountBucket_loadingCsvBucket()
             throws IOException {
 
@@ -386,6 +386,7 @@ class BucketServiceTest
                 System.out.println("Total codes:" + cursorRow.get());
                 System.out.println("Total invalid codes:" + invalidCodes.get());
             }
+            Assertions.assertTrue(csvRecordCount > 0);
         }
     }
 
@@ -397,31 +398,5 @@ class BucketServiceTest
             throw new CGNException(e.getMessage());
         }
         return recordCount;
-    }
-
-
-    private DiscountEntity setupDiscount()
-            throws IOException {
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        discountRepository.save(discountEntity);
-        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-
-        // load 10 codes by uploading 5 times a "2 code" bucket.
-        for (var i = 0; i < 5; i++) {
-            var bucketCodeLoadUid = TestUtils.generateDiscountBucketCodeUid();
-
-            azureStorage.uploadCsv(multipartFile.getBytes(), bucketCodeLoadUid, multipartFile.getSize());
-
-            discountEntity.setLastBucketCodeLoadUid(bucketCodeLoadUid);
-            discountRepository.save(discountEntity);
-
-            bucketService.createPendingBucketLoad(discountEntity);
-            bucketService.setRunningBucketLoad(discountEntity.getId());
-            bucketService.performBucketLoad(discountEntity.getId());
-
-            Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
-        }
-
-        return discountEntity;
     }
 }

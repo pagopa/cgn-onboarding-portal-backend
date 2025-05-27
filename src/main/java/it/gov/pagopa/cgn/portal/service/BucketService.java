@@ -60,6 +60,7 @@ public class BucketService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void updateDiscountBucketCodeSummary(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        log.info("Updating discount bucket summary for id {}:", discountBucketCodeSummaryEntity.getId());
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
@@ -72,7 +73,7 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean checkDiscountBucketCodeSummaryAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    public void checkDiscountBucketCodeSummaryAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
@@ -80,7 +81,7 @@ public class BucketService {
         var remainingCodes = discountBucketCodeSummary.getAvailableCodes();
 
         if (totalCodes <= 0) {
-            throw new InternalErrorException("totalCodes <= 0 summmary id: " + discountBucketCodeSummary.getId());
+            throw new InternalErrorException("totalCodes <= 0 summary id: " + discountBucketCodeSummary.getId());
         }
 
         var remainingPercent = Math.floor(Float.valueOf(remainingCodes) / Float.valueOf(totalCodes) * 100);
@@ -88,31 +89,34 @@ public class BucketService {
         // WARNING! Keep checks in ascending order!
         if (remainingCodes <= 0) {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
-            return true;
+            log.info("All bucket codes have expired; an email notification has been sent.");
+            return;
         }
 
         if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_10.getValue()) {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_10,
                                                                               remainingCodes);
-            return true;
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            return;
         }
 
         if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_25.getValue()) {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_25,
                                                                               remainingCodes);
-            return true;
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            return;
         }
 
         if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_50.getValue()) {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_50,
                                                                               remainingCodes);
-            return true;
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
         }
 
-        return false;
+        log.info("All bucket codes are available. No notification email sent.");
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
