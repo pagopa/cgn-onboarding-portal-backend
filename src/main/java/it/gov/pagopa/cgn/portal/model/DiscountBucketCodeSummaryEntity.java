@@ -21,6 +21,10 @@ public class DiscountBucketCodeSummaryEntity
     private Long id;
 
     @NotNull
+    @Column(name = "total_codes")
+    private Long totalCodes;
+
+    @NotNull
     @Column(name = "available_codes")
     private Long availableCodes;
 
@@ -38,6 +42,7 @@ public class DiscountBucketCodeSummaryEntity
 
     public DiscountBucketCodeSummaryEntity(DiscountEntity discount) {
         this.id = discount.getId();
+        this.totalCodes = 0L;
         this.availableCodes = 0L;
     }
 

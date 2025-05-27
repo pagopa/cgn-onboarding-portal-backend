@@ -5,7 +5,6 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
-import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
@@ -46,31 +45,10 @@ class CheckAvailableDiscountBucketCodesJobTest
     }
 
     @Test
-    void Execute_ExecuteJob_SendPercent50Notification()
+    void Execute_ExecuteJob_UpdateAvailableCodes()
             throws IOException {
         init();
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent25Notification()
-            throws IOException {
-        init();
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent10Notification()
-            throws IOException {
-        init();
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10);
-    }
-
-    @Test
-    void Execute_ExecuteJob_SendPercent0Notification()
-            throws IOException {
-        init();
-        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0);
+        updateSummary();
     }
 
     private void init()
@@ -116,15 +94,14 @@ class CheckAvailableDiscountBucketCodesJobTest
         }
     }
 
-    private void testNotification(BucketCodeExpiringThresholdEnum threshold) {
-        burnBucketCodesToLeaveLessThanThresholdCodes(threshold, discountEntity);
+    private void updateSummary() {
+        burnBucketCodesToLeaveLessThanThresholdCodes(10, BucketCodeExpiringThresholdEnum.PERCENT_50, discountEntity);
 
         job.execute(null);
 
         Awaitility.await()
                   .atMost(15, TimeUnit.SECONDS)
-                  .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                          discountEntity,
-                          threshold))!=null);
+                  .until(() -> discountBucketCodeSummaryRepository.findByDiscount(discountEntity).getAvailableCodes()==
+                               5L);
     }
 }

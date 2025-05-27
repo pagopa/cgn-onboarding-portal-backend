@@ -23,6 +23,7 @@ public class SchedulerRunner
             throws Exception {
         jobScheduler.scheduleCheckExpiringDiscountsJob();
         jobScheduler.scheduleCheckAvailableDiscountBucketCodesJob();
+        jobScheduler.scheduleLowAvailableDiscountBucketCodesNotificationJob();
         jobScheduler.scheduleSuspendDiscountsWithoutAvailableBucketCodesJob();
         jobScheduler.scheduleSendDiscountsToEycaJob();
     }
