@@ -68,9 +68,6 @@ class BucketServiceTest
     @Autowired
     private BucketService bucketService;
 
-    @Autowired
-    private NotificationRepository notificationRepository;
-
     private AgreementEntity agreementEntity;
     private MockMultipartFile multipartFile;
 
@@ -326,57 +323,6 @@ class BucketServiceTest
         bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
 
         Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> discountBucketCodeRepository.count()==0);
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryExpirationAndSendNotification_BucketNotLoaded_NoNotifications()
-            throws IOException {
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        discountRepository.save(discountEntity);
-
-        azureStorage.uploadCsv(multipartFile.getBytes(),
-                               discountEntity.getLastBucketCodeLoadUid(),
-                               multipartFile.getSize());
-
-        bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-        bucketService.setRunningBucketLoad(discountEntity.getId());
-        // we do not run loading => bucket code summary available codes are 0
-        // => job should skip the check and not require a notification
-
-        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getAvailableCodes());
-        Assertions.assertEquals(0, discountBucketCodeSummaryEntity.getTotalCodes());
-
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryAndSendNotification(
-                discountBucketCodeSummaryEntity);
-        // no notification should be sent because bucket has not been loaded yet
-        Assertions.assertFalse(notificationRequired);
-    }
-
-    @Test
-    void CheckDiscountBucketCodeSummaryAndSendNotification_NotificationNotSent()
-            throws IOException {
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
-        discountRepository.save(discountEntity);
-
-        azureStorage.uploadCsv(multipartFile.getBytes(),
-                               discountEntity.getLastBucketCodeLoadUid(),
-                               multipartFile.getSize());
-
-        bucketService.createPendingBucketLoad(discountEntity);
-        bucketService.prepareDiscountBucketCodeSummary(discountEntity);
-        bucketService.setRunningBucketLoad(discountEntity.getId());
-        bucketService.performBucketLoad(discountEntity.getId());
-
-        Assertions.assertTrue(bucketService.checkBucketLoadUID(discountEntity.getLastBucketCodeLoad().getUid()));
-
-        var discountBucketCodeSummaryEntity = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
-        var notificationRequired = bucketService.checkDiscountBucketCodeSummaryAndSendNotification(
-                discountBucketCodeSummaryEntity);
-
-        // no notification should be sent because all codes are available
-        Assertions.assertFalse(notificationRequired);
     }
 
     @Test

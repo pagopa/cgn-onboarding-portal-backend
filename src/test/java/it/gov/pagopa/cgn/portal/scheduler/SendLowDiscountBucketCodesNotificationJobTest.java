@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.scheduler;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
@@ -40,9 +41,22 @@ class SendLowDiscountBucketCodesNotificationJobTest
 
     private DiscountEntity discountEntity;
 
+
     @Test
-    void Execute_ExecuteJob_NoBucketCodeSummaries() {
+    void Execute_ExecuteJob_NoBucketCodeSummaries_JobNotRun() {
         Assertions.assertDoesNotThrow(() -> job.execute(null));
+    }
+
+    @Test
+    void Execute_ExecuteJob_NoBurnedCodes_NotificationNotSent()
+            throws IOException {
+        init();
+
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_50, false);
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_25, false);
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_10, false);
+        testNotification(BucketCodeExpiringThresholdEnum.PERCENT_0, false);
+
     }
 
     @Test
@@ -77,6 +91,8 @@ class SendLowDiscountBucketCodesNotificationJobTest
             throws IOException {
         setAdminAuth();
 
+        clearNotification();
+
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
         discountEntity = testObject.getDiscountEntityList().getFirst();
@@ -89,9 +105,6 @@ class SendLowDiscountBucketCodesNotificationJobTest
         discountEntity.setEndDate(LocalDate.now().plusDays(3));
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");
         discountRepository.save(discountEntity);
-
-        byte[] csv = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("test-codes.csv"));
-        MockMultipartFile multipartFile = new MockMultipartFile("bucketload", "test-codes.csv", "text/csv", csv);
 
         BlobContainerClient documentContainerClient = new BlobContainerClientBuilder().connectionString(
                 getAzureConnectionString()).containerName(configProperties.getDocumentsContainerName()).buildClient();
@@ -107,15 +120,33 @@ class SendLowDiscountBucketCodesNotificationJobTest
         discountBucketCodeSummaryRepository.save(summary);
     }
 
+    private void clearNotification() {
+        notificationRepository.deleteAll();
+    }
+
     private void testNotification(BucketCodeExpiringThresholdEnum threshold) {
-        burnSummaryAvailableCodesToLeaveLessThanThresholdCodes(10, threshold, discountEntity);
+        testNotification(threshold, true);
+    }
+
+    private void testNotification(BucketCodeExpiringThresholdEnum threshold, boolean burnCodes) {
+        if (burnCodes) {
+            burnSummaryAvailableCodesToLeaveLessThanThresholdCodes(10, threshold, discountEntity);
+        }
 
         job.execute(null);
 
-        Awaitility.await()
-                  .atMost(15, TimeUnit.SECONDS)
-                  .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
-                          discountEntity,
-                          threshold))!=null);
+        if (burnCodes) {
+            Awaitility.await()
+                      .atMost(10, TimeUnit.SECONDS)
+                      .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                              discountEntity,
+                              threshold))!=null);
+        } else {
+            Awaitility.await()
+                      .pollDelay(5, TimeUnit.SECONDS)
+                      .until(() -> notificationRepository.findByKey(EmailNotificationFacade.createTrackingKeyForExpirationNotification(
+                              discountEntity,
+                              threshold))==null);
+        }
     }
 }
