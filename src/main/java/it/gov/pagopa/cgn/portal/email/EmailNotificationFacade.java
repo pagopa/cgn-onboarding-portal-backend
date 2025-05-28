@@ -18,6 +18,7 @@ import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -214,7 +215,8 @@ public class EmailNotificationFacade {
 
     public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
                                                                     BucketCodeExpiringThresholdEnum threshold) {
-        return threshold.name() + "::" + discount.getId() + "::" + discount.getLastBucketCodeLoad().getUid();
+        return threshold.name() + "::" + discount.getId() + "::" + Year.now().getValue() + "::" +
+               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
     }
 
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
@@ -264,7 +266,11 @@ public class EmailNotificationFacade {
         this.configProperties = configProperties;
     }
 
-    private EmailParams createEmailParams(List<String> mailTo, List<String> mailBcc, String subject, String body, String failureMessage) {
+    private EmailParams createEmailParams(List<String> mailTo,
+                                          List<String> mailBcc,
+                                          String subject,
+                                          String body,
+                                          String failureMessage) {
         return createEmailParams(mailTo,
                                  Optional.empty(),
                                  Optional.of(mailBcc),
@@ -387,7 +393,7 @@ public class EmailNotificationFacade {
 
     public void notifyEycaAdmin(String body) {
         String subject = "Discounts for Generic Code/URLs " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",Locale.ENGLISH));
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
         String failureMessage = "It is not possible to send the email to Eyca admin";
         EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")),
                                                     Arrays.asList(configProperties.getEycaJobMailTo().split(";")),
