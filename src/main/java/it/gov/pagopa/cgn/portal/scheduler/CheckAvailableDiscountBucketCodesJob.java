@@ -37,7 +37,7 @@ public class CheckAvailableDiscountBucketCodesJob
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedNotExpired();
+        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAll();
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() +
