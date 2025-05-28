@@ -70,8 +70,11 @@ public class BucketService {
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
         discountBucketCodeSummary.setAvailableCodes(remainingCodes);
+        discountBucketCodeSummary.setUpdateTime(OffsetDateTime.now());
         if (remainingCodes <= 0) {
             discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+        } else {
+            discountBucketCodeSummary.setExpiredAt(null);
         }
         discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
     }
