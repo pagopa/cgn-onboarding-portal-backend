@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
@@ -17,6 +18,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,59 +63,71 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    public void checkWeeklyDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    public void updateDiscountBucketCodeSummary(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+        log.info("Updating discount bucket summary for id {}:", discountBucketCodeSummaryEntity.getId());
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
         var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
-        var remainingPercent = Math.floor(
-                remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
-        
-        //TODO: emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount, t, remainingCodes);
-
-        // update bucket summary
-        if (remainingCodes <= 0) {
-            // we send here the 0% email notification to be sure that we send it when there are no more codes
-            // because calculating the percent with Math.floor could round to 0% a small amount of codes
-            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
-            discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
-        }
         discountBucketCodeSummary.setAvailableCodes(remainingCodes);
+        discountBucketCodeSummary.setUpdateTime(OffsetDateTime.now());
+        if (remainingCodes <= 0) {
+            discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+        } else {
+            discountBucketCodeSummary.setExpiredAt(null);
+        }
         discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
     }
 
-
     @Transactional(Transactional.TxType.REQUIRED)
-    public boolean checkDiscountBucketCodeSummaryExpirationAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
+    public void checkDiscountBucketCodeSummaryAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
-        var remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
-        var remainingPercent = Math.floor(
-                remainingCodes / Float.valueOf(discountBucketCodeSummary.getAvailableCodes()) * 100);
-        var notificationRequired = Arrays.stream(BucketCodeExpiringThresholdEnum.values())
-                                         .sorted()
-                                         .filter(t -> remainingPercent <= t.getValue())
-                                         .findFirst()
-                                         .map(t -> {
-                                             if (t!=BucketCodeExpiringThresholdEnum.PERCENT_0) {
-                                                 emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(
-                                                         discount,
-                                                         t,
-                                                         remainingCodes);
-                                             }
-                                             return true;
-                                         });
-        // update bucket summary
-        if (remainingCodes <= 0) {
-            // we send here the 0% email notification to be sure that we send it when there are no more codes
-            // because calculating the percent with Math.floor could round to 0% a small amount of codes
-            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
-            discountBucketCodeSummary.setExpiredAt(OffsetDateTime.now());
+
+        // DO NOT SEND NOTIFICATION IF DISCOUNT HAS EXPIRED
+        if (discount.getEndDate().isBefore(LocalDate.now())) return;
+
+        var totalCodes = discountBucketCodeSummary.getTotalCodes();
+        var remainingCodes = discountBucketCodeSummary.getAvailableCodes();
+
+        if (totalCodes <= 0) {
+            throw new InternalErrorException("totalCodes <= 0 summary id: " + discountBucketCodeSummary.getId());
         }
-        discountBucketCodeSummary.setAvailableCodes(remainingCodes);
-        discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
-        return notificationRequired.orElse(false);
+
+        var remainingPercent = Math.floor(Float.valueOf(remainingCodes) / Float.valueOf(totalCodes) * 100);
+
+        // WARNING! Keep checks in ascending order!
+        if (remainingCodes <= 0) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
+            log.info("All bucket codes have expired; an email notification has been sent.");
+            return;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_10.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_10,
+                                                                              remainingCodes);
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            return;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_25.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_25,
+                                                                              remainingCodes);
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            return;
+        }
+
+        if (remainingPercent <= BucketCodeExpiringThresholdEnum.PERCENT_50.getValue()) {
+            emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
+                                                                              BucketCodeExpiringThresholdEnum.PERCENT_50,
+                                                                              remainingCodes);
+            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+        }
+
+        log.info("There are enough bucket codes. No notification email sent.");
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -178,6 +192,7 @@ public class BucketService {
 
             // update discountBucketCodeSummaryEntity
             var availableCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discountId);
+            discountBucketCodeSummaryEntity.setTotalCodes(availableCodes);
             discountBucketCodeSummaryEntity.setAvailableCodes(availableCodes);
             discountBucketCodeSummaryEntity.setExpiredAt(null);
             discountBucketCodeSummaryRepository.save(discountBucketCodeSummaryEntity);

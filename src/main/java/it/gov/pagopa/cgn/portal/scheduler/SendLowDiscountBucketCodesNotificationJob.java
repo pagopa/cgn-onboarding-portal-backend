@@ -17,17 +17,17 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class CheckAvailableDiscountBucketCodesJob
+public class SendLowDiscountBucketCodesNotificationJob
         implements Job {
 
-    private static final String JOB_LOG_NAME = "Available Discounts Buckets Codes Job ";
+    private static final String JOB_LOG_NAME = "Low Discounts Buckets Codes Notification Job ";
 
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketService bucketService;
 
     @Autowired
-    public CheckAvailableDiscountBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
-                                                BucketService bucketService) {
+    public SendLowDiscountBucketCodesNotificationJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
+                                                     BucketService bucketService) {
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.bucketService = bucketService;
     }
@@ -37,12 +37,12 @@ public class CheckAvailableDiscountBucketCodesJob
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAll();
+        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedNotExpired();
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() +
                      " not expired discount bucket code summaries to check");
-            discountBucketCodeSummaryList.forEach(bucketService::updateDiscountBucketCodeSummary);
+            discountBucketCodeSummaryList.forEach(bucketService::checkDiscountBucketCodeSummaryAndSendNotification);
         }
 
         Instant end = Instant.now();

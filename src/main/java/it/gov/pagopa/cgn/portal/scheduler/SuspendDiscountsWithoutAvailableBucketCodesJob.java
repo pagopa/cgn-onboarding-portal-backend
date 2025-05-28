@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -14,7 +13,6 @@ import org.springframework.util.CollectionUtils;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
@@ -26,16 +24,13 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
 
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final DiscountService discountService;
-    private final ConfigProperties configProperties;
 
 
     @Autowired
     public SuspendDiscountsWithoutAvailableBucketCodesJob(DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
-                                                          DiscountService discountService,
-                                                          ConfigProperties configProperties) {
+                                                          DiscountService discountService) {
         this.discountBucketCodeSummaryRepository = discountBucketCodeSummaryRepository;
         this.discountService = discountService;
-        this.configProperties = configProperties;
     }
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
@@ -43,9 +38,7 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedAndExpired(
-                OffsetDateTime.now()
-                              .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
+        List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedAndExpired();
 
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() +
