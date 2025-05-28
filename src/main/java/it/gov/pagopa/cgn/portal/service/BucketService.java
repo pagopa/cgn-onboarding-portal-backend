@@ -18,6 +18,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,10 @@ public class BucketService {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
         DiscountEntity discount = discountBucketCodeSummary.getDiscount();
+
+        // DO NOT SEND NOTIFICATION IF DISCOUNT HAS EXPIRED
+        if (discount.getEndDate().isBefore(LocalDate.now())) return;
+
         var totalCodes = discountBucketCodeSummary.getTotalCodes();
         var remainingCodes = discountBucketCodeSummary.getAvailableCodes();
 
