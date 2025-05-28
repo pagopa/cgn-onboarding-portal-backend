@@ -349,6 +349,7 @@ public class ExportService {
             Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
             if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
                 log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
+                return;
             }
 
             log.info("sendDiscountsToEyca start");

@@ -748,6 +748,7 @@ class EycaExportServiceTest
 
     @Test
     void testSendDiscountsToEyca_ExceptionSetsToDeleteFromEycaAdmin() {
+        initMockitoPreconditions();
 
         List<EycaDataExportViewEntity> entities = TestUtils.getTobeDeletedEycaDataExportViewEntityList();
         List<DataExportEycaWrapper<DeleteDataExportEyca>> wrappers = exportService.getWrappersToDeleteOnEyca(entities);
