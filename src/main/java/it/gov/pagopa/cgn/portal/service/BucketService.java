@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class BucketService {
+    public static final String REMAINING_CODES_AVAILABLE = "Remaining codes: {}% available; an email notification has been sent.";
     private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketCodeLoadRepository bucketCodeLoadRepository;
@@ -109,7 +110,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_10,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
             return;
         }
 
@@ -117,7 +118,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_25,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
             return;
         }
 
@@ -125,7 +126,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_50,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
         }
 
         log.info("There are enough bucket codes. No notification email sent.");

@@ -21,16 +21,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-public class SendWeeklyDiscountBucketCodesSummaryJobTest
+class SendWeeklyDiscountBucketCodesSummaryJobTest
         extends IntegrationAbstractTest {
 
     private final SendWeeklyDiscountBucketCodesSummaryJob job;
@@ -50,7 +48,7 @@ public class SendWeeklyDiscountBucketCodesSummaryJobTest
     }
 
     @BeforeEach
-    public void init()
+    void init()
             throws IOException {
         setAdminAuth();
 
@@ -116,8 +114,7 @@ public class SendWeeklyDiscountBucketCodesSummaryJobTest
     }
 
     @Test
-    public void testNotifications()
-            throws IOException {
+    void testNotifications() {
 
         job.execute(null);
 
@@ -127,7 +124,6 @@ public class SendWeeklyDiscountBucketCodesSummaryJobTest
     public boolean verifySavedNotifications() {
         try {
 
-            List<DiscountBucketCodeSummaryEntity> summaries = discountBucketCodeSummaryRepository.findAllPublishedNotExpired();
             discountBucketCodeSummaryRepository.findAllPublishedNotExpired().forEach(summary -> {
                 DiscountEntity d = discountRepository.findById(summary.getId()).orElseThrow();
                 AgreementEntity agreement = d.getAgreement();

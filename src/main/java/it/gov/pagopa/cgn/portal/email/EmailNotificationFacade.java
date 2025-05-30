@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ public class EmailNotificationFacade {
     private final TemplateEngine htmlTemplateEngine;
 
     private final EmailNotificationService emailNotificationService;
-    private final DiscountBucketCodeSummaryRepository summaryRepository;
 
     private final ConfigProperties configProperties;
 
@@ -294,11 +292,9 @@ public class EmailNotificationFacade {
     @Autowired
     public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
                                    EmailNotificationService emailNotificationService,
-                                   DiscountBucketCodeSummaryRepository summaryRepository,
                                    ConfigProperties configProperties) {
         this.htmlTemplateEngine = htmlTemplateEngine;
         this.emailNotificationService = emailNotificationService;
-        this.summaryRepository = summaryRepository;
         this.configProperties = configProperties;
     }
 
