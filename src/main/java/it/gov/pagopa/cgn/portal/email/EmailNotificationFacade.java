@@ -229,7 +229,7 @@ public class EmailNotificationFacade {
 
     public void notifyWeeklyMerchantDiscountBucketCodesSummary(ProfileEntity profileEntity,
                                                                List<Map<String, Long>> listOfDiscountsToAvailableCodes) {
-        var subject = "[Carta Giovani Nazionale] Riepilogo dei codici ancora disponibili per le tue opportunità";
+        var subject = "[Carta Giovani Nazionale] Riepilogo codici disponibili";
         var context = new Context();
 
         String referentEmail = profileEntity.getReferent().getEmailAddress();
@@ -256,7 +256,7 @@ public class EmailNotificationFacade {
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
                                                           BucketCodeExpiringThresholdEnum threshold,
                                                           Long remainingCodes) {
-        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
+        var subject = "[Carta Giovani Nazionale] Lista codici in esaurimento";
         var context = new Context();
 
         ProfileEntity profileEntity = discount.getAgreement().getProfile();
@@ -274,7 +274,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
-        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione è esaurita";
+        var subject = "[Carta Giovani Nazionale] Lista codici esaurita";
         var context = new Context();
 
         ProfileEntity profileEntity = discount.getAgreement().getProfile();
