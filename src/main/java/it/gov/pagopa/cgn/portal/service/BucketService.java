@@ -5,10 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
@@ -20,15 +17,13 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class BucketService {
+    public static final String REMAINING_CODES_AVAILABLE = "Remaining codes: {}% available; an email notification has been sent.";
     private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketCodeLoadRepository bucketCodeLoadRepository;
@@ -80,6 +75,13 @@ public class BucketService {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    public void notifyWeeklyMerchantDiscountBucketCodesSummary(ProfileEntity profileEntity,
+                                                               List<Map<String, Long>> listOfDiscountsToAvailableCodes) {
+        emailNotificationFacade.notifyWeeklyMerchantDiscountBucketCodesSummary(profileEntity,
+                                                                               listOfDiscountsToAvailableCodes);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
     public void checkDiscountBucketCodeSummaryAndSendNotification(DiscountBucketCodeSummaryEntity discountBucketCodeSummaryEntity) {
         var discountBucketCodeSummary = discountBucketCodeSummaryRepository.getReferenceById(
                 discountBucketCodeSummaryEntity.getId());
@@ -108,7 +110,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_10,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
             return;
         }
 
@@ -116,7 +118,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_25,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
             return;
         }
 
@@ -124,7 +126,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_50,
                                                                               remainingCodes);
-            log.info("Remaining codes: {}% available; an email notification has been sent.", remainingPercent);
+            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
         }
 
         log.info("There are enough bucket codes. No notification email sent.");

@@ -6,9 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
-import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,8 +32,11 @@ public class EmailNotificationFacade {
 
     private final ConfigProperties configProperties;
 
-    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";  // Compliant
+    private static final String CONTEXT_DISCOUNT_NAME = "discount_name";
 
+    private static final String MISSING_CODES = "missing_codes";
+
+    private static final String DISCOUNTS = "discounts";
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
@@ -219,10 +220,41 @@ public class EmailNotificationFacade {
                Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
     }
 
+    public static String createTrackingKeyForWeeklySummaryNotification(ProfileEntity profile) {
+        return "WEEKLY-SUMMARY" + "::" + profile.getId() + "::" + Year.now().getValue() + "::" +
+               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+    }
+
+    public void notifyWeeklyMerchantDiscountBucketCodesSummary(ProfileEntity profileEntity,
+                                                               List<Map<String, Long>> listOfDiscountsToAvailableCodes) {
+        var subject = "[Carta Giovani Nazionale] Riepilogo codici disponibili";
+        var context = new Context();
+
+        String referentEmail = profileEntity.getReferent().getEmailAddress();
+        List<String> secondaryReferents = retrieveSecondaryRecipients(profileEntity);
+
+        List<Map<String, Object>> toDisplayList = listOfDiscountsToAvailableCodes.stream().map(map -> {
+            Map.Entry<String, Long> entry = map.entrySet().iterator().next();
+            return Map.<String, Object>of("name", entry.getKey(), "availableCodes", entry.getValue());
+        }).toList();
+
+        context.setVariable(DISCOUNTS, toDisplayList);
+
+
+        final String errorMessage =
+                "Failed to send Weekly Discount Bucket Codes Summary notification to: " + referentEmail;
+        final String trackingKey = createTrackingKeyForWeeklySummaryNotification(profileEntity);
+
+        var body = getTemplateHtml(TemplateEmail.WEEKLY_SUMMARY_BUCKET_CODES, context);
+        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+    }
+
+
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
                                                           BucketCodeExpiringThresholdEnum threshold,
                                                           Long remainingCodes) {
-        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione sta per esaurirsi";
+        var subject = "[Carta Giovani Nazionale] Lista codici in esaurimento";
         var context = new Context();
 
         ProfileEntity profileEntity = discount.getAgreement().getProfile();
@@ -230,7 +262,7 @@ public class EmailNotificationFacade {
         List<String> secondaryReferents = retrieveSecondaryRecipients(profileEntity);
 
         context.setVariable(CONTEXT_DISCOUNT_NAME, discount.getName());
-        context.setVariable("missing_codes", remainingCodes);
+        context.setVariable(MISSING_CODES, remainingCodes);
         final String errorMessage = "Failed to send Discount Bucket Codes Expiring notification to: " + referentEmail;
         final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
@@ -240,7 +272,7 @@ public class EmailNotificationFacade {
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
-        var subject = "[Carta Giovani Nazionale] La lista di codici sconto per la tua agevolazione è esaurita";
+        var subject = "[Carta Giovani Nazionale] Lista codici esaurita";
         var context = new Context();
 
         ProfileEntity profileEntity = discount.getAgreement().getProfile();
