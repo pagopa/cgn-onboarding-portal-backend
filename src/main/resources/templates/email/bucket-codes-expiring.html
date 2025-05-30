@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it" xmlns="http://www.w3.org/1999/xhtml"
->
+      xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>
         Lista di codici sconto in esaurimento
@@ -222,7 +222,8 @@
                                                     >
                                                         <mj-raw>
                                                             <img align="left" alt="Logo CGN" class="logocgn"
-                                                                 src="cid:cgn-logo.png" style="display:block;width:72px;"
+                                                                 src="cid:cgn-logo.png"
+                                                                 style="display:block;width:72px;"
                                                                  width="72"/>
                                                         </mj-raw>
                                                     </div>
@@ -305,11 +306,16 @@
                                                 >
 
                                                     <div
-                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Ti informiamo che la lista di codici sconto per l’agevolazione
-                                                        <span th:text="${discount_name}"></span> sta per esaurirsi: sono
-                                                        rimasti ancora <span th:text="${missing_codes}"></span> codici.
-                                                    </p></div>
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:0px;text-align:left;color:#17324D;"
+                                                    >
+                                                        <p style="color: #445a6f">
+                                                            <b>
+                                                                <span th:text="${discount.name}"></span><br>
+                                                                Codici residui:&nbsp;<span
+                                                                    th:text="${missing_codes}"></span>
+                                                            </b>
+                                                        </p>
+                                                    </div>
 
                                                 </td>
                                             </tr>
@@ -322,7 +328,11 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Puoi accedere al portale per caricarne di nuovi.</p></div>
+                                                    ><p>Se vuoi caricare nuove liste di codici, puoi farlo attraverso il
+                                                        portale operatori come spiegato nella <b><a
+                                                                href="https://developer.pagopa.it/app-io/guides/carta-giovani-nazionale/le-opportunita/le-modalita-di-riconoscimento-e-validazione-delle-opportunita/modalita-lista-di-codici-statici"
+                                                                style="color: #0066cc;">Documentazione
+                                                            tecnica</a></b></p></div>
 
                                                 </td>
                                             </tr>
@@ -342,7 +352,8 @@
 
                                             <tr>
                                                 <td
-                                                        align="left" style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
+                                                        align="left"
+                                                        style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
                                                         vertical-align="middle"
                                                 >
 

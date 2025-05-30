@@ -5,10 +5,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
-import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
@@ -20,10 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -77,6 +71,13 @@ public class BucketService {
             discountBucketCodeSummary.setExpiredAt(null);
         }
         discountBucketCodeSummaryRepository.save(discountBucketCodeSummary);
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public void notifyWeeklyMerchantDiscountBucketCodesSummary(ProfileEntity profileEntity,
+                                                               List<Map<String, Long>> listOfDiscountsToAvailableCodes) {
+        emailNotificationFacade.notifyWeeklyMerchantDiscountBucketCodesSummary(profileEntity,
+                                                                               listOfDiscountsToAvailableCodes);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)

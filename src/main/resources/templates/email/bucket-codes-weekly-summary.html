@@ -3,7 +3,7 @@
       xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>
-        Il test è fallito
+        Lista di codici sconto in esaurimento
     </title>
     <!--[if !mso]><!-->
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
@@ -286,13 +286,66 @@
                                             <tr>
                                                 <td
                                                         align="left" class="titolo"
-                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
+                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;padding-right:100px;word-break:break-word;"
                                                 >
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:13px;font-weight:bold;line-height:1;text-align:left;color:#17324D;"
-                                                    ><h1 style="font-size:32px; line-height:40px;">Il test è
-                                                        fallito</h1></div>
+                                                    ><h1 style="font-size:32px; line-height:40px;">Riepilogo dei codici
+                                                        ancora disponibili per le tue opportunità<span
+                                                                th:text="${discount_name}"></span>
+                                                    </h1></div>
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                        align="left" class="intro"
+                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
+                                                >
+
+                                                    <div
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
+                                                    ><p>Ecco il resoconto aggiornato dei codici sconto ancora
+                                                        disponibili per le opportunità che hai attive.</p></div>
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                        align="left" class="intro"
+                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
+                                                >
+
+                                                    <div
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
+                                                    >
+                                                        <th:block th:each="discount : ${discounts}">
+                                                            <p style="color: #445a6f">
+                                                                <b>
+                                                                    <span th:text="${discount.name}"></span><br>
+                                                                    Codici residui:&nbsp;<span
+                                                                        th:text="${discount.availableCodes}"></span>
+                                                                </b>
+                                                            </p>
+                                                        </th:block>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                        align="left" class="intro"
+                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
+                                                >
+
+                                                    <div
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
+                                                    ><p>Se vuoi caricare nuove liste di codici, puoi farlo attraverso il
+                                                        portale operatori come spiegato nella <b><a
+                                                                href="https://developer.pagopa.it/app-io/guides/carta-giovani-nazionale/le-opportunita/le-modalita-di-riconoscimento-e-validazione-delle-opportunita/modalita-lista-di-codici-statici"
+                                                                style="color: #0066cc;">Documentazione
+                                                            tecnica</a></b></p></div>
 
                                                 </td>
                                             </tr>
@@ -305,42 +358,7 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Ciao, <br/> il team di CGN ha effettuato i test tecnici
-                                                        sull’opportunità
-                                                        <span th:text="${discount_name}"></span>, secondo la modalità di
-                                                        riconoscimento che hai scelto.</p></div>
-
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td
-                                                        align="left" class="intro"
-                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
-                                                >
-
-                                                    <div
-                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Purtroppo l’esito è <strong>negativo</strong> con la seguente
-                                                        motivazione: <span
-                                                                th:text="${failure_reason}"></span>.</p></div>
-
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td
-                                                        align="left" class="intro"
-                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
-                                                >
-
-                                                    <div
-                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Se hai bisogno di supporto, scrivi a <a
-                                                            href="mailto:cartagiovaninazionale@governo.it">cartagiovaninazionale@governo.it</a><br/>
-                                                        Quando il problema è stato risolto, puoi mandarci una nuova
-                                                        richiesta di test.<br/>
-                                                        Grazie mille,</p></div>
+                                                    ><p>Puoi accedere al portale per caricarne di nuovi.</p></div>
 
                                                 </td>
                                             </tr>
@@ -377,7 +395,7 @@
                                                                     valign="middle"
                                                             >
                                                                 <a
-                                                                        href="https://portal.cgnonboardingportal.pagopa.it"
+                                                                        href="https://portal.cgnonboardingportal.pagopa.it/"
                                                                         style="display:inline-block;background:#0073E6;color:#ffffff;font-family:Titillium Web, Arial;font-size:13px;font-weight:bold;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;"
                                                                         target="_blank"
                                                                 >
@@ -512,4 +530,3 @@
 
 </body>
 </html>
-  

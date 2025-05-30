@@ -1,6 +1,6 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
+import java.time.*;
+import java.util.*;
+import java.util.stream.*;
 
 @Component
 @Slf4j
@@ -42,11 +42,22 @@ public class SendWeeklyDiscountBucketCodesSummaryJob
         if (!CollectionUtils.isEmpty(discountBucketCodeSummaryList)) {
             log.info("Found " + discountBucketCodeSummaryList.size() +
                      " not expired discount bucket code summaries to check");
-            discountBucketCodeSummaryList.forEach(bucketService::checkDiscountBucketCodeSummaryExpirationAndSendNotification);
+
+            Map<ProfileEntity, List<Map<String, Long>>> groupedListDiscountsByProfile = groupDiscountsByProfile(
+                    discountBucketCodeSummaryList);
+
+            groupedListDiscountsByProfile.forEach(bucketService::notifyWeeklyMerchantDiscountBucketCodesSummary);
         }
 
         Instant end = Instant.now();
         log.info(JOB_LOG_NAME + "ended in " + Duration.between(start, end).getSeconds() + " seconds");
     }
 
+    public Map<ProfileEntity, List<Map<String, Long>>> groupDiscountsByProfile(List<DiscountBucketCodeSummaryEntity> summaries) {
+        return summaries.stream()
+                        .collect(Collectors.groupingBy(s -> s.getDiscount().getAgreement().getProfile(),
+                                                       Collectors.mapping(s -> Map.of(s.getDiscount().getName(),
+                                                                                      s.getAvailableCodes()),
+                                                                          Collectors.toList())));
+    }
 }

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it" xmlns="http://www.w3.org/1999/xhtml"
->
+      xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>
         Lista di codici sconto esaurita
@@ -222,7 +222,8 @@
                                                     >
                                                         <mj-raw>
                                                             <img align="left" alt="Logo CGN" class="logocgn"
-                                                                 src="cid:cgn-logo.png" style="display:block;width:72px;"
+                                                                 src="cid:cgn-logo.png"
+                                                                 style="display:block;width:72px;"
                                                                  width="72"/>
                                                         </mj-raw>
                                                     </div>
@@ -290,9 +291,10 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:13px;font-weight:bold;line-height:1;text-align:left;color:#17324D;"
-                                                    ><h1 style="font-size:32px; line-height:40px;">La lista di codici
-                                                        sconto per la tua agevolazione <span
-                                                                th:text="${discount_name}"></span> è esaurita</h1></div>
+                                                    ><h1 style="font-size:32px; line-height:40px;">I codici sconto per
+                                                        la tua opportunità<span
+                                                                th:text="${discount_name}"></span> sono esauriti</h1>
+                                                    </div>
 
                                                 </td>
                                             </tr>
@@ -305,8 +307,8 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Ti informiamo che la lista di codici sconto per l’agevolazione
-                                                        <span th:text="${discount_name}"></span> è esaurita.</p></div>
+                                                    ><p>Non ci sono più codici disponibili per l’opportunità, per questo
+                                                        è stata sospesa e non è più visibile in app. </p></div>
 
                                                 </td>
                                             </tr>
@@ -319,8 +321,11 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Puoi accedere al portale per caricarne di nuovi, altrimenti
-                                                        l'agevolazione sarà presto disattivata.</p></div>
+                                                    ><p>Se vuoi caricare nuove liste di codici, puoi farlo attraverso il
+                                                        portale operatori come spiegato nella <b><a
+                                                                href="https://developer.pagopa.it/app-io/guides/carta-giovani-nazionale/le-opportunita/le-modalita-di-riconoscimento-e-validazione-delle-opportunita/modalita-lista-di-codici-statici"
+                                                                style="color: #0066cc;">Documentazione
+                                                            tecnica</a></b></p></div>
 
                                                 </td>
                                             </tr>
@@ -340,7 +345,8 @@
 
                                             <tr>
                                                 <td
-                                                        align="left" style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
+                                                        align="left"
+                                                        style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
                                                         vertical-align="middle"
                                                 >
 
