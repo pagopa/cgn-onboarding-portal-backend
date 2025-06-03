@@ -72,7 +72,6 @@ public class BackofficeAgreementConverterTest {
         agreementEntity.setImageUrl("image12345.png");
 
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(LocalDate.now().plusYears(1));
 
         agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());

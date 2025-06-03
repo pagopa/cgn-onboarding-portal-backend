@@ -90,7 +90,6 @@ class UploadImageTest
         Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getEndDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
         Assertions.assertNull(agreementEntity.getRequestApprovalTime());
         Assertions.assertNull(agreementEntity.getBackofficeAssignee());

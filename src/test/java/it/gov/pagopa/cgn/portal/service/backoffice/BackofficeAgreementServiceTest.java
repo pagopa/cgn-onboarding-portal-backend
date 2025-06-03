@@ -366,7 +366,6 @@ class BackofficeAgreementServiceTest
 
         Assertions.assertNotEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getEndDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
 
     }
@@ -379,7 +378,6 @@ class BackofficeAgreementServiceTest
                                                                                      reasonMsg);
         Assertions.assertEquals(AgreementStateEnum.REJECTED, rejectAgreement.getState());
         Assertions.assertNull(rejectAgreement.getStartDate());
-        Assertions.assertNull(rejectAgreement.getEndDate());
         Assertions.assertEquals(reasonMsg, rejectAgreement.getRejectReasonMessage());
     }
 
@@ -404,7 +402,6 @@ class BackofficeAgreementServiceTest
         agreementEntity = agreementService.findAgreementById(agreementId);
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getEndDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
 
     }

@@ -23,7 +23,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;

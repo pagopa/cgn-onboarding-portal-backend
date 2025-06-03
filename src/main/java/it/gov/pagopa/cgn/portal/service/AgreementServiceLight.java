@@ -49,7 +49,6 @@ public class AgreementServiceLight {
         agreement.setState(AgreementStateEnum.DRAFT);
         agreement.setRequestApprovalTime(null);
         agreement.setStartDate(null);
-        agreement.setEndDate(null);
         agreement.setRejectReasonMessage(null);
         agreement.setBackofficeAssignee(null);
         return agreementRepository.save(agreement);

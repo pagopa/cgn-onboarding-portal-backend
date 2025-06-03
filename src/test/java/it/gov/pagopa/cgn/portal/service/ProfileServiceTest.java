@@ -290,7 +290,6 @@ class ProfileServiceTest
         agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreement.getState());
         Assertions.assertNull(agreement.getStartDate());
-        Assertions.assertNull(agreement.getEndDate());
         Assertions.assertNull(agreement.getRejectReasonMessage());
         Assertions.assertNull(agreement.getRequestApprovalTime());
         Assertions.assertNull(agreement.getBackofficeAssignee());
