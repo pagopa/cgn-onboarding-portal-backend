@@ -34,10 +34,6 @@ public class CGNUtils {
     private CGNUtils() {
     }
 
-    public static LocalDate getDefaultAgreementEndDate() {
-        return LocalDate.now().plusYears(1);
-    }
-
     public static void validateImage(MultipartFile image, int minWidth, int minHeight) {
         Dimension dimension;
         double mbSize;

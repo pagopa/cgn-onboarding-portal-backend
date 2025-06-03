@@ -241,7 +241,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
@@ -257,7 +256,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
@@ -285,7 +283,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
@@ -301,7 +298,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
@@ -317,7 +313,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
     }
 
@@ -341,7 +336,6 @@ class BackofficeAgreementServiceTest
         Assertions.assertNotNull(approveAgreement.getEntityType());
         Assertions.assertEquals(AgreementStateEnum.APPROVED, approveAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), approveAgreement.getStartDate());
-        Assertions.assertEquals(CGNUtils.getDefaultAgreementEndDate(), approveAgreement.getEndDate());
         Assertions.assertNull(approveAgreement.getRejectReasonMessage());
 
         Assertions.assertTrue(memoryAppender.contains(

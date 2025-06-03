@@ -987,7 +987,6 @@ class DiscountServiceTest
 
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1197,7 +1196,6 @@ class DiscountServiceTest
 
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
         // publish discount
@@ -1338,7 +1336,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1378,7 +1375,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1424,7 +1420,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1479,7 +1474,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1551,7 +1545,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1596,7 +1589,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1641,7 +1633,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 

@@ -117,7 +117,6 @@ public class BackofficeAgreementService {
 
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);

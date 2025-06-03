@@ -644,7 +644,6 @@ class BackofficeAgreementApiTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementRepository.save(agreementEntity);
 
         return discountEntity;
