@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.FailureReason;
