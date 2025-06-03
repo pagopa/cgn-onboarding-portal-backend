@@ -81,19 +81,19 @@ class UploadImageTest
     @Test
     void UploadImage_UploadImageOfRejectedAgreement_StateAgreementUpdateToDraft() {
         AgreementTestObject testObject = createPendingAgreement();
-        AgreementEntity agreementEntity = testObject.getAgreementEntity();
-        agreementEntity = backofficeAgreementService.rejectAgreement(agreementEntity.getId(), "reason");
+        AgreementEntity agreement = testObject.getAgreementEntity();
+        agreement = backofficeAgreementService.rejectAgreement(agreement.getId(), "reason");
 
-        String imageUrl = agreementService.uploadImage(agreementEntity.getId(), multipartFile);
+        String imageUrl = agreementService.uploadImage(agreement.getId(), multipartFile);
         Assertions.assertNotNull(imageUrl);
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
-        Assertions.assertEquals(imageUrl, agreementEntity.getImageUrl());
-        Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
-        Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getRejectReasonMessage());
-        Assertions.assertNull(agreementEntity.getRequestApprovalTime());
-        Assertions.assertNull(agreementEntity.getBackofficeAssignee());
-        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreementEntity.getId());
+        agreement = agreementService.findAgreementById(agreement.getId());
+        Assertions.assertEquals(imageUrl, agreement.getImageUrl());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, agreement.getState());
+        Assertions.assertNull(agreement.getStartDate());
+        Assertions.assertNull(agreement.getRejectReasonMessage());
+        Assertions.assertNull(agreement.getRequestApprovalTime());
+        Assertions.assertNull(agreement.getBackofficeAssignee());
+        List<DocumentEntity> documents = documentRepository.findByAgreementId(agreement.getId());
         Assertions.assertTrue(CollectionUtils.isEmpty(documents));
 
     }

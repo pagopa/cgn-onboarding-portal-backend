@@ -300,19 +300,19 @@ class ProfileServiceTest
     @Test
     void Update_UpdateProfileWithDocumentUploadedWillDeleteDocuments_Ok() {
         // creating agreement (and user)
-        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+        AgreementEntity agreement = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
                                                                                            EntityType.PRIVATE,
                                                                                            TestUtils.FAKE_ORGANIZATION_NAME);
         //creating profile
-        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
         profileService.createProfile(profileEntity, agreementId);
         //creating discount
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
         discountService.createDiscount(agreementId, discountEntity);
-        saveSampleDocuments(agreementEntity);
+        saveSampleDocuments(agreement);
         Assertions.assertEquals(2, documentRepository.findByAgreementId(agreementId).size());
 
-        ProfileEntity updatedProfile = TestUtils.createSampleProfileEntity(agreementEntity);
+        ProfileEntity updatedProfile = TestUtils.createSampleProfileEntity(agreement);
         updatedProfile.setSalesChannel(SalesChannelEnum.OFFLINE);
         profileService.updateProfile(agreementId, updatedProfile);
 

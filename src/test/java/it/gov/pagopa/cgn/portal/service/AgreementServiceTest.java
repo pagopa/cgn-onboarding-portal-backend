@@ -43,7 +43,7 @@ class AgreementServiceTest
         Optional<AgreementUserEntity> userEntityOptional;
         userEntityOptional = this.userRepository.findAll()
                                                 .stream()
-                                                .filter((user) -> user.getAgreementId().equals(agreementEntity.getId()))
+                                                .filter(user -> user.getAgreementId().equals(agreementEntity.getId()))
                                                 .findFirst();
         Assertions.assertTrue(userEntityOptional.isPresent());
     }
