@@ -101,7 +101,6 @@ public class AgreementConverterTest {
         dto.setImageUrl("imageURL");
         dto.setState(AgreementState.APPROVED_AGREEMENT);
         dto.setStartDate(LocalDate.now());
-        dto.setEndDate(LocalDate.of(2021, 12, 31));
         dto.setEntityType(EntityType.PRIVATE);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);

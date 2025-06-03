@@ -892,14 +892,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - required:
-            - endDate
             - startDate
           type: object
           properties:
             startDate:
-              type: string
-              format: date
-            endDate:
               type: string
               format: date
             firstDiscountPublishingDate:
