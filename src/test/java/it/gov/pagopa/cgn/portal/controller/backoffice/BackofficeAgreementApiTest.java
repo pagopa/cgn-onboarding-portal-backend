@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.FailureReason;
@@ -644,7 +643,6 @@ class BackofficeAgreementApiTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementRepository.save(agreementEntity);
 
         return discountEntity;

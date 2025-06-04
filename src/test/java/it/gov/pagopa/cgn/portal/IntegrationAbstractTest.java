@@ -307,7 +307,6 @@ public class IntegrationAbstractTest {
     protected AgreementEntity approveAgreement(AgreementEntity agreementEntity, boolean persist) {
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         if (persist) {
             agreementRepository.save(agreementEntity);
         }
@@ -332,7 +331,6 @@ public class IntegrationAbstractTest {
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementRepository.save(agreementEntity);
     }
 
