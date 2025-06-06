@@ -52,7 +52,7 @@ public class JobScheduler {
 
     public void scheduleSendWeeklyDiscountBucketCodesSummaryJob()
             throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey("send-weekly-discount-bucket-codes-summary-job", DISCOUNTS_JOB_GROUP);
+        JobKey jobKey = JobKey.jobKey("send-weekly-discount-bucket-codes-summary", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
                     configProperties.getScheduleSendWeeklyDiscountBucketCodesSummaryJobCronExpression(),
                     SendWeeklyDiscountBucketCodesSummaryJob.class);

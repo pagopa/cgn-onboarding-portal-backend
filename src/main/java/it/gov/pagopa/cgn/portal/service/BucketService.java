@@ -12,6 +12,7 @@ import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -31,6 +32,7 @@ public class BucketService {
     private final AzureStorage azureStorage;
     private final EmailNotificationFacade emailNotificationFacade;
 
+    @Autowired
     public BucketService(DiscountBucketCodeRepository discountBucketCodeRepository,
                          DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository,
                          BucketCodeLoadRepository bucketCodeLoadRepository,

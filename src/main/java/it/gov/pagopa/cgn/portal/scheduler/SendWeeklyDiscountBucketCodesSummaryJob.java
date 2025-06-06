@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
 import it.gov.pagopa.cgn.portal.service.BucketService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
-import java.time.*;
-import java.util.*;
-import java.util.stream.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -50,7 +53,7 @@ public class SendWeeklyDiscountBucketCodesSummaryJob
         }
 
         Instant end = Instant.now();
-        log.info(JOB_LOG_NAME + "ended in " + Duration.between(start, end).getSeconds() + " seconds");
+        log.info(JOB_LOG_NAME + " ended in " + Duration.between(start, end).getSeconds() + " seconds");
     }
 
     public Map<ProfileEntity, List<Map<String, Long>>> groupDiscountsByProfile(List<DiscountBucketCodeSummaryEntity> summaries) {

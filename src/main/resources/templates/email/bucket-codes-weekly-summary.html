@@ -291,10 +291,7 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:13px;font-weight:bold;line-height:1;text-align:left;color:#17324D;"
-                                                    ><h1 style="font-size:32px; line-height:40px;">Riepilogo dei codici
-                                                        ancora disponibili per le tue opportunità<span
-                                                                th:text="${discount_name}"></span>
-                                                    </h1></div>
+                                                    ><h1 style="font-size:32px; line-height:40px;">Riepilogo dei codici ancora disponibili per le tue opportunità</h1></div>
 
                                                 </td>
                                             </tr>
@@ -323,9 +320,9 @@
                                                         <th:block th:each="discount : ${discounts}">
                                                             <p style="color: #445a6f">
                                                                 <b>
-                                                                    <span th:text="${discount.name}"></span><br>
+                                                                    <span th:text="${discount.name}">Sconto Missione Cultura</span><br>
                                                                     Codici residui:&nbsp;<span
-                                                                        th:text="${discount.availableCodes}"></span>
+                                                                        th:text="${discount.availableCodes}">5000</span>
                                                                 </b>
                                                             </p>
                                                         </th:block>
