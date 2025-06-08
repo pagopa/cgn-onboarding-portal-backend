@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.converter.Iso8601TimestampCompatible;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
@@ -65,6 +66,8 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     protected MockMvc mockMvc;
     @Mock
     private AttributeAuthorityService attributeAuthorityServiceMock;
+    @Mock
+    ConfigProperties configPropertiesMock;
 
     @PostConstruct
     void setup() {
@@ -77,7 +80,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                                                            organizationWithReferentsAndStatusConverter,
                                                                                            organizationWithReferentsPostConverter,
                                                                                            referentFiscalCodeConverter,
-                                                                                           backofficeAgreementConverter);
+                                                                                           backofficeAgreementConverter,configPropertiesMock);
         BackofficeAttributeAuthorityOrganizationsController controller = new BackofficeAttributeAuthorityOrganizationsController(
                 facade);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -133,20 +136,9 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     @Test
     void UpsertOrganization_Ok()
             throws Exception {
-        OrganizationWithReferents organization = new OrganizationWithReferents();
-        organization.setKeyOrganizationFiscalCode("00000000000");
-        organization.setOrganizationFiscalCode("00000000000");
-        organization.setOrganizationName("org 1");
-        organization.setPec("org1@pec.it");
-        organization.setEntityType(EntityType.PRIVATE);
+        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
 
-        OrganizationWithReferentsAttributeAuthority mockResult = new OrganizationWithReferentsAttributeAuthority();
-        mockResult.setKeyOrganizationFiscalCode(organization.getKeyOrganizationFiscalCode());
-        mockResult.setOrganizationFiscalCode(organization.getOrganizationFiscalCode());
-        mockResult.setPec(organization.getPec());
-        mockResult.setOrganizationName(organization.getOrganizationName());
-        mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
+        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult))
                .when(attributeAuthorityServiceMock)
@@ -164,12 +156,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     @Test
     void UpsertOrganization_BadRequest()
             throws Exception {
-        OrganizationWithReferents organization = new OrganizationWithReferents();
-        organization.setKeyOrganizationFiscalCode("12345678");
-        organization.setOrganizationFiscalCode("12345678");
-        organization.setOrganizationName("org 1");
-        organization.setPec("org1@pec.it");
-        organization.setEntityType(EntityType.PRIVATE);
+        OrganizationWithReferents organization = getOrganizationWithReferents("12345678");
 
         Mockito.doReturn(ResponseEntity.badRequest().build())
                .when(attributeAuthorityServiceMock)
@@ -182,17 +169,12 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     }
 
     @Test
-    void UpsertOrganization_moreThenTenOrganizations_ko()
-            throws Exception {
-        OrganizationWithReferents organization = new OrganizationWithReferents();
-        organization.setKeyOrganizationFiscalCode("00000000000");
-        organization.setOrganizationFiscalCode("00000000000");
-        organization.setOrganizationName("org 1");
-        organization.setPec("org1@pec.it");
-        organization.setEntityType(EntityType.PRIVATE);
+    void UpsertOrganization_moreThenTenOrganizations_prod_ko() {
+        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
         organization.setReferents(List.of("referents1"));
 
         Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
+        Mockito.doReturn(true).when(configPropertiesMock).isEnvProd();
 
         Exception exception = Assertions.assertThrows(NestedServletException.class,
                                                       () -> mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
@@ -204,22 +186,32 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     }
 
     @Test
+    void UpsertOrganization_moreThenTenOrganizations_not_prod_Ok()
+            throws Exception {
+        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
+        organization.setReferents(List.of("referents1"));
+
+        Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
+        Mockito.doReturn(false).when(configPropertiesMock).isEnvProd();
+        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
+
+        Mockito.doReturn(ResponseEntity.ok().body(mockResult))
+               .when(attributeAuthorityServiceMock)
+               .upsertOrganization(Mockito.any());
+
+
+        mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(organization)))
+               .andDo(log())
+               .andExpect(status().isOk());
+    }
+
+    @Test
     void UpsertOrganization_referentNotFound_ok()
             throws Exception {
-        OrganizationWithReferents organization = new OrganizationWithReferents();
-        organization.setKeyOrganizationFiscalCode("00000000000");
-        organization.setOrganizationFiscalCode("00000000000");
-        organization.setOrganizationName("org 1");
-        organization.setPec("org1@pec.it");
-        organization.setEntityType(EntityType.PRIVATE);
+        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
 
-        OrganizationWithReferentsAttributeAuthority mockResult = new OrganizationWithReferentsAttributeAuthority();
-        mockResult.setKeyOrganizationFiscalCode(organization.getKeyOrganizationFiscalCode());
-        mockResult.setOrganizationFiscalCode(organization.getOrganizationFiscalCode());
-        mockResult.setPec(organization.getPec());
-        mockResult.setOrganizationName(organization.getOrganizationName());
-        mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
+        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult))
                .when(attributeAuthorityServiceMock)
@@ -234,6 +226,28 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    private static OrganizationWithReferentsAttributeAuthority getOrganizationWithReferentsAttributeAuthority(OrganizationWithReferents organization) {
+
+        OrganizationWithReferentsAttributeAuthority mockResult = new OrganizationWithReferentsAttributeAuthority();
+        mockResult.setKeyOrganizationFiscalCode(organization.getKeyOrganizationFiscalCode());
+        mockResult.setOrganizationFiscalCode(organization.getOrganizationFiscalCode());
+        mockResult.setPec(organization.getPec());
+        mockResult.setOrganizationName(organization.getOrganizationName());
+        mockResult.setReferents(organization.getReferents());
+        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
+        return mockResult;
+    }
+
+    private static OrganizationWithReferents getOrganizationWithReferents(String number) {
+        OrganizationWithReferents organization = new OrganizationWithReferents();
+        organization.setKeyOrganizationFiscalCode(number);
+        organization.setOrganizationFiscalCode(number);
+        organization.setOrganizationName("org 1");
+        organization.setPec("org1@pec.it");
+        organization.setEntityType(EntityType.PRIVATE);
+        return organization;
     }
 
 
