@@ -32,6 +32,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.util.NestedServletException;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -66,8 +67,8 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     protected MockMvc mockMvc;
     @Mock
     private AttributeAuthorityService attributeAuthorityServiceMock;
-    @Mock
-    ConfigProperties configPropertiesMock;
+    @Autowired
+    ConfigProperties configProperties;
 
     @PostConstruct
     void setup() {
@@ -80,7 +81,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                                                            organizationWithReferentsAndStatusConverter,
                                                                                            organizationWithReferentsPostConverter,
                                                                                            referentFiscalCodeConverter,
-                                                                                           backofficeAgreementConverter,configPropertiesMock);
+                                                                                           backofficeAgreementConverter,configProperties);
         BackofficeAttributeAuthorityOrganizationsController controller = new BackofficeAttributeAuthorityOrganizationsController(
                 facade);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -169,12 +170,14 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     }
 
     @Test
-    void UpsertOrganization_moreThenTenOrganizations_prod_ko() {
+    void UpsertOrganization_moreThenTenOrganizations_prod_ko()
+            throws Exception {
         OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
         organization.setReferents(List.of("referents1"));
 
+        setEnvironment("prod");
+
         Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
-        Mockito.doReturn(true).when(configPropertiesMock).isEnvProd();
 
         Exception exception = Assertions.assertThrows(NestedServletException.class,
                                                       () -> mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
@@ -191,8 +194,10 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
         organization.setReferents(List.of("referents1"));
 
+        setEnvironment("uat");
+
         Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
-        Mockito.doReturn(false).when(configPropertiesMock).isEnvProd();
+
         OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
 
         Mockito.doReturn(ResponseEntity.ok().body(mockResult))
@@ -226,6 +231,13 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    private void setEnvironment(String environment)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field field = ConfigProperties.class.getDeclaredField("environment");
+        field.setAccessible(true);
+        field.set(configProperties, environment);
     }
 
     private static OrganizationWithReferentsAttributeAuthority getOrganizationWithReferentsAttributeAuthority(OrganizationWithReferents organization) {
