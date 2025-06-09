@@ -43,7 +43,6 @@ public class AgreementConverter
                 ApprovedAgreement approvedAgreement;
                 approvedAgreement = new ApprovedAgreement();
                 approvedAgreement.setStartDate(entity.getStartDate());
-                approvedAgreement.setEndDate(entity.getEndDate());
                 approvedAgreement.setFirstDiscountPublishingDate(entity.getFirstDiscountPublishingDate());
                 dto = approvedAgreement;
                 break;
@@ -79,7 +78,6 @@ public class AgreementConverter
         if (AgreementState.APPROVED_AGREEMENT.equals(dto.getState())) {
             ApprovedAgreement state = (ApprovedAgreement) dto;
             entity.setStartDate(state.getStartDate());
-            entity.setEndDate(state.getEndDate());
             entity.setFirstDiscountPublishingDate(state.getFirstDiscountPublishingDate());
         }
         if (AgreementState.REJECTED_AGREEMENT.equals(dto.getState())) {

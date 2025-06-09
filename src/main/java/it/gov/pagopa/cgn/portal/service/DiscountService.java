@@ -491,6 +491,12 @@ public class DiscountService {
         ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
+        long remainingCodes = discountBucketCodeRepository.countNotUsedByDiscountId(discount.getId());
+
+        if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) && remainingCodes <= 0) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
+        }
+
         // check sales channel
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS.getValue());

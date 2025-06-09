@@ -29,7 +29,8 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -987,7 +988,6 @@ class DiscountServiceTest
 
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1197,7 +1197,6 @@ class DiscountServiceTest
 
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
         // publish discount
@@ -1338,7 +1337,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1378,7 +1376,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1424,7 +1421,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1479,7 +1475,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1551,7 +1546,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1596,7 +1590,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1641,7 +1634,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity = approveAgreement(agreementEntity);  // simulation of approved
 
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity = agreementRepository.save(agreementEntity);
         Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
 
@@ -1759,7 +1751,6 @@ class DiscountServiceTest
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getEndDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
         Assertions.assertNull(agreementEntity.getRequestApprovalTime());
         Assertions.assertNull(agreementEntity.getBackofficeAssignee());
@@ -1944,7 +1935,7 @@ class DiscountServiceTest
         Assertions.assertNotNull(toUpdateEntity.getUpdateTime());
 
         OffsetDateTime firstUpdateTime = toUpdateEntity.getUpdateTime();
-        toUpdateEntity = TestUtils.callAfter(1, toUpdateEntity, discountBucketCodeSummaryRepository::save);
+        toUpdateEntity = TestUtils.callAfter(5, toUpdateEntity, discountBucketCodeSummaryRepository::save);
 
         Assertions.assertNotEquals(toUpdateEntity.getUpdateTime(), firstUpdateTime);
     }

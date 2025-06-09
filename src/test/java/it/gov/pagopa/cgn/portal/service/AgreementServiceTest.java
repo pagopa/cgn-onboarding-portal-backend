@@ -31,7 +31,6 @@ class AgreementServiceTest
         Assertions.assertNotNull(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, agreementEntity.getState());
         Assertions.assertNull(agreementEntity.getStartDate());
-        Assertions.assertNull(agreementEntity.getEndDate());
         Assertions.assertNull(agreementEntity.getImageUrl());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
     }
@@ -44,7 +43,7 @@ class AgreementServiceTest
         Optional<AgreementUserEntity> userEntityOptional;
         userEntityOptional = this.userRepository.findAll()
                                                 .stream()
-                                                .filter((user) -> user.getAgreementId().equals(agreementEntity.getId()))
+                                                .filter(user -> user.getAgreementId().equals(agreementEntity.getId()))
                                                 .findFirst();
         Assertions.assertTrue(userEntityOptional.isPresent());
     }
@@ -77,7 +76,6 @@ class AgreementServiceTest
         AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.PENDING, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
-        Assertions.assertNull(pendingAgreement.getEndDate());
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
         Assertions.assertNotNull(pendingAgreement.getRequestApprovalTime());
@@ -99,7 +97,6 @@ class AgreementServiceTest
         AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
-        Assertions.assertNull(pendingAgreement.getEndDate());
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
         Assertions.assertNull(pendingAgreement.getRequestApprovalTime());
@@ -123,7 +120,6 @@ class AgreementServiceTest
         AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
-        Assertions.assertNull(pendingAgreement.getEndDate());
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
         Assertions.assertNull(pendingAgreement.getRequestApprovalTime());
@@ -146,7 +142,6 @@ class AgreementServiceTest
         AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
-        Assertions.assertNull(pendingAgreement.getEndDate());
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
     }
@@ -170,7 +165,6 @@ class AgreementServiceTest
         AgreementEntity pendingAgreement = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.DRAFT, pendingAgreement.getState());
         Assertions.assertNull(pendingAgreement.getStartDate());
-        Assertions.assertNull(pendingAgreement.getEndDate());
         Assertions.assertNull(pendingAgreement.getImageUrl());
         Assertions.assertNull(pendingAgreement.getRejectReasonMessage());
     }
