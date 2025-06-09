@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.email;
 import it.gov.pagopa.cgn.portal.model.NotificationEntity;
 import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.InvalidFileNameException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -88,7 +89,7 @@ public class EmailNotificationService {
             javaMailSender.send(mimeMessage);
             trackNotification(trackingKey);
         } catch (Exception e) {
-            trackNotification(trackingKey, e.getMessage());
+            trackNotification(trackingKey, StringUtils.abbreviate(e.getMessage(), 255));
             throw e;
         }
     }
