@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class SendWeeklyDiscountBucketCodesSummaryJob
         implements Job {
 
-    private static final String JOB_LOG_NAME = "Send Weekly Discount Bucket Codes Summary Job";
+    private static final String JOB_LOG_NAME = "Send Weekly Discount Bucket Codes Summary Job ";
 
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketService bucketService;
