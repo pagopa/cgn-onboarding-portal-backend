@@ -337,7 +337,6 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      false,
                                                                      EntityType.PUBLIC_ADMINISTRATION);
         Consumer<UpsertResult> assertionsBlock = ur -> {
-            ;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
             Assertions.assertNotNull(ur.response.getBody());
             Assertions.assertEquals(anOrganizationFiscalCode, ur.response.getBody().getOrganizationFiscalCode());
