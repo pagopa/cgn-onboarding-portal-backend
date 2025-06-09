@@ -9,7 +9,6 @@ import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeSummaryEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import org.apache.commons.io.IOUtils;
@@ -23,7 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
