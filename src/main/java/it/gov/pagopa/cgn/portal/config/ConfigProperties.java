@@ -155,7 +155,12 @@ public class ConfigProperties {
     @Value("${jwt.public-key}")
     private String jwtPublicKey;
 
+    @Value("${environment}")
+    private String environment;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }
+
+    public boolean isEnvProd() {return "prod".equals(environment);}
 }

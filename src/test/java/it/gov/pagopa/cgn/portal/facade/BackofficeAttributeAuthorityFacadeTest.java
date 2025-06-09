@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -46,6 +47,8 @@ class BackofficeAttributeAuthorityFacadeTest
     private BackofficeDiscountConverter backofficeDiscountConverter;
     private BackofficeProfileConverter backofficeProfileConverter;
     private BackofficeDocumentConverter backofficeDocumentConverter;
+    private  ConfigProperties configProperties;
+
 
     @BeforeEach
     void init() {
@@ -81,7 +84,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                     organizationWithReferentsAndStatusConverter,
                                                                                     organizationWithReferentsPostConverter,
                                                                                     referentFiscalCodeConverter,
-                                                                                    backofficeAgreementConverter);
+                                                                                    backofficeAgreementConverter,configProperties);
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
         agreementEntity = agreementService.createAgreementIfNotExists(anOrganizationTaxCodeOrVat,
@@ -334,7 +337,6 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                      false,
                                                                      EntityType.PUBLIC_ADMINISTRATION);
         Consumer<UpsertResult> assertionsBlock = ur -> {
-            ;
             Assertions.assertEquals(HttpStatus.OK, ur.response.getStatusCode());
             Assertions.assertNotNull(ur.response.getBody());
             Assertions.assertEquals(anOrganizationFiscalCode, ur.response.getBody().getOrganizationFiscalCode());
