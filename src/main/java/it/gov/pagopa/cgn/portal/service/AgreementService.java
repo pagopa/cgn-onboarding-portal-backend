@@ -23,7 +23,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AgreementService
@@ -91,7 +90,7 @@ public class AgreementService
             userAgreement = userAgreementOpt.get();
             // current user has already an agreement. Find it
             agreementEntity = agreementRepository.findById(userAgreement.getAgreementId())
-                                                 .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue()));
+                                                 .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
         } else {
             userAgreement = userService.create(merchantTaxCode);
             agreementEntity = createAgreement(userAgreement.getAgreementId(), entityType, organizationName);
@@ -151,7 +150,7 @@ public class AgreementService
             discounts = discounts.stream().filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
                                                        && LocalDate.now()
                                                                    .isBefore(d.getEndDate().plusDays(1))) // not expired
-                                 .collect(Collectors.toList());
+                    .toList();
             agreementEntity.setDiscountList(discounts);
         }
         agreementEntity.setDocumentList(documentService.getAllDocuments(agreementId,
