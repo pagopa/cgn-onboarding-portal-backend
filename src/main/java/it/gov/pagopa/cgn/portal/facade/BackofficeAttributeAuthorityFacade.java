@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.facade;
 
+import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -37,6 +38,7 @@ public class BackofficeAttributeAuthorityFacade {
     private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
     private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
     private final BackofficeAgreementConverter agreementConverter;
+    private final ConfigProperties configProperties;
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
         switch (agreement.getState()) {
             case DRAFT, REJECTED:
@@ -113,7 +115,8 @@ public class BackofficeAttributeAuthorityFacade {
                                               OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
                                               OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
                                               ReferentFiscalCodeConverter referentFiscalCodeConverter,
-                                              BackofficeAgreementConverter agreementConverter) {
+                                              BackofficeAgreementConverter agreementConverter,
+                                              ConfigProperties configProperties) {
 
         this.attributeAuthorityService = attributeAuthorityService;
         this.agreementService = agreementService;
@@ -125,6 +128,7 @@ public class BackofficeAttributeAuthorityFacade {
         this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
         this.referentFiscalCodeConverter = referentFiscalCodeConverter;
         this.agreementConverter = agreementConverter;
+        this.configProperties = configProperties;
     }
 
     public ResponseEntity<Organizations> getOrganizations(String searchQuery,
@@ -161,7 +165,7 @@ public class BackofficeAttributeAuthorityFacade {
             } catch (HttpClientErrorException e) {
                 log.error(e.getMessage());
             }
-            if (count > 10)
+            if (count > 10 && configProperties.isEnvProd())
                 throw new InvalidRequestException(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue());
         });
 
