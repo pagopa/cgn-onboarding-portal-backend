@@ -892,14 +892,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - required:
-            - endDate
             - startDate
           type: object
           properties:
             startDate:
-              type: string
-              format: date
-            endDate:
               type: string
               format: date
             firstDiscountPublishingDate:
@@ -1744,6 +1740,8 @@ components:
         - CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND
         - PROFILE_ALREADY_EXISTS_FOR_AGREEMENT_PROVIDED
         - CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS
+        - CANNOT_PROCEED_WITH_DISCOUNT_WITH_EMPTY_BUCKET
+        - CANNOT_RETRIEVE_BUCKET_CODE_FROM_DISCOUNT_WITH_EMPTY_BUCKET
     ErrorCodeString:
       type: string
     ErrorCode:

@@ -3,10 +3,7 @@ package it.gov.pagopa.cgn.portal;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.facade.BackofficeExportFacade;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
-import it.gov.pagopa.cgn.portal.model.DiscountEntity;
-import it.gov.pagopa.cgn.portal.model.DocumentEntity;
-import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
@@ -278,10 +275,20 @@ public class IntegrationAbstractTest {
         documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
     }
 
-    protected void burnBucketCodesToLeaveLessThanThresholdCodes(BucketCodeExpiringThresholdEnum threshold,
+    protected void burnSummaryAvailableCodesToLeaveLessThanThresholdCodes(int totalCodes,
+                                                                          BucketCodeExpiringThresholdEnum threshold,
+                                                                          DiscountEntity discountEntity) {
+        int thresholdCodes = (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
+        log.info("Will leave " + thresholdCodes + " codes.");
+        DiscountBucketCodeSummaryEntity summary = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
+        summary.setAvailableCodes((long) thresholdCodes);
+        discountBucketCodeSummaryRepository.save(summary);
+    }
+
+    protected void burnBucketCodesToLeaveLessThanThresholdCodes(int totalCodes,
+                                                                BucketCodeExpiringThresholdEnum threshold,
                                                                 DiscountEntity discountEntity) {
-        // use 100% - threshold codes
-        int codeToUse = 10 - (int) Math.floor((float) 10 * threshold.getValue() / 100);
+        int codeToUse = totalCodes - (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
         log.info("Will use " + codeToUse + " codes.");
         discountBucketCodeRepository.findAllByDiscount(discountEntity).stream().limit(codeToUse).forEach(c -> {
             c.setIsUsed(true);
@@ -300,7 +307,6 @@ public class IntegrationAbstractTest {
     protected AgreementEntity approveAgreement(AgreementEntity agreementEntity, boolean persist) {
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         if (persist) {
             agreementRepository.save(agreementEntity);
         }
@@ -325,7 +331,6 @@ public class IntegrationAbstractTest {
         agreementEntity = agreementService.requestApproval(agreementEntity.getId());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementRepository.save(agreementEntity);
     }
 

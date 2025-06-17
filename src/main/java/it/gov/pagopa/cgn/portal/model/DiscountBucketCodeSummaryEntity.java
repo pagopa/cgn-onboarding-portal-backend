@@ -13,11 +13,16 @@ import java.time.OffsetDateTime;
 @Table(name = "discount_bucket_code_summary")
 @Data
 public class DiscountBucketCodeSummaryEntity
+        extends BaseEntity
         implements Serializable {
 
     @Id
     @Column(name = "discount_fk")
     private Long id;
+
+    @NotNull
+    @Column(name = "total_codes")
+    private Long totalCodes;
 
     @NotNull
     @Column(name = "available_codes")
@@ -37,6 +42,7 @@ public class DiscountBucketCodeSummaryEntity
 
     public DiscountBucketCodeSummaryEntity(DiscountEntity discount) {
         this.id = discount.getId();
+        this.totalCodes = 0L;
         this.availableCodes = 0L;
     }
 

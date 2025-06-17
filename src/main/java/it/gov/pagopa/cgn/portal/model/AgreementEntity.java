@@ -41,9 +41,6 @@ public class AgreementEntity
     @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "end_date")
-    private LocalDate endDate;
-
     @Column(name = "first_discount_publishing_date")
     private LocalDate firstDiscountPublishingDate;
 

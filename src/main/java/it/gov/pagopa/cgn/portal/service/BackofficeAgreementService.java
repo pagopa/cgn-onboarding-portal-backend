@@ -26,14 +26,12 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @Slf4j
 public class BackofficeAgreementService {
 
-    private static final String AGREEMENT_LABEL = "Agreement ";
     private final AgreementRepository agreementRepository;
     private final AgreementServiceLight agreementServiceLight;
     private final DocumentService documentService;
@@ -42,10 +40,10 @@ public class BackofficeAgreementService {
     private final Collection<DocumentTypeEnum> mandatoryDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
                                                                               DocumentTypeEnum.ADHESION_REQUEST,
                                                                               DocumentTypeEnum.BACKOFFICE_AGREEMENT)
-                                                                          .collect(Collectors.toList());
+                                                                          .toList();
     private final Collection<DocumentTypeEnum> mandatoryPaDocuments = Stream.of(DocumentTypeEnum.AGREEMENT,
                                                                                 DocumentTypeEnum.BACKOFFICE_AGREEMENT)
-                                                                            .collect(Collectors.toList());
+                                                                            .toList();
 
     @Autowired
     public BackofficeAgreementService(AgreementRepository agreementRepository,
@@ -72,7 +70,7 @@ public class BackofficeAgreementService {
             List<DocumentEntity> documents = agreementEntity.getDocumentList()
                                                             .stream()
                                                             .filter(d -> !d.getDocumentType().isBackoffice())
-                                                            .collect(Collectors.toList());
+                                                            .toList();
             //setting SAS Url
             azureStorage.setSecureDocumentUrl(documents);
             agreementEntity.setDocumentList(documents);
@@ -108,16 +106,13 @@ public class BackofficeAgreementService {
                                                mandatoryDocuments:
                                                mandatoryPaDocuments;
 
-        if (CollectionUtils.isEmpty(documents) || !documents.stream()
-                                                            .map(DocumentEntity::getDocumentType)
-                                                            .collect(Collectors.toList())
-                                                            .containsAll(manDocs)) {
+        if (CollectionUtils.isEmpty(documents) ||
+            !documents.stream().map(DocumentEntity::getDocumentType).toList().containsAll(manDocs)) {
             throw new InvalidRequestException(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue());
         }
 
         agreementEntity.setRejectReasonMessage(null);
         agreementEntity.setStartDate(LocalDate.now());
-        agreementEntity.setEndDate(CGNUtils.getDefaultAgreementEndDate());
         agreementEntity.setState(AgreementStateEnum.APPROVED);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);

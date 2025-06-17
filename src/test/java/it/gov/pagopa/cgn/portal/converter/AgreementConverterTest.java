@@ -84,7 +84,6 @@ public class AgreementConverterTest {
     public void Convert_ConvertApprovedAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = TestUtils.createSampleAgreementEntityWithCommonFields();
         agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setEndDate(LocalDate.of(2021, 12, 31));
         agreementEntity.setStartDate(LocalDate.now());
         agreementEntity.setEntityType(EntityTypeEnum.PRIVATE);
         Agreement agreementDto = agreementConverter.toDto(agreementEntity);
@@ -93,7 +92,6 @@ public class AgreementConverterTest {
         Assert.assertTrue(agreementDto instanceof ApprovedAgreement);
         ApprovedAgreement approvedDto = (ApprovedAgreement) agreementDto;
         Assert.assertEquals(agreementEntity.getStartDate(), approvedDto.getStartDate());
-        Assert.assertEquals(agreementEntity.getEndDate(), approvedDto.getEndDate());
     }
 
     @Test
@@ -103,14 +101,11 @@ public class AgreementConverterTest {
         dto.setImageUrl("imageURL");
         dto.setState(AgreementState.APPROVED_AGREEMENT);
         dto.setStartDate(LocalDate.now());
-        dto.setEndDate(LocalDate.of(2021, 12, 31));
         dto.setEntityType(EntityType.PRIVATE);
         AgreementEntity entity = agreementConverter.toEntity(dto);
         commonAssertionsDtoToEntity(entity, dto);
         Assert.assertEquals(AgreementStateEnum.APPROVED, entity.getState());
         Assert.assertEquals(dto.getStartDate(), entity.getStartDate());
-        Assert.assertEquals(dto.getEndDate(), entity.getEndDate());
-
     }
 
     private void commonAssertionsEntityToDto(AgreementEntity agreementEntity, Agreement agreementDto) {

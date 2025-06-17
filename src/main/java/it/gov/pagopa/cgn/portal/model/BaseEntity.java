@@ -1,5 +1,8 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
@@ -7,6 +10,8 @@ import javax.persistence.PreUpdate;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class BaseEntity
         implements Serializable {

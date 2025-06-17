@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface DiscountBucketCodeSummaryRepository
@@ -19,10 +18,11 @@ public interface DiscountBucketCodeSummaryRepository
     @Query(value = "delete from discount_bucket_code_summary where discount_fk=:discount_id", nativeQuery = true)
     void deleteByDiscountId(@Param("discount_id") Long discountId);
 
-    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt is null and d.state = 'PUBLISHED'")
+    @Query(value = "select * from discount_bucket_code_summary bs join discount d on bs.discount_fk = d.discount_k where bs.expired_at is null and d.state = 'PUBLISHED'",
+           nativeQuery = true)
     List<DiscountBucketCodeSummaryEntity> findAllPublishedNotExpired();
 
-    @Query("select bs from DiscountBucketCodeSummaryEntity bs join bs.discount d where bs.expiredAt <=  ?1 and d.state = 'PUBLISHED'")
-    List<DiscountBucketCodeSummaryEntity> findAllPublishedAndExpired(
-            OffsetDateTime thresholdDatetime);
+    @Query(value = "select * from discount_bucket_code_summary bs join discount d on bs.discount_fk = d.discount_k where bs.expired_at <= CURRENT_TIMESTAMP and d.state = 'PUBLISHED'",
+           nativeQuery = true)
+    List<DiscountBucketCodeSummaryEntity> findAllPublishedAndExpired();
 }

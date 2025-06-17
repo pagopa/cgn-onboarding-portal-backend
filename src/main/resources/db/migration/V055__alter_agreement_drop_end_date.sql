@@ -1,0 +1,1 @@
+ALTER TABLE agreement DROP COLUMN end_date;

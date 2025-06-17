@@ -35,6 +35,8 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class TestUtils {
@@ -453,6 +455,18 @@ public class TestUtils {
 
         return discountEntity;
     }
+
+    public static DiscountBucketCodeEntity createDummyDiscountBucketCodeEntity(DiscountEntity discount, String code) {
+        DiscountBucketCodeEntity discountBucketCodeEntity = new DiscountBucketCodeEntity();
+        discountBucketCodeEntity.setId(1L);
+        discountBucketCodeEntity.setCode(code);
+        discountBucketCodeEntity.setIsUsed(false);
+        discountBucketCodeEntity.setUsageDatetime(null);
+        discountBucketCodeEntity.setDiscount(discount);
+        discountBucketCodeEntity.setBucketCodeLoadId(discount.getLastBucketCodeLoad().getId());
+        return discountBucketCodeEntity;
+    }
+
 
     public static BucketCodeLoadEntity createDummyBucketLoadEntity(Long discountId) {
         BucketCodeLoadEntity bucketCodeLoadEntity = new BucketCodeLoadEntity();
@@ -1492,5 +1506,14 @@ public class TestUtils {
     public static void setAdminAuth() {
         SecurityContextHolder.getContext()
                              .setAuthentication(new JwtAuthenticationToken(new JwtAdminUser(TestUtils.FAKE_ID)));
+    }
+
+
+    public static <T, R> R callAfter(int seconds, T input, Function<T, R> function)
+            throws InterruptedException, ExecutionException {
+        try (ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor()) {
+            ScheduledFuture<R> future = scheduler.schedule(() -> function.apply(input), seconds, TimeUnit.SECONDS);
+            return future.get();
+        }
     }
 }

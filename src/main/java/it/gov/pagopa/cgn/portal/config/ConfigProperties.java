@@ -88,6 +88,9 @@ public class ConfigProperties {
     @Value("${check.available.discounts.bucket.codes.job.cron}")
     private String availableDiscountBucketCodesJobCronExpression;
 
+    @Value("${send.low.bucket.codes.notification.job.cron}")
+    private String lowDiscountBucketCodesNotificationJobCronExpression;
+
     @Value("${suspend.discounts.without.available.bucket.codes.job.cron}")
     private String suspendDiscountsWithoutAvailableBucketCodesJobCronExpression;
 
@@ -152,7 +155,12 @@ public class ConfigProperties {
     @Value("${jwt.public-key}")
     private String jwtPublicKey;
 
+    @Value("${environment}")
+    private String environment;
+
     public boolean isActiveProfileDev() {
         return "dev".equals(getActiveProfile());
     }
+
+    public boolean isEnvProd() {return "prod".equals(environment);}
 }
