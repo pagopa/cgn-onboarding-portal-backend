@@ -14,8 +14,6 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationStatus;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -29,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.util.NestedServletException;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
@@ -167,48 +164,6 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                               .content(TestUtils.getJson(organization)))
                .andDo(log())
                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void UpsertOrganization_moreThenTenOrganizations_prod_ko()
-            throws Exception {
-        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
-        organization.setReferents(List.of("referents1"));
-
-        setEnvironment("prod");
-
-        Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
-
-        Exception exception = Assertions.assertThrows(NestedServletException.class,
-                                                      () -> mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
-                                                                                                  .content(TestUtils.getJson(
-                                                                                                          organization))));
-
-        Assertions.assertEquals(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue(),
-                                exception.getCause().getMessage());
-    }
-
-    @Test
-    void UpsertOrganization_moreThenTenOrganizations_not_prod_Ok()
-            throws Exception {
-        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
-        organization.setReferents(List.of("referents1"));
-
-        setEnvironment("uat");
-
-        Mockito.doReturn(11).when(attributeAuthorityServiceMock).countUserOrganizations(Mockito.any());
-
-        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
-
-        Mockito.doReturn(ResponseEntity.ok().body(mockResult))
-               .when(attributeAuthorityServiceMock)
-               .upsertOrganization(Mockito.any());
-
-
-        mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
-                                              .content(TestUtils.getJson(organization)))
-               .andDo(log())
-               .andExpect(status().isOk());
     }
 
     @Test

@@ -3,7 +3,6 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
@@ -12,7 +11,6 @@ import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -165,8 +163,6 @@ public class BackofficeAttributeAuthorityFacade {
             } catch (HttpClientErrorException e) {
                 log.error(e.getMessage());
             }
-            if (count > 10 && configProperties.isEnvProd())
-                throw new InvalidRequestException(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue());
         });
 
         //workaround fino al rilascio flusso pagopa
