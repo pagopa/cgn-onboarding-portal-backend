@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
 import it.gov.pagopa.cgn.portal.converter.Iso8601TimestampCompatible;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
@@ -29,7 +28,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.annotation.PostConstruct;
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -64,8 +62,6 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     protected MockMvc mockMvc;
     @Mock
     private AttributeAuthorityService attributeAuthorityServiceMock;
-    @Autowired
-    ConfigProperties configProperties;
 
     @PostConstruct
     void setup() {
@@ -78,7 +74,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                                                            organizationWithReferentsAndStatusConverter,
                                                                                            organizationWithReferentsPostConverter,
                                                                                            referentFiscalCodeConverter,
-                                                                                           backofficeAgreementConverter,configProperties);
+                                                                                           backofficeAgreementConverter);
         BackofficeAttributeAuthorityOrganizationsController controller = new BackofficeAttributeAuthorityOrganizationsController(
                 facade);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -186,13 +182,6 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
-    }
-
-    private void setEnvironment(String environment)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field field = ConfigProperties.class.getDeclaredField("environment");
-        field.setAccessible(true);
-        field.set(configProperties, environment);
     }
 
     private static OrganizationWithReferentsAttributeAuthority getOrganizationWithReferentsAttributeAuthority(OrganizationWithReferents organization) {
