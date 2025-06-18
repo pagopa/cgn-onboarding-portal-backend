@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
@@ -155,15 +154,6 @@ public class BackofficeAttributeAuthorityFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
-        // check if we have more than 10 companies for each referent
-        organizationWithReferents.getReferents().forEach(referentFiscalCode -> {
-            int count = 0;
-            try {
-                count = attributeAuthorityService.countUserOrganizations(referentFiscalCode);
-            } catch (HttpClientErrorException e) {
-                log.error(e.getMessage());
-            }
-        });
 
         //workaround fino al rilascio flusso pagopa
         organizationWithReferents.setEntityType(organizationWithReferents.getEntityType()==null ?
