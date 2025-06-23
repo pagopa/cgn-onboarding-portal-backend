@@ -1,9 +1,7 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
@@ -12,13 +10,11 @@ import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
-import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
@@ -38,7 +34,6 @@ public class BackofficeAttributeAuthorityFacade {
     private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
     private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
     private final BackofficeAgreementConverter agreementConverter;
-    private final ConfigProperties configProperties;
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
         switch (agreement.getState()) {
             case DRAFT, REJECTED:
@@ -115,8 +110,7 @@ public class BackofficeAttributeAuthorityFacade {
                                               OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
                                               OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
                                               ReferentFiscalCodeConverter referentFiscalCodeConverter,
-                                              BackofficeAgreementConverter agreementConverter,
-                                              ConfigProperties configProperties) {
+                                              BackofficeAgreementConverter agreementConverter) {
 
         this.attributeAuthorityService = attributeAuthorityService;
         this.agreementService = agreementService;
@@ -128,7 +122,6 @@ public class BackofficeAttributeAuthorityFacade {
         this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
         this.referentFiscalCodeConverter = referentFiscalCodeConverter;
         this.agreementConverter = agreementConverter;
-        this.configProperties = configProperties;
     }
 
     public ResponseEntity<Organizations> getOrganizations(String searchQuery,
@@ -157,17 +150,6 @@ public class BackofficeAttributeAuthorityFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferents> upsertOrganization(OrganizationWithReferents organizationWithReferents) {
-        // check if we have more than 10 companies for each referent
-        organizationWithReferents.getReferents().forEach(referentFiscalCode -> {
-            int count = 0;
-            try {
-                count = attributeAuthorityService.countUserOrganizations(referentFiscalCode);
-            } catch (HttpClientErrorException e) {
-                log.error(e.getMessage());
-            }
-            if (count > 10 && configProperties.isEnvProd())
-                throw new InvalidRequestException(ErrorCodeEnum.CANNOT_BIND_MORE_THAN_TEN_ORGANIZATIONS.getValue());
-        });
 
         //workaround fino al rilascio flusso pagopa
         organizationWithReferents.setEntityType(organizationWithReferents.getEntityType()==null ?
