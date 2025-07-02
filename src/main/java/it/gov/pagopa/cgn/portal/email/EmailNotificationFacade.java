@@ -250,7 +250,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.WEEKLY_SUMMARY_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
 
@@ -272,7 +272,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,remainingCodes.toString());
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
@@ -290,7 +290,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
     @Autowired

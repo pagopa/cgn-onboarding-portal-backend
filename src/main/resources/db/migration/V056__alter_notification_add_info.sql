@@ -1,0 +1,1 @@
+ALTER TABLE notification ADD COLUMN info VARCHAR(255);
