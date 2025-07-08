@@ -1,1 +1,1 @@
-ALTER TABLE notification ADD COLUMN info VARCHAR(255);
+ALTER TABLE notification ADD COLUMN info text;

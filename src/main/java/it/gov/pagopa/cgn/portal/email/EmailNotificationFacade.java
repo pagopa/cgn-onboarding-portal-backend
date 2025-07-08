@@ -272,7 +272,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,remainingCodes.toString());
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,"Email inviata al raggiungimento di "+ remainingCodes.toString() + " codici.");
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
