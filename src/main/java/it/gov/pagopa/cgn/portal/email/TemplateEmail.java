@@ -19,6 +19,7 @@ public enum TemplateEmail {
     DISCOUNT_TEST_PASSED("email/discount-test-passed.html"),
     DISCOUNT_TEST_FAILED("email/discount-test-failed.html"),
     EXPIRING_BUCKET_CODES("email/bucket-codes-expiring.html"),
+    WEEKLY_SUMMARY_BUCKET_CODES("email/bucket-codes-weekly-summary.html"),
     EXPIRED_BUCKET_CODES("email/bucket-codes-expired.html"),
     HELP_REQUEST("email/help-request.html");
 

@@ -95,46 +95,55 @@ class EmailNotificationServiceTest
     @Test
     void EmailNotificationService_sendAsyncMessage_TrackNotification_Ok() {
         String notificationTrackingKey = "a-tracking-key-async-1";
-        emailNotificationService.sendAsyncMessage(emailParams, notificationTrackingKey);
+        String info = "info";
+        emailNotificationService.sendAsyncMessage(emailParams, notificationTrackingKey,info);
         Mockito.verify(javaMailSenderMock, Mockito.timeout(5000).times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.timeout(5000).times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
+        Assertions.assertEquals(info, argument.getValue().getInfo());
     }
 
     @Test
     void EmailNotificationService_sendAsyncMessage_TrackNotification_Ko() {
         String notificationTrackingKey = "a-tracking-key-async-2";
         String anErrorMessage = "An error";
+        String info = "info";
         Mockito.doThrow(new RuntimeException(anErrorMessage)).when(javaMailSenderMock).send(expectedMimeMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, notificationTrackingKey);
+        emailNotificationService.sendAsyncMessage(emailParams, notificationTrackingKey,info);
         Mockito.verify(javaMailSenderMock, Mockito.timeout(5000).times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.timeout(5000).times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
         Assertions.assertEquals(anErrorMessage, argument.getValue().getErrorMessage());
+        Assertions.assertNull(argument.getValue().getInfo());
     }
 
     @Test
     void EmailNotificationService_sendSyncMessage_TrackNotification_Ok()
             throws MessagingException {
         String notificationTrackingKey = "a-tracking-key-1";
-        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey);
+        String info = "info";
+        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey, info);
         Mockito.verify(javaMailSenderMock, Mockito.times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
+        Assertions.assertEquals(info, argument.getValue().getInfo());
+
     }
 
     @Test
     void EmailNotificationService_sendSyncMessage_TrackNotification_Ko() {
         String notificationTrackingKey = "a-tracking-key-2";
         String anErrorMessage = "An error";
+        String info = "info";
         Mockito.doThrow(new RuntimeException(anErrorMessage)).when(javaMailSenderMock).send(expectedMimeMessage);
         Assertions.assertThrows(RuntimeException.class, () -> {
-            emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey);
+            emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey, info);
         });
         Mockito.verify(javaMailSenderMock, Mockito.times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
         Assertions.assertEquals(anErrorMessage, argument.getValue().getErrorMessage());
+        Assertions.assertNull(argument.getValue().getInfo());
     }
 
     @Test
@@ -144,7 +153,7 @@ class EmailNotificationServiceTest
         Mockito.doReturn(new NotificationEntity(notificationTrackingKey))
                .when(notificationRepositoryMock)
                .findByKey(notificationTrackingKey);
-        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey);
+        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey, null);
         Mockito.verify(javaMailSenderMock, Mockito.times(0)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.times(0)).save(argument.capture());
     }
@@ -159,7 +168,7 @@ class EmailNotificationServiceTest
         notificationToRetry.setSentAt(errorAt);
         notificationToRetry.setErrorMessage(errorMessage);
         Mockito.doReturn(notificationToRetry).when(notificationRepositoryMock).findByKey(notificationTrackingKey);
-        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey);
+        emailNotificationService.sendSyncMessage(emailParams, notificationTrackingKey,null);
         Mockito.verify(javaMailSenderMock, Mockito.times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.times(1)).save(argument.capture());
         // the new notification should have the same key, no error message and a sent_at greater than the one in error

@@ -25,6 +25,7 @@ public class SchedulerRunner
         jobScheduler.scheduleCheckAvailableDiscountBucketCodesJob();
         jobScheduler.scheduleLowAvailableDiscountBucketCodesNotificationJob();
         jobScheduler.scheduleSuspendDiscountsWithoutAvailableBucketCodesJob();
+        jobScheduler.scheduleSendWeeklyDiscountBucketCodesSummaryJob();
         jobScheduler.scheduleSendDiscountsToEycaJob();
     }
 }

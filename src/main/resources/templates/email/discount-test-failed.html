@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="it" xmlns="http://www.w3.org/1999/xhtml"
->
+      xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>
         Il test è fallito
@@ -222,7 +222,8 @@
                                                     >
                                                         <mj-raw>
                                                             <img align="left" alt="Logo CGN" class="logocgn"
-                                                                 src="cid:cgn-logo.png" style="display:block;width:72px;"
+                                                                 src="cid:cgn-logo.png"
+                                                                 style="display:block;width:72px;"
                                                                  width="72"/>
                                                         </mj-raw>
                                                     </div>
@@ -304,20 +305,8 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Ciao,</p></div>
-
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td
-                                                        align="left" class="intro"
-                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
-                                                >
-
-                                                    <div
-                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>il team di CGN ha effettuato i test tecnici sull’opportunità
+                                                    ><p>Ciao, <br/> il team di CGN ha effettuato i test tecnici
+                                                        sull’opportunità
                                                         <span th:text="${discount_name}"></span>, secondo la modalità di
                                                         riconoscimento che hai scelto.</p></div>
 
@@ -332,8 +321,9 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Purtroppo l’esito è <strong>negativo</strong> con la seguente motivazione: <span
-                                                            th:text="${failure_reason}"></span>.</p></div>
+                                                    ><p>Purtroppo l’esito è <strong>negativo</strong> con la seguente
+                                                        motivazione: <span
+                                                                th:text="${failure_reason}"></span>.</p></div>
 
                                                 </td>
                                             </tr>
@@ -346,8 +336,10 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
-                                                    ><p>Se hai bisogno di supporto, scrivi a <a href="mailto:cartagiovaninazionale@governo.it">cartagiovaninazionale@governo.it</a><br/>
-                                                        Quando il problema è stato risolto, puoi mandarci una nuova richiesta di test.<br/>
+                                                    ><p>Se hai bisogno di supporto, scrivi a <a
+                                                            href="mailto:cartagiovaninazionale@governo.it">cartagiovaninazionale@governo.it</a><br/>
+                                                        Quando il problema è stato risolto, puoi mandarci una nuova
+                                                        richiesta di test.<br/>
                                                         Grazie mille,</p></div>
 
                                                 </td>
@@ -368,7 +360,8 @@
 
                                             <tr>
                                                 <td
-                                                        align="left" style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
+                                                        align="left"
+                                                        style="font-size:0px;padding:0;padding-left:100px;word-break:break-word;"
                                                         vertical-align="middle"
                                                 >
 
