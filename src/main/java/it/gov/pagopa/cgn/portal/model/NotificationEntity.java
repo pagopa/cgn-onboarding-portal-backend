@@ -33,6 +33,10 @@ public class NotificationEntity
     @Column(name = "error_message", length = 255)
     private String errorMessage;
 
+    @Size(max = 255)
+    @Column(name = "info", length = 255)
+    private String info;
+
     public NotificationEntity() {
     }
 

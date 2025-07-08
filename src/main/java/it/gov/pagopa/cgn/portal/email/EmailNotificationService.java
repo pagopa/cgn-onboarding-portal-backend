@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.email;
 import it.gov.pagopa.cgn.portal.model.NotificationEntity;
 import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.InvalidFileNameException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -28,13 +29,13 @@ public class EmailNotificationService {
     }
 
     public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams) {
-        return sendAsyncMessage(emailParams, null);
+        return sendAsyncMessage(emailParams, null,null);
     }
 
-    public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams, String trackingKey) {
+    public CompletableFuture<Void> sendAsyncMessage(EmailParams emailParams, String trackingKey, String info) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                sendSyncMessage(emailParams, trackingKey);
+                sendSyncMessage(emailParams, trackingKey, info);
             } catch (MessagingException e) {
                 log.error(emailParams.getFailureMessage(), e);
             }
@@ -44,10 +45,10 @@ public class EmailNotificationService {
 
     public void sendSyncMessage(EmailParams emailParams)
             throws MessagingException {
-        sendSyncMessage(emailParams, null);
+        sendSyncMessage(emailParams, null, null);
     }
 
-    public void sendSyncMessage(EmailParams emailParams, String trackingKey)
+    public void sendSyncMessage(EmailParams emailParams, String trackingKey, String info)
             throws MessagingException {
 
         if (notificationAlreadySent(trackingKey)) return;
@@ -86,19 +87,15 @@ public class EmailNotificationService {
 
             log.info("Sending email '{}'", log.isDebugEnabled() ? emailParams.toString():emailParams.toLightString());
             javaMailSender.send(mimeMessage);
-            trackNotification(trackingKey);
+            trackNotification(trackingKey,null,info);
         } catch (Exception e) {
-            trackNotification(trackingKey, e.getMessage());
+            trackNotification(trackingKey, StringUtils.abbreviate(e.getMessage(), 255),null);
             throw e;
         }
     }
 
     private NotificationEntity findNotification(String trackingKey) {
         return notificationRepository.findByKey(trackingKey);
-    }
-
-    private void trackNotification(String trackingKey) {
-        trackNotification(trackingKey, null);
     }
 
     /**
@@ -108,7 +105,7 @@ public class EmailNotificationService {
      * @param trackingKey  a key that uniquely identify this notification
      * @param errorMessage a message that indicates any error occurred
      */
-    private void trackNotification(String trackingKey, String errorMessage) {
+    private void trackNotification(String trackingKey, String errorMessage, String info) {
         if (trackingKey!=null) {
             // if a key has been given we check if a notification exists
             // this is useful to update a notification that had an error
@@ -119,6 +116,7 @@ public class EmailNotificationService {
             }
             notification.setSentAt(OffsetDateTime.now());
             notification.setErrorMessage(errorMessage);
+            notification.setInfo(info);
             notificationRepository.save(notification);
         }
     }

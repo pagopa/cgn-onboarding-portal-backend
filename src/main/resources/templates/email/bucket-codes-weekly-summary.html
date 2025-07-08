@@ -291,10 +291,7 @@
 
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:13px;font-weight:bold;line-height:1;text-align:left;color:#17324D;"
-                                                    ><h1 style="font-size:32px; line-height:40px;">
-														I codici sconto per la tua opportunità «<span th:text="${discount_name}"></span>» stanno diminuendo
-                                                    </h1>
-													</div>
+                                                    ><h1 style="font-size:32px; line-height:40px;">Riepilogo dei codici ancora disponibili per le tue opportunità</h1></div>
 
                                                 </td>
                                             </tr>
@@ -305,15 +302,12 @@
                                                 >
 
                                                     <div
-                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:0px;text-align:left;color:#17324D;"
-                                                    >
-                                                        <p style="color: #445a6f">
-																Il <b><span th:text="${percent}"></span>% dei codici </b>delle liste è ancora disponibile.
-                                                        </p>
-                                                    </div>
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
+                                                    ><p>Ecco il resoconto aggiornato dei codici sconto ancora
+                                                        disponibili per le opportunità che hai attive.</p></div>
 
                                                 </td>
-                                            </tr>											
+                                            </tr>
                                             <tr>
                                                 <td
                                                         align="left" class="intro"
@@ -323,16 +317,19 @@
                                                     <div
                                                             style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
                                                     >
-                                                        <p style="color: #445a6f">
-                                                            <b>
-                                                                Codici residui:&nbsp;<span
-                                                                    th:text="${missing_codes}"></span>
-                                                            </b>
-                                                        </p>
+                                                        <th:block th:each="discount : ${discounts}">
+                                                            <p style="color: #445a6f">
+                                                                <b>
+                                                                    <span th:text="${discount.name}"></span><br>
+                                                                    Codici residui:&nbsp;<span
+                                                                        th:text="${discount.availableCodes}"></span>
+                                                                </b>
+                                                            </p>
+                                                        </th:block>
                                                     </div>
+
                                                 </td>
                                             </tr>
-
                                             <tr>
                                                 <td
                                                         align="left" class="intro"
@@ -346,6 +343,19 @@
                                                                 href="https://developer.pagopa.it/app-io/guides/carta-giovani-nazionale/le-opportunita/le-modalita-di-riconoscimento-e-validazione-delle-opportunita/modalita-lista-di-codici-statici"
                                                                 style="color: #0066cc;">Documentazione
                                                             tecnica</a></b></p></div>
+
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td
+                                                        align="left" class="intro"
+                                                        style="font-size:0px;padding:10px 25px;padding-left:100px;word-break:break-word;"
+                                                >
+
+                                                    <div
+                                                            style="font-family:Titillium Web, Arial;font-size:16px;font-weight:400;line-height:24px;text-align:left;color:#17324D;"
+                                                    ><p>Puoi accedere al portale per caricarne di nuovi.</p></div>
 
                                                 </td>
                                             </tr>
