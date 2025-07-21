@@ -1,17 +1,17 @@
 package it.gov.pagopa.cgn.portal.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.security.GeneralSecurityException;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -37,14 +37,21 @@ public class JwtUtils {
      */
     public String buildJwtToken(Map<String, String> claims) {
         try {
+            //for compatibility.
+            //with new libraries of jwt claims can be optional
+            //but for us claims must be present
+            if (claims == null) {
+                throw new IllegalArgumentException("Claims must not be null");
+            }
+
             Date issuedAt = new Date();
             Date expiresAt = new Date(issuedAt.getTime() + 60 * 60 * 12 * 1000); // 12 hours
             return Jwts.builder()
-                       .setClaims(claims)
-                       .setIssuer(configProperties.getCgnPortalBaseUrl())
-                       .setIssuedAt(issuedAt)
-                       .setExpiration(expiresAt)
-                       .signWith(loadPrivateKey(configProperties.getJwtPrivateKey()), SignatureAlgorithm.RS256)
+                       .claims(claims)
+                       .issuer(configProperties.getCgnPortalBaseUrl())
+                       .issuedAt(issuedAt)
+                       .expiration(expiresAt)
+                       .signWith(loadPrivateKey(configProperties.getJwtPrivateKey()), Jwts.SIG.RS256)
                        .compact();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -58,20 +65,24 @@ public class JwtUtils {
      * @param token a JWT token in string format
      * @return Claims
      */
+
     public Claims getClaimsFromSignedToken(String token) {
         try {
+            JwtParser parser = Jwts.parser()
+                                   .verifyWith(loadPublicKey(configProperties.getJwtPublicKey()))
+                                   .requireIssuer(configProperties.getCgnPortalBaseUrl())
+                                   .build();
 
-            return Jwts.parserBuilder()
-                       .setSigningKey(loadPublicKey(configProperties.getJwtPublicKey()))
-                       .requireIssuer(configProperties.getCgnPortalBaseUrl())
-                       .build()
-                       .parseClaimsJws(token)
-                       .getBody();
+            return parser
+                    .parseSignedClaims(token)
+                    .getPayload();
+
         } catch (GeneralSecurityException e) {
-            log.error(e.getMessage(), e);
+            log.error("Errore nella verifica del token JWT", e);
             throw new SecurityException(e);
         }
     }
+
 
     public JwtUser getUserDetails(String token) {
         if (token==null) return null;
@@ -90,7 +101,7 @@ public class JwtUtils {
         }
     }
 
-    private Key loadPrivateKey(String key64)
+    private PrivateKey loadPrivateKey(String key64)
             throws GeneralSecurityException {
         byte[] clear = Base64.getDecoder().decode(key64.getBytes());
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
@@ -100,9 +111,8 @@ public class JwtUtils {
         return privateKey;
     }
 
-    private static Key loadPublicKey(String stored)
-            throws GeneralSecurityException {
-        byte[] data = Base64.getDecoder().decode((stored.getBytes()));
+    private static PublicKey loadPublicKey(String stored) throws GeneralSecurityException {
+        byte[] data = Base64.getDecoder().decode(stored.getBytes());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
         KeyFactory fact = KeyFactory.getInstance("RSA");
         return fact.generatePublic(spec);
