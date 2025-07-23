@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -83,7 +85,8 @@ public class WebSecurityConfig {
         return httpSecurity.build();
     }
 
-    private String[] getAntMatchers() {
+    private RequestMatcher[]  getAntMatchers() {
+
         return ("dev".equals(activeProfile) ?
                 List.of("/actuator/**",
                         "/session",
@@ -92,6 +95,7 @@ public class WebSecurityConfig {
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html"):
-                List.of("/actuator/**", "/session", "/help", "/")).toArray(String[]::new);
+                List.of("/actuator/**", "/session", "/help", "/")).stream().map(AntPathRequestMatcher::new)
+                                                                  .toArray(RequestMatcher[]::new);
     }
 }
