@@ -17,6 +17,6 @@ public class CustomAccessDeniedHandler
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException)
             throws IOException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
     }
 }

@@ -33,7 +33,7 @@ public class WebSecurityConfig {
     @Value("${spring.profiles.active:Unknown}")
     private String activeProfile;
 
-    private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
@@ -42,11 +42,11 @@ public class WebSecurityConfig {
     private final JwtAuthenticationTokenFilter jwtAuthTokenFilter;
 
     @Autowired
-    public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+    public WebSecurityConfig(JwtAuthenticationEntryPoint authenticationEntryPoint,
                              CustomAccessDeniedHandler accessDeniedHandler,
                              ConfigProperties configProperties,
                              JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
-        this.unauthorizedHandler = unauthorizedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.configProperties = configProperties;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
@@ -72,7 +72,7 @@ public class WebSecurityConfig {
             throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                     .exceptionHandling(handling -> {
-                        handling.authenticationEntryPoint(unauthorizedHandler);
+                        handling.authenticationEntryPoint(authenticationEntryPoint);
                         handling.accessDeniedHandler(accessDeniedHandler);
                     })
                     .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
