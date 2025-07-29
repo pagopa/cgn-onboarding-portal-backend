@@ -35,15 +35,19 @@ public class WebSecurityConfig {
 
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
 
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
     private final ConfigProperties configProperties;
 
     private final JwtAuthenticationTokenFilter jwtAuthTokenFilter;
 
     @Autowired
     public WebSecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                             CustomAccessDeniedHandler accessDeniedHandler,
                              ConfigProperties configProperties,
                              JwtAuthenticationTokenFilter jwtAuthTokenFilter) {
         this.unauthorizedHandler = unauthorizedHandler;
+        this.accessDeniedHandler = accessDeniedHandler;
         this.configProperties = configProperties;
         this.jwtAuthTokenFilter = jwtAuthTokenFilter;
     }
@@ -65,18 +69,18 @@ public class WebSecurityConfig {
     @Bean
     @SuppressWarnings("java:S4502")
     SecurityFilterChain filterChain(HttpSecurity httpSecurity)
-                throws Exception {
+            throws Exception {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                    .exceptionHandling(handling -> handling
-                                .authenticationEntryPoint(unauthorizedHandler))
-                    .sessionManagement(management -> management
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .exceptionHandling(handling -> {
+                        handling.authenticationEntryPoint(unauthorizedHandler);
+                        handling.accessDeniedHandler(accessDeniedHandler);
+                    })
+                    .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .cors(withDefaults())
-                    .authorizeHttpRequests(requests -> requests
-                                .requestMatchers(getAntMatchers())
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated());
+                    .authorizeHttpRequests(requests -> requests.requestMatchers(getAntMatchers())
+                                                               .permitAll()
+                                                               .anyRequest()
+                                                               .authenticated());
 
         // UsernamePasswordAuthenticationFilter isn't properly need, we should rewrite the filter chain
         httpSecurity.addFilterBefore(jwtAuthTokenFilter, UsernamePasswordAuthenticationFilter.class);
@@ -85,7 +89,7 @@ public class WebSecurityConfig {
         return httpSecurity.build();
     }
 
-    private RequestMatcher[]  getAntMatchers() {
+    private RequestMatcher[] getAntMatchers() {
 
         return ("dev".equals(activeProfile) ?
                 List.of("/actuator/**",
@@ -95,7 +99,8 @@ public class WebSecurityConfig {
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/swagger-ui.html"):
-                List.of("/actuator/**", "/session", "/help", "/")).stream().map(AntPathRequestMatcher::new)
+                List.of("/actuator/**", "/session", "/help", "/")).stream()
+                                                                  .map(AntPathRequestMatcher::new)
                                                                   .toArray(RequestMatcher[]::new);
     }
 }
