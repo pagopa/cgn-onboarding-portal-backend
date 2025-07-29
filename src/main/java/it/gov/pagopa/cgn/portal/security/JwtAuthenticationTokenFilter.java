@@ -42,6 +42,7 @@ public class JwtAuthenticationTokenFilter
                 userDetails = jwtUtils.getUserDetails(authToken.get());
             } catch (Exception e) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
             }
         }
 
