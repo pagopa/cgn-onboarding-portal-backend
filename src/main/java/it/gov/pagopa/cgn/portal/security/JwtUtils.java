@@ -40,7 +40,7 @@ public class JwtUtils {
             //for compatibility.
             //with new libraries of jwt claims can be optional
             //but for us claims must be present
-            if (claims == null) {
+            if (claims==null) {
                 throw new IllegalArgumentException("Claims must not be null");
             }
 
@@ -73,12 +73,13 @@ public class JwtUtils {
                                    .requireIssuer(configProperties.getCgnPortalBaseUrl())
                                    .build();
 
-            return parser
-                    .parseSignedClaims(token)
-                    .getPayload();
+            return parser.parseSignedClaims(token).getPayload();
 
         } catch (GeneralSecurityException e) {
-            log.error("Errore nella verifica del token JWT", e);
+            log.error("General security exception", e);
+            throw new SecurityException(e);
+        } catch (Exception e) {
+            log.error("Generic exception", e);
             throw new SecurityException(e);
         }
     }
@@ -111,7 +112,8 @@ public class JwtUtils {
         return privateKey;
     }
 
-    private static PublicKey loadPublicKey(String stored) throws GeneralSecurityException {
+    private static PublicKey loadPublicKey(String stored)
+            throws GeneralSecurityException {
         byte[] data = Base64.getDecoder().decode(stored.getBytes());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
         KeyFactory fact = KeyFactory.getInstance("RSA");
