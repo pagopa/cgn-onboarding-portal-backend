@@ -23,9 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class JwtUtilsTest {
 
     @Autowired
-    private ConfigProperties configProperties;
-
-    @Autowired
     private JwtUtils jwtUtils;
 
     @Test
