@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -39,8 +38,7 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
     }
 
     @Test
-    void Execute_ExecuteJob_CheckMaterializedViews()
-            throws IOException {
+    void Execute_ExecuteJob_CheckMaterializedViews() {
         init();
 
         // refresh materialized views
