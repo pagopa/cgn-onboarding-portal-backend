@@ -45,7 +45,7 @@ class PublicSessionApiControllerTest
         this.mockMvc.perform(post(TestUtils.SESSION_PATH).contentType(MediaType.APPLICATION_JSON)
                                                          .content(TestUtils.getJson(request)))
                     .andDo(log())
-                    .andExpect(status().isInternalServerError());
+                    .andExpect(status().isForbidden());
     }
 
     @Test

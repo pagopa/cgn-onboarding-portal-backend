@@ -1,6 +1,5 @@
 package it.gov.pagopa.cgn.portal.controller;
 
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.facade.SessionFacade;
 import it.gov.pagopa.cgnonboardingportal.publicapi.api.SessionApi;
 import it.gov.pagopa.cgnonboardingportal.publicapi.model.ActiveDirectoryData;
@@ -41,7 +40,7 @@ public class PublicSessionApiController
         } catch (Exception e) {
             log.error("get session token failure: {}",
                       Arrays.stream(e.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
-            throw new InternalErrorException(e.getMessage());
+            throw new SecurityException(e.getMessage());
         }
     }
 }
