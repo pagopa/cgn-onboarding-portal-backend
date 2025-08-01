@@ -38,7 +38,12 @@ public class JwtAuthenticationTokenFilter
         JwtUser userDetails = null;
 
         if (authToken.isPresent()) {
-            userDetails = jwtUtils.getUserDetails(authToken.get());
+            try {
+                userDetails = jwtUtils.getUserDetails(authToken.get());
+            } catch (Exception e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return;
+            }
         }
 
         if (userDetails!=null && SecurityContextHolder.getContext().getAuthentication()==null) {
