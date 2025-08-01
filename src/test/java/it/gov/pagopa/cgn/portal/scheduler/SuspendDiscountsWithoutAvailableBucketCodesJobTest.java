@@ -71,8 +71,7 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
     }
 
 
-    private void init()
-            throws IOException {
+    private void init() {
         setAdminAuth();
 
         AgreementTestObject testObject = createApprovedAgreement();

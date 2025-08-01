@@ -38,7 +38,7 @@ public class JobScheduler {
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("low-available-codes-notification", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    paramFacade.getLowDiscountBucketCodesNotificationJobCronExpression(),
+                    paramFacade.getSendLowDiscountBucketCodesNotificationJobCronExpression(),
                     SendLowDiscountBucketCodesNotificationJob.class);
     }
 

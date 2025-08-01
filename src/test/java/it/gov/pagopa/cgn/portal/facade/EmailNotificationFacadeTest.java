@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
-public class EmailNotificationFacadeTest {
+class EmailNotificationFacadeTest {
     @Mock
     private TemplateEngine htmlTemplateEngine;
 
@@ -40,7 +40,7 @@ public class EmailNotificationFacadeTest {
     private EmailNotificationFacade emailNotificationFacade;
 
     @BeforeEach
-    public void init() {
+    void init() {
         MockitoAnnotations.openMocks(this);
     }
 

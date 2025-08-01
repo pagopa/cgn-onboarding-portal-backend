@@ -88,7 +88,7 @@ public class EycaApiTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Only for local launch")
     public void testCallListApiEyca_ok() {
         eycaExportService.authenticateOnEyca();
         ListApiResponseEyca lare = eycaExportService.listDiscounts(1,1000, "json");

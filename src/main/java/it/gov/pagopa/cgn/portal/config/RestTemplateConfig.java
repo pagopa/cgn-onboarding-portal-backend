@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.config;
 
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -45,7 +46,7 @@ public class RestTemplateConfig {
                                                             .loadTrustMaterial(null, acceptingTrustStrategy)
                                                             .build();
             } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                throw new RuntimeException(e);
+                throw new InternalErrorException(e.getMessage());
             }
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 

@@ -45,7 +45,7 @@ public class ParamFacade {
                      : paramService.getParam(ParamGroupEnum.CHECK_AVAILABLE_DISC_JOB, "check.available.discounts.bucket.codes.job.cron");
     }
 
-    public String getLowDiscountBucketCodesNotificationJobCronExpression() {
+    public String getSendLowDiscountBucketCodesNotificationJobCronExpression() {
         return isDev ? configProperties.getSendLowDiscountBucketCodesNotificationJobCronExpression()
                      : paramService.getParam(ParamGroupEnum.SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB, "send.low.bucket.codes.notification.job.cron");
     }
