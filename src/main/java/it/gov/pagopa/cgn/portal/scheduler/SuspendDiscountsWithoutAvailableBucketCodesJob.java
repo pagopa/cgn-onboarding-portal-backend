@@ -47,7 +47,7 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
         }
 
         Instant end = Instant.now();
-        log.info(JOB_LOG_NAME + "ended in " + Duration.between(start, end).getSeconds() + " seconds");
+        log.info(JOB_LOG_NAME + "ended in {} seconds", Duration.between(start, end).getSeconds());
     }
 
 }

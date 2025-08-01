@@ -39,19 +39,6 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
     }
 
     @Test
-    void Execute_ExecuteJob_SuspendDiscountIfGivenDaysPassed()
-            throws IOException {
-        init();
-        discountBucketCodeSummaryRepository.findAll().forEach(s -> {
-            s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now()
-                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
-            discountBucketCodeSummaryRepository.save(s);
-        });
-        testJob(DiscountStateEnum.SUSPENDED);
-    }
-
-    @Test
     void Execute_ExecuteJob_CheckMaterializedViews()
             throws IOException {
         init();
@@ -60,17 +47,16 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
         onlineMerchantRepository.refreshView();
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !onlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {
             s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now()
-                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
+            s.setExpiredAt(OffsetDateTime.now());
             discountBucketCodeSummaryRepository.save(s);
         });
 

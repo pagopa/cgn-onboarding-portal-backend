@@ -9,7 +9,6 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -19,9 +18,6 @@ import java.util.Optional;
 @ActiveProfiles({"dev"})
 class AgreementServiceTest
         extends IntegrationAbstractTest {
-
-    @Autowired
-    private DocumentService documentService;
 
     @Test
     void Create_CreateAgreementWithInitializedData_Ok() {

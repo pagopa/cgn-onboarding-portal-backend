@@ -6,8 +6,6 @@ import it.gov.pagopa.cgn.portal.service.EycaExportService;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ListApiResponseEyca;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ListDataExportEyca;
-import org.apache.http.util.Asserts;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -51,7 +49,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
                     @MockBean(PublishedProductCategoryRepository.class),
                     @MockBean(SecondaryReferentRepository.class),
                     @MockBean(JobScheduler.class),
-                    @MockBean(TestReferentRepository.class)})
+                    @MockBean(TestReferentRepository.class),
+                    @MockBean(ParamRepository.class)})
 @RunWith(SpringRunner.class)
 public class EycaApiTest {
 

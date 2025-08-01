@@ -1,39 +1,25 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.email.EmailParams;
-import it.gov.pagopa.cgn.portal.email.TemplateEmail;
-import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
-import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.ReferentEntity;
-import it.gov.pagopa.cgn.portal.service.AgreementService;
-import it.gov.pagopa.cgn.portal.service.BucketService;
-import it.gov.pagopa.cgn.portal.service.DocumentService;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
@@ -46,6 +32,9 @@ public class EmailNotificationFacadeTest {
 
     @Mock
     private ConfigProperties configProperties;
+
+    @Mock
+    private ParamFacade paramFacade;
 
     @InjectMocks
     private EmailNotificationFacade emailNotificationFacade;
@@ -60,8 +49,8 @@ public class EmailNotificationFacadeTest {
     public void createEmailParams_shouldUseBccWhenPresent() {
         String body = "fake body";
 
-        when(configProperties.getEycaAdminMailTo()).thenReturn("eycaMailTo@contoso.com");
-        when(configProperties.getEycaJobMailTo()).thenReturn("eycaJobMailTo@contoso.com");
+        when(paramFacade.getEycaAdminMailTo()).thenReturn(new String[]{"eycaMailTo@contoso.com"});
+        when(paramFacade.getEycaJobMailTo()).thenReturn(new String[]{"eycaJobMailTo@contoso.com"});
 
         emailNotificationFacade.notifyEycaAdmin(body);
 
