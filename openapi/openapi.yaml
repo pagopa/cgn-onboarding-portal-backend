@@ -948,7 +948,7 @@ components:
         - pecAddress
         - referent
         - salesChannel
-        - taxCodeOr\Vat
+        - taxCodeOrVat
         - telephoneNumber
       type: object
       properties:
