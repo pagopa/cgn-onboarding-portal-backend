@@ -213,6 +213,28 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
+    private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
+                                                             List<String> secondaryReferents,
+                                                             String subject,
+                                                             String body,
+                                                             String errorMessage) {
+
+        List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
+
+        boolean suspendReferentsMailSending = Boolean.valueOf(paramFacade.getSuspendReferentsMailSending());
+
+        List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
+        Optional<List<String>> ccList = suspendReferentsMailSending ? Optional.empty() : Optional.of(secondaryReferents);
+
+        var emailParams = createEmailParams(toList,
+                                            ccList,
+                                            Optional.of(bccList),
+                                            Optional.empty(), subject, body,
+                                            errorMessage,
+                                            Optional.empty());
+        return emailParams;
+    }
+
     public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();
@@ -224,7 +246,8 @@ public class EmailNotificationFacade {
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, null);
+            var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body, null);
+
             emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
             // in this case exception will be propagated
@@ -264,7 +287,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForWeeklySummaryNotification(profileEntity);
 
         var body = getTemplateHtml(TemplateEmail.WEEKLY_SUMMARY_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
@@ -286,7 +309,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,"Email inviata al raggiungimento di "+ remainingCodes.toString() + " codici.");
     }
 
@@ -304,7 +327,7 @@ public class EmailNotificationFacade {
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 

@@ -30,7 +30,7 @@ public class JobScheduler {
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("check-available-codes", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    paramFacade.getAvailableDiscountBucketCodesJobCronExpression(),
+                    paramFacade.getCheckAvailableDiscountBucketCodesJobCronExpression(),
                     CheckAvailableDiscountBucketCodesJob.class);
     }
 

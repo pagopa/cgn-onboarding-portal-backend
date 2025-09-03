@@ -28,4 +28,5 @@ VALUES
 ('SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB', 'send.low.bucket.codes.notification.job.cron', '0 0/5 * * * ? *'),
 ('SUSPEND_DISCOUNTS_JOB', 'suspend.discounts.without.available.bucket.codes.job.cron', '0 0/5 * * * ? *'),
 ('SEND_WEEKLY_SUMMARY_JOB', 'send.weekly.discount.bucket.codes.summary.job.cron', '0 0 7 ? * WED'),
-('SEND_DISCOUNTS_EYCA_JOB', 'send.discounts.to.eyca.job.cron', '0 0 2 * * ? *')
+('SEND_DISCOUNTS_EYCA_JOB', 'send.discounts.to.eyca.job.cron', '0 0 2 * * ? *'),
+('CGN_JOB_FLAGS', 'suspend.referents.mail.sending', 'false')

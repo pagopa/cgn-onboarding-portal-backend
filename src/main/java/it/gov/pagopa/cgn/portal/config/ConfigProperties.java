@@ -160,6 +160,9 @@ public class ConfigProperties {
     @Value("${environment}")
     private String environment;
 
+    @Value("${suspend.referents.mail.sending}")
+    private String suspendReferentsMailSending;
+
     public boolean isActiveProfileDev() {
         boolean isDev =  "dev".equalsIgnoreCase(getActiveProfile());
         log.info("isDev={}", isDev);

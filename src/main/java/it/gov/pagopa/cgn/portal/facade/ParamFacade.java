@@ -4,10 +4,12 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.ParamGroupEnum;
 import it.gov.pagopa.cgn.portal.service.ParamService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ParamFacade {
 
     private final ConfigProperties configProperties;
@@ -20,6 +22,7 @@ public class ParamFacade {
         this.configProperties = configProperties;
         this.paramService = paramService;
         this.isDev = configProperties.isActiveProfileDev();
+        log.info("ParamFacade.isDev = {}", isDev);
     }
 
     public String[] getEycaJobMailTo(){
@@ -40,7 +43,7 @@ public class ParamFacade {
                      : Integer.parseInt(paramService.getParam(ParamGroupEnum.CHECK_EXPIRING_DISC_JOB, "check.expiring.discounts.job.days"));
     }
 
-    public String getAvailableDiscountBucketCodesJobCronExpression() {
+    public String getCheckAvailableDiscountBucketCodesJobCronExpression() {
         return isDev ? configProperties.getCheckAvailableDiscountBucketCodesJobCronExpression()
                      : paramService.getParam(ParamGroupEnum.CHECK_AVAILABLE_DISC_JOB, "check.available.discounts.bucket.codes.job.cron");
     }
@@ -63,5 +66,11 @@ public class ParamFacade {
     public String getSendDiscountsToEycaJobCronExpression() {
         return isDev ? configProperties.getSendDiscountsToEycaJobCronExpression()
                      : paramService.getParam(ParamGroupEnum.SEND_DISCOUNTS_EYCA_JOB, "send.discounts.to.eyca.job.cron");
+    }
+
+    public String getSuspendReferentsMailSending() {
+
+        return isDev ? configProperties.getSuspendReferentsMailSending()
+                : paramService.getParam(ParamGroupEnum.CGN_JOB_FLAGS, "suspend.referents.mail.sending");
     }
 }
