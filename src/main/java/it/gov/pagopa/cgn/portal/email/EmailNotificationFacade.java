@@ -221,18 +221,17 @@ public class EmailNotificationFacade {
 
         List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
 
-        boolean suspendReferentsMailSending = Boolean.valueOf(paramFacade.getSuspendReferentsMailSending());
+        boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
 
         List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
         Optional<List<String>> ccList = suspendReferentsMailSending ? Optional.empty() : Optional.of(secondaryReferents);
 
-        var emailParams = createEmailParams(toList,
-                                            ccList,
-                                            Optional.of(bccList),
-                                            Optional.empty(), subject, body,
-                                            errorMessage,
-                                            Optional.empty());
-        return emailParams;
+        return  createEmailParams(toList,
+                                ccList,
+                                Optional.of(bccList),
+                                Optional.empty(), subject, body,
+                                errorMessage,
+                                Optional.empty());
     }
 
     public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
