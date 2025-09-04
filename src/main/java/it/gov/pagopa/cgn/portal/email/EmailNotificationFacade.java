@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeExpiringThresholdEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
+import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
@@ -33,6 +34,8 @@ public class EmailNotificationFacade {
 
     private final ConfigProperties configProperties;
 
+    private final ParamFacade paramFacade;
+
     public static final String FAILURE_REASON = "failure_reason";
     public static final String OPERATOR_NAME = "operator_name";
     public static final String DISCOUNT_TYPE = "discount_type";
@@ -40,6 +43,18 @@ public class EmailNotificationFacade {
     public static final String MISSING_CODES = "missing_codes";
     public static final String DISCOUNTS = "discounts";
     public static final String PERCENT = "percent";
+
+    @Autowired
+    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
+                                   EmailNotificationService emailNotificationService,
+                                   ConfigProperties configProperties,
+                                   ParamFacade paramFacade) {
+        this.htmlTemplateEngine = htmlTemplateEngine;
+        this.emailNotificationService = emailNotificationService;
+        this.configProperties = configProperties;
+        this.paramFacade = paramFacade;
+    }
+
 
     public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
@@ -198,6 +213,27 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams);
     }
 
+    private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
+                                                             List<String> secondaryReferents,
+                                                             String subject,
+                                                             String body,
+                                                             String errorMessage) {
+
+        List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
+
+        boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
+
+        List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
+        Optional<List<String>> ccList = suspendReferentsMailSending ? Optional.empty() : Optional.of(secondaryReferents);
+
+        return  createEmailParams(toList,
+                                ccList,
+                                Optional.of(bccList),
+                                Optional.empty(), subject, body,
+                                errorMessage,
+                                Optional.empty());
+    }
+
     public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] La tua agevolazione sta per scadere";
         var context = new Context();
@@ -209,7 +245,8 @@ public class EmailNotificationFacade {
 
         try {
             var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
-            var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, null);
+            var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body, null);
+
             emailNotificationService.sendSyncMessage(emailParams);
         } catch (Exception e) {
             // in this case exception will be propagated
@@ -249,7 +286,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForWeeklySummaryNotification(profileEntity);
 
         var body = getTemplateHtml(TemplateEmail.WEEKLY_SUMMARY_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
@@ -271,7 +308,7 @@ public class EmailNotificationFacade {
         final String trackingKey = createTrackingKeyForExpirationNotification(discount, threshold);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,"Email inviata al raggiungimento di "+ remainingCodes.toString() + " codici.");
     }
 
@@ -289,18 +326,10 @@ public class EmailNotificationFacade {
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_0);
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
+        var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    @Autowired
-    public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
-                                   EmailNotificationService emailNotificationService,
-                                   ConfigProperties configProperties) {
-        this.htmlTemplateEngine = htmlTemplateEngine;
-        this.emailNotificationService = emailNotificationService;
-        this.configProperties = configProperties;
-    }
 
     private EmailParams createEmailParams(List<String> mailTo,
                                           List<String> mailBcc,
@@ -419,7 +448,7 @@ public class EmailNotificationFacade {
         String subject = "Eyca job launch summary attachments of: " +
                          LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String failureMessage = "It is not possible to send the email with the job summary attacchments.";
-        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaJobMailTo().split(";")),
+        EmailParams emailParams = createEmailParams(Arrays.asList(paramFacade.getEycaJobMailTo()),
                                                     subject,
                                                     body,
                                                     failureMessage,
@@ -431,8 +460,8 @@ public class EmailNotificationFacade {
         String subject = "Discounts for Generic Code/URLs " +
                          LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
         String failureMessage = "It is not possible to send the email to Eyca admin";
-        EmailParams emailParams = createEmailParams(Arrays.asList(configProperties.getEycaAdminMailTo().split(";")),
-                                                    Arrays.asList(configProperties.getEycaJobMailTo().split(";")),
+        EmailParams emailParams = createEmailParams(Arrays.asList(paramFacade.getEycaAdminMailTo()),
+                                                    Arrays.asList(paramFacade.getEycaJobMailTo()),
                                                     subject,
                                                     body,
                                                     failureMessage);
@@ -453,7 +482,7 @@ public class EmailNotificationFacade {
                                                   .stream()
                                                   .map(SecondaryReferentEntity::getEmailAddress)
                                                   .collect(Collectors.toList());
-        secondaryReferents.addAll(Collections.singletonList(configProperties.getCgnDepartmentEmail()));
+        secondaryReferents.add(configProperties.getCgnDepartmentEmail());
 
         return secondaryReferents;
     }
