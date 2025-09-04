@@ -2,7 +2,7 @@ CREATE SEQUENCE "param_k_seq"
 INCREMENT BY 1 MINVALUE 1 NO MAXVALUE
 START WITH 1 NO CYCLE;
 
-CREATE TYPE param_group_enum AS ENUM ('SEND_WEEKLY_SUMMARY_JOB','SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB','CHECK_EXPIRING_DISC_JOB','SEND_DISCOUNTS_EYCA_JOB', 'WEEKLY_SUMMARY_JOB', 'CHECK_AVAILABLE_DISC_JOB', 'SUSPEND_DISCOUNTS_JOB','CGN_JOB_FLAGS');
+CREATE TYPE param_group_enum AS ENUM ('SEND_WEEKLY_SUMMARY_JOB','SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB','CHECK_EXPIRING_DISC_JOB','SEND_DISCOUNTS_EYCA_JOB', 'WEEKLY_SUMMARY_JOB', 'CHECK_AVAILABLE_DISC_JOB', 'SUSPEND_DISCOUNTS_JOB');
 CREATE CAST (character varying AS param_group_enum) WITH INOUT AS ASSIGNMENT;
 
 CREATE TABLE param
@@ -28,5 +28,4 @@ VALUES
 ('SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB', 'send.low.bucket.codes.notification.job.cron', '0 0/5 * * * ? *'),
 ('SUSPEND_DISCOUNTS_JOB', 'suspend.discounts.without.available.bucket.codes.job.cron', '0 0/5 * * * ? *'),
 ('SEND_WEEKLY_SUMMARY_JOB', 'send.weekly.discount.bucket.codes.summary.job.cron', '0 0 7 ? * WED'),
-('SEND_DISCOUNTS_EYCA_JOB', 'send.discounts.to.eyca.job.cron', '0 0 2 * * ? *'),
-('CGN_JOB_FLAGS', 'suspend.referents.mail.sending', 'false')
+('SEND_DISCOUNTS_EYCA_JOB', 'send.discounts.to.eyca.job.cron', '0 0 2 * * ? *')
