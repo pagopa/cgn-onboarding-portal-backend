@@ -57,7 +57,7 @@ class EmailNotificationFacadeTest {
 
 
     @Test
-    public void createEmailParams_shouldUseBccWhenPresent() {
+    void createEmailParams_shouldUseBccWhenPresent() {
         String body = "fake body";
 
         emailNotificationFacade.notifyEycaAdmin(body);
@@ -76,7 +76,7 @@ class EmailNotificationFacadeTest {
         assertNotNull("Bcc non deve essere null",params.getMailBCCList());
     }
     @Test
-    public void notifyMerchantDiscountTestFailed_shouldFillTemplateWithContextValues() {
+    void notifyMerchantDiscountTestFailed_shouldFillTemplateWithContextValues() {
 
         String discountName = "Sconto Speciale";
         String reasonMessage = "Il test è fallito per errore tecnico.";

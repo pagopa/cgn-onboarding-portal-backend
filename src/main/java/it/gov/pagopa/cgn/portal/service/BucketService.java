@@ -31,6 +31,7 @@ public class BucketService {
     private final DiscountRepository discountRepository;
     private final AzureStorage azureStorage;
     private final EmailNotificationFacade emailNotificationFacade;
+    private static final String TEXT_EMAIL_SENT = "an email notification has been sent.";
 
     @Autowired
     public BucketService(DiscountBucketCodeRepository discountBucketCodeRepository,
@@ -113,7 +114,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_10,
                                                                               remainingCodes);
-            log.info(actualValuesStr,"an email notification has been sent.");
+            log.info(actualValuesStr, TEXT_EMAIL_SENT);
             return;
         }
 
@@ -121,7 +122,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_25,
                                                                               remainingCodes);
-            log.info(actualValuesStr,"an email notification has been sent.");
+            log.info(actualValuesStr,TEXT_EMAIL_SENT);
             return;
         }
 
@@ -129,7 +130,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_50,
                                                                               remainingCodes);
-            log.info(actualValuesStr,"an email notification has been sent.");
+            log.info(actualValuesStr,TEXT_EMAIL_SENT);
         }
 
         log.info(actualValuesStr,"there are enough bucket codes. No notification email sent.");

@@ -18,7 +18,6 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.annotation.PostConstruct;
-import javax.mail.MessagingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -159,8 +158,7 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams)
-            throws MessagingException {
+    public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) {
         var subject =
                 "[Carta Giovani Nazionale] Nuova richiesta di supporto da " + helpRequestParams.getMerchantLegalName();
         var context = new Context();
@@ -390,8 +388,6 @@ public class EmailNotificationFacade {
                                                              String body,
                                                              String errorMessage) {
 
-        List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
-
         boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
 
         List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
@@ -453,65 +449,6 @@ public class EmailNotificationFacade {
                                  body,
                                  failureMessage,
                                  Optional.of(attachments));
-    }
-
-    private EmailParams createEmailParams(String mailTo, String subject, String body, String failureMessage) {
-        return createEmailParams(mailTo,
-                                 Optional.empty(),
-                                 Optional.empty(),
-                                 Optional.empty(),
-                                 subject,
-                                 body,
-                                 failureMessage,
-                                 Optional.empty());
-    }
-
-    private EmailParams createEmailParams(String mailTo,
-                                          List<String> secondaryMailToList,
-                                          String subject,
-                                          String body,
-                                          String failureMessage) {
-        return createEmailParams(mailTo,
-                                 Optional.of(secondaryMailToList),
-                                 Optional.empty(),
-                                 Optional.empty(),
-                                 subject,
-                                 body,
-                                 failureMessage,
-                                 Optional.empty());
-    }
-
-    private EmailParams createEmailParams(String mailTo,
-                                          String replyToOpt,
-                                          String subject,
-                                          String body,
-                                          String failureMessage) {
-        return createEmailParams(mailTo,
-                                 Optional.empty(),
-                                 Optional.empty(),
-                                 Optional.of(replyToOpt),
-                                 subject,
-                                 body,
-                                 failureMessage,
-                                 Optional.empty());
-    }
-
-    private EmailParams createEmailParams(String mailTo,
-                                          Optional<List<String>> ccList,
-                                          Optional<List<String>> bccList,
-                                          Optional<String> replyToOpt,
-                                          String subject,
-                                          String body,
-                                          String failureMessage,
-                                          Optional<List<Attachment>> attachments) {
-        return createEmailParams(Collections.singletonList(mailTo),
-                                 ccList,
-                                 bccList,
-                                 replyToOpt,
-                                 subject,
-                                 body,
-                                 failureMessage,
-                                 attachments);
     }
 
     private EmailParams createEmailParams(List<String> mailTo,
