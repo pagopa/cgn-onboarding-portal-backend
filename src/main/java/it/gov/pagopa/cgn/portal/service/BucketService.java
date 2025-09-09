@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -24,7 +25,6 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class BucketService {
-    public static final String REMAINING_CODES_AVAILABLE = "Remaining codes: {}% available; an email notification has been sent.";
     private final DiscountBucketCodeRepository discountBucketCodeRepository;
     private final DiscountBucketCodeSummaryRepository discountBucketCodeSummaryRepository;
     private final BucketCodeLoadRepository bucketCodeLoadRepository;
@@ -99,12 +99,13 @@ public class BucketService {
             throw new InternalErrorException("totalCodes <= 0 summary id: " + discountBucketCodeSummary.getId());
         }
 
-        var remainingPercent = Math.floor(Float.valueOf(remainingCodes) / Float.valueOf(totalCodes) * 100);
+        double remainingPercent = Math.floor(Float.valueOf(remainingCodes) / Float.valueOf(totalCodes) * 100);
+        DecimalFormat df = new DecimalFormat("0.###");
+        String actualValuesStr = String.format("DiscountId: %s, totalCodes: %s remainingCodes: %s, remainingPercent: %s: {}",discount.getId(),totalCodes,remainingCodes,df.format(remainingPercent));
 
-        // WARNING! Keep checks in ascending order!
         if (remainingCodes <= 0) {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(discount);
-            log.info("All bucket codes have expired; an email notification has been sent.");
+            log.info(actualValuesStr,"All bucket codes have expired; an email notification has been sent.");
             return;
         }
 
@@ -112,7 +113,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_10,
                                                                               remainingCodes);
-            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
+            log.info(actualValuesStr,"an email notification has been sent.");
             return;
         }
 
@@ -120,7 +121,7 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_25,
                                                                               remainingCodes);
-            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
+            log.info(actualValuesStr,"an email notification has been sent.");
             return;
         }
 
@@ -128,10 +129,10 @@ public class BucketService {
             emailNotificationFacade.notifyMerchantDiscountBucketCodesExpiring(discount,
                                                                               BucketCodeExpiringThresholdEnum.PERCENT_50,
                                                                               remainingCodes);
-            log.info(REMAINING_CODES_AVAILABLE, remainingPercent);
+            log.info(actualValuesStr,"an email notification has been sent.");
         }
 
-        log.info("There are enough bucket codes. No notification email sent.");
+        log.info(actualValuesStr,"there are enough bucket codes. No notification email sent.");
     }
 
     @Transactional(Transactional.TxType.REQUIRED)

@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.facade.ParamFacade;
+import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
@@ -16,8 +17,10 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -35,6 +38,8 @@ public class EmailNotificationFacade {
     private final ConfigProperties configProperties;
 
     private final ParamFacade paramFacade;
+
+    private List<String> bccList;
 
     public static final String FAILURE_REASON = "failure_reason";
     public static final String OPERATOR_NAME = "operator_name";
@@ -55,29 +60,53 @@ public class EmailNotificationFacade {
         this.paramFacade = paramFacade;
     }
 
+    @PostConstruct
+    public void init() {
+        bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
+    }
 
-    public void notifyDepartmentNewAgreementRequest(String merchantFullName) {
+    public void notifyDepartmentNewAgreementRequest( ProfileEntity profile) {
+        String merchantFullName = profile.getFullName();
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable("merchant_fullname", merchantFullName);
         final String errorMessage =
                 "Failed to send New Agreement Request notification from " + merchantFullName + " to department";
         String body = getTemplateHtml(TemplateEmail.NEW_AGREEMENT, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.NEW_AGREEMENT_REQUEST, profile.getAgreement().getId(), 0);
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                          Optional.empty(),
+                          Optional.of(bccList),
+                          Optional.empty(), subject, body,
+                          errorMessage,
+                          Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    public void notifyDepartementToTestDiscount(String merchantFullName, String discountName, String discountType) {
+
+    public void notifyDepartementToTestDiscount(AgreementEntity agreement, DiscountEntity discount) {
+        String merchantFullName = discount.getAgreement().getProfile().getFullName();
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
         var context = new Context();
         context.setVariable(OPERATOR_NAME, merchantFullName);
-        context.setVariable(DISCOUNT_NAME, discountName);
-        context.setVariable(DISCOUNT_TYPE, discountType);
+        context.setVariable(DISCOUNT_NAME, discount.getName());
+        context.setVariable(DISCOUNT_TYPE, agreement.getProfile().getDiscountCodeType().getCode());
         final String errorMessage =
                 "Failed to send test request notification from " + merchantFullName + " to department";
         String body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_REQUEST, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(), subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
+
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_TEST_REQUEST, agreement.getId(), discount.getId());
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                                                    Optional.empty(),
+                                                    Optional.of(bccList),
+                                                    Optional.empty(), subject, body,
+                                                    errorMessage,
+                                                    Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
     public void notifyMerchantAgreementRequestApproved(ProfileEntity profile,
@@ -90,40 +119,20 @@ public class EmailNotificationFacade {
         final String errorMessage = "Failed to send Agreement Request Approved notification to: " + referentEmail;
         try {
             TemplateEmail template = getApprovedAgreementTemplateBySalesChannel(salesChannel, discountCodeTypeOpt);
-
-            var secondaryReferents = retrieveSecondaryRecipients(profile);
-
+            List<String> secondaryReferents = retrieveSecondaryRecipients(profile);
             String body = getTemplateHtml(template);
-            var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-            emailNotificationService.sendAsyncMessage(emailParams);
+            final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.AGREEMENT_REQUEST_APPROVED, profile.getAgreement().getId(), 0);
+
+           EmailParams emailParams = createEmailParams(Collections.singletonList(referentEmail),
+                              Optional.of(secondaryReferents),
+                              Optional.of(bccList),
+                              Optional.empty(), subject, body,
+                              errorMessage,
+                              Optional.empty());
+
+            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
         } catch (Exception e) {
             log.error(errorMessage, e);
-        }
-    }
-
-    private TemplateEmail getApprovedAgreementTemplateBySalesChannel(SalesChannelEnum salesChannel,
-                                                                     Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
-        switch (salesChannel) {
-            case BOTH:
-                return TemplateEmail.APPROVED_AGREEMENT_BOTH;
-            case OFFLINE:
-                return TemplateEmail.APPROVED_AGREEMENT_OFFLINE;
-            case ONLINE:
-                return getApprovedAgreementTemplateByDiscountCodeType(discountCodeTypeOpt.orElseThrow(() -> new InvalidValueException(
-                        "An online merchant must have a Discount Code validation type set")));
-            default:
-                throw new InvalidValueException(salesChannel + " is not a valid Sales Channel");
-        }
-    }
-
-    private TemplateEmail getApprovedAgreementTemplateByDiscountCodeType(DiscountCodeTypeEnum discountCodeType) {
-        switch (discountCodeType) {
-            case API:
-                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_API_CODE;
-            case STATIC:
-                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_STATIC_CODE;
-            default:
-                throw new InvalidValueException(discountCodeType + " is not a valid Discount Code Type");
         }
     }
 
@@ -138,8 +147,16 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.REJECTED_AGREEMENT, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.AGREEMENT_REQUEST_REJECTED, profile.getAgreement().getId(), 0);
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(referentEmail),
+                                                    Optional.of(secondaryReferents),
+                                                    Optional.of(bccList),
+                                                    Optional.empty(), subject, body,
+                                                    errorMessage,
+                                                    Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
     public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams)
@@ -160,18 +177,24 @@ public class EmailNotificationFacade {
         context.setVariable("referent_last_name", helpRequestParams.getReferentLastName());
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
-        var emailParams = createEmailParams(configProperties.getCgnDepartmentEmail(),
-                                            helpRequestParams.getReplyToEmailAddress(),
-                                            subject,
-                                            body,
-                                            null);
-        emailNotificationService.sendSyncMessage(emailParams);
+
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.HELP_REQUEST, "0",0);
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(configProperties.getCgnDepartmentEmail()),
+                                                    Optional.empty(),
+                                                    Optional.of(bccList),
+                                                    Optional.of(helpRequestParams.getReplyToEmailAddress()), subject, body,
+                                                    null,
+                                                    Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    public void notifyMerchantDiscountSuspended(ProfileEntity profile, String discountName, String suspensionMessage) {
+
+    public void notifyMerchantDiscountSuspended(ProfileEntity profile, DiscountEntity discount, String suspensionMessage) {
         var subject = "[Carta Giovani Nazionale] Opportunità sospesa";
         var context = new Context();
-        context.setVariable(DISCOUNT_NAME, discountName);
+        context.setVariable(DISCOUNT_NAME, discount.getName());
         context.setVariable("suspension_message", suspensionMessage);
         var referentEmail = profile.getReferent().getEmailAddress();
 
@@ -180,58 +203,64 @@ public class EmailNotificationFacade {
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.SUSPENDED_DISCOUNT, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_SUSPENDED,
+                                                                              profile.getAgreement().getId(),discount.getId());
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(referentEmail),
+                                                    Optional.of(secondaryReferents),
+                                                    Optional.of(bccList),
+                                                    Optional.empty(), subject, body,
+                                                    errorMessage,
+                                                    Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    public void notifyMerchantDiscountTestPassed(ProfileEntity profile, String discountName) {
+    public void notifyMerchantDiscountTestPassed(ProfileEntity profile, DiscountEntity discount) {
         var subject = "[Carta Giovani Nazionale] Il test è stato superato";
         var context = new Context();
-        context.setVariable(DISCOUNT_NAME, discountName);
+        context.setVariable(DISCOUNT_NAME, discount.getName());
         var referentEmail = profile.getReferent().getEmailAddress();
         final String errorMessage = "Failed to send Discount Test Passed notification to: " + referentEmail;
 
         var secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_PASSED, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_TEST_PASSED,
+                                                                              profile.getAgreement().getId(),discount.getId());
+
+        EmailParams emailParams = createEmailParams(Collections.singletonList(referentEmail),
+                                                    Optional.of(secondaryReferents),
+                                                    Optional.of(bccList),
+                                                    Optional.empty(), subject, body,
+                                                    errorMessage,
+                                                    Optional.empty());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
-    public void notifyMerchantDiscountTestFailed(ProfileEntity profile, String discountName, String reasonMessage) {
+    public void notifyMerchantDiscountTestFailed(ProfileEntity profile, DiscountEntity discount, String reasonMessage) {
         var subject = "[Carta Giovani Nazionale] Il test è fallito";
         var context = new Context();
-        context.setVariable(DISCOUNT_NAME, discountName);
+        context.setVariable(DISCOUNT_NAME, discount.getName());
         context.setVariable(FAILURE_REASON, reasonMessage);
-        var referentEmail = profile.getReferent().getEmailAddress();
+        String referentEmail = profile.getReferent().getEmailAddress();
         final String errorMessage = "Failed to send Discount Test Failed notification to: " + referentEmail;
 
-        var secondaryReferents = retrieveSecondaryRecipients(profile);
+        List<String> secondaryReferents = retrieveSecondaryRecipients(profile);
 
         var body = getTemplateHtml(TemplateEmail.DISCOUNT_TEST_FAILED, context);
-        var emailParams = createEmailParams(referentEmail, secondaryReferents, subject, body, errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
-    }
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_TEST_FAILED,
+                                                                              profile.getAgreement().getId(),discount.getId());
 
-    private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
-                                                             List<String> secondaryReferents,
-                                                             String subject,
-                                                             String body,
-                                                             String errorMessage) {
+        EmailParams emailParams = createEmailParams(Collections.singletonList(referentEmail),
+                                                    Optional.of(secondaryReferents),
+                                                    Optional.of(bccList),
+                                                    Optional.empty(), subject, body,
+                                                    errorMessage,
+                                                    Optional.empty());
 
-        List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
-
-        boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
-
-        List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
-        Optional<List<String>> ccList = suspendReferentsMailSending ? Optional.empty() : Optional.of(secondaryReferents);
-
-        return  createEmailParams(toList,
-                                ccList,
-                                Optional.of(bccList),
-                                Optional.empty(), subject, body,
-                                errorMessage,
-                                Optional.empty());
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
 
     public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
@@ -244,25 +273,15 @@ public class EmailNotificationFacade {
         List<String> secondaryReferents = retrieveSecondaryRecipients(profileEntity);
 
         try {
-            var body = getTemplateHtml(TemplateEmail.EXPIRED_DISCOUNT, context);
+            var body = getTemplateHtml(TemplateEmail.EXPIRING_DISCOUNT, context);
             var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body, null);
+            final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_EXPIRING,
+                                                                                  discount.getAgreement().getId(),discount.getId());
 
-            emailNotificationService.sendSyncMessage(emailParams);
+            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
         } catch (Exception e) {
-            // in this case exception will be propagated
             throw new CGNException(e);
         }
-    }
-
-    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
-                                                                    BucketCodeExpiringThresholdEnum threshold) {
-        return threshold.name() + "::" + discount.getId() + "::" + Year.now().getValue() + "::" +
-               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
-    }
-
-    public static String createTrackingKeyForWeeklySummaryNotification(ProfileEntity profile) {
-        return "WEEKLY-SUMMARY" + "::" + profile.getId() + "::" + Year.now().getValue() + "::" +
-               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
     }
 
     public void notifyWeeklyMerchantDiscountBucketCodesSummary(ProfileEntity profileEntity,
@@ -289,7 +308,6 @@ public class EmailNotificationFacade {
         var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
     }
-
 
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
                                                           BucketCodeExpiringThresholdEnum threshold,
@@ -328,6 +346,82 @@ public class EmailNotificationFacade {
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+    }
+
+
+    public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
+        String subject = "Eyca job launch summary attachments of: " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String failureMessage = "It is not possible to send the email with the job summary attacchments.";
+
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA,"",0);
+
+        EmailParams emailParams = createEmailParams(bccList,
+                                                    subject,
+                                                    body,
+                                                    failureMessage,
+                                                    attachments);
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+    }
+
+    public void notifyEycaAdmin(String body) {
+        String subject = "Discounts for Generic Code/URLs " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
+        String failureMessage = "It is not possible to send the email to Eyca admin";
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.ADMIN_EYCA,"",0);
+
+        boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
+
+        List<String> toList  = suspendReferentsMailSending ? List.of() : Arrays.asList(paramFacade.getEycaAdminMailTo());
+
+        EmailParams emailParams = createEmailParams(toList,
+                                                    bccList,
+                                                    subject,
+                                                    body,
+                                                    failureMessage);
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+    }
+
+    private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
+                                                             List<String> secondaryReferents,
+                                                             String subject,
+                                                             String body,
+                                                             String errorMessage) {
+
+        List<String> bccList = Arrays.asList(paramFacade.getEycaJobMailTo());
+
+        boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
+
+        List<String> toList  = suspendReferentsMailSending ? List.of() : Collections.singletonList(referentEmail);
+        Optional<List<String>> ccList = suspendReferentsMailSending ? Optional.empty() : Optional.of(secondaryReferents);
+
+        return  createEmailParams(toList,
+                                  ccList,
+                                  Optional.of(bccList),
+                                  Optional.empty(), subject, body,
+                                  errorMessage,
+                                  Optional.empty());
+    }
+
+    public static String createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum emailEvent, String agreementId, long discountId) {
+        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        return  emailEvent.name()
+                + (agreementId != null && !agreementId.isEmpty() ? "::" + agreementId : "")
+                + (discountId != 0 ? "::" + discountId : "")
+                + "::" + timeStamp;
+    }
+
+    public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
+                                                                    BucketCodeExpiringThresholdEnum threshold) {
+        return threshold.name() + "::" + discount.getId() + "::" + Year.now().getValue() + "::" +
+               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+    }
+
+    public static String createTrackingKeyForWeeklySummaryNotification(ProfileEntity profile) {
+        return "WEEKLY-SUMMARY" + "::" + profile.getId() + "::" + Year.now().getValue() + "::" +
+               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
     }
 
 
@@ -443,31 +537,6 @@ public class EmailNotificationFacade {
                           .build();
     }
 
-
-    public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
-        String subject = "Eyca job launch summary attachments of: " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String failureMessage = "It is not possible to send the email with the job summary attacchments.";
-        EmailParams emailParams = createEmailParams(Arrays.asList(paramFacade.getEycaJobMailTo()),
-                                                    subject,
-                                                    body,
-                                                    failureMessage,
-                                                    attachments);
-        emailNotificationService.sendAsyncMessage(emailParams);
-    }
-
-    public void notifyEycaAdmin(String body) {
-        String subject = "Discounts for Generic Code/URLs " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
-        String failureMessage = "It is not possible to send the email to Eyca admin";
-        EmailParams emailParams = createEmailParams(Arrays.asList(paramFacade.getEycaAdminMailTo()),
-                                                    Arrays.asList(paramFacade.getEycaJobMailTo()),
-                                                    subject,
-                                                    body,
-                                                    failureMessage);
-        emailNotificationService.sendAsyncMessage(emailParams);
-    }
-
     private String getTemplateHtml(TemplateEmail template) {
         return getTemplateHtml(template, new Context());
     }
@@ -494,4 +563,29 @@ public class EmailNotificationFacade {
         }
     }
 
+    private TemplateEmail getApprovedAgreementTemplateBySalesChannel(SalesChannelEnum salesChannel,
+                                                                     Optional<DiscountCodeTypeEnum> discountCodeTypeOpt) {
+        switch (salesChannel) {
+            case BOTH:
+                return TemplateEmail.APPROVED_AGREEMENT_BOTH;
+            case OFFLINE:
+                return TemplateEmail.APPROVED_AGREEMENT_OFFLINE;
+            case ONLINE:
+                return getApprovedAgreementTemplateByDiscountCodeType(discountCodeTypeOpt.orElseThrow(() -> new InvalidValueException(
+                        "An online merchant must have a Discount Code validation type set")));
+            default:
+                throw new InvalidValueException(salesChannel + " is not a valid Sales Channel");
+        }
+    }
+
+    private TemplateEmail getApprovedAgreementTemplateByDiscountCodeType(DiscountCodeTypeEnum discountCodeType) {
+        switch (discountCodeType) {
+            case API:
+                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_API_CODE;
+            case STATIC:
+                return TemplateEmail.APPROVED_AGREEMENT_ONLINE_STATIC_CODE;
+            default:
+                throw new InvalidValueException(discountCodeType + " is not a valid Discount Code Type");
+        }
+    }
 }

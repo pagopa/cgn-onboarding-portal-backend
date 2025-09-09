@@ -36,7 +36,7 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public void execute(JobExecutionContext context) {
 
-        log.info(JOB_LOG_NAME + "started");
+        log.info(JOB_LOG_NAME + " started");
         Instant start = Instant.now();
         List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedAndExpired();
 
