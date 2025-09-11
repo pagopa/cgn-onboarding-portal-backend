@@ -159,7 +159,6 @@ class EmailNotificationFacadeTest {
 
     @Test
     void createEmailParams_RecipientsSummary_shouldHaveOnlyBccWhenSuspendReferentsMailSendingIsTrue() {
-        String body = "fake body";
 
         when(paramFacade.getSuspendReferentsMailSending()).thenReturn("true");
 
