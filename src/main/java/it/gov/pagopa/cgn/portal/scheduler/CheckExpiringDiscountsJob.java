@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
+import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
@@ -27,15 +27,15 @@ public class CheckExpiringDiscountsJob
 
     private final DiscountService discountService;
     private final DiscountRepository discountRepository;
-    private final ConfigProperties configProperties;
+    private final ParamFacade paramFacade;
 
     @Autowired
     public CheckExpiringDiscountsJob(DiscountService discountService,
                                      DiscountRepository discountRepository,
-                                     ConfigProperties configProperties) {
+                                     ParamFacade paramFacade) {
         this.discountService = discountService;
         this.discountRepository = discountRepository;
-        this.configProperties = configProperties;
+        this.paramFacade = paramFacade;
     }
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
@@ -45,7 +45,7 @@ public class CheckExpiringDiscountsJob
         Instant start = Instant.now();
         List<DiscountEntity> discountList = discountRepository.findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
                 DiscountStateEnum.PUBLISHED,
-                LocalDate.now().plusDays(configProperties.getExpiringDiscountsJobDays()));
+                LocalDate.now().plusDays(paramFacade.getCheckExpiringDiscountsJobDays()));
 
         if (!CollectionUtils.isEmpty(discountList)) {
             log.info("Found " + discountList.size() + " discounts to notify");

@@ -120,7 +120,7 @@ public class AgreementService
 
         var saved = agreementRepository.save(agreementEntity);
 
-        emailNotificationFacade.notifyDepartmentNewAgreementRequest(profile.getFullName());
+        emailNotificationFacade.notifyDepartmentNewAgreementRequest(profile);
 
         return saved;
     }

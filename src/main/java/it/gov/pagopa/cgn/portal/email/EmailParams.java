@@ -32,7 +32,22 @@ public class EmailParams {
                mailCCList + ", mailBCCList=" + mailBCCList + ", subject='" + subject + '\'' + '}';
     }
 
+    private void appendValues(StringBuilder sb, String prefix, List<String> values) {
+        if (values != null && !values.isEmpty()) {
+            sb.append(prefix).append(String.join(",", values)).append(" ");
+        }
+    }
 
+    public String getRecipientsSummary() {
+        StringBuilder sb = new StringBuilder();
+
+        appendValues(sb, "To:", mailToList);
+        appendValues(sb, "Cc:", mailCCList.orElse(null));
+        appendValues(sb, "Bcc:", mailBCCList.orElse(null));
+        appendValues(sb, "Reply-To:", replyToOpt.map(List::of).orElseGet(List::of));
+
+        return sb.toString().trim();
+    }
 
     @Getter
     @AllArgsConstructor

@@ -1,12 +1,14 @@
 package it.gov.pagopa.cgn.portal.config;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 @Getter
 @Component
+@Slf4j
 public class ConfigProperties {
 
     @Value("${spring.profiles.active}")
@@ -83,28 +85,25 @@ public class ConfigProperties {
     private String recaptchaGoogleHost;
 
     @Value("${check.expiring.discounts.job.cron}")
-    private String expiringDiscountsJobCronExpression;
+    private String checkExpiringDiscountsJobCronExpression;
 
     @Value("${check.available.discounts.bucket.codes.job.cron}")
-    private String availableDiscountBucketCodesJobCronExpression;
+    private String checkAvailableDiscountBucketCodesJobCronExpression;
 
     @Value("${send.low.bucket.codes.notification.job.cron}")
-    private String lowDiscountBucketCodesNotificationJobCronExpression;
+    private String sendLowDiscountBucketCodesNotificationJobCronExpression;
 
     @Value("${suspend.discounts.without.available.bucket.codes.job.cron}")
     private String suspendDiscountsWithoutAvailableBucketCodesJobCronExpression;
 
     @Value("${send.weekly.discount.bucket.codes.summary.job.cron}")
-    private String scheduleSendWeeklyDiscountBucketCodesSummaryJobCronExpression;
-
-    @Value("${suspend.discounts.without.available.bucket.codes.after.days}")
-    private int suspendDiscountsWithoutAvailableBucketCodesAfterDays;
+    private String sendWeeklyDiscountBucketCodesSummaryJobCronExpression;
 
     @Value("${send.discounts.to.eyca.job.cron}")
     private String sendDiscountsToEycaJobCronExpression;
 
     @Value("${check.expiring.discounts.job.days}")
-    private int expiringDiscountsJobDays;
+    private int checkExpiringDiscountsJobDays;
 
     @Value("${cgn.geolocation.secret-token}")
     private String geolocationToken;
@@ -161,8 +160,13 @@ public class ConfigProperties {
     @Value("${environment}")
     private String environment;
 
+    @Value("${suspend.referents.mail.sending}")
+    private String suspendReferentsMailSending;
+
     public boolean isActiveProfileDev() {
-        return "dev".equals(getActiveProfile());
+        boolean isDev =  "dev".equalsIgnoreCase(getActiveProfile());
+        log.info("isDev={}", isDev);
+        return isDev;
     }
 
     public boolean isEnvProd() {return "prod".equals(environment);}

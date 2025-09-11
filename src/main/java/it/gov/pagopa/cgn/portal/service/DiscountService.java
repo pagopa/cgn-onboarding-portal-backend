@@ -249,12 +249,7 @@ public class DiscountService {
 
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
 
-        emailNotificationFacade.notifyDepartementToTestDiscount(discount.getAgreement().getProfile().getFullName(),
-                                                                discount.getName(),
-                                                                discount.getAgreement()
-                                                                        .getProfile()
-                                                                        .getDiscountCodeType()
-                                                                        .getCode());
+        emailNotificationFacade.notifyDepartementToTestDiscount(agreementEntity,discount);
 
         return discount;
     }
@@ -328,7 +323,7 @@ public class DiscountService {
         discount = discountRepository.save(discount);
 
         // send notification
-        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity, discount.getName(), reasonMessage);
+        emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity, discount, reasonMessage);
 
         // refresh materialized views
         refreshMaterializedViews(profileEntity);
@@ -376,7 +371,7 @@ public class DiscountService {
         discount.setState(DiscountStateEnum.TEST_PASSED);
         discount = discountRepository.save(discount);
 
-        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity, discount.getName());
+        emailNotificationFacade.notifyMerchantDiscountTestPassed(profileEntity, discount);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -393,7 +388,7 @@ public class DiscountService {
         discount.setTestFailureReason(reasonMessage);
         discount = discountRepository.save(discount);
 
-        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity, discount.getName(), reasonMessage);
+        emailNotificationFacade.notifyMerchantDiscountTestFailed(profileEntity, discount, reasonMessage);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)

@@ -36,7 +36,7 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public void execute(JobExecutionContext context) {
 
-        log.info(JOB_LOG_NAME + "started");
+        log.info(JOB_LOG_NAME + " started");
         Instant start = Instant.now();
         List<DiscountBucketCodeSummaryEntity> discountBucketCodeSummaryList = discountBucketCodeSummaryRepository.findAllPublishedAndExpired();
 
@@ -47,7 +47,7 @@ public class SuspendDiscountsWithoutAvailableBucketCodesJob
         }
 
         Instant end = Instant.now();
-        log.info(JOB_LOG_NAME + "ended in " + Duration.between(start, end).getSeconds() + " seconds");
+        log.info(JOB_LOG_NAME + "ended in {} seconds", Duration.between(start, end).getSeconds());
     }
 
 }
