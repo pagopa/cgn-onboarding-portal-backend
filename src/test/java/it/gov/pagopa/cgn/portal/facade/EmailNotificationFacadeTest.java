@@ -68,7 +68,7 @@ class EmailNotificationFacadeTest {
         verify(emailNotificationService).sendAsyncMessage(
                 emailParamsCaptor.capture(),
                 trackingKeyCaptor.capture(),
-                isNull()
+                anyString()
         );
 
         EmailParams params = emailParamsCaptor.getValue();
@@ -111,6 +111,86 @@ class EmailNotificationFacadeTest {
         // Assert
         assertTrue("Not expected discountName", returnedHtmlBody.contains(discountName));
         assertTrue("Not expected reason message", returnedHtmlBody.contains(reasonMessage));
+    }
+
+    @Test
+    void createEmailParams_shouldBePresentRecipientsSummary() {
+        String body = "fake body";
+
+        emailNotificationFacade.notifyEycaAdmin(body);
+
+        ArgumentCaptor<String> recipientSummaryCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(emailNotificationService).sendAsyncMessage(
+                any(),
+                anyString(),
+                recipientSummaryCaptor.capture()
+        );
+
+        String recipientSummary = recipientSummaryCaptor.getValue();
+
+        assertNotNull("recipientSummary non deve essere null",recipientSummary);
+        assertEquals("recipientSummary deve contenere To e Bcc", "To:eycaMailTo@contoso.com Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+
+    }
+
+    @Test
+    void createEmailParams_RecipientsSummary_shouldHaveOnlyBccWhenSuspendReferentsMailSendingIsTrueForEyca() {
+        String body = "fake body";
+
+        when(paramFacade.getSuspendReferentsMailSending()).thenReturn("true");
+
+        emailNotificationFacade.notifyEycaAdmin(body);
+
+        ArgumentCaptor<String> recipientSummaryCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(emailNotificationService).sendAsyncMessage(
+                any(),
+                anyString(),
+                recipientSummaryCaptor.capture()
+        );
+
+        String recipientSummary = recipientSummaryCaptor.getValue();
+
+        assertNotNull("recipientSummary non deve essere null",recipientSummary);
+        assertEquals("recipientSummary deve contenere solo bcc", "Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+
+    }
+
+    @Test
+    void createEmailParams_RecipientsSummary_shouldHaveOnlyBccWhenSuspendReferentsMailSendingIsTrue() {
+        String body = "fake body";
+
+        when(paramFacade.getSuspendReferentsMailSending()).thenReturn("true");
+
+        ReferentEntity re = new ReferentEntity();
+        re.setEmailAddress("emailaddress@contoso.com");
+        DiscountEntity de = new DiscountEntity();
+        de.setId(123L);
+        de.setName("discountName");
+        AgreementEntity ae = new AgreementEntity();
+        ae.setId("xxx-xxx");
+        ProfileEntity pe = new ProfileEntity();
+        pe.setReferent(re);
+        pe.setAgreement(ae);
+        de.setAgreement(ae);
+        ae.setProfile(pe);
+
+        emailNotificationFacade.notifyMerchantDiscountBucketCodesExpired(de);
+
+        ArgumentCaptor<String> recipientSummaryCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(emailNotificationService).sendAsyncMessage(
+                any(),
+                anyString(),
+                recipientSummaryCaptor.capture()
+        );
+
+        String recipientSummary = recipientSummaryCaptor.getValue();
+
+        assertNotNull("recipientSummary non deve essere null",recipientSummary);
+        assertEquals("recipientSummary deve contenere solo bcc", "Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+
     }
 
     @Test

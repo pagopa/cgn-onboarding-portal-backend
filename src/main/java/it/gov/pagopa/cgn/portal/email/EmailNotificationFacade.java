@@ -81,7 +81,7 @@ public class EmailNotificationFacade {
                           errorMessage,
                           Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
 
@@ -105,7 +105,7 @@ public class EmailNotificationFacade {
                                                     errorMessage,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyMerchantAgreementRequestApproved(ProfileEntity profile,
@@ -129,7 +129,7 @@ public class EmailNotificationFacade {
                               errorMessage,
                               Optional.empty());
 
-            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
         } catch (Exception e) {
             log.error(errorMessage, e);
         }
@@ -155,7 +155,7 @@ public class EmailNotificationFacade {
                                                     errorMessage,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyDepartmentNewHelpRequest(HelpRequestParams helpRequestParams) {
@@ -185,7 +185,7 @@ public class EmailNotificationFacade {
                                                     null,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
 
@@ -211,7 +211,7 @@ public class EmailNotificationFacade {
                                                     errorMessage,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyMerchantDiscountTestPassed(ProfileEntity profile, DiscountEntity discount) {
@@ -234,7 +234,7 @@ public class EmailNotificationFacade {
                                                     errorMessage,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyMerchantDiscountTestFailed(ProfileEntity profile, DiscountEntity discount, String reasonMessage) {
@@ -258,7 +258,7 @@ public class EmailNotificationFacade {
                                                     errorMessage,
                                                     Optional.empty());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyMerchantDiscountExpiring(DiscountEntity discount) {
@@ -276,7 +276,7 @@ public class EmailNotificationFacade {
             final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.DISCOUNT_EXPIRING,
                                                                                   discount.getAgreement().getId(),discount.getId());
 
-            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+            emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
         } catch (Exception e) {
             throw new CGNException(e);
         }
@@ -304,7 +304,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.WEEKLY_SUMMARY_BUCKET_CODES, context);
         var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyMerchantDiscountBucketCodesExpiring(DiscountEntity discount,
@@ -325,7 +325,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRING_BUCKET_CODES, context);
         var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,"Email inviata al raggiungimento di "+ remainingCodes.toString() + " codici.");
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey, emailParams.getRecipientsSummary() + " | Email inviata al raggiungimento di "+ remainingCodes.toString() + " codici.");
     }
 
     public void notifyMerchantDiscountBucketCodesExpired(DiscountEntity discount) {
@@ -343,7 +343,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.EXPIRED_BUCKET_CODES, context);
         var emailParams = createEmailParamsForAutomatedSending(referentEmail, secondaryReferents, subject, body,errorMessage);
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
 
@@ -360,7 +360,7 @@ public class EmailNotificationFacade {
                                                     failureMessage,
                                                     attachments);
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     public void notifyEycaAdmin(String body) {
@@ -379,7 +379,7 @@ public class EmailNotificationFacade {
                                                     body,
                                                     failureMessage);
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,null);
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
     private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
