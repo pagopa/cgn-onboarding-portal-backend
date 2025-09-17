@@ -1,0 +1,1 @@
+ALTER TYPE param_group_enum ADD VALUE 'CGN_JOB_FLAGS';

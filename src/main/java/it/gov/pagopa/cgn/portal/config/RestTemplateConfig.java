@@ -1,10 +1,11 @@
 package it.gov.pagopa.cgn.portal.config;
 
+import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.TrustStrategy;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +23,16 @@ import java.util.function.Supplier;
 @Configuration
 public class RestTemplateConfig {
 
-    @Value("${spring.profiles.active:Unknown}")
-    private String activeProfile;
+    private final ConfigProperties configProperties;
+
+    @Autowired
+    RestTemplateConfig(ConfigProperties configProperties) {
+        this.configProperties = configProperties;
+    }
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        System.out.println("isDev=" + isDev());
-        return isDev() ? builder.requestFactory(getFactorySupplierForDisableSSL()).build():builder.build();
+        return configProperties.isActiveProfileDev() ? builder.requestFactory(getFactorySupplierForDisableSSL()).build():builder.build();
     }
 
     private Supplier<ClientHttpRequestFactory> getFactorySupplierForDisableSSL() {
@@ -42,7 +46,7 @@ public class RestTemplateConfig {
                                                             .loadTrustMaterial(null, acceptingTrustStrategy)
                                                             .build();
             } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-                throw new RuntimeException(e);
+                throw new InternalErrorException(e.getMessage());
             }
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
 
@@ -50,9 +54,5 @@ public class RestTemplateConfig {
 
             return new HttpComponentsClientHttpRequestFactory(httpClient);
         };
-    }
-
-    private boolean isDev() {
-        return activeProfile.equalsIgnoreCase("dev");
     }
 }

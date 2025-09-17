@@ -14,7 +14,7 @@ public enum TemplateEmail {
     APPROVED_AGREEMENT_ONLINE_STATIC_CODE("email/agreement-request-approved-online-static-code.html"),
     REJECTED_AGREEMENT("email/agreement-request-rejected.html"),
     SUSPENDED_DISCOUNT("email/discount-suspended.html"),
-    EXPIRED_DISCOUNT("email/discount-expiring.html"),
+    EXPIRING_DISCOUNT("email/discount-expiring.html"),
     DISCOUNT_TEST_REQUEST("email/discount-test-request.html"),
     DISCOUNT_TEST_PASSED("email/discount-test-passed.html"),
     DISCOUNT_TEST_FAILED("email/discount-test-failed.html"),

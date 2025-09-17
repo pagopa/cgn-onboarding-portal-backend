@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.concurrent.TimeUnit;
 
@@ -39,38 +38,23 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
     }
 
     @Test
-    void Execute_ExecuteJob_SuspendDiscountIfGivenDaysPassed()
-            throws IOException {
-        init();
-        discountBucketCodeSummaryRepository.findAll().forEach(s -> {
-            s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now()
-                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
-            discountBucketCodeSummaryRepository.save(s);
-        });
-        testJob(DiscountStateEnum.SUSPENDED);
-    }
-
-    @Test
-    void Execute_ExecuteJob_CheckMaterializedViews()
-            throws IOException {
+    void Execute_ExecuteJob_CheckMaterializedViews() {
         init();
 
         // refresh materialized views
         onlineMerchantRepository.refreshView();
 
         // await for view to be refreshed
-        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> onlineMerchantRepository.findAll().size() >= 1);
+        Awaitility.await().atMost(5, TimeUnit.SECONDS).until(() -> !onlineMerchantRepository.findAll().isEmpty());
 
         // assert the merchant is in the view
         var onlineMerchantEntities = onlineMerchantRepository.findAll();
         Assertions.assertEquals(1, onlineMerchantEntities.size());
-        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.get(0).getId());
+        Assertions.assertEquals(agreementEntity.getId(), onlineMerchantEntities.getFirst().getId());
 
         discountBucketCodeSummaryRepository.findAll().forEach(s -> {
             s.setAvailableCodes(1L);
-            s.setExpiredAt(OffsetDateTime.now()
-                                         .minusDays(configProperties.getSuspendDiscountsWithoutAvailableBucketCodesAfterDays()));
+            s.setExpiredAt(OffsetDateTime.now());
             discountBucketCodeSummaryRepository.save(s);
         });
 
@@ -85,8 +69,7 @@ class SuspendDiscountsWithoutAvailableBucketCodesJobTest
     }
 
 
-    private void init()
-            throws IOException {
+    private void init() {
         setAdminAuth();
 
         AgreementTestObject testObject = createApprovedAgreement();

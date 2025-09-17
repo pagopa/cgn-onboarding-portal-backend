@@ -1,6 +1,6 @@
 package it.gov.pagopa.cgn.portal.scheduler;
 
-import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.stereotype.Service;
@@ -13,24 +13,24 @@ public class JobScheduler {
 
     private static final String DISCOUNTS_JOB_GROUP = "discounts";
     private final Scheduler scheduler;
-    private final ConfigProperties configProperties;
+    private final ParamFacade paramFacade;
 
-    public JobScheduler(Scheduler scheduler, ConfigProperties configProperties) {
+    public JobScheduler(Scheduler scheduler, ParamFacade paramFacade) {
         this.scheduler = scheduler;
-        this.configProperties = configProperties;
+        this.paramFacade = paramFacade;
     }
 
     public void scheduleCheckExpiringDiscountsJob()
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("check-expiring", DISCOUNTS_JOB_GROUP);
-        scheduleJob(jobKey, configProperties.getExpiringDiscountsJobCronExpression(), CheckExpiringDiscountsJob.class);
+        scheduleJob(jobKey, paramFacade.getCheckExpiringDiscountsJobCronExpression(), CheckExpiringDiscountsJob.class);
     }
 
     public void scheduleCheckAvailableDiscountBucketCodesJob()
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("check-available-codes", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    configProperties.getAvailableDiscountBucketCodesJobCronExpression(),
+                    paramFacade.getCheckAvailableDiscountBucketCodesJobCronExpression(),
                     CheckAvailableDiscountBucketCodesJob.class);
     }
 
@@ -38,7 +38,7 @@ public class JobScheduler {
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("low-available-codes-notification", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    configProperties.getLowDiscountBucketCodesNotificationJobCronExpression(),
+                    paramFacade.getSendLowDiscountBucketCodesNotificationJobCronExpression(),
                     SendLowDiscountBucketCodesNotificationJob.class);
     }
 
@@ -46,7 +46,7 @@ public class JobScheduler {
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("suspend-discount-with-expired-bucket", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    configProperties.getSuspendDiscountsWithoutAvailableBucketCodesJobCronExpression(),
+                    paramFacade.getSuspendDiscountsWithoutAvailableBucketCodesJobCronExpression(),
                     SuspendDiscountsWithoutAvailableBucketCodesJob.class);
     }
 
@@ -54,14 +54,14 @@ public class JobScheduler {
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("send-weekly-discount-bucket-codes-summary", DISCOUNTS_JOB_GROUP);
         scheduleJob(jobKey,
-                    configProperties.getScheduleSendWeeklyDiscountBucketCodesSummaryJobCronExpression(),
+                    paramFacade.getSendWeeklyDiscountBucketCodesSummaryJobCronExpression(),
                     SendWeeklyDiscountBucketCodesSummaryJob.class);
     }
 
     public void scheduleSendDiscountsToEycaJob()
             throws SchedulerException {
         JobKey jobKey = JobKey.jobKey("send-discount-to-eyca", DISCOUNTS_JOB_GROUP);
-        scheduleJob(jobKey, configProperties.getSendDiscountsToEycaJobCronExpression(), SendDiscountsToEycaJob.class);
+        scheduleJob(jobKey, paramFacade.getSendDiscountsToEycaJobCronExpression(), SendDiscountsToEycaJob.class);
     }
 
     private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)
