@@ -43,7 +43,7 @@ public class CheckExpiringDiscountsJob
 
         log.info(JOB_LOG_NAME + "started");
         Instant start = Instant.now();
-        List<DiscountEntity> discountList = discountRepository.findByStateAndExpirationWarningSentDateTimeIsNullAndEndDateLessThan(
+        List<DiscountEntity> discountList = discountRepository.findDiscountsExpiringSoon(
                 DiscountStateEnum.PUBLISHED,
                 LocalDate.now().plusDays(paramFacade.getCheckExpiringDiscountsJobDays()));
 

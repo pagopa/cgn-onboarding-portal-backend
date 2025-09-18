@@ -38,6 +38,51 @@ class CheckExpiringDiscountsJobTest
     }
 
     @Test
+    void Execute_ExecuteJobUpdateExpiringSoonDiscount_Ok() {
+        AgreementTestObject testObject = createApprovedAgreement();
+        AgreementEntity agreementEntity = testObject.getAgreementEntity();
+        DiscountEntity discountEntity1 = testObject.getDiscountEntityList().get(0);
+        DiscountEntity discountEntity2 = testObject.getDiscountEntityList().get(1);
+
+        // simulate test passed
+        discountEntity1.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity2.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity1 = discountRepository.save(discountEntity1);
+        discountEntity2 = discountRepository.save(discountEntity2);
+
+        discountEntity1 = discountService.publishDiscount(agreementEntity.getId(), discountEntity1.getId());
+        discountEntity2 = discountService.publishDiscount(agreementEntity.getId(), discountEntity2.getId());
+        discountEntity1.setEndDate(LocalDate.now().plusDays(3));
+
+        discountEntity2.setStartDate(LocalDate.now().minusDays(6));
+        discountEntity2.setEndDate(LocalDate.now().minusDays(3));
+        discountRepository.save(discountEntity1);
+        discountRepository.save(discountEntity2);
+
+        LocalDate maxDate = LocalDate.now().plusDays(15);
+
+        List<DiscountEntity> discounts = discountRepository.findDiscountsExpiringSoon(DiscountStateEnum.PUBLISHED,maxDate);
+
+        Assertions.assertNotNull(discounts);
+        Assertions.assertEquals(1,discounts.size());
+
+        job.execute(null);
+
+        discountEntity1 = discountRepository.findById(discountEntity1.getId()).get();
+
+        Assertions.assertNotNull(discountEntity1.getExpirationWarningSentDateTime());
+        Assertions.assertEquals(LocalDate.now(), discountEntity1.getExpirationWarningSentDateTime().toLocalDate());
+
+        discountService.updateDiscount(agreementEntity.getId(),discountEntity1.getId(), discountEntity1);
+
+        discountEntity1 = discountRepository.findById(discountEntity1.getId()).get();
+
+        Assertions.assertNull(discountEntity1.getExpirationWarningSentDateTime());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, discountEntity1.getState());
+
+    }
+
+    @Test
     void Execute_ExecuteJobUpdateExpiringDiscount_Ok() {
         AgreementTestObject testObject = createApprovedAgreement();
         AgreementEntity agreementEntity = testObject.getAgreementEntity();
