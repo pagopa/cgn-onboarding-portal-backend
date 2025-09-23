@@ -121,7 +121,6 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
 
         // now we can publish the discount
         discountService.publishDiscount(agreementId, discountId);
@@ -230,10 +229,10 @@ class ProfileFacadeTest
     @Transactional
     @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Create_Profile_Expect_OK() {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+        AgreementEntity agreementEntityNew = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
                                                                                       EntityType.PRIVATE,
                                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
-        var agreementId = agreementEntity.getId();
+        var agreementId = agreementEntityNew.getId();
         CreateProfile createProfile = TestUtils.offLineProfileFromProfileEntity(profileEntity);
         profileFacade.createProfile(agreementId, createProfile);
 
@@ -271,9 +270,6 @@ class ProfileFacadeTest
         // operator publish the discount
         discountService.publishDiscount(agreementId, discountId);
 
-        // operator change his profile to static code
-        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
-                                                                                        DiscountCodeType.STATIC);
         profileEntity.setWebsiteUrl(" ");
         profileEntity = profileService.updateProfile(agreementId,profileEntity);
 
