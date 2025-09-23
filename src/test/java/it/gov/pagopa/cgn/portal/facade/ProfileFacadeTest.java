@@ -5,7 +5,10 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.profile.CreateProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.ProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.*;
+import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.SecondaryReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -241,4 +244,40 @@ class ProfileFacadeTest
         Assertions.assertNotNull(profile.getSecondaryReferents());
     }
 
+    @Test
+    void UpdateProfile_ChangeWebsiteUrlWithBlank_ShouldBeNull() {
+        var agreementId = agreementEntity.getId();
+
+        // set profile for landing page
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
+
+        // create a discount and request agreement approval
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
+                                                                                            URL,
+                                                                                            EYCA_URL,
+                                                                                            REFERRER);
+        discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
+
+        // simulate test passed
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        agreementService.requestApproval(agreementId);
+        var discountId = discountEntity.getId();
+
+        // admin approve agreement
+        adminApproveAgreement();
+
+        // operator publish the discount
+        discountService.publishDiscount(agreementId, discountId);
+
+        // operator change his profile to static code
+        UpdateProfile updateProfile = TestUtils.updatableOnlineProfileFromProfileEntity(profileEntity,
+                                                                                        DiscountCodeType.STATIC);
+        profileEntity.setWebsiteUrl(" ");
+        profileEntity = profileService.updateProfile(agreementId,profileEntity);
+
+        Assertions.assertNull(profileEntity.getWebsiteUrl());
+
+    }
 }
