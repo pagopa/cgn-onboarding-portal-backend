@@ -2,18 +2,25 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +37,9 @@ class CreateProfileApiTest
     private AgreementService agreementService;
 
     private String profilePath;
+
+    @SpyBean
+    private ProfileFacade profileFacadeSpy;
 
     @BeforeEach
     void init() {
@@ -207,6 +217,35 @@ class CreateProfileApiTest
                                               .content(TestUtils.getJson(createProfile)))
                     .andDo(log())
                     .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void CreateProfile_anyNullableAttributeShouldBeSettedNull_whenBlankBePassed_Ok()
+            throws Exception {
+        CreateProfile createProfile = createSampleCreateOffline();
+        createProfile.setName(" ");
+        createProfile.setNameEn(" ");
+        createProfile.setNameDe(" ");
+        ((OfflineChannel)createProfile.getSalesChannel()).setWebsiteUrl(" ");
+
+        this.mockMvc.perform(post(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                              .content(TestUtils.getJson(createProfile)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+        ArgumentCaptor<CreateProfile> captor = ArgumentCaptor.forClass(CreateProfile.class);
+        verify(profileFacadeSpy).createProfile(any(), captor.capture());
+
+        CreateProfile createFromPerform = captor.getValue();
+
+        SalesChannel sc = createFromPerform.getSalesChannel();
+        assertInstanceOf(OfflineChannel.class, sc, "OfflineChannel attended");
+        OfflineChannel oc = (OfflineChannel) sc;
+        assertNull(oc.getWebsiteUrl(), "blank WebsiteUrl must be null at facade");
+        assertNull(createFromPerform.getName(), "blank Name must be null at facade");
+        assertNull(createFromPerform.getNameEn(), "blank referent NameEn must be null at facade");
+        assertNull(createFromPerform.getNameDe(), "blank referent NameDe must be null at facade");
 
     }
 

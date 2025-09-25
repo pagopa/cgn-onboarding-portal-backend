@@ -2,20 +2,27 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.facade.ProfileFacade;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -34,6 +41,9 @@ class UpdateProfileApiTest
 
     @Autowired
     private ProfileService profileService;
+
+    @SpyBean
+    private ProfileFacade profileFacadeSpy;
 
     private String profilePath;
     private AgreementEntity agreement;
@@ -151,5 +161,68 @@ class UpdateProfileApiTest
                     .andExpect(jsonPath("$.salesChannel.websiteUrl").value(bothChannels.getWebsiteUrl()));
     }
 
+    @Test
+    void UpdateProfile_ShouldBeSettedTrimmedStringWebsiteUrl_whenNotTrimmedStringBePassed_Ok()
+            throws Exception {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        profileService.createProfile(profileEntity, agreement.getId());
+        UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
+        OfflineChannel offlineChannel = new OfflineChannel();
+        offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
+        offlineChannel.setWebsiteUrl(" test ");
+        offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
+        updateProfile.setSalesChannel(offlineChannel);
+
+        this.mockMvc.perform(put(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                             .content(TestUtils.getJson(updateProfile)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+
+        ArgumentCaptor<UpdateProfile> captor = ArgumentCaptor.forClass(UpdateProfile.class);
+        verify(profileFacadeSpy).updateProfile(any(), captor.capture());
+
+        SalesChannel sc = captor.getValue().getSalesChannel();
+        assertInstanceOf(OfflineChannel.class, sc, "OfflineChannel attended");
+        OfflineChannel oc = (OfflineChannel) sc;
+
+        Assertions.assertNotNull(oc.getWebsiteUrl());
+        assertEquals("test", oc.getWebsiteUrl());
+    }
+
+    @Test
+    void UpdateProfile_anyNullableAttributeShouldBeSettedNull_whenBlankBePassed_Ok()
+            throws Exception {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        profileService.createProfile(profileEntity, agreement.getId());
+        UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
+        OfflineChannel offlineChannel = new OfflineChannel();
+        offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
+        offlineChannel.setWebsiteUrl(" ");
+        offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
+        updateProfile.setSalesChannel(offlineChannel);
+        updateProfile.setName(" ");
+        updateProfile.setNameEn(" ");
+        updateProfile.setNameDe(" ");
+
+        this.mockMvc.perform(put(profilePath).contentType(MediaType.APPLICATION_JSON)
+                                             .content(TestUtils.getJson(updateProfile)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+        ArgumentCaptor<UpdateProfile> captor = ArgumentCaptor.forClass(UpdateProfile.class);
+        verify(profileFacadeSpy).updateProfile(any(), captor.capture());
+
+        UpdateProfile updateFromPerform = captor.getValue();
+
+        SalesChannel sc = updateFromPerform.getSalesChannel();
+        assertInstanceOf(OfflineChannel.class, sc, "OfflineChannel attended");
+        OfflineChannel oc = (OfflineChannel) sc;
+        assertNull(oc.getWebsiteUrl(), "blank WebsiteUrl must be null at facade");
+        assertNull(updateFromPerform.getName(), "blank Name must be null at facade");
+        assertNull(updateFromPerform.getNameEn(), "blank referent NameEn must be null at facade");
+        assertNull(updateFromPerform.getNameDe(), "blank referent NameDe must be null at facade");
+
+    }
 }
 
