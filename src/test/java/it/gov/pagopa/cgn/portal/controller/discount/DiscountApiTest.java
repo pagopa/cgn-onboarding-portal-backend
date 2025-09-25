@@ -9,6 +9,7 @@ import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
+import it.gov.pagopa.cgn.portal.facade.DiscountFacade;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.BucketCodeLoadEntity;
@@ -27,9 +28,11 @@ import org.apache.commons.io.IOUtils;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -40,8 +43,12 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static it.gov.pagopa.cgn.portal.TestUtils.createSampleDiscountEntity;
 import static it.gov.pagopa.cgn.portal.TestUtils.createSampleDiscountEntityWithEycaLandingPage;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -78,6 +85,9 @@ class DiscountApiTest
 
     @Autowired
     private BucketCodeLoadRepository bucketCodeLoadRepository;
+
+    @SpyBean
+    private DiscountFacade discountFacadeSpy;
 
     private String discountPath;
     private AgreementEntity agreement;
@@ -672,6 +682,36 @@ class DiscountApiTest
                                                                              .content(TestUtils.getJson(updateDiscount)))
                     .andDo(log())
                     .andExpect(content().string(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
+    }
+
+
+    @Test
+    void Update_anyNullableAttributeShouldBeSettedNull_whenBlankBePassed_Ok()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+        DiscountEntity discountEntity = createSampleDiscountEntity(agreement);
+        discountEntity.setVisibleOnEyca(true);
+        discountEntity.setEycaLandingPageUrl(" ");
+        discountEntity.setDiscountUrl(" ");
+        discountEntity.setLandingPageUrl(" ");
+
+        discountEntity = discountService.createDiscount(agreement.getId(), discountEntity).getDiscountEntity();
+
+        UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
+
+        this.mockMvc.perform(post(discountPath).contentType(MediaType.APPLICATION_JSON)
+                                               .content(TestUtils.getJson(updateDiscount)))
+                    .andDo(log())
+                    .andExpect(status().isOk());
+
+        ArgumentCaptor<CreateDiscount> captor = ArgumentCaptor.forClass(CreateDiscount.class);
+        verify(discountFacadeSpy).createDiscount(any(), captor.capture());
+
+        CreateDiscount createFromPerform = captor.getValue();
+
+        assertNull(createFromPerform.getEycaLandingPageUrl(), "blank EycaLandingPageUrl must be null at facade");
+        assertNull(createFromPerform.getLandingPageUrl(), "blank referent LandingPageUrl must be null at facade");
+        assertNull(createFromPerform.getDiscountUrl(), "blank referent DiscountUrl must be null at facade");
     }
 
     @Test

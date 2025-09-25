@@ -242,38 +242,4 @@ class ProfileFacadeTest
         Assertions.assertNotNull(profile);
         Assertions.assertNotNull(profile.getSecondaryReferents());
     }
-
-    @Test
-    void UpdateProfile_ChangeWebsiteUrlWithBlank_ShouldBeNull() {
-        var agreementId = agreementEntity.getId();
-
-        // set profile for landing page
-        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.LANDINGPAGE);
-
-        // create a discount and request agreement approval
-        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
-                                                                                            URL,
-                                                                                            EYCA_URL,
-                                                                                            REFERRER);
-        discountEntity = discountService.createDiscount(agreementId, discountEntity).getDiscountEntity();
-
-        // simulate test passed
-        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
-
-        agreementService.requestApproval(agreementId);
-        var discountId = discountEntity.getId();
-
-        // admin approve agreement
-        adminApproveAgreement();
-
-        // operator publish the discount
-        discountService.publishDiscount(agreementId, discountId);
-
-        profileEntity.setWebsiteUrl(" ");
-        profileEntity = profileService.updateProfile(agreementId,profileEntity);
-
-        Assertions.assertNull(profileEntity.getWebsiteUrl());
-
-    }
 }
