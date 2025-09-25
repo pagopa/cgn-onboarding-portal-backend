@@ -55,8 +55,6 @@ class UpdateProfileApiTest
                                                                 TestUtils.FAKE_ORGANIZATION_NAME);
         profilePath = TestUtils.getProfilePath(agreement.getId());
         setOperatorAuth();
-
-        //profileFacadeMock = Mockito.mock(ProfileFacade.class);
     }
 
     @Test
