@@ -6,7 +6,9 @@ import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AddressEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgn.portal.util.RegexUtils;
 import it.gov.pagopa.cgnonboardingportal.model.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -71,6 +73,7 @@ public abstract class CommonProfileConverter<E, D>
         switch (channelType) {
             case ONLINE_CHANNEL:
                 if (salesChannelDto instanceof OnlineChannel onlineChannel) {
+                    validateWebsiteUrl(onlineChannel.getWebsiteUrl());
                     entity.setSalesChannel(SalesChannelEnum.ONLINE);
                     entity.setWebsiteUrl(onlineChannel.getWebsiteUrl());
                     entity.setDiscountCodeType(toEntityDiscountCodeTypeEnum.apply(onlineChannel.getDiscountCodeType()));
@@ -79,21 +82,25 @@ public abstract class CommonProfileConverter<E, D>
                 }
                 break;
             case OFFLINE_CHANNEL:
-                if (salesChannelDto instanceof OfflineChannel physicalStoreChannel) {
+                if (salesChannelDto instanceof OfflineChannel offlineChannel) {
+                    if(!StringUtils.isEmpty(offlineChannel.getWebsiteUrl())) {
+                        validateWebsiteUrl(offlineChannel.getWebsiteUrl());
+                    }
                     entity.setSalesChannel(SalesChannelEnum.OFFLINE);
-                    entity.setWebsiteUrl(physicalStoreChannel.getWebsiteUrl());
+                    entity.setWebsiteUrl(offlineChannel.getWebsiteUrl());
                     // addressList must be not empty
-                    entity.setAddressList(physicalStoreChannel.getAddresses()
+                    entity.setAddressList(offlineChannel.getAddresses()
                                                               .stream()
                                                               .map(address -> addressToEntity.apply(address, entity))
                                                               .toList());
-                    entity.setAllNationalAddresses(physicalStoreChannel.getAllNationalAddresses());
+                    entity.setAllNationalAddresses(offlineChannel.getAllNationalAddresses());
                 } else {
                     throw new InvalidRequestException(SALES_CHANNEL_IS_INVALID);
                 }
                 break;
             case BOTH_CHANNELS:
                 if (salesChannelDto instanceof BothChannels bothChannels) {
+                    validateWebsiteUrl(bothChannels.getWebsiteUrl());
                     entity.setSalesChannel(SalesChannelEnum.BOTH);
                     entity.setWebsiteUrl(bothChannels.getWebsiteUrl());
                     entity.setAddressList(bothChannels.getAddresses()
@@ -108,6 +115,13 @@ public abstract class CommonProfileConverter<E, D>
                 break;
         }
     };
+
+    private void validateWebsiteUrl(String websiteUrl) {
+        if(!RegexUtils.checkRulesForInternetUrl(websiteUrl)) {
+            throw new InvalidRequestException("website url not valid");
+        }
+    }
+
     protected Function<AddressEntity, Address> addressToDto = entity -> {
         Address dto = new Address();
         dto.setFullAddress(entity.getFullAddress());

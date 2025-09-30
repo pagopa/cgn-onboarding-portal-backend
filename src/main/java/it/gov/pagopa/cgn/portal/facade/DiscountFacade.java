@@ -4,9 +4,11 @@ import it.gov.pagopa.cgn.portal.converter.discount.CreateDiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.DiscountConverter;
 import it.gov.pagopa.cgn.portal.converter.discount.UpdateDiscountConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
+import it.gov.pagopa.cgn.portal.util.RegexUtils;
 import it.gov.pagopa.cgn.portal.wrapper.CrudDiscountWrapper;
 import it.gov.pagopa.cgnonboardingportal.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ public class DiscountFacade {
     }
 
     public ResponseEntity<Discount> createDiscount(String agreementId, CreateDiscount createDiscountDto) {
+        validateInternetUrls(createDiscountDto.getLandingPageUrl(),createDiscountDto.getEycaLandingPageUrl(),createDiscountDto.getDiscountUrl());
+
         DiscountEntity discountEntity = createDiscountConverter.toEntity(createDiscountDto);
         CrudDiscountWrapper wrapper = discountService.createDiscount(agreementId, discountEntity);
         discountEntity = wrapper.getDiscountEntity();
@@ -61,6 +65,9 @@ public class DiscountFacade {
     public ResponseEntity<Discount> updateDiscount(String agreementId,
                                                    String discountId,
                                                    UpdateDiscount updateDiscountDto) {
+
+        validateInternetUrls(updateDiscountDto.getLandingPageUrl(),updateDiscountDto.getEycaLandingPageUrl(),updateDiscountDto.getDiscountUrl());
+
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(updateDiscountDto);
         CrudDiscountWrapper wrapper = discountService.updateDiscount(agreementId,
                                                                      Long.valueOf(discountId),
@@ -91,5 +98,16 @@ public class DiscountFacade {
 
     public DiscountBucketCodeLoadingProgess getDiscountBucketCodeLoadingProgess(String agreementId, String discountId) {
         return discountService.getDiscountBucketCodeLoadingProgess(agreementId, Long.valueOf(discountId));
+    }
+
+    private void validateInternetUrls(String landingPageUrl, String eycaLandingPageUrl, String discountUrl) {
+        String error = !RegexUtils.checkRulesForInternetUrl(landingPageUrl) ? "landing page url"
+                        :!RegexUtils.checkRulesForInternetUrl(discountUrl) ? "discount url"
+                        :!RegexUtils.checkRulesForInternetUrl(eycaLandingPageUrl) ? "eyca landing page url"
+                        :null;
+
+        if(error != null) {
+            throw new InvalidRequestException(error + " not valid");
+        }
     }
 }
