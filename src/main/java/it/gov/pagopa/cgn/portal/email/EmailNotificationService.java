@@ -3,22 +3,28 @@ package it.gov.pagopa.cgn.portal.email;
 import it.gov.pagopa.cgn.portal.model.NotificationEntity;
 import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.InvalidFileNameException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
+import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
 import javax.mail.internet.MimeMessage;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
 public class EmailNotificationService {
 
+    public static final int MAX_EXCEPTION_DEEP = 10;
     private final JavaMailSender javaMailSender;
     private final NotificationRepository notificationRepository;
 
@@ -89,11 +95,49 @@ public class EmailNotificationService {
             javaMailSender.send(mimeMessage);
             trackNotification(trackingKey,null,info);
         } catch (Exception e) {
-            trackNotification(trackingKey, StringUtils.abbreviate(e.getMessage(), 255),null);
+            trackNotification(trackingKey, getRootMessage(e), getInfoFromSendFailedException(e));
             throw e;
         }
     }
 
+    private SendFailedException findSendFailedException(Throwable e) {
+        return Stream.iterate(e, Objects::nonNull, Throwable::getCause)
+                     .limit(MAX_EXCEPTION_DEEP)
+                     .filter(SendFailedException.class::isInstance)
+                     .map(SendFailedException.class::cast)
+                     .findFirst()
+                     .orElse(null);
+    }
+
+    private String getRootMessage(Throwable e) {
+        Throwable trRoot = Stream.iterate(e, Objects::nonNull, Throwable::getCause)
+                                 .limit(MAX_EXCEPTION_DEEP)
+                                 .reduce((a, b) -> b)
+                                 .orElse(null);
+
+        return trRoot!=null ? trRoot.toString(): e.toString();
+    }
+
+    private String getInfoFromSendFailedException(Throwable t) {
+        SendFailedException sfe = findSendFailedException(t);
+
+        if(sfe == null) return null;
+
+        String invalid = addressesToString("invalid", sfe.getInvalidAddresses());
+        String unsent  = addressesToString("unsent",  sfe.getValidUnsentAddresses());
+
+        return Stream.of(invalid, unsent)
+                     .filter(s -> !s.isEmpty())
+                     .collect(Collectors.joining("; "));
+    }
+
+    private String addressesToString(String label, Address[] addresses) {
+        return (addresses != null && addresses.length > 0)
+               ? label + ": " + Arrays.stream(addresses)
+                                      .map(Address::toString)
+                                      .collect(Collectors.joining(", "))
+               : "";
+    }
     private NotificationEntity findNotification(String trackingKey) {
         return notificationRepository.findByKey(trackingKey);
     }
@@ -105,7 +149,7 @@ public class EmailNotificationService {
      * @param trackingKey  a key that uniquely identify this notification
      * @param errorMessage a message that indicates any error occurred
      */
-    private void trackNotification(String trackingKey, String errorMessage, String info) {
+    public void trackNotification(String trackingKey, String errorMessage, String info) {
         if (trackingKey!=null) {
             // if a key has been given we check if a notification exists
             // this is useful to update a notification that had an error

@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
+import com.sun.mail.smtp.SMTPAddressFailedException;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
 import it.gov.pagopa.cgn.portal.email.EmailParams;
@@ -8,20 +9,32 @@ import it.gov.pagopa.cgn.portal.repository.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 
+import javax.mail.Address;
 import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.net.SocketTimeoutException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -40,6 +53,17 @@ class EmailNotificationServiceTest
     private final MimeMessage expectedMimeMessage;
 
     ArgumentCaptor<NotificationEntity> argument;
+
+    @Spy
+    @InjectMocks
+    EmailNotificationService emailNotificationServiceSpy;
+
+    @Captor
+    ArgumentCaptor<String> messageCaptor;
+
+    @Captor
+    ArgumentCaptor<String> infoCaptor;
+
 
     public EmailNotificationServiceTest() {
 
@@ -113,7 +137,7 @@ class EmailNotificationServiceTest
         Mockito.verify(javaMailSenderMock, Mockito.timeout(5000).times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.timeout(5000).times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
-        Assertions.assertEquals(anErrorMessage, argument.getValue().getErrorMessage());
+        Assertions.assertEquals("java.lang.RuntimeException: An error", argument.getValue().getErrorMessage());
         Assertions.assertNull(argument.getValue().getInfo());
     }
 
@@ -142,7 +166,7 @@ class EmailNotificationServiceTest
         Mockito.verify(javaMailSenderMock, Mockito.times(1)).send(expectedMimeMessage);
         Mockito.verify(notificationRepositoryMock, Mockito.times(1)).save(argument.capture());
         Assertions.assertEquals(notificationTrackingKey, argument.getValue().getKey());
-        Assertions.assertEquals(anErrorMessage, argument.getValue().getErrorMessage());
+        Assertions.assertEquals("java.lang.RuntimeException: An error", argument.getValue().getErrorMessage());
         Assertions.assertNull(argument.getValue().getInfo());
     }
 
@@ -176,5 +200,84 @@ class EmailNotificationServiceTest
         Assertions.assertNull(argument.getValue().getErrorMessage());
         Assertions.assertNotEquals(errorAt, argument.getValue().getSentAt());
         Assertions.assertTrue(errorAt.isBefore(argument.getValue().getSentAt()));
+    }
+
+    @Test
+    void shouldTrackNotification_whenThrowsSendFailedException() throws  Exception {
+        SendFailedException sfe = getSendFailedException();
+        MessagingException sfMex = new MessagingException("Exception reading response", sfe);
+
+        String trackingKey = "TK-123";
+        String info = "unit-test";
+
+        when(notificationRepositoryMock.findByKey(anyString())).thenReturn(null);
+
+        Mockito.doThrow(new MailSendException("send failed", sfMex)).when(javaMailSenderMock).send(expectedMimeMessage);
+
+        Resource logo = Mockito.mock(Resource.class);
+        Mockito.when(logo.getFilename()).thenReturn("logoName");
+
+        assertThrows(
+                MailSendException.class,
+                () -> emailNotificationServiceSpy.sendSyncMessage(emailParams, trackingKey, info)
+        );
+
+        verify(emailNotificationServiceSpy).trackNotification(any(), messageCaptor.capture(), infoCaptor.capture());
+
+        Assertions.assertEquals(
+                "com.sun.mail.smtp.SMTPAddressFailedException: 5.7.1 <pippo.franco@rai.it>: Recipient address rejected: Access denied",
+                messageCaptor.getValue());
+
+        Assertions.assertEquals("invalid: pippo.franco@rai.it", infoCaptor.getValue());
+
+
+    }
+
+    @Test
+    void shouldTrackNotification_whenThrowsSocketTimeoutException() {
+
+        SocketTimeoutException ste = new SocketTimeoutException("Read timed out");
+        MailException mMex = new MailSendException("Exception reading response", ste);
+
+        String trackingKey = "TK-123";
+        String info = "unit-test";
+
+        when(notificationRepositoryMock.findByKey(anyString())).thenReturn(null);
+
+        Mockito.doThrow(mMex).when(javaMailSenderMock).send(expectedMimeMessage);
+
+        Resource logo = Mockito.mock(Resource.class);
+        Mockito.when(logo.getFilename()).thenReturn("logoName");
+
+        assertThrows(
+                MailSendException.class,
+                () -> emailNotificationServiceSpy.sendSyncMessage(emailParams, trackingKey, info)
+        );
+
+        verify(emailNotificationServiceSpy).trackNotification(any(), messageCaptor.capture(), any());
+
+        Assertions.assertEquals("java.net.SocketTimeoutException: Read timed out", messageCaptor.getValue());
+
+    }
+
+    private SendFailedException getSendFailedException()
+            throws AddressException {
+        InternetAddress invalid = new InternetAddress("pippo.franco@rai.it");
+
+        SMTPAddressFailedException smtpEx =
+                new SMTPAddressFailedException(
+                        invalid,
+                        "RCPT TO",           // comando SMTP
+                        554,                 // reply code
+                        "5.7.1 <" + invalid.toString() + ">: Recipient address rejected: Access denied"
+                );
+
+        return new SendFailedException(
+                "Invalid Addresses",
+                smtpEx,        // nested
+                null,                // validSent
+                null,                // validUnsent
+                new Address[]{invalid}
+        );
     }
 }
