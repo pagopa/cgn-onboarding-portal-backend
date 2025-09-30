@@ -217,8 +217,6 @@ class EmailNotificationServiceTest
         Resource logo = Mockito.mock(Resource.class);
         Mockito.when(logo.getFilename()).thenReturn("logoName");
 
-        EmailParams emailParams = getEmailParams(logo);
-
         assertThrows(
                 MailSendException.class,
                 () -> emailNotificationServiceSpy.sendSyncMessage(emailParams, trackingKey, info)
@@ -251,8 +249,6 @@ class EmailNotificationServiceTest
         Resource logo = Mockito.mock(Resource.class);
         Mockito.when(logo.getFilename()).thenReturn("logoName");
 
-        EmailParams emailParams = getEmailParams(logo);
-
         assertThrows(
                 MailSendException.class,
                 () -> emailNotificationServiceSpy.sendSyncMessage(emailParams, trackingKey, info)
@@ -262,21 +258,6 @@ class EmailNotificationServiceTest
 
         Assertions.assertEquals("java.net.SocketTimeoutException: Read timed out", messageCaptor.getValue());
 
-    }
-
-    private EmailParams getEmailParams(Resource logo) {
-        return EmailParams.builder()
-                          .replyToOpt(Optional.of("noreply@test.local"))
-                          .mailFrom("noreply@test.local")
-                          .mailToList(List.of("user@example.com"))
-                          .mailCCList(Optional.of(List.of("user@example.com")))
-                          .mailBCCList(Optional.of(List.of("user@example.com")))
-                          .subject("Subject")
-                          .body("Body")
-                          .logo(logo)
-                          .logoName("logoName")
-                          .attachments(Optional.empty())
-                          .build();
     }
 
     private SendFailedException getSendFailedException()
