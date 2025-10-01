@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class UpdateDiscountConverterTest {
 
     private static final String STATIC_CODE = "static_code";
-    private static final String URL = "www.landingpage.com";
+    private static final String URL = "https://www.landingpage.com";
     private static final String REFERRER = "referrer";
     private final UpdateDiscountConverter updateDiscountConverter = new UpdateDiscountConverter();
 

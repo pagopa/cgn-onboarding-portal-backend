@@ -39,9 +39,9 @@ class DiscountServiceTest
         extends IntegrationAbstractTest {
 
     private static final String STATIC_CODE = "static_code";
-    private static final String URL = "www.landingpage.com";
-    private static final String EYCA_URL = "www.eycalandingpage.com";
-    private static final String EYCA_URL_2 = "www.neweycalandingpage.com";
+    private static final String URL = "https://www.landingpage.com";
+    private static final String EYCA_URL = "https://www.eycalandingpage.com";
+    private static final String EYCA_URL_2 = "https://www.neweycalandingpage.com";
     private static final String REFERRER = "referrer";
     public static final String FAKE_CODE = "FAKE_CODE";
 

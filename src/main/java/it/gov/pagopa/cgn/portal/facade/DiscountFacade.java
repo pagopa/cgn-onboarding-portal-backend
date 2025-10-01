@@ -101,9 +101,9 @@ public class DiscountFacade {
     }
 
     private void validateInternetUrls(String landingPageUrl, String eycaLandingPageUrl, String discountUrl) {
-        String error = !RegexUtils.checkRulesForInternetUrl(landingPageUrl) ? "landing page url"
-                        :!RegexUtils.checkRulesForInternetUrl(discountUrl) ? "discount url"
-                        :!RegexUtils.checkRulesForInternetUrl(eycaLandingPageUrl) ? "eyca landing page url"
+        String error = landingPageUrl != null && !landingPageUrl.isEmpty() && !RegexUtils.checkRulesForInternetUrl(landingPageUrl) ? "landing page url"
+                        : discountUrl != null && !discountUrl.isEmpty() &&  !RegexUtils.checkRulesForInternetUrl(discountUrl) ? "discount url"
+                        : eycaLandingPageUrl != null && !eycaLandingPageUrl.isEmpty() &&   !RegexUtils.checkRulesForInternetUrl(eycaLandingPageUrl) ? "eyca landing page url"
                         :null;
 
         if(error != null) {
