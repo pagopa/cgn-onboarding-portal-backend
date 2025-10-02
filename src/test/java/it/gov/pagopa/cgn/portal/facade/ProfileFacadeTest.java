@@ -121,7 +121,7 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
+        discountRepository.save(discountEntity);
 
         // now we can publish the discount
         discountService.publishDiscount(agreementId, discountId);
