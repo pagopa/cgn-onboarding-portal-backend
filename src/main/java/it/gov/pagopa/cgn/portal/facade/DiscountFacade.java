@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DiscountFacade {
@@ -101,13 +102,17 @@ public class DiscountFacade {
     }
 
     private void validateInternetUrls(String landingPageUrl, String eycaLandingPageUrl, String discountUrl) {
-        String error = landingPageUrl != null && !landingPageUrl.isEmpty() && !RegexUtils.checkRulesForInternetUrl(landingPageUrl) ? "landing page url"
-                        : discountUrl != null && !discountUrl.isEmpty() &&  !RegexUtils.checkRulesForInternetUrl(discountUrl) ? "discount url"
-                        : eycaLandingPageUrl != null && !eycaLandingPageUrl.isEmpty() &&   !RegexUtils.checkRulesForInternetUrl(eycaLandingPageUrl) ? "eyca landing page url"
-                        :null;
+        Map<String, String> urls = Map.of(
+                "landing page url", landingPageUrl,
+                "discount url", discountUrl,
+                "eyca landing page url", eycaLandingPageUrl
+        );
 
-        if(error != null) {
-            throw new InvalidRequestException(error + " not valid");
+        for (Map.Entry<String, String> entry : urls.entrySet()) {
+            String value = entry.getValue();
+            if (value != null && !value.isEmpty() && !RegexUtils.checkRulesForHttpsUrl(value)) {
+                throw new InvalidRequestException(entry.getKey() + " not valid");
+            }
         }
     }
 }

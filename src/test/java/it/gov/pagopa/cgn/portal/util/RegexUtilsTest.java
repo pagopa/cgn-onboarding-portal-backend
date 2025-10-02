@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.util;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -18,7 +17,7 @@ public class RegexUtilsTest {
                  "https://pro-va.it","https://www.prova.it/he-lp.html","https://sub.domain.prova.com","https://prova.it/a_b",
                  "https://prova.it/a%20b?x=1"})
     public void regexWebsiteUrl_ok (String websiteUrl) {
-        Assertions.assertTrue(RegexUtils.checkRulesForInternetUrl(websiteUrl));
+        Assertions.assertTrue(RegexUtils.checkRulesForHttpsUrl(websiteUrl));
     }
 
     @Test
@@ -27,11 +26,10 @@ public class RegexUtilsTest {
                  "https://pr_ova.it","https://prova","https://prova.c0m","https://.it", "https://prova.it/a b",
                  "http:://prova.com/help","https://prova.it/ ciao/mondo","https://prova.it/ciao\tmondo"})
     public void regexWebsiteUrl_ko (String websiteUrl) {
-        Assertions.assertFalse(RegexUtils.checkRulesForInternetUrl(websiteUrl));
+        Assertions.assertFalse(RegexUtils.checkRulesForHttpsUrl(websiteUrl));
     }
 
     @Test
-    @Ignore
     @Parameters({"https://www.google.com/search?q=regex+url+validation",
                  "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                  "https://en.wikipedia.org/wiki/Italy",
@@ -133,6 +131,6 @@ public class RegexUtilsTest {
                  "https://www.techcrunch.com/2025/09/01/sample-startup-raises-10m/?guccounter=1",
                  "https://www.wikipedia.org/wiki/Special:Random#somefragment"})
     public void regexWebsiteRealUrl_ok (String websiteUrl) {
-        Assertions.assertTrue(RegexUtils.checkRulesForInternetUrl(websiteUrl));
+        Assertions.assertTrue(RegexUtils.checkRulesForHttpsUrl(websiteUrl));
     }
 }

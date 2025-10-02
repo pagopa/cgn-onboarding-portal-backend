@@ -82,7 +82,7 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
+        discountRepository.save(discountEntity);
 
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
@@ -230,7 +230,7 @@ class ProfileFacadeTest
     @Transactional
     @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Create_Profile_Expect_OK() {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
                                                                                       EntityType.PRIVATE,
                                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
         var agreementId = agreementEntity.getId();

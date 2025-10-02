@@ -4,9 +4,11 @@ import java.util.regex.Pattern;
 
 public class RegexUtils {
 
-    private static final Pattern URL_PATTERN = Pattern.compile("^https://(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z]{2,63}(?:/\\S*)?$");
+    private RegexUtils () {}
 
-    public static boolean checkRulesForInternetUrl(String url) {
+    private static final Pattern URL_PATTERN = Pattern.compile("^(?i)https://(?:(?>[a-z0-9]+(?:-[a-z0-9]+)*)\\.)+[a-z]{2,63}(?:/\\S*)?$");
+
+    public static boolean checkRulesForHttpsUrl(String url) {
         return URL_PATTERN.matcher(url).matches();
     }
 }

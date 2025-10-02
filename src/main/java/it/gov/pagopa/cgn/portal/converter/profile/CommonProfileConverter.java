@@ -117,7 +117,7 @@ public abstract class CommonProfileConverter<E, D>
     };
 
     private void validateWebsiteUrl(String websiteUrl) {
-        if(!RegexUtils.checkRulesForInternetUrl(websiteUrl)) {
+        if(!RegexUtils.checkRulesForHttpsUrl(websiteUrl)) {
             throw new InvalidRequestException("website url not valid");
         }
     }
