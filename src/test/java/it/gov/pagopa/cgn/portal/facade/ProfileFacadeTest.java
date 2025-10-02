@@ -5,7 +5,10 @@ import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.profile.CreateProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.ProfileConverter;
 import it.gov.pagopa.cgn.portal.converter.profile.UpdateProfileConverter;
-import it.gov.pagopa.cgn.portal.converter.referent.*;
+import it.gov.pagopa.cgn.portal.converter.referent.CreateReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.ReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.SecondaryReferentConverter;
+import it.gov.pagopa.cgn.portal.converter.referent.UpdateReferentConverter;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
@@ -34,8 +37,8 @@ class ProfileFacadeTest
         extends IntegrationAbstractTest {
 
     private static final String STATIC_CODE = "static_code";
-    private static final String URL = "www.landingpage.com";
-    private static final String EYCA_URL = "www.eycalandingpage.com";
+    private static final String URL = "https://www.landingpage.com";
+    private static final String EYCA_URL = "https://www.eycalandingpage.com";
     private static final String REFERRER = "referrer";
     private ProfileFacade profileFacade;
     private AgreementEntity agreementEntity;
@@ -79,7 +82,7 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
+        discountRepository.save(discountEntity);
 
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
@@ -118,7 +121,7 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
+        discountRepository.save(discountEntity);
 
         // now we can publish the discount
         discountService.publishDiscount(agreementId, discountId);
@@ -227,7 +230,7 @@ class ProfileFacadeTest
     @Transactional
     @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Create_Profile_Expect_OK() {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
                                                                                       EntityType.PRIVATE,
                                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
         var agreementId = agreementEntity.getId();

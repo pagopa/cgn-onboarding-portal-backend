@@ -508,8 +508,8 @@ class DocumentServiceTest
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithLandingPage(agreementEntity,
-                                                                                            "anurl.com",
-                                                                                            "eycaanurl.com",
+                                                                                            "https://anurl.com",
+                                                                                            "https://eycaanurl.com",
                                                                                             "areferrer");
         discountEntity.setDiscountValue(null);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
