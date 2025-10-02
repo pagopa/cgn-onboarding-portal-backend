@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class DiscountFacade {
@@ -41,7 +40,7 @@ public class DiscountFacade {
     }
 
     public ResponseEntity<Discount> createDiscount(String agreementId, CreateDiscount createDiscountDto) {
-        validateInternetUrls(createDiscountDto.getLandingPageUrl(),createDiscountDto.getEycaLandingPageUrl(),createDiscountDto.getDiscountUrl());
+        validateDiscountUrls(createDiscountDto.getLandingPageUrl(),createDiscountDto.getEycaLandingPageUrl(),createDiscountDto.getDiscountUrl());
 
         DiscountEntity discountEntity = createDiscountConverter.toEntity(createDiscountDto);
         CrudDiscountWrapper wrapper = discountService.createDiscount(agreementId, discountEntity);
@@ -67,7 +66,7 @@ public class DiscountFacade {
                                                    String discountId,
                                                    UpdateDiscount updateDiscountDto) {
 
-        validateInternetUrls(updateDiscountDto.getLandingPageUrl(),updateDiscountDto.getEycaLandingPageUrl(),updateDiscountDto.getDiscountUrl());
+        validateDiscountUrls(updateDiscountDto.getLandingPageUrl(),updateDiscountDto.getEycaLandingPageUrl(),updateDiscountDto.getDiscountUrl());
 
         DiscountEntity discountEntity = updateDiscountConverter.toEntity(updateDiscountDto);
         CrudDiscountWrapper wrapper = discountService.updateDiscount(agreementId,
@@ -101,18 +100,15 @@ public class DiscountFacade {
         return discountService.getDiscountBucketCodeLoadingProgess(agreementId, Long.valueOf(discountId));
     }
 
-    private void validateInternetUrls(String landingPageUrl, String eycaLandingPageUrl, String discountUrl) {
-        Map<String, String> urls = Map.of(
-                "landing page url", landingPageUrl,
-                "discount url", discountUrl,
-                "eyca landing page url", eycaLandingPageUrl
-        );
+    private void validateDiscountUrls(String landingPageUrl, String eycaLandingPageUrl, String discountUrl) {
+        validateHttpsUrls(landingPageUrl,"landingPageUrl");
+        validateHttpsUrls(eycaLandingPageUrl,"eycaLandingPageUrl");
+        validateHttpsUrls(discountUrl,"discountUrl");
+    }
 
-        for (Map.Entry<String, String> entry : urls.entrySet()) {
-            String value = entry.getValue();
-            if (value != null && !value.isEmpty() && !RegexUtils.checkRulesForHttpsUrl(value)) {
-                throw new InvalidRequestException(entry.getKey() + " not valid");
-            }
+    private void validateHttpsUrls(String url, String label) {
+        if (url != null && !url.isEmpty() && !RegexUtils.checkRulesForHttpsUrl(url)) {
+            throw new InvalidRequestException(String.format("for %s, %s is not a valid url", label,url));
         }
     }
 }
