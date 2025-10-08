@@ -12,11 +12,7 @@ public class TrimStringDeserializer
     @Override
     public String deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException {
-        String value = jp.getValueAsString();
-        if (value!=null) {
-            value = value.trim();
-        }
-        return value;
+        String s = jp.getValueAsString();
+        return (s == null || s.trim().isEmpty()) ? null : s.trim();
     }
-
 }

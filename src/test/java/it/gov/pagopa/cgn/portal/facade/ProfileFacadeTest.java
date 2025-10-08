@@ -230,10 +230,10 @@ class ProfileFacadeTest
     @Transactional
     @Tag("SkipCleanup") // we skip CleanAll because test is transactional
     void Create_Profile_Expect_OK() {
-        agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
+        AgreementEntity agreementEntityNew = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID_2,
                                                                                       EntityType.PRIVATE,
                                                                                       TestUtils.FAKE_ORGANIZATION_NAME);
-        var agreementId = agreementEntity.getId();
+        var agreementId = agreementEntityNew.getId();
         CreateProfile createProfile = TestUtils.offLineProfileFromProfileEntity(profileEntity);
         profileFacade.createProfile(agreementId, createProfile);
 
@@ -243,5 +243,4 @@ class ProfileFacadeTest
         Assertions.assertNotNull(profile);
         Assertions.assertNotNull(profile.getSecondaryReferents());
     }
-
 }
