@@ -141,7 +141,7 @@ class ProfileServiceTest
     @Test
     void Create_CreateProfileWithInvalidEmail_ThrowException() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileWithCommonFields();
-        profileEntity.setPecAddress("fakeemail.it");
+        profileEntity.setPecAddress("https://fakeemail.it");
         profileEntity.setWebsiteUrl("https://www.pagopa.gov.it/");
         profileEntity.setSalesChannel(SalesChannelEnum.ONLINE);
         Assertions.assertThrows(Exception.class, () -> {

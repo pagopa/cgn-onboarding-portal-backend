@@ -37,8 +37,8 @@ class ProfileFacadeTest
         extends IntegrationAbstractTest {
 
     private static final String STATIC_CODE = "static_code";
-    private static final String URL = "www.landingpage.com";
-    private static final String EYCA_URL = "www.eycalandingpage.com";
+    private static final String URL = "https://www.landingpage.com";
+    private static final String EYCA_URL = "https://www.eycalandingpage.com";
     private static final String REFERRER = "referrer";
     private ProfileFacade profileFacade;
     private AgreementEntity agreementEntity;
@@ -82,7 +82,7 @@ class ProfileFacadeTest
 
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
-        discountEntity = discountRepository.save(discountEntity);
+        discountRepository.save(discountEntity);
 
         agreementService.requestApproval(agreementId);
         var discountId = discountEntity.getId();
@@ -122,6 +122,7 @@ class ProfileFacadeTest
         // simulate test passed
         discountEntity.setState(DiscountStateEnum.TEST_PASSED);
         discountRepository.save(discountEntity);
+
         // now we can publish the discount
         discountService.publishDiscount(agreementId, discountId);
 

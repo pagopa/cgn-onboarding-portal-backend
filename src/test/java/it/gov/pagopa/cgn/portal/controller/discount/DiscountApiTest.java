@@ -489,8 +489,8 @@ class DiscountApiTest
 
         UpdateDiscount updateDiscount = TestUtils.updatableDiscountFromDiscountEntity(discountEntity);
         updateDiscount.setName("new_name");
-        updateDiscount.setLandingPageUrl("new_url");
-        updateDiscount.setEycaLandingPageUrl("new_eyca_url");
+        updateDiscount.setLandingPageUrl("https://new-url.com");
+        updateDiscount.setEycaLandingPageUrl("https://new-eyca-url.it");
         updateDiscount.setVisibleOnEyca(true);
         updateDiscount.setLandingPageReferrer("new_referrer");
 
@@ -903,7 +903,7 @@ class DiscountApiTest
         initTest(DiscountCodeTypeEnum.LANDINGPAGE);
 
         DiscountEntity discount = TestUtils.createSampleDiscountEntity(agreement);
-        discount.setLandingPageUrl("http://www.fakeurl.it");
+        discount.setLandingPageUrl("https://www.fakeurl.it");
         discount.setLandingPageReferrer("referrer");
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
 
@@ -991,7 +991,7 @@ class DiscountApiTest
 
     private CreateDiscount createSampleCreateDiscountWithLandingPage() {
         CreateDiscount discount = createSampleCreateDiscount();
-        discount.setLandingPageUrl("landingpage.com");
+        discount.setLandingPageUrl("https://landingpage.com");
         discount.setLandingPageReferrer("referrer");
         return discount;
     }

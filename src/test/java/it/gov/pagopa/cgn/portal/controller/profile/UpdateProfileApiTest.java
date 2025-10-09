@@ -169,7 +169,7 @@ class UpdateProfileApiTest
         UpdateProfile updateProfile = TestUtils.createSampleUpdateProfileWithCommonFields();
         OfflineChannel offlineChannel = new OfflineChannel();
         offlineChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
-        offlineChannel.setWebsiteUrl(" test ");
+        offlineChannel.setWebsiteUrl(" https://www.test.it ");
         offlineChannel.setAddresses(TestUtils.createSampleAddressDto());
         updateProfile.setSalesChannel(offlineChannel);
 
@@ -187,7 +187,7 @@ class UpdateProfileApiTest
         OfflineChannel oc = (OfflineChannel) sc;
 
         Assertions.assertNotNull(oc.getWebsiteUrl());
-        assertEquals("test", oc.getWebsiteUrl());
+        assertEquals("https://www.test.it", oc.getWebsiteUrl());
     }
 
     @Test

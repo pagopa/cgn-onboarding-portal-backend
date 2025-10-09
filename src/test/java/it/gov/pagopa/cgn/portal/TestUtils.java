@@ -214,7 +214,7 @@ public class TestUtils {
                                                                         DiscountCodeType discountCodeType) {
         OnlineChannel salesChannel = new OnlineChannel();
         salesChannel.setChannelType(SalesChannelType.ONLINE_CHANNEL);
-        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setWebsiteUrl("https://anurl.com");
         salesChannel.setDiscountCodeType(discountCodeType);
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
     }
@@ -225,7 +225,7 @@ public class TestUtils {
 
         OfflineChannel salesChannel = new OfflineChannel();
         salesChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
-        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setWebsiteUrl("https://anurl.com");
         salesChannel.setAddresses(Stream.of(address).toList());
         salesChannel.setAllNationalAddresses(true);
         return updatableProfileFromProfileEntity(profileEntity, salesChannel);
@@ -265,7 +265,7 @@ public class TestUtils {
 
         OfflineChannel salesChannel = new OfflineChannel();
         salesChannel.setChannelType(SalesChannelType.OFFLINE_CHANNEL);
-        salesChannel.setWebsiteUrl("anurl.com");
+        salesChannel.setWebsiteUrl("https://anurl.com");
         salesChannel.setAddresses(Stream.of(address).toList());
         salesChannel.setAllNationalAddresses(true);
         return createProfileFromProfileEntity(profileEntity, salesChannel);
@@ -503,7 +503,7 @@ public class TestUtils {
         discountEntity.setAgreement(agreement);
         discountEntity.setStaticCode("static_code");
         discountEntity.setVisibleOnEyca(false);
-        discountEntity.setDiscountUrl("anurl.com");
+        discountEntity.setDiscountUrl("https://anurl.com");
         return discountEntity;
     }
 
@@ -529,8 +529,8 @@ public class TestUtils {
         entity0.setReferent(1L);
         entity0.setLive("Y");
         entity0.setDiscountId(7L);
-        entity0.setLandingPageUrl("LANDING PAGE URL");
-        entity0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity0.setLandingPageUrl("https://landingpageurl.com");
+        entity0.setEycaLandingPageUrl("https://landingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
         return Collections.singletonList(entity0);
 
@@ -683,8 +683,8 @@ public class TestUtils {
         entity0.setDiscountType("LANDING PAGE");
         entity0.setLive("Y");
         entity0.setDiscountId(1L);
-        entity0.setLandingPageUrl("LANDING PAGE URL");
-        entity0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity0.setLandingPageUrl("https://landingpageurl.com");
+        entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
         return List.of(entity0);
     }
@@ -702,8 +702,8 @@ public class TestUtils {
         entity0.setDiscountType("LANDING PAGE");
         entity0.setLive("Y");
         entity0.setDiscountId(1L);
-        entity0.setLandingPageUrl("LANDING PAGE URL");
-        entity0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity0.setLandingPageUrl("https://landingpageurl.com");
+        entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
         return List.of(entity0);
     }
@@ -719,8 +719,8 @@ public class TestUtils {
         entity0.setStreet("address0");
         entity0.setDiscountType("LANDING PAGE");
         entity0.setLive("Y");
-        entity0.setLandingPageUrl("LANDING PAGE URL");
-        entity0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity0.setLandingPageUrl("https://landingpageurl.com");
+        entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
         entity0.setDiscountId(1L);
 
@@ -734,8 +734,8 @@ public class TestUtils {
         entity1.setDiscountType("LANDING PAGE");
         entity1.setLive("Y");
         entity1.setDiscountId(2L);
-        entity1.setLandingPageUrl("LANDING PAGE URL");
-        entity1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity1.setLandingPageUrl("https://landingpageurl.com");
+        entity1.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity1.setCountry("italy");
         entity1.setCity("city");
         entity1.setStreet("address0");
@@ -753,8 +753,8 @@ public class TestUtils {
         entity2.setDiscountType("LANDING PAGE");
         entity2.setLive("Y");
         entity2.setDiscountId(3L);
-        entity2.setLandingPageUrl("LANDING PAGE URL");
-        entity2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity2.setLandingPageUrl("https://landingpageurl.com");
+        entity2.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity2.setCity("city");
         entity2.setStreet("address0");
         entity2.setLatitude("48");
@@ -771,8 +771,8 @@ public class TestUtils {
         entity3.setDiscountType("LANDING PAGE");
         entity3.setLive("Y");
         entity3.setDiscountId(4L);
-        entity3.setLandingPageUrl("LANDING PAGE URL");
-        entity3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity3.setLandingPageUrl("https://landingpageurl.com");
+        entity3.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity3.setCountry("italy");
         entity3.setStreet("address0");
         entity3.setLatitude("48");
@@ -789,8 +789,8 @@ public class TestUtils {
         entity4.setDiscountType("LANDING PAGE");
         entity4.setLive("Y");
         entity4.setDiscountId(5L);
-        entity4.setLandingPageUrl("LANDING PAGE URL");
-        entity4.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity4.setLandingPageUrl("https://landingpageurl.com");
+        entity4.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity4.setCountry("italy");
         entity4.setCity("city");
         entity4.setLatitude("48");
@@ -805,10 +805,10 @@ public class TestUtils {
         entity5.setName("name_0");
         entity5.setNameLocal("name_local_0");
         entity5.setDiscountType("LANDING PAGE");
-        entity5.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity5.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity5.setLive("Y");
         entity5.setDiscountId(6L);
-        entity5.setLandingPageUrl("LANDING PAGE URL");
+        entity5.setLandingPageUrl("https://landingpageurl.com");
         entity5.setCountry("italy");
         entity5.setCity("city");
         entity5.setStreet("address0");
@@ -853,8 +853,8 @@ public class TestUtils {
         entity8.setDiscountType("LANDING PAGE");
         entity8.setLive("y");
         entity8.setDiscountId(9L);
-        entity8.setLandingPageUrl("LANDING PAGE URL");
-        entity8.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity8.setLandingPageUrl("https://landingpageurl.com");
+        entity8.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity8.setEycaUpdateId("655464565");
         entity8.setEycaEmailUpdateRequired(true);
 
@@ -870,8 +870,8 @@ public class TestUtils {
         entity9.setLive("N");
         entity9.setDiscountId(10L);
         entity9.setEycaUpdateId("650054665");
-        entity9.setLandingPageUrl("LANDING PAGE URL");
-        entity9.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity9.setLandingPageUrl("https://landingpageurl.com");
+        entity9.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity9.setEndDate(LocalDate.now().minusDays(4));
         entity9.setEycaEmailUpdateRequired(true);
         EycaDataExportViewEntity entity10 = new EycaDataExportViewEntity();
@@ -886,8 +886,8 @@ public class TestUtils {
         entity10.setDiscountType("LANDING PAGE");
         entity10.setLive("N");
         entity10.setDiscountId(10L);
-        entity10.setLandingPageUrl("LANDING PAGE URL");
-        entity10.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity10.setLandingPageUrl("https://landingpageurl.com");
+        entity10.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity10.setEycaUpdateId("6551114565");
         entity10.setEndDate(LocalDate.now());
         entity10.setEycaEmailUpdateRequired(true);
@@ -903,8 +903,8 @@ public class TestUtils {
         entity11.setDiscountType("LANDING PAGE");
         entity11.setLive("Y");
         entity11.setDiscountId(11L);
-        entity11.setLandingPageUrl("LANDING PAGE URL");
-        entity11.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity11.setLandingPageUrl("https://landingpageurl.com");
+        entity11.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity11.setEycaUpdateId("6551114565");
         entity11.setEndDate(LocalDate.now().plusDays(2));
 
@@ -1000,8 +1000,8 @@ public class TestUtils {
         entity0.setDiscountType("LANDING PAGE");
         entity0.setLive("N");
         entity0.setDiscountId(6L);
-        entity0.setLandingPageUrl("LANDING PAGE URL");
-        entity0.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity0.setLandingPageUrl("https://landingpageurl.com");
+        entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaUpdateId("ce00958658596");
         entity0.setStartDate(LocalDate.now().minusDays(10));
         entity0.setEndDate(LocalDate.now());
@@ -1019,8 +1019,8 @@ public class TestUtils {
         entity1.setStartDate(LocalDate.now().minusDays(10));
         entity1.setEndDate(LocalDate.now());
         entity1.setDiscountId(7L);
-        entity1.setLandingPageUrl("LANDING PAGE URL");
-        entity1.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity1.setLandingPageUrl("https://landingpageurl.com");
+        entity1.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity1.setEycaUpdateId("ce00957778596");
         entity1.setEycaEmailUpdateRequired(true);
 
@@ -1036,8 +1036,8 @@ public class TestUtils {
         entity2.setStartDate(LocalDate.now().minusDays(10));
         entity2.setEndDate(LocalDate.now());
         entity2.setDiscountId(8L);
-        entity2.setLandingPageUrl("LANDING PAGE URL");
-        entity2.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity2.setLandingPageUrl("https://landingpageurl.com");
+        entity2.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity2.setEycaUpdateId("ce00958999596");
         entity2.setEycaEmailUpdateRequired(true);
 
@@ -1053,8 +1053,8 @@ public class TestUtils {
         entity3.setStartDate(LocalDate.now().minusDays(10));
         entity3.setEndDate(LocalDate.now());
         entity3.setDiscountId(8L);
-        entity3.setLandingPageUrl("LANDING PAGE URL");
-        entity3.setEycaLandingPageUrl("EYCA LANDING PAGE URL");
+        entity3.setLandingPageUrl("https://landingpageurl.com");
+        entity3.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity3.setEycaEmailUpdateRequired(true);
 
         return Arrays.asList(entity0, entity1, entity2, entity3);

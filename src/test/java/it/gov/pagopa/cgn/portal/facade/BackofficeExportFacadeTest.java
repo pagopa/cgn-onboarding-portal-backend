@@ -35,8 +35,8 @@ class BackofficeExportFacadeTest
 
     private AgreementEntity agreementEntity;
 
-    private static final String EYCA_URL = "www.eycalandingpage.com/lpe";
-    private static final String EYCA_URL_2 = "www.eycalandingpage.com/Lpe2";
+    private static final String EYCA_URL = "https://www.eycalandingpage.com/lpe";
+    private static final String EYCA_URL_2 = "https://www.eycalandingpage.com/Lpe2";
 
     @BeforeEach
     void init() {
