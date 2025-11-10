@@ -64,6 +64,14 @@ public class JobScheduler {
         scheduleJob(jobKey, paramFacade.getSendDiscountsToEycaJobCronExpression(), SendDiscountsToEycaJob.class);
     }
 
+    public void scheduleCleanDiscountsBucketCodesJob()
+            throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("clean-discounts-bucket-codes", DISCOUNTS_JOB_GROUP);
+        scheduleJob(jobKey,
+                    paramFacade.getCleanDiscountsBucketCodesJobCronExpression(),
+                    CleanDiscountsBucketCodesJob.class);
+    }
+
     private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)
             throws SchedulerException {
         for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {

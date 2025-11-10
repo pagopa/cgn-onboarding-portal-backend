@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -176,7 +177,7 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.HELP_REQUEST, context);
 
-        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.HELP_REQUEST, "0",0);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.HELP_REQUEST);
 
         EmailParams emailParams = createEmailParams(Collections.singletonList(configProperties.getCgnDepartmentEmail()),
                                                     Optional.empty(),
@@ -352,7 +353,7 @@ public class EmailNotificationFacade {
                          LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String failureMessage = "It is not possible to send the email with the job summary attacchments.";
 
-        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA,"",0);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA);
 
         EmailParams emailParams = createEmailParams(bccList,
                                                     subject,
@@ -367,7 +368,7 @@ public class EmailNotificationFacade {
         String subject = "Discounts for Generic Code/URLs " +
                          LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
         String failureMessage = "It is not possible to send the email to Eyca admin";
-        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.ADMIN_EYCA,"",0);
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.ADMIN_EYCA);
 
         boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());
 
@@ -380,6 +381,31 @@ public class EmailNotificationFacade {
                                                     failureMessage);
 
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
+    }
+
+    public void notifyCleanDiscountsBucketCodes(DiscountBucketCodeRepository.CutoffInfo ci, long deletedRows) {
+        String body = String.format(""" 
+                                    The Clean Discount Bucket Codes job has successfully completed.
+                                    All bucket codes before retention period have been deleted.
+    
+                                    Summary:
+                                    • Deleted codes: {}
+                                    • Retention period: {}
+                                    • Cutoff: {}
+                                    """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff());
+
+        String subject = "Clean Discount Bucket Codes – Job execution report";
+        String failureMessage = "It is not possible to send the email for cleaned bucket codes.";
+
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.CLEAN_DISCOUNTS_BUCKET_CODES);
+
+        EmailParams emailParams = createEmailParams(bccList,
+                                                    subject,
+                                                    body,
+                                                    failureMessage,
+                                                    Collections.emptyList());
+
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,String.format("Deleted codes: {} Retention period: {} Cutoff: {}|{}",emailParams.getRecipientsSummary()));
     }
 
     private EmailParams createEmailParamsForAutomatedSending(String referentEmail,
@@ -400,7 +426,9 @@ public class EmailNotificationFacade {
                                   errorMessage,
                                   Optional.empty());
     }
-
+    public static String createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum emailEvent) {
+        return createTrackingKeyForEmailEventNotification(emailEvent, "", 0);
+    }
     public static String createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum emailEvent, String agreementId, long discountId) {
         String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         return  emailEvent.name()

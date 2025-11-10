@@ -220,4 +220,11 @@ public class BucketService {
                                                                                discountEntity.getLastBucketCodeLoad()
                                                                                              .getId());
     }
+
+    public void deleteAllBucketCodesUsedBeforeRetentionPeriod() {
+        DiscountBucketCodeRepository.CutoffInfo ci = discountBucketCodeRepository.computeCutoff();
+        long deletedRows = discountBucketCodeRepository.deleteAllBucketCodesUsedBeforeCutoff(ci.getCutoff());
+
+        emailNotificationFacade.notifyCleanDiscountsBucketCodes(ci,deletedRows);
+    }
 }
