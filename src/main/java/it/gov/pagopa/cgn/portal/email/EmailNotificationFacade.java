@@ -19,6 +19,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
@@ -383,7 +384,7 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
-    public void notifyCleanDiscountsBucketCodes(DiscountBucketCodeRepository.CutoffInfo ci, long deletedRows) {
+    public void notifyCleanDiscountsBucketCodes(DiscountBucketCodeRepository.CutoffInfo ci, long deletedRows, Duration executionTime) {
         String body = String.format(""" 
                                     The Clean Discount Bucket Codes job has successfully completed.
                                     All bucket codes before retention period have been deleted.
@@ -392,7 +393,8 @@ public class EmailNotificationFacade {
                                     • Deleted codes: {}
                                     • Retention period: {}
                                     • Cutoff: {}
-                                    """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff());
+                                    • ExecutionTime: {}
+                                    """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff(), executionTime);
 
         String subject = "Clean Discount Bucket Codes – Job execution report";
         String failureMessage = "It is not possible to send the email for cleaned bucket codes.";
@@ -405,7 +407,13 @@ public class EmailNotificationFacade {
                                                     failureMessage,
                                                     Collections.emptyList());
 
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,String.format("Deleted codes: {} Retention period: {} Cutoff: {}|{}",emailParams.getRecipientsSummary()));
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey,String.format("""
+                                                                                            Deleted codes: {} 
+                                                                                            Retention period: {} 
+                                                                                            Cutoff: {}|{}
+                                                                                         """,
+                                                                                         deletedRows,ci.getRetentionPeriod(),ci.getCutoff(),
+                                                                                         emailParams.getRecipientsSummary()));
     }
 
     private EmailParams createEmailParamsForAutomatedSending(String referentEmail,

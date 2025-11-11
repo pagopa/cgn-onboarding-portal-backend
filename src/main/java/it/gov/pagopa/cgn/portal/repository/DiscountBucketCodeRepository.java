@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public interface DiscountBucketCodeRepository
@@ -35,31 +35,30 @@ public interface DiscountBucketCodeRepository
     void burnDiscountBucketCode(@Param("bucket_code_k") Long bucketCodeId);
 
     // Idempotent, independent of execution time, timezone, and daylight saving time (DST).
-    @Query(value =
-        """
-        SELECT
-          param_value AS "retentionPeriod",
-          (
-            (CURRENT_DATE AT TIME ZONE 'Europe/Rome')
-            - (param_value)::interval
-          ) AT TIME ZONE 'Europe/Rome' AS "cutoff"
-        FROM param
-        WHERE param_group = 'CLEAN_DISCOUNTS_BUCKET_CODES_JOB'
-          AND param_key   = 'clean.discounts.bucket.codes.retention.period'
-       """, nativeQuery = true)
+    @Query(value = """
+      SELECT
+        param_value AS retentionPeriod,
+        (
+          (CURRENT_DATE AT TIME ZONE 'Europe/Rome')
+          - CAST(param_value AS interval)
+        ) AT TIME ZONE 'Europe/Rome' AS cutoff
+      FROM param
+      WHERE param_group = 'CLEAN_DISCOUNTS_BUCKET_CODES_JOB'
+        AND param_key   = 'clean.discounts.bucket.codes.retention.period'
+    """, nativeQuery = true)
     CutoffInfo computeCutoff();
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value =
         """
         DELETE FROM discount_bucket_code
         WHERE used IS TRUE
          AND usage_datetime < :cutoff
         """, nativeQuery = true)
-    long deleteAllBucketCodesUsedBeforeCutoff(@Param("cutoff") OffsetDateTime cutoff);
+    int deleteAllBucketCodesUsedBeforeCutoff(@Param("cutoff") Instant cutoff);
 
     interface CutoffInfo {
         String getRetentionPeriod();
-        OffsetDateTime getCutoff();
+        Instant getCutoff();
     }
 }
