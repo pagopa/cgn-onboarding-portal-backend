@@ -60,7 +60,7 @@ class CleanDiscountsBucketCodesJobTest
 
     @Test
     void Execute_ExecuteJob_NoBucketToDelete_JobNotRun()
-            throws IOException {
+            {
         Assertions.assertDoesNotThrow(() -> job.execute(null));
         NotificationEntity ne = notificationRepository.findByKey(trackingKey);
         Assertions.assertNull(ne);
@@ -68,15 +68,13 @@ class CleanDiscountsBucketCodesJobTest
 
     @Test
     void shouldPersistNotificationWithExpectedTrackingKey_whenJobRuns()
-            throws IOException {
+            {
         DiscountBucketCodeRepository.CutoffInfo ci = mock(DiscountBucketCodeRepository.CutoffInfo.class);
         when(ci.getRetentionPeriod()).thenReturn("P6M");
         when(ci.getCutoff()).thenReturn(cutoff);
         doReturn(ci).when(discountBucketCodeRepositorySpy).computeCutoff();
 
         Mockito.clearInvocations(emailNotificationService);
-
-        ArgumentCaptor<String> trackingKeyCaptor = ArgumentCaptor.forClass(String.class);
 
         job.execute(null);
 
@@ -101,7 +99,7 @@ class CleanDiscountsBucketCodesJobTest
     }
 
     private void init()
-            throws IOException {
+             {
 
         clearNotification();
 
@@ -115,11 +113,7 @@ class CleanDiscountsBucketCodesJobTest
         discountEntity.setState(DiscountStateEnum.PUBLISHED);
         discountEntity.setEndDate(LocalDate.now().plusDays(3));
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");
-        discountEntity = discountRepository.save(discountEntity);
-
-//        OffsetDateTime beforeCutoff = OffsetDateTime.parse("2024-01-10T10:00:00Z");
-//        OffsetDateTime afterCutoff  = OffsetDateTime.parse("2025-01-10T10:00:00Z");
-//        cutoff  = Instant.parse("2024-06-01T00:00:00Z");
+        discountRepository.save(discountEntity);
 
         OffsetDateTime nowUtc   = OffsetDateTime.now(ZoneOffset.UTC);
         OffsetDateTime cutoffOd = nowUtc.minusMonths(6).withHour(0).withMinute(0).withSecond(0).withNano(0);

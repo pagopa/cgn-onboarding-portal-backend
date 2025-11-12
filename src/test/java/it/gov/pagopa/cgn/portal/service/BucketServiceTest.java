@@ -397,8 +397,7 @@ class BucketServiceTest
     }
 
     @Test
-    void shouldReturnCutoffAndRetentionPeriodWhenComputingCutoff()
-            throws IOException {
+    void shouldReturnCutoffAndRetentionPeriodWhenComputingCutoff() {
         DiscountBucketCodeRepository.CutoffInfo info = discountBucketCodeRepository.computeCutoff();
         Assertions.assertNotNull(info.getCutoff());
         Assertions.assertNotNull(info.getRetentionPeriod());
