@@ -23,7 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.IOException;
 import java.time.*;
 import java.util.List;
 
@@ -53,7 +52,7 @@ class CleanDiscountsBucketCodesJobTest
 
     //@BeforeTransaction
     @BeforeEach
-    void before() throws IOException {
+    void before() {
         setAdminAuth();
         init();
     }
