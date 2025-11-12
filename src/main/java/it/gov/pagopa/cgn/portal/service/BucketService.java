@@ -223,6 +223,7 @@ public class BucketService {
                                                                                              .getId());
     }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void deleteAllBucketCodesUsedBeforeRetentionPeriod() {
         DiscountBucketCodeRepository.CutoffInfo ci = discountBucketCodeRepository.computeCutoff();
 

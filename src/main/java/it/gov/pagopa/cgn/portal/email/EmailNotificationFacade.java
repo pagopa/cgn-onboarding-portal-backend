@@ -390,10 +390,10 @@ public class EmailNotificationFacade {
                                     All bucket codes before retention period have been deleted.
     
                                     Summary:
-                                    • Deleted codes: {}
-                                    • Retention period: {}
-                                    • Cutoff: {}
-                                    • ExecutionTime: {}
+                                    • Deleted codes: %d
+                                    • Retention period: %s
+                                    • Cutoff: %s
+                                    • ExecutionTime: %s
                                     """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff(), executionTime);
 
         String subject = "Clean Discount Bucket Codes – Job execution report";
@@ -408,11 +408,12 @@ public class EmailNotificationFacade {
                                                     Collections.emptyList());
 
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,String.format("""
-                                                                                            Deleted codes: {} 
-                                                                                            Retention period: {} 
-                                                                                            Cutoff: {}|{}
+                                                                                            Deleted:  %d 
+                                                                                            Retention: %s 
+                                                                                            Cutoff: %s
+                                                                                            ExecTime: %s|%s
                                                                                          """,
-                                                                                         deletedRows,ci.getRetentionPeriod(),ci.getCutoff(),
+                                                                                         deletedRows,ci.getRetentionPeriod(),ci.getCutoff(),executionTime,
                                                                                          emailParams.getRecipientsSummary()));
     }
 
