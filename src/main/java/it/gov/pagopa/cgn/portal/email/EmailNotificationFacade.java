@@ -387,13 +387,17 @@ public class EmailNotificationFacade {
     public void notifyCleanDiscountsBucketCodes(DiscountBucketCodeRepository.CutoffInfo ci, long deletedRows, Duration executionTime) {
         String body = String.format(""" 
                                     The Clean Discount Bucket Codes job has successfully completed.
+                                    <br /><br />
                                     All bucket codes before retention period have been deleted.
-    
-                                    Summary:
-                                    • Deleted codes: %d
-                                    • Retention period: %s
-                                    • Cutoff: %s
-                                    • ExecutionTime: %s
+                                    <br /><br />
+                                    Summary:                                   
+                                    <br /> <br />                                   
+                                    <ul>
+                                      <li>Deleted codes: %d</li>
+                                      <li>Retention period: %s</li>
+                                      <li>Cutoff: %s</li>
+                                      <li>Execution time: %s</li>
+                                    </ul>
                                     """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff(), executionTime);
 
         String subject = "Clean Discount Bucket Codes – Job execution report";
