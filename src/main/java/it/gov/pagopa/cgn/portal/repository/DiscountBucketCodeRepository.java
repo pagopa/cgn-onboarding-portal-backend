@@ -34,14 +34,13 @@ public interface DiscountBucketCodeRepository
     @Query(value = "update discount_bucket_code set used = true where bucket_code_k=:bucket_code_k", nativeQuery = true)
     void burnDiscountBucketCode(@Param("bucket_code_k") Long bucketCodeId);
 
-    // Idempotent, independent of execution time, timezone, and daylight saving time (DST).
     @Query(value = """
       SELECT
         param_value AS retentionPeriod,
-        (
-          (CURRENT_DATE AT TIME ZONE 'Europe/Rome')
-          - CAST(param_value AS interval)
-        ) AT TIME ZONE 'Europe/Rome' AS cutoff
+        CAST(
+          CAST(CURRENT_DATE - CAST(param_value AS interval) AS date)
+          AS timestamp
+        ) AS cutoff
       FROM param
       WHERE param_group = 'CLEAN_DISCOUNTS_BUCKET_CODES_JOB'
         AND param_key   = 'clean.discounts.bucket.codes.retention.period'
