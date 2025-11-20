@@ -8,7 +8,6 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -120,7 +119,16 @@ public class DocumentService {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue());
         }
 
-        byte[] content = inputStream.readAllBytes();
+        byte[] rawContent = inputStream.readAllBytes();
+        String rawString = new String(rawContent, java.nio.charset.StandardCharsets.UTF_8);
+        java.io.BufferedReader br = new java.io.BufferedReader(new java.io.StringReader(rawString));
+        java.util.List<String> cleanedLines = new java.util.ArrayList<>();
+        String row;
+        while ((row = br.readLine()) != null) {
+            cleanedLines.add(removeInvisibleCharacters(row));
+        }
+        String cleanedString = String.join("\n", cleanedLines);
+        byte[] content = cleanedString.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         long csvRecordCount = countCsvRecord(content);
         if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
@@ -128,7 +136,7 @@ public class DocumentService {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
             if (content.length==0) {
-                throw new InternalErrorException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+                throw new InvalidRequestException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
             }
             if (csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
                                                  StringUtils.isBlank(line.get(0)))) {
@@ -178,6 +186,29 @@ public class DocumentService {
             throw new CGNException(e.getMessage());
         }
         return recordCount;
+    }
+
+    private String removeInvisibleCharacters(String line) {
+        if (line == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < line.length(); i++) {
+            char ch = line.charAt(i);
+            // Skip the BOM explicitly
+            if (ch == '\uFEFF') {
+                continue;
+            }
+            int charType = Character.getType(ch);
+            // Filter out format, control or non‑spacing mark characters; retain commas and tabs
+            if (charType == Character.FORMAT || charType == Character.CONTROL || charType == Character.NON_SPACING_MARK) {
+                if (ch != ',' && ch != '\t') {
+                    continue;
+                }
+            }
+            sb.append(ch);
+        }
+        return sb.toString();
     }
 
     @Transactional

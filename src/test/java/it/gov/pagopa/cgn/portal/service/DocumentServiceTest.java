@@ -18,6 +18,9 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
+import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
@@ -27,18 +30,23 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
+import org.thymeleaf.TemplateEngine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -543,6 +551,70 @@ class DocumentServiceTest
         String actual = stripper.getText(document);
         GenerateAdhesionRequestAssertions(actual);
 
+    }
+
+    @Test
+    void testStoreBucketValidationsWithInvisibleCharacters()
+            throws Exception {
+        setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
+
+        ProfileRepository profileRepository = Mockito.mock(ProfileRepository.class);
+        DocumentRepository documentRepository = Mockito.mock(DocumentRepository.class);
+        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
+        AgreementServiceLight agreementServiceLight = Mockito.mock(AgreementServiceLight.class);
+        TemplateEngine templateEngine = Mockito.mock(TemplateEngine.class);
+
+        AzureStorage azureStorage = Mockito.mock(AzureStorage.class);
+        ConfigProperties configProperties = Mockito.mock(ConfigProperties.class);
+
+        ProfileEntity mockedProfile = Mockito.mock(ProfileEntity.class);
+        Mockito.when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
+        Mockito.when(profileRepository.findByAgreementId(Mockito.anyString()))
+               .thenReturn(Optional.of(mockedProfile));
+
+        Mockito.when(configProperties.getBucketMinCsvRows()).thenReturn(1);
+        Mockito.doNothing().when(azureStorage).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        DocumentService documentService = new DocumentService(documentRepository,
+                                                              profileRepository,
+                                                              discountRepository,
+                                                              agreementServiceLight,
+                                                              azureStorage,
+                                                              templateEngine,
+                                                              configProperties);
+
+        InputStream resourceStream = this.getClass().getClassLoader()
+                                         .getResourceAsStream("test-bucket-codes.csv");
+        Assertions.assertNotNull(resourceStream, "Test CSV file should exist in resources");
+        List<String> rows = new java.io.BufferedReader(new java.io.InputStreamReader(resourceStream, StandardCharsets.UTF_8))
+                .lines().toList();
+
+        // Collect produced messages
+        Set<String> producedMessages = new HashSet<>();
+
+        int rowIndex = 0;
+        for (String originalCode : rows) {
+            rowIndex++;
+            try (InputStream singleIs = new ByteArrayInputStream(originalCode.getBytes(StandardCharsets.UTF_8))) {
+                documentService.storeBucket(agreementEntityPA.getId(), singleIs, originalCode.length());
+            } catch (InvalidRequestException ex) {
+                producedMessages.add(ex.getMessage());
+                System.out.println("Riga " + rowIndex + ": codice='" + originalCode + "' messaggio='" + ex.getMessage() + "'");
+            }
+        }
+
+        // Define the expected set of messages
+        Set<String> expectedMessages = new HashSet<>();
+        expectedMessages.add(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+        expectedMessages.add(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue());
+        expectedMessages.add(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue());
+        expectedMessages.add(ErrorCodeEnum.ONE_OR_MORE_CODES_ARE_NOT_VALID.getValue());
+
+        // Assert that all expected messages are produced and no additional ones exist
+        Assertions.assertTrue(producedMessages.containsAll(expectedMessages),
+                              "Not all expected validation messages were produced");
+        Assertions.assertEquals(expectedMessages.size(), producedMessages.size(),
+                                "Unexpected validation messages were produced");
     }
 
     private void GenerateAdhesionRequestAssertions(String actual) {
