@@ -25,13 +25,13 @@ public class EmailTemplateTest
     protected TemplateEngine htmlTemplateEngine;
 
     @Test
-    public void templateFileIsOnClasspath() {
+    void templateFileIsOnClasspath() {
         verifyIsOnPath(TemplateEmail.CLEAN_DISCOUNT_BUCKET_CODES);
         verifyIsOnPath(TemplateEmail.SEND_DISCOUNTS_TO_EYCA);
     }
 
     @Test
-    public void bodyShouldContainExpectedValuesForCleanDiscountBucketCodes() {
+    void bodyShouldContainExpectedValuesForCleanDiscountBucketCodes() {
         long deletedCodes = 1234L;
         String retentionPeriod = "P180D";
         Instant cutoff = Instant.parse("2025-01-01T00:00:00Z");
@@ -60,7 +60,7 @@ public class EmailTemplateTest
 
 
     @Test
-    public void bodyShouldContainExpectedValuesForSendDiscountsToEyca() {
+    void bodyShouldContainExpectedValuesForSendDiscountsToEyca() {
         int entitiesToCreateOnEyca = 12;
         int entitiesToUpdateOnEyca = 34;
         int entitiesToDeleteOnEyca = 10;
