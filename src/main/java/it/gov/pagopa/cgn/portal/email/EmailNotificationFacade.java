@@ -349,10 +349,24 @@ public class EmailNotificationFacade {
     }
 
 
-    public void notifyAdminForJobEyca(List<Attachment> attachments, String body) {
-        String subject = "Eyca job launch summary attachments of: " +
+    public void notifyAdminForJobEyca(List<Attachment> attachments,
+                                      Integer entitiesToCreateOnEyca,
+                                      Integer entitiesToUpdateOnEyca,
+                                      Integer entitiesToDeleteOnEyca) {
+
+        var context = new Context();
+        context.setVariable("entitiesToCreateOnEyca", entitiesToCreateOnEyca);
+        context.setVariable("entitiesToUpdateOnEyca", entitiesToUpdateOnEyca);
+        context.setVariable("entitiesToDeleteOnEyca", entitiesToDeleteOnEyca);
+
+        var body = getTemplateHtml(TemplateEmail.CLEAN_DISCOUNT_BUCKET_CODES, context);
+
+        log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + body);
+
+        String subject = "Riepilogo del lancio del job eyca del: " +
                          LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String failureMessage = "It is not possible to send the email with the job summary attacchments.";
+        String failureMessage = "Non è stato possibile inviare l'email del riepilogo del job eyca";
+
 
         final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA);
 
@@ -385,23 +399,17 @@ public class EmailNotificationFacade {
     }
 
     public void notifyCleanDiscountsBucketCodes(DiscountBucketCodeRepository.CutoffInfo ci, long deletedRows, Duration executionTime) {
-        String body = String.format(""" 
-                                    The Clean Discount Bucket Codes job has successfully completed.
-                                    <br /><br />
-                                    All bucket codes before retention period have been deleted.
-                                    <br /><br />
-                                    Summary:                                   
-                                    <br /> <br />                                   
-                                    <ul>
-                                      <li>Deleted codes: %d</li>
-                                      <li>Retention period: %s</li>
-                                      <li>Cutoff: %s</li>
-                                      <li>Execution time: %s</li>
-                                    </ul>
-                                    """,deletedRows,ci.getRetentionPeriod(),ci.getCutoff(), executionTime);
 
-        String subject = "Clean Discount Bucket Codes – Job execution report";
-        String failureMessage = "It is not possible to send the email for cleaned bucket codes.";
+        var context = new Context();
+        context.setVariable("deletedCodes", deletedRows);
+        context.setVariable("retentionPeriod", ci.getRetentionPeriod());
+        context.setVariable("cutoff", ci.getCutoff());
+        context.setVariable("execTime", executionTime);
+
+        var body = getTemplateHtml(TemplateEmail.CLEAN_DISCOUNT_BUCKET_CODES, context);
+
+        String subject = "Clean Discount Bucket Codes – report esecuzione job";
+        String failureMessage = "Non è stato possibile inviare l'email per il Job Clean Discount Bucket Codes.";
 
         final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.CLEAN_DISCOUNTS_BUCKET_CODES);
 
@@ -413,7 +421,7 @@ public class EmailNotificationFacade {
 
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,String.format("""
                                                                                             Deleted:  %d 
-                                                                                            Retention: %s 
+                                                                                            Ret.Period: %s 
                                                                                             Cutoff: %s
                                                                                             ExecTime: %s|%s
                                                                                          """,
