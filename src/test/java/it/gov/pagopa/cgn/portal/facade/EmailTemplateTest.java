@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class EmailTemplateTest
+class EmailTemplateTest
         extends IntegrationAbstractTest {
 
     @Autowired
