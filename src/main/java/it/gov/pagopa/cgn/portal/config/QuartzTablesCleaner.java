@@ -12,7 +12,7 @@ public class QuartzTablesCleaner implements ApplicationListener<ApplicationStart
 
     private final JdbcTemplate jdbcTemplate;
 
-    public static enum QuartsTablesEnum {
+    public enum QuartsTablesEnum {
         QRTZ_FIRED_TRIGGERS,
         QRTZ_PAUSED_TRIGGER_GRPS,
         QRTZ_SCHEDULER_STATE,
