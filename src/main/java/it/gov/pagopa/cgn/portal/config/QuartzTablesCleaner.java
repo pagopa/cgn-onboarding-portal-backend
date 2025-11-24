@@ -12,34 +12,34 @@ public class QuartzTablesCleaner implements ApplicationListener<ApplicationStart
 
     private final JdbcTemplate jdbcTemplate;
 
+    public static enum QuartsTablesEnum {
+        QRTZ_FIRED_TRIGGERS,
+        QRTZ_PAUSED_TRIGGER_GRPS,
+        QRTZ_SCHEDULER_STATE,
+        QRTZ_LOCKS,
+        QRTZ_SIMPLE_TRIGGERS,
+        QRTZ_CRON_TRIGGERS,
+        QRTZ_SIMPROP_TRIGGERS,
+        QRTZ_BLOB_TRIGGERS,
+        QRTZ_TRIGGERS,
+        QRTZ_JOB_DETAILS;
+    }
+
     public QuartzTablesCleaner(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
-        cleanQuartzTables();
+            cleanQuartzTables();
     }
 
     private void cleanQuartzTables() {
-        String[] tables = {
-                "QRTZ_FIRED_TRIGGERS",
-                "QRTZ_PAUSED_TRIGGER_GRPS",
-                "QRTZ_SCHEDULER_STATE",
-                "QRTZ_LOCKS",
-                "QRTZ_SIMPLE_TRIGGERS",
-                "QRTZ_CRON_TRIGGERS",
-                "QRTZ_SIMPROP_TRIGGERS",
-                "QRTZ_BLOB_TRIGGERS",
-                "QRTZ_TRIGGERS",
-                "QRTZ_JOB_DETAILS"
-        };
-
         log.info("Quartz tables start cleaning...");
 
-        for (String table : tables) {
+        for (QuartsTablesEnum table : QuartsTablesEnum.values()) {
             try {
-                String delete = "DELETE FROM " + table;
+                String delete = String.format("DELETE FROM %s", table);
                 jdbcTemplate.update(delete);
                 log.info("{} OK", delete);
             } catch (Exception e) {
