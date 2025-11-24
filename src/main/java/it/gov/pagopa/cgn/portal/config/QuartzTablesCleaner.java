@@ -34,6 +34,7 @@ public class QuartzTablesCleaner implements ApplicationListener<ApplicationStart
             cleanQuartzTables();
     }
 
+    @SuppressWarnings("java:S2077") // Safe: table name comes from enum, not user input
     private void cleanQuartzTables() {
         log.info("Quartz tables start cleaning...");
 
