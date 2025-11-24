@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface DiscountBucketCodeRepositoryCustom {
 
-    public void bulkPersist(List<DiscountBucketCodeEntity> entities);
+    void bulkPersist(List<DiscountBucketCodeEntity> entities);
 
 }

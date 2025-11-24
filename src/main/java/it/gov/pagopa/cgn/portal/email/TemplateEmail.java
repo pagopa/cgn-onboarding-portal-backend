@@ -21,7 +21,8 @@ public enum TemplateEmail {
     EXPIRING_BUCKET_CODES("email/bucket-codes-expiring.html"),
     WEEKLY_SUMMARY_BUCKET_CODES("email/bucket-codes-weekly-summary.html"),
     EXPIRED_BUCKET_CODES("email/bucket-codes-expired.html"),
-    HELP_REQUEST("email/help-request.html");
-
+    HELP_REQUEST("email/help-request.html"),
+    CLEAN_DISCOUNT_BUCKET_CODES("email/internal/clean-discount-bucket-codes.html"),
+    SEND_DISCOUNTS_TO_EYCA("email/internal/send-discounts-to-eyca.html");
     private final String templateName;
 }

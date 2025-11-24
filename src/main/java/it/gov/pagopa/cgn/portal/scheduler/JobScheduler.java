@@ -64,10 +64,21 @@ public class JobScheduler {
         scheduleJob(jobKey, paramFacade.getSendDiscountsToEycaJobCronExpression(), SendDiscountsToEycaJob.class);
     }
 
+    public void scheduleCleanDiscountsBucketCodesJob()
+            throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("clean-discounts-bucket-codes", DISCOUNTS_JOB_GROUP);
+        scheduleJob(jobKey,
+                    paramFacade.getCleanDiscountsBucketCodesJobCronExpression(),
+                    CleanDiscountsBucketCodesJob.class);
+    }
+
     private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)
             throws SchedulerException {
-        for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
-            scheduler.unscheduleJob(trigger.getKey());
+
+        //deletes job and own triggers
+        if (scheduler.checkExists(jobKey)) {
+            log.info("Job [{}] it already exists, I'll delete it before recreating it", jobKey.getName());
+            scheduler.deleteJob(jobKey);
         }
 
         log.info("Scheduling job [{}] with cron [{}]", jobKey.getName(), cronExpression);
