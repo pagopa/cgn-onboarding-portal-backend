@@ -500,6 +500,7 @@ public class EmailNotificationFacade {
                                  Optional.of(attachments));
     }
 
+    @SuppressWarnings("java:S107") 
     private EmailParams createEmailParams(List<String> mailTo,
                                           Optional<List<String>> ccList,
                                           Optional<List<String>> bccList,
