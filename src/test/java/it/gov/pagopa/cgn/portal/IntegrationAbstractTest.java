@@ -356,6 +356,7 @@ public class IntegrationAbstractTest {
                                                                                  .withPassword("admin");
 
         private static void startContainers() {
+            postgres.withCommand("postgres", "-c", "max_connections=200");
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
         }
 
