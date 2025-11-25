@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
-public class SendDiscountsToEycaJobTest extends IntegrationAbstractTest {
+class SendDiscountsToEycaJobTest extends IntegrationAbstractTest {
 
     @MockBean
     private EmailNotificationService emailNotificationService;

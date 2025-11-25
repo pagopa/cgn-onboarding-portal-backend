@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
 @Slf4j
+@SuppressWarnings("java:S5786")
 public class IntegrationAbstractTest {
 
     @Autowired
