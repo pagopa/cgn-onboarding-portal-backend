@@ -11,7 +11,10 @@ import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
-import it.gov.pagopa.cgn.portal.repository.*;
+import it.gov.pagopa.cgn.portal.repository.BucketCodeLoadRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeSummaryRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
@@ -28,11 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -388,6 +394,68 @@ class BucketServiceTest
             }
             Assertions.assertTrue(csvRecordCount > 0);
         }
+    }
+
+    @Test
+    void shouldReturnCutoffAndRetentionPeriodWhenComputingCutoff() {
+        DiscountBucketCodeRepository.CutoffInfo info = discountBucketCodeRepository.computeCutoff();
+        Assertions.assertNotNull(info.getCutoff());
+        Assertions.assertNotNull(info.getRetentionPeriod());
+
+    }
+
+    @Transactional
+    @Test
+    void shouldDeleteOnlyUsedBucketCodesWithUsageDateBeforeCutoff() {
+        // given
+        OffsetDateTime beforeCutoff = OffsetDateTime.parse("2024-01-10T10:00:00Z");
+        OffsetDateTime afterCutoff  = OffsetDateTime.parse("2025-01-10T10:00:00Z");
+        Instant cutoff       = Instant.parse("2024-06-01T00:00:00Z");
+
+        DiscountEntity deBeforeCutoff = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+        DiscountEntity deAfterCutoff = TestUtils.createSampleDiscountEntityWithBucketCodes(agreementEntity);
+
+        discountRepository.saveAll(List.of(deBeforeCutoff,deAfterCutoff));
+
+        // creo i record di test
+        DiscountBucketCodeEntity toDelete      = newCode(true, deBeforeCutoff, beforeCutoff);
+        DiscountBucketCodeEntity shouldRemainBefore = newCode(false,deBeforeCutoff, beforeCutoff);
+        DiscountBucketCodeEntity shouldRemainAfter = newCode(true, deAfterCutoff, afterCutoff);
+
+
+        discountBucketCodeRepository.saveAll(List.of(toDelete, shouldRemainAfter, shouldRemainBefore));
+        discountBucketCodeRepository.flush();
+
+        // when
+        long deletedCount = discountBucketCodeRepository.deleteAllBucketCodesUsedBeforeCutoff(cutoff);
+
+        // then
+        Assertions.assertEquals(1L, deletedCount);
+
+        List<DiscountBucketCodeEntity> remaining = discountBucketCodeRepository.findAll();
+        Assertions.assertEquals(2, remaining.size());
+
+        // verifica che rimanga 1 usato (quello dopo cutoff) e 1 non usato
+        long usedCount = remaining.stream().filter(DiscountBucketCodeEntity::getIsUsed).count();
+        Assertions.assertEquals(1L, usedCount);
+
+        boolean existsUsedAfterCutoff = remaining.stream()
+                                                 .anyMatch(c -> c.getIsUsed() && !c.getUsageDatetime().toInstant().isBefore(cutoff));
+        Assertions.assertTrue(existsUsedAfterCutoff);
+
+        boolean existsNotUsed = remaining.stream()
+                                         .anyMatch(c -> !c.getIsUsed());
+        Assertions.assertTrue(existsNotUsed);
+    }
+
+    private DiscountBucketCodeEntity newCode(boolean used, DiscountEntity de, OffsetDateTime usageDatetime) {
+        DiscountBucketCodeEntity e = new DiscountBucketCodeEntity();
+        e.setIsUsed(used);
+        e.setUsageDatetime(usageDatetime);
+        e.setCode("x");
+        e.setBucketCodeLoadId(0L);
+        e.setDiscount(de);
+        return e;
     }
 
     private long countCsvRecord(byte[] content) {

@@ -380,12 +380,10 @@ public class ExportService {
                                                              entitiesToUpdateOnEyca,
                                                              entitiesToDeleteOnEyca);
 
-            String bodyForAdminForJobEyca =
-                    "Discounts to create: " + entitiesToCreateOnEyca.size() + "<br /> Discounts to update: " +
-                    entitiesToUpdateOnEyca.size() + "<br /> Discounts to delete: " + entitiesToDeleteOnEyca.size();
-
-            log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + bodyForAdminForJobEyca);
-            emailNotificationFacade.notifyAdminForJobEyca(attachments, bodyForAdminForJobEyca);
+            emailNotificationFacade.notifyAdminForJobEyca(attachments,
+                                                          entitiesToCreateOnEyca.size(),
+                                                          entitiesToUpdateOnEyca.size(),
+                                                          entitiesToDeleteOnEyca.size());
             log.info("sendDiscountsToEyca end success");
 
             if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty() ||
