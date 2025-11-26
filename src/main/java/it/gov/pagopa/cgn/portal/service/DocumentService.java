@@ -33,9 +33,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +58,7 @@ public class DocumentService {
                || cp == '\t';
     };
 
-    private static final Function<String, String> removeInvisibleChars = line -> {
+    private static final UnaryOperator<String> removeInvisibleChars = line -> {
         if (line == null) {
             return null;
         }
@@ -69,7 +69,7 @@ public class DocumentService {
         return sb.toString();
     };
 
-    private static final Function<byte[], byte[]> cleanContent = rawContent -> {
+    private static final UnaryOperator<byte[]> cleanContent = rawContent -> {
         String cleanedString = new BufferedReader(
                 new StringReader(new String(rawContent, StandardCharsets.UTF_8)))
                 .lines()

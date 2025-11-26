@@ -211,9 +211,12 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithInvalidData_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+        byte[] content = "".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-          new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
@@ -222,10 +225,12 @@ class DocumentServiceTest
     void Upload_UploadBucketWithInvalidData_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
+        byte[] content = "".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntityPA.getId(),
-        new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8))));
-
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
@@ -234,9 +239,13 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
+        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-            new ByteArrayInputStream("ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
                                 exception.getMessage());
@@ -246,9 +255,13 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
+        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntityPA.getId();
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntityPA.getId(),
-            new ByteArrayInputStream("ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
                                 exception.getMessage());
@@ -258,9 +271,12 @@ class DocumentServiceTest
     void Upload_UploadBucketWithCodeTypeNoBucket_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.LANDINGPAGE);
 
+        byte[] content = "".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-            new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
                                 exception.getMessage());
@@ -270,9 +286,12 @@ class DocumentServiceTest
     void Upload_UploadBucketWithCodeTypeNoBucket_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.LANDINGPAGE);
 
+        byte[] content = "".getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntityPA.getId(),
-            new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
                                 exception.getMessage());
@@ -282,11 +301,14 @@ class DocumentServiceTest
     void Upload_UploadBucketWithNotMinimumBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
-        //bucket csv without header
+
+        byte[] content = "item1\n".repeat(9999).getBytes(StandardCharsets.UTF_8);
+        InputStream in = new ByteArrayInputStream(content);
+        String agreementId = agreementEntity.getId();
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-            new ByteArrayInputStream( "item1\n".repeat(9999).getBytes(StandardCharsets.UTF_8))));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue(),
                                 exception.getMessage());
@@ -329,8 +351,10 @@ class DocumentServiceTest
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
 
+        byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+
         Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementEntity.getId(),
-            new ByteArrayInputStream("A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8))));
+                                                                        new ByteArrayInputStream(contentCharsAndNum)));
     }
 
     @Test
