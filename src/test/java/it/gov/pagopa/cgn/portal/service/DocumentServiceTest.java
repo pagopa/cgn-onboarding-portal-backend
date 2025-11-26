@@ -586,7 +586,7 @@ class DocumentServiceTest
                 documentServiceLocal.storeBucket(agreementEntity.getId(), singleIs);
             } catch (InvalidRequestException ex) {
                 producedMessages.add(ex.getMessage());
-                log.info("Riga " + rowIndex + ": codice='" + originalCode + "' messaggio='" + ex.getMessage() + "'");
+                log.info("Riga {}: codice='{}' messaggio='{}'", rowIndex, originalCode, ex.getMessage());
             }
         }
 
