@@ -322,23 +322,24 @@ class DocumentServiceTest
         byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        String agreementId = agreementEntity.getId();
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementEntity.getId(),
-            new ByteArrayInputStream(contentOnlyChars)));
+                                                      () -> documentService.storeBucket(agreementId,
+                                                                              new ByteArrayInputStream(contentOnlyChars)));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
+                                            () -> documentService.storeBucket(agreementId,
                                                                               new ByteArrayInputStream(contentOnlyNum)));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
-                                            () -> documentService.storeBucket(agreementEntity.getId(),
+                                            () -> documentService.storeBucket(agreementId,
                                                                               new ByteArrayInputStream(contentNotAllowedSpChar)));
 
         Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
@@ -352,8 +353,8 @@ class DocumentServiceTest
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
 
         byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-
-        Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementEntity.getId(),
+        String agreementId = agreementEntity.getId();
+        Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementId,
                                                                         new ByteArrayInputStream(contentCharsAndNum)));
     }
 
@@ -548,24 +549,24 @@ class DocumentServiceTest
         AgreementServiceLight agreementServiceLight = Mockito.mock(AgreementServiceLight.class);
         TemplateEngine templateEngine = Mockito.mock(TemplateEngine.class);
 
-        AzureStorage azureStorage = Mockito.mock(AzureStorage.class);
-        ConfigProperties configProperties = Mockito.mock(ConfigProperties.class);
+        AzureStorage azureStorageMock = Mockito.mock(AzureStorage.class);
+        ConfigProperties configPropertiesMock = Mockito.mock(ConfigProperties.class);
 
         ProfileEntity mockedProfile = Mockito.mock(ProfileEntity.class);
         Mockito.when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
         Mockito.when(profileRepository.findByAgreementId(Mockito.anyString()))
                .thenReturn(Optional.of(mockedProfile));
 
-        Mockito.when(configProperties.getBucketMinCsvRows()).thenReturn(1);
-        Mockito.doNothing().when(azureStorage).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+        Mockito.when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
+        Mockito.doNothing().when(azureStorageMock).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
 
-        DocumentService documentService = new DocumentService(documentRepository,
+        DocumentService documentServiceLocal = new DocumentService(documentRepository,
                                                               profileRepository,
                                                               discountRepository,
                                                               agreementServiceLight,
-                                                              azureStorage,
+                                                              azureStorageMock,
                                                               templateEngine,
-                                                              configProperties);
+                                                              configPropertiesMock);
 
         InputStream resourceStream = this.getClass().getClassLoader()
                                          .getResourceAsStream("test-bucket-codes.csv");
@@ -582,7 +583,7 @@ class DocumentServiceTest
         for (String originalCode : rows) {
             rowIndex++;
             try (InputStream singleIs = new ByteArrayInputStream(originalCode.getBytes(StandardCharsets.UTF_8))) {
-                documentService.storeBucket(agreementEntity.getId(), singleIs);
+                documentServiceLocal.storeBucket(agreementEntity.getId(), singleIs);
             } catch (InvalidRequestException ex) {
                 producedMessages.add(ex.getMessage());
                 log.info("Riga " + rowIndex + ": codice='" + originalCode + "' messaggio='" + ex.getMessage() + "'");
