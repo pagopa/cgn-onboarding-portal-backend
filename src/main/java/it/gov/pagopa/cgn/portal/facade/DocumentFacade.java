@@ -76,7 +76,7 @@ public class DocumentFacade {
     public ResponseEntity<BucketLoad> uploadBucket(String agreementId, MultipartFile document) {
         String bucketLoadUID;
         try {
-            bucketLoadUID = documentService.storeBucket(agreementId, document.getInputStream(), document.getSize());
+            bucketLoadUID = documentService.storeBucket(agreementId, document.getInputStream());
         } catch (IOException e) {
             throw new InternalErrorException(e.getMessage());
         }
