@@ -323,24 +323,27 @@ class DocumentServiceTest
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         String agreementId = agreementEntity.getId();
+        
+        ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
+        ByteArrayInputStream bisOn = new ByteArrayInputStream(contentOnlyNum);
+        ByteArrayInputStream bisNaSc = new ByteArrayInputStream(contentNotAllowedSpChar);
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementId,
-                                                                              new ByteArrayInputStream(contentOnlyChars)));
+                                                      () -> documentService.storeBucket(agreementId,bisOc));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
                                             () -> documentService.storeBucket(agreementId,
-                                                                              new ByteArrayInputStream(contentOnlyNum)));
+                                                                              bisOn));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
                                             () -> documentService.storeBucket(agreementId,
-                                                                              new ByteArrayInputStream(contentNotAllowedSpChar)));
+                                                                              bisNaSc));
 
         Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
                                 exception.getMessage());
