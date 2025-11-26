@@ -359,7 +359,7 @@ public class EmailNotificationFacade {
         context.setVariable("entitiesToUpdateOnEyca", entitiesToUpdateOnEyca);
         context.setVariable("entitiesToDeleteOnEyca", entitiesToDeleteOnEyca);
 
-        var body = getTemplateHtml(TemplateEmail.CLEAN_DISCOUNT_BUCKET_CODES, context);
+        var body = getTemplateHtml(TemplateEmail.SEND_DISCOUNTS_TO_EYCA, context);
 
         log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + body);
 
@@ -500,6 +500,7 @@ public class EmailNotificationFacade {
                                  Optional.of(attachments));
     }
 
+    @SuppressWarnings("java:S107") 
     private EmailParams createEmailParams(List<String> mailTo,
                                           Optional<List<String>> ccList,
                                           Optional<List<String>> bccList,
