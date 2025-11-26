@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
 @Slf4j
+@SuppressWarnings("java:S5786")
 public class IntegrationAbstractTest {
 
     @Autowired
@@ -356,6 +357,7 @@ public class IntegrationAbstractTest {
                                                                                  .withPassword("admin");
 
         private static void startContainers() {
+            postgres.withCommand("postgres", "-c", "max_connections=200");
             Startables.deepStart(Stream.of(postgres, azurite, greenMailContainer)).join();
         }
 

@@ -163,6 +163,10 @@ public class ConfigProperties {
     @Value("${suspend.referents.mail.sending}")
     private String suspendReferentsMailSending;
 
+    @Value("${clean.discounts.bucket.codes.job.cron}")
+    private String cleanDiscountsBucketCodesJobCronExpression;
+
+
     public boolean isActiveProfileDev() {
         boolean isDev =  "dev".equalsIgnoreCase(getActiveProfile());
         log.info("isDev={}", isDev);

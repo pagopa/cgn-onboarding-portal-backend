@@ -68,6 +68,11 @@ public class ParamFacade {
                      : paramService.getParam(ParamGroupEnum.SEND_DISCOUNTS_EYCA_JOB, "send.discounts.to.eyca.job.cron");
     }
 
+    public String getCleanDiscountsBucketCodesJobCronExpression() {
+        return isDev ? configProperties.getCleanDiscountsBucketCodesJobCronExpression()
+                     : paramService.getParam(ParamGroupEnum.CLEAN_DISCOUNTS_BUCKET_CODES_JOB, "clean.discounts.bucket.codes.job.cron");
+    }
+
     public String getSuspendReferentsMailSending() {
 
         return isDev ? configProperties.getSuspendReferentsMailSending()

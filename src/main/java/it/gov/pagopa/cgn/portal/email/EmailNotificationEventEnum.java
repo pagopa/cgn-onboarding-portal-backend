@@ -11,5 +11,6 @@ public enum EmailNotificationEventEnum {
     DISCOUNT_TEST_FAILED,
     DISCOUNT_EXPIRING,
     JOB_ADMIN_EYCA,
-    ADMIN_EYCA
+    ADMIN_EYCA,
+    CLEAN_DISCOUNTS_BUCKET_CODES
 }

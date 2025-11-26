@@ -13,7 +13,8 @@ public enum ParamGroupEnum {
     SUSPEND_DISCOUNTS_JOB,
     CHECK_EXPIRING_DISC_JOB,
     SEND_LOW_DISC_BUCKET_CODES_NOTIF_JOB,
-    CGN_JOB_FLAGS;
+    CGN_JOB_FLAGS,
+    CLEAN_DISCOUNTS_BUCKET_CODES_JOB;
 
     private final String code;
 

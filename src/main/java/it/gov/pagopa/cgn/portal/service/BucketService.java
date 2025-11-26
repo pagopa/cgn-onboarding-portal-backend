@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Stream;
@@ -219,5 +221,16 @@ public class BucketService {
         return discountBucketCodeRepository.countByDiscountAndBucketCodeLoadId(discountEntity,
                                                                                discountEntity.getLastBucketCodeLoad()
                                                                                              .getId());
+    }
+
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public void deleteAllBucketCodesUsedBeforeRetentionPeriod() {
+        DiscountBucketCodeRepository.CutoffInfo ci = discountBucketCodeRepository.computeCutoff();
+
+        Instant start = Instant.now();
+        long deletedRows = discountBucketCodeRepository.deleteAllBucketCodesUsedBeforeCutoff(ci.getCutoff());
+        Duration executionTime = Duration.between(start, Instant.now());
+
+        emailNotificationFacade.notifyCleanDiscountsBucketCodes(ci,deletedRows,executionTime);
     }
 }
