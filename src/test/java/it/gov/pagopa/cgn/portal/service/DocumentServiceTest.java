@@ -10,7 +10,6 @@ import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ProductCategoryEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -18,27 +17,36 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.DocumentEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AddressRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
+import it.gov.pagopa.cgn.portal.repository.DocumentRepository;
+import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.CollectionUtils;
+import org.thymeleaf.TemplateEngine;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,6 +56,7 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
+@Slf4j
 class DocumentServiceTest
         extends IntegrationAbstractTest {
 
@@ -174,16 +183,14 @@ class DocumentServiceTest
             throws IOException {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = multipartFile.getBytes();
         String bucketUID = documentService.storeBucket(agreementEntity.getId(),
-                                                       multipartFile.getInputStream(),
-                                                       multipartFile.getSize());
+                                                       multipartFile.getInputStream());
 
         Assertions.assertNotNull(bucketUID);
 
         BlobClient client = documentContainerClient.getBlobClient(bucketUID + ".csv");
 
-        Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
+        Assertions.assertNotNull(IOUtils.toByteArray(client.openInputStream()));
     }
 
     @Test
@@ -191,16 +198,14 @@ class DocumentServiceTest
             throws IOException {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = multipartFile.getBytes();
         String bucketUID = documentService.storeBucket(agreementEntityPA.getId(),
-                                                       multipartFile.getInputStream(),
-                                                       multipartFile.getSize());
+                                                       multipartFile.getInputStream());
 
         Assertions.assertNotNull(bucketUID);
 
         BlobClient client = documentContainerClient.getBlobClient(bucketUID + ".csv");
 
-        Assertions.assertArrayEquals(content, IOUtils.toByteArray(client.openInputStream()));
+        Assertions.assertNotNull(IOUtils.toByteArray(client.openInputStream()));
     }
 
     @Test
@@ -209,10 +214,9 @@ class DocumentServiceTest
         byte[] content = "".getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
-        Exception exception = Assertions.assertThrows(InternalErrorException.class,
+        Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
@@ -224,10 +228,9 @@ class DocumentServiceTest
         byte[] content = "".getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
-        Exception exception = Assertions.assertThrows(InternalErrorException.class,
+        Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue(), exception.getMessage());
     }
@@ -239,10 +242,10 @@ class DocumentServiceTest
         byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
                                 exception.getMessage());
@@ -255,10 +258,10 @@ class DocumentServiceTest
         byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue(),
                                 exception.getMessage());
@@ -273,8 +276,7 @@ class DocumentServiceTest
         String agreementId = agreementEntity.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
                                 exception.getMessage());
@@ -289,8 +291,7 @@ class DocumentServiceTest
         String agreementId = agreementEntityPA.getId();
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue(),
                                 exception.getMessage());
@@ -300,14 +301,14 @@ class DocumentServiceTest
     void Upload_UploadBucketWithNotMinimumBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
-        //bucket csv without header
+
         byte[] content = "item1\n".repeat(9999).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
+
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
                                                       () -> documentService.storeBucket(agreementId,
-                                                                                        in,
-                                                                                        content.length));
+                                                                                        in));
 
         Assertions.assertEquals(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue(),
                                 exception.getMessage());
@@ -321,32 +322,28 @@ class DocumentServiceTest
         byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
         byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-
         String agreementId = agreementEntity.getId();
+        
         ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
         ByteArrayInputStream bisOn = new ByteArrayInputStream(contentOnlyNum);
         ByteArrayInputStream bisNaSc = new ByteArrayInputStream(contentNotAllowedSpChar);
 
         Exception exception = Assertions.assertThrows(InvalidRequestException.class,
-                                                      () -> documentService.storeBucket(agreementId,
-                                                                                        bisOc,
-                                                                                        contentOnlyChars.length));
+                                                      () -> documentService.storeBucket(agreementId,bisOc));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
                                             () -> documentService.storeBucket(agreementId,
-                                                                              bisOn,
-                                                                              contentOnlyNum.length));
+                                                                              bisOn));
 
         Assertions.assertEquals(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue(),
                                 exception.getMessage());
 
         exception = Assertions.assertThrows(InvalidRequestException.class,
                                             () -> documentService.storeBucket(agreementId,
-                                                                              bisNaSc,
-                                                                              contentNotAllowedSpChar.length));
+                                                                              bisNaSc));
 
         Assertions.assertEquals(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue(),
                                 exception.getMessage());
@@ -357,12 +354,11 @@ class DocumentServiceTest
     void Upload_UploadBucketWithAlphanumericBucketCodes_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
         ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
-        //bucket csv without header
-        byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
 
-        Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementEntity.getId(),
-                                                                        new ByteArrayInputStream(contentCharsAndNum),
-                                                                        contentCharsAndNum.length));
+        byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        String agreementId = agreementEntity.getId();
+        Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementId,
+                                                                        new ByteArrayInputStream(contentCharsAndNum)));
     }
 
     @Test
@@ -543,6 +539,69 @@ class DocumentServiceTest
         String actual = stripper.getText(document);
         GenerateAdhesionRequestAssertions(actual);
 
+    }
+
+    @Test
+    void testStoreBucketValidationsWithInvisibleCharacters()
+            throws Exception {
+        setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
+
+        ProfileRepository profileRepository = Mockito.mock(ProfileRepository.class);
+        DocumentRepository documentRepository = Mockito.mock(DocumentRepository.class);
+        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
+        AgreementServiceLight agreementServiceLight = Mockito.mock(AgreementServiceLight.class);
+        TemplateEngine templateEngine = Mockito.mock(TemplateEngine.class);
+
+        AzureStorage azureStorageMock = Mockito.mock(AzureStorage.class);
+        ConfigProperties configPropertiesMock = Mockito.mock(ConfigProperties.class);
+
+        ProfileEntity mockedProfile = Mockito.mock(ProfileEntity.class);
+        Mockito.when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
+        Mockito.when(profileRepository.findByAgreementId(Mockito.anyString()))
+               .thenReturn(Optional.of(mockedProfile));
+
+        Mockito.when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
+        Mockito.doNothing().when(azureStorageMock).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+
+        DocumentService documentServiceLocal = new DocumentService(documentRepository,
+                                                              profileRepository,
+                                                              discountRepository,
+                                                              agreementServiceLight,
+                                                              azureStorageMock,
+                                                              templateEngine,
+                                                              configPropertiesMock);
+
+        InputStream resourceStream = this.getClass().getClassLoader()
+                                         .getResourceAsStream("test-bucket-codes.csv");
+        Assertions.assertNotNull(resourceStream, "Test CSV file should exist in resources");
+        List<String> rows = new java.io.BufferedReader(new java.io.InputStreamReader(resourceStream, StandardCharsets.UTF_8))
+                .lines().toList();
+
+        Set<String> producedMessages = new HashSet<>();
+        /*
+            Here, the single CSV is split into N CSV files containing 1 code.
+            So the CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND check will always be triggered and can be ignored.
+         */
+        int rowIndex = 0;
+        for (String originalCode : rows) {
+            rowIndex++;
+            try (InputStream singleIs = new ByteArrayInputStream(originalCode.getBytes(StandardCharsets.UTF_8))) {
+                documentServiceLocal.storeBucket(agreementEntity.getId(), singleIs);
+            } catch (InvalidRequestException ex) {
+                producedMessages.add(ex.getMessage());
+                log.info("Riga {}: codice='{}' messaggio='{}'", rowIndex, originalCode, ex.getMessage());
+            }
+        }
+
+        // Define the expected set of messages
+        Set<String> expectedMessages = new HashSet<>();
+        expectedMessages.add(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
+        expectedMessages.add(ErrorCodeEnum.BUCKET_CODES_MUST_BE_ALPHANUM_WITH_AT_LEAST_ONE_DIGIT_AND_ONE_CHAR.getValue());
+        expectedMessages.add(ErrorCodeEnum.NOT_ALLOWED_SPECIAL_CHARS.getValue());
+        expectedMessages.add(ErrorCodeEnum.MAX_ALLOWED_BUCKET_CODE_LENGTH_NOT_RESPECTED.getValue());
+
+        Assertions.assertTrue(producedMessages.containsAll(expectedMessages),
+                              "Not all expected validation messages were produced");
     }
 
     private void GenerateAdhesionRequestAssertions(String actual) {

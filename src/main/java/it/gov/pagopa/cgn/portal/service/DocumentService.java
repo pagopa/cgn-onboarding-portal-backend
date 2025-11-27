@@ -8,7 +8,6 @@ import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.CGNException;
-import it.gov.pagopa.cgn.portal.exception.InternalErrorException;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
@@ -29,14 +28,14 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,8 +44,40 @@ import java.util.stream.Stream;
 @Slf4j
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class DocumentService {
-
     private static final int MAX_ALLOWED_BUCKET_CODE_LENGTH = 20;
+
+    private static final IntPredicate visibleChar = cp -> {
+        if (cp == 0xFEFF) {
+            return false;
+        }
+        int type = Character.getType(cp);
+        return !(type == Character.FORMAT
+                 || type == Character.CONTROL
+                 || type == Character.NON_SPACING_MARK)
+               || cp == ','
+               || cp == '\t';
+    };
+
+    private static final UnaryOperator<String> removeInvisibleChars = line -> {
+        if (line == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder(line.length());
+        line.codePoints()
+            .filter(visibleChar)
+            .forEach(sb::appendCodePoint);
+        return sb.toString();
+    };
+
+    private static final UnaryOperator<byte[]> cleanContent = rawContent -> {
+        String cleanedString = new BufferedReader(
+                new StringReader(new String(rawContent, StandardCharsets.UTF_8)))
+                .lines()
+                .map(removeInvisibleChars)
+                .collect(Collectors.joining("\n"));
+        return cleanedString.getBytes(StandardCharsets.UTF_8);
+    };
+
     private final DocumentRepository documentRepository;
     private final ProfileRepository profileRepository;
     private final DiscountRepository discountRepository;
@@ -112,7 +143,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public String storeBucket(String agreementId, InputStream inputStream, long size)
+    public String storeBucket(String agreementId, InputStream inputStream)
             throws IOException {
         ProfileEntity profileEntity = profileRepository.findByAgreementId(agreementId)
                                                        .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
@@ -120,7 +151,8 @@ public class DocumentService {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_CODE_FOR_DISCOUNT_NO_BUCKET.getValue());
         }
 
-        byte[] content = inputStream.readAllBytes();
+        byte[] content = cleanContent.apply(inputStream.readAllBytes());
+
         long csvRecordCount = countCsvRecord(content);
         if (csvRecordCount < configProperties.getBucketMinCsvRows()) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_LOAD_BUCKET_FOR_NOT_RESPECTED_MINIMUM_BOUND.getValue());
@@ -128,7 +160,7 @@ public class DocumentService {
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
             if (content.length==0) {
-                throw new InternalErrorException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
+                throw new InvalidRequestException(ErrorCodeEnum.CSV_DATA_NOT_VALID.getValue());
             }
             if (csvRecordStream.anyMatch(line -> line.get(0).length() > MAX_ALLOWED_BUCKET_CODE_LENGTH ||
                                                  StringUtils.isBlank(line.get(0)))) {
@@ -139,7 +171,6 @@ public class DocumentService {
         Pattern pDigits = Pattern.compile("\\d"); //[0-9]
         Pattern pAlphab = Pattern.compile("[A-Za-z]");
         Pattern spChars = Pattern.compile("^(?=.*\\d)[a-zA-Z0-9][-a-zA-Z0-9]+$");
-        Pattern anyNotNumOrChars = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d-]{1,20}$");
 
         try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
             Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
@@ -157,15 +188,8 @@ public class DocumentService {
             }
         }
 
-        try (ByteArrayInputStream contentIs = new ByteArrayInputStream(content)) {
-            Stream<CSVRecord> csvRecordStream = CsvUtils.getCsvRecordStream(contentIs);
-            if (csvRecordStream.anyMatch(line -> !(anyNotNumOrChars.matcher(line.get(0)).find()))) { //can contains only hypen
-                throw new InvalidRequestException(ErrorCodeEnum.ONE_OR_MORE_CODES_ARE_NOT_VALID.getValue());
-            }
-        }
-
         String bucketLoadUID = UUID.randomUUID().toString();
-        azureStorage.uploadCsv(content, bucketLoadUID, size);
+        azureStorage.uploadCsv(content, bucketLoadUID, content.length);
 
         return bucketLoadUID;
     }
