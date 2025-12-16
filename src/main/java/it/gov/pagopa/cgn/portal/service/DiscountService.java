@@ -23,6 +23,7 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -183,6 +184,11 @@ public class DiscountService {
             (!dbEntity.getLandingPageUrl().equals(discountEntity.getLandingPageUrl()) ||
              !dbEntity.getLandingPageReferrer().equals(discountEntity.getLandingPageReferrer()))) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
+        }
+
+        if (DiscountCodeTypeEnum.STATIC.equals(profileDiscountType)
+            && !Objects.equals(dbEntity.getStaticCode(), discountEntity.getStaticCode())) {
+            dbEntity.setState(DiscountStateEnum.TEST_PENDING);
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
