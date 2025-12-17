@@ -452,7 +452,7 @@ class DiscountApiTest
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
+                    .andExpect(jsonPath("$.state").value(DiscountState.TEST_PENDING.getValue())) // default state
                     .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
                     .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
                     .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
