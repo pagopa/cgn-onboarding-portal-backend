@@ -596,7 +596,7 @@ class EycaExportServiceTest
     @Test
     void testBuildCsv_shouldReturnNotEmptyResource() {
         ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-        Assertions.assertEquals(104549, resource.getByteArray().length);
+        Assertions.assertEquals(104763, resource.getByteArray().length);
     }
 
     @Test
@@ -675,7 +675,8 @@ class EycaExportServiceTest
     @Test
     void testCreateBodyOneOfOrAllOrNothing_Ok() {
         List<String[]> rowsForCreate = new ArrayList<>();
-        rowsForCreate.add(new String[]{TestUtils.FAKE_OID_1,
+        rowsForCreate.add(new String[]{TestUtils.FAKE_CCDB_1,
+                                       TestUtils.FAKE_OID_1,
                                        "Amazon",
                                        "CYBERMONDAY24",
                                        "No limit",
@@ -687,7 +688,8 @@ class EycaExportServiceTest
         String bodyC = exportService.createBody(rowsForCreate, Collections.emptyList(), Collections.emptyList());
 
         List<String[]> rowsForUpdate = new ArrayList<>();
-        rowsForUpdate.add(new String[]{TestUtils.FAKE_OID_2,
+        rowsForUpdate.add(new String[]{TestUtils.FAKE_CCDB_2,
+                                       TestUtils.FAKE_OID_2,
                                        "Uci Cinemas",
                                        "CHRISTMAS24",
                                        "No limit",
@@ -699,7 +701,8 @@ class EycaExportServiceTest
         String bodyU = exportService.createBody(Collections.emptyList(), rowsForUpdate, Collections.emptyList());
 
         List<String[]> rowsForDelete = new ArrayList<>();
-        rowsForDelete.add(new String[]{TestUtils.FAKE_OID_3,
+        rowsForDelete.add(new String[]{TestUtils.FAKE_CCDB_3,
+                                       TestUtils.FAKE_OID_3,
                                        "Uci Cinemas",
                                        "CHRISTMAS25",
                                        "No limit",

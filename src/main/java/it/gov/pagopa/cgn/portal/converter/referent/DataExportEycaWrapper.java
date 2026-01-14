@@ -1,7 +1,6 @@
 package it.gov.pagopa.cgn.portal.converter.referent;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,9 +32,11 @@ public class DataExportEycaWrapper<T> {
     @JsonIgnore
     private String endDate;
     @JsonIgnore
-    private Boolean eycaEmailUpdateRequired;
+    private Boolean eycaEmailUpdateRequired = false;
     @JsonIgnore
     private Boolean toDeleteFromEycaAdmin = false;
+    @JsonIgnore
+    private String ccdbId;
 
     @ToString.Exclude
     private T dataExportEyca;
@@ -43,5 +44,4 @@ public class DataExportEycaWrapper<T> {
     public DataExportEycaWrapper(T dataExportEyca) {
         this.dataExportEyca = dataExportEyca;
     }
-
 }

@@ -73,6 +73,10 @@ public class TestUtils {
     public static final String API_TOKEN_PRIMARY_KEY = "primary-key-001";
     public static final String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
 
+    public static final String FAKE_CCDB_1 = "1";
+    public static final String FAKE_CCDB_2 = "2";
+    public static final String FAKE_CCDB_3 = "3";
+
     public static final String FAKE_OID_1 = "c75020241204020019952562";
     public static final String FAKE_OID_2 = "c28020241204020019770616";
     public static final String FAKE_OID_3 = "c28020241204020019770611";
@@ -537,7 +541,7 @@ public class TestUtils {
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity0(Long discountId, String eycaUpdateId) {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity0(Long discountId, String eycaUpdateId, String discountType) {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(40L);
         entity0.setCategories("SV");
@@ -567,14 +571,15 @@ public class TestUtils {
         entity0.setRegion("");
         entity0.setLongitude("");
         entity0.setLatitude("");
-        entity0.setDiscountType("SHOP");
+        entity0.setDiscountType(discountType);
+        entity0.setEycaEmailUpdateRequired(false);
         entity0.setLive("Y");
 
         return entity0;
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity1(Long discountId, String eycaUpdateId) {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity1(Long discountId, String eycaUpdateId, String discountType) {
         EycaDataExportViewEntity entity1 = new EycaDataExportViewEntity();
         entity1.setId(26L);
         entity1.setCategories("LR,SV");
@@ -605,7 +610,7 @@ public class TestUtils {
         entity1.setRegion("");
         entity1.setLongitude("");
         entity1.setLatitude("");
-        entity1.setDiscountType("SHOP");
+        entity1.setDiscountType(discountType);
         entity1.setLive("Y");
 
         return entity1;
@@ -613,14 +618,14 @@ public class TestUtils {
 
 
     public static List<EycaDataExportViewEntity> getRealDataList() {
-        return Arrays.asList(getRealEycaDataExportViewEntity0(500L, null),
-                             getRealEycaDataExportViewEntity1(501L, null),
-                             getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447"),
-                             getRealEycaDataExportViewEntity1(503L, "c49020232220173105078447"));
+        return Arrays.asList(getRealEycaDataExportViewEntity0(500L, null,"SHOP"),
+                             getRealEycaDataExportViewEntity1(501L, null,"SHOP"),
+                             getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447","SHOP"),
+                             getRealEycaDataExportViewEntity1(503L, "c49020232220173105078447","SHOP"));
     }
 
     public static List<EycaDataExportViewEntity> getRealDataListForSync() {
-        return List.of(getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447"));
+        return List.of(getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447",DiscountCodeTypeEnum.STATIC.getEycaDataCode()));
     }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
@@ -1122,6 +1127,7 @@ public class TestUtils {
 
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setCcdbId(FAKE_CCDB_1);
         discountItemEyca.setId(FAKE_OID_1);
         items.add(discountItemEyca);
 
@@ -1318,8 +1324,10 @@ public class TestUtils {
         ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
         List<DiscountItemEyca> itemsFromEyca = new ArrayList<>();
         DiscountItemEyca item1 = new DiscountItemEyca();
+        item1.setCcdbId(FAKE_CCDB_1);
         item1.setId(FAKE_OID_1);
         DiscountItemEyca item2 = new DiscountItemEyca();
+        item2.setCcdbId(FAKE_CCDB_2);
         item2.setId(FAKE_OID_2);
         itemsFromEyca.add(item1);
         itemsFromEyca.add(item2);

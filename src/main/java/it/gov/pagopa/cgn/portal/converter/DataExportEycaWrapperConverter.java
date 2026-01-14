@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -76,6 +76,7 @@ public class DataExportEycaWrapperConverter
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setEycaEmailUpdateRequired(entity.getEycaEmailUpdateRequired());
+        dto.setCcdbId(entity.getCcdbId());
         return dto;
     };
 }

@@ -75,7 +75,8 @@ public class ExportService {
     private final DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter;
     private final EmailNotificationFacade emailNotificationFacade;
 
-    private final String[] eycaDataExportHeaders = new String[]{"discount_id",
+    private final String[] eycaDataExportHeaders = new String[]{"ccdb_id",
+                                                                "discount_id",
                                                                 "id",
                                                                 "state",
                                                                 "categories",
@@ -293,7 +294,9 @@ public class ExportService {
 
             printerConsumer.apply(printer).accept(eycaDataExportHeaders);
             exportViewEntities.stream()
-                              .map(r -> new String[]{Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
+                              .map(r -> new String[]{
+                                                     Optional.ofNullable(r.getCcdbId()).orElse("-"),
+                                                     Optional.ofNullable(r.getDiscountId()).orElse(0L).toString(),
                                                      Optional.ofNullable(r.getId()).orElse(0L).toString(),
                                                      r.getState(),
                                                      r.getCategories(),
@@ -347,7 +350,7 @@ public class ExportService {
         try {
 
             Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
-            if (eycaExportEnabled.isEmpty() || Boolean.FALSE.equals(eycaExportEnabled.get())) {
+            if (eycaExportEnabled.isEmpty() || !eycaExportEnabled.get()) {
                 log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
                 return;
             }
@@ -472,7 +475,9 @@ public class ExportService {
                                                                          .equals(dew.getDiscountType()) ||
                                               "N/A".equals(dew.getDiscountType())) &&
                                              eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
-                              .map(dew -> new String[]{dew.getEycaUpdateId(),
+                              .map(dew -> new String[]{
+                                                       dew.getCcdbId(),
+                                                       dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getStaticCode(),
                                                        dew.getLimitOfUse(),
@@ -487,7 +492,9 @@ public class ExportService {
                               .filter(dew -> DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode()
                                                                              .equals(dew.getDiscountType()) &&
                                              eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
-                              .map(dew -> new String[]{dew.getEycaUpdateId(),
+                              .map(dew -> new String[]{
+                                                       dew.getCcdbId(),
+                                                       dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getEycaLandingPageUrl(),
                                                        dew.getLimitOfUse(),
@@ -502,7 +509,8 @@ public class ExportService {
 
         String tableTitle = "<b><u>%s</u></b><br><br />%s";
 
-        String[] header = new String[]{"Discount ID(OID)",
+        String[] header = new String[]{"Initiative ID(ccdbId)",
+                                       "Discount ID(OID)",
                                        "Discount Provider",
                                        "Generic Code/URL",
                                        "Limit of use",
@@ -578,7 +586,8 @@ public class ExportService {
             log.info("SEARCH SearchDataExportEyca: " + exportEyca.toString());
 
             try {
-                if (notExistsDiscountOnEyca(exportEyca)) {
+                String ccdbId = getCcdbIdOnEyca(exportEyca);
+                if(ccdbId == null) {  // if (notExistsDiscountOnEyca(exportEyca)) {
                     String eycaUpdateId = exportEyca.getId();
                     DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
                                                               .orElseThrow(() -> new CGNException(
@@ -596,6 +605,12 @@ public class ExportService {
                         discountRepository.saveAndFlush(entity);
                         viewItem.setEycaUpdateId(null);
                     }
+                }
+                else {
+                    exportViewEntities.stream()
+                                      .filter(d -> exportEyca.getId().equals(d.getEycaUpdateId()))
+                                      .findFirst()
+                                      .ifPresent(viewItem -> viewItem.setCcdbId(ccdbId));
                 }
             } catch (RestClientException rce) {
                 log.info("SEARCH eycaApi.searchDiscount Exception: " + rce.getMessage());
@@ -658,6 +673,19 @@ public class ExportService {
             throws RestClientException {
         return notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, false)) &&
                notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, true));
+    }
+
+    String getCcdbIdOnEyca(SearchDataExportEyca exportEyca)
+            throws RestClientException {
+        SearchApiResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);
+        if(notExistsOnEycaPraticate.test(sae)){
+            sae = eycaExportService.searchDiscount(exportEyca, JSON, true);
+            if(notExistsOnEycaPraticate.test(sae)){
+                return null;
+            }
+
+        }
+        return sae.getApiResponse().getData().getDiscounts().getData().getFirst().getCcdbId();
     }
 
 

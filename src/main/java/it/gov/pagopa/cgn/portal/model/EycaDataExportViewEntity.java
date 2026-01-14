@@ -1,14 +1,10 @@
 package it.gov.pagopa.cgn.portal.model;
 
 import lombok.Data;
-
 import lombok.ToString;
 import org.hibernate.annotations.Immutable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.Max;
 import java.time.LocalDate;
 
@@ -125,4 +121,7 @@ public class EycaDataExportViewEntity {
 
     @Column(name = "eyca_email_update_required")
     private Boolean eycaEmailUpdateRequired;
+
+    @Transient
+    private String ccdbId;
 }

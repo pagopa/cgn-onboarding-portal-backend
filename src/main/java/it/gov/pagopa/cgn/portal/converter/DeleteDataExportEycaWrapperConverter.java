@@ -2,21 +2,14 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
-import it.gov.pagopa.cgn.portal.service.ExportService;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DeleteDataExportEyca;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.sql.Delete;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class DeleteDataExportEycaWrapperConverter
@@ -58,6 +51,7 @@ public class DeleteDataExportEycaWrapperConverter
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setDiscountType(entity.getDiscountType());
         dto.setEycaEmailUpdateRequired(false);
+        dto.setCcdbId(entity.getCcdbId());
         return dto;
     };
 }

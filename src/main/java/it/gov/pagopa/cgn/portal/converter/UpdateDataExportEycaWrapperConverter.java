@@ -2,9 +2,8 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +52,7 @@ public class UpdateDataExportEycaWrapperConverter
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setEycaEmailUpdateRequired(entity.getEycaEmailUpdateRequired());
-
+        dto.setCcdbId(entity.getCcdbId());
         return dto;
     };
 }
