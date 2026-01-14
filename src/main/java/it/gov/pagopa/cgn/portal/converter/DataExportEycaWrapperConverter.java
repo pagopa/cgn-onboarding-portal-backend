@@ -14,7 +14,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class DataExportEycaWrapperConverter
@@ -58,10 +57,10 @@ public class DataExportEycaWrapperConverter
         dataExport.setTextLocal(entity.getTextLocal());
         dataExport.setWeb(entity.getWeb());
         if (!StringUtils.isEmpty(entity.getTags())) {
-            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).collect(Collectors.toList()));
+            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).toList());
         }
         if (!StringUtils.isEmpty(entity.getCategories())) {
-            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(",")).collect(Collectors.toList()));
+            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(",")).toList());
         }
         dataExport.setImageSourceWeb(entity.getImage());
 
