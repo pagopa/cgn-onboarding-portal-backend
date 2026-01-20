@@ -39,11 +39,11 @@ public class DeleteDataExportEycaWrapperConverter
         dto.setVendor(entity.getVendor());
 
         dto.setStartDate(entity.getStartDate() != null
-                             ? entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH))
+                             ? entity.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN))
                              : "N/A");
 
         dto.setEndDate(entity.getEndDate() != null
-                           ? entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH))
+                           ? entity.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN))
                            : "N/A");
 
         dto.setLimitOfUse("No Limit");
