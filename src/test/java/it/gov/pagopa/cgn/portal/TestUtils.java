@@ -17,6 +17,7 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
@@ -72,6 +73,10 @@ public class TestUtils {
 
     public static final String API_TOKEN_PRIMARY_KEY = "primary-key-001";
     public static final String API_TOKEN_SECONDARY_KEY = "secondary-key-001";
+
+    public static final String FAKE_CCDB_1 = "1";
+    public static final String FAKE_CCDB_2 = "2";
+    public static final String FAKE_CCDB_3 = "3";
 
     public static final String FAKE_OID_1 = "c75020241204020019952562";
     public static final String FAKE_OID_2 = "c28020241204020019770616";
@@ -537,7 +542,7 @@ public class TestUtils {
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity0(Long discountId, String eycaUpdateId) {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity0(Long discountId, String eycaUpdateId, String discountType) {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(40L);
         entity0.setCategories("SV");
@@ -567,14 +572,15 @@ public class TestUtils {
         entity0.setRegion("");
         entity0.setLongitude("");
         entity0.setLatitude("");
-        entity0.setDiscountType("SHOP");
+        entity0.setDiscountType(discountType);
+        entity0.setEycaEmailUpdateRequired(false);
         entity0.setLive("Y");
 
         return entity0;
     }
 
 
-    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity1(Long discountId, String eycaUpdateId) {
+    private static EycaDataExportViewEntity getRealEycaDataExportViewEntity1(Long discountId, String eycaUpdateId, String discountType) {
         EycaDataExportViewEntity entity1 = new EycaDataExportViewEntity();
         entity1.setId(26L);
         entity1.setCategories("LR,SV");
@@ -605,7 +611,7 @@ public class TestUtils {
         entity1.setRegion("");
         entity1.setLongitude("");
         entity1.setLatitude("");
-        entity1.setDiscountType("SHOP");
+        entity1.setDiscountType(discountType);
         entity1.setLive("Y");
 
         return entity1;
@@ -613,14 +619,14 @@ public class TestUtils {
 
 
     public static List<EycaDataExportViewEntity> getRealDataList() {
-        return Arrays.asList(getRealEycaDataExportViewEntity0(500L, null),
-                             getRealEycaDataExportViewEntity1(501L, null),
-                             getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447"),
-                             getRealEycaDataExportViewEntity1(503L, "c49020232220173105078447"));
+        return Arrays.asList(getRealEycaDataExportViewEntity0(500L, null,"SHOP"),
+                             getRealEycaDataExportViewEntity1(501L, null,"SHOP"),
+                             getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447","SHOP"),
+                             getRealEycaDataExportViewEntity1(503L, "c49020232220173105078447","SHOP"));
     }
 
     public static List<EycaDataExportViewEntity> getRealDataListForSync() {
-        return List.of(getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447"));
+        return List.of(getRealEycaDataExportViewEntity0(502L, "c49020231110173105078447",DiscountCodeTypeEnum.STATIC.getEycaDataCode()));
     }
 
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityListFromCSV() {
@@ -1122,6 +1128,7 @@ public class TestUtils {
 
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setCcdbId(FAKE_CCDB_1);
         discountItemEyca.setId(FAKE_OID_1);
         items.add(discountItemEyca);
 
@@ -1318,8 +1325,10 @@ public class TestUtils {
         ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
         List<DiscountItemEyca> itemsFromEyca = new ArrayList<>();
         DiscountItemEyca item1 = new DiscountItemEyca();
+        item1.setCcdbId(FAKE_CCDB_1);
         item1.setId(FAKE_OID_1);
         DiscountItemEyca item2 = new DiscountItemEyca();
+        item2.setCcdbId(FAKE_CCDB_2);
         item2.setId(FAKE_OID_2);
         itemsFromEyca.add(item1);
         itemsFromEyca.add(item2);
@@ -1329,6 +1338,37 @@ public class TestUtils {
         return response;
     }
 
+    public static List<ExportService.EycaManualRowView> getEycaManualRowViews( String type) {
+        return List.of(
+                new ExportService.EycaManualRowView(
+                        "ccdbId1"+type,
+                        "c23020251202020023436713",
+                        "Starting Finance",
+                        "SFXCG20",
+                        "No limit",
+                        "2025-05-16",
+                        "2026-05-16"
+                ),
+                new ExportService.EycaManualRowView(
+                        "ccdbId2",
+                        "c53020251202020023812393",
+                        "HELKIN",
+                        "CGN2025-XMAS",
+                        "No limit",
+                        "2025-12-02",
+                        "2026-01-30"
+                ),
+                new ExportService.EycaManualRowView(
+                        "ccdbId6",
+                        "c63020251127020024948065",
+                        "IDCERT | Certificazione Informatica (Accredia)",
+                        "https://www.sitoveramentemoltolungo.com/pages/page/AS3KFGKOVBSEOIK3OGOBOAKQK3K45KRK3-34455I4EPP3444I/CC_1234456789",
+                        "No limit",
+                        "2025-11-10",
+                        "2025-12-01"
+                )
+        );
+    }
 
     public static class SubscriptionKeysContractTestData
             implements SubscriptionKeysContract {

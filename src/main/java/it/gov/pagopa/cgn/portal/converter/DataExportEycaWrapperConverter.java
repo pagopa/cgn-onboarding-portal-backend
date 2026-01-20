@@ -10,11 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class DataExportEycaWrapperConverter
@@ -58,10 +57,10 @@ public class DataExportEycaWrapperConverter
         dataExport.setTextLocal(entity.getTextLocal());
         dataExport.setWeb(entity.getWeb());
         if (!StringUtils.isEmpty(entity.getTags())) {
-            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).collect(Collectors.toList()));
+            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).toList());
         }
         if (!StringUtils.isEmpty(entity.getCategories())) {
-            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(",")).collect(Collectors.toList()));
+            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(",")).toList());
         }
         dataExport.setImageSourceWeb(entity.getImage());
 
@@ -70,12 +69,13 @@ public class DataExportEycaWrapperConverter
         dto.setDiscountID(entity.getDiscountId());
         dto.setDiscountType(entity.getDiscountType());
         dto.setVendor(entity.getVendor());
-        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
-        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN)));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN)));
         dto.setLimitOfUse("No Limit");
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setEycaEmailUpdateRequired(entity.getEycaEmailUpdateRequired());
+        dto.setCcdbId(entity.getCcdbId());
         return dto;
     };
 }

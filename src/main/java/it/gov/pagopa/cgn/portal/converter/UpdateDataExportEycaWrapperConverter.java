@@ -2,9 +2,8 @@ package it.gov.pagopa.cgn.portal.converter;
 
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
-
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
@@ -46,14 +45,14 @@ public class UpdateDataExportEycaWrapperConverter
         dto.setDiscountID(entity.getDiscountId());
         dto.setDiscountType(entity.getDiscountType());
         dto.setVendor(entity.getVendor());
-        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
-        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH)));
+        dto.setStartDate(entity.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN)));
+        dto.setEndDate(entity.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ITALIAN)));
         dto.setLimitOfUse("No Limit");
 
         dto.setStaticCode(entity.getStaticCode());
         dto.setEycaLandingPageUrl(entity.getEycaLandingPageUrl());
         dto.setEycaEmailUpdateRequired(entity.getEycaEmailUpdateRequired());
-
+        dto.setCcdbId(entity.getCcdbId());
         return dto;
     };
 }
