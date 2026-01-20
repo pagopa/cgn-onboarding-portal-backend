@@ -622,12 +622,6 @@ public class ExportService {
         }
     }
 
-    boolean notExistsDiscountOnEyca(SearchDataExportEyca exportEyca)
-            throws RestClientException {
-        return notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, false)) &&
-               notExistsOnEycaPraticate.test(eycaExportService.searchDiscount(exportEyca, JSON, true));
-    }
-
     String getCcdbIdOnEyca(SearchDataExportEyca exportEyca)
             throws RestClientException {
         SearchApiResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);

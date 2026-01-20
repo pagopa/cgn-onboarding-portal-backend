@@ -59,7 +59,6 @@ class EmailNotificationFacadeTest {
 
     @Test
     void createEmailParams_shouldUseBccWhenPresent() {
-        String body = "fake body";
 
         emailNotificationFacade.notifyEycaAdmin(Collections.emptyList(),Collections.emptyList(),Collections.emptyList());
 
@@ -116,7 +115,6 @@ class EmailNotificationFacadeTest {
 
     @Test
     void createEmailParams_shouldBePresentRecipientsSummary() {
-        String body = "fake body";
 
         emailNotificationFacade.notifyEycaAdmin(Collections.emptyList(),Collections.emptyList(),Collections.emptyList());
 
@@ -137,7 +135,6 @@ class EmailNotificationFacadeTest {
 
     @Test
     void createEmailParams_RecipientsSummary_shouldHaveOnlyBccWhenSuspendReferentsMailSendingIsTrueForEyca() {
-        String body = "fake body";
 
         when(paramFacade.getSuspendReferentsMailSending()).thenReturn("true");
 
