@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -60,7 +61,7 @@ class EmailNotificationFacadeTest {
     void createEmailParams_shouldUseBccWhenPresent() {
         String body = "fake body";
 
-        emailNotificationFacade.notifyEycaAdmin(body);
+        emailNotificationFacade.notifyEycaAdmin(Collections.emptyList(),Collections.emptyList(),Collections.emptyList());
 
         ArgumentCaptor<EmailParams> emailParamsCaptor = ArgumentCaptor.forClass(EmailParams.class);
         ArgumentCaptor<String> trackingKeyCaptor = ArgumentCaptor.forClass(String.class);
@@ -117,7 +118,7 @@ class EmailNotificationFacadeTest {
     void createEmailParams_shouldBePresentRecipientsSummary() {
         String body = "fake body";
 
-        emailNotificationFacade.notifyEycaAdmin(body);
+        emailNotificationFacade.notifyEycaAdmin(Collections.emptyList(),Collections.emptyList(),Collections.emptyList());
 
         ArgumentCaptor<String> recipientSummaryCaptor = ArgumentCaptor.forClass(String.class);
 
@@ -140,7 +141,7 @@ class EmailNotificationFacadeTest {
 
         when(paramFacade.getSuspendReferentsMailSending()).thenReturn("true");
 
-        emailNotificationFacade.notifyEycaAdmin(body);
+        emailNotificationFacade.notifyEycaAdmin(Collections.emptyList(),Collections.emptyList(),Collections.emptyList());
 
         ArgumentCaptor<String> recipientSummaryCaptor = ArgumentCaptor.forClass(String.class);
 

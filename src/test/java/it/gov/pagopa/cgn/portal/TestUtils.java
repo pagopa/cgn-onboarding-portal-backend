@@ -17,6 +17,7 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.security.JwtAdminUser;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgn.portal.service.ExportService;
 import it.gov.pagopa.cgn.portal.util.CsvUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.SuspendDiscount;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
@@ -1337,6 +1338,37 @@ public class TestUtils {
         return response;
     }
 
+    public static List<ExportService.EycaManualRowView> getEycaManualRowViews( String type) {
+        return List.of(
+                new ExportService.EycaManualRowView(
+                        "ccdbId1"+type,
+                        "c23020251202020023436713",
+                        "Starting Finance",
+                        "SFXCG20",
+                        "No limit",
+                        "2025-05-16",
+                        "2026-05-16"
+                ),
+                new ExportService.EycaManualRowView(
+                        "ccdbId2",
+                        "c53020251202020023812393",
+                        "HELKIN",
+                        "CGN2025-XMAS",
+                        "No limit",
+                        "2025-12-02",
+                        "2026-01-30"
+                ),
+                new ExportService.EycaManualRowView(
+                        "ccdbId6",
+                        "c63020251127020024948065",
+                        "IDCERT | Certificazione Informatica (Accredia)",
+                        "https://www.sitoveramentemoltolungo.com/pages/page/AS3KFGKOVBSEOIK3OGOBOAKQK3K45KRK3-34455I4EPP3444I/CC_1234456789",
+                        "No limit",
+                        "2025-11-10",
+                        "2025-12-01"
+                )
+        );
+    }
 
     public static class SubscriptionKeysContractTestData
             implements SubscriptionKeysContract {

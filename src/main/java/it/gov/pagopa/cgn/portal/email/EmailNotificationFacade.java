@@ -12,6 +12,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
+import it.gov.pagopa.cgn.portal.service.ExportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -379,10 +380,21 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
-    public void notifyEycaAdmin(String body) {
-        String subject = "Discounts for Generic Code/URLs " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH));
-        String failureMessage = "It is not possible to send the email to Eyca admin";
+    public void notifyEycaAdmin(List<ExportService.EycaManualRowView> rowsForCreate,
+                                  List<ExportService.EycaManualRowView> rowsForUpdate,
+                                  List<ExportService.EycaManualRowView> rowsForDelete) {
+        var context = new Context();
+        context.setVariable("createdOnEyca", rowsForCreate);
+        context.setVariable("toUpdateOnEyca", rowsForUpdate);
+        context.setVariable("toDeleteOnEyca", rowsForDelete);
+
+        var body = getTemplateHtml(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT, context);
+
+        log.info("MAIL-BODY-ADMIN-EYCA: " + body);
+
+        String subject = "Opportunità EYCA da aggiornare - " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yy", Locale.ITALIAN));
+        String failureMessage = "Non è stato possibile inviare l'email di eyca al Dipartimento";
         final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.ADMIN_EYCA);
 
         boolean suspendReferentsMailSending = Boolean.parseBoolean(paramFacade.getSuspendReferentsMailSending());

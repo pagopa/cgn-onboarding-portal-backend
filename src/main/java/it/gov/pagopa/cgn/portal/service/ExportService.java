@@ -75,6 +75,26 @@ public class ExportService {
     private final DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter;
     private final EmailNotificationFacade emailNotificationFacade;
 
+    public record EycaManualRowView(
+            String initiativeId,
+            String discountId,
+            String provider,
+            String genericCodeOrUrl,
+            String limitOfUse,
+            String validityStart,
+            String validityEnd
+    ) {
+
+        public static EycaManualRowView of(String initiativeId,String discountId,String provider,
+                String genericCodeOrUrl,String limitOfUse,String validityStart,String validityEnd
+        ) {
+            return new EycaManualRowView(initiativeId,discountId,provider,genericCodeOrUrl,limitOfUse,validityStart,
+                    validityEnd
+            );
+        }
+    }
+
+
     private final String[] eycaDataExportHeaders = new String[]{"ccdb_id",
                                                                 "discount_id",
                                                                 "id",
@@ -392,10 +412,10 @@ public class ExportService {
             if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty() ||
                 !entitiesToDeleteOnEyca.isEmpty()) {
 
-                List<String[]> rowsToCreate = new ArrayList<>(getListForStaticCode(entitiesToCreateOnEyca, false));
+                List<EycaManualRowView> rowsToCreate = new ArrayList<>(getListForStaticCode(entitiesToCreateOnEyca, false));
                 rowsToCreate.addAll(getListForLandingPage(entitiesToCreateOnEyca, false));
 
-                List<String[]> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
+                List<EycaManualRowView> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
                 rowsToUpdate.addAll(getListForLandingPage(entitiesToUpdateOnEyca, true));
 
                 //only for those that could not be deleted
@@ -403,15 +423,12 @@ public class ExportService {
                                                                .filter(row -> Boolean.TRUE.equals(row.getToDeleteFromEycaAdmin()))
                                                                .toList();
 
-                List<String[]> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
+                List<EycaManualRowView> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
                 rowsToDelete.addAll(getListForLandingPage(entitiesToDeleteOnEyca, false));
 
                 if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty() || !rowsToDelete.isEmpty()) {
 
-                    String bodyEycaAdmin = createBody(rowsToCreate, rowsToUpdate, rowsToDelete);
-
-                    log.info("MAIL-BODY-ADMIN-EYCA: " + bodyEycaAdmin);
-                    emailNotificationFacade.notifyEycaAdmin(bodyEycaAdmin);
+                    emailNotificationFacade.notifyEycaAdmin(rowsToCreate, rowsToUpdate, rowsToDelete);
                     log.info("notifyEycaAdmin end success");
 
                     entitiesToUpdateOnEyca.stream()
@@ -468,105 +485,41 @@ public class ExportService {
         return attachments;
     }
 
-    private <T> List<String[]> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca,
+    private <T> List<EycaManualRowView> getListForStaticCode(List<DataExportEycaWrapper<T>> entitiesForEyca,
                                                     Boolean eycaEmailUpdateRequired) {
         return entitiesForEyca.stream()
                               .filter(dew -> (DiscountCodeTypeEnum.STATIC.getEycaDataCode()
                                                                          .equals(dew.getDiscountType()) ||
                                               "N/A".equals(dew.getDiscountType())) &&
                                              eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
-                              .map(dew -> new String[]{
+                              .map(dew -> EycaManualRowView.of(
                                                        dew.getCcdbId(),
                                                        dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getStaticCode(),
                                                        dew.getLimitOfUse(),
                                                        dew.getStartDate(),
-                                                       dew.getEndDate()})
+                                                       dew.getEndDate())
+                              )
                               .toList();
     }
 
-    private <T> List<String[]> getListForLandingPage(List<DataExportEycaWrapper<T>> entitiesForEyca,
+    private <T> List<EycaManualRowView> getListForLandingPage(List<DataExportEycaWrapper<T>> entitiesForEyca,
                                                      Boolean eycaEmailUpdateRequired) {
         return entitiesForEyca.stream()
                               .filter(dew -> DiscountCodeTypeEnum.LANDINGPAGE.getEycaDataCode()
                                                                              .equals(dew.getDiscountType()) &&
                                              eycaEmailUpdateRequired.equals(dew.getEycaEmailUpdateRequired()))
-                              .map(dew -> new String[]{
+                              .map(dew -> EycaManualRowView.of(
                                                        dew.getCcdbId(),
                                                        dew.getEycaUpdateId(),
                                                        dew.getVendor(),
                                                        dew.getEycaLandingPageUrl(),
                                                        dew.getLimitOfUse(),
                                                        dew.getStartDate(),
-                                                       dew.getEndDate()})
+                                                       dew.getEndDate())
+                              )
                               .toList();
-    }
-
-    public String createBody(List<String[]> rowsForCreate, List<String[]> rowsForUpdate, List<String[]> rowsForDelete) {
-        String bodyTemplate = "Hi all, herewith we send you the list of discounts and related references:" +
-                              "<br /><br />%s<br />%s<br />%s";
-
-        String tableTitle = "<b><u>%s</u></b><br><br />%s";
-
-        String[] header = new String[]{"Initiative ID(ccdbId)",
-                                       "Discount ID(OID)",
-                                       "Discount Provider",
-                                       "Generic Code/URL",
-                                       "Limit of use",
-                                       "Valid from",
-                                       "Valid until"};
-        String tableAndTitleCreate = "";
-        String tableAndTitleUpdate = "";
-        String tableAndTitleDelete = "";
-        if (rowsForCreate!=null && !rowsForCreate.isEmpty()) {
-            rowsForCreate.addFirst(header);
-            String table = generateHtmlTable(rowsForCreate);
-            tableAndTitleCreate = String.format(tableTitle, "Created on EYCA (with live=0):", table);
-        }
-        if (rowsForUpdate!=null && !rowsForUpdate.isEmpty()) {
-            rowsForUpdate.addFirst(header);
-            String table = generateHtmlTable(rowsForUpdate);
-            tableAndTitleUpdate = String.format(tableTitle, "To update on EYCA:", table);
-        }
-        if (rowsForDelete!=null && !rowsForDelete.isEmpty()) {
-            rowsForDelete.addFirst(header);
-            String table = generateHtmlTable(rowsForDelete);
-            tableAndTitleDelete = String.format(tableTitle, "To delete on EYCA:", table);
-        }
-
-        return String.format(bodyTemplate, tableAndTitleCreate, tableAndTitleUpdate, tableAndTitleDelete);
-    }
-
-    public static String generateHtmlTable(List<String[]> data) {
-        if (data==null || data.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder html = new StringBuilder();
-
-        html.append("<table border=\"0\" style=\"table-layout: auto;\">");
-
-        // header
-        String[] header = data.get(0);
-        html.append("<thead><tr>");
-        List.of(header)
-            .forEach(cell -> html.append("<th style=\"padding: 1px; text-align: left;\">")
-                                 .append(cell)
-                                 .append("</th>"));
-        html.append("</tr></thead>");
-
-        // body of table
-        html.append("<tbody>");
-        data.stream()
-            .skip(1)
-            .forEach(row -> html.append("<tr>")
-                                .append(Stream.of(row).map(cell -> "<td>" + cell + "</td>").collect(joining()))
-                                .append("</tr>"));
-        html.append("</tbody>");
-        html.append("</table>");
-
-        return html.toString();
     }
 
     public void syncEycaUpdateIdOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
@@ -587,7 +540,7 @@ public class ExportService {
 
             try {
                 String ccdbId = getCcdbIdOnEyca(exportEyca);
-                if(ccdbId == null) {  // if (notExistsDiscountOnEyca(exportEyca)) {
+                if(ccdbId == null) {
                     String eycaUpdateId = exportEyca.getId();
                     DiscountEntity entity = discountRepository.findByEycaUpdateId(eycaUpdateId)
                                                               .orElseThrow(() -> new CGNException(

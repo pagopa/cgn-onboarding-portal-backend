@@ -43,7 +43,6 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -672,65 +671,7 @@ class EycaExportServiceTest
 
     }
 
-    @Test
-    void testCreateBodyOneOfOrAllOrNothing_Ok() {
-        List<String[]> rowsForCreate = new ArrayList<>();
-        rowsForCreate.add(new String[]{TestUtils.FAKE_CCDB_1,
-                                       TestUtils.FAKE_OID_1,
-                                       "Amazon",
-                                       "CYBERMONDAY24",
-                                       "No limit",
-                                       LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                          Locale.ENGLISH)),
-                                       LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                                       Locale.ENGLISH))});
-
-        String bodyC = exportService.createBody(rowsForCreate, Collections.emptyList(), Collections.emptyList());
-
-        List<String[]> rowsForUpdate = new ArrayList<>();
-        rowsForUpdate.add(new String[]{TestUtils.FAKE_CCDB_2,
-                                       TestUtils.FAKE_OID_2,
-                                       "Uci Cinemas",
-                                       "CHRISTMAS24",
-                                       "No limit",
-                                       LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                          Locale.ENGLISH)),
-                                       LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                                       Locale.ENGLISH))});
-
-        String bodyU = exportService.createBody(Collections.emptyList(), rowsForUpdate, Collections.emptyList());
-
-        List<String[]> rowsForDelete = new ArrayList<>();
-        rowsForDelete.add(new String[]{TestUtils.FAKE_CCDB_3,
-                                       TestUtils.FAKE_OID_3,
-                                       "Uci Cinemas",
-                                       "CHRISTMAS25",
-                                       "No limit",
-                                       LocalDate.now().format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                          Locale.ENGLISH)),
-                                       LocalDate.now().plusDays(10).format(DateTimeFormatter.ofPattern("MMM d, yyyy",
-                                                                                                       Locale.ENGLISH))});
-
-        String bodyD = exportService.createBody(Collections.emptyList(), Collections.emptyList(), rowsForDelete);
-
-        //oneof
-        Assertions.assertTrue(bodyC.contains("Created") && !bodyC.contains("update") && !bodyC.contains("delete"));
-        Assertions.assertTrue(!bodyU.contains("Created") && bodyU.contains("update") && !bodyU.contains("delete"));
-        Assertions.assertTrue(!bodyD.contains("Created") && !bodyD.contains("update") && bodyD.contains("delete"));
-
-        //all
-        String bodyA = exportService.createBody(rowsForCreate, rowsForUpdate, rowsForDelete);
-        Assertions.assertTrue(bodyA.contains("Created") && bodyA.contains("update") && bodyA.contains("delete"));
-
-        //nothing
-        String bodyN = exportService.createBody(Collections.emptyList(),
-                                                Collections.emptyList(),
-                                                Collections.emptyList());
-        Assertions.assertTrue(!bodyN.contains("Created") && !bodyN.contains("update") && !bodyN.contains("delete"));
-
-    }
-
-    @Test
+   @Test
     void sendDeleteEycaDiscountsWithNADate_KO() {
         initMockitoPreconditions();
 
