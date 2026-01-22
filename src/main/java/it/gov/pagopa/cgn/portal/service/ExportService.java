@@ -588,6 +588,7 @@ public class ExportService {
                 entityToDelete.setLive(LIVE_NO);
                 entityToDelete.setVendor(discountItemEyca.getVendor());
                 entityToDelete.setDiscountType("N/A");
+                entityToDelete.setCcdbId(discountItemEyca.getCcdbId());
                 exportViewEntities.add(entityToDelete);
             }
         });
@@ -718,6 +719,7 @@ public class ExportService {
                     entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
                     discountRepository.save(entity);
                     exportEycaWrapper.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
+                    exportEycaWrapper.setCcdbId(response.getApiResponse().getData().getDiscount().get(0).getCcdbId());
                 }
             } catch (RestClientException | CGNException e) {
                 log.info("CREATE eycaApi.createDiscount Exception>>: " + e.getMessage());

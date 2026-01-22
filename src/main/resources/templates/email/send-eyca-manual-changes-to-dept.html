@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="it" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Riferimenti per aggiornamento manuale su EYCA</title>
+
+    <style type="text/css">
+        body { margin:0; padding:0; }
+        img { border:0; outline:none; text-decoration:none; }
+        table { border-collapse:collapse; }
+    </style>
+</head>
+
+<body style="margin:0; padding:0; background-color:#E9EEF6;">
+<!-- Wrapper full width -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E9EEF6;">
+    <tbody>
+    <tr>
+        <td align="center" style="padding:24px 12px;">
+
+            <!-- Container 600 -->
+            <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"
+                   style="width:600px; max-width:600px; background-color:#FFFFFF;">
+                <tbody>
+
+                <!-- Top bar + logo -->
+                <tr>
+                    <td style="border-top:8px solid #0066CC; padding:18px 24px 8px 24px;">
+                        <img src="cid:cgn-logo.png" width="72" alt="Logo CGN"
+                             style="display:block; width:72px; height:auto;">
+                    </td>
+                </tr>
+
+                <!-- Title -->
+                <tr>
+                    <td style="padding:8px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#0B1F3B;">
+                        <div style="font-size:28px; line-height:36px; font-weight:700;">
+                            Riferimenti per aggiornamento manuale su EYCA
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Intro -->
+                <tr>
+                    <td style="padding:10px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#0B1F3B;">
+                        <div style="font-size:16px; line-height:24px;">
+                            Di seguito inviamo la lista degli aggiornamenti e i relativi riferimenti:
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- ===================== SEZIONE: Creati ===================== -->
+                <tr th:if="${createdOnEyca != null and !#lists.isEmpty(createdOnEyca)}">
+                    <td style="padding:18px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#0B1F3B;">
+                        <div style="font-size:18px; line-height:26px; font-weight:700; margin:0 0 10px 0;">
+                            Creati su EYCA (con live=0)
+                        </div>
+
+                        <!-- Data table -->
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                               style="width:100%; border:1px solid #D7DFEA;">
+                            <tr>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Initiative ID
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Discount ID (OID)
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Discount Provider
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Generic code/Generic URL
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Limit of use
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity start
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity end
+                                </th>
+                            </tr>
+
+                            <tr th:each="row : ${createdOnEyca}">
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.initiativeId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.discountId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.provider}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.genericCodeOrUrl}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.limitOfUse}"></td>
+
+                                <!-- DATE: sono stringhe, vanno stampate così come arrivano -->
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityStart}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityEnd}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- ===================== SEZIONE: Da aggiornare ===================== -->
+                <tr th:if="${toUpdateOnEyca != null and !#lists.isEmpty(toUpdateOnEyca)}">
+                    <td style="padding:18px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#0B1F3B;">
+                        <div style="font-size:18px; line-height:26px; font-weight:700; margin:0 0 10px 0;">
+                            Da aggiornare su EYCA
+                        </div>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                               style="width:100%; border:1px solid #D7DFEA;">
+                            <tr>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Initiative ID
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Discount ID (OID)
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Discount Provider
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Generic code/Generic URL
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Limit of use
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity start
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity end
+                                </th>
+                            </tr>
+
+                            <tr th:each="row : ${toUpdateOnEyca}">
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.initiativeId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.discountId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.provider}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.genericCodeOrUrl}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.limitOfUse}"></td>
+
+                                <!-- DATE: stringhe -->
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityStart}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityEnd}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- ===================== SEZIONE: Da eliminare ===================== -->
+                <tr th:if="${toDeleteOnEyca != null and !#lists.isEmpty(toDeleteOnEyca)}">
+                    <td style="padding:18px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#0B1F3B;">
+                        <div style="font-size:18px; line-height:26px; font-weight:700; margin:0 0 10px 0;">
+                            Da eliminare su EYCA
+                        </div>
+
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                               style="width:100%; border:1px solid #D7DFEA;">
+                            <tr>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Initiative ID
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Discount ID (OID)
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Discount Provider
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA;">
+                                    Generic code/Generic URL
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Limit of use
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity start
+                                </th>
+                                <th align="left" style="padding:10px; font-size:13px; font-weight:700; border-bottom:1px solid #D7DFEA; white-space:nowrap;">
+                                    Validity end
+                                </th>
+                            </tr>
+
+                            <tr th:each="row : ${toDeleteOnEyca}">
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.initiativeId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.discountId}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.provider}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; word-break:break-word; overflow-wrap:anywhere;"
+                                    th:text="${row.genericCodeOrUrl}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.limitOfUse}"></td>
+
+                                <!-- DATE: stringhe -->
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityStart}"></td>
+
+                                <td style="padding:10px; font-size:13px; border-top:1px solid #D7DFEA; vertical-align:top; white-space:nowrap;"
+                                    th:text="${row.validityEnd}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding:18px 24px 0 24px; font-family:Arial, Helvetica, sans-serif; color:#51657A;">
+                        <div style="font-size:14px; line-height:20px;">Il team di backend CGN</div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:10px 24px 20px 24px; font-family:Arial, Helvetica, sans-serif; color:#51657A;">
+                        <div style="font-size:14px; line-height:20px;">
+                            Ricevi questo messaggio perché sei iscritto al gruppo CGN Email Diagnostic.
+                        </div>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
