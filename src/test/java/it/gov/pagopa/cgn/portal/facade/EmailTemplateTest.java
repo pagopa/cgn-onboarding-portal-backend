@@ -62,66 +62,6 @@ class EmailTemplateTest
     }
 
     @Test
-    void bodyShouldContainExpectedValuesForSendEycaManualChangesToDept() {
-        List<ExportService.EycaManualRowView> rows = null;
-        Context ctx = null;
-        String body = null;
-
-        rows = TestUtils.getEycaManualRowViews("_created");
-        ctx = new Context();
-        ctx.setVariable("createdOnEyca", rows);
-        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
-
-        assertTrue(body.contains(String.valueOf("ccdbId1_created")),
-                   "Body should contain ccdbId1_created");
-        assertFalse(body.contains(String.valueOf("ccdbId1_update")),
-                   "Body should not contain ccdbId1_update");
-        assertFalse(body.contains(String.valueOf("ccdbId1_delete")),
-                    "Body should not contain ccdbId1_delete");
-
-        rows = TestUtils.getEycaManualRowViews("_update");
-        ctx = new Context();
-        ctx.setVariable("toUpdateOnEyca", rows);
-        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
-
-        assertFalse(body.contains(String.valueOf("ccdbId1_created")),
-                   "Body should contain ccdbId1_created");
-        assertTrue(body.contains(String.valueOf("ccdbId1_update")),
-                    "Body should contain ccdbId1_update");
-        assertFalse(body.contains(String.valueOf("ccdbId1_delete")),
-                    "Body should not contain ccdbId1_delete");
-
-        rows = TestUtils.getEycaManualRowViews("_delete");
-        ctx = new Context();
-        ctx.setVariable("toDeleteOnEyca", rows);
-        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
-
-        assertFalse(body.contains(String.valueOf("ccdbId1_created")),
-                    "Body should not contain ccdbId1_created");
-        assertFalse(body.contains(String.valueOf("ccdbId1_update")),
-                   "Body should contain ccdbId1_update");
-        assertTrue(body.contains(String.valueOf("ccdbId1_delete")),
-                    "Body should contain ccdbId1_delete");
-
-        ctx = new Context();
-        ctx.setVariable("createdOnEyca", TestUtils.getEycaManualRowViews("_created"));
-        ctx.setVariable("toUpdateOnEyca", TestUtils.getEycaManualRowViews("_update"));
-        ctx.setVariable("toDeleteOnEyca", TestUtils.getEycaManualRowViews("_delete"));
-        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
-
-        assertTrue(body.contains(String.valueOf("ccdbId1_created")),
-                    "Body should contain ccdbId1_created");
-        assertTrue(body.contains(String.valueOf("ccdbId1_update")),
-                    "Body should contain ccdbId1_update");
-        assertTrue(body.contains(String.valueOf("ccdbId1_delete")),
-                   "Body should contain ccdbId1_delete");
-
-        assertNotNull(body);
-        assertTrue(body.contains("Ricevi questo messaggio perché sei iscritto al gruppo CGN Email Diagnostic."));
-
-    }
-
-    @Test
     void bodyShouldContainExpectedValuesForSendDiscountsToEyca() {
         int entitiesToCreateOnEyca = 12;
         int entitiesToUpdateOnEyca = 34;
@@ -143,6 +83,75 @@ class EmailTemplateTest
                    "Body should contain entitiesToUpdateOnEyca");
         assertTrue(body.contains(String.valueOf(entitiesToDeleteOnEyca)),
                    "Body should contain entitiesToDeleteOnEyca");
+    }
+
+
+    @Test
+    void bodyShouldContainExpectedValuesForSendEycaManualChangesToDept() {
+        List<ExportService.EycaManualRowView> rows = null;
+        Context ctx = null;
+        String body = null;
+
+        rows = TestUtils.getEycaManualRowViews("_created");
+        ctx = new Context();
+        ctx.setVariable("createdOnEyca", rows);
+        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
+
+        assertTrue(body.contains(String.valueOf("ccdbId1_created")),
+                   "Body should contain ccdbId1_created");
+        assertFalse(body.contains(String.valueOf("ccdbId1_update")),
+                    "Body should not contain ccdbId1_update");
+        assertFalse(body.contains(String.valueOf("ccdbId1_delete")),
+                    "Body should not contain ccdbId1_delete");
+
+        rows = TestUtils.getEycaManualRowViews("_update");
+        ctx = new Context();
+        ctx.setVariable("toUpdateOnEyca", rows);
+        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
+
+        assertFalse(body.contains(String.valueOf("ccdbId1_created")),
+                    "Body should contain ccdbId1_created");
+        assertTrue(body.contains(String.valueOf("ccdbId1_update")),
+                   "Body should contain ccdbId1_update");
+        assertFalse(body.contains(String.valueOf("ccdbId1_delete")),
+                    "Body should not contain ccdbId1_delete");
+
+        rows = TestUtils.getEycaManualRowViews("_delete");
+        ctx = new Context();
+        ctx.setVariable("toDeleteOnEyca", rows);
+        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
+
+        assertFalse(body.contains(String.valueOf("ccdbId1_created")),
+                    "Body should not contain ccdbId1_created");
+        assertFalse(body.contains(String.valueOf("ccdbId1_update")),
+                    "Body should contain ccdbId1_update");
+        assertTrue(body.contains(String.valueOf("ccdbId1_delete")),
+                   "Body should contain ccdbId1_delete");
+
+        ctx = new Context();
+        ctx.setVariable("createdOnEyca", TestUtils.getEycaManualRowViews("_created"));
+        ctx.setVariable("toUpdateOnEyca", TestUtils.getEycaManualRowViews("_update"));
+        ctx.setVariable("toDeleteOnEyca", TestUtils.getEycaManualRowViews("_delete"));
+        body = htmlTemplateEngine.process(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName(), ctx);
+
+        assertTrue(body.contains(String.valueOf("ccdbId1_created")),
+                   "Body should contain ccdbId1_created");
+        assertTrue(body.contains(String.valueOf("ccdbId1_update")),
+                   "Body should contain ccdbId1_update");
+        assertTrue(body.contains(String.valueOf("ccdbId1_delete")),
+                   "Body should contain ccdbId1_delete");
+
+        assertNotNull(body);
+        assertTrue(body.contains("Ricevi questo messaggio perché sei iscritto al gruppo CGN Email Diagnostic."));
+
+    }
+
+    @Test
+    void templateEmailEnumShouldExposeTemplateName() {
+        assertEquals(
+                "email/send-eyca-manual-changes-to-dept.html",
+                TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT.getTemplateName()
+        );
     }
 
 

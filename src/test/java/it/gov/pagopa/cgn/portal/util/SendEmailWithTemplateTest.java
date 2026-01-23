@@ -9,7 +9,8 @@ import org.thymeleaf.context.Context;
 import javax.mail.MessagingException;
 import java.util.List;
 
-@Disabled("Test disabilitato per invio email reale")
+@Disabled("Test disabled, for only real sending")
+@SuppressWarnings("java:S2699")
 class SendEmailWithTemplateTest {
 
     @Test
@@ -37,7 +38,5 @@ class SendEmailWithTemplateTest {
         context.setVariable("toDeleteOnEyca", List.of(rowForDelete));
 
         tEmailSender.sendEmail("Test invio", TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT,context);
-
-        
     }
 }
