@@ -24,12 +24,12 @@ public class TemplateEmailSender {
      */
 
     protected static TemplateEngine templateEngine;
-    protected static final String smtpHost = "smtp.gmail.com";
-    protected static final int smtpPort = 587;
-    protected static final String smtpUsername = "";
-    protected static final String smtpPassword = "";
-    protected static final String fromEmail="";
-    protected static final String toEmail="";
+    protected static final String SMTP_HOST = "smtp.gmail.com";
+    protected static final int SMTP_PORT = 587;
+    protected static final String SMTP_USERNAME = "";
+    protected static final String SMTP_PASSWORD = "";
+    protected static final String EMAIL_FROM ="";
+    protected static final String EMAIL_TO="";
 
 
     public TemplateEmailSender() {
@@ -53,25 +53,26 @@ public class TemplateEmailSender {
     protected void sendEmail(String subject, TemplateEmail tEmail, Context context ) throws MessagingException {
 
         Properties props = new Properties();
-        props.put("mail.smtp.host", smtpHost);
-        props.put("mail.smtp.port", String.valueOf(smtpPort));
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", String.valueOf(SMTP_PORT));
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.connectiontimeout", "5000");
         props.put("mail.smtp.timeout", "5000");
         props.put("mail.smtp.writetimeout", "5000");
+        props.put("mail.smtp.ssl.checkserveridentity", "true");
 
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(smtpUsername, smtpPassword);
+                return new PasswordAuthentication(SMTP_USERNAME, SMTP_PASSWORD);
             }
         });
 
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(fromEmail));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        message.setFrom(new InternetAddress(EMAIL_FROM));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(EMAIL_TO));
         message.setSubject(subject);
         message.setText(templateEngine.process(tEmail.getTemplateName(), context), "utf-8", "html");
 

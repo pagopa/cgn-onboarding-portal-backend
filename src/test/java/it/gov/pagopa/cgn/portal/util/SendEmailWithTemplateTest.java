@@ -37,5 +37,7 @@ class SendEmailWithTemplateTest {
         context.setVariable("toDeleteOnEyca", List.of(rowForDelete));
 
         tEmailSender.sendEmail("Test invio", TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT,context);
+
+        
     }
 }
