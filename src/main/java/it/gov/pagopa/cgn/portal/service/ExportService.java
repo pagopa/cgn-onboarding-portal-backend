@@ -188,7 +188,7 @@ public class ExportService {
                                                             "LANDING_PAGE_URL",
                                                             "LANDING PAGE REFERRER",
                                                             "EYCA_LANDING_PAGE_URL",};
-    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPraticate = sae -> sae.getApiResponse()!=null &&
+    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPradicate = sae -> sae.getApiResponse()!=null &&
                                                                                      sae.getApiResponse().getData()!=
                                                                                      null && sae.getApiResponse()
                                                                                                 .getData()
@@ -197,6 +197,20 @@ public class ExportService {
                                                                                                             .getData()
                                                                                                             .getDiscounts()
                                                                                                             .getData());
+
+    private final Predicate<ListApiResponseEyca> hasDiscountsListApiPradicate =
+            r -> r != null
+                 && r.getApiResponse() != null
+                 && r.getApiResponse().getData() != null
+                 && r.getApiResponse().getData().getDiscount() != null
+                 && !r.getApiResponse().getData().getDiscount().isEmpty();
+
+    private final Predicate<ApiResponseEyca> hasDiscountsApiPradicate =
+            r -> r != null
+                 && r.getApiResponse() != null
+                 && r.getApiResponse().getData() != null
+                 && r.getApiResponse().getData().getDiscount() != null
+                 && !r.getApiResponse().getData().getDiscount().isEmpty();
 
 
     public ExportService(AgreementRepository agreementRepository,
@@ -598,9 +612,7 @@ public class ExportService {
 
     public List<DiscountItemEyca> getDiscountItemsOnEyca(ListApiResponseEyca response) {
 
-        if (response!=null && response.getApiResponse()!=null && response.getApiResponse().getData()!=null &&
-            response.getApiResponse().getData().getDiscount()!=null &&
-            !response.getApiResponse().getData().getDiscount().isEmpty()) {
+        if (hasDiscountsListApiPradicate.test(response)) {
 
             List<DiscountItemEyca> discountItemsEyca = response.getApiResponse()
                                                                .getData()
@@ -626,9 +638,9 @@ public class ExportService {
     String getCcdbIdOnEyca(SearchDataExportEyca exportEyca)
             throws RestClientException {
         SearchApiResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);
-        if(notExistsOnEycaPraticate.test(sae)){
+        if(notExistsOnEycaPradicate.test(sae)){
             sae = eycaExportService.searchDiscount(exportEyca, JSON, true);
-            if(notExistsOnEycaPraticate.test(sae)){
+            if(notExistsOnEycaPradicate.test(sae)){
                 return null;
             }
 
@@ -712,17 +724,17 @@ public class ExportService {
                                                                                               exportEycaWrapper.getDiscountID() +
                                                                                               " not found on Discount table"));
 
-                if (response!=null && response.getApiResponse()!=null && response.getApiResponse().getData()!=null &&
-                    response.getApiResponse().getData().getDiscount()!=null &&
-                    !response.getApiResponse().getData().getDiscount().isEmpty()) {
+                if (hasDiscountsApiPradicate.test(response)) {
 
-                    entity.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
+                    DiscountItemEyca die = response.getApiResponse().getData().getDiscount().getFirst();
+
+                    entity.setEycaUpdateId(die.getId());
                     discountRepository.save(entity);
-                    exportEycaWrapper.setEycaUpdateId(response.getApiResponse().getData().getDiscount().get(0).getId());
-                    exportEycaWrapper.setCcdbId(response.getApiResponse().getData().getDiscount().get(0).getCcdbId());
+                    exportEycaWrapper.setEycaUpdateId(die.getId());
+                    exportEycaWrapper.setCcdbId(die.getCcdbId());
                 }
             } catch (RestClientException | CGNException e) {
-                log.info("CREATE eycaApi.createDiscount Exception>>: " + e.getMessage());
+                log.info("CREATE eycaApi.createDiscount Exception>>: {}", e.getMessage());
             }
         });
     }
