@@ -709,7 +709,7 @@ public class ExportService {
         exportEycaList.forEach(exportEycaWrapper -> {
             DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
-            log.info("CREATE DataExportEyca: " + CGNUtils.toJson(exportEyca));
+            log.info("CREATE DataExportEyca: {}", CGNUtils.toJson(exportEyca));
             ApiResponseEyca response = null;
             try {
                 response = eycaExportService.createDiscount(exportEyca, JSON);
@@ -763,7 +763,7 @@ public class ExportService {
                     log.info(response.toString());
                 }
             } catch (RestClientException | CGNException e) {
-                log.info("UPDATE eycaApi.updateDiscount Exception: " + e.getMessage());
+                log.info("UPDATE eycaApi.updateDiscount Exception: {}", e.getMessage());
             }
         });
     }
@@ -782,7 +782,7 @@ public class ExportService {
         exportEycaList.forEach(exportEycaWrapper -> {
             DeleteDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
-            log.info("DELETE DeleteDataExportEyca: " + exportEyca.toString());
+            log.info("DELETE DeleteDataExportEyca: {}", exportEyca.toString());
             DeleteApiResponseEyca response = null;
             try {
                 if (!eycaApiDeleteDebug) {

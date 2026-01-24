@@ -150,6 +150,30 @@ class EycaExportServiceTest
     }
 
     @Test
+    void sendCreateEycaDiscounts_WithValidResponse_UpdatesEntityAndWrapper_OK() {
+        initMockitoPreconditions();
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
+        discountEntity.setId(1L);
+
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
+        Mockito.when(discountRepository.findById(1L)).thenReturn(Optional.of(discountEntity));
+
+        ApiResponseEyca apiResponseEyca = TestUtils.getApiResponseWithCcdbId();
+
+        doNothing().when(eycaExportServiceMock).authenticateOnEyca();
+        Mockito.when(eycaExportServiceMock.listDiscounts(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString()))
+               .thenReturn(TestUtils.getListApiResponseEycaEmpty());
+        Mockito.when(eycaExportServiceMock.createDiscount(Mockito.any(DataExportEyca.class), Mockito.anyString()))
+               .thenReturn(apiResponseEyca);
+
+        exportService.sendDiscountsToEyca();
+        
+        Mockito.verify(discountRepository, times(1)).findById(1L);
+        Mockito.verify(discountRepository, times(1)).save(Mockito.any(DiscountEntity.class));
+    }
+
+    @Test
     void sendUpdateEycaDiscountsListEmpty_OK() {
         initMockitoPreconditions();
 
