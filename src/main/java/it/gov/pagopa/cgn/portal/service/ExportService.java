@@ -188,7 +188,7 @@ public class ExportService {
                                                             "LANDING_PAGE_URL",
                                                             "LANDING PAGE REFERRER",
                                                             "EYCA_LANDING_PAGE_URL",};
-    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPradicate = sae -> sae.getApiResponse()!=null &&
+    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPredicate = sae -> sae.getApiResponse()!=null &&
                                                                                      sae.getApiResponse().getData()!=
                                                                                      null && sae.getApiResponse()
                                                                                                 .getData()
@@ -198,14 +198,14 @@ public class ExportService {
                                                                                                             .getDiscounts()
                                                                                                             .getData());
 
-    private final Predicate<ListApiResponseEyca> hasDiscountsListApiPradicate =
+    private final Predicate<ListApiResponseEyca> hasDiscountsListApiPredicate =
             r -> r != null
                  && r.getApiResponse() != null
                  && r.getApiResponse().getData() != null
                  && r.getApiResponse().getData().getDiscount() != null
                  && !r.getApiResponse().getData().getDiscount().isEmpty();
 
-    private final Predicate<ApiResponseEyca> hasDiscountsApiPradicate =
+    private final Predicate<ApiResponseEyca> hasDiscountsApiPredicate =
             r -> r != null
                  && r.getApiResponse() != null
                  && r.getApiResponse().getData() != null
@@ -612,7 +612,7 @@ public class ExportService {
 
     public List<DiscountItemEyca> getDiscountItemsOnEyca(ListApiResponseEyca response) {
 
-        if (hasDiscountsListApiPradicate.test(response)) {
+        if (hasDiscountsListApiPredicate.test(response)) {
 
             List<DiscountItemEyca> discountItemsEyca = response.getApiResponse()
                                                                .getData()
@@ -638,9 +638,9 @@ public class ExportService {
     String getCcdbIdOnEyca(SearchDataExportEyca exportEyca)
             throws RestClientException {
         SearchApiResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);
-        if(notExistsOnEycaPradicate.test(sae)){
+        if(notExistsOnEycaPredicate.test(sae)){
             sae = eycaExportService.searchDiscount(exportEyca, JSON, true);
-            if(notExistsOnEycaPradicate.test(sae)){
+            if(notExistsOnEycaPredicate.test(sae)){
                 return null;
             }
 
@@ -724,7 +724,7 @@ public class ExportService {
                                                                                               exportEycaWrapper.getDiscountID() +
                                                                                               " not found on Discount table"));
 
-                if (hasDiscountsApiPradicate.test(response)) {
+                if (hasDiscountsApiPredicate.test(response)) {
 
                     DiscountItemEyca die = response.getApiResponse().getData().getDiscount().getFirst();
 
