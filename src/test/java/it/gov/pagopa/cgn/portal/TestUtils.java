@@ -685,6 +685,12 @@ public class TestUtils {
         entity0.setVendor("vendor_0");
         entity0.setName("name_0");
         entity0.setNameLocal("name_local_0");
+        entity0.setText("Test discount text");
+        entity0.setTextLocal("Test discount text local");
+        entity0.setEmail("test@example.com");
+        entity0.setPhone("1234567890");
+        entity0.setWeb("https://example.com");
+        entity0.setLocationLocalId("LOC001");
         entity0.setStreet("address0");
         entity0.setDiscountType("LANDING PAGE");
         entity0.setLive("Y");
@@ -692,6 +698,8 @@ public class TestUtils {
         entity0.setLandingPageUrl("https://landingpageurl.com");
         entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
+        entity0.setStartDate(LocalDate.of(2026, 1, 1));
+        entity0.setEndDate(LocalDate.of(2026, 12, 31));
         return List.of(entity0);
     }
 
@@ -1170,6 +1178,24 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
+    public static ApiResponseEyca getApiResponseWithCcdbId() {
+        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+
+        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        List<DiscountItemEyca> items = new ArrayList<>();
+        DiscountItemEyca discountItemEyca = new DiscountItemEyca();
+        discountItemEyca.setId(FAKE_OID_1);
+        discountItemEyca.setCcdbId(FAKE_CCDB_1);
+
+        items.add(discountItemEyca);
+        apiResponseDataEyca.setDiscount(items);
+        apiResponseApiResponseEyca.setData(apiResponseDataEyca);
+        apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
+
+        return apiResponseEyca;
+    }
+
     public static ApiResponseEyca getIncompleteApiResponse_0() {
         return new ApiResponseEyca();
     }
@@ -1333,6 +1359,16 @@ public class TestUtils {
         itemsFromEyca.add(item1);
         itemsFromEyca.add(item2);
         apiResponseApiResponseDataEyca.setDiscount(itemsFromEyca);
+        listApiResponseApiResponseEyca.setData(apiResponseApiResponseDataEyca);
+        response.setApiResponse(listApiResponseApiResponseEyca);
+        return response;
+    }
+
+    public static ListApiResponseEyca getListApiResponseEycaEmpty() {
+        ListApiResponseEyca response = new ListApiResponseEyca();
+        ListApiResponseApiResponseEyca listApiResponseApiResponseEyca = new ListApiResponseApiResponseEyca();
+        ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        apiResponseApiResponseDataEyca.setDiscount(Collections.emptyList());
         listApiResponseApiResponseEyca.setData(apiResponseApiResponseDataEyca);
         response.setApiResponse(listApiResponseApiResponseEyca);
         return response;
