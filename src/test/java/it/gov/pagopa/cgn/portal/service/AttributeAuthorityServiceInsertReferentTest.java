@@ -1,0 +1,135 @@
+package it.gov.pagopa.cgn.portal.service;
+
+import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
+import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
+import it.gov.pagopa.cgn.portal.repository.AAOrganizationReferentRepository;
+import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
+import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
+
+@SpringBootTest
+@ActiveProfiles("dev")
+class AttributeAuthorityServiceInsertReferentTest
+        extends IntegrationAbstractTest {
+
+    @Autowired
+    private AttributeAuthorityService attributeAuthorityService;
+
+    @Autowired
+    private AAOrganizationRepository aaOrganizationRepository;
+
+    @Autowired
+    private AAReferentRepository aaReferentRepository;
+
+    @Autowired
+    private AAOrganizationReferentRepository aaOrganizationReferentRepository;
+
+    @AfterEach
+    void cleanAAData() {
+        aaOrganizationReferentRepository.deleteAll();
+        aaOrganizationReferentRepository.flush();
+        aaOrganizationRepository.deleteAll();
+        aaOrganizationRepository.flush();
+        aaReferentRepository.deleteAll();
+        aaReferentRepository.flush();
+    }
+
+    @Test
+    void InsertReferent_Ok() {
+        String keyFiscalCode = "RSSMRA80A01H501U";
+        AAOrganizationEntity organization = new AAOrganizationEntity();
+        organization.setFiscalCode(keyFiscalCode);
+        organization.setName("Test Org");
+        organization.setPec("test@pec.it");
+        organization.setInsertedAt(OffsetDateTime.now());
+        organization.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(organization);
+
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("AAAAAA00A00A000A");
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+        Assertions.assertEquals(1, aaReferentRepository.count());
+    }
+
+    @Test
+    void InsertReferent_OrganizationNotFound() {
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("AAAAAA00A00A000A");
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("RSSMRA80A01H501U", request);
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void InsertReferent_InvalidOrganizationFiscalCode_BadRequest() {
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("AAAAAA00A00A000A");
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("INVALID", request);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void InsertReferent_InvalidReferentFiscalCode_BadRequest() {
+        String keyFiscalCode = "RSSMRA80A01H501U";
+        AAOrganizationEntity organization = new AAOrganizationEntity();
+        organization.setFiscalCode(keyFiscalCode);
+        organization.setName("Test Org");
+        organization.setPec("test@pec.it");
+        organization.setInsertedAt(OffsetDateTime.now());
+        organization.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(organization);
+
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("INVALID");
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    void InsertReferent_Duplicate_Ok() {
+        String keyFiscalCode = "RSSMRA80A01H501U";
+        AAOrganizationEntity organization = new AAOrganizationEntity();
+        organization.setFiscalCode(keyFiscalCode);
+        organization.setName("Test Org");
+        organization.setPec("test@pec.it");
+        organization.setInsertedAt(OffsetDateTime.now());
+        organization.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(organization);
+
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("AAAAAA00A00A000A");
+
+        ResponseEntity<Void> response1 = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+        ResponseEntity<Void> response2 = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+
+        Assertions.assertEquals(HttpStatus.OK, response1.getStatusCode());
+        Assertions.assertEquals(HttpStatus.OK, response2.getStatusCode());
+        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+
+        Optional<AAReferentEntity> referent = aaReferentRepository.findById("AAAAAA00A00A000A");
+        Assertions.assertTrue(referent.isPresent());
+    }
+}

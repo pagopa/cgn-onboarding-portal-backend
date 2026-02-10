@@ -100,6 +100,18 @@ class AttributeAuthorityServiceTest
     }
 
     @Test
+    void UpsertOrganization_InvalidFiscalCode_BadRequest() {
+        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        request.setKeyOrganizationFiscalCode("INVALID");
+        
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+                attributeAuthorityService.upsertOrganization(request);
+        
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Mockito.verify(aaOrganizationRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
     void shouldReturnListOfCompanies_givenFiscalCode() {
         String fiscalCode = "RSSMRA80A01H501U";
         AAOrganizationEntity organization1 = new AAOrganizationEntity();
@@ -181,46 +193,31 @@ class AttributeAuthorityServiceTest
     }
 
     @Test
-    void UpsertOrganization_ServiceUnavailable() {
-        HttpClientErrorException exception = Assertions.assertThrows(
-                HttpClientErrorException.class,
-                () -> attributeAuthorityService.upsertOrganization(new OrganizationWithReferentsPostAttributeAuthority())
-        );
+    void DeleteOrganization_InvalidFiscalCode_BadRequest() {
+        ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization("INVALID");
         
-        Assertions.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Mockito.verify(aaOrganizationRepository, Mockito.never()).delete(Mockito.any());
     }
 
     @Test
-    void DeleteOrganization_ServiceUnavailable() {
-        HttpClientErrorException exception = Assertions.assertThrows(
-                HttpClientErrorException.class,
-                () -> attributeAuthorityService.deleteOrganization("1234567890")
-        );
-        
-        Assertions.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
-    }
-
-    @Test
-    void InsertReferent_ServiceUnavailable() {
+    void InsertReferent_InvalidOrganizationFiscalCode_BadRequest() {
         ReferentFiscalCodeAttributeAuthority referent = new ReferentFiscalCodeAttributeAuthority();
         referent.setReferentFiscalCode("AAAAAA00A00A000A");
-        
-        HttpClientErrorException exception = Assertions.assertThrows(
-                HttpClientErrorException.class,
-                () -> attributeAuthorityService.insertReferent("1234567890", referent)
-        );
-        
-        Assertions.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("INVALID", referent);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Mockito.verify(aaOrganizationRepository, Mockito.never()).findById(Mockito.any());
+        Mockito.verify(aaReferentRepository, Mockito.never()).findById(Mockito.any());
     }
 
     @Test
-    void DeleteReferent_ServiceUnavailable() {
-        HttpClientErrorException exception = Assertions.assertThrows(
-                HttpClientErrorException.class,
-                () -> attributeAuthorityService.deleteReferent("1234567890", "AAAAAA00A00A000A")
-        );
-        
-        Assertions.assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatusCode());
+    void DeleteReferent_InvalidOrganizationFiscalCode_BadRequest() {
+        ResponseEntity<Void> response = attributeAuthorityService.deleteReferent("INVALID", "AAAAAA00A00A000A");
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Mockito.verify(aaOrganizationRepository, Mockito.never()).findById(Mockito.any());
     }
 
 }

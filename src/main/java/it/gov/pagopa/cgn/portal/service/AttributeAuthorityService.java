@@ -17,8 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -83,13 +88,113 @@ public class AttributeAuthorityService {
         }
     }
 
+    @Transactional(readOnly = false)
+    public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
+        try {
+            if (!isFiscalCode(keyOrganizationFiscalCode)) {
+                log.warn("Invalid fiscal code for deleteOrganization: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            
+            // Load organization
+            Optional<AAOrganizationEntity> organization = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
+            
+            if (organization.isEmpty()) {
+                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            // Delete organization (orphanRemoval handles referents cascade)
+            aaOrganizationRepository.delete(organization.get());
+            aaOrganizationRepository.flush();
+            
+            log.info("Deleted organization with fiscal code: {}", keyOrganizationFiscalCode);
+            
+            return new ResponseEntity<>(HttpStatus.OK);
+            
+        } catch (Exception e) {
+            log.error("Error deleting organization", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(readOnly = false)
     public ResponseEntity<OrganizationWithReferentsAttributeAuthority> upsertOrganization(
             OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
-        log.warn("Write operation blocked: upsertOrganization not allowed on external Attribute Authority API");
-        throw new HttpClientErrorException(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Write operations to Attribute Authority are not allowed."
-        );
+        try {
+            String keyOrgFiscalCode = organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode();
+            
+            if (!isFiscalCode(keyOrgFiscalCode)) {
+                log.warn("Invalid fiscal code for upsertOrganization: {}", keyOrgFiscalCode);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            
+            // Upsert organization
+            AAOrganizationEntity organization = aaOrganizationRepository.findById(keyOrgFiscalCode)
+                    .map(existing -> {
+                        // Don't update fiscal code - it's the primary key
+                        existing.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
+                        existing.setPec(organizationWithReferentsAttributeAuthority.getPec());
+                        return existing;
+                    })
+                    .orElseGet(() -> {
+                        AAOrganizationEntity newOrg = new AAOrganizationEntity();
+                        newOrg.setFiscalCode(keyOrgFiscalCode);
+                        newOrg.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
+                        newOrg.setPec(organizationWithReferentsAttributeAuthority.getPec());
+                        newOrg.setInsertedAt(OffsetDateTime.now());
+                        return newOrg;
+                    });
+            
+            List<String> referentCodes = organizationWithReferentsAttributeAuthority.getReferents()
+                    .stream()
+                    .distinct()
+                    .toList();
+            
+            List<AAReferentEntity> referents = new ArrayList<>();
+            for (String code : referentCodes) {
+                AAReferentEntity referent = aaReferentRepository.findById(code).orElse(null);
+                if (referent == null) {
+                    AAReferentEntity newReferent = new AAReferentEntity();
+                    newReferent.setFiscalCode(code);
+                    referent = aaReferentRepository.save(newReferent);
+                }
+                referents.add(referent);
+            }
+            
+            List<AAOrganizationReferentEntity> newReferents = referents.stream()
+                    .map(referent -> {
+                        AAOrganizationReferentEntity join = new AAOrganizationReferentEntity();
+                        join.setOrganization(organization);
+                        join.setReferent(referent);
+                        return join;
+                    })
+                    .collect(Collectors.toCollection(ArrayList::new));
+            
+            // Initialize collection if null (for new organizations)
+            List<AAOrganizationReferentEntity> currentReferents = organization.getOrganizationReferents();
+            if (currentReferents == null) {
+                currentReferents = new ArrayList<>();
+                organization.setOrganizationReferents(currentReferents);
+            } else {
+                // Clear existing referents (orphanRemoval will delete them from DB)
+                currentReferents.clear();
+            }
+            
+            // Add new referents
+            currentReferents.addAll(newReferents);
+            
+            // Save organization with referents
+            AAOrganizationEntity savedOrganization = aaOrganizationRepository.save(organization);
+            
+            log.info("Upserted organization with fiscal code: {}", keyOrgFiscalCode);
+            
+            return new ResponseEntity<>(mapToOrganizationWithReferents(savedOrganization), HttpStatus.OK);
+            
+        } catch (Exception e) {
+            log.error("Error upserting organization", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -103,14 +208,6 @@ public class AttributeAuthorityService {
             log.error("Error fetching organization with fiscal code: {}", keyOrganizationFiscalCode, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
-        log.warn("Write operation blocked: deleteOrganization not allowed on external Attribute Authority API");
-        throw new HttpClientErrorException(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Write operations to Attribute Authority are not allowed."
-        );
     }
 
     @Transactional(readOnly = true)
@@ -131,21 +228,104 @@ public class AttributeAuthorityService {
         }
     }
 
+    @Transactional(readOnly = false)
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
                                                ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
-        log.warn("Write operation blocked: insertReferent not allowed on external Attribute Authority API");
-        throw new HttpClientErrorException(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Write operations to Attribute Authority are not allowed."
-        );
+        try {
+            if (!isFiscalCode(keyOrganizationFiscalCode)) {
+                log.warn("Invalid fiscal code for insertReferent: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            if (referentFiscalCodeAttributeAuthority == null
+                    || !isFiscalCode(referentFiscalCodeAttributeAuthority.getReferentFiscalCode())) {
+                log.warn("Invalid referent fiscal code for insertReferent");
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
+            if (organizationOpt.isEmpty()) {
+                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            String referentFiscalCode = referentFiscalCodeAttributeAuthority.getReferentFiscalCode();
+
+            AAReferentEntity referent = aaReferentRepository.findById(referentFiscalCode)
+                    .orElseGet(() -> {
+                        AAReferentEntity newReferent = new AAReferentEntity();
+                        newReferent.setFiscalCode(referentFiscalCode);
+                        return aaReferentRepository.save(newReferent);
+                    });
+
+            AAOrganizationEntity organization = organizationOpt.get();
+            List<AAOrganizationReferentEntity> currentReferents = organization.getOrganizationReferents();
+            if (currentReferents == null) {
+                currentReferents = new ArrayList<>();
+                organization.setOrganizationReferents(currentReferents);
+            }
+
+            boolean alreadyLinked = currentReferents.stream()
+                    .anyMatch(link -> link.getReferent() != null
+                            && referentFiscalCode.equals(link.getReferent().getFiscalCode()));
+
+            if (!alreadyLinked) {
+                AAOrganizationReferentEntity join = new AAOrganizationReferentEntity();
+                join.setOrganization(organization);
+                join.setReferent(referent);
+                currentReferents.add(join);
+            }
+
+            aaOrganizationRepository.save(organization);
+
+            log.info("Inserted referent {} for organization {}", referentFiscalCode, keyOrganizationFiscalCode);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Error inserting referent for organization: {}", keyOrganizationFiscalCode, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    @Transactional(readOnly = false)
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
-        log.warn("Write operation blocked: deleteReferent not allowed on external Attribute Authority API");
-        throw new HttpClientErrorException(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Write operations to Attribute Authority are not allowed."
-        );
+        try {
+            if (!isFiscalCode(keyOrganizationFiscalCode)) {
+                log.warn("Invalid organization fiscal code for deleteReferent: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            if (!isFiscalCode(referentFiscalCode)) {
+                log.warn("Invalid referent fiscal code for deleteReferent: {}", referentFiscalCode);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
+            if (organizationOpt.isEmpty()) {
+                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            AAOrganizationEntity organization = organizationOpt.get();
+            List<AAOrganizationReferentEntity> currentReferents = organization.getOrganizationReferents();
+
+            if (currentReferents != null) {
+                boolean removed = currentReferents.removeIf(link ->
+                        link.getReferent() != null
+                                && referentFiscalCode.equals(link.getReferent().getFiscalCode())
+                );
+
+                if (removed) {
+                    aaOrganizationRepository.save(organization);
+                    log.info("Deleted referent {} from organization {}", referentFiscalCode, keyOrganizationFiscalCode);
+                }
+            }
+
+            return new ResponseEntity<>(HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error("Error deleting referent from organization: {}", keyOrganizationFiscalCode, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -198,12 +378,9 @@ public class AttributeAuthorityService {
         if (sortBy == null) {
             return "fiscalCode";
         }
-        return switch (sortBy) {
-            case "name" -> "name";
-            case "pec" -> "pec";
-            case "insertedAt" -> "insertedAt";
-            default -> "fiscalCode";
-        };
+        // Validazione enum definito in OpenAPI backoffice/openapi.yaml
+        Set<String> validColumns = Set.of("fiscalCode", "name", "pec", "insertedAt");
+        return validColumns.contains(sortBy) ? sortBy : "fiscalCode";
     }
 
     private OrganizationWithReferentsAttributeAuthority mapToOrganizationWithReferents(
