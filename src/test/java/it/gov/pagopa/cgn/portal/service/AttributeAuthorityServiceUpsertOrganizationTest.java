@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
 import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationReferentRepository;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
@@ -239,5 +240,75 @@ class AttributeAuthorityServiceUpsertOrganizationTest
 
         Optional<AAReferentEntity> createdReferent = aaReferentRepository.findById(newReferentFiscalCode);
         Assertions.assertTrue(createdReferent.isPresent());
+    }
+
+    @Test
+    void UpsertOrganization_AddReferentToExisting_PreservesExistingLinks() {
+        String keyFiscalCode = "RSSMRA80A01H501U";
+        
+        AAReferentEntity referentA = new AAReferentEntity();
+        referentA.setFiscalCode("AAAAAA00A00A000A");
+        aaReferentRepository.saveAndFlush(referentA);
+
+        AAOrganizationEntity organization = new AAOrganizationEntity();
+        organization.setFiscalCode(keyFiscalCode);
+        organization.setName("Test Org");
+        organization.setPec("test@pec.it");
+        organization.setInsertedAt(OffsetDateTime.now());
+        aaOrganizationRepository.saveAndFlush(organization);
+
+        OrganizationWithReferentsPostAttributeAuthority request1 = new OrganizationWithReferentsPostAttributeAuthority();
+        request1.setKeyOrganizationFiscalCode(keyFiscalCode);
+        request1.setOrganizationFiscalCode(keyFiscalCode);
+        request1.setOrganizationName("Test Org");
+        request1.setPec("test@pec.it");
+        request1.setReferents(List.of("AAAAAA00A00A000A"));
+
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response1 =
+                attributeAuthorityService.upsertOrganization(request1);
+        Assertions.assertEquals(HttpStatus.OK, response1.getStatusCode());
+
+        List<AAOrganizationReferentEntity> linksAfterFirst = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        OffsetDateTime linkACreatedAt = linksAfterFirst.stream()
+                .filter(link -> link.getReferent() != null 
+                        && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()))
+                .findFirst()
+                .orElseThrow()
+                .getCreatedAt();
+
+        AAReferentEntity referentB = new AAReferentEntity();
+        referentB.setFiscalCode("BBBBBB00B00B000B");
+        aaReferentRepository.saveAndFlush(referentB);
+
+        OrganizationWithReferentsPostAttributeAuthority request2 = new OrganizationWithReferentsPostAttributeAuthority();
+        request2.setKeyOrganizationFiscalCode(keyFiscalCode);
+        request2.setOrganizationFiscalCode(keyFiscalCode);
+        request2.setOrganizationName("Test Org");
+        request2.setPec("test@pec.it");
+        request2.setReferents(List.of("AAAAAA00A00A000A", "BBBBBB00B00B000B"));
+
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response2 =
+                attributeAuthorityService.upsertOrganization(request2);
+
+        Assertions.assertEquals(HttpStatus.OK, response2.getStatusCode());
+        Assertions.assertNotNull(response2.getBody());
+        Assertions.assertEquals(2, response2.getBody().getReferents().size());
+        Assertions.assertTrue(response2.getBody().getReferents().contains("AAAAAA00A00A000A"));
+        Assertions.assertTrue(response2.getBody().getReferents().contains("BBBBBB00B00B000B"));
+
+        List<AAOrganizationReferentEntity> linksAfterSecond = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        OffsetDateTime linkACreatedAtAfter = linksAfterSecond.stream()
+                .filter(link -> link.getReferent() != null 
+                        && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()))
+                .findFirst()
+                .orElseThrow()
+                .getCreatedAt();
+
+        Assertions.assertEquals(linkACreatedAt, linkACreatedAtAfter, 
+                "Link A's createdAt should be preserved, not recreated");
+        
+        Assertions.assertTrue(linksAfterSecond.stream()
+                .anyMatch(link -> link.getReferent() != null 
+                        && "BBBBBB00B00B000B".equals(link.getReferent().getFiscalCode())));
     }
 }

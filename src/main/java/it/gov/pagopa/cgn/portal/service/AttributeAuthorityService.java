@@ -148,24 +148,34 @@ public class AttributeAuthorityService {
                 referents.add(referent);
             }
             
-            List<AAOrganizationReferentEntity> newReferents = referents.stream()
-                    .map(referent -> {
-                        AAOrganizationReferentEntity join = new AAOrganizationReferentEntity();
-                        join.setOrganization(organization);
-                        join.setReferent(referent);
-                        return join;
-                    })
-                    .collect(Collectors.toCollection(ArrayList::new));
-            
             List<AAOrganizationReferentEntity> currentReferents = organization.getOrganizationReferents();
             if (currentReferents == null) {
                 currentReferents = new ArrayList<>();
                 organization.setOrganizationReferents(currentReferents);
-            } else {
-                currentReferents.clear();
             }
-            
-            currentReferents.addAll(newReferents);
+
+            Set<String> newReferentCodes = referents.stream()
+                    .map(AAReferentEntity::getFiscalCode)
+                    .collect(Collectors.toSet());
+
+            currentReferents.removeIf(link ->
+                    link.getReferent() != null
+                            && !newReferentCodes.contains(link.getReferent().getFiscalCode())
+            );
+
+            Set<String> existingReferentCodes = currentReferents.stream()
+                    .filter(link -> link.getReferent() != null)
+                    .map(link -> link.getReferent().getFiscalCode())
+                    .collect(Collectors.toSet());
+
+            for (AAReferentEntity referent : referents) {
+                if (!existingReferentCodes.contains(referent.getFiscalCode())) {
+                    AAOrganizationReferentEntity join = new AAOrganizationReferentEntity();
+                    join.setOrganization(organization);
+                    join.setReferent(referent);
+                    currentReferents.add(join);
+                }
+            }
             
             AAOrganizationEntity savedOrganization = aaOrganizationRepository.save(organization);
             
