@@ -95,29 +95,6 @@ class AttributeAuthorityServiceDeleteReferentTest
     }
 
     @Test
-    void DeleteReferent_InvalidOrganizationFiscalCode_BadRequest() {
-        ResponseEntity<Void> response = attributeAuthorityService.deleteReferent("INVALID", "AAAAAA00A00A000A");
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void DeleteReferent_InvalidReferentFiscalCode_BadRequest() {
-        String keyFiscalCode = "RSSMRA80A01H501U";
-        AAOrganizationEntity organization = new AAOrganizationEntity();
-        organization.setFiscalCode(keyFiscalCode);
-        organization.setName("Test Org");
-        organization.setPec("test@pec.it");
-        organization.setInsertedAt(OffsetDateTime.now());
-        organization.setOrganizationReferents(new ArrayList<>());
-        aaOrganizationRepository.saveAndFlush(organization);
-
-        ResponseEntity<Void> response = attributeAuthorityService.deleteReferent(keyFiscalCode, "INVALID");
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
     void DeleteReferent_ReferentNotInOrganization_Ok() {
         // Given: Organization without that referent
         String keyFiscalCode = "RSSMRA80A01H501U";

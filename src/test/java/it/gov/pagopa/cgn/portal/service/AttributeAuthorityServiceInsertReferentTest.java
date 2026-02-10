@@ -70,6 +70,27 @@ class AttributeAuthorityServiceInsertReferentTest
     }
 
     @Test
+    void InsertReferent_VatOrganizationFiscalCode_Ok() {
+        String keyFiscalCode = "54683216974";
+        AAOrganizationEntity organization = new AAOrganizationEntity();
+        organization.setFiscalCode(keyFiscalCode);
+        organization.setName("Test Org VAT");
+        organization.setPec("vat@pec.it");
+        organization.setInsertedAt(OffsetDateTime.now());
+        organization.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(organization);
+
+        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
+        request.setReferentFiscalCode("AAAAAA00A00A000A");
+
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+        Assertions.assertEquals(1, aaReferentRepository.count());
+    }
+
+    @Test
     void InsertReferent_OrganizationNotFound() {
         ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
         request.setReferentFiscalCode("AAAAAA00A00A000A");
@@ -77,35 +98,6 @@ class AttributeAuthorityServiceInsertReferentTest
         ResponseEntity<Void> response = attributeAuthorityService.insertReferent("RSSMRA80A01H501U", request);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    void InsertReferent_InvalidOrganizationFiscalCode_BadRequest() {
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("AAAAAA00A00A000A");
-
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("INVALID", request);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void InsertReferent_InvalidReferentFiscalCode_BadRequest() {
-        String keyFiscalCode = "RSSMRA80A01H501U";
-        AAOrganizationEntity organization = new AAOrganizationEntity();
-        organization.setFiscalCode(keyFiscalCode);
-        organization.setName("Test Org");
-        organization.setPec("test@pec.it");
-        organization.setInsertedAt(OffsetDateTime.now());
-        organization.setOrganizationReferents(new ArrayList<>());
-        aaOrganizationRepository.saveAndFlush(organization);
-
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("INVALID");
-
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test

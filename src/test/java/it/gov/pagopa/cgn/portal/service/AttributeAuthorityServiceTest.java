@@ -9,8 +9,6 @@ import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -97,18 +94,6 @@ class AttributeAuthorityServiceTest
         Assertions.assertEquals(1, response.getBody().size());
         Assertions.assertEquals("AAAAAA00A00A000A", response.getBody().getFirst());
         Mockito.verify(aaOrganizationRepository, Mockito.times(1)).findById("1234567890");
-    }
-
-    @Test
-    void UpsertOrganization_InvalidFiscalCode_BadRequest() {
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
-        request.setKeyOrganizationFiscalCode("INVALID");
-        
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
-                attributeAuthorityService.upsertOrganization(request);
-        
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Mockito.verify(aaOrganizationRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Test
@@ -191,33 +176,4 @@ class AttributeAuthorityServiceTest
         Assertions.assertEquals(3, count);
         Mockito.verify(aaReferentRepository, Mockito.times(1)).findById(fiscalCode);
     }
-
-    @Test
-    void DeleteOrganization_InvalidFiscalCode_BadRequest() {
-        ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization("INVALID");
-        
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Mockito.verify(aaOrganizationRepository, Mockito.never()).delete(Mockito.any());
-    }
-
-    @Test
-    void InsertReferent_InvalidOrganizationFiscalCode_BadRequest() {
-        ReferentFiscalCodeAttributeAuthority referent = new ReferentFiscalCodeAttributeAuthority();
-        referent.setReferentFiscalCode("AAAAAA00A00A000A");
-
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("INVALID", referent);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Mockito.verify(aaOrganizationRepository, Mockito.never()).findById(Mockito.any());
-        Mockito.verify(aaReferentRepository, Mockito.never()).findById(Mockito.any());
-    }
-
-    @Test
-    void DeleteReferent_InvalidOrganizationFiscalCode_BadRequest() {
-        ResponseEntity<Void> response = attributeAuthorityService.deleteReferent("INVALID", "AAAAAA00A00A000A");
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Mockito.verify(aaOrganizationRepository, Mockito.never()).findById(Mockito.any());
-    }
-
 }

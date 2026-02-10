@@ -67,21 +67,30 @@ class AttributeAuthorityServiceDeleteOrganizationTest
     }
 
     @Test
+    void DeleteOrganization_VatFiscalCode_Ok() {
+        String keyFiscalCode = "54683216974";
+        AAOrganizationEntity existing = new AAOrganizationEntity();
+        existing.setFiscalCode(keyFiscalCode);
+        existing.setName("Test Org VAT");
+        existing.setPec("vat@pec.it");
+        existing.setInsertedAt(OffsetDateTime.now());
+        aaOrganizationRepository.saveAndFlush(existing);
+
+        ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization(keyFiscalCode);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        Optional<AAOrganizationEntity> deleted = aaOrganizationRepository.findById(keyFiscalCode);
+        Assertions.assertTrue(deleted.isEmpty());
+    }
+
+    @Test
     void DeleteOrganization_NotFound() {
         String keyFiscalCode = "RSSMRA80A01H501U";
 
         ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization(keyFiscalCode);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    void DeleteOrganization_InvalidFiscalCode_BadRequest() {
-        String invalidFiscalCode = "INVALID";
-
-        ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization(invalidFiscalCode);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test

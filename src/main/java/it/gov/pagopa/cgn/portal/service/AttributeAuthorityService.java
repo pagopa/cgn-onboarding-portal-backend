@@ -52,7 +52,7 @@ public class AttributeAuthorityService {
             int pageNum = page != null ? page : 0;
             int pageSizeNum = pageSize != null ? pageSize : 20;
 
-            boolean isFiscalCodeSearch = isFiscalCode(searchQuery);
+            boolean isFiscalCodeSearch = isReferentFiscalCode(searchQuery);
 
             Sort sort = buildSort(sortBy, sortDirection);
             Pageable pageable = PageRequest.of(pageNum, pageSizeNum, sort);
@@ -91,12 +91,6 @@ public class AttributeAuthorityService {
     @Transactional(readOnly = false)
     public ResponseEntity<Void> deleteOrganization(String keyOrganizationFiscalCode) {
         try {
-            if (!isFiscalCode(keyOrganizationFiscalCode)) {
-                log.warn("Invalid fiscal code for deleteOrganization: {}", keyOrganizationFiscalCode);
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            
-            // Load organization
             Optional<AAOrganizationEntity> organization = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             
             if (organization.isEmpty()) {
@@ -104,7 +98,6 @@ public class AttributeAuthorityService {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             
-            // Delete organization (orphanRemoval handles referents cascade)
             aaOrganizationRepository.delete(organization.get());
             aaOrganizationRepository.flush();
             
@@ -124,15 +117,8 @@ public class AttributeAuthorityService {
         try {
             String keyOrgFiscalCode = organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode();
             
-            if (!isFiscalCode(keyOrgFiscalCode)) {
-                log.warn("Invalid fiscal code for upsertOrganization: {}", keyOrgFiscalCode);
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            
-            // Upsert organization
             AAOrganizationEntity organization = aaOrganizationRepository.findById(keyOrgFiscalCode)
                     .map(existing -> {
-                        // Don't update fiscal code - it's the primary key
                         existing.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
                         existing.setPec(organizationWithReferentsAttributeAuthority.getPec());
                         return existing;
@@ -171,20 +157,16 @@ public class AttributeAuthorityService {
                     })
                     .collect(Collectors.toCollection(ArrayList::new));
             
-            // Initialize collection if null (for new organizations)
             List<AAOrganizationReferentEntity> currentReferents = organization.getOrganizationReferents();
             if (currentReferents == null) {
                 currentReferents = new ArrayList<>();
                 organization.setOrganizationReferents(currentReferents);
             } else {
-                // Clear existing referents (orphanRemoval will delete them from DB)
                 currentReferents.clear();
             }
             
-            // Add new referents
             currentReferents.addAll(newReferents);
             
-            // Save organization with referents
             AAOrganizationEntity savedOrganization = aaOrganizationRepository.save(organization);
             
             log.info("Upserted organization with fiscal code: {}", keyOrgFiscalCode);
@@ -232,17 +214,6 @@ public class AttributeAuthorityService {
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
                                                ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
         try {
-            if (!isFiscalCode(keyOrganizationFiscalCode)) {
-                log.warn("Invalid fiscal code for insertReferent: {}", keyOrganizationFiscalCode);
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            if (referentFiscalCodeAttributeAuthority == null
-                    || !isFiscalCode(referentFiscalCodeAttributeAuthority.getReferentFiscalCode())) {
-                log.warn("Invalid referent fiscal code for insertReferent");
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
             Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             if (organizationOpt.isEmpty()) {
                 log.warn("Organization not found: {}", keyOrganizationFiscalCode);
@@ -289,16 +260,6 @@ public class AttributeAuthorityService {
     @Transactional(readOnly = false)
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {
         try {
-            if (!isFiscalCode(keyOrganizationFiscalCode)) {
-                log.warn("Invalid organization fiscal code for deleteReferent: {}", keyOrganizationFiscalCode);
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            if (!isFiscalCode(referentFiscalCode)) {
-                log.warn("Invalid referent fiscal code for deleteReferent: {}", referentFiscalCode);
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
             Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             if (organizationOpt.isEmpty()) {
                 log.warn("Organization not found: {}", keyOrganizationFiscalCode);
@@ -354,7 +315,7 @@ public class AttributeAuthorityService {
         return getAgreementOrganizations(referentFiscalCode).size();
     }
 
-    private boolean isFiscalCode(String input) {
+    private boolean isReferentFiscalCode(String input) {
         if (input == null || input.isEmpty()) {
             return false;
         }
@@ -378,7 +339,6 @@ public class AttributeAuthorityService {
         if (sortBy == null) {
             return "fiscalCode";
         }
-        // Validazione enum definito in OpenAPI backoffice/openapi.yaml
         Set<String> validColumns = Set.of("fiscalCode", "name", "pec", "insertedAt");
         return validColumns.contains(sortBy) ? sortBy : "fiscalCode";
     }

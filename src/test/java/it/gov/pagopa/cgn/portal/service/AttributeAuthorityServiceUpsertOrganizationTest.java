@@ -77,6 +77,28 @@ class AttributeAuthorityServiceUpsertOrganizationTest
     }
 
     @Test
+    void UpsertOrganization_VatKeyFiscalCode_Ok() {
+        String keyFiscalCode = "54683216974";
+        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        request.setKeyOrganizationFiscalCode(keyFiscalCode);
+        request.setOrganizationFiscalCode("54683216974");
+        request.setOrganizationName("Test Organization VAT");
+        request.setPec("vat@pec.it");
+        request.setReferents(List.of("AAAAAA00A00A000A"));
+
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+                attributeAuthorityService.upsertOrganization(request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        Assertions.assertEquals(keyFiscalCode, response.getBody().getKeyOrganizationFiscalCode());
+
+        Optional<AAOrganizationEntity> savedOrg = aaOrganizationRepository.findById(keyFiscalCode);
+        Assertions.assertTrue(savedOrg.isPresent());
+        Assertions.assertEquals("Test Organization VAT", savedOrg.get().getName());
+    }
+
+    @Test
     void UpsertOrganization_Update_Ok() {
         String keyFiscalCode = "RSSMRA80A01H501U";
         AAOrganizationEntity existing = new AAOrganizationEntity();
@@ -166,36 +188,6 @@ class AttributeAuthorityServiceUpsertOrganizationTest
 
         Optional<AAOrganizationEntity> savedOrg = aaOrganizationRepository.findById(keyFiscalCode);
         Assertions.assertTrue(savedOrg.isPresent());
-    }
-
-    @Test
-    void UpsertOrganization_InvalidFiscalCode_BadRequest() {
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
-        request.setKeyOrganizationFiscalCode("INVALID");
-        request.setOrganizationFiscalCode("12345678901234");
-        request.setOrganizationName("Test Organization");
-        request.setPec("test@pec.it");
-        request.setReferents(List.of("AAAAAA00A00A000A"));
-
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
-                attributeAuthorityService.upsertOrganization(request);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    }
-
-    @Test
-    void UpsertOrganization_NullKeyFiscalCode_BadRequest() {
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
-        request.setKeyOrganizationFiscalCode(null);
-        request.setOrganizationFiscalCode("12345678901234");
-        request.setOrganizationName("Test Organization");
-        request.setPec("test@pec.it");
-        request.setReferents(List.of("AAAAAA00A00A000A"));
-
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
-                attributeAuthorityService.upsertOrganization(request);
-
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
