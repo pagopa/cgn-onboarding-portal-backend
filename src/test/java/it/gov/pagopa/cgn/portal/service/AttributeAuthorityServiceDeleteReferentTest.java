@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -72,7 +73,13 @@ class AttributeAuthorityServiceDeleteReferentTest
         organization.setOrganizationReferents(referents);
         aaOrganizationRepository.saveAndFlush(organization);
 
-        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+        // Verify link exists before deletion
+        List<AAOrganizationReferentEntity> linksBefore = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        boolean linkExistsBefore = linksBefore.stream()
+            .anyMatch(link -> link.getOrganization() != null && link.getReferent() != null
+                           && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                           && referentCode.equals(link.getReferent().getFiscalCode()));
+        Assertions.assertTrue(linkExistsBefore, "Link must exist before deletion");
 
         // When: Delete referent
         ResponseEntity<Void> response = attributeAuthorityService.deleteReferent(keyFiscalCode, referentCode);
@@ -80,11 +87,17 @@ class AttributeAuthorityServiceDeleteReferentTest
         // Then: Verify response
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        // Verify join deleted (orphanRemoval)
-        Assertions.assertEquals(0, aaOrganizationReferentRepository.count());
+        // Verify link deleted (orphanRemoval)
+        List<AAOrganizationReferentEntity> linksAfter = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        boolean linkExistsAfter = linksAfter.stream()
+            .anyMatch(link -> link.getOrganization() != null && link.getReferent() != null
+                           && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                           && referentCode.equals(link.getReferent().getFiscalCode()));
+        Assertions.assertFalse(linkExistsAfter, "Link must be deleted");
 
         // Verify referent entity still exists
-        Assertions.assertEquals(1, aaReferentRepository.count());
+        Optional<AAReferentEntity> referentStillExists = aaReferentRepository.findById(referentCode);
+        Assertions.assertTrue(referentStillExists.isPresent(), "Referent entity must still exist");
     }
 
     @Test
@@ -144,16 +157,36 @@ class AttributeAuthorityServiceDeleteReferentTest
         organization.setOrganizationReferents(referents);
         aaOrganizationRepository.saveAndFlush(organization);
 
-        Assertions.assertEquals(2, aaOrganizationReferentRepository.count());
+        // Verify both links exist before deletion
+        List<AAOrganizationReferentEntity> linksBefore = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long linksBeforeCount = linksBefore.stream()
+            .filter(link -> link.getOrganization() != null
+                         && keyFiscalCode.equals(link.getOrganization().getFiscalCode()))
+            .count();
+        Assertions.assertEquals(2, linksBeforeCount, "Should have 2 links before deletion");
 
         // When: Delete one referent
         ResponseEntity<Void> response = attributeAuthorityService.deleteReferent(keyFiscalCode, "AAAAAA00A00A000A");
 
-        // Then: Verify only one join deleted
+        // Then: Verify only one link deleted
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+        
+        List<AAOrganizationReferentEntity> linksAfter = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long linksAfterCount = linksAfter.stream()
+            .filter(link -> link.getOrganization() != null
+                         && keyFiscalCode.equals(link.getOrganization().getFiscalCode()))
+            .count();
+        Assertions.assertEquals(1, linksAfterCount, "Should have 1 link after deletion");
+        
+        // Verify referent B link still exists
+        boolean linkBExists = linksAfter.stream()
+            .anyMatch(link -> link.getOrganization() != null && link.getReferent() != null
+                           && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                           && "BBBBBB00B00B000B".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertTrue(linkBExists, "Link to referent B must still exist");
 
         // Verify both referents still exist
-        Assertions.assertEquals(2, aaReferentRepository.count());
+        Assertions.assertTrue(aaReferentRepository.findById("AAAAAA00A00A000A").isPresent(), "Referent A must exist");
+        Assertions.assertTrue(aaReferentRepository.findById("BBBBBB00B00B000B").isPresent(), "Referent B must exist");
     }
 }

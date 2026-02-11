@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -86,8 +87,18 @@ class AttributeAuthorityServiceInsertReferentTest
         ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
-        Assertions.assertEquals(1, aaReferentRepository.count());
+        
+        // Verify link exists between organization and referent
+        List<AAOrganizationReferentEntity> links = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        boolean linkExists = links.stream()
+            .anyMatch(link -> link.getOrganization() != null && link.getReferent() != null
+                           && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                           && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertTrue(linkExists, "Link between organization and referent must exist");
+        
+        // Verify referent exists
+        Optional<AAReferentEntity> referent = aaReferentRepository.findById("AAAAAA00A00A000A");
+        Assertions.assertTrue(referent.isPresent(), "Referent must exist");
     }
 
     @Test
@@ -119,7 +130,15 @@ class AttributeAuthorityServiceInsertReferentTest
 
         Assertions.assertEquals(HttpStatus.OK, response1.getStatusCode());
         Assertions.assertEquals(HttpStatus.OK, response2.getStatusCode());
-        Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
+        
+        // Verify only one link exists (duplicate insert should not create second link)
+        List<AAOrganizationReferentEntity> links = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long linkCount = links.stream()
+            .filter(link -> link.getOrganization() != null && link.getReferent() != null
+                         && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                         && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()))
+            .count();
+        Assertions.assertEquals(1, linkCount, "Should have exactly one link after duplicate insert");
 
         Optional<AAReferentEntity> referent = aaReferentRepository.findById("AAAAAA00A00A000A");
         Assertions.assertTrue(referent.isPresent());

@@ -216,7 +216,9 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         Assertions.assertNotNull(response.getBody());
         Assertions.assertEquals(2, response.getBody().getReferents().size());
 
-        Assertions.assertEquals(2, aaReferentRepository.count());
+        // Verify both referents exist
+        Assertions.assertTrue(aaReferentRepository.findById("AAAAAA00A00A000A").isPresent(), "Referent A must exist");
+        Assertions.assertTrue(aaReferentRepository.findById("BBBBBB00B00B000B").isPresent(), "Referent B must exist");
     }
 
     @Test

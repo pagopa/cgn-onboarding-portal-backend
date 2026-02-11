@@ -125,7 +125,13 @@ class AttributeAuthorityServiceDeleteOrganizationTest
         organization.setOrganizationReferents(referents);
         aaOrganizationRepository.saveAndFlush(organization);
 
-        Assertions.assertEquals(2, aaOrganizationReferentRepository.count());
+        // Verify both links exist before deletion
+        List<AAOrganizationReferentEntity> linksBefore = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long linksBeforeCount = linksBefore.stream()
+            .filter(link -> link.getOrganization() != null
+                         && keyFiscalCode.equals(link.getOrganization().getFiscalCode()))
+            .count();
+        Assertions.assertEquals(2, linksBeforeCount, "Should have 2 links before deletion");
 
         ResponseEntity<Void> response = attributeAuthorityService.deleteOrganization(keyFiscalCode);
 
@@ -134,9 +140,16 @@ class AttributeAuthorityServiceDeleteOrganizationTest
         Optional<AAOrganizationEntity> deleted = aaOrganizationRepository.findById(keyFiscalCode);
         Assertions.assertTrue(deleted.isEmpty());
 
-        Assertions.assertEquals(0, aaOrganizationReferentRepository.count());
+        // Verify all links to this organization are deleted
+        List<AAOrganizationReferentEntity> linksAfter = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        boolean anyLinksRemain = linksAfter.stream()
+            .anyMatch(link -> link.getOrganization() != null
+                           && keyFiscalCode.equals(link.getOrganization().getFiscalCode()));
+        Assertions.assertFalse(anyLinksRemain, "No links to deleted organization should remain");
 
-        Assertions.assertEquals(2, aaReferentRepository.count());
+        // Verify both referents still exist
+        Assertions.assertTrue(aaReferentRepository.findById("AAAAAA00A00A000A").isPresent(), "Referent A must exist");
+        Assertions.assertTrue(aaReferentRepository.findById("BBBBBB00B00B000B").isPresent(), "Referent B must exist");
     }
 
 }
