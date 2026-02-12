@@ -21,7 +21,7 @@ import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-class AttributeAuthorityServiceGetUserCompaniesTest extends IntegrationAbstractTest {
+class AttributeAuthorityServiceGetUserCompaniesTest extends IntegrationAbstractTest { 
 
     @Autowired
     private AttributeAuthorityService attributeAuthorityService;
