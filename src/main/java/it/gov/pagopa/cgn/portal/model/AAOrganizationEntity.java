@@ -7,13 +7,14 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "organizations")
 @Data
-public class AAOrganizationEntity {
+public class AAOrganizationEntity implements Serializable {
 
     @Id
     @NotNull

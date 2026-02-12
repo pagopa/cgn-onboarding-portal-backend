@@ -31,6 +31,7 @@ public class AttributeAuthorityService {
 
     private static final String FISCAL_CODE_REGEX = "^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$";
     private static final Pattern FISCAL_CODE_PATTERN = Pattern.compile(FISCAL_CODE_REGEX);
+    public static final String ORGANIZATION_NOT_FOUND = "Organization not found: {}";
 
     private final AAOrganizationRepository aaOrganizationRepository;
 
@@ -94,7 +95,7 @@ public class AttributeAuthorityService {
             Optional<AAOrganizationEntity> organization = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             
             if (organization.isEmpty()) {
-                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                log.warn(ORGANIZATION_NOT_FOUND, keyOrganizationFiscalCode);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             
@@ -226,7 +227,7 @@ public class AttributeAuthorityService {
         try {
             Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             if (organizationOpt.isEmpty()) {
-                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                log.warn(ORGANIZATION_NOT_FOUND, keyOrganizationFiscalCode);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
@@ -272,7 +273,7 @@ public class AttributeAuthorityService {
         try {
             Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             if (organizationOpt.isEmpty()) {
-                log.warn("Organization not found: {}", keyOrganizationFiscalCode);
+                log.warn(ORGANIZATION_NOT_FOUND, keyOrganizationFiscalCode);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
@@ -322,7 +323,14 @@ public class AttributeAuthorityService {
     @Transactional(readOnly = true)
     public int countUserOrganizations(String referentFiscalCode)
             throws HttpClientErrorException {
-        return getAgreementOrganizations(referentFiscalCode).size();
+        Optional<AAReferentEntity> referent = aaReferentRepository.findById(referentFiscalCode);
+        if (referent.isEmpty()) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        }
+        if (referent.get().getOrganizationReferents() == null) {
+            return 0;
+        }
+        return referent.get().getOrganizationReferents().size();
     }
 
     private boolean isReferentFiscalCode(String input) {
@@ -346,11 +354,9 @@ public class AttributeAuthorityService {
     }
 
     private String mapSortByToColumnName(String sortBy) {
-        if (sortBy == null) {
-            return "fiscalCode";
-        }
-        Set<String> validColumns = Set.of("fiscalCode", "name", "pec", "insertedAt");
-        return validColumns.contains(sortBy) ? sortBy : "fiscalCode";
+        List<String> validColumns = List.of("fiscalCode", "name", "pec", "insertedAt");
+
+        return sortBy != null && validColumns.contains(sortBy) ? sortBy : validColumns.getFirst();
     }
 
     private OrganizationWithReferentsAttributeAuthority mapToOrganizationWithReferents(
