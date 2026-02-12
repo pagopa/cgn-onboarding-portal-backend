@@ -45,9 +45,9 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         AAReferentEntity ref1 = createAndSaveReferent("RSSMRA80A01H501U");
         AAReferentEntity ref2 = createAndSaveReferent("VRNGNN85M25L736K");
 
-        AAOrganizationEntity org1 = createAndSaveOrganization("12345678", "Org One", "org1@pec.it", 
+        createAndSaveOrganization("12345678", "Org One", "org1@pec.it",
                 List.of(ref1, ref2));
-        AAOrganizationEntity org2 = createAndSaveOrganization("87654321", "Org Two", "org2@pec.it",
+        createAndSaveOrganization("87654321", "Org Two", "org2@pec.it",
                 List.of(ref1));
 
         ResponseEntity<OrganizationsAttributeAuthority> response = 
