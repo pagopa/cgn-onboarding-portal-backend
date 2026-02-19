@@ -52,10 +52,10 @@ class AttributeAuthorityServiceUpsertOrganizationTest
 
     @Test
     void UpsertOrganization_Create_Ok() {
-        String keyFiscalCode = "RSSMRA80A01H501U";
+        String keyFiscalCode = "12345678901234";
         OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
-        request.setOrganizationFiscalCode("12345678901234");
+        request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A", "BBBBBB00B00B000B"));
@@ -102,17 +102,18 @@ class AttributeAuthorityServiceUpsertOrganizationTest
 
     @Test
     void UpsertOrganization_Update_Ok() {
-        String keyFiscalCode = "RSSMRA80A01H501U";
+        String oldKeyFiscalCode = "56345678901231";
+        String newKeyFiscalCode = "12345678901234";
         AAOrganizationEntity existing = new AAOrganizationEntity();
-        existing.setFiscalCode(keyFiscalCode);
+        existing.setFiscalCode(oldKeyFiscalCode);
         existing.setName("Old Name");
         existing.setPec("old@pec.it");
         existing.setInsertedAt(OffsetDateTime.now());
         aaOrganizationRepository.saveAndFlush(existing);
 
         OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
-        request.setKeyOrganizationFiscalCode(keyFiscalCode);
-        request.setOrganizationFiscalCode("12345678901234");
+        request.setKeyOrganizationFiscalCode(oldKeyFiscalCode);
+        request.setOrganizationFiscalCode(newKeyFiscalCode);
         request.setOrganizationName("Updated Name");
         request.setPec("updated@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A"));
@@ -127,7 +128,7 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         Assertions.assertEquals("updated@pec.it", body.getPec());
         Assertions.assertEquals(1, body.getReferents().size());
 
-        Optional<AAOrganizationEntity> updated = aaOrganizationRepository.findById(keyFiscalCode);
+        Optional<AAOrganizationEntity> updated = aaOrganizationRepository.findById(newKeyFiscalCode);
         Assertions.assertTrue(updated.isPresent());
         Assertions.assertEquals("Updated Name", updated.get().getName());
     }
@@ -135,24 +136,49 @@ class AttributeAuthorityServiceUpsertOrganizationTest
     @Test
     void UpsertOrganization_UpdateReferents_Ok() {
         String keyFiscalCode = "RSSMRA80A01H501U";
-        AAReferentEntity referent1 = new AAReferentEntity();
-        referent1.setFiscalCode("AAAAAA00A00A000A");
-        aaReferentRepository.saveAndFlush(referent1);
+        
+        AAReferentEntity referentA = new AAReferentEntity();
+        referentA.setFiscalCode("AAAAAA00A00A000A");
+        aaReferentRepository.saveAndFlush(referentA);
 
-        AAReferentEntity referent2 = new AAReferentEntity();
-        referent2.setFiscalCode("BBBBBB00B00B000B");
-        aaReferentRepository.saveAndFlush(referent2);
+        AAReferentEntity referentB = new AAReferentEntity();
+        referentB.setFiscalCode("BBBBBB00B00B000B");
+        aaReferentRepository.saveAndFlush(referentB);
+
+        AAReferentEntity referentC = new AAReferentEntity();
+        referentC.setFiscalCode("CCCCCC00C00C000C");
+        aaReferentRepository.saveAndFlush(referentC);
 
         AAOrganizationEntity existing = new AAOrganizationEntity();
         existing.setFiscalCode(keyFiscalCode);
         existing.setName("Test Org");
         existing.setPec("test@pec.it");
         existing.setInsertedAt(OffsetDateTime.now());
+        
+        List<AAOrganizationReferentEntity> initialReferents = new ArrayList<>();
+        AAOrganizationReferentEntity linkA = new AAOrganizationReferentEntity();
+        linkA.setOrganization(existing);
+        linkA.setReferent(referentA);
+        initialReferents.add(linkA);
+        
+        AAOrganizationReferentEntity linkB = new AAOrganizationReferentEntity();
+        linkB.setOrganization(existing);
+        linkB.setReferent(referentB);
+        initialReferents.add(linkB);
+        
+        existing.setOrganizationReferents(initialReferents);
         aaOrganizationRepository.saveAndFlush(existing);
+
+        List<AAOrganizationReferentEntity> linksBefore = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long countBefore = linksBefore.stream()
+                .filter(link -> link.getOrganization() != null
+                        && keyFiscalCode.equals(link.getOrganization().getFiscalCode()))
+                .count();
+        Assertions.assertEquals(2, countBefore, "Should have 2 referents before update");
 
         OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
-        request.setOrganizationFiscalCode("12345678901234");
+        request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Org");
         request.setPec("test@pec.it");
         request.setReferents(List.of("CCCCCC00C00C000C"));
@@ -168,6 +194,33 @@ class AttributeAuthorityServiceUpsertOrganizationTest
 
         Optional<AAOrganizationEntity> updated = aaOrganizationRepository.findById(keyFiscalCode);
         Assertions.assertTrue(updated.isPresent());
+        
+        List<AAOrganizationReferentEntity> linksAfter = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        long countAfter = linksAfter.stream()
+                .filter(link -> link.getOrganization() != null
+                        && keyFiscalCode.equals(link.getOrganization().getFiscalCode()))
+                .count();
+        Assertions.assertEquals(1, countAfter, "Should have 1 referent after update");
+        boolean hasC = linksAfter.stream()
+                .anyMatch(link -> link.getOrganization() != null
+                        && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                        && link.getReferent() != null
+                        && "CCCCCC00C00C000C".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertTrue(hasC, "Referent should be linked");
+        
+        boolean hasA = linksAfter.stream()
+                .anyMatch(link -> link.getOrganization() != null
+                        && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                        && link.getReferent() != null
+                        && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertFalse(hasA, "Referent A should no longer be linked");
+        
+        boolean hasB = linksAfter.stream()
+                .anyMatch(link -> link.getOrganization() != null
+                        && keyFiscalCode.equals(link.getOrganization().getFiscalCode())
+                        && link.getReferent() != null
+                        && "BBBBBB00B00B000B".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertFalse(hasB, "Referent B should no longer be linked");
     }
 
     @Test
@@ -175,7 +228,7 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         String keyFiscalCode = "RSSMRA80A01H501U";
         OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
-        request.setOrganizationFiscalCode("12345678901234");
+        request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of());
@@ -361,5 +414,52 @@ class AttributeAuthorityServiceUpsertOrganizationTest
                 "Organization should exist with new fiscal code");
         Assertions.assertEquals("Test AA 2", updatedOrg.get().getName());
         Assertions.assertEquals("pec@pec.it", updatedOrg.get().getPec());
+    }
+
+    @Test
+    void UpsertOrganization_UpdateWithoutChangingPK_Ok() {
+        String fiscalCode = "12345678901234";
+        AAOrganizationEntity existing = new AAOrganizationEntity();
+        existing.setFiscalCode(fiscalCode);
+        existing.setName("Original Name");
+        existing.setPec("original@pec.it");
+        existing.setInsertedAt(OffsetDateTime.now());
+        existing.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(existing);
+        
+        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        request.setKeyOrganizationFiscalCode(fiscalCode);
+        request.setOrganizationFiscalCode(fiscalCode);
+        request.setOrganizationName("Updated Name");
+        request.setPec("updated@pec.it");
+        request.setReferents(List.of("AAAAAA00A00A000A"));
+
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+                attributeAuthorityService.upsertOrganization(request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        
+        Assertions.assertEquals(fiscalCode, response.getBody().getOrganizationFiscalCode(),
+                "Fiscal code should remain unchanged");
+        Assertions.assertEquals("Updated Name", response.getBody().getOrganizationName());
+        Assertions.assertEquals("updated@pec.it", response.getBody().getPec());
+        Assertions.assertEquals(1, response.getBody().getReferents().size());
+        
+        Optional<AAOrganizationEntity> updated = aaOrganizationRepository.findById(fiscalCode);
+        Assertions.assertTrue(updated.isPresent(), 
+                "Organization should still exist with same fiscal code");
+        Assertions.assertEquals("Updated Name", updated.get().getName(),
+                "Name should be updated");
+        Assertions.assertEquals("updated@pec.it", updated.get().getPec(),
+                "PEC should be updated");
+        
+        List<AAOrganizationReferentEntity> links = (List<AAOrganizationReferentEntity>) aaOrganizationReferentRepository.findAll();
+        boolean hasReferent = links.stream()
+                .anyMatch(link -> link.getOrganization() != null
+                        && fiscalCode.equals(link.getOrganization().getFiscalCode())
+                        && link.getReferent() != null
+                        && "AAAAAA00A00A000A".equals(link.getReferent().getFiscalCode()));
+        Assertions.assertTrue(hasReferent, "Referent should be linked to organization");
     }
 }
