@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -312,5 +313,53 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         Assertions.assertTrue(linksAfterSecond.stream()
                 .anyMatch(link -> link.getReferent() != null 
                         && "BBBBBB00B00B000B".equals(link.getReferent().getFiscalCode())));
+    }
+
+    @Test
+    void UpsertOrganization_ChangeFiscalCode_ShouldUpdateFiscalCode() {
+        // Create organization with initial fiscal code
+        String oldFiscalCode = "54798975426";
+        AAOrganizationEntity existing = new AAOrganizationEntity();
+        existing.setFiscalCode(oldFiscalCode);
+        existing.setName("Original Name");
+        existing.setPec("old@pec.it");
+        existing.setInsertedAt(OffsetDateTime.now());
+        existing.setOrganizationReferents(new ArrayList<>());
+        aaOrganizationRepository.saveAndFlush(existing);
+        
+        // Verify organization exists with old fiscal code
+        Assertions.assertTrue(aaOrganizationRepository.findById(oldFiscalCode).isPresent());
+        
+        // Update organization with new fiscal code
+        String newFiscalCode = "54798975429";
+        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        request.setKeyOrganizationFiscalCode(oldFiscalCode);  // Search with old PK
+        request.setOrganizationFiscalCode(newFiscalCode);      // Update to new PK
+        request.setOrganizationName("Test AA 2");
+        request.setPec("pec@pec.it");
+        request.setReferents(List.of("ISPXNB32R82Y766D"));
+
+        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+                attributeAuthorityService.upsertOrganization(request);
+
+        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
+        
+        // Verify response contains new organizationFiscalCode
+        Assertions.assertEquals(newFiscalCode, response.getBody().getOrganizationFiscalCode(),
+                "Response should return new organizationFiscalCode");
+        Assertions.assertEquals("Test AA 2", response.getBody().getOrganizationName());
+        Assertions.assertEquals("pec@pec.it", response.getBody().getPec());
+        
+        // Verify old fiscal code no longer exists
+        Assertions.assertTrue(aaOrganizationRepository.findById(oldFiscalCode).isEmpty(),
+                "Organization with old fiscal code should no longer exist");
+        
+        // Verify organization exists with new fiscal code
+        Optional<AAOrganizationEntity> updatedOrg = aaOrganizationRepository.findById(newFiscalCode);
+        Assertions.assertTrue(updatedOrg.isPresent(), 
+                "Organization should exist with new fiscal code");
+        Assertions.assertEquals("Test AA 2", updatedOrg.get().getName());
+        Assertions.assertEquals("pec@pec.it", updatedOrg.get().getPec());
     }
 }

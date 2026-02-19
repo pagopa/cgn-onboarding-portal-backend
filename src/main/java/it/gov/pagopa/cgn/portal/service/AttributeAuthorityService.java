@@ -117,8 +117,14 @@ public class AttributeAuthorityService {
             OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
         try {
             String keyOrgFiscalCode = organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode();
+            String newOrgFiscalCode = organizationWithReferentsAttributeAuthority.getOrganizationFiscalCode();
             
-            AAOrganizationEntity organization = aaOrganizationRepository.findById(keyOrgFiscalCode)
+            if (!keyOrgFiscalCode.equals(newOrgFiscalCode) && aaOrganizationRepository.existsById(keyOrgFiscalCode)) {
+                aaOrganizationRepository.updateFiscalCode(keyOrgFiscalCode, newOrgFiscalCode);
+                aaOrganizationRepository.flush();
+            }
+
+            AAOrganizationEntity organization = aaOrganizationRepository.findById(newOrgFiscalCode)
                     .map(existing -> {
                         existing.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
                         existing.setPec(organizationWithReferentsAttributeAuthority.getPec());
@@ -126,7 +132,7 @@ public class AttributeAuthorityService {
                     })
                     .orElseGet(() -> {
                         AAOrganizationEntity newOrg = new AAOrganizationEntity();
-                        newOrg.setFiscalCode(keyOrgFiscalCode);
+                        newOrg.setFiscalCode(newOrgFiscalCode);
                         newOrg.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
                         newOrg.setPec(organizationWithReferentsAttributeAuthority.getPec());
                         newOrg.setInsertedAt(OffsetDateTime.now());
