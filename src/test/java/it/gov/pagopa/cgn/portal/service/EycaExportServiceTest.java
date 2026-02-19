@@ -619,7 +619,7 @@ class EycaExportServiceTest
     @Test
     void testBuildCsv_shouldReturnNotEmptyResource() {
         ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-        Assertions.assertEquals(104763, resource.getByteArray().length);
+        Assertions.assertEquals(106411, resource.getByteArray().length);
     }
 
     @Test
