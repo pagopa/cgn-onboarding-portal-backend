@@ -37,7 +37,7 @@ SELECT
     '' as "phone",
     p.website_url as "web",
     '' as "tags",
-    'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
+    'https://io-p-itn-cgn-pe-frontend-assets-fde-01-e6cbebfwdrhcaqed.a02.azurefd.net/' || ag.image_url as "image",
 	l.live as "live",
     '' as "location_local_id",
     ad.full_address as "street",
