@@ -306,6 +306,8 @@ components:
           type: array
           items:
             type: string
+        image_source__web:
+          type: string
         image_source__file:
           type: string
         files:
