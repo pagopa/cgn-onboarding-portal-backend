@@ -38,6 +38,7 @@ public class UpdateDataExportEycaWrapperConverter
         updateDataExportEyca.setWeb(entity.getWeb());
         updateDataExportEyca.setText(entity.getText());
         updateDataExportEyca.setTextLocal(entity.getTextLocal());
+        updateDataExportEyca.setImageSourceWeb(entity.getImage());
 
         DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<>(
                 updateDataExportEyca);
