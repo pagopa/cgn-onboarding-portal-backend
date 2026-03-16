@@ -1,11 +1,8 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
-import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
-import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,10 +42,10 @@ public class AttributeAuthorityService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<OrganizationsAttributeAuthority> getOrganizations(String searchQuery,
-                                                                            Integer page,
-                                                                            Integer pageSize,
-                                                                            String sortBy,
-                                                                            String sortDirection) {
+                                                                                                                                       Integer page,
+                                                                                                                                       Integer pageSize,
+                                                                                                                                       String sortBy,
+                                                                                                                                       String sortDirection) {
         try {
             int pageNum = page != null ? page : 0;
             int pageSizeNum = pageSize != null ? pageSize : 20;

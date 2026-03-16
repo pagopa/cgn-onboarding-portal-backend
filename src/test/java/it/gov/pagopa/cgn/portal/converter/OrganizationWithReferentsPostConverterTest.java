@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsPostConverter;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
+import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsPostAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import org.apache.commons.lang3.NotImplementedException;

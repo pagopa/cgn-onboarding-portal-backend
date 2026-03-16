@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractAttributeAuthorityConverter;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsPostAttributeAuthority;
+import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsPostAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
@@ -35,6 +35,4 @@ public class OrganizationWithReferentsPostConverter
     protected Function<OrganizationWithReferents, OrganizationWithReferentsPostAttributeAuthority> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
-
-
 }

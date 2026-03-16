@@ -1,13 +1,10 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
-import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
-import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
+import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -50,7 +48,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         createAndSaveOrganization("87654321", "Org Two", "org2@pec.it",
                 List.of(ref1));
 
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<OrganizationsAttributeAuthority> response =
                 attributeAuthorityService.getOrganizations(null, null, null, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -186,8 +184,8 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         assertEquals("Test Org", item.getOrganizationName());
         assertEquals("test@pec.it", item.getPec());
         assertEquals(2, item.getReferents().size());
-        assertTrue(item.getReferents().contains("RSSMRA80A01H501U"));
-        assertTrue(item.getReferents().contains("VRNGNN85M25L736K"));
+        Assertions.assertTrue(item.getReferents().contains("RSSMRA80A01H501U"));
+        Assertions.assertTrue(item.getReferents().contains("VRNGNN85M25L736K"));
     }
 
     @Test

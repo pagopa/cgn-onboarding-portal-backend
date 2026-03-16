@@ -6,9 +6,9 @@ import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizat
 import it.gov.pagopa.cgn.portal.converter.Iso8601TimestampCompatible;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
+import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsAttributeAuthority;
+import it.gov.pagopa.cgn.portal.model.OrganizationsAttributeAuthority;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationStatus;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;

@@ -1,11 +1,11 @@
 package it.gov.pagopa.cgn.portal.facade;
 
+import it.gov.pagopa.cgn.portal.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgn.portal.security.CgnUserRoleEnum;
 import it.gov.pagopa.cgn.portal.security.JwtClaims;
 import it.gov.pagopa.cgn.portal.security.JwtUtils;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.model.Organization;
 import it.gov.pagopa.cgnonboardingportal.model.Organizations;
 import lombok.extern.slf4j.Slf4j;

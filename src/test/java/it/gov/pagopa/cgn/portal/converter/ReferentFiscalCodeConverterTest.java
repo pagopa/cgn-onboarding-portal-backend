@@ -1,7 +1,7 @@
 package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.converter.backoffice.ReferentFiscalCodeConverter;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
+import it.gov.pagopa.cgn.portal.model.ReferentFiscalCodeAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ReferentFiscalCode;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Assert;
