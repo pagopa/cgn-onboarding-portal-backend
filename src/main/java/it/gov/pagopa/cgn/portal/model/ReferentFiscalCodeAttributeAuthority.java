@@ -61,8 +61,8 @@ public class ReferentFiscalCodeAttributeAuthority implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ReferentFiscalCodeAttributeAuthority referentFiscalCode = (ReferentFiscalCodeAttributeAuthority) o;
-    return Objects.equals(this.referentFiscalCode, referentFiscalCode.referentFiscalCode);
+    ReferentFiscalCodeAttributeAuthority raa = (ReferentFiscalCodeAttributeAuthority) o;
+    return Objects.equals(this.referentFiscalCode, raa.referentFiscalCode);
   }
 
   @Override
