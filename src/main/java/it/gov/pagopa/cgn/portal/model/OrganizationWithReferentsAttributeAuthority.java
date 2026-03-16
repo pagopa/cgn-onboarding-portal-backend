@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,33 +27,38 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
   private static final long serialVersionUID = 1L;
 
   public static final String JSON_PROPERTY_KEY_ORGANIZATION_FISCAL_CODE = "keyOrganizationFiscalCode";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String keyOrganizationFiscalCode;
 
   public static final String JSON_PROPERTY_ORGANIZATION_FISCAL_CODE = "organizationFiscalCode";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String organizationFiscalCode;
 
   public static final String JSON_PROPERTY_ORGANIZATION_NAME = "organizationName";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String organizationName;
 
   public static final String JSON_PROPERTY_PEC = "pec";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String pec;
 
   public static final String JSON_PROPERTY_REFERENTS = "referents";
-  @javax.annotation.Nonnull
+  @Nonnull
   private List<String> referents = new ArrayList<>();
 
   public static final String JSON_PROPERTY_INSERTED_AT = "insertedAt";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String insertedAt;
 
   public OrganizationWithReferentsAttributeAuthority() {
+      keyOrganizationFiscalCode = "";
+      organizationFiscalCode = "";
+      organizationName = "";
+      pec = "";
+      insertedAt = "";
   }
 
-  public OrganizationWithReferentsAttributeAuthority keyOrganizationFiscalCode(@javax.annotation.Nonnull String keyOrganizationFiscalCode) {
+  public OrganizationWithReferentsAttributeAuthority keyOrganizationFiscalCode(@Nonnull String keyOrganizationFiscalCode) {
     
     this.keyOrganizationFiscalCode = keyOrganizationFiscalCode;
     return this;
@@ -62,7 +68,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * Get keyOrganizationFiscalCode
    * @return keyOrganizationFiscalCode
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_KEY_ORGANIZATION_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -73,11 +79,11 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_KEY_ORGANIZATION_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setKeyOrganizationFiscalCode(@javax.annotation.Nonnull String keyOrganizationFiscalCode) {
+  public void setKeyOrganizationFiscalCode(@Nonnull String keyOrganizationFiscalCode) {
     this.keyOrganizationFiscalCode = keyOrganizationFiscalCode;
   }
 
-  public OrganizationWithReferentsAttributeAuthority organizationFiscalCode(@javax.annotation.Nonnull String organizationFiscalCode) {
+  public OrganizationWithReferentsAttributeAuthority organizationFiscalCode(@Nonnull String organizationFiscalCode) {
     
     this.organizationFiscalCode = organizationFiscalCode;
     return this;
@@ -87,7 +93,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * Get organizationFiscalCode
    * @return organizationFiscalCode
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -98,11 +104,11 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOrganizationFiscalCode(@javax.annotation.Nonnull String organizationFiscalCode) {
+  public void setOrganizationFiscalCode(@Nonnull String organizationFiscalCode) {
     this.organizationFiscalCode = organizationFiscalCode;
   }
 
-  public OrganizationWithReferentsAttributeAuthority organizationName(@javax.annotation.Nonnull String organizationName) {
+  public OrganizationWithReferentsAttributeAuthority organizationName(@Nonnull String organizationName) {
     
     this.organizationName = organizationName;
     return this;
@@ -112,7 +118,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * Get organizationName
    * @return organizationName
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -123,11 +129,11 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOrganizationName(@javax.annotation.Nonnull String organizationName) {
+  public void setOrganizationName(@Nonnull String organizationName) {
     this.organizationName = organizationName;
   }
 
-  public OrganizationWithReferentsAttributeAuthority pec(@javax.annotation.Nonnull String pec) {
+  public OrganizationWithReferentsAttributeAuthority pec(@Nonnull String pec) {
     
     this.pec = pec;
     return this;
@@ -137,7 +143,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * Get pec
    * @return pec
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_PEC)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -148,11 +154,11 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_PEC)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPec(@javax.annotation.Nonnull String pec) {
+  public void setPec(@Nonnull String pec) {
     this.pec = pec;
   }
 
-  public OrganizationWithReferentsAttributeAuthority referents(@javax.annotation.Nonnull List<String> referents) {
+  public OrganizationWithReferentsAttributeAuthority referents(@Nonnull List<String> referents) {
     
     this.referents = referents;
     return this;
@@ -170,7 +176,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * Get referents
    * @return referents
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_REFERENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -181,11 +187,11 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_REFERENTS)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setReferents(@javax.annotation.Nonnull List<String> referents) {
+  public void setReferents(@Nonnull List<String> referents) {
     this.referents = referents;
   }
 
-  public OrganizationWithReferentsAttributeAuthority insertedAt(@javax.annotation.Nonnull String insertedAt) {
+  public OrganizationWithReferentsAttributeAuthority insertedAt(@Nonnull String insertedAt) {
     
     this.insertedAt = insertedAt;
     return this;
@@ -195,7 +201,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
    * A date-time field in ISO-8601 format and UTC timezone.
    * @return insertedAt
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_INSERTED_AT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -206,7 +212,7 @@ public class OrganizationWithReferentsAttributeAuthority implements Serializable
 
   @JsonProperty(JSON_PROPERTY_INSERTED_AT)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setInsertedAt(@javax.annotation.Nonnull String insertedAt) {
+  public void setInsertedAt(@Nonnull String insertedAt) {
     this.insertedAt = insertedAt;
   }
 

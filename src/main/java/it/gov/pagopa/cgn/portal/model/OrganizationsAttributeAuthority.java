@@ -29,24 +29,13 @@ public class OrganizationsAttributeAuthority implements Serializable {
   @javax.annotation.Nullable
   private Integer count;
 
-  public OrganizationsAttributeAuthority() {
-  }
-
   public OrganizationsAttributeAuthority items(@javax.annotation.Nullable List<OrganizationWithReferentsAttributeAuthority> items) {
     
     this.items = items;
     return this;
   }
 
-  public OrganizationsAttributeAuthority addItemsItem(OrganizationWithReferentsAttributeAuthority itemsItem) {
-    if (this.items == null) {
-      this.items = new ArrayList<>();
-    }
-    this.items.add(itemsItem);
-    return this;
-  }
-
-  /**
+    /**
    * Get items
    * @return items
    */

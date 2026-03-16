@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -19,13 +20,14 @@ public class ReferentFiscalCodeAttributeAuthority implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public static final String JSON_PROPERTY_REFERENT_FISCAL_CODE = "referentFiscalCode";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String referentFiscalCode;
 
   public ReferentFiscalCodeAttributeAuthority() {
+      referentFiscalCode = "";
   }
 
-  public ReferentFiscalCodeAttributeAuthority referentFiscalCode(@javax.annotation.Nonnull String referentFiscalCode) {
+  public ReferentFiscalCodeAttributeAuthority referentFiscalCode(@Nonnull String referentFiscalCode) {
     
     this.referentFiscalCode = referentFiscalCode;
     return this;
@@ -35,7 +37,7 @@ public class ReferentFiscalCodeAttributeAuthority implements Serializable {
    * User&#39;s fiscal code.
    * @return referentFiscalCode
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_REFERENT_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -46,7 +48,7 @@ public class ReferentFiscalCodeAttributeAuthority implements Serializable {
 
   @JsonProperty(JSON_PROPERTY_REFERENT_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setReferentFiscalCode(@javax.annotation.Nonnull String referentFiscalCode) {
+  public void setReferentFiscalCode(@Nonnull String referentFiscalCode) {
     this.referentFiscalCode = referentFiscalCode;
   }
 

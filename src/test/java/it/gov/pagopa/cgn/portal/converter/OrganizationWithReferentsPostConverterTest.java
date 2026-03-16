@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(SpringRunner.class)
@@ -29,7 +28,7 @@ public class OrganizationWithReferentsPostConverterTest {
         organizationWithReferents.setPec("12345678@pec.it");
         organizationWithReferents.setInsertedAt(LocalDate.now());
         organizationWithReferents.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B")
-                                                     .collect(Collectors.toList()));
+                                                     .toList());
         organizationWithReferents.setEntityType(EntityType.PRIVATE);
         OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority = organizationWithReferentsPostConverter.toAttributeAuthorityModel(
                 organizationWithReferents);
@@ -44,7 +43,7 @@ public class OrganizationWithReferentsPostConverterTest {
         organizationWithReferentsPostAttributeAuthority.setOrganizationFiscalCode("12345678");
         organizationWithReferentsPostAttributeAuthority.setPec("12345678@pec.it");
         organizationWithReferentsPostAttributeAuthority.setReferents(Stream.of("AAAAAA00A00A000A", "BBBBBB00B00B000B")
-                                                                           .collect(Collectors.toList()));
+                                                                             .toList());
         Assertions.assertThrows(NotImplementedException.class,
                                 () -> organizationWithReferentsPostConverter.fromAttributeAuthorityModel(
                                         organizationWithReferentsPostAttributeAuthority));

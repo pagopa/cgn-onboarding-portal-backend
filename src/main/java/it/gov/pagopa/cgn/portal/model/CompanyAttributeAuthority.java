@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -21,21 +22,24 @@ public class CompanyAttributeAuthority implements Serializable {
   private static final long serialVersionUID = 1L;
 
   public static final String JSON_PROPERTY_FISCAL_CODE = "fiscalCode";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String fiscalCode;
 
   public static final String JSON_PROPERTY_ORGANIZATION_NAME = "organizationName";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String organizationName;
 
   public static final String JSON_PROPERTY_PEC = "pec";
-  @javax.annotation.Nonnull
+  @Nonnull
   private String pec;
 
   public CompanyAttributeAuthority() {
+      fiscalCode = "";
+      organizationName = "";
+      pec = "";
   }
 
-  public CompanyAttributeAuthority fiscalCode(@javax.annotation.Nonnull String fiscalCode) {
+  public CompanyAttributeAuthority fiscalCode(@Nonnull String fiscalCode) {
     
     this.fiscalCode = fiscalCode;
     return this;
@@ -45,7 +49,7 @@ public class CompanyAttributeAuthority implements Serializable {
    * Get fiscalCode
    * @return fiscalCode
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -56,11 +60,11 @@ public class CompanyAttributeAuthority implements Serializable {
 
   @JsonProperty(JSON_PROPERTY_FISCAL_CODE)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setFiscalCode(@javax.annotation.Nonnull String fiscalCode) {
+  public void setFiscalCode(@Nonnull String fiscalCode) {
     this.fiscalCode = fiscalCode;
   }
 
-  public CompanyAttributeAuthority organizationName(@javax.annotation.Nonnull String organizationName) {
+  public CompanyAttributeAuthority organizationName(@Nonnull String organizationName) {
     
     this.organizationName = organizationName;
     return this;
@@ -70,7 +74,7 @@ public class CompanyAttributeAuthority implements Serializable {
    * Get organizationName
    * @return organizationName
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -81,11 +85,11 @@ public class CompanyAttributeAuthority implements Serializable {
 
   @JsonProperty(JSON_PROPERTY_ORGANIZATION_NAME)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setOrganizationName(@javax.annotation.Nonnull String organizationName) {
+  public void setOrganizationName(@Nonnull String organizationName) {
     this.organizationName = organizationName;
   }
 
-  public CompanyAttributeAuthority pec(@javax.annotation.Nonnull String pec) {
+  public CompanyAttributeAuthority pec(@Nonnull String pec) {
     
     this.pec = pec;
     return this;
@@ -95,7 +99,7 @@ public class CompanyAttributeAuthority implements Serializable {
    * Get pec
    * @return pec
    */
-  @javax.annotation.Nonnull
+  @Nonnull
   @JsonProperty(JSON_PROPERTY_PEC)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
 
@@ -106,7 +110,7 @@ public class CompanyAttributeAuthority implements Serializable {
 
   @JsonProperty(JSON_PROPERTY_PEC)
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
-  public void setPec(@javax.annotation.Nonnull String pec) {
+  public void setPec(@Nonnull String pec) {
     this.pec = pec;
   }
 
