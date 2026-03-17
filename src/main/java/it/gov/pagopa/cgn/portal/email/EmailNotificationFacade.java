@@ -11,7 +11,9 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.model.SecondaryReferentEntity;
+import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.DiscountBucketCodeRepository;
+import it.gov.pagopa.cgn.portal.repository.DiscountRepository;
 import it.gov.pagopa.cgn.portal.service.ExportService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,10 @@ public class EmailNotificationFacade {
 
     private List<String> bccList;
 
+    private AgreementRepository agreementRepository;
+
+    private DiscountRepository discountRepository;
+
     public static final String FAILURE_REASON = "failure_reason";
     public static final String OPERATOR_NAME = "operator_name";
     public static final String DISCOUNT_TYPE = "discount_type";
@@ -55,11 +61,18 @@ public class EmailNotificationFacade {
     public EmailNotificationFacade(TemplateEngine htmlTemplateEngine,
                                    EmailNotificationService emailNotificationService,
                                    ConfigProperties configProperties,
-                                   ParamFacade paramFacade) {
+                                   ParamFacade paramFacade,
+                                   AgreementRepository agreementRepository,
+                                   DiscountRepository discountRepository) {
+
+
         this.htmlTemplateEngine = htmlTemplateEngine;
         this.emailNotificationService = emailNotificationService;
         this.configProperties = configProperties;
         this.paramFacade = paramFacade;
+
+        this.agreementRepository = agreementRepository;
+        this.discountRepository = discountRepository;
     }
 
     @PostConstruct
@@ -87,6 +100,12 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
+    public void notifyDepartementToTestDiscount(String agreementId, Long discountId) {
+        AgreementEntity agreementEntity = agreementRepository.findById(agreementId).orElseThrow();
+        DiscountEntity discountEntity = discountRepository.findById(discountId).orElseThrow();
+
+        notifyDepartementToTestDiscount(agreementEntity, discountEntity);
+    }
 
     public void notifyDepartementToTestDiscount(AgreementEntity agreement, DiscountEntity discount) {
         String merchantFullName = discount.getAgreement().getProfile().getFullName();
