@@ -101,13 +101,9 @@ public class EmailNotificationFacade {
     }
 
     public void notifyDepartementToTestDiscount(String agreementId, Long discountId) {
-        AgreementEntity agreementEntity = agreementRepository.findById(agreementId).orElseThrow();
-        DiscountEntity discountEntity = discountRepository.findById(discountId).orElseThrow();
+        AgreementEntity agreement = agreementRepository.findById(agreementId).orElseThrow();
+        DiscountEntity discount = discountRepository.findById(discountId).orElseThrow();
 
-        notifyDepartementToTestDiscount(agreementEntity, discountEntity);
-    }
-
-    public void notifyDepartementToTestDiscount(AgreementEntity agreement, DiscountEntity discount) {
         String merchantFullName = discount.getAgreement().getProfile().getFullName();
         var subject = "[Carta Giovani Nazionale] Nuova richiesta di test convenzione da " + merchantFullName;
         var context = new Context();
