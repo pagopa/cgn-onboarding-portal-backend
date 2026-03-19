@@ -9,6 +9,8 @@ import it.gov.pagopa.cgn.portal.enums.*;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.filestorage.AzureStorage;
 import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.pubsubs.DiscountChangedToTestPendingEvent;
+import it.gov.pagopa.cgn.portal.pubsubs.DiscountChangedToTestPendingListener;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
@@ -17,8 +19,10 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +43,7 @@ class DiscountServiceTest
         extends IntegrationAbstractTest {
 
     private static final String STATIC_CODE = "static_code";
+    private static final String UPDATED_STATIC_CODE = "updated_static_code";
     private static final String URL = "https://www.landingpage.com";
     private static final String EYCA_URL = "https://www.eycalandingpage.com";
     private static final String EYCA_URL_2 = "https://www.neweycalandingpage.com";
@@ -56,6 +61,9 @@ class DiscountServiceTest
 
     @Autowired
     private BucketService bucketService;
+
+    @SpyBean
+    private DiscountChangedToTestPendingListener discountChangedToTestPendingListener;
 
     private AgreementEntity agreementEntity;
 
@@ -540,6 +548,121 @@ class DiscountServiceTest
         Assertions.assertNull(dbDiscount.getEycaLandingPageUrl());
         Assertions.assertFalse(updatedDiscount.getVisibleOnEyca());
         Assertions.assertFalse(dbDiscount.getVisibleOnEyca());
+    }
+
+    @Test
+    void UpdateDiscount_StaticCodeChanged_PublishesTestPendingEvent() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                           STATIC_CODE);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                            UPDATED_STATIC_CODE);
+
+        discountService.updateDiscount(agreementEntity.getId(),
+                                       discountEntity.getId(),
+                                       updatedDiscount);
+
+        ArgumentCaptor<DiscountChangedToTestPendingEvent> eventCaptor = ArgumentCaptor.forClass(
+                DiscountChangedToTestPendingEvent.class);
+
+        org.mockito.Mockito.verify(discountChangedToTestPendingListener)
+                   .handle(eventCaptor.capture());
+
+        DiscountChangedToTestPendingEvent event = eventCaptor.getValue();
+        Assertions.assertEquals(agreementEntity.getId(), event.getAgreementId());
+        Assertions.assertEquals(discountEntity.getId(), event.getDiscountId());
+    }
+
+    @Test
+    void UpdateDiscount_StaticCodeChanged_TracksDepartmentTestNotification() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                           STATIC_CODE);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                            UPDATED_STATIC_CODE);
+
+        discountService.updateDiscount(agreementEntity.getId(),
+                                       discountEntity.getId(),
+                                       updatedDiscount);
+
+        String trackingKeyPrefix = "DISCOUNT_TEST_REQUEST::" + agreementEntity.getId() + "::" + discountEntity.getId() + "::";
+
+        Awaitility.await()
+                  .atMost(10, TimeUnit.SECONDS)
+                  .untilAsserted(() -> {
+                      boolean found = notificationRepository.findAll()
+                                                            .stream()
+                                                            .anyMatch(notification -> notification.getKey()!=null &&
+                                                                                      notification.getKey().startsWith(
+                                                                                              trackingKeyPrefix));
+                      Assertions.assertTrue(found);
+                  });
+    }
+
+    @Test
+    void UpdateDiscount_StaticCodeUnchanged_DoesNotPublishTestPendingEvent() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                           STATIC_CODE);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                            STATIC_CODE);
+        DiscountEntity dbDiscount = discountService.updateDiscount(agreementEntity.getId(),
+                                                                   discountEntity.getId(),
+                                                                   updatedDiscount)
+                                                .getDiscountEntity();
+
+        Assertions.assertNotEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
+
+        org.mockito.Mockito.verify(discountChangedToTestPendingListener,
+                                   org.mockito.Mockito.never())
+                           .handle(org.mockito.ArgumentMatchers.any(DiscountChangedToTestPendingEvent.class));
+    }
+
+    @Test
+    void UpdateDiscount_PublishedStaticCodeChanged_UpdatesInformationLastUpdateDate() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                           STATIC_CODE);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, discountEntity.getState());
+
+        LocalDate oldDate = LocalDate.now().minusDays(3);
+
+        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
+        agreementEntity.setInformationLastUpdateDate(oldDate);
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
+                                                                                            UPDATED_STATIC_CODE);
+
+        DiscountEntity updatedDbDiscount = discountService.updateDiscount(agreementEntity.getId(),
+                                                                          discountEntity.getId(),
+                                                                          updatedDiscount)
+                                                      .getDiscountEntity();
+
+        Assertions.assertEquals(DiscountStateEnum.TEST_PENDING, updatedDbDiscount.getState());
+
+        agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
     }
 
     @Test
@@ -1641,6 +1764,19 @@ class DiscountServiceTest
         dbDiscount = discountService.testDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
+
+        String trackingKeyPrefix = "DISCOUNT_TEST_REQUEST::" + agreementEntity.getId() + "::" + dbDiscount.getId() + "::";
+
+        Awaitility.await()
+                  .atMost(5, TimeUnit.SECONDS)
+                  .untilAsserted(() -> {
+                      boolean found = notificationRepository.findAll()
+                                                            .stream()
+                                                            .anyMatch(notification -> notification.getKey()!=null &&
+                                                                                      notification.getKey().startsWith(
+                                                                                              trackingKeyPrefix));
+                      Assertions.assertTrue(found);
+                  });
     }
 
     @Test
