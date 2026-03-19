@@ -254,8 +254,7 @@ public class DiscountService {
 
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
 
-        emailNotificationFacade.notifyDepartementToTestDiscount(agreementEntity,discount);
-
+        applicationEventPublisher.publishEvent(new DiscountChangedToTestPendingEvent(agreementId, discountId));
         return discount;
     }
 

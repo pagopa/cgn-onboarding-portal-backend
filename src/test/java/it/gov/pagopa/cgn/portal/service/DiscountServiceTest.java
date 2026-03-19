@@ -1764,6 +1764,19 @@ class DiscountServiceTest
         dbDiscount = discountService.testDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
+
+        String trackingKeyPrefix = "DISCOUNT_TEST_REQUEST::" + agreementEntity.getId() + "::" + dbDiscount.getId() + "::";
+
+        Awaitility.await()
+                  .atMost(5, TimeUnit.SECONDS)
+                  .untilAsserted(() -> {
+                      boolean found = notificationRepository.findAll()
+                                                            .stream()
+                                                            .anyMatch(notification -> notification.getKey()!=null &&
+                                                                                      notification.getKey().startsWith(
+                                                                                              trackingKeyPrefix));
+                      Assertions.assertTrue(found);
+                  });
     }
 
     @Test
