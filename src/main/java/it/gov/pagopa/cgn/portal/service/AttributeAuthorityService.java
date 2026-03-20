@@ -302,15 +302,14 @@ public class AttributeAuthorityService {
     }
 
     @Transactional(readOnly = true)
-    public List<CompanyAttributeAuthority> getAgreementOrganizations(String referentFiscalCode)
+    public List<AAOrganizationEntity> getAgreementOrganizations(String referentFiscalCode)
             throws HttpClientErrorException {
         try {
             return aaReferentRepository.findById(referentFiscalCode)
                     .map(referent -> referent.getOrganizationReferents() == null
-                            ? List.<CompanyAttributeAuthority>of()
+                            ? List.<AAOrganizationEntity>of()
                             : referent.getOrganizationReferents().stream()
                             .map(AAOrganizationReferentEntity::getOrganization)
-                            .map(this::mapToCompany)
                             .toList())
                     .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
         } catch (HttpClientErrorException e) {

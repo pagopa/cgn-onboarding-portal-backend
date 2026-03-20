@@ -4,7 +4,6 @@ import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
 import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
 import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
-import it.gov.pagopa.cgn.portal.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
 import org.junit.jupiter.api.Assertions;
@@ -39,7 +38,7 @@ class AttributeAuthorityServiceGetUserCompaniesTest extends IntegrationAbstractT
         createAndSaveOrganization("12345678901", "Org 1", "org1@pec.it", List.of(referent));
         createAndSaveOrganization("98765432109", "Org 2", "org2@pec.it", List.of(referent));
 
-        List<CompanyAttributeAuthority> companies = attributeAuthorityService.getAgreementOrganizations(
+        List<AAOrganizationEntity> companies = attributeAuthorityService.getAgreementOrganizations(
                 referent.getFiscalCode());
 
         Assertions.assertEquals(2, companies.size());

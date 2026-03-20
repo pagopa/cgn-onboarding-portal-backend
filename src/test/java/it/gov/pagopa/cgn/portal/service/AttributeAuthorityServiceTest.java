@@ -120,7 +120,7 @@ class AttributeAuthorityServiceTest
         Mockito.when(aaReferentRepository.findById(fiscalCode))
                .thenReturn(java.util.Optional.of(referent));
 
-        List<CompanyAttributeAuthority> result = attributeAuthorityService.getAgreementOrganizations(fiscalCode);
+        List<AAOrganizationEntity> result = attributeAuthorityService.getAgreementOrganizations(fiscalCode);
 
         Assertions.assertEquals(2, result.size());
         Assertions.assertEquals("1", result.getFirst().getFiscalCode());

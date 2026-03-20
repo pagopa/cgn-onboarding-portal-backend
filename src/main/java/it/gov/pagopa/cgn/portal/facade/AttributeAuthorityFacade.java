@@ -1,6 +1,6 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.model.CompanyAttributeAuthority;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
 import it.gov.pagopa.cgn.portal.security.CgnUserRoleEnum;
 import it.gov.pagopa.cgn.portal.security.JwtClaims;
 import it.gov.pagopa.cgn.portal.security.JwtUtils;
@@ -34,7 +34,7 @@ public class AttributeAuthorityFacade {
     public ResponseEntity<Organizations> getOrganizations() {
         String operatorFiscalCode = CGNUtils.getJwtOperatorFiscalCode();
         try {
-            List<CompanyAttributeAuthority> companies = attributeAuthorityService.getAgreementOrganizations(
+                List<AAOrganizationEntity> companies = attributeAuthorityService.getAgreementOrganizations(
                     operatorFiscalCode);
 
             Organizations organizations = new Organizations(companies.stream().map(company -> {
@@ -46,7 +46,7 @@ public class AttributeAuthorityFacade {
                 claims.put(JwtClaims.ORGANIZATION_FISCAL_CODE.getCode(), company.getFiscalCode());
                 String organizationToken = jwtUtils.buildJwtToken(claims);
                 Organization organization = new Organization();
-                organization.setOrganizationName(company.getOrganizationName());
+                organization.setOrganizationName(company.getName());
                 organization.setEmail(company.getPec());
                 organization.setOrganizationFiscalCode(company.getFiscalCode());
                 organization.setToken(organizationToken);
