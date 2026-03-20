@@ -454,7 +454,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -548,6 +547,21 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
+                    <!-- before generated sources -->
+                    <execution>
+                        <id>clean-generated-sources</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo>*** CLEAN FULL GENERATED SOURCES ***</echo>
+                                <delete dir="${project.build.directory}/generated-sources"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                    <!-- after generated sources -->
                     <execution>
                         <phase>process-sources</phase>
                         <goals>
