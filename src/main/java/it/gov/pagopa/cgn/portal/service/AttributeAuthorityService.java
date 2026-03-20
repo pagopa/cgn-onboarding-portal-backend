@@ -226,15 +226,13 @@ public class AttributeAuthorityService {
 
     @Transactional(readOnly = false)
     public ResponseEntity<Void> insertReferent(String keyOrganizationFiscalCode,
-                                               ReferentFiscalCodeAttributeAuthority referentFiscalCodeAttributeAuthority) {
+                                               String referentFiscalCode) {
         try {
             Optional<AAOrganizationEntity> organizationOpt = aaOrganizationRepository.findById(keyOrganizationFiscalCode);
             if (organizationOpt.isEmpty()) {
                 log.warn(ORGANIZATION_NOT_FOUND, keyOrganizationFiscalCode);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-
-            String referentFiscalCode = referentFiscalCodeAttributeAuthority.getReferentFiscalCode();
 
             AAReferentEntity referent = aaReferentRepository.findById(referentFiscalCode)
                     .orElseGet(() -> {

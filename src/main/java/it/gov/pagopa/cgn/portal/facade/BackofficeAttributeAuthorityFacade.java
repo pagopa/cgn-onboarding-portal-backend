@@ -207,8 +207,7 @@ public class BackofficeAttributeAuthorityFacade {
                                                ReferentFiscalCode referentFiscalCode) {
 
         return attributeAuthorityService.insertReferent(keyOrganizationFiscalCode,
-                                                        referentFiscalCodeConverter.toAttributeAuthorityModel(
-                                                                referentFiscalCode));
+                                referentFiscalCode.getReferentFiscalCode());
     }
 
     public ResponseEntity<Void> deleteReferent(String keyOrganizationFiscalCode, String referentFiscalCode) {

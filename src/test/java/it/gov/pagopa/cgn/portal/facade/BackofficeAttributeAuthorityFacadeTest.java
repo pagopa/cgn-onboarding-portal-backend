@@ -445,7 +445,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void InsertReferent_Ok() {
-        Mockito.when(attributeAuthorityService.insertReferent(Mockito.any(), Mockito.any()))
+        Mockito.when(attributeAuthorityService.insertReferent(Mockito.anyString(), Mockito.anyString()))
                .thenReturn(ResponseEntity.noContent().build());
         ReferentFiscalCode referentFiscalCode = new ReferentFiscalCode();
         referentFiscalCode.setReferentFiscalCode("AAAAAA00A00A000A");
