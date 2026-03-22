@@ -3,16 +3,11 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.controller.BackofficeAttributeAuthorityOrganizationsController;
-import it.gov.pagopa.cgn.portal.converter.Iso8601TimestampCompatible;
-import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsConverter;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAttributeAuthorityFacade;
-import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsAttributeAuthority;
-import it.gov.pagopa.cgn.portal.model.OrganizationsAttributeAuthority;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationStatus;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
-import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -42,19 +37,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         extends IntegrationAbstractTest {
 
     @Autowired
-    protected OrganizationsConverter organizationsConverter;
-
-    @Autowired
     protected OrganizationWithReferentsConverter organizationWithReferentsConverter;
-
-    @Autowired
-    protected OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
-
-    @Autowired
-    protected OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
-
-    @Autowired
-    protected ReferentFiscalCodeConverter referentFiscalCodeConverter;
 
     @Autowired
     protected BackofficeAgreementConverter backofficeAgreementConverter;
@@ -69,11 +52,7 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                                                            agreementService,
                                                                                            agreementUserService,
                                                                                            profileService,
-                                                                                           organizationsConverter,
                                                                                            organizationWithReferentsConverter,
-                                                                                           organizationWithReferentsAndStatusConverter,
-                                                                                           organizationWithReferentsPostConverter,
-                                                                                           referentFiscalCodeConverter,
                                                                                            backofficeAgreementConverter);
         BackofficeAttributeAuthorityOrganizationsController controller = new BackofficeAttributeAuthorityOrganizationsController(
                 facade);
@@ -111,10 +90,9 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                                                     organization1.getEntityType(),
                                                     TestUtils.FAKE_ORGANIZATION_NAME);
 
-        OrganizationsAttributeAuthority organizationsAA = new OrganizationsAttributeAuthority();
+        Organizations organizationsAA = new Organizations();
 
-        organizationsAA.setItems(List.of(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                organization0), organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(organization1)));
+        organizationsAA.setItems(List.of(organization0,organization1));
 
         Mockito.doReturn(ResponseEntity.ok(organizationsAA))
                .when(attributeAuthorityServiceMock)
@@ -130,19 +108,20 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     @Test
     void UpsertOrganization_Ok()
             throws Exception {
-        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
+        OrganizationWithReferents organizationMockResult = getOrganizationWithReferents("00000000000");
+        OrganizationWithReferentsAndStatus attributeAuthorityResponse =
+            createOrganizationWithReferentsAndStatusFrom(organizationMockResult);
 
-        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
 
-        Mockito.doReturn(ResponseEntity.ok().body(mockResult))
+        Mockito.doReturn(ResponseEntity.ok().body(attributeAuthorityResponse))
                .when(attributeAuthorityServiceMock)
                .upsertOrganization(Mockito.any());
 
         mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
-                                              .content(TestUtils.getJson(organization)))
+                                              .content(TestUtils.getJson(organizationMockResult)))
                .andDo(log())
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
+               .andExpect(jsonPath("$.organizationName").value(organizationMockResult.getOrganizationName()))
                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
     }
@@ -165,11 +144,11 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
     @Test
     void UpsertOrganization_referentNotFound_ok()
             throws Exception {
-        OrganizationWithReferents organization = getOrganizationWithReferents("00000000000");
+        OrganizationWithReferents organizationMockResult = getOrganizationWithReferents("00000000000");
+        OrganizationWithReferentsAndStatus attributeAuthorityResponse =
+            createOrganizationWithReferentsAndStatusFrom(organizationMockResult);
 
-        OrganizationWithReferentsAttributeAuthority mockResult = getOrganizationWithReferentsAttributeAuthority(organization);
-
-        Mockito.doReturn(ResponseEntity.ok().body(mockResult))
+        Mockito.doReturn(ResponseEntity.ok().body(attributeAuthorityResponse))
                .when(attributeAuthorityServiceMock)
                .upsertOrganization(Mockito.any());
 
@@ -177,23 +156,11 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
 
         mockMvc.perform(post("/organizations").contentType(MediaType.APPLICATION_JSON)
-                                              .content(TestUtils.getJson(organization)))
+                                              .content(TestUtils.getJson(organizationMockResult)))
                .andDo(log())
                .andExpect(status().isOk())
-               .andExpect(jsonPath("$.organizationName").value(organization.getOrganizationName()))
+               .andExpect(jsonPath("$.organizationName").value(organizationMockResult.getOrganizationName()))
                .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
-    }
-
-    private static OrganizationWithReferentsAttributeAuthority getOrganizationWithReferentsAttributeAuthority(OrganizationWithReferents organization) {
-
-        OrganizationWithReferentsAttributeAuthority mockResult = new OrganizationWithReferentsAttributeAuthority();
-        mockResult.setKeyOrganizationFiscalCode(organization.getKeyOrganizationFiscalCode());
-        mockResult.setOrganizationFiscalCode(organization.getOrganizationFiscalCode());
-        mockResult.setPec(organization.getPec());
-        mockResult.setOrganizationName(organization.getOrganizationName());
-        mockResult.setReferents(organization.getReferents());
-        mockResult.setInsertedAt(Iso8601TimestampCompatible.toISO8601UTCTimestamp(LocalDate.now()));
-        return mockResult;
     }
 
     private static OrganizationWithReferents getOrganizationWithReferents(String number) {
@@ -204,6 +171,20 @@ class BackofficeAttributeAuthorityOrganizationsApiTest
         organization.setPec("org1@pec.it");
         organization.setEntityType(EntityType.PRIVATE);
         return organization;
+    }
+
+    private static OrganizationWithReferentsAndStatus createOrganizationWithReferentsAndStatusFrom(
+            OrganizationWithReferents organizationWithReferents) {
+        OrganizationWithReferentsAndStatus organizationWithReferentsAndStatus = new OrganizationWithReferentsAndStatus();
+        organizationWithReferentsAndStatus.setKeyOrganizationFiscalCode(organizationWithReferents.getKeyOrganizationFiscalCode());
+        organizationWithReferentsAndStatus.setOrganizationFiscalCode(organizationWithReferents.getOrganizationFiscalCode());
+        organizationWithReferentsAndStatus.setOrganizationName(organizationWithReferents.getOrganizationName());
+        organizationWithReferentsAndStatus.setPec(organizationWithReferents.getPec());
+        organizationWithReferentsAndStatus.setInsertedAt(LocalDate.now());
+        organizationWithReferentsAndStatus.setReferents(organizationWithReferents.getReferents());
+        organizationWithReferentsAndStatus.setEntityType(organizationWithReferents.getEntityType());
+        organizationWithReferentsAndStatus.setStatus(OrganizationStatus.DRAFT);
+        return organizationWithReferentsAndStatus;
     }
 
 

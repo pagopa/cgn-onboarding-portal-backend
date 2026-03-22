@@ -1,8 +1,14 @@
 package it.gov.pagopa.cgn.portal.service;
 
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
+import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,11 +47,11 @@ public class AttributeAuthorityService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<OrganizationsAttributeAuthority> getOrganizations(String searchQuery,
-                                                                                                                                       Integer page,
-                                                                                                                                       Integer pageSize,
-                                                                                                                                       String sortBy,
-                                                                                                                                       String sortDirection) {
+    public ResponseEntity<Organizations> getOrganizations(String searchQuery,
+                                                          Integer page,
+                                                          Integer pageSize,
+                                                          String sortBy,
+                                                          String sortDirection) {
         try {
             int pageNum = page != null ? page : 0;
             int pageSizeNum = pageSize != null ? pageSize : 20;
@@ -69,12 +75,12 @@ public class AttributeAuthorityService {
                 count = aaOrganizationRepository.countAllWithReferents();
             }
 
-            List<OrganizationWithReferentsAttributeAuthority> items = result.getContent()
+            List<OrganizationWithReferentsAndStatus> items = result.getContent()
                                                                             .stream()
                                                                             .map(this::mapToOrganizationWithReferents)
                                                                             .toList();
 
-            OrganizationsAttributeAuthority response = new OrganizationsAttributeAuthority();
+            Organizations response = new Organizations();
             response.setCount(Math.toIntExact(count));
             response.setItems(items);
 
@@ -110,11 +116,11 @@ public class AttributeAuthorityService {
     }
 
     @Transactional(readOnly = false)
-    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> upsertOrganization(
-            OrganizationWithReferentsPostAttributeAuthority organizationWithReferentsAttributeAuthority) {
+    public ResponseEntity<OrganizationWithReferentsAndStatus> upsertOrganization(
+            OrganizationWithReferents organizationWithReferents) {
         try {
-            String keyOrgFiscalCode = organizationWithReferentsAttributeAuthority.getKeyOrganizationFiscalCode();
-            String newOrgFiscalCode = organizationWithReferentsAttributeAuthority.getOrganizationFiscalCode();
+            String keyOrgFiscalCode = organizationWithReferents.getKeyOrganizationFiscalCode();
+            String newOrgFiscalCode = organizationWithReferents.getOrganizationFiscalCode();
             
             if (!keyOrgFiscalCode.equals(newOrgFiscalCode) && aaOrganizationRepository.existsById(keyOrgFiscalCode)) {
                 aaOrganizationRepository.updateFiscalCode(keyOrgFiscalCode, newOrgFiscalCode);
@@ -123,20 +129,20 @@ public class AttributeAuthorityService {
 
             AAOrganizationEntity organization = aaOrganizationRepository.findById(newOrgFiscalCode)
                     .map(existing -> {
-                        existing.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
-                        existing.setPec(organizationWithReferentsAttributeAuthority.getPec());
+                        existing.setName(organizationWithReferents.getOrganizationName());
+                        existing.setPec(organizationWithReferents.getPec());
                         return existing;
                     })
                     .orElseGet(() -> {
                         AAOrganizationEntity newOrg = new AAOrganizationEntity();
                         newOrg.setFiscalCode(newOrgFiscalCode);
-                        newOrg.setName(organizationWithReferentsAttributeAuthority.getOrganizationName());
-                        newOrg.setPec(organizationWithReferentsAttributeAuthority.getPec());
+                        newOrg.setName(organizationWithReferents.getOrganizationName());
+                        newOrg.setPec(organizationWithReferents.getPec());
                         newOrg.setInsertedAt(OffsetDateTime.now());
                         return newOrg;
                     });
             
-            List<String> referentCodes = organizationWithReferentsAttributeAuthority.getReferents()
+            List<String> referentCodes = organizationWithReferents.getReferents()
                     .stream()
                     .distinct()
                     .toList();
@@ -194,7 +200,7 @@ public class AttributeAuthorityService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<OrganizationWithReferentsAttributeAuthority> getOrganization(String keyOrganizationFiscalCode) {
+    public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
         try {
             return aaOrganizationRepository.findById(keyOrganizationFiscalCode)
                     .map(this::mapToOrganizationWithReferents)
@@ -359,25 +365,18 @@ public class AttributeAuthorityService {
         return sortBy != null && validColumns.contains(sortBy) ? sortBy : validColumns.getFirst();
     }
 
-    private OrganizationWithReferentsAttributeAuthority mapToOrganizationWithReferents(
+    private OrganizationWithReferentsAndStatus mapToOrganizationWithReferents(
             AAOrganizationEntity organization) {
-        OrganizationWithReferentsAttributeAuthority result = new OrganizationWithReferentsAttributeAuthority();
+        OrganizationWithReferentsAndStatus result = new OrganizationWithReferentsAndStatus();
         result.setKeyOrganizationFiscalCode(organization.getFiscalCode());
         result.setOrganizationFiscalCode(organization.getFiscalCode());
         result.setOrganizationName(organization.getName());
         result.setPec(organization.getPec());
-        result.setInsertedAt(organization.getInsertedAt().toString());
+        result.setInsertedAt(organization.getInsertedAt().toLocalDate());
         result.setReferents(organization.getOrganizationReferents().stream()
                 .map(orgRef -> orgRef.getReferent().getFiscalCode())
                 .toList());
-        return result;
-    }
-
-    private CompanyAttributeAuthority mapToCompany(AAOrganizationEntity organization) {
-        CompanyAttributeAuthority result = new CompanyAttributeAuthority();
-        result.setFiscalCode(organization.getFiscalCode());
-        result.setOrganizationName(organization.getName());
-        result.setPec(organization.getPec());
+        result.setStatus(OrganizationStatus.ENABLED);
         return result;
     }
 }

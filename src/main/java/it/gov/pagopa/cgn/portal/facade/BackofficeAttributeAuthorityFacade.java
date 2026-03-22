@@ -1,10 +1,10 @@
 package it.gov.pagopa.cgn.portal.facade;
 
-import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.converter.backoffice.BackofficeAgreementConverter;
+import it.gov.pagopa.cgn.portal.converter.backoffice.OrganizationWithReferentsConverter;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
-import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.AgreementUserService;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
@@ -28,11 +28,7 @@ import java.util.function.Consumer;
 public class BackofficeAttributeAuthorityFacade {
 
     private final AttributeAuthorityService attributeAuthorityService;
-    private final OrganizationsConverter organizationsConverter;
     private final OrganizationWithReferentsConverter organizationWithReferentsConverter;
-    private final OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
-    private final OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter;
-    private final ReferentFiscalCodeConverter referentFiscalCodeConverter;
     private final BackofficeAgreementConverter agreementConverter;
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
         switch (agreement.getState()) {
@@ -105,22 +101,14 @@ public class BackofficeAttributeAuthorityFacade {
                                               AgreementService agreementService,
                                               AgreementUserService agreementUserService,
                                               ProfileService profileService,
-                                              OrganizationsConverter organizationsConverter,
                                               OrganizationWithReferentsConverter organizationWithReferentsConverter,
-                                              OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter,
-                                              OrganizationWithReferentsPostConverter organizationWithReferentsPostConverter,
-                                              ReferentFiscalCodeConverter referentFiscalCodeConverter,
                                               BackofficeAgreementConverter agreementConverter) {
 
         this.attributeAuthorityService = attributeAuthorityService;
         this.agreementService = agreementService;
         this.agreementUserService = agreementUserService;
         this.profileService = profileService;
-        this.organizationsConverter = organizationsConverter;
         this.organizationWithReferentsConverter = organizationWithReferentsConverter;
-        this.organizationWithReferentsAndStatusConverter = organizationWithReferentsAndStatusConverter;
-        this.organizationWithReferentsPostConverter = organizationWithReferentsPostConverter;
-        this.referentFiscalCodeConverter = referentFiscalCodeConverter;
         this.agreementConverter = agreementConverter;
     }
 
@@ -130,8 +118,7 @@ public class BackofficeAttributeAuthorityFacade {
                                                           String sortBy,
                                                           String sortDirection) {
 
-        ResponseEntity<Organizations> response = organizationsConverter.fromAttributeAuthorityResponse(
-                attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection));
+        ResponseEntity<Organizations> response = attributeAuthorityService.getOrganizations(searchQuery, page, pageSize, sortBy, sortDirection);
 
         getOrganizationsAgreementAndMapStatus.accept(response);
 
@@ -141,8 +128,7 @@ public class BackofficeAttributeAuthorityFacade {
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<OrganizationWithReferentsAndStatus> getOrganization(String keyOrganizationFiscalCode) {
 
-        ResponseEntity<OrganizationWithReferentsAndStatus> response = organizationWithReferentsAndStatusConverter.fromAttributeAuthorityResponse(
-                attributeAuthorityService.getOrganization(keyOrganizationFiscalCode));
+        ResponseEntity<OrganizationWithReferentsAndStatus> response = attributeAuthorityService.getOrganization(keyOrganizationFiscalCode);
 
         getOrganizationAgreementAndMapStatus.accept(response);
         return response;
@@ -167,11 +153,10 @@ public class BackofficeAttributeAuthorityFacade {
 
         // we upsert into attribute authority only after the db has been updated successfully
         // if attribute authority fails then the db transaction would be rolled back
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> updatedOrganizationWithReferentsAttributeAuthority = attributeAuthorityService.upsertOrganization(
-                organizationWithReferentsPostConverter.toAttributeAuthorityModel(organizationWithReferents));
+        ResponseEntity<OrganizationWithReferentsAndStatus> updatedOrganizationWithReferents = attributeAuthorityService.upsertOrganization(organizationWithReferents);
 
         ResponseEntity<OrganizationWithReferents> response = organizationWithReferentsConverter.fromAttributeAuthorityResponse(
-                updatedOrganizationWithReferentsAttributeAuthority);
+                updatedOrganizationWithReferents);
 
         OrganizationWithReferents respBody = response.getBody();
         if (respBody!=null && response.getStatusCode()==HttpStatus.OK) {

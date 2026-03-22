@@ -1,8 +1,8 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractAttributeAuthorityConverter;
-import it.gov.pagopa.cgn.portal.model.OrganizationWithReferentsAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
@@ -10,37 +10,37 @@ import java.util.function.Function;
 @Component
 public class OrganizationWithReferentsConverter
         extends
-        AbstractAttributeAuthorityConverter<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> {
+        AbstractAttributeAuthorityConverter<OrganizationWithReferentsAndStatus, OrganizationWithReferents> {
 
 
-    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
+    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferents> fromAttributeAuthorityModel = attributeAuthorityModel -> {
         OrganizationWithReferents backofficeModel = new OrganizationWithReferents();
         backofficeModel.setKeyOrganizationFiscalCode(attributeAuthorityModel.getKeyOrganizationFiscalCode());
         backofficeModel.setOrganizationFiscalCode(attributeAuthorityModel.getOrganizationFiscalCode());
         backofficeModel.setOrganizationName(attributeAuthorityModel.getOrganizationName());
         backofficeModel.setPec(attributeAuthorityModel.getPec());
-        backofficeModel.setInsertedAt(getLocalDate(attributeAuthorityModel.getInsertedAt()));
+        backofficeModel.setInsertedAt(attributeAuthorityModel.getInsertedAt());
         backofficeModel.setReferents(attributeAuthorityModel.getReferents());
         return backofficeModel;
     };
-    protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModel = backofficeModel -> {
-        OrganizationWithReferentsAttributeAuthority attributeAuthorityModel = new OrganizationWithReferentsAttributeAuthority();
+    protected Function<OrganizationWithReferents, OrganizationWithReferentsAndStatus> toAttributeAuthorityModel = backofficeModel -> {
+        OrganizationWithReferentsAndStatus attributeAuthorityModel = new OrganizationWithReferentsAndStatus();
         attributeAuthorityModel.setKeyOrganizationFiscalCode(backofficeModel.getKeyOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationFiscalCode(backofficeModel.getOrganizationFiscalCode());
         attributeAuthorityModel.setOrganizationName(backofficeModel.getOrganizationName());
         attributeAuthorityModel.setPec(backofficeModel.getPec());
-        attributeAuthorityModel.setInsertedAt(getISO8601UTCTimestamp(backofficeModel.getInsertedAt()));
+        attributeAuthorityModel.setInsertedAt(backofficeModel.getInsertedAt());
         attributeAuthorityModel.setReferents(backofficeModel.getReferents());
         return attributeAuthorityModel;
     };
 
     @Override
-    protected Function<OrganizationWithReferentsAttributeAuthority, OrganizationWithReferents> fromAttributeAuthorityModelFunction() {
+    protected Function<OrganizationWithReferentsAndStatus, OrganizationWithReferents> fromAttributeAuthorityModelFunction() {
         return fromAttributeAuthorityModel;
     }
 
     @Override
-    protected Function<OrganizationWithReferents, OrganizationWithReferentsAttributeAuthority> toAttributeAuthorityModelFunction() {
+    protected Function<OrganizationWithReferents, OrganizationWithReferentsAndStatus> toAttributeAuthorityModelFunction() {
         return toAttributeAuthorityModel;
     }
 }

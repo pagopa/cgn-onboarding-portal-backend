@@ -1,9 +1,13 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
+import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +52,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         createAndSaveOrganization("87654321", "Org Two", "org2@pec.it",
                 List.of(ref1));
 
-        ResponseEntity<OrganizationsAttributeAuthority> response =
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations(null, null, null, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -67,7 +71,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         createAndSaveOrganization("22222222", "Beta Organization", "beta@pec.it", List.of(ref));
         createAndSaveOrganization("33333333", "Alpha Beta Corp", "alphabeta@pec.it", List.of(ref));
 
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations("Alpha", 0, 10, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -86,7 +90,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         createAndSaveOrganization("11111111", "Org 1", "org1@pec.it", List.of(ref1));
         createAndSaveOrganization("22222222", "Org 2", "org2@pec.it", List.of(ref2));
 
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations("RSSMRA80A01H501U", null, null, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -108,9 +112,9 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
                     List.of(ref));
         }
 
-        ResponseEntity<OrganizationsAttributeAuthority> response1 = 
+        ResponseEntity<Organizations> response1 =
                 attributeAuthorityService.getOrganizations(null, 0, 10, null, null);
-        ResponseEntity<OrganizationsAttributeAuthority> response2 = 
+        ResponseEntity<Organizations> response2 =
                 attributeAuthorityService.getOrganizations(null, 1, 10, null, null);
 
         assertNotNull(response1.getBody());
@@ -131,9 +135,9 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         createAndSaveOrganization("11111111", "Alpha Corp", "alpha@pec.it", List.of(ref));
         createAndSaveOrganization("22222222", "Beta Ltd", "beta@pec.it", List.of(ref));
 
-        ResponseEntity<OrganizationsAttributeAuthority> responseAsc = 
+        ResponseEntity<Organizations> responseAsc =
                 attributeAuthorityService.getOrganizations(null, null, null, "name", "ASC");
-        ResponseEntity<OrganizationsAttributeAuthority> responseDesc = 
+        ResponseEntity<Organizations> responseDesc =
                 attributeAuthorityService.getOrganizations(null, null, null, "name", "DESC");
 
         assertNotNull(responseAsc.getBody());
@@ -148,7 +152,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
 
     @Test
     void testGetOrganizationsEmptyResult_ReturnsEmptyListWithZeroCount() {
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations("nonexistent", null, null, null, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -166,12 +170,12 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
 
         createAndSaveOrganization("12345678", "Test Org", "test@pec.it", List.of(ref1, ref2));
 
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations(null, null, null, null, null);
 
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getItems());
-        OrganizationWithReferentsAttributeAuthority item = response.getBody().getItems().getFirst();
+        OrganizationWithReferentsAndStatus item = response.getBody().getItems().getFirst();
         assertNotNull(item);
         assertNotNull(item.getKeyOrganizationFiscalCode());
         assertNotNull(item.getOrganizationFiscalCode());
@@ -202,7 +206,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         orgWithoutRef.setOrganizationReferents(List.of());
         aaOrganizationRepository.save(orgWithoutRef);
 
-        ResponseEntity<OrganizationsAttributeAuthority> response = 
+        ResponseEntity<Organizations> response =
                 attributeAuthorityService.getOrganizations(null, null, null, null, null);
 
         assertNotNull(response.getBody());
@@ -219,7 +223,7 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         return aaReferentRepository.save(referent);
     }
 
-    private AAOrganizationEntity createAndSaveOrganization(String fiscalCode, String name, String pec, 
+    private void createAndSaveOrganization(String fiscalCode, String name, String pec,
                                                            List<AAReferentEntity> referents) {
         AAOrganizationEntity org = new AAOrganizationEntity();
         org.setFiscalCode(fiscalCode);
@@ -241,6 +245,6 @@ class AttributeAuthorityServiceGetOrganizationsTest extends IntegrationAbstractT
         } else {
             savedOrg.setOrganizationReferents(List.of());
         }
-        return aaOrganizationRepository.save(savedOrg);
+        aaOrganizationRepository.save(savedOrg);
     }
 }

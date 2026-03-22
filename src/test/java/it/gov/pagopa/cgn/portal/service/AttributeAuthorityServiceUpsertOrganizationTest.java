@@ -1,10 +1,14 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
+import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationReferentRepository;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferents;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,19 +53,19 @@ class AttributeAuthorityServiceUpsertOrganizationTest
     @Test
     void UpsertOrganization_Create_Ok() {
         String keyFiscalCode = "12345678901234";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A", "BBBBBB00B00B000B"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals(keyFiscalCode, body.getKeyOrganizationFiscalCode());
         Assertions.assertEquals("Test Organization", body.getOrganizationName());
         Assertions.assertEquals("test@pec.it", body.getPec());
@@ -77,14 +81,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
     @Test
     void UpsertOrganization_VatKeyFiscalCode_Ok() {
         String keyFiscalCode = "54683216974";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode("54683216974");
         request.setOrganizationName("Test Organization VAT");
         request.setPec("vat@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -107,19 +111,19 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         existing.setInsertedAt(OffsetDateTime.now());
         aaOrganizationRepository.saveAndFlush(existing);
 
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(oldKeyFiscalCode);
         request.setOrganizationFiscalCode(newKeyFiscalCode);
         request.setOrganizationName("Updated Name");
         request.setPec("updated@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals("Updated Name", body.getOrganizationName());
         Assertions.assertEquals("updated@pec.it", body.getPec());
         Assertions.assertEquals(1, body.getReferents().size());
@@ -172,19 +176,19 @@ class AttributeAuthorityServiceUpsertOrganizationTest
                 .count();
         Assertions.assertEquals(2, countBefore, "Should have 2 referents before update");
 
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Org");
         request.setPec("test@pec.it");
         request.setReferents(List.of("CCCCCC00C00C000C"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals(1, body.getReferents().size());
         Assertions.assertEquals("CCCCCC00C00C000C", body.getReferents().getFirst());
 
@@ -222,19 +226,19 @@ class AttributeAuthorityServiceUpsertOrganizationTest
     @Test
     void UpsertOrganization_EmptyReferents_Ok() {
         String keyFiscalCode = "RSSMRA80A01H501U";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of());
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals(0, body.getReferents().size());
 
         Optional<AAOrganizationEntity> savedOrg = aaOrganizationRepository.findById(keyFiscalCode);
@@ -252,14 +256,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         aaReferentRepository.saveAndFlush(referent2);
 
         String keyFiscalCode = "RSSMRA80A01H501U";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode("12345678901234");
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A", "BBBBBB00B00B000B"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -276,14 +280,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         String newReferentFiscalCode = "NEWREF0A00A000AB";
 
         String keyFiscalCode = "RSSMRA80A01H501U";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(keyFiscalCode);
         request.setOrganizationFiscalCode("12345678901234");
         request.setOrganizationName("Test Organization");
         request.setPec("test@pec.it");
         request.setReferents(List.of(newReferentFiscalCode));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -309,14 +313,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         organization.setInsertedAt(OffsetDateTime.now());
         aaOrganizationRepository.saveAndFlush(organization);
 
-        OrganizationWithReferentsPostAttributeAuthority request1 = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request1 = new OrganizationWithReferents();
         request1.setKeyOrganizationFiscalCode(keyFiscalCode);
         request1.setOrganizationFiscalCode(keyFiscalCode);
         request1.setOrganizationName("Test Org");
         request1.setPec("test@pec.it");
         request1.setReferents(List.of("AAAAAA00A00A000A"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response1 =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response1 =
                 attributeAuthorityService.upsertOrganization(request1);
         Assertions.assertEquals(HttpStatus.OK, response1.getStatusCode());
 
@@ -332,14 +336,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         referentB.setFiscalCode("BBBBBB00B00B000B");
         aaReferentRepository.saveAndFlush(referentB);
 
-        OrganizationWithReferentsPostAttributeAuthority request2 = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request2 = new OrganizationWithReferents();
         request2.setKeyOrganizationFiscalCode(keyFiscalCode);
         request2.setOrganizationFiscalCode(keyFiscalCode);
         request2.setOrganizationName("Test Org");
         request2.setPec("test@pec.it");
         request2.setReferents(List.of("AAAAAA00A00A000A", "BBBBBB00B00B000B"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response2 =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response2 =
                 attributeAuthorityService.upsertOrganization(request2);
 
         Assertions.assertEquals(HttpStatus.OK, response2.getStatusCode());
@@ -381,14 +385,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         
         // Update organization with new fiscal code
         String newFiscalCode = "54798975429";
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(oldFiscalCode);  // Search with old PK
         request.setOrganizationFiscalCode(newFiscalCode);      // Update to new PK
         request.setOrganizationName("Test AA 2");
         request.setPec("pec@pec.it");
         request.setReferents(List.of("ISPXNB32R82Y766D"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -423,14 +427,14 @@ class AttributeAuthorityServiceUpsertOrganizationTest
         existing.setOrganizationReferents(new ArrayList<>());
         aaOrganizationRepository.saveAndFlush(existing);
         
-        OrganizationWithReferentsPostAttributeAuthority request = new OrganizationWithReferentsPostAttributeAuthority();
+        OrganizationWithReferents request = new OrganizationWithReferents();
         request.setKeyOrganizationFiscalCode(fiscalCode);
         request.setOrganizationFiscalCode(fiscalCode);
         request.setOrganizationName("Updated Name");
         request.setPec("updated@pec.it");
         request.setReferents(List.of("AAAAAA00A00A000A"));
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response =
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.upsertOrganization(request);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());

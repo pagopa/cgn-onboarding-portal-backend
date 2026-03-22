@@ -1,9 +1,13 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
-import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
+import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.Organizations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,11 +49,11 @@ class AttributeAuthorityServiceTest
         Mockito.when(aaOrganizationRepository.countAllWithReferents())
                .thenReturn(0L);
         
-        ResponseEntity<OrganizationsAttributeAuthority> response = attributeAuthorityService.getOrganizations(null,
-                                                                                                              null,
-                                                                                                              null,
-                                                                                                              null,
-                                                                                                              null);
+        ResponseEntity<Organizations> response = attributeAuthorityService.getOrganizations(null,
+                                                                                            null,
+                                                                                            null,
+                                                                                            null,
+                                                                                            null);
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         Mockito.verify(aaOrganizationRepository, Mockito.times(1)).findAllWithReferents(Mockito.any());
@@ -60,7 +64,7 @@ class AttributeAuthorityServiceTest
     void GetOrganization_Ok() {
         Mockito.when(aaOrganizationRepository.findById(Mockito.anyString()))
                .thenReturn(java.util.Optional.empty());
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = attributeAuthorityService.getOrganization(
+        ResponseEntity<OrganizationWithReferentsAndStatus> response = attributeAuthorityService.getOrganization(
                 "1234567890");
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         Mockito.verify(aaOrganizationRepository, Mockito.times(1)).findById("1234567890");
