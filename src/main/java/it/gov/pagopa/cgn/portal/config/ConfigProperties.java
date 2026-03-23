@@ -108,9 +108,6 @@ public class ConfigProperties {
     @Value("${cgn.geolocation.secret-token}")
     private String geolocationToken;
 
-    @Value("${cgn.attribute-authority.base-url}")
-    private String attributeAuthorityBaseUrl;
-
     @Value("${eyca.export.not.allowed.discount.modes}")
     private String eycaNotAllowedDiscountModes;
 
@@ -168,10 +165,12 @@ public class ConfigProperties {
 
 
     public boolean isActiveProfileDev() {
-        boolean isDev =  "dev".equalsIgnoreCase(getActiveProfile());
+        boolean isDev = "dev".equalsIgnoreCase(getActiveProfile());
         log.info("isDev={}", isDev);
         return isDev;
     }
 
-    public boolean isEnvProd() {return "prod".equals(environment);}
+    public boolean isEnvProd() {
+        return "prod".equals(environment);
+    }
 }

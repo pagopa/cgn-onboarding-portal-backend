@@ -7,7 +7,6 @@ import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationReferentRepository;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.ReferentFiscalCodeAttributeAuthority;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -60,10 +59,9 @@ class AttributeAuthorityServiceInsertReferentTest
         organization.setOrganizationReferents(new ArrayList<>());
         aaOrganizationRepository.saveAndFlush(organization);
 
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("AAAAAA00A00A000A");
+        String referentFiscalCode = "AAAAAA00A00A000A";
 
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, referentFiscalCode);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals(1, aaOrganizationReferentRepository.count());
@@ -81,10 +79,9 @@ class AttributeAuthorityServiceInsertReferentTest
         organization.setOrganizationReferents(new ArrayList<>());
         aaOrganizationRepository.saveAndFlush(organization);
 
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("AAAAAA00A00A000A");
+        String referentFiscalCode = "AAAAAA00A00A000A";
 
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent(keyFiscalCode, referentFiscalCode);
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         
@@ -103,10 +100,9 @@ class AttributeAuthorityServiceInsertReferentTest
 
     @Test
     void InsertReferent_OrganizationNotFound() {
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("AAAAAA00A00A000A");
+        String referentFiscalCode = "AAAAAA00A00A000A";
 
-        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("RSSMRA80A01H501U", request);
+        ResponseEntity<Void> response = attributeAuthorityService.insertReferent("RSSMRA80A01H501U", referentFiscalCode);
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -122,11 +118,10 @@ class AttributeAuthorityServiceInsertReferentTest
         organization.setOrganizationReferents(new ArrayList<>());
         aaOrganizationRepository.saveAndFlush(organization);
 
-        ReferentFiscalCodeAttributeAuthority request = new ReferentFiscalCodeAttributeAuthority();
-        request.setReferentFiscalCode("AAAAAA00A00A000A");
+        String referentFiscalCode = "AAAAAA00A00A000A";
 
-        ResponseEntity<Void> response1 = attributeAuthorityService.insertReferent(keyFiscalCode, request);
-        ResponseEntity<Void> response2 = attributeAuthorityService.insertReferent(keyFiscalCode, request);
+        ResponseEntity<Void> response1 = attributeAuthorityService.insertReferent(keyFiscalCode, referentFiscalCode);
+        ResponseEntity<Void> response2 = attributeAuthorityService.insertReferent(keyFiscalCode, referentFiscalCode);
 
         Assertions.assertEquals(HttpStatus.OK, response1.getStatusCode());
         Assertions.assertEquals(HttpStatus.OK, response2.getStatusCode());

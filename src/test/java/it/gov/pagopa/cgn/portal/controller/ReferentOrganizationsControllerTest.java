@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
 import it.gov.pagopa.cgn.portal.security.JwtClaims;
 import it.gov.pagopa.cgn.portal.security.JwtUtils;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.model.Organization;
 import it.gov.pagopa.cgnonboardingportal.model.Organizations;
 import org.junit.jupiter.api.Assertions;
@@ -49,9 +49,9 @@ class ReferentOrganizationsControllerTest
     @Test
     void testGetOrganizations_shouldReturnOrganizations()
             throws Exception {
-        CompanyAttributeAuthority company = new CompanyAttributeAuthority();
+        AAOrganizationEntity company = new AAOrganizationEntity();
         company.setFiscalCode("12345678901");
-        company.setOrganizationName(TestUtils.FAKE_ORGANIZATION_NAME);
+        company.setName(TestUtils.FAKE_ORGANIZATION_NAME);
         company.setPec("test@pec.it");
 
         Organizations orgs = new Organizations();
@@ -62,7 +62,7 @@ class ReferentOrganizationsControllerTest
         org.setToken(TestUtils.FAKE_ORG_TOKEN);
         orgs.setItems(List.of(org));
 
-        List<CompanyAttributeAuthority> companies = List.of(company);
+        List<AAOrganizationEntity> companies = List.of(company);
 
         try (MockedStatic<CGNUtils> mockedCgnUtils = Mockito.mockStatic(CGNUtils.class)) {
             mockedCgnUtils.when(CGNUtils::getJwtOperatorFiscalCode).thenReturn(TestUtils.FAKE_FISCAL_CODE);

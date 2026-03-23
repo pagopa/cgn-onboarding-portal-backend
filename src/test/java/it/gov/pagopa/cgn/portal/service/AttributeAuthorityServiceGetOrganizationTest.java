@@ -6,7 +6,7 @@ import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
 import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.OrganizationWithReferentsAttributeAuthority;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.OrganizationWithReferentsAndStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +45,13 @@ class AttributeAuthorityServiceGetOrganizationTest extends IntegrationAbstractTe
                 List.of(referent1, referent2)
         );
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.getOrganization(organization.getFiscalCode());
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals("12345678901", body.getKeyOrganizationFiscalCode());
         Assertions.assertEquals("12345678901", body.getOrganizationFiscalCode());
         Assertions.assertEquals("Test Organization", body.getOrganizationName());
@@ -64,7 +65,7 @@ class AttributeAuthorityServiceGetOrganizationTest extends IntegrationAbstractTe
 
     @Test
     void getOrganization_OrganizationNotFound_ReturnsNotFound() {
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.getOrganization("NONEXISTENT123");
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -80,13 +81,13 @@ class AttributeAuthorityServiceGetOrganizationTest extends IntegrationAbstractTe
                 List.of()
         );
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.getOrganization(organization.getFiscalCode());
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals("98765432109", body.getKeyOrganizationFiscalCode());
         Assertions.assertNotNull(body.getReferents());
         Assertions.assertEquals(0, body.getReferents().size());
@@ -103,13 +104,13 @@ class AttributeAuthorityServiceGetOrganizationTest extends IntegrationAbstractTe
                 List.of(referent)
         );
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.getOrganization(organization.getFiscalCode());
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals("11223344556", body.getKeyOrganizationFiscalCode());
         Assertions.assertNotNull(body.getReferents());
         Assertions.assertEquals(1, body.getReferents().size());
@@ -127,21 +128,20 @@ class AttributeAuthorityServiceGetOrganizationTest extends IntegrationAbstractTe
                 List.of(referent)
         );
 
-        ResponseEntity<OrganizationWithReferentsAttributeAuthority> response = 
+        ResponseEntity<OrganizationWithReferentsAndStatus> response =
                 attributeAuthorityService.getOrganization(organization.getFiscalCode());
 
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertNotNull(response.getBody());
         
-        OrganizationWithReferentsAttributeAuthority body = response.getBody();
+        OrganizationWithReferentsAndStatus body = response.getBody();
         Assertions.assertEquals(organization.getFiscalCode(), body.getKeyOrganizationFiscalCode());
         Assertions.assertEquals(organization.getFiscalCode(), body.getOrganizationFiscalCode());
         Assertions.assertEquals(organization.getName(), body.getOrganizationName());
         Assertions.assertEquals(organization.getPec(), body.getPec());
         
-        String insertedAtString = body.getInsertedAt();
+        LocalDate insertedAtString = body.getInsertedAt();
         Assertions.assertNotNull(insertedAtString);
-        Assertions.assertFalse(insertedAtString.isEmpty());
     }
 
     private AAReferentEntity createAndSaveReferent(String fiscalCode) {
