@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class AttributeAuthorityFacade {
         this.attributeAuthorityService = attributeAuthorityService;
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Organizations> getOrganizations() {
         String operatorFiscalCode = CGNUtils.getJwtOperatorFiscalCode();
         try {
