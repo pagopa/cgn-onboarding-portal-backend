@@ -1,16 +1,22 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
+import it.gov.pagopa.cgn.portal.facade.AttributeAuthorityFacade;
 import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
 import it.gov.pagopa.cgn.portal.model.AAOrganizationReferentEntity;
 import it.gov.pagopa.cgn.portal.model.AAReferentEntity;
 import it.gov.pagopa.cgn.portal.repository.AAOrganizationRepository;
 import it.gov.pagopa.cgn.portal.repository.AAReferentRepository;
+import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.model.Organizations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -24,6 +30,9 @@ class AttributeAuthorityServiceGetUserCompaniesTest extends IntegrationAbstractT
 
     @Autowired
     private AttributeAuthorityService attributeAuthorityService;
+
+    @Autowired
+    private AttributeAuthorityFacade attributeAuthorityFacade;
 
     @Autowired
     private AAOrganizationRepository aaOrganizationRepository;
@@ -65,6 +74,27 @@ class AttributeAuthorityServiceGetUserCompaniesTest extends IntegrationAbstractT
         int count = attributeAuthorityService.countUserOrganizations(referent.getFiscalCode());
 
         Assertions.assertEquals(3, count);
+    }
+
+    @Test
+    void getOrganizationsViaFacade_shouldNotThrowLazyInitializationException() {
+        String referentFiscalCode = "RSSMRA80A01H501U";
+        AAReferentEntity referent = createAndSaveReferent(referentFiscalCode);
+        createAndSaveOrganization("12345678901", "Org 1", "org1@pec.it", List.of(referent));
+
+        try (MockedStatic<CGNUtils> mockedCgnUtils = Mockito.mockStatic(CGNUtils.class)) {
+            mockedCgnUtils.when(CGNUtils::getJwtOperatorFiscalCode).thenReturn(referentFiscalCode);
+            mockedCgnUtils.when(CGNUtils::getJwtOperatorFirstName).thenReturn("Mario");
+            mockedCgnUtils.when(CGNUtils::getJwtOperatorLastName).thenReturn("Rossi");
+
+            ResponseEntity<Organizations> response = Assertions.assertDoesNotThrow(
+                    () -> attributeAuthorityFacade.getOrganizations()
+            );
+
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+            Assertions.assertNotNull(response.getBody());
+            Assertions.assertEquals(1, response.getBody().getItems().size());
+        }
     }
 
     private AAReferentEntity createAndSaveReferent(String fiscalCode) {
