@@ -2,12 +2,16 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.BackofficeApprovedSortColumnEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationCommand;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -214,6 +219,42 @@ class BackofficeApprovedAgreementApiTest
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
                     .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("discounts", hasSize(0)));
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgress_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromActive_BadRequest()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Cannot execute StartTerminationInProgress for agreement in state ACTIVE"));
     }
 
 }

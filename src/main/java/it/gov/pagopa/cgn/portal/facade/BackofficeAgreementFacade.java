@@ -92,6 +92,12 @@ public class BackofficeAgreementFacade {
         return ResponseEntity.ok(agreementDetailConverter.toDto(agreement));
     }
 
+    public ResponseEntity<Void> manageAgreementTermination(String agreementId,
+                                                           AgreementTerminationCommand terminationCommand) {
+        backofficeAgreementService.manageAgreementTermination(agreementId, terminationCommand.getAction());
+        return ResponseEntity.noContent().build();
+    }
+
     public ResponseEntity<Void> assignAgreement(String agreementId) {
         backofficeAgreementService.assignAgreement(agreementId);
         return ResponseEntity.noContent().build();

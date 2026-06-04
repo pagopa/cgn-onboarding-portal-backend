@@ -175,6 +175,10 @@ public class TestUtils {
                direction.name();
     }
 
+    public static String getApprovedAgreementTerminationPath(String agreementId) {
+        return AGREEMENT_APPROVED_CONTROLLER_PATH + agreementId + "/termination";
+    }
+
     public static String createAgreements() {
         return AGREEMENTS_CONTROLLER_PATH;
     }

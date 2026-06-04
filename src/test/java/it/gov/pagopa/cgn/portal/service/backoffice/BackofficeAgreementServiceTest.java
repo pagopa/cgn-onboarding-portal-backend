@@ -17,6 +17,7 @@ import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.BackofficeAgreementService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.apache.commons.lang3.StringUtils;
@@ -404,6 +405,72 @@ class BackofficeAgreementServiceTest
         Assertions.assertNull(agreementEntity.getStartDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
 
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromInactive_Ok() {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                                                                 AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, updatedAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromActive_ThrowException() {
+        AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        String agreementId = agreementEntity.getId();
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> backofficeAgreementService.manageAgreementTermination(
+                        agreementId,
+                                        AgreementTerminationAction.START_TERMINATION_IN_PROGRESS));
+    }
+
+    @Test
+    void ManageAgreementTermination_CancelTerminationInProgress_Ok() {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                                                                 AgreementTerminationAction.CANCEL_TERMINATION_IN_PROGRESS);
+
+        Assertions.assertEquals(AgreementStateEnum.INACTIVE, updatedAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_CancelTerminationInProgressFromActive_ThrowException() {
+        AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        String agreementId = agreementEntity.getId();
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> backofficeAgreementService.manageAgreementTermination(
+                        agreementId,
+                                        AgreementTerminationAction.CANCEL_TERMINATION_IN_PROGRESS));
+    }
+
+    @Test
+    void ManageAgreementTermination_CompleteTermination_Ok() {
+        AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                                                                 AgreementTerminationAction.COMPLETE_TERMINATION);
+
+        Assertions.assertEquals(AgreementStateEnum.TERMINATED, updatedAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
     }
 
     @Test

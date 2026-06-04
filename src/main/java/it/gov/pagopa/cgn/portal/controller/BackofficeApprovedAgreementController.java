@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.controller;
 import it.gov.pagopa.cgn.portal.facade.BackofficeAgreementFacade;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgnonboardingportal.backoffice.api.ApprovedAgreementsApi;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationCommand;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementDetail;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreements;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,11 @@ public class BackofficeApprovedAgreementController
                                                                      sortColumn,
                                                                      sortDirection);
         return backofficeAgreementFacade.getApprovedAgreements(filter);
+    }
+
+    @Override
+    public ResponseEntity<Void> manageAgreementTermination(String agreementId,
+                                                           AgreementTerminationCommand terminationCommand) {
+        return backofficeAgreementFacade.manageAgreementTermination(agreementId, terminationCommand);
     }
 }
