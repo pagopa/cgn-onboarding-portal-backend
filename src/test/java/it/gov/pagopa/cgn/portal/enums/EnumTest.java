@@ -34,8 +34,15 @@ public class EnumTest {
                                  .sorted(Comparator.comparing(AgreementStateEnum::getCode))
                                  .map(AgreementStateEnum::getCode)
                                  .toArray(String[]::new);
-        Assertions.assertEquals(4, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"APPROVED", "DRAFT", "PENDING", "REJECTED"}, sortedValues);
+        Assertions.assertEquals(8, sortedValues.length);
+        Assertions.assertArrayEquals(new String[]{"ACTIVE",
+                                                  "APPROVED",
+                                                  "DRAFT",
+                                                  "INACTIVE",
+                                                  "PENDING",
+                                                  "REJECTED",
+                                                  "TERMINATED",
+                                                  "TERMINATION_IN_PROGRESS"}, sortedValues);
     }
 
     @Test

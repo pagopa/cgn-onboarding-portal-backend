@@ -856,6 +856,9 @@ paths:
         "204":
           description: Request Received
           content: { }
+        "403":
+          description: Forbidden
+          content: { }
       x-codegen-request-body-name: helpRequest
 components:
   schemas:
@@ -901,6 +904,22 @@ components:
             firstDiscountPublishingDate:
               type: string
               format: date
+    ActiveAgreement:
+      allOf:
+        - $ref: '#/components/schemas/ApprovedAgreement'
+        - type: object
+    InactiveAgreement:
+      allOf:
+        - $ref: '#/components/schemas/ApprovedAgreement'
+        - type: object
+    TerminationInProgressAgreement:
+      allOf:
+        - $ref: '#/components/schemas/ApprovedAgreement'
+        - type: object
+    TerminatedAgreement:
+      allOf:
+        - $ref: '#/components/schemas/ApprovedAgreement'
+        - type: object
     RejectedAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
@@ -918,6 +937,10 @@ components:
         - PendingAgreement
         - ApprovedAgreement
         - RejectedAgreement
+        - ActiveAgreement
+        - InactiveAgreement
+        - TerminationInProgressAgreement
+        - TerminatedAgreement
     CompletedStep:
       type: string
       enum:

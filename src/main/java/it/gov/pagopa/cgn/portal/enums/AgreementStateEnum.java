@@ -8,7 +8,14 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum AgreementStateEnum {
 
-    DRAFT("DRAFT"), PENDING("PENDING"), APPROVED("APPROVED"), REJECTED("REJECTED");
+    DRAFT("DRAFT"),
+    PENDING("PENDING"),
+    APPROVED("APPROVED"),
+    REJECTED("REJECTED"),
+    ACTIVE("ACTIVE"),
+    INACTIVE("INACTIVE"),
+    TERMINATION_IN_PROGRESS("TERMINATION_IN_PROGRESS"),
+    TERMINATED("TERMINATED");
 
     private final String code;
 }

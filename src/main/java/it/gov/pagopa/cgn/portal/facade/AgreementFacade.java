@@ -53,9 +53,16 @@ public class AgreementFacade {
     }
 
     private List<CompletedStep> getCompletedSteps(AgreementEntity agreementEntity) {
-        if (AgreementStateEnum.APPROVED.equals(agreementEntity.getState()) ||
-            AgreementStateEnum.PENDING.equals(agreementEntity.getState())) {
-            return Arrays.asList(CompletedStep.values());
+        switch (agreementEntity.getState()) {
+            case PENDING:
+            case APPROVED:
+            case ACTIVE:
+            case INACTIVE:
+            case TERMINATION_IN_PROGRESS:
+            case TERMINATED:
+                return Arrays.asList(CompletedStep.values());
+            default:
+                break;
         }
         List<CompletedStep> steps = new ArrayList<>();
         if (agreementEntity.getProfile()!=null) {

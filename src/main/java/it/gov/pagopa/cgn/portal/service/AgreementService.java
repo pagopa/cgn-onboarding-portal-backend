@@ -145,6 +145,9 @@ public class AgreementService
     @Transactional(readOnly = true)
     public AgreementEntity getApprovedAgreement(String agreementId) {
         AgreementEntity agreementEntity = findAgreementById(agreementId);
+        if (!isApprovedAgreementState(agreementEntity.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue());
+        }
         List<DiscountEntity> discounts = agreementEntity.getDiscountList();
         if (!CollectionUtils.isEmpty(discounts)) {
             discounts = discounts.stream().filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
@@ -158,6 +161,19 @@ public class AgreementService
                                                                                                         .isBackoffice()));
 
         return agreementEntity;
+    }
+
+    private boolean isApprovedAgreementState(AgreementStateEnum state) {
+        switch (state) {
+            case APPROVED:
+            case ACTIVE:
+            case INACTIVE:
+            case TERMINATION_IN_PROGRESS:
+            case TERMINATED:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private AgreementEntity createAgreement(String agreementId, EntityType entityType, String organizationName) {
