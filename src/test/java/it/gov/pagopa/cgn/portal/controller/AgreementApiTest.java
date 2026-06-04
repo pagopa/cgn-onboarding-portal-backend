@@ -10,10 +10,12 @@ import it.gov.pagopa.cgn.portal.model.*;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
+import it.gov.pagopa.cgnonboardingportal.model.HelpRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
@@ -168,6 +170,179 @@ class AgreementApiTest
                     .andExpect(jsonPath("$.completedSteps", hasSize(3)))
                     .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
 
+    }
+
+    @Test
+    void GetAgreement_GetApprovedAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        saveApprovedAgreement(agreementEntity);
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
+
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.APPROVED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
+    void GetAgreement_GetActiveAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity).getDiscountEntity();
+
+        saveApprovedAgreement(agreementEntity);
+
+        discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+        discountEntity = discountRepository.save(discountEntity);
+        discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.ACTIVE_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
+    void GetAgreement_GetInactiveAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.INACTIVE_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
+    void GetAgreement_GetTerminationInProgressAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                      AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        setOperatorAuth();
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.TERMINATION_IN_PROGRESS_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
+    void GetAgreement_GetTerminatedAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.COMPLETE_TERMINATION);
+
+        setOperatorAuth();
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.TERMINATED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
+    void SendHelpRequest_SendHelpRequestWithTerminatedAgreement_Forbidden()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.COMPLETE_TERMINATION);
+
+        HelpRequest helpRequest = TestUtils.createSampleAuthenticatedHelpRequest();
+
+        setOperatorAuth();
+        this.mockMvc.perform(post(TestUtils.getAuthenticatedHelpPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(helpRequest)))
+                    .andDo(log())
+                    .andExpect(status().isForbidden());
     }
 
     @Test
@@ -615,19 +790,24 @@ class AgreementApiTest
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
 
+        // keep the fixture semantically aligned with current published discounts
+        agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreementEntity);
+
         for (int i = 0; i < 5; i++) {
             // creating discount
             DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
             discountEntity = discountService.createDiscount(agreementEntity.getId(), discountEntity)
                                             .getDiscountEntity();
 
-            // simulate already published discounts
-            discountEntity.setState(DiscountStateEnum.PUBLISHED);
-            discountRepository.save(discountEntity);
+            // simulate already published current discounts through the real publish flow
+            discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+            discountEntity = discountRepository.save(discountEntity);
+            discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
         }
 
-        // activate agreement
-        saveApprovedAgreement(agreementEntity);
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
 
         // creating discount
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);

@@ -5,9 +5,13 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.DocumentService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +79,33 @@ class DocumentApiTest
                     .andExpect(jsonPath("$.items[0].documentType").value("agreement"))
                     .andExpect(jsonPath("$.items[0].documentUrl").isNotEmpty())
                     .andExpect(jsonPath("$.items[0].documentTimestamp").isNotEmpty());
+    }
+
+    @Test
+    void GetDocuments_GetDocumentsWithTerminatedAgreement_Forbidden()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.COMPLETE_TERMINATION);
+
+        this.mockMvc.perform(get(TestUtils.getDocumentPath(agreementEntity.getId())))
+                    .andDo(log())
+                    .andExpect(status().isForbidden());
     }
 
     @Test
