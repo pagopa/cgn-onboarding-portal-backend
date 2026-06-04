@@ -1,10 +1,12 @@
 package it.gov.pagopa.cgn.portal.converter.backoffice.approved;
 
 import it.gov.pagopa.cgn.portal.converter.AbstractConverter;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreements;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
@@ -15,9 +17,17 @@ import java.util.function.Function;
 @Component
 public class BackofficeApprovedAgreementConverter
         extends AbstractConverter<ApprovedAgreementEntity, ApprovedAgreement> {
+    private static final Map<AgreementStateEnum, ApprovedAgreementState> approvedAgreementStateEnumMap = new EnumMap<>(AgreementStateEnum.class);
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.APPROVED, ApprovedAgreementState.APPROVED);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.ACTIVE, ApprovedAgreementState.ACTIVE);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.INACTIVE, ApprovedAgreementState.INACTIVE);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATION_IN_PROGRESS,
+                                          ApprovedAgreementState.TERMINATION_IN_PROGRESS);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATED, ApprovedAgreementState.TERMINATED);
+
         backofficeEntityTypeEnumMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         backofficeEntityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
     }
@@ -28,11 +38,17 @@ public class BackofficeApprovedAgreementConverter
         dto.setAgreementLastUpdateDate(entity.getInformationLastUpdateDate());
         dto.setFullName(entity.getFullName());
         dto.setAgreementStartDate(entity.getStartDate());
+        dto.setState(getApprovedAgreementStateFromAgreementStateEnum(entity.getState()));
         dto.setPublishedDiscounts(entity.getPublishedDiscounts());
         dto.setTestPending(entity.getTestPending());
         dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
         return dto;
     };
+
+    public static ApprovedAgreementState getApprovedAgreementStateFromAgreementStateEnum(AgreementStateEnum stateEnum) {
+        return Optional.ofNullable(approvedAgreementStateEnumMap.get(stateEnum))
+                       .orElseThrow(() -> getInvalidEnumMapping(stateEnum.getCode()));
+    }
 
     public static EntityType getEntityTypeFromEntityTypeEnum(EntityTypeEnum etEnum) {
         return Optional.ofNullable(backofficeEntityTypeEnumMap.get(etEnum))

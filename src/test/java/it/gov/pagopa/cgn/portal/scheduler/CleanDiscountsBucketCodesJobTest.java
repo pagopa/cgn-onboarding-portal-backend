@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationEventEnum;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationService;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountBucketCodeEntity;
@@ -113,6 +114,8 @@ class CleanDiscountsBucketCodesJobTest
         discountEntity.setEndDate(LocalDate.now().plusDays(3));
         discountEntity.setLastBucketCodeLoadFileName("codes.csv");
         discountRepository.save(discountEntity);
+        agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreementEntity);
 
         OffsetDateTime nowUtc   = OffsetDateTime.now(ZoneOffset.UTC);
         OffsetDateTime cutoffOd = nowUtc.minusMonths(6).withHour(0).withMinute(0).withSecond(0).withNano(0);

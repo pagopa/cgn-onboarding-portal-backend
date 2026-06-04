@@ -32,14 +32,29 @@ public class BackofficeAttributeAuthorityFacade {
     private final BackofficeAgreementConverter agreementConverter;
     private final BiConsumer<AgreementEntity, OrganizationWithReferentsAndStatus> mapStatus = (agreement, organization) -> {
         switch (agreement.getState()) {
-            case DRAFT, REJECTED:
+            case DRAFT:
                 organization.setStatus(OrganizationStatus.DRAFT);
                 break;
             case PENDING:
                 organization.setStatus(OrganizationStatus.PENDING);
                 break;
             case APPROVED:
+                organization.setStatus(OrganizationStatus.APPROVED);
+                break;
+            case REJECTED:
+                organization.setStatus(OrganizationStatus.REJECTED);
+                break;
+            case ACTIVE:
                 organization.setStatus(OrganizationStatus.ACTIVE);
+                break;
+            case INACTIVE:
+                organization.setStatus(OrganizationStatus.INACTIVE);
+                break;
+            case TERMINATION_IN_PROGRESS:
+                organization.setStatus(OrganizationStatus.TERMINATION_IN_PROGRESS);
+                break;
+            case TERMINATED:
+                organization.setStatus(OrganizationStatus.TERMINATED);
                 break;
             default:
                 break;

@@ -490,7 +490,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get list of approved agreements
+      summary: Get list of agreements in post-approval states
       operationId: getApprovedAgreements
       parameters:
         - name: profileFullName
@@ -543,7 +543,7 @@ paths:
               - DESC
       responses:
         "200":
-          description: List of approved agreements
+          description: List of agreements in post-approval states
           content:
             application/json:
               schema:
@@ -555,7 +555,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get approved agreement
+      summary: Get agreement in post-approval states
       operationId: getApprovedAgreement
       parameters:
         - name: agreementId
@@ -566,7 +566,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Approved agreement
+          description: Agreement in post-approval states
           content:
             application/json:
               schema:
@@ -577,6 +577,43 @@ paths:
         "404":
           description: Not found
           content: { }
+  /approved-agreements/{agreementId}/termination:
+    post:
+      tags:
+        - agreement
+      summary: Execute a post-approval agreement state transition command
+      operationId: manageAgreementTermination
+      parameters:
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Command to execute on the agreement state
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementTerminationCommand'
+        required: true
+      responses:
+        "204":
+          description: Agreement state changed
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
+      x-codegen-request-body-name: terminationCommand
   /organizations:
     get:
       tags:
@@ -924,6 +961,7 @@ components:
         - agreementStartDate
         - fullName
         - publishedDiscounts
+        - state
         - testPending
       type: object
       properties:
@@ -937,6 +975,8 @@ components:
         agreementLastUpdateDate:
           type: string
           format: date
+        state:
+          $ref: '#/components/schemas/ApprovedAgreementState'
         publishedDiscounts:
           type: integer
           format: int64
@@ -950,10 +990,13 @@ components:
         - agreementId
         - documents
         - profile
+        - state
       type: object
       properties:
         agreementId:
           type: string
+        state:
+          $ref: '#/components/schemas/ApprovedAgreementState'
         profile:
           $ref: '#/components/schemas/ApprovedAgreementProfile'
         discounts:
@@ -967,6 +1010,27 @@ components:
         - AssignedAgreement
         - ApprovedAgreement
         - RejectedAgreement
+    ApprovedAgreementState:
+      type: string
+      enum:
+        - Approved
+        - Active
+        - Inactive
+        - TerminationInProgress
+        - Terminated
+    AgreementTerminationCommand:
+      required:
+        - action
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/AgreementTerminationAction'
+    AgreementTerminationAction:
+      type: string
+      enum:
+        - StartTerminationInProgress
+        - CancelTerminationInProgress
+        - CompleteTermination
     EntityType:
       type: string
       enum:
@@ -1426,10 +1490,14 @@ components:
     OrganizationStatus:
       type: string
       enum:
-        - Enabled
         - Draft
         - Pending
+        - Approved
+        - Rejected
         - Active
+        - Inactive
+        - TerminationInProgress
+        - Terminated
     OrganizationWithReferents:
       allOf:
         - $ref: '#/components/schemas/KeyOrganizationFiscalCode'

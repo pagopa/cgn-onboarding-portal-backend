@@ -24,6 +24,7 @@ import javax.transaction.Transactional;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -272,6 +273,9 @@ public class DiscountService {
         validatePublishingDiscount(agreementEntity, discount, profileEntity);
         discount.setState(DiscountStateEnum.PUBLISHED);
         discount = discountRepository.save(discount);
+        if (!AgreementStateEnum.ACTIVE.equals(agreementEntity.getState())) {
+            agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        }
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
         if (agreementEntity.getFirstDiscountPublishingDate()==null) {
             long numPublishedDiscount = discountRepository.countByAgreementIdAndState(agreementId,
@@ -501,7 +505,10 @@ public class DiscountService {
              bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_BUCKET_LOAD_IN_PROGRESS.getValue());
         }
-        if (!AgreementStateEnum.APPROVED.equals(agreementEntity.getState())) {
+        if (!EnumSet.of(AgreementStateEnum.APPROVED,
+                        AgreementStateEnum.ACTIVE,
+                        AgreementStateEnum.INACTIVE,
+                        AgreementStateEnum.TERMINATION_IN_PROGRESS).contains(agreementEntity.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT.getValue());
         }
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {

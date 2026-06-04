@@ -22,6 +22,7 @@ public class BackofficeApprovedAgreementDetailConverter
     protected Function<AgreementEntity, ApprovedAgreementDetail> toDto = entity -> {
         ApprovedAgreementDetail dto = new ApprovedAgreementDetail();
         dto.setAgreementId(entity.getId());
+        dto.setState(BackofficeApprovedAgreementConverter.getApprovedAgreementStateFromAgreementStateEnum(entity.getState()));
         dto.setDiscounts((List<ApprovedAgreementDiscount>) discountConverter.toDtoCollection(entity.getDiscountList()));
         dto.setDocuments((List<Document>) documentConverter.toDtoCollection(entity.getDocumentList()));
         dto.setProfile(profileConverter.toDto(entity.getProfile()));

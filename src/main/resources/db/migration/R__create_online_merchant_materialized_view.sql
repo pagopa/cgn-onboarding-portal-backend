@@ -9,7 +9,7 @@ WITH merchant AS (SELECT a.agreement_k,
                          p.discount_code_type
                   FROM agreement a
                            JOIN profile p ON (p.agreement_fk = a.agreement_k)
-                  WHERE a.state = 'APPROVED'
+                                    WHERE a.state = 'ACTIVE'
                     AND a.start_date <= CURRENT_DATE
                     AND p.sales_channel IN ('ONLINE', 'BOTH')),
      product_categories AS (SELECT DISTINCT d.agreement_fk,

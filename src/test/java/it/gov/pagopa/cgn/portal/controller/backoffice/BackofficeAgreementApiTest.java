@@ -480,6 +480,9 @@ class BackofficeAgreementApiTest
 
         discountEntity.setState(DiscountStateEnum.PUBLISHED);
         discountRepository.save(discountEntity);
+        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreementEntity);
 
         this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
                                                                                       discountEntity.getId()

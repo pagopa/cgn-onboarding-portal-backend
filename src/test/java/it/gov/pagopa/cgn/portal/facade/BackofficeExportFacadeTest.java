@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -48,6 +49,11 @@ class BackofficeExportFacadeTest
     private void createProfile() {
         ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
         profileService.createProfile(profileEntity, agreementEntity.getId());
+    }
+
+    private void activateAgreement() {
+        agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreementEntity);
     }
 
     @Test
@@ -124,6 +130,7 @@ class BackofficeExportFacadeTest
             throws IOException {
 
         createProfile();
+        activateAgreement();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountEntity1.setVisibleOnEyca(true);
@@ -152,6 +159,7 @@ class BackofficeExportFacadeTest
         ExportService exportService = (ExportService) ReflectionTestUtils.getField(backofficeExportFacade,
                                                                                    "exportService");
         createProfile();
+        activateAgreement();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountEntity1.setVisibleOnEyca(true);
@@ -176,6 +184,7 @@ class BackofficeExportFacadeTest
     void exportEycaDiscounts_whenDataPresent_thenReturnsCsvResponse()
             throws IOException {
         createProfile();
+        activateAgreement();
         DiscountEntity discountEntity1 = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountEntity1.setName("Discount 1");
         discountEntity1.setVisibleOnEyca(true);

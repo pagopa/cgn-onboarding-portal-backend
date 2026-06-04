@@ -376,7 +376,7 @@ public class AttributeAuthorityService {
         result.setReferents(organization.getOrganizationReferents().stream()
                 .map(orgRef -> orgRef.getReferent().getFiscalCode())
                 .toList());
-        result.setStatus(OrganizationStatus.ENABLED);
+        result.setStatus(OrganizationStatus.DRAFT);
         return result;
     }
 }

@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.facade;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.converter.backoffice.*;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -134,12 +135,12 @@ class BackofficeAttributeAuthorityFacadeTest
     }
 
     @Test
-    void GetOrganization_ENABLED_Ok() {
+    void GetOrganization_ACTIVEFromAttributeAuthority_Ok() {
         OrganizationWithReferentsAndStatus organization0 = createOrganizationWithReferentsAndStatusMock("12345678",
                                                                                                         "12345678",
                                                                                                         "org0",
                                                                                                         "org0@pec.it",
-                                                                                                        OrganizationStatus.ENABLED,
+                                                                                                        OrganizationStatus.ACTIVE,
                                                                                                         null);
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
@@ -221,7 +222,7 @@ class BackofficeAttributeAuthorityFacadeTest
     }
 
     @Test
-    void GetOrganization_ACTIVE_Ok() {
+    void GetOrganization_APPROVEDFromApprovedAgreement_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         saveSampleDocuments(agreementEntity);
@@ -246,11 +247,11 @@ class BackofficeAttributeAuthorityFacadeTest
 
         Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
         Assertions.assertNotNull(organizationResponse.getBody());
-        Assertions.assertEquals(OrganizationStatus.ACTIVE, organizationResponse.getBody().getStatus());
+        Assertions.assertEquals(OrganizationStatus.APPROVED, organizationResponse.getBody().getStatus());
     }
 
     @Test
-    void GetOrganization_REJECTED_to_DRAFT_Ok() {
+    void GetOrganization_REJECTED_Ok() {
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
         discountService.createDiscount(agreementEntity.getId(), discountEntity);
         saveSampleDocuments(agreementEntity);
@@ -275,7 +276,23 @@ class BackofficeAttributeAuthorityFacadeTest
 
         Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
         Assertions.assertNotNull(organizationResponse.getBody());
-        Assertions.assertEquals(OrganizationStatus.DRAFT, organizationResponse.getBody().getStatus());
+        Assertions.assertEquals(OrganizationStatus.REJECTED, organizationResponse.getBody().getStatus());
+    }
+
+    @Test
+    void GetOrganization_INACTIVE_Ok() {
+        assertMappedAgreementStatus(AgreementStateEnum.INACTIVE, OrganizationStatus.INACTIVE);
+    }
+
+    @Test
+    void GetOrganization_TerminationInProgress_Ok() {
+        assertMappedAgreementStatus(AgreementStateEnum.TERMINATION_IN_PROGRESS,
+                                    OrganizationStatus.TERMINATION_IN_PROGRESS);
+    }
+
+    @Test
+    void GetOrganization_TERMINATED_Ok() {
+        assertMappedAgreementStatus(AgreementStateEnum.TERMINATED, OrganizationStatus.TERMINATED);
     }
 
     @Test
@@ -478,6 +495,29 @@ class BackofficeAttributeAuthorityFacadeTest
         organizationWithReferents.setStatus(status);
         organizationWithReferents.setEntityType(entityType);
         return organizationWithReferents;
+    }
+
+    private void assertMappedAgreementStatus(AgreementStateEnum agreementState, OrganizationStatus expectedStatus) {
+        agreementEntity.setState(agreementState);
+        agreementRepository.save(agreementEntity);
+
+        OrganizationWithReferentsAndStatus organization = createOrganizationWithReferentsAndStatusMock(
+                profileEntity.getTaxCodeOrVat(),
+                profileEntity.getTaxCodeOrVat(),
+                "org0",
+                "org0@pec.it",
+                null,
+                null);
+
+        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
+               .thenReturn(ResponseEntity.ok(organization));
+
+        ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
+                profileEntity.getTaxCodeOrVat());
+
+        Assertions.assertEquals(HttpStatus.OK, organizationResponse.getStatusCode());
+        Assertions.assertNotNull(organizationResponse.getBody());
+        Assertions.assertEquals(expectedStatus, organizationResponse.getBody().getStatus());
     }
 
     private UpsertResult upsertOrganizationWithReferents(String aKeyOrganizationFiscalCode,
