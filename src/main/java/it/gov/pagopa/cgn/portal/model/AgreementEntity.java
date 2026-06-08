@@ -76,6 +76,9 @@ public class AgreementEntity
     @Column(name = "information_last_update_date")
     private LocalDate informationLastUpdateDate;
 
+    @Column(name = "termination_request_date")
+    private LocalDate terminationRequestDate;
+
     @Column(name = "organization_name")
     private String organizationName;
 

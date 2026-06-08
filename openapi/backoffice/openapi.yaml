@@ -997,6 +997,9 @@ components:
           type: string
         state:
           $ref: '#/components/schemas/ApprovedAgreementState'
+        terminationRequestDate:
+          type: string
+          format: date
         profile:
           $ref: '#/components/schemas/ApprovedAgreementProfile'
         discounts:

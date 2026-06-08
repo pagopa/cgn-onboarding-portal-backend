@@ -148,31 +148,20 @@ public class BackofficeAgreementService {
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         switch (action) {
             case START_TERMINATION_IN_PROGRESS:
-                return updateAgreementState(agreementEntity,
-                                            AgreementStateEnum.TERMINATION_IN_PROGRESS,
-                                            EnumSet.of(AgreementStateEnum.INACTIVE),
-                                            action);
+                checkAgreementState(agreementEntity, EnumSet.of(AgreementStateEnum.INACTIVE), action);
+                agreementEntity.setTerminationRequestDate(LocalDate.now());
+                return updateAgreementState(agreementEntity, AgreementStateEnum.TERMINATION_IN_PROGRESS);
             case CANCEL_TERMINATION_IN_PROGRESS:
-                return updateAgreementState(agreementEntity,
-                                            AgreementStateEnum.INACTIVE,
-                                            EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS),
-                                            action);
+                checkAgreementState(agreementEntity, EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS), action);
+                agreementEntity.setTerminationRequestDate(null);
+                return updateAgreementState(agreementEntity, AgreementStateEnum.INACTIVE);
             case COMPLETE_TERMINATION:
-                return updateAgreementState(agreementEntity,
-                                            AgreementStateEnum.TERMINATED,
-                                            EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS),
-                                            action);
+                checkAgreementState(agreementEntity, EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS), action);
+                agreementEntity.setTerminationRequestDate(null);
+                return updateAgreementState(agreementEntity, AgreementStateEnum.TERMINATED);
             default:
                 throw new InvalidRequestException("Unsupported termination action: " + action);
         }
-    }
-
-    private AgreementEntity updateAgreementState(AgreementEntity agreementEntity,
-                                                 AgreementStateEnum targetState,
-                                                 EnumSet<AgreementStateEnum> allowedStates,
-                                                 AgreementTerminationAction action) {
-        checkAgreementState(agreementEntity, allowedStates, action);
-        return updateAgreementState(agreementEntity, targetState);
     }
 
     private AgreementEntity updateAgreementState(AgreementEntity agreementEntity,

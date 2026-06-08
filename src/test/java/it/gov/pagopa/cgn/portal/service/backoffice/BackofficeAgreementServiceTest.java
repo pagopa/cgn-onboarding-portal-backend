@@ -419,6 +419,7 @@ class BackofficeAgreementServiceTest
 
         Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, updatedAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(LocalDate.now(), updatedAgreement.getTerminationRequestDate());
     }
 
     @Test
@@ -438,6 +439,7 @@ class BackofficeAgreementServiceTest
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity.setTerminationRequestDate(LocalDate.now().minusDays(1));
         agreementEntity = agreementRepository.save(agreementEntity);
 
         AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
@@ -445,6 +447,7 @@ class BackofficeAgreementServiceTest
 
         Assertions.assertEquals(AgreementStateEnum.INACTIVE, updatedAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+        Assertions.assertNull(updatedAgreement.getTerminationRequestDate());
     }
 
     @Test
@@ -464,6 +467,7 @@ class BackofficeAgreementServiceTest
         AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity.setTerminationRequestDate(LocalDate.now().minusDays(1));
         agreementEntity = agreementRepository.save(agreementEntity);
 
         AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
@@ -471,6 +475,7 @@ class BackofficeAgreementServiceTest
 
         Assertions.assertEquals(AgreementStateEnum.TERMINATED, updatedAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+        Assertions.assertNull(updatedAgreement.getTerminationRequestDate());
     }
 
     @Test
