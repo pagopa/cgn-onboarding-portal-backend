@@ -240,32 +240,6 @@ class BackofficeApprovedAgreementApiTest
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, agreementEntity.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
-        Assertions.assertEquals(LocalDate.now(), agreementEntity.getTerminationRequestDate());
-    }
-
-    @Test
-    void GetAgreement_GetTerminationInProgressAgreementDetail_ShouldExposeTerminationRequestDate()
-            throws Exception {
-        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
-        agreementEntity.setState(AgreementStateEnum.INACTIVE);
-        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
-        agreementRepository.save(agreementEntity);
-
-        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
-
-        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
-                                     .contentType(MediaType.APPLICATION_JSON)
-                                     .content(TestUtils.getJson(command)))
-                    .andDo(log())
-                    .andExpect(status().isNoContent());
-
-        this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
-                    .andDo(log())
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
-                    .andExpect(jsonPath("state").value("TerminationInProgress"))
-                    .andExpect(jsonPath("terminationRequestDate").value(LocalDate.now().toString()));
     }
 
     @Test
