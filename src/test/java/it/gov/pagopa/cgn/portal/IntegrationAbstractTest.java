@@ -55,6 +55,8 @@ public class IntegrationAbstractTest {
     @Autowired
     protected ProfileRepository profileRepository;
     @Autowired
+    protected ChangeAuditRepository changeAuditRepository;
+    @Autowired
     protected AgreementUserRepository userRepository;
     @Autowired
     protected AgreementUserRepository agreementUserRepository;
@@ -130,6 +132,8 @@ public class IntegrationAbstractTest {
         agreementRepository.flush();
         userRepository.deleteAll();
         userRepository.flush();
+        changeAuditRepository.deleteAll();
+        changeAuditRepository.flush();
     }
 
     protected List<DocumentEntity> saveSamplePaDocuments(AgreementEntity agreementEntity) {

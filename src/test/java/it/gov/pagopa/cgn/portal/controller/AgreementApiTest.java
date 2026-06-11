@@ -367,6 +367,49 @@ class AgreementApiTest
                     .andExpect(status().isNoContent());
     }
 
+        @Test
+        void RequestApproval_RequestApproval_ShouldWriteChangeAuditRow()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                   EntityType.PRIVATE,
+                                                   TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
+
+        this.mockMvc.perform(post(TestUtils.getAgreementApprovalPath(agreementEntity.getId())))
+                .andDo(log())
+                .andExpect(status().isNoContent());
+
+        List<ChangeAuditEntity> audits = changeAuditRepository.findAll();
+
+        Assertions.assertEquals(2, audits.size());
+        Assertions.assertTrue(audits.stream().anyMatch(audit ->
+            ChangeAuditSubjectTypeEnum.AGREEMENT.equals(audit.getSubjectType()) &&
+            ChangeAuditOperationTypeEnum.INSERT.equals(audit.getOperationType()) &&
+            agreementEntity.getId().equals(audit.getSubjectId())));
+
+        ChangeAuditEntity updateAudit = audits.stream()
+                              .filter(audit -> ChangeAuditSubjectTypeEnum.AGREEMENT.equals(
+                                  audit.getSubjectType()))
+                              .filter(audit -> ChangeAuditOperationTypeEnum.UPDATE.equals(
+                                  audit.getOperationType()))
+                              .findFirst()
+                              .orElseThrow();
+
+        Assertions.assertEquals(agreementEntity.getId(), updateAudit.getSubjectId());
+        Assertions.assertEquals(TestUtils.FAKE_ID, updateAudit.getActorRef());
+        Assertions.assertEquals(profileEntity.getFullName(), updateAudit.getPartnerFullName());
+        Assertions.assertNotNull(updateAudit.getInsertTime());
+        Assertions.assertEquals("PENDING", updateAudit.getValue().get("state"));
+        Assertions.assertEquals(agreementEntity.getId(), updateAudit.getValue().get("agreement_k"));
+        Assertions.assertNotNull(updateAudit.getValue().get("request_approval_time"));
+        Assertions.assertEquals(TestUtils.FAKE_ORGANIZATION_NAME,
+                    updateAudit.getValue().get("organization_name"));
+        }
+
     @Test
     void RequestApproval_RequestApprovalWithoutDiscount_BadRequest()
             throws Exception {

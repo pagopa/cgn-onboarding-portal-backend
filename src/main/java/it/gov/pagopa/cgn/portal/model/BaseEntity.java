@@ -1,9 +1,11 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import it.gov.pagopa.cgn.portal.audit.ChangeAuditEntityListener;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Column;
+import javax.persistence.EntityListeners;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
@@ -13,6 +15,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(ChangeAuditEntityListener.class)
 public abstract class BaseEntity
         implements Serializable {
 

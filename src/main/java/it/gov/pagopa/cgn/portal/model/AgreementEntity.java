@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.model;
 
+import it.gov.pagopa.cgn.portal.annotation.Audited;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
 import it.gov.pagopa.cgn.portal.util.PostgreSQLEnumType;
@@ -21,6 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "agreement")
 @Data
+@Audited
 @TypeDef(name = "agreement_state_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 @TypeDef(name = "entity_type_enum", typeClass = PostgreSQLEnumType.class)  // postgress enum type
 public class AgreementEntity
