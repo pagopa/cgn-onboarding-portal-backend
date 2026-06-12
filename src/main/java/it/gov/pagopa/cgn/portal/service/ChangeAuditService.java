@@ -1,6 +1,7 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.audit.ChangeAuditEvent;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ChangeAuditOperationTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.ChangeAuditSubjectTypeEnum;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 
 @Service
 public class ChangeAuditService {
@@ -36,6 +40,23 @@ public class ChangeAuditService {
         entity.setInsertTime(OffsetDateTime.now());
         entity.setValue(event.getValue());
         return changeAuditRepository.save(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<OffsetDateTime> findAgreementStateSince(String agreementId,
+                                                            AgreementStateEnum currentState) {
+        if (currentState == null) {
+            return Optional.empty();
+        }
+
+        return changeAuditRepository.findAgreementStateSince(agreementId, currentState.name())
+                                    .map(this::toOffsetDateTime);
+    }
+
+    private OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
+        return timestamp.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toOffsetDateTime();
     }
 
     private String resolvePartnerFullName(ChangeAuditEvent event) {

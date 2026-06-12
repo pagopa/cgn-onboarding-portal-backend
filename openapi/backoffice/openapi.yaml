@@ -997,6 +997,10 @@ components:
           type: string
         state:
           $ref: '#/components/schemas/ApprovedAgreementState'
+        agreementStateSince:
+          type: string
+          format: date-time
+          nullable: true
         profile:
           $ref: '#/components/schemas/ApprovedAgreementProfile'
         discounts:

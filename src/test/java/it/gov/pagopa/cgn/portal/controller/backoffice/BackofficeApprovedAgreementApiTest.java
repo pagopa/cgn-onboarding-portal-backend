@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.BackofficeApprovedSortColumnEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.ChangeAuditEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -169,11 +171,15 @@ class BackofficeApprovedAgreementApiTest
         // publish discount
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
+        OffsetDateTime agreementStateSince = findFirstAuditInsertTimeForState(agreementEntity.getId(),
+                                              AgreementStateEnum.ACTIVE);
+
         this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
+                .andExpect(jsonPath("agreementStateSince").value(agreementStateSince.toString()))
                     .andExpect(jsonPath("profile").isNotEmpty())
                     .andExpect(jsonPath("profile.name").value(profileEntity.getName()))
                     .andExpect(jsonPath("profile.description").value(profileEntity.getDescription()))
@@ -255,6 +261,16 @@ class BackofficeApprovedAgreementApiTest
                     .andDo(log())
                     .andExpect(status().isBadRequest())
                     .andExpect(content().string("Cannot execute StartTerminationInProgress for agreement in state ACTIVE"));
+    }
+
+    private OffsetDateTime findFirstAuditInsertTimeForState(String agreementId, AgreementStateEnum state) {
+        return changeAuditRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+                                    .stream()
+                                    .filter(audit -> agreementId.equals(audit.getSubjectId()))
+                                    .filter(audit -> state.name().equals(audit.getValue().get("state")))
+                                    .map(ChangeAuditEntity::getInsertTime)
+                                    .findFirst()
+                                    .orElseThrow();
     }
 
 }

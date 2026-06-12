@@ -51,6 +51,8 @@ public class BackofficeAgreementFacade {
 
     private final AzureStorage azureStorage;
 
+    private final ChangeAuditService changeAuditService;
+
 
     @Autowired
     public BackofficeAgreementFacade(BackofficeAgreementService backofficeAgreementService,
@@ -62,7 +64,8 @@ public class BackofficeAgreementFacade {
                                      BackofficeApprovedAgreementDetailConverter agreementDetailConverter,
                                      BackofficeApprovedAgreementConverter approvedAgreementConverter,
                                      AzureStorage azureStorage,
-                                     ApprovedAgreementService approvedAgreementService) {
+                                     ApprovedAgreementService approvedAgreementService,
+                                     ChangeAuditService changeAuditService) {
         this.backofficeAgreementService = backofficeAgreementService;
         this.agreementService = agreementService;
         this.discountService = discountService;
@@ -73,6 +76,7 @@ public class BackofficeAgreementFacade {
         this.documentService = documentService;
         this.azureStorage = azureStorage;
         this.approvedAgreementService = approvedAgreementService;
+        this.changeAuditService = changeAuditService;
     }
 
     @Transactional(readOnly = true)  // for converter
@@ -89,7 +93,10 @@ public class BackofficeAgreementFacade {
     @Transactional(readOnly = true)  // for converter
     public ResponseEntity<ApprovedAgreementDetail> getApprovedAgreementDetail(String agreementId) {
         AgreementEntity agreement = agreementService.getApprovedAgreement(agreementId);
-        return ResponseEntity.ok(agreementDetailConverter.toDto(agreement));
+        ApprovedAgreementDetail detail = agreementDetailConverter.toDto(agreement);
+        changeAuditService.findAgreementStateSince(agreement.getId(), agreement.getState())
+                          .ifPresent(detail::agreementStateSince);
+        return ResponseEntity.ok(detail);
     }
 
     public ResponseEntity<Void> manageAgreementTermination(String agreementId,
