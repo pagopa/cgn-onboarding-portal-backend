@@ -155,6 +155,30 @@ public class AgreementConverterTest {
     }
 
     @Test
+    public void Convert_ConvertTerminationReminderSentAgreementEntityToDTO_Ok() {
+        AgreementEntity agreementEntity = createApprovedLikeAgreementEntity(AgreementStateEnum.TERMINATION_REMINDER_SENT);
+
+        Agreement agreementDto = agreementConverter.toDto(agreementEntity);
+
+        commonAssertionsEntityToDto(agreementEntity, agreementDto);
+        Assert.assertEquals(AgreementState.TERMINATION_REMINDER_SENT_AGREEMENT, agreementDto.getState());
+        Assert.assertTrue(agreementDto instanceof TerminationReminderSentAgreement);
+        assertApprovedLikeDtoFields((ApprovedAgreement) agreementDto, agreementEntity);
+    }
+
+    @Test
+    public void Convert_ConvertTerminationReminderSentAgreementDtoToEntity_Ok() {
+        TerminationReminderSentAgreement dto = createApprovedLikeAgreementDto(new TerminationReminderSentAgreement(),
+                                                                              AgreementState.TERMINATION_REMINDER_SENT_AGREEMENT);
+
+        AgreementEntity entity = agreementConverter.toEntity(dto);
+
+        commonAssertionsDtoToEntity(entity, dto);
+        Assert.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, entity.getState());
+        assertApprovedLikeEntityFields(entity, dto);
+    }
+
+    @Test
     public void Convert_ConvertTerminationInProgressAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createApprovedLikeAgreementEntity(AgreementStateEnum.TERMINATION_IN_PROGRESS);
 

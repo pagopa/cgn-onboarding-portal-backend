@@ -1020,6 +1020,7 @@ components:
         - Approved
         - Active
         - Inactive
+        - TerminationReminderSent
         - TerminationInProgress
         - Terminated
     AgreementTerminationCommand:
@@ -1032,6 +1033,7 @@ components:
     AgreementTerminationAction:
       type: string
       enum:
+        - SendTerminationReminder
         - StartTerminationInProgress
         - CancelTerminationInProgress
         - CompleteTermination
@@ -1500,6 +1502,7 @@ components:
         - Rejected
         - Active
         - Inactive
+        - TerminationReminderSent
         - TerminationInProgress
         - Terminated
     OrganizationWithReferents:

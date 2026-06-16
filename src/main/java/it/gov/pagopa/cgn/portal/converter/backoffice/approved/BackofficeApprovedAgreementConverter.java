@@ -24,6 +24,8 @@ public class BackofficeApprovedAgreementConverter
         approvedAgreementStateEnumMap.put(AgreementStateEnum.APPROVED, ApprovedAgreementState.APPROVED);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.ACTIVE, ApprovedAgreementState.ACTIVE);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.INACTIVE, ApprovedAgreementState.INACTIVE);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                          ApprovedAgreementState.TERMINATION_REMINDER_SENT);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATION_IN_PROGRESS,
                                           ApprovedAgreementState.TERMINATION_IN_PROGRESS);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATED, ApprovedAgreementState.TERMINATED);

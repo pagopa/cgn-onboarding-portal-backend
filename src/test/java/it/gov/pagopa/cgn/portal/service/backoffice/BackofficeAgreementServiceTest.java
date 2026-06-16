@@ -408,9 +408,23 @@ class BackofficeAgreementServiceTest
     }
 
     @Test
-    void ManageAgreementTermination_StartTerminationInProgressFromInactive_Ok() {
+    void ManageAgreementTermination_SendTerminationReminderFromInactive_Ok() {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                                                                 AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, updatedAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromTerminationReminderSent_Ok() {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_REMINDER_SENT);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
         agreementEntity = agreementRepository.save(agreementEntity);
 
@@ -419,6 +433,19 @@ class BackofficeAgreementServiceTest
 
         Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, updatedAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromInactive_ThrowException() {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity = agreementRepository.save(agreementEntity);
+        String agreementId = agreementEntity.getId();
+
+        Assertions.assertThrows(InvalidRequestException.class,
+                                () -> backofficeAgreementService.manageAgreementTermination(
+                                        agreementId,
+                                        AgreementTerminationAction.START_TERMINATION_IN_PROGRESS));
     }
 
     @Test
@@ -443,7 +470,7 @@ class BackofficeAgreementServiceTest
         AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
                                                                                                  AgreementTerminationAction.CANCEL_TERMINATION_IN_PROGRESS);
 
-        Assertions.assertEquals(AgreementStateEnum.INACTIVE, updatedAgreement.getState());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, updatedAgreement.getState());
         Assertions.assertEquals(LocalDate.now(), updatedAgreement.getInformationLastUpdateDate());
     }
 

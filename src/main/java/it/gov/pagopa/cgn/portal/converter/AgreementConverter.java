@@ -27,6 +27,7 @@ public class AgreementConverter
         enumMap.put(AgreementStateEnum.REJECTED, AgreementState.REJECTED_AGREEMENT);
         enumMap.put(AgreementStateEnum.ACTIVE, AgreementState.ACTIVE_AGREEMENT);
         enumMap.put(AgreementStateEnum.INACTIVE, AgreementState.INACTIVE_AGREEMENT);
+        enumMap.put(AgreementStateEnum.TERMINATION_REMINDER_SENT, AgreementState.TERMINATION_REMINDER_SENT_AGREEMENT);
         enumMap.put(AgreementStateEnum.TERMINATION_IN_PROGRESS, AgreementState.TERMINATION_IN_PROGRESS_AGREEMENT);
         enumMap.put(AgreementStateEnum.TERMINATED, AgreementState.TERMINATED_AGREEMENT);
 
@@ -62,6 +63,9 @@ public class AgreementConverter
                 break;
             case INACTIVE:
                 dto = fillApprovedAgreementFields(new InactiveAgreement(), entity);
+                break;
+            case TERMINATION_REMINDER_SENT:
+                dto = fillApprovedAgreementFields(new TerminationReminderSentAgreement(), entity);
                 break;
             case TERMINATION_IN_PROGRESS:
                 dto = fillApprovedAgreementFields(new TerminationInProgressAgreement(), entity);

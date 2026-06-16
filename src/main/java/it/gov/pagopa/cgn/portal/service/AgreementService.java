@@ -168,6 +168,7 @@ public class AgreementService
             case APPROVED:
             case ACTIVE:
             case INACTIVE:
+            case TERMINATION_REMINDER_SENT:
             case TERMINATION_IN_PROGRESS:
             case TERMINATED:
                 return true;

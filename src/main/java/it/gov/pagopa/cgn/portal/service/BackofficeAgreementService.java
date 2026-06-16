@@ -147,14 +147,19 @@ public class BackofficeAgreementService {
     public AgreementEntity manageAgreementTermination(String agreementId, AgreementTerminationAction action) {
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
         switch (action) {
+            case SEND_TERMINATION_REMINDER:
+                return updateAgreementState(agreementEntity,
+                                            AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                            EnumSet.of(AgreementStateEnum.INACTIVE),
+                                            action);
             case START_TERMINATION_IN_PROGRESS:
                 return updateAgreementState(agreementEntity,
                                             AgreementStateEnum.TERMINATION_IN_PROGRESS,
-                                            EnumSet.of(AgreementStateEnum.INACTIVE),
+                                            EnumSet.of(AgreementStateEnum.TERMINATION_REMINDER_SENT),
                                             action);
             case CANCEL_TERMINATION_IN_PROGRESS:
                 return updateAgreementState(agreementEntity,
-                                            AgreementStateEnum.INACTIVE,
+                                            AgreementStateEnum.TERMINATION_REMINDER_SENT,
                                             EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS),
                                             action);
             case COMPLETE_TERMINATION:

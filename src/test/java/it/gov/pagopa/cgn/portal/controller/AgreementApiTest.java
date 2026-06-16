@@ -252,6 +252,36 @@ class AgreementApiTest
     }
 
     @Test
+    void GetAgreement_GetTerminationReminderSentAgreement_Ok()
+            throws Exception {
+        AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                           EntityType.PRIVATE,
+                                                                                           TestUtils.FAKE_ORGANIZATION_NAME);
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreementEntity);
+        profileService.createProfile(profileEntity, agreementEntity.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        discountService.createDiscount(agreementEntity.getId(), discountEntity);
+
+        saveApprovedAgreement(agreementEntity);
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        setOperatorAuth();
+        this.mockMvc.perform(post(TestUtils.createAgreements()))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.state").value(AgreementState.TERMINATION_REMINDER_SENT_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.completedSteps", hasSize(CompletedStep.values().length)))
+                    .andExpect(jsonPath("$.entityType").value(EntityType.PRIVATE.getValue()));
+    }
+
+    @Test
     void GetAgreement_GetTerminationInProgressAgreement_Ok()
             throws Exception {
         AgreementEntity agreementEntity = this.agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
@@ -269,7 +299,9 @@ class AgreementApiTest
         agreementRepository.save(agreementEntity);
 
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
-                                      AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
 
         setOperatorAuth();
         this.mockMvc.perform(post(TestUtils.createAgreements()))
@@ -298,6 +330,8 @@ class AgreementApiTest
         agreementEntity.setState(AgreementStateEnum.INACTIVE);
         agreementRepository.save(agreementEntity);
 
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
                                                               AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
@@ -330,6 +364,8 @@ class AgreementApiTest
         agreementEntity.setState(AgreementStateEnum.INACTIVE);
         agreementRepository.save(agreementEntity);
 
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
                                                               AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),

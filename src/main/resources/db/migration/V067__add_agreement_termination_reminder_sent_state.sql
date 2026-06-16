@@ -1,0 +1,1 @@
+ALTER TYPE agreement_state_enum ADD VALUE 'TERMINATION_REMINDER_SENT';

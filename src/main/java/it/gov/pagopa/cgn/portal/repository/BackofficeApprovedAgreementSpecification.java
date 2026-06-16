@@ -40,6 +40,7 @@ public class BackofficeApprovedAgreementSpecification
                               .in(AgreementStateEnum.APPROVED,
                                   AgreementStateEnum.ACTIVE,
                                   AgreementStateEnum.INACTIVE,
+                                  AgreementStateEnum.TERMINATION_REMINDER_SENT,
                                   AgreementStateEnum.TERMINATION_IN_PROGRESS,
                                   AgreementStateEnum.TERMINATED));
     }

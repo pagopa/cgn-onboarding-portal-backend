@@ -228,10 +228,31 @@ class BackofficeApprovedAgreementApiTest
     }
 
     @Test
-    void ManageAgreementTermination_StartTerminationInProgress_NoContent()
+    void ManageAgreementTermination_SendTerminationReminder_NoContent()
             throws Exception {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgress_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_REMINDER_SENT);
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
         agreementRepository.save(agreementEntity);
 
@@ -246,6 +267,22 @@ class BackofficeApprovedAgreementApiTest
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, agreementEntity.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromInactive_BadRequest()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Cannot execute StartTerminationInProgress for agreement in state INACTIVE"));
     }
 
     @Test

@@ -50,6 +50,9 @@ public class BackofficeAttributeAuthorityFacade {
             case INACTIVE:
                 organization.setStatus(OrganizationStatus.INACTIVE);
                 break;
+            case TERMINATION_REMINDER_SENT:
+                organization.setStatus(OrganizationStatus.TERMINATION_REMINDER_SENT);
+                break;
             case TERMINATION_IN_PROGRESS:
                 organization.setStatus(OrganizationStatus.TERMINATION_IN_PROGRESS);
                 break;

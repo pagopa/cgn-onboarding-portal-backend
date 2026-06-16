@@ -86,6 +86,8 @@ class GetProfileApiTest
         agreementRepository.save(agreement);
 
         backofficeAgreementService.manageAgreementTermination(agreement.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+        backofficeAgreementService.manageAgreementTermination(agreement.getId(),
                                                               AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
         backofficeAgreementService.manageAgreementTermination(agreement.getId(),
                                                               AgreementTerminationAction.COMPLETE_TERMINATION);

@@ -99,6 +99,8 @@ class DocumentApiTest
         agreementRepository.save(agreementEntity);
 
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+        backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
                                                               AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
         backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
                                                               AgreementTerminationAction.COMPLETE_TERMINATION);

@@ -285,6 +285,12 @@ class BackofficeAttributeAuthorityFacadeTest
     }
 
     @Test
+    void GetOrganization_TerminationReminderSent_Ok() {
+        assertMappedAgreementStatus(AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                    OrganizationStatus.TERMINATION_REMINDER_SENT);
+    }
+
+    @Test
     void GetOrganization_TerminationInProgress_Ok() {
         assertMappedAgreementStatus(AgreementStateEnum.TERMINATION_IN_PROGRESS,
                                     OrganizationStatus.TERMINATION_IN_PROGRESS);

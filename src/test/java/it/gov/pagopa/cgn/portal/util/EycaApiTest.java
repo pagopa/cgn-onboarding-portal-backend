@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.util;
 
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.scheduler.JobScheduler;
+import it.gov.pagopa.cgn.portal.service.ChangeAuditService;
 import it.gov.pagopa.cgn.portal.service.EycaExportService;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
@@ -36,6 +37,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
                     @MockBean(AgreementUserRepository.class),
                     @MockBean(ApprovedAgreementRepository.class),
                     @MockBean(BucketCodeLoadRepository.class),
+                    @MockBean(ChangeAuditRepository.class),
                     @MockBean(DiscountBucketCodeRepository.class),
                     @MockBean(DiscountBucketCodeSummaryRepository.class),
                     @MockBean(DiscountRepository.class),
@@ -53,6 +55,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
                     @MockBean(ParamRepository.class),
                     @MockBean(AAOrganizationRepository.class),
                     @MockBean(AAReferentRepository.class),
+                    @MockBean(ChangeAuditService.class),
                     @MockBean(AAOrganizationReferentRepository.class)
 })
 @RunWith(SpringRunner.class)

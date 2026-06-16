@@ -58,6 +58,7 @@ public class AgreementFacade {
             case APPROVED:
             case ACTIVE:
             case INACTIVE:
+            case TERMINATION_REMINDER_SENT:
             case TERMINATION_IN_PROGRESS:
             case TERMINATED:
                 return Arrays.asList(CompletedStep.values());

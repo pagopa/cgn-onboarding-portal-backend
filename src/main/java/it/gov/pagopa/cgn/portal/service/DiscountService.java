@@ -508,6 +508,7 @@ public class DiscountService {
         if (!EnumSet.of(AgreementStateEnum.APPROVED,
                         AgreementStateEnum.ACTIVE,
                         AgreementStateEnum.INACTIVE,
+                        AgreementStateEnum.TERMINATION_REMINDER_SENT,
                         AgreementStateEnum.TERMINATION_IN_PROGRESS).contains(agreementEntity.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_NOT_APPROVED_AGREEMENT.getValue());
         }
