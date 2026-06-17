@@ -165,6 +165,7 @@ public class AgreementService
 
     private boolean isApprovedAgreementState(AgreementStateEnum state) {
         switch (state) {
+            case DRAFT:
             case APPROVED:
             case ACTIVE:
             case INACTIVE:

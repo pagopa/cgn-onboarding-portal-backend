@@ -2,11 +2,13 @@ package it.gov.pagopa.cgn.portal.service.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.filter.BackofficeFilter;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.ApprovedAgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +50,30 @@ class BackofficeApprovedAgreementServiceTest
                                 responseAgreement.getInformationLastUpdateDate());
         Assertions.assertEquals(agreementEntity.getProfile().getFullName(), responseAgreement.getFullName());
         Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
+    }
+
+    @Test
+    void GetApprovedAgreements_GetDraftAgreementWithoutProfile_AgreementFoundWithOrganizationNameFallback() {
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                      EntityType.PRIVATE,
+                                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
+
+        BackofficeFilter filter = BackofficeFilter.builder().build();
+        Page<ApprovedAgreementEntity> page = approvedAgreementService.getApprovedAgreements(filter);
+
+        Assertions.assertEquals(1L, page.getTotalElements());
+        Assertions.assertEquals(1, page.getTotalPages());
+        Assertions.assertNotNull(page.getContent());
+        Assertions.assertFalse(page.getContent().isEmpty());
+
+        ApprovedAgreementEntity responseAgreement = page.getContent().get(0);
+        Assertions.assertEquals(agreementEntity.getId(), responseAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, responseAgreement.getState());
+        Assertions.assertEquals(TestUtils.FAKE_ORGANIZATION_NAME, responseAgreement.getFullName());
+        Assertions.assertNull(responseAgreement.getStartDate());
+        Assertions.assertNull(responseAgreement.getInformationLastUpdateDate());
+        Assertions.assertEquals(0, responseAgreement.getPublishedDiscounts());
+        Assertions.assertFalse(responseAgreement.getTestPending());
     }
 
     @Test
@@ -103,6 +129,21 @@ class BackofficeApprovedAgreementServiceTest
         Assertions.assertEquals(agreementEntity.getId(), approvedAgreement.getId());
         Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDiscountList()));
         Assertions.assertFalse(CollectionUtils.isEmpty(approvedAgreement.getDocumentList()));
+    }
+
+    @Test
+    void GetApprovedAgreementDetail_GetDraftAgreementWithoutProfile_AgreementDetailFound() {
+        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
+                                                                                      EntityType.PRIVATE,
+                                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
+
+        AgreementEntity draftAgreement = agreementService.getApprovedAgreement(agreementEntity.getId());
+
+        Assertions.assertNotNull(draftAgreement);
+        Assertions.assertEquals(agreementEntity.getId(), draftAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, draftAgreement.getState());
+        Assertions.assertTrue(CollectionUtils.isEmpty(draftAgreement.getDiscountList()));
+        Assertions.assertTrue(CollectionUtils.isEmpty(draftAgreement.getDocumentList()));
     }
 
     @Test

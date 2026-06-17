@@ -8,6 +8,7 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreements;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class BackofficeApprovedAgreementConverter
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
     static {
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.DRAFT, ApprovedAgreementState.DRAFT);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.APPROVED, ApprovedAgreementState.APPROVED);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.ACTIVE, ApprovedAgreementState.ACTIVE);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.INACTIVE, ApprovedAgreementState.INACTIVE);
@@ -37,9 +39,9 @@ public class BackofficeApprovedAgreementConverter
     protected Function<ApprovedAgreementEntity, ApprovedAgreement> toDto = entity -> {
         ApprovedAgreement dto = new ApprovedAgreement();
         dto.setAgreementId(entity.getId());
-        dto.setAgreementLastUpdateDate(entity.getInformationLastUpdateDate());
+        dto.setAgreementLastUpdateDate(JsonNullable.of(entity.getInformationLastUpdateDate()));
         dto.setFullName(entity.getFullName());
-        dto.setAgreementStartDate(entity.getStartDate());
+        dto.setAgreementStartDate(JsonNullable.of(entity.getStartDate()));
         dto.setState(getApprovedAgreementStateFromAgreementStateEnum(entity.getState()));
         dto.setPublishedDiscounts(entity.getPublishedDiscounts());
         dto.setTestPending(entity.getTestPending());

@@ -490,7 +490,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get list of agreements in post-approval states
+      summary: Get list of operator agreements
       operationId: getApprovedAgreements
       parameters:
         - name: profileFullName
@@ -543,7 +543,7 @@ paths:
               - DESC
       responses:
         "200":
-          description: List of agreements in post-approval states
+          description: List of operator agreements
           content:
             application/json:
               schema:
@@ -555,7 +555,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get agreement in post-approval states
+      summary: Get operator agreement
       operationId: getApprovedAgreement
       parameters:
         - name: agreementId
@@ -566,7 +566,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Agreement in post-approval states
+          description: Operator agreement
           content:
             application/json:
               schema:
@@ -957,8 +957,6 @@ components:
     ApprovedAgreement:
       required:
         - agreementId
-        - agreementLastUpdateDate
-        - agreementStartDate
         - fullName
         - publishedDiscounts
         - state
@@ -972,9 +970,11 @@ components:
         agreementStartDate:
           type: string
           format: date
+          nullable: true
         agreementLastUpdateDate:
           type: string
           format: date
+          nullable: true
         state:
           $ref: '#/components/schemas/ApprovedAgreementState'
         publishedDiscounts:
@@ -989,7 +989,6 @@ components:
       required:
         - agreementId
         - documents
-        - profile
         - state
       type: object
       properties:
@@ -1002,7 +1001,9 @@ components:
           format: date-time
           nullable: true
         profile:
-          $ref: '#/components/schemas/ApprovedAgreementProfile'
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ApprovedAgreementProfile'
         discounts:
           $ref: '#/components/schemas/ApprovedAgreementDiscounts'
         documents:
@@ -1017,6 +1018,7 @@ components:
     ApprovedAgreementState:
       type: string
       enum:
+        - Draft
         - Approved
         - Active
         - Inactive

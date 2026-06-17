@@ -6,6 +6,7 @@ import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementDetail;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.ApprovedAgreementDiscount;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Document;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class BackofficeApprovedAgreementDetailConverter
         dto.setState(BackofficeApprovedAgreementConverter.getApprovedAgreementStateFromAgreementStateEnum(entity.getState()));
         dto.setDiscounts((List<ApprovedAgreementDiscount>) discountConverter.toDtoCollection(entity.getDiscountList()));
         dto.setDocuments((List<Document>) documentConverter.toDtoCollection(entity.getDocumentList()));
-        dto.setProfile(profileConverter.toDto(entity.getProfile()));
+        dto.setProfile(JsonNullable.of(profileConverter.toDto(entity.getProfile())));
         return dto;
     };
 

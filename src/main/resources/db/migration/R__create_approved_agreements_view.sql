@@ -21,11 +21,11 @@ SELECT a.agreement_k,
        a.state,
        a.assignee,
        a.request_approval_time,
-       p.full_name,
+       COALESCE(p.full_name, a.organization_name) AS full_name,
        c.published_discounts,
        t.test_pending,
        a.entity_type
 FROM agreement a
-         JOIN profile p ON (a.agreement_k = p.agreement_fk)
+         LEFT JOIN profile p ON (a.agreement_k = p.agreement_fk)
          JOIN discounts_counter c ON (a.agreement_k = c.agreement_k)
          JOIN test_pending_checker t ON (a.agreement_k = t.agreement_k)

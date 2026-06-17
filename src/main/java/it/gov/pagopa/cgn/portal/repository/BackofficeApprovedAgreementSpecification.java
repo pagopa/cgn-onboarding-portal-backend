@@ -37,7 +37,8 @@ public class BackofficeApprovedAgreementSpecification
                                              CriteriaBuilder cb,
                                              List<Predicate> predicateList) {
         predicateList.add(root.get("state")
-                              .in(AgreementStateEnum.APPROVED,
+                              .in(AgreementStateEnum.DRAFT,
+                                  AgreementStateEnum.APPROVED,
                                   AgreementStateEnum.ACTIVE,
                                   AgreementStateEnum.INACTIVE,
                                   AgreementStateEnum.TERMINATION_REMINDER_SENT,
@@ -70,6 +71,11 @@ public class BackofficeApprovedAgreementSpecification
 
     private Path<LocalDate> getLastUpdateDatePath(Root<ApprovedAgreementEntity> root) {
         return root.get("informationLastUpdateDate");
+    }
+
+    @Override
+    protected Path<String> getProfileFullNamePath(Root<ApprovedAgreementEntity> root) {
+        return root.get("fullName");
     }
 
 }
