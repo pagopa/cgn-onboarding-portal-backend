@@ -18,12 +18,13 @@ import java.util.function.Function;
 public class BackofficeAgreementConverter
         extends AbstractConverter<AgreementEntity, Agreement> {
 
-    private static final Map<String, AgreementStateEnum> enumMap = HashMap.newHashMap(4);
+    private static final Map<String, AgreementStateEnum> enumMap = HashMap.newHashMap(5);
     private static final Map<EntityTypeEnum, EntityType> backofficeEntityTypeEnumMap = new EnumMap<>(EntityTypeEnum.class);
 
 
     static {
         enumMap.put(AgreementState.APPROVED_AGREEMENT.getValue(), AgreementStateEnum.APPROVED);
+        enumMap.put(AgreementState.DRAFT_AGREEMENT.getValue(), AgreementStateEnum.DRAFT);
         enumMap.put(AgreementState.PENDING_AGREEMENT.getValue(), AgreementStateEnum.PENDING);
         enumMap.put(AgreementState.REJECTED_AGREEMENT.getValue(), AgreementStateEnum.REJECTED);
         enumMap.put(AgreementState.ASSIGNED_AGREEMENT.getValue(), AgreementStateEnum.PENDING);
@@ -33,7 +34,10 @@ public class BackofficeAgreementConverter
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
         Agreement dto;
-        if (entity.getState()==AgreementStateEnum.PENDING) {
+        if (entity.getState()==AgreementStateEnum.DRAFT) {
+            dto = new DraftAgreement();
+            dto.setState(AgreementState.DRAFT_AGREEMENT);
+        } else if (entity.getState()==AgreementStateEnum.PENDING) {
             if (StringUtils.isBlank(entity.getBackofficeAssignee())) {
                 dto = new PendingAgreement();
                 dto.setState(AgreementState.PENDING_AGREEMENT);
@@ -57,6 +61,7 @@ public class BackofficeAgreementConverter
         Agreement dto = toDtoWithStatusFilled.apply(entity);
         dto.setId(entity.getId());
         dto.setEntityType(getEntityTypeFromEntityTypeEnum(entity.getEntityType()));
+        dto.setOrganizationName(entity.getOrganizationName());
         if (entity.getRequestApprovalTime()!=null) {
             dto.setRequestDate(entity.getRequestApprovalTime().toLocalDate());
         }

@@ -61,6 +61,41 @@ class BackofficeAgreementServiceTest
     }
 
     @Test
+    void GetAgreement_GetDraftAgreementWithoutFilter_AgreementFound() {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     TestUtils.FAKE_ORGANIZATION_NAME);
+        BackofficeFilter filter = BackofficeFilter.builder().build();
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Assertions.assertEquals(1L, page.getTotalElements());
+        Assertions.assertEquals(1, page.getTotalPages());
+        Assertions.assertNotNull(page.getContent());
+        Assertions.assertFalse(page.getContent().isEmpty());
+        AgreementEntity retrievedAgreement = page.getContent().get(0);
+        Assertions.assertEquals(draftAgreement.getId(), retrievedAgreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.DRAFT, retrievedAgreement.getState());
+        Assertions.assertNotNull(retrievedAgreement.getEntityType());
+    }
+
+    @Test
+    void GetAgreement_GetDraftAgreementWithOrganizationNameFilter_AgreementFound() {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     TestUtils.FAKE_ORGANIZATION_NAME);
+        BackofficeFilter filter = BackofficeFilter.builder()
+                                                  .profileFullName(draftAgreement.getOrganizationName()
+                                                                                 .toLowerCase())
+                                                  .build();
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Assertions.assertEquals(1L, page.getTotalElements());
+        Assertions.assertEquals(1, page.getTotalPages());
+        Assertions.assertNotNull(page.getContent());
+        Assertions.assertFalse(page.getContent().isEmpty());
+        Assertions.assertEquals(draftAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertNotNull(page.getContent().get(0).getEntityType());
+    }
+
+    @Test
     void GetAgreement_GetAgreementWithProfileFullNameFilter_AgreementFound() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()

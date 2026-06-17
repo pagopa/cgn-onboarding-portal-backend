@@ -920,7 +920,6 @@ components:
     Agreement:
       required:
         - id
-        - requestDate
         - state
       type: object
       properties:
@@ -933,6 +932,8 @@ components:
           format: date
         profile:
           $ref: '#/components/schemas/Profile'
+        organizationName:
+          type: string
         discounts:
           $ref: '#/components/schemas/Discounts'
         documents:
@@ -941,14 +942,21 @@ components:
           $ref: '#/components/schemas/EntityType'
       discriminator:
         propertyName: state
-    PendingAgreement:
+    DraftAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - type: object
+    PendingAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - required:
+            - requestDate
+          type: object
     AssignedAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - required:
+            - requestDate
             - assignee
           type: object
           properties:
@@ -1010,6 +1018,7 @@ components:
     AgreementState:
       type: string
       enum:
+        - DraftAgreement
         - PendingAgreement
         - AssignedAgreement
         - ApprovedAgreement
