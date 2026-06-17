@@ -72,29 +72,6 @@ class BackofficeApprovedAgreementApiTest
     }
 
     @Test
-    void GetAgreements_GetDraftAgreementWithoutProfile_Ok()
-            throws Exception {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
-                                                                                      EntityType.PRIVATE,
-                                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
-
-        this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH))
-                    .andDo(log())
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.items").isArray())
-                    .andExpect(jsonPath("$.items").isNotEmpty())
-                    .andExpect(jsonPath("$.items", hasSize(1)))
-                    .andExpect(jsonPath("$.total").value(1))
-                    .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PRIVATE.getValue()))
-                    .andExpect(jsonPath("$.items[0].agreementId").value(agreementEntity.getId()))
-                    .andExpect(jsonPath("$.items[0].publishedDiscounts").value(0))
-                    .andExpect(jsonPath("$.items[0].testPending").value(false))
-                    .andExpect(jsonPath("$.items[0].fullName").value(TestUtils.FAKE_ORGANIZATION_NAME))
-                    .andExpect(jsonPath("$.items[0].state").value("Draft"));
-    }
-
-    @Test
     void GetAgreements_GetAgreementsApprovedSortedByOperator_Ok()
             throws Exception {
         final int numRows = 3;
@@ -221,24 +198,6 @@ class BackofficeApprovedAgreementApiTest
                     .andExpect(jsonPath("discounts[0].name").value(discountEntity.getName()))
                     .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()))
                     .andExpect(jsonPath("discounts[0].visibleOnEyca").value(discountEntity.getVisibleOnEyca()));
-    }
-
-    @Test
-    void GetAgreements_GetDraftAgreementDetailsWithoutProfile_Ok()
-            throws Exception {
-        AgreementEntity agreementEntity = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID,
-                                                                                      EntityType.PRIVATE,
-                                                                                      TestUtils.FAKE_ORGANIZATION_NAME);
-
-        this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
-                    .andDo(log())
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
-                    .andExpect(jsonPath("state").value("Draft"))
-                    .andExpect(jsonPath("profile").doesNotExist())
-                    .andExpect(jsonPath("discounts", hasSize(0)))
-                    .andExpect(jsonPath("documents", hasSize(0)));
     }
 
     @Test
