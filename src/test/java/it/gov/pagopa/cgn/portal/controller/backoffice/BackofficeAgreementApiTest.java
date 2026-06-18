@@ -118,6 +118,39 @@ class BackofficeAgreementApiTest
     }
 
     @Test
+    void GetAgreements_GetAgreementsRejectedDraftAndPending_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(3)))
+                    .andExpect(jsonPath("$.total").value(3))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + draftAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.DRAFT_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + pendingAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.PENDING_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + rejectedAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.REJECTED_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + rejectedAgreement.getId() +
+                                        "')].reasonMessage").value(hasItem(rejectedAgreement.getRejectReasonMessage())));
+    }
+
+    @Test
     void GetAgreements_GetDraftAgreementWithStatusFilter_Ok()
             throws Exception {
         AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
@@ -139,12 +172,46 @@ class BackofficeAgreementApiTest
     }
 
     @Test
+    void GetAgreements_GetRejectedAgreementWithStatusFilter_Ok()
+            throws Exception {
+        agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                    EntityType.PRIVATE,
+                                                    "Draft Organization");
+        createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, 1, false);
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithStatusFilterPath("RejectedAgreement",
+                                                                                    Optional.empty())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(rejectedAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.REJECTED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].reasonMessage").value(rejectedAgreement.getRejectReasonMessage()));
+    }
+
+    @Test
     void GetAgreements_GetPendingAgreementWithStatusFilterExcludesDraft_Ok()
             throws Exception {
         agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
                                                     EntityType.PRIVATE,
                                                     "Draft Organization");
-        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
 
         this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithStatusFilterPath("PendingAgreement",
                                                                                     Optional.empty())))

@@ -56,7 +56,8 @@ public class BackofficeAgreementToValidateSpecification
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root,
                                              CriteriaBuilder cb,
                                              List<Predicate> predicateList) {
-        predicateList.add(root.get("state").in(AgreementStateEnum.DRAFT, AgreementStateEnum.PENDING));
+        predicateList.add(root.get("state")
+                              .in(AgreementStateEnum.DRAFT, AgreementStateEnum.PENDING, AgreementStateEnum.REJECTED));
     }
 
     @Override
@@ -117,6 +118,10 @@ public class BackofficeAgreementToValidateSpecification
                     filter.getAgreementState());
             if (AgreementStateEnum.DRAFT.equals(agreementStateEnum)) {
                 predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.DRAFT));
+                return;
+            }
+            if (AgreementStateEnum.REJECTED.equals(agreementStateEnum)) {
+                predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.REJECTED));
                 return;
             }
             //if assigned, database status is Pending but assignee should be used (if present or else not null)

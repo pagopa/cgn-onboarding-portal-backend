@@ -2,13 +2,13 @@ package it.gov.pagopa.cgn.portal.converter.backoffice;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.EntityTypeEnum;
-import it.gov.pagopa.cgn.portal.exception.CGNException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementState;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.AssignedAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.DraftAgreement;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.PendingAgreement;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.RejectedAgreement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,12 +65,19 @@ public class BackofficeAgreementConverterTest {
     }
 
     @Test
-    public void ToDto_RejectedAgreementToDto_ThrowCGNException() {
+    public void ToDto_RejectedAgreementToDto_ok() {
         BackofficeAgreementConverter converter = getBackofficeAgreementConverter();
 
         AgreementEntity agreementEntity = createSampleAgreementEntity();
         agreementEntity.setState(AgreementStateEnum.REJECTED);
-        Assert.assertThrows(CGNException.class, () -> converter.toDto.apply(agreementEntity));
+        agreementEntity.setRejectReasonMessage("reason");
+
+        Agreement agreementDto = converter.toDto.apply(agreementEntity);
+        Assert.assertTrue(agreementDto instanceof RejectedAgreement);
+        Assert.assertEquals(AgreementState.REJECTED_AGREEMENT, agreementDto.getState());
+        Assert.assertEquals(agreementEntity.getRequestApprovalTime().toLocalDate(), agreementDto.getRequestDate());
+        Assert.assertEquals(agreementEntity.getRejectReasonMessage(),
+                            ((RejectedAgreement) agreementDto).getReasonMessage());
 
     }
 

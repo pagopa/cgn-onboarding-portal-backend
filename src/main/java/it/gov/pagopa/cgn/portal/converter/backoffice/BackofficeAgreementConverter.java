@@ -49,6 +49,11 @@ public class BackofficeAgreementConverter
                 dto = assignedAgreement;
                 dto.setState(AgreementState.ASSIGNED_AGREEMENT);
             }
+        } else if (entity.getState()==AgreementStateEnum.REJECTED) {
+            RejectedAgreement rejectedAgreement = new RejectedAgreement();
+            rejectedAgreement.setReasonMessage(entity.getRejectReasonMessage());
+            dto = rejectedAgreement;
+            dto.setState(AgreementState.REJECTED_AGREEMENT);
         } else {
             throw new CGNException("Enum mapping not found for " + entity.getState());
         }
