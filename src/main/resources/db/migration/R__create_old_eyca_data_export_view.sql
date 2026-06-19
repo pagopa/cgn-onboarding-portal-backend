@@ -40,7 +40,7 @@ SELECT
     '' as "phone",
     p.website_url as "web",
     '' as "tags",
-    'https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/' || ag.image_url as "image",
+    'https://io-p-itn-cgn-pe-frontend-assets-fde-01-e6cbebfwdrhcaqed.a02.azurefd.net/' || ag.image_url as "image",
     CASE
         WHEN d.state = 'PUBLISHED'
         AND d.start_date <= CURRENT_DATE

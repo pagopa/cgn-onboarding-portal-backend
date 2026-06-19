@@ -1,17 +1,18 @@
 package it.gov.pagopa.cgn.portal.facade;
 
+import it.gov.pagopa.cgn.portal.model.AAOrganizationEntity;
 import it.gov.pagopa.cgn.portal.security.CgnUserRoleEnum;
 import it.gov.pagopa.cgn.portal.security.JwtClaims;
 import it.gov.pagopa.cgn.portal.security.JwtUtils;
 import it.gov.pagopa.cgn.portal.service.AttributeAuthorityService;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
-import it.gov.pagopa.cgnonboardingportal.attributeauthority.model.CompanyAttributeAuthority;
 import it.gov.pagopa.cgnonboardingportal.model.Organization;
 import it.gov.pagopa.cgnonboardingportal.model.Organizations;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
@@ -31,10 +32,11 @@ public class AttributeAuthorityFacade {
         this.attributeAuthorityService = attributeAuthorityService;
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Organizations> getOrganizations() {
         String operatorFiscalCode = CGNUtils.getJwtOperatorFiscalCode();
         try {
-            List<CompanyAttributeAuthority> companies = attributeAuthorityService.getAgreementOrganizations(
+                List<AAOrganizationEntity> companies = attributeAuthorityService.getAgreementOrganizations(
                     operatorFiscalCode);
 
             Organizations organizations = new Organizations(companies.stream().map(company -> {
@@ -46,7 +48,7 @@ public class AttributeAuthorityFacade {
                 claims.put(JwtClaims.ORGANIZATION_FISCAL_CODE.getCode(), company.getFiscalCode());
                 String organizationToken = jwtUtils.buildJwtToken(claims);
                 Organization organization = new Organization();
-                organization.setOrganizationName(company.getOrganizationName());
+                organization.setOrganizationName(company.getName());
                 organization.setEmail(company.getPec());
                 organization.setOrganizationFiscalCode(company.getFiscalCode());
                 organization.setToken(organizationToken);

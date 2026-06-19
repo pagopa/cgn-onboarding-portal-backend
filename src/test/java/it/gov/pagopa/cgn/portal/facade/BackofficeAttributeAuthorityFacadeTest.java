@@ -35,9 +35,6 @@ class BackofficeAttributeAuthorityFacadeTest
     private BackofficeAttributeAuthorityFacade backofficeAttributeAuthorityFacade;
     private AttributeAuthorityService attributeAuthorityService;
     private OrganizationWithReferentsConverter organizationWithReferentsConverter;
-    private OrganizationWithReferentsAndStatusConverter organizationWithReferentsAndStatusConverter;
-    private ReferentFiscalCodeConverter referentFiscalCodeConverter;
-    private OrganizationsConverter organizationsConverter;
     private AgreementUserService agreementUserServiceSpy;
     private ProfileService profileServiceSpy;
     private AgreementEntity agreementEntity;
@@ -60,9 +57,6 @@ class BackofficeAttributeAuthorityFacadeTest
 
         attributeAuthorityService = Mockito.mock(AttributeAuthorityService.class);
         organizationWithReferentsConverter = new OrganizationWithReferentsConverter();
-        organizationWithReferentsAndStatusConverter = new OrganizationWithReferentsAndStatusConverter();
-        organizationsConverter = new OrganizationsConverter(organizationWithReferentsAndStatusConverter);
-        referentFiscalCodeConverter = new ReferentFiscalCodeConverter();
         backofficeDiscountConverter = new BackofficeDiscountConverter();
         backofficeProfileConverter = new BackofficeProfileConverter();
         backofficeDocumentConverter = new BackofficeDocumentConverter();
@@ -70,17 +64,12 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                         backofficeDocumentConverter,
                                                                         backofficeProfileConverter);
 
-        var organizationWithReferentsPostConverter = new OrganizationWithReferentsPostConverter();
 
         backofficeAttributeAuthorityFacade = new BackofficeAttributeAuthorityFacade(attributeAuthorityService,
                                                                                     agreementService,
                                                                                     agreementUserServiceSpy,
                                                                                     profileServiceSpy,
-                                                                                    organizationsConverter,
                                                                                     organizationWithReferentsConverter,
-                                                                                    organizationWithReferentsAndStatusConverter,
-                                                                                    organizationWithReferentsPostConverter,
-                                                                                    referentFiscalCodeConverter,
                                                                                     backofficeAgreementConverter);
 
         String anOrganizationTaxCodeOrVat = "abcdeghilmnopqrs";
@@ -121,7 +110,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                 Mockito.any(),
                                                                 Mockito.any(),
                                                                 Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationsConverter.toAttributeAuthorityModel(organizations)));
+               .thenReturn(ResponseEntity.ok(organizations));
 
         agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),
                                                     organization0.getEntityType(),
@@ -154,8 +143,8 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         null);
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
+               .thenReturn(ResponseEntity.ok(
+                       organization0));
 
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 organization0.getKeyOrganizationFiscalCode());
@@ -186,8 +175,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
         Consumer<OrganizationWithReferentsAndStatus> assertions = org -> {
             Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-                   .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                           org)));
+                   .thenReturn(ResponseEntity.ok(org));
 
             agreementService.createAgreementIfNotExists(org.getKeyOrganizationFiscalCode(),
                                                         org.getEntityType(),
@@ -223,8 +211,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
+               .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -253,8 +240,7 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         null);
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
+               .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -283,8 +269,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
 
         Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizationWithReferentsAndStatusConverter.toAttributeAuthorityModel(
-                       organization0)));
+               .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -445,7 +430,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void InsertReferent_Ok() {
-        Mockito.when(attributeAuthorityService.insertReferent(Mockito.any(), Mockito.any()))
+        Mockito.when(attributeAuthorityService.insertReferent(Mockito.anyString(), Mockito.anyString()))
                .thenReturn(ResponseEntity.noContent().build());
         ReferentFiscalCode referentFiscalCode = new ReferentFiscalCode();
         referentFiscalCode.setReferentFiscalCode("AAAAAA00A00A000A");

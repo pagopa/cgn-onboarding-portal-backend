@@ -619,7 +619,7 @@ class EycaExportServiceTest
     @Test
     void testBuildCsv_shouldReturnNotEmptyResource() {
         ByteArrayResource resource = exportService.buildEycaCsv(TestUtils.getEycaDataExportViewEntityListFromCSV());
-        Assertions.assertEquals(104763, resource.getByteArray().length);
+        Assertions.assertEquals(106411, resource.getByteArray().length);
     }
 
     @Test
@@ -817,5 +817,41 @@ class EycaExportServiceTest
 
         // Assert
         verify(mockExportService, times(1)).sendDiscountsToEyca();
+    }
+
+    @Test
+    void sendUpdateEycaDiscountsWithImageSourceWeb_OK() {
+        initMockitoPreconditions();
+
+        EycaDataExportViewEntity entity = new EycaDataExportViewEntity();
+        entity.setId(1L);
+        entity.setDiscountId(1L);
+        entity.setEycaUpdateId("test-update-id-001");
+        entity.setVendor("Test Vendor");
+        entity.setName("Test Discount");
+        entity.setImage("https://www.example.com/image.jpg");
+        entity.setLive("Y");
+        entity.setStartDate(LocalDate.of(2026, 1, 1));
+        entity.setEndDate(LocalDate.of(2026, 12, 31));
+
+        Mockito.when(eycaDataExportRepository.findAll()).thenReturn(List.of(entity));
+
+        ApiResponseEyca apiResponseEyca = TestUtils.getApiResponse();
+        Mockito.when(eycaExportServiceMock.updateDiscount(Mockito.any(UpdateDataExportEyca.class), Mockito.anyString()))
+               .thenReturn(apiResponseEyca);
+
+        SearchApiResponseEyca searchApiResponseEyca = TestUtils.getSearchApiResponseEyca();
+        Mockito.when(eycaExportServiceMock.searchDiscount(Mockito.any(SearchDataExportEyca.class),
+                                                          Mockito.anyString(),
+                                                          Mockito.any(Boolean.class)))
+               .thenReturn(searchApiResponseEyca);
+
+        exportService.sendDiscountsToEyca();
+
+        Mockito.verify(eycaExportServiceMock, times(1)).updateDiscount(
+                ArgumentMatchers.argThat(updateData -> updateData.getImageSourceWeb() != null &&
+                                                   updateData.getImageSourceWeb().equals("https://www.example.com/image.jpg")),
+                Mockito.anyString()
+        );
     }
 }

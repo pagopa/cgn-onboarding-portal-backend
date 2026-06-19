@@ -50,7 +50,11 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
                     @MockBean(SecondaryReferentRepository.class),
                     @MockBean(JobScheduler.class),
                     @MockBean(TestReferentRepository.class),
-                    @MockBean(ParamRepository.class)})
+                    @MockBean(ParamRepository.class),
+                    @MockBean(AAOrganizationRepository.class),
+                    @MockBean(AAReferentRepository.class),
+                    @MockBean(AAOrganizationReferentRepository.class)
+})
 @RunWith(SpringRunner.class)
 public class EycaApiTest {
 

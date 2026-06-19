@@ -563,7 +563,7 @@ public class TestUtils {
         entity0.setWeb(null);
         entity0.setTags("");
         entity0.setImage(
-                "https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+                "https://io-p-itn-cgn-pe-frontend-assets-fde-01-e6cbebfwdrhcaqed.a02.azurefd.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
         entity0.setLocationLocalId("");
         entity0.setStreet(null);
         entity0.setCity("");
@@ -602,7 +602,7 @@ public class TestUtils {
         entity1.setWeb(null);
         entity1.setTags("");
         entity1.setImage(
-                "https://cgnonboardingportal-p-cdnendpoint-storage.azureedge.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
+                "https://io-p-itn-cgn-pe-frontend-assets-fde-01-e6cbebfwdrhcaqed.a02.azurefd.net/profileimages/image-2eb38226-928f-40e7-8a06-eecb4a15cb1f.jpg");
         entity1.setLocationLocalId("");
         entity1.setStreet(null);
         entity1.setCity("");

@@ -7,6 +7,7 @@ import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.*;
+import it.gov.pagopa.cgn.portal.pubsubs.DiscountChangedToTestPendingEvent;
 import it.gov.pagopa.cgn.portal.repository.*;
 import it.gov.pagopa.cgn.portal.util.BucketLoadUtils;
 import it.gov.pagopa.cgn.portal.util.ValidationUtils;
@@ -15,6 +16,7 @@ import it.gov.pagopa.cgnonboardingportal.model.DiscountBucketCodeLoadingProgess;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -48,11 +50,8 @@ public class DiscountService {
     private final OnlineMerchantRepository onlineMerchantRepository;
     private final PublishedProductCategoryRepository publishedProductCategoryRepository;
     private final BiConsumer<DiscountEntity, List<DiscountProductEntity>> updateProducts = (discountEntity, productsToUpdate) -> {
-        // add all products from DTO. If there are products already present will be
-        // skipped
         discountEntity.addProductList(productsToUpdate);
 
-        // search and remove (if there are) products deleted by user
         List<DiscountProductEntity> toDeleteProduct = discountEntity.getProducts()
                                                                     .stream()
                                                                     .filter(prodEntity -> !productsToUpdate.contains(
@@ -92,6 +91,8 @@ public class DiscountService {
         dbEntity.setDiscountUrl(toUpdateEntity.getDiscountUrl());
     };
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
     public DiscountService(DiscountRepository discountRepository,
                            AgreementServiceLight agreementServiceLight,
@@ -106,7 +107,8 @@ public class DiscountService {
                            MerchantRepository merchantRepository,
                            OfflineMerchantRepository offlineMerchantRepository,
                            OnlineMerchantRepository onlineMerchantRepository,
-                           PublishedProductCategoryRepository publishedProductCategoryRepository) {
+                           PublishedProductCategoryRepository publishedProductCategoryRepository,
+                           ApplicationEventPublisher applicationEventPublisher) {
         this.discountRepository = discountRepository;
         this.agreementServiceLight = agreementServiceLight;
         this.profileService = profileService;
@@ -121,11 +123,11 @@ public class DiscountService {
         this.offlineMerchantRepository = offlineMerchantRepository;
         this.onlineMerchantRepository = onlineMerchantRepository;
         this.publishedProductCategoryRepository = publishedProductCategoryRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper createDiscount(String agreementId, DiscountEntity discountEntity) {
-        // check if agreement exits. If not the method throw an exception
         AgreementEntity agreement = agreementServiceLight.findAgreementById(agreementId);
         discountEntity.setAgreement(agreement);
         ProfileEntity profileEntity = validateDiscount(agreementId, discountEntity, true);
@@ -156,7 +158,6 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public CrudDiscountWrapper updateDiscount(String agreementId, Long discountId, DiscountEntity discountEntity) {
-        // check if agreement exits. If not the method throw an exception
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
 
         DiscountEntity dbEntity = findDiscountById(discountId);
@@ -189,6 +190,10 @@ public class DiscountService {
         if (DiscountCodeTypeEnum.STATIC.equals(profileDiscountType)
             && !Objects.equals(dbEntity.getStaticCode(), discountEntity.getStaticCode())) {
             dbEntity.setState(DiscountStateEnum.TEST_PENDING);
+
+            agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
+
+            applicationEventPublisher.publishEvent(new DiscountChangedToTestPendingEvent(agreementId, discountId));
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
@@ -199,14 +204,11 @@ public class DiscountService {
             dbEntity = bucketService.createPendingBucketLoad(dbEntity);
         }
 
-        // if state is Published, last modify must be updated because public information
-        // was modified
         if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
             dbEntity.setExpirationWarningSentDateTime(null);
         }
 
-        // updating suspended discount: move to draft status
         if (DiscountStateEnum.SUSPENDED.equals(dbEntity.getState())) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
         }
@@ -224,7 +226,6 @@ public class DiscountService {
 
         discountRepository.save(dbEntity);
 
-        // refresh materialized views
         refreshMaterializedViews(profile);
 
         return new CrudDiscountWrapper(dbEntity, profileDiscountType, isChangedBucketLoad);
@@ -232,14 +233,12 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void deleteDiscount(String agreementId, Long discountId) {
-        // check if agreement exits. If not the method throw an exception
         agreementServiceLight.findAgreementById(agreementId);
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         discountRepository.deleteById(discountId);
 
-        // refresh materialized views
         refreshMaterializedViews(profileEntity);
     }
 
@@ -255,8 +254,7 @@ public class DiscountService {
 
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
 
-        emailNotificationFacade.notifyDepartementToTestDiscount(agreementEntity,discount);
-
+        applicationEventPublisher.publishEvent(new DiscountChangedToTestPendingEvent(agreementId, discountId));
         return discount;
     }
 
@@ -268,7 +266,6 @@ public class DiscountService {
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         DiscountEntity discount = findDiscountById(discountId);
-        // we should update start date to "now" if it's in the past
         if (LocalDate.now().isAfter(discount.getStartDate())) {
             discount.setStartDate(LocalDate.now());
         }
@@ -276,16 +273,14 @@ public class DiscountService {
         discount.setState(DiscountStateEnum.PUBLISHED);
         discount = discountRepository.save(discount);
         agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
-        // check if exists almost one discount already published
         if (agreementEntity.getFirstDiscountPublishingDate()==null) {
             long numPublishedDiscount = discountRepository.countByAgreementIdAndState(agreementId,
                                                                                       DiscountStateEnum.PUBLISHED);
-            if (numPublishedDiscount==1) { // 1 -> discount just created
+            if (numPublishedDiscount==1) {
                 agreementServiceLight.setFirstDiscountPublishingDate(agreementEntity);
             }
         }
 
-        // refresh materialized views
         refreshMaterializedViews(profileEntity);
 
         return discount;
@@ -304,7 +299,6 @@ public class DiscountService {
         discount.setState(DiscountStateEnum.DRAFT);
         discount = discountRepository.save(discount);
 
-        // refresh materialized views
         refreshMaterializedViews(profileEntity);
 
         return discount;
@@ -319,7 +313,7 @@ public class DiscountService {
         DiscountEntity discount = findDiscountById(discountId);
         checkDiscountRelatedSameAgreement(discount, agreementId);
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
-            return discount; // already suspended
+            return discount;
         }
         if (!DiscountStateEnum.PUBLISHED.equals(discount.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_SUSPEND_DISCOUNT_NOT_PUBLISHED.getValue());
@@ -328,10 +322,8 @@ public class DiscountService {
         discount.setSuspendedReasonMessage(reasonMessage);
         discount = discountRepository.save(discount);
 
-        // send notification
         emailNotificationFacade.notifyMerchantDiscountSuspended(profileEntity, discount, reasonMessage);
 
-        // refresh materialized views
         refreshMaterializedViews(profileEntity);
 
         return discount;
@@ -365,7 +357,6 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void setDiscountTestPassed(String agreementId, Long discountId) {
-        // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                                                     .orElseThrow(() -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
         DiscountEntity discount = findDiscountById(discountId);
@@ -382,7 +373,6 @@ public class DiscountService {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public void setDiscountTestFailed(String agreementId, Long discountId, String reasonMessage) {
-        // send notification
         ProfileEntity profileEntity = profileService.getProfile(agreementId)
                                                     .orElseThrow(() -> new InvalidRequestException((ErrorCodeEnum.PROFILE_NOT_FOUND.getValue())));
         DiscountEntity discount = findDiscountById(discountId);
@@ -470,18 +460,14 @@ public class DiscountService {
     private void validatePublishingDiscount(AgreementEntity agreementEntity,
                                             DiscountEntity discount,
                                             ProfileEntity profileEntity) {
-        // perform common discount validation to keep entities coherent
         commonDiscountValidation(profileEntity, discount, false);
 
-        // perform testing specific validation
         validateTestingDiscount(profileEntity, agreementEntity, discount);
 
-        // perform publishing specific validation
         validatePublishingDiscount(profileEntity, discount);
     }
 
     private void validatePublishingDiscount(ProfileEntity profileEntity, DiscountEntity discount) {
-        //perform publishing specific validation
         if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
             !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST.getValue());
@@ -498,15 +484,12 @@ public class DiscountService {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
         }
 
-        // check sales channel
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS.getValue());
         }
 
-        // perform common discount validation to keep entities coherent
         commonDiscountValidation(profileEntity, discount, false);
 
-        // perform testing specific validation
         validateTestingDiscount(profileEntity, agreementEntity, discount);
     }
 
@@ -565,7 +548,6 @@ public class DiscountService {
         }
 
 
-        // If profile use API, static code and landing page will not used
         if (DiscountCodeTypeEnum.API.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
@@ -577,7 +559,6 @@ public class DiscountService {
             bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
-        // If profile use STATIC, landing page will not used
         if (DiscountCodeTypeEnum.STATIC.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setLandingPageUrl(null);
             discountEntity.setEycaLandingPageUrl(null);
@@ -588,7 +569,6 @@ public class DiscountService {
             bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
-        // If profile use LANDINGPAGE, static code will not used
         if (DiscountCodeTypeEnum.LANDINGPAGE.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLastBucketCodeLoadUid(null);
@@ -597,15 +577,12 @@ public class DiscountService {
             bucketLoadUtils.deleteBucketCodes(discountEntity.getId());
         }
 
-        // If profile use BUCKET, others will not used
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType())) {
             discountEntity.setStaticCode(null);
             discountEntity.setLandingPageUrl(null);
             discountEntity.setLandingPageReferrer(null);
         }
 
-        // If profile sales channel is OFFLINE, any discount is visible on eyca
-        // and all online stuff should be cleaned
         if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
             discountEntity.setVisibleOnEyca(true);
             discountEntity.setStaticCode(null);
