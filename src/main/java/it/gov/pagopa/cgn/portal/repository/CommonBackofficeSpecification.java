@@ -43,12 +43,16 @@ public abstract class CommonBackofficeSpecification<T>
 
     protected abstract Order getOrder(Root<T> root, CriteriaBuilder cb);
 
+    protected List<Order> getOrders(Root<T> root, CriteriaBuilder cb) {
+        return List.of(getOrder(root, cb));
+    }
+
     @Override
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
         List<Predicate> predicateList = addFiltersPredicate(root, cb);
         addStaticFiltersPredicate(root, cb, predicateList);
         query.where(predicateList.toArray(new Predicate[predicateList.size()]));
-        query.orderBy(getOrder(root, cb));
+        query.orderBy(getOrders(root, cb));
         return null;
     }
 

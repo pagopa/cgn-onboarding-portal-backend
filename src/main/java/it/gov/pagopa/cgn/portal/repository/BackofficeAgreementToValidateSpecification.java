@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.query.criteria.internal.OrderImpl;
 
 import javax.persistence.criteria.*;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +20,15 @@ import java.util.Objects;
 
 public class BackofficeAgreementToValidateSpecification
         extends CommonBackofficeSpecification<AgreementEntity> {
+
+    private enum DefaultAgreementOrder {
+        PENDING_AGREEMENT,
+        ASSIGNED_TO_CURRENT_USER_AGREEMENT,
+        ASSIGNED_TO_OTHER_USER_AGREEMENT,
+        DRAFT_AGREEMENT,
+        REJECTED_AGREEMENT,
+        FALLBACK_AGREEMENT
+    }
 
     public BackofficeAgreementToValidateSpecification(BackofficeFilter filter, String currentUser) {
         super(filter, currentUser);
@@ -62,23 +70,61 @@ public class BackofficeAgreementToValidateSpecification
 
     @Override
     protected Order getOrder(Root<AgreementEntity> root, CriteriaBuilder cb) {
-        Path<OffsetDateTime> dateExpression = getRequestApprovalTimePath(root);
-
         if (filter.getRequestSortColumnEnum()!=null) {
             return getOrderByFilter(root, cb);
         }
-        // order by requestApprovalTime desc
-        if (StringUtils.isBlank(currentUser)) {
-            return new OrderImpl(dateExpression, direction.isAscending());
+        return getDefaultOrders(root, cb).get(0);
+    }
+
+    @Override
+    protected List<Order> getOrders(Root<AgreementEntity> root, CriteriaBuilder cb) {
+        if (filter.getRequestSortColumnEnum()!=null) {
+            return List.of(getOrderByFilter(root, cb));
         }
-        return new OrderImpl(cb.selectCase()
-                               // first the agreements assigned to current user
-                               .when(cb.equal(getBackofficeAssigneePath(root), currentUser),
-                                     LocalDate.now().minusYears(10))
-                               // last the agreements assigned to others user
-                               .when(cb.isNotNull(getBackofficeAssigneePath(root)), LocalDate.now().plusYears(10))
-                               // after agreements assigned to current user, the agreements not assigned
-                               .otherwise(dateExpression), direction.isAscending());
+        return getDefaultOrders(root, cb);
+    }
+
+    private List<Order> getDefaultOrders(Root<AgreementEntity> root, CriteriaBuilder cb) {
+        return List.of(new OrderImpl(getDefaultAgreementPriorityExpression(root, cb), true),
+                       new OrderImpl(getDefaultAgreementDateExpression(root, cb), false),
+                       new OrderImpl(root.get("id"), true));
+    }
+
+    private Expression<Integer> getDefaultAgreementPriorityExpression(Root<AgreementEntity> root, CriteriaBuilder cb) {
+        Path<AgreementStateEnum> statePath = root.get("state");
+        Path<String> assigneePath = getBackofficeAssigneePath(root);
+        Predicate pendingAgreement = cb.equal(statePath, AgreementStateEnum.PENDING);
+
+        CriteriaBuilder.Case<Integer> priority = cb.<Integer>selectCase()
+                                                   .when(cb.and(pendingAgreement, cb.isNull(assigneePath)),
+                                                         DefaultAgreementOrder.PENDING_AGREEMENT.ordinal());
+
+        if (StringUtils.isBlank(currentUser)) {
+            priority = priority.when(cb.and(cb.equal(statePath, AgreementStateEnum.PENDING),
+                                            cb.isNotNull(assigneePath)),
+                                     DefaultAgreementOrder.ASSIGNED_TO_CURRENT_USER_AGREEMENT.ordinal());
+        } else {
+            priority = priority.when(cb.and(cb.equal(statePath, AgreementStateEnum.PENDING),
+                                            cb.equal(assigneePath, currentUser)),
+                                      DefaultAgreementOrder.ASSIGNED_TO_CURRENT_USER_AGREEMENT.ordinal())
+                               .when(cb.and(cb.equal(statePath, AgreementStateEnum.PENDING),
+                                            cb.isNotNull(assigneePath),
+                                            cb.notEqual(assigneePath, currentUser)),
+                                     DefaultAgreementOrder.ASSIGNED_TO_OTHER_USER_AGREEMENT.ordinal());
+        }
+
+        return priority.when(cb.equal(statePath, AgreementStateEnum.DRAFT),
+                             DefaultAgreementOrder.DRAFT_AGREEMENT.ordinal())
+                       .when(cb.equal(statePath, AgreementStateEnum.REJECTED),
+                             DefaultAgreementOrder.REJECTED_AGREEMENT.ordinal())
+                       .otherwise(DefaultAgreementOrder.FALLBACK_AGREEMENT.ordinal());
+    }
+
+    private Expression<OffsetDateTime> getDefaultAgreementDateExpression(Root<AgreementEntity> root,
+                                                                         CriteriaBuilder cb) {
+        return cb.<OffsetDateTime>selectCase()
+                 .when(cb.equal(root.get("state"), AgreementStateEnum.DRAFT), getInsertTimePath(root))
+                 .otherwise(getRequestApprovalTimePath(root));
     }
 
     private Order getOrderByFilter(Root<AgreementEntity> root, CriteriaBuilder cb) {
@@ -105,6 +151,10 @@ public class BackofficeAgreementToValidateSpecification
 
     private Path<OffsetDateTime> getRequestApprovalTimePath(Root<AgreementEntity> root) {
         return root.get("requestApprovalTime");
+    }
+
+    private Path<OffsetDateTime> getInsertTimePath(Root<AgreementEntity> root) {
+        return root.get("insertTime");
     }
 
     private Expression<String> getOperatorNameExpression(Root<AgreementEntity> root, CriteriaBuilder cb) {

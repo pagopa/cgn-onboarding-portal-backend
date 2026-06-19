@@ -151,6 +151,56 @@ class BackofficeAgreementApiTest
     }
 
     @Test
+    void GetAgreements_GetAgreementsDefaultSortedByWorkflowStatus_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_D5",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
+        AgreementEntity assignedToCurrentUserAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                                DiscountCodeTypeEnum.STATIC,
+                                                                                2,
+                                                                                false).getAgreementEntity();
+        assignedToCurrentUserAgreement = backofficeAgreementService.assignAgreement(
+                assignedToCurrentUserAgreement.getId());
+        AgreementEntity assignedToOtherUserAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                              DiscountCodeTypeEnum.STATIC,
+                                                                              3,
+                                                                              false).getAgreementEntity();
+        assignedToOtherUserAgreement.setBackofficeAssignee("Other Admin");
+        assignedToOtherUserAgreement = agreementRepository.save(assignedToOtherUserAgreement);
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   4,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(5)))
+                    .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].id").value(pendingAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.PENDING_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].assignee").doesNotExist())
+                    .andExpect(jsonPath("$.items[1].id").value(assignedToCurrentUserAgreement.getId()))
+                    .andExpect(jsonPath("$.items[1].state").value(AgreementState.ASSIGNED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[1].assignee.fullName").value(assignedToCurrentUserAgreement.getBackofficeAssignee()))
+                    .andExpect(jsonPath("$.items[2].id").value(assignedToOtherUserAgreement.getId()))
+                    .andExpect(jsonPath("$.items[2].state").value(AgreementState.ASSIGNED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[2].assignee.fullName").value(assignedToOtherUserAgreement.getBackofficeAssignee()))
+                    .andExpect(jsonPath("$.items[3].id").value(draftAgreement.getId()))
+                    .andExpect(jsonPath("$.items[3].state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[4].id").value(rejectedAgreement.getId()))
+                    .andExpect(jsonPath("$.items[4].state").value(AgreementState.REJECTED_AGREEMENT.getValue()));
+    }
+
+    @Test
     void GetAgreements_GetDraftAgreementWithStatusFilter_Ok()
             throws Exception {
         AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
