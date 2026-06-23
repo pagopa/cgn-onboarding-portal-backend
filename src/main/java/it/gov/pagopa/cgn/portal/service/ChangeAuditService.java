@@ -12,13 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.sql.Timestamp; // NOSONAR java:S2143 - Native query projection returns java.sql.Timestamp.
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("java:S2143") // Native query projection returns java.sql.Timestamp, converted to OffsetDateTime.
 public class ChangeAuditService {
 
     private final ChangeAuditRepository changeAuditRepository;

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("java:S2143")
 public class AgreementService
         extends AgreementServiceLight {
 
@@ -166,12 +167,7 @@ public class AgreementService
 
     private boolean isApprovedAgreementState(AgreementStateEnum state) {
         switch (state) {
-            case APPROVED:
-            case ACTIVE:
-            case INACTIVE:
-            case TERMINATION_REMINDER_SENT:
-            case TERMINATION_IN_PROGRESS:
-            case TERMINATED:
+            case APPROVED,ACTIVE,INACTIVE,TERMINATION_REMINDER_SENT,TERMINATION_IN_PROGRESS,TERMINATED:
                 return true;
             default:
                 return false;
