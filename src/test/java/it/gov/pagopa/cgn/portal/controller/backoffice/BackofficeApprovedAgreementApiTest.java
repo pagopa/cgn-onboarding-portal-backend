@@ -2,12 +2,17 @@ package it.gov.pagopa.cgn.portal.controller.backoffice;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.BackofficeApprovedSortColumnEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.ChangeAuditEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationCommand;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +23,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -73,7 +79,7 @@ class BackofficeApprovedAgreementApiTest
                                                                             .sorted(Comparator.comparing(a -> a.getProfileEntity()
                                                                                                                .getFullName()))
                                                                             .map(AgreementTestObject::getAgreementEntity)
-                                                                            .collect(Collectors.toList());
+                                                                            .toList();
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
@@ -93,11 +99,7 @@ class BackofficeApprovedAgreementApiTest
     void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok()
             throws Exception {
         final int numRows = 3;
-        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
-        testObjectList.stream()
-                      .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
-                      .map(AgreementTestObject::getAgreementEntity)
-                      .collect(Collectors.toList());
+        createMultipleApprovedAgreement(numRows, true);
 
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS,
                                                                                 Sort.Direction.ASC)))
@@ -128,7 +130,7 @@ class BackofficeApprovedAgreementApiTest
                                                                                   .sorted(Comparator.comparing(a -> a.getAgreementEntity()
                                                                                                                      .getInformationLastUpdateDate()))
                                                                                   .map(AgreementTestObject::getAgreementEntity)
-                                                                                  .collect(Collectors.toList());
+                                                                                  .toList();
 
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR,
                                                                                 Sort.Direction.ASC)))
@@ -164,11 +166,15 @@ class BackofficeApprovedAgreementApiTest
         // publish discount
         discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
 
+        OffsetDateTime agreementStateSince = findFirstAuditInsertTimeForState(agreementEntity.getId(),
+                                              AgreementStateEnum.ACTIVE);
+
         this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
                     .andDo(log())
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
+                .andExpect(jsonPath("agreementStateSince").value(agreementStateSince.toString()))
                     .andExpect(jsonPath("profile").isNotEmpty())
                     .andExpect(jsonPath("profile.name").value(profileEntity.getName()))
                     .andExpect(jsonPath("profile.description").value(profileEntity.getDescription()))
@@ -214,6 +220,89 @@ class BackofficeApprovedAgreementApiTest
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
                     .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("discounts", hasSize(0)));
+    }
+
+    @Test
+    void ManageAgreementTermination_SendTerminationReminder_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgress_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_REMINDER_SENT);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromInactive_BadRequest()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        agreementEntity.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreementEntity);
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Cannot execute StartTerminationInProgress for agreement in state INACTIVE"));
+    }
+
+    @Test
+    void ManageAgreementTermination_StartTerminationInProgressFromActive_BadRequest()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement(1, true).getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string("Cannot execute StartTerminationInProgress for agreement in state ACTIVE"));
+    }
+
+    private OffsetDateTime findFirstAuditInsertTimeForState(String agreementId, AgreementStateEnum state) {
+        return changeAuditRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
+                                    .stream()
+                                    .filter(audit -> agreementId.equals(audit.getSubjectId()))
+                                    .filter(audit -> state.name().equals(audit.getValue().get("state")))
+                                    .map(ChangeAuditEntity::getInsertTime)
+                                    .findFirst()
+                                    .orElseThrow();
     }
 
 }

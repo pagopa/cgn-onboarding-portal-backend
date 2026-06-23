@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -173,6 +174,10 @@ public class TestUtils {
                                                               Sort.Direction direction) {
         return AGREEMENT_APPROVED_CONTROLLER_PATH + "?sortColumn=" + columnEnum.getValue() + "&sortDirection=" +
                direction.name();
+    }
+
+    public static String getApprovedAgreementTerminationPath(String agreementId) {
+        return AGREEMENT_APPROVED_CONTROLLER_PATH + agreementId + "/termination";
     }
 
     public static String createAgreements() {
@@ -556,8 +561,8 @@ public class TestUtils {
         entity0.setText("- - - - To access the discount, show your EYCA card at the point of sale.");
         entity0.setTextLocal(
                 "Durante l'evento,allo stand del Ministro per lo Sport e i Giovani,Ã¨ possibile presentare il proprio CV per uno stage di 6 mesi nell'organizzazione di eventi sportivi internazionali.E' previsto un rimborso spese mensile di â‚¬400 per 20 ore a settimana. - Necessaria l'iscrizione a un corso di laurea specialistica,master o dottorato,oltre a un eccellente livello di inglese. Requisiti e ulteriori informazioni al link. - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
-        entity0.setStartDate(LocalDate.of(2023, 11, 29));
-        entity0.setEndDate(LocalDate.of(2023, 12, 10));
+        entity0.setStartDate(LocalDate.of(2023, Month.NOVEMBER, 29));
+        entity0.setEndDate(LocalDate.of(2023, Month.DECEMBER, 10));
         entity0.setEmail("");
         entity0.setPhone("");
         entity0.setWeb(null);
@@ -595,8 +600,8 @@ public class TestUtils {
                 "is the digital home created by Dipartimento per le politiche giovanili e il Servizio civile universale for those willing to get new tools, face new challenges and find their own way. - If you are between 14 and 35 years old, you are an italian resident and you want to get opportunities for education, volunteering, national and foreign calls, GIOVANI2030 is the right place for you! - To access the discount, show your EYCA card at the point of sale.");
         entity1.setTextLocal(
                 "la casa digitale creata dal Dipartimento per le politiche giovanili e il Servizio civile universale proprio per chi, come te, cerca nuovi strumenti e nuove sfide per crescere e trovare la propria strada. - Se hai tra i 14 e i 35 anni, risiedi in Italia e vuoi conoscere le migliori opportunitÃ  di formazione, volontariato, cultura e bandi nazionali ed esteri, GIOVANI2030 Ã¨ il posto giusto per te! - Per accedere all'agevolazione, mostra la tua carta EYCA presso il punto vendita.");
-        entity1.setStartDate(LocalDate.of(2023, 4, 17));
-        entity1.setEndDate(LocalDate.of(2023, 12, 31));
+        entity1.setStartDate(LocalDate.of(2023, Month.APRIL, 17));
+        entity1.setEndDate(LocalDate.of(2023, Month.DECEMBER, 31));
         entity1.setEmail("");
         entity1.setPhone("");
         entity1.setWeb(null);
@@ -698,8 +703,8 @@ public class TestUtils {
         entity0.setLandingPageUrl("https://landingpageurl.com");
         entity0.setEycaLandingPageUrl("https://eycalandingpageurl.com");
         entity0.setEycaEmailUpdateRequired(true);
-        entity0.setStartDate(LocalDate.of(2026, 1, 1));
-        entity0.setEndDate(LocalDate.of(2026, 12, 31));
+        entity0.setStartDate(LocalDate.of(2026, Month.JANUARY, 1));
+        entity0.setEndDate(LocalDate.of(2026, Month.DECEMBER, 31));
         return List.of(entity0);
     }
 

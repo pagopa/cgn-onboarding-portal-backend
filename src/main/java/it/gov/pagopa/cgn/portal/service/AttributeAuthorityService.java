@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -138,7 +139,7 @@ public class AttributeAuthorityService {
                         newOrg.setFiscalCode(newOrgFiscalCode);
                         newOrg.setName(organizationWithReferents.getOrganizationName());
                         newOrg.setPec(organizationWithReferents.getPec());
-                        newOrg.setInsertedAt(OffsetDateTime.now());
+                        newOrg.setInsertedAt(OffsetDateTime.now(ZoneOffset.UTC));
                         return newOrg;
                     });
             
@@ -376,7 +377,7 @@ public class AttributeAuthorityService {
         result.setReferents(organization.getOrganizationReferents().stream()
                 .map(orgRef -> orgRef.getReferent().getFiscalCode())
                 .toList());
-        result.setStatus(OrganizationStatus.ENABLED);
+        result.setStatus(OrganizationStatus.DRAFT);
         return result;
     }
 }

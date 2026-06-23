@@ -1,0 +1,32 @@
+package it.gov.pagopa.cgn.portal.config;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SpringContextHolder
+        implements ApplicationContextAware {
+
+    private static ApplicationContext context;
+
+    @SuppressWarnings("java:S2696")
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext)
+            throws BeansException {
+        context = applicationContext;
+    }
+
+    public static boolean isReady() {
+        return context != null;
+    }
+
+    public static <T> T getBean(Class<T> beanClass) {
+        return context.getBean(beanClass);
+    }
+
+    public static void publishEvent(Object event) {
+        context.publishEvent(event);
+    }
+}

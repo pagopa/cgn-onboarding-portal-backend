@@ -490,7 +490,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get list of approved agreements
+      summary: Get list of agreements in post-approval states
       operationId: getApprovedAgreements
       parameters:
         - name: profileFullName
@@ -543,7 +543,7 @@ paths:
               - DESC
       responses:
         "200":
-          description: List of approved agreements
+          description: List of agreements in post-approval states
           content:
             application/json:
               schema:
@@ -555,7 +555,7 @@ paths:
     get:
       tags:
         - agreement
-      summary: Get approved agreement
+      summary: Get agreement in post-approval states
       operationId: getApprovedAgreement
       parameters:
         - name: agreementId
@@ -566,7 +566,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Approved agreement
+          description: Agreement in post-approval states
           content:
             application/json:
               schema:
@@ -577,6 +577,43 @@ paths:
         "404":
           description: Not found
           content: { }
+  /approved-agreements/{agreementId}/termination:
+    post:
+      tags:
+        - agreement
+      summary: Execute a post-approval agreement state transition command
+      operationId: manageAgreementTermination
+      parameters:
+        - name: agreementId
+          in: path
+          description: Agreement id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Command to execute on the agreement state
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgreementTerminationCommand'
+        required: true
+      responses:
+        "204":
+          description: Agreement state changed
+          content: { }
+        "400":
+          description: Bad request
+          content: { }
+        "403":
+          description: Forbidden
+          content: { }
+        "404":
+          description: Not found
+          content: { }
+        "409":
+          description: Conflict
+          content: { }
+      x-codegen-request-body-name: terminationCommand
   /organizations:
     get:
       tags:
@@ -883,7 +920,6 @@ components:
     Agreement:
       required:
         - id
-        - requestDate
         - state
       type: object
       properties:
@@ -896,6 +932,8 @@ components:
           format: date
         profile:
           $ref: '#/components/schemas/Profile'
+        organizationName:
+          type: string
         discounts:
           $ref: '#/components/schemas/Discounts'
         documents:
@@ -904,19 +942,37 @@ components:
           $ref: '#/components/schemas/EntityType'
       discriminator:
         propertyName: state
-    PendingAgreement:
+    DraftAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - type: object
+    PendingAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - required:
+            - requestDate
+          type: object
     AssignedAgreement:
       allOf:
         - $ref: '#/components/schemas/Agreement'
         - required:
+            - requestDate
             - assignee
           type: object
           properties:
             assignee:
               $ref: '#/components/schemas/Assignee'
+    RejectedAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - required:
+            - requestDate
+            - reasonMessage
+          type: object
+          properties:
+            reasonMessage:
+              maxLength: 500
+              type: string
     ApprovedAgreement:
       required:
         - agreementId
@@ -924,6 +980,7 @@ components:
         - agreementStartDate
         - fullName
         - publishedDiscounts
+        - state
         - testPending
       type: object
       properties:
@@ -937,6 +994,8 @@ components:
         agreementLastUpdateDate:
           type: string
           format: date
+        state:
+          $ref: '#/components/schemas/ApprovedAgreementState'
         publishedDiscounts:
           type: integer
           format: int64
@@ -950,10 +1009,17 @@ components:
         - agreementId
         - documents
         - profile
+        - state
       type: object
       properties:
         agreementId:
           type: string
+        state:
+          $ref: '#/components/schemas/ApprovedAgreementState'
+        agreementStateSince:
+          type: string
+          format: date-time
+          nullable: true
         profile:
           $ref: '#/components/schemas/ApprovedAgreementProfile'
         discounts:
@@ -963,10 +1029,34 @@ components:
     AgreementState:
       type: string
       enum:
+        - DraftAgreement
         - PendingAgreement
         - AssignedAgreement
         - ApprovedAgreement
         - RejectedAgreement
+    ApprovedAgreementState:
+      type: string
+      enum:
+        - Approved
+        - Active
+        - Inactive
+        - TerminationReminderSent
+        - TerminationInProgress
+        - Terminated
+    AgreementTerminationCommand:
+      required:
+        - action
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/AgreementTerminationAction'
+    AgreementTerminationAction:
+      type: string
+      enum:
+        - SendTerminationReminder
+        - StartTerminationInProgress
+        - CancelTerminationInProgress
+        - CompleteTermination
     EntityType:
       type: string
       enum:
@@ -1426,10 +1516,15 @@ components:
     OrganizationStatus:
       type: string
       enum:
-        - Enabled
         - Draft
         - Pending
+        - Approved
+        - Rejected
         - Active
+        - Inactive
+        - TerminationReminderSent
+        - TerminationInProgress
+        - Terminated
     OrganizationWithReferents:
       allOf:
         - $ref: '#/components/schemas/KeyOrganizationFiscalCode'

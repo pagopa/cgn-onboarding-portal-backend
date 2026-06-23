@@ -7,7 +7,7 @@ WITH merchant AS (SELECT a.agreement_k,
                          COALESCE(NULLIF(p.name, ''), p.full_name) AS name
                   FROM agreement a
                            JOIN profile p ON (p.agreement_fk = a.agreement_k)
-                  WHERE a.state = 'APPROVED'
+                                    WHERE a.state = 'ACTIVE'
                     AND a.start_date <= CURRENT_DATE
                     AND p.sales_channel IN ('OFFLINE', 'BOTH')),
      product_categories AS (SELECT DISTINCT d.agreement_fk,

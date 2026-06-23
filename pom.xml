@@ -131,6 +131,11 @@
             <scope>runtime</scope>
             <version>42.7.11</version>
         </dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-utils-hibernate-55</artifactId>
+            <version>3.7.6</version>
+        </dependency>
         <!-- utilities -->
         <dependency>
             <groupId>org.apache.commons</groupId>

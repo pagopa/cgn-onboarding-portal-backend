@@ -1,10 +1,13 @@
 package it.gov.pagopa.cgn.portal.interceptor;
 
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementUserEntity;
+import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.AgreementUserRepository;
 import it.gov.pagopa.cgn.portal.security.JwtAuthenticationToken;
 import it.gov.pagopa.cgn.portal.security.JwtOperatorUser;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,8 +22,15 @@ import java.util.Map;
 public class AgreementInterceptor
         implements HandlerInterceptor {
 
+    private final AgreementUserRepository userRepository;
+
+    private final AgreementRepository agreementRepository;
+
     @Autowired
-    private AgreementUserRepository userRepository;
+    public AgreementInterceptor(AgreementUserRepository userRepository, AgreementRepository agreementRepository) {
+        this.userRepository = userRepository;
+        this.agreementRepository = agreementRepository;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -29,10 +39,19 @@ public class AgreementInterceptor
         AgreementUserEntity agreementUserEntity = userRepository.findById(getCurrentUserId())
                                                                 .orElseThrow(() -> new InvalidRequestException(
                                                                         "Current user doesn't exist"));
-        if (agreementUserEntity.getAgreementId().equals(agreementIdParam)) {
-            return true;
+        if (!agreementUserEntity.getAgreementId().equals(agreementIdParam)) {
+            throw new SecurityException("Current user is trying to use different agreementId");
         }
-        throw new SecurityException("Current user is trying to use different agreementId");
+
+        AgreementStateEnum agreementState = agreementRepository.findById(agreementIdParam)
+                                                               .orElseThrow(() -> new InvalidRequestException(
+                                                                       ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()))
+                                                               .getState();
+        if (AgreementStateEnum.TERMINATED.equals(agreementState)) {
+            throw new SecurityException("Current user is trying to use terminated agreement");
+        }
+
+        return true;
     }
 
     private String getCurrentUserId() {

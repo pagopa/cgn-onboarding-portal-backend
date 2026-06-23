@@ -13,6 +13,7 @@ import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.BackofficeAgreementToValidateSpecification;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -111,10 +114,11 @@ public class BackofficeAgreementService {
             throw new InvalidRequestException(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue());
         }
 
+        LocalDate currentDate = LocalDate.now(ZoneOffset.UTC);
         agreementEntity.setRejectReasonMessage(null);
-        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setStartDate(currentDate);
         agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
+        agreementEntity.setInformationLastUpdateDate(currentDate);  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);
 
         var profile = agreementEntity.getProfile();
@@ -139,6 +143,60 @@ public class BackofficeAgreementService {
         emailNotificationFacade.notifyMerchantAgreementRequestRejected(profileEntity, reasonMessage);
 
         return agreementEntity;
+    }
+
+    @Transactional
+    public AgreementEntity manageAgreementTermination(String agreementId, AgreementTerminationAction action) {
+        AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
+        switch (action) {
+            case SEND_TERMINATION_REMINDER:
+                return updateAgreementState(agreementEntity,
+                                            AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                            EnumSet.of(AgreementStateEnum.INACTIVE),
+                                            action);
+            case START_TERMINATION_IN_PROGRESS:
+                return updateAgreementState(agreementEntity,
+                                            AgreementStateEnum.TERMINATION_IN_PROGRESS,
+                                            EnumSet.of(AgreementStateEnum.TERMINATION_REMINDER_SENT),
+                                            action);
+            case CANCEL_TERMINATION_IN_PROGRESS:
+                return updateAgreementState(agreementEntity,
+                                            AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                            EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS),
+                                            action);
+            case COMPLETE_TERMINATION:
+                return updateAgreementState(agreementEntity,
+                                            AgreementStateEnum.TERMINATED,
+                                            EnumSet.of(AgreementStateEnum.TERMINATION_IN_PROGRESS),
+                                            action);
+            default:
+                throw new InvalidRequestException("Unsupported termination action: " + action);
+        }
+    }
+
+    private AgreementEntity updateAgreementState(AgreementEntity agreementEntity,
+                                                 AgreementStateEnum targetState,
+                                                 EnumSet<AgreementStateEnum> allowedStates,
+                                                 AgreementTerminationAction action) {
+        checkAgreementState(agreementEntity, allowedStates, action);
+        return updateAgreementState(agreementEntity, targetState);
+    }
+
+    private AgreementEntity updateAgreementState(AgreementEntity agreementEntity,
+                                                 AgreementStateEnum targetState) {
+        agreementEntity.setState(targetState);
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now(ZoneOffset.UTC));
+        return agreementRepository.save(agreementEntity);
+    }
+
+    private void checkAgreementState(AgreementEntity agreementEntity,
+                                     EnumSet<AgreementStateEnum> allowedStates,
+                                     AgreementTerminationAction action) {
+        if (!allowedStates.contains(agreementEntity.getState())) {
+            throw new InvalidRequestException(String.format("Cannot execute %s for agreement in state %s",
+                                                            action.getValue(),
+                                                            agreementEntity.getState().getCode()));
+        }
     }
 
     private void validateForUnassignment(AgreementEntity agreementEntity) {

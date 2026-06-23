@@ -2,10 +2,14 @@ package it.gov.pagopa.cgn.portal.controller.profile;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
+import it.gov.pagopa.cgn.portal.model.DiscountEntity;
 import it.gov.pagopa.cgn.portal.model.ProfileEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
+import it.gov.pagopa.cgn.portal.service.DiscountService;
 import it.gov.pagopa.cgn.portal.service.ProfileService;
+import it.gov.pagopa.cgnonboardingportal.backoffice.model.AgreementTerminationAction;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.DiscountCodeType;
 import it.gov.pagopa.cgnonboardingportal.model.SalesChannelType;
@@ -36,6 +40,9 @@ class GetProfileApiTest
     @Autowired
     private ProfileService profileService;
 
+    @Autowired
+    private DiscountService discountService;
+
     private String profilePath;
     private AgreementEntity agreement;
 
@@ -62,6 +69,33 @@ class GetProfileApiTest
         this.mockMvc.perform(get(profilePath).contentType(MediaType.APPLICATION_JSON))
                     .andDo(log())
                     .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void Get_GetProfileWithTerminatedAgreement_Forbidden()
+            throws Exception {
+        ProfileEntity profileEntity = TestUtils.createSampleProfileEntity(agreement);
+        profileService.createProfile(profileEntity, agreement.getId());
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreement);
+        discountService.createDiscount(agreement.getId(), discountEntity);
+
+        saveApprovedAgreement(agreement);
+
+        agreement = agreementService.findAgreementById(agreement.getId());
+        agreement.setState(AgreementStateEnum.INACTIVE);
+        agreementRepository.save(agreement);
+
+        backofficeAgreementService.manageAgreementTermination(agreement.getId(),
+                                                              AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+        backofficeAgreementService.manageAgreementTermination(agreement.getId(),
+                                                              AgreementTerminationAction.START_TERMINATION_IN_PROGRESS);
+        backofficeAgreementService.manageAgreementTermination(agreement.getId(),
+                                                              AgreementTerminationAction.COMPLETE_TERMINATION);
+
+        setOperatorAuth();
+        this.mockMvc.perform(get(profilePath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isForbidden());
     }
 
     @Test

@@ -36,7 +36,13 @@ public class BackofficeApprovedAgreementSpecification
     protected void addStaticFiltersPredicate(Root<ApprovedAgreementEntity> root,
                                              CriteriaBuilder cb,
                                              List<Predicate> predicateList) {
-        predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.APPROVED));
+        predicateList.add(root.get("state")
+                              .in(AgreementStateEnum.APPROVED,
+                                  AgreementStateEnum.ACTIVE,
+                                  AgreementStateEnum.INACTIVE,
+                                  AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                  AgreementStateEnum.TERMINATION_IN_PROGRESS,
+                                  AgreementStateEnum.TERMINATED));
     }
 
     @Override

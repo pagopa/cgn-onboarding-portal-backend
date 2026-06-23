@@ -1015,6 +1015,7 @@ class DiscountServiceTest
         dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
         agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
         Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
 
         // await for view to be refreshed
@@ -1032,6 +1033,30 @@ class DiscountServiceTest
         publishedProductCategories.forEach(c -> {
             Assertions.assertTrue(discountProductCategories.contains(c.getProductCategory()));
         });
+    }
+
+    @Test
+    void Publish_PublishDiscountWithTerminationInProgressAgreement_ShouldSetAgreementActive_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);
+        agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
     }
 
     @Test

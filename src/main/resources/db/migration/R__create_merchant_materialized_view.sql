@@ -12,7 +12,7 @@ WITH merchants AS (
         FROM agreement a
             JOIN profile p ON (p.agreement_fk = a.agreement_k)
             JOIN discount d ON (d.agreement_fk = a.agreement_k)
-        WHERE a.state = 'APPROVED'
+        WHERE a.state = 'ACTIVE'
             AND a.start_date <= CURRENT_DATE
             AND d.state = 'PUBLISHED'
             AND d.start_date <= CURRENT_DATE

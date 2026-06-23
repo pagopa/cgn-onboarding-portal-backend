@@ -9,16 +9,17 @@ import it.gov.pagopa.cgn.portal.service.*;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgn.portal.util.CGNUtils;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -38,9 +39,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ContextConfiguration(initializers = IntegrationAbstractTest.Initializer.class)
-@Slf4j
 @SuppressWarnings("java:S5786")
 public class IntegrationAbstractTest {
+
+    private static final Logger log = LoggerFactory.getLogger(IntegrationAbstractTest.class);
 
     @Autowired
     protected DiscountRepository discountRepository;
@@ -52,6 +54,8 @@ public class IntegrationAbstractTest {
     protected AgreementRepository agreementRepository;
     @Autowired
     protected ProfileRepository profileRepository;
+    @Autowired
+    protected ChangeAuditRepository changeAuditRepository;
     @Autowired
     protected AgreementUserRepository userRepository;
     @Autowired
@@ -128,6 +132,8 @@ public class IntegrationAbstractTest {
         agreementRepository.flush();
         userRepository.deleteAll();
         userRepository.flush();
+        changeAuditRepository.deleteAll();
+        changeAuditRepository.flush();
     }
 
     protected List<DocumentEntity> saveSamplePaDocuments(AgreementEntity agreementEntity) {
@@ -225,7 +231,7 @@ public class IntegrationAbstractTest {
         for (var i = 0; i < idx + 1; i++) {
             // creating discount
             DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
-            if (publishDiscounts) {
+            if (publishDiscounts && expireDiscount) {
                 discountEntity.setState(DiscountStateEnum.PUBLISHED);
             }
             if (expireDiscount) {
@@ -243,6 +249,18 @@ public class IntegrationAbstractTest {
         agreementEntity = agreementRepository.save(agreementEntity);
         documentEntityList.addAll(saveBackofficeSampleDocuments(agreementEntity));
         agreementEntity = backofficeAgreementService.approveAgreement(agreementEntity.getId());
+
+        if (publishDiscounts && !expireDiscount) {
+            for (int i = 0; i < discountEntities.size(); i++) {
+                DiscountEntity discountEntity = discountEntities.get(i);
+                discountEntity.setState(DiscountStateEnum.TEST_PASSED);
+                discountEntity = discountRepository.save(discountEntity);
+                discountEntity = discountService.publishDiscount(agreementEntity.getId(), discountEntity.getId());
+                discountEntities.set(i, discountEntity);
+            }
+            agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        }
+
         return createAgreementTestObject(agreementEntity, profileEntity, discountEntities, documentEntityList);
     }
 
@@ -280,7 +298,7 @@ public class IntegrationAbstractTest {
                                                                           BucketCodeExpiringThresholdEnum threshold,
                                                                           DiscountEntity discountEntity) {
         int thresholdCodes = (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
-        log.info("Will leave " + thresholdCodes + " codes.");
+        log.info("Will leave {} codes.", thresholdCodes);
         DiscountBucketCodeSummaryEntity summary = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         summary.setAvailableCodes((long) thresholdCodes);
         discountBucketCodeSummaryRepository.save(summary);
@@ -290,7 +308,7 @@ public class IntegrationAbstractTest {
                                                                 BucketCodeExpiringThresholdEnum threshold,
                                                                 DiscountEntity discountEntity) {
         int codeToUse = totalCodes - (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
-        log.info("Will use " + codeToUse + " codes.");
+        log.info("Will use {} codes.", codeToUse);
         discountBucketCodeRepository.findAllByDiscount(discountEntity).stream().limit(codeToUse).forEach(c -> {
             c.setIsUsed(true);
             discountBucketCodeRepository.save(c);
@@ -327,12 +345,25 @@ public class IntegrationAbstractTest {
     }
 
     protected void saveApprovedAgreement(AgreementEntity agreementEntity) {
-        // activate agreement
-        documentRepository.saveAll(TestUtils.createSampleDocumentList(agreementEntity));
-        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
-        agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setStartDate(LocalDate.now());
-        agreementRepository.save(agreementEntity);
+        Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            setAdminAuth();
+
+            if (EntityTypeEnum.PUBLIC_ADMINISTRATION.equals(agreementEntity.getEntityType())) {
+                saveSamplePaDocuments(agreementEntity);
+            } else {
+                saveSampleDocuments(agreementEntity);
+            }
+
+            agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+            agreementEntity.setBackofficeAssignee(CGNUtils.getJwtAdminUserName());
+            agreementEntity = agreementRepository.save(agreementEntity);
+            saveBackofficeSampleDocuments(agreementEntity);
+
+            backofficeAgreementService.approveAgreement(agreementEntity.getId());
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(currentAuthentication);
+        }
     }
 
     protected static class Initializer
@@ -386,12 +417,42 @@ public class IntegrationAbstractTest {
         }
     }
 
-    @Getter
-    @Setter
     protected class AgreementTestObject {
         private AgreementEntity agreementEntity;
         private List<DiscountEntity> discountEntityList;
         private List<DocumentEntity> documentEntityList;
         private ProfileEntity profileEntity;
+
+        public AgreementEntity getAgreementEntity() {
+            return agreementEntity;
+        }
+
+        public void setAgreementEntity(AgreementEntity agreementEntity) {
+            this.agreementEntity = agreementEntity;
+        }
+
+        public List<DiscountEntity> getDiscountEntityList() {
+            return discountEntityList;
+        }
+
+        public void setDiscountEntityList(List<DiscountEntity> discountEntityList) {
+            this.discountEntityList = discountEntityList;
+        }
+
+        public List<DocumentEntity> getDocumentEntityList() {
+            return documentEntityList;
+        }
+
+        public void setDocumentEntityList(List<DocumentEntity> documentEntityList) {
+            this.documentEntityList = documentEntityList;
+        }
+
+        public ProfileEntity getProfileEntity() {
+            return profileEntity;
+        }
+
+        public void setProfileEntity(ProfileEntity profileEntity) {
+            this.profileEntity = profileEntity;
+        }
     }
 }

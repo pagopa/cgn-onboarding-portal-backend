@@ -23,7 +23,6 @@ import it.gov.pagopa.cgn.portal.repository.ProfileRepository;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.backoffice.model.EntityType;
 import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -31,6 +30,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -56,9 +57,10 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
-@Slf4j
 class DocumentServiceTest
         extends IntegrationAbstractTest {
+
+    private static final Logger log = LoggerFactory.getLogger(DocumentServiceTest.class);
 
     @Autowired
     private DocumentService documentService;

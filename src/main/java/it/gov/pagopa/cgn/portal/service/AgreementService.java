@@ -21,10 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("java:S2143")
 public class AgreementService
         extends AgreementServiceLight {
 
@@ -116,7 +118,7 @@ public class AgreementService
             throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_APPROVABLE_FOR_WRONG_MANDATORY_DOCUMENTS.getValue());
         }
         agreementEntity.setState(AgreementStateEnum.PENDING);
-        agreementEntity.setRequestApprovalTime(OffsetDateTime.now());
+        agreementEntity.setRequestApprovalTime(OffsetDateTime.now(ZoneOffset.UTC));
 
         var saved = agreementRepository.save(agreementEntity);
 
@@ -145,10 +147,13 @@ public class AgreementService
     @Transactional(readOnly = true)
     public AgreementEntity getApprovedAgreement(String agreementId) {
         AgreementEntity agreementEntity = findAgreementById(agreementId);
+        if (!isApprovedAgreementState(agreementEntity.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue());
+        }
         List<DiscountEntity> discounts = agreementEntity.getDiscountList();
         if (!CollectionUtils.isEmpty(discounts)) {
             discounts = discounts.stream().filter(d -> !DiscountStateEnum.DRAFT.equals(d.getState()) // not draft
-                                                       && LocalDate.now()
+                                                       && LocalDate.now(ZoneOffset.UTC)
                                                                    .isBefore(d.getEndDate().plusDays(1))) // not expired
                     .toList();
             agreementEntity.setDiscountList(discounts);
@@ -158,6 +163,15 @@ public class AgreementService
                                                                                                         .isBackoffice()));
 
         return agreementEntity;
+    }
+
+    private boolean isApprovedAgreementState(AgreementStateEnum state) {
+        switch (state) {
+            case APPROVED,ACTIVE,INACTIVE,TERMINATION_REMINDER_SENT,TERMINATION_IN_PROGRESS,TERMINATED:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private AgreementEntity createAgreement(String agreementId, EntityType entityType, String organizationName) {

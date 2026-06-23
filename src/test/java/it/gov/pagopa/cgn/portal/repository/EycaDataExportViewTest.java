@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.repository;
 
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.enums.ParamGroupEnum;
 import it.gov.pagopa.cgn.portal.enums.SalesChannelEnum;
@@ -64,6 +65,8 @@ class EycaDataExportViewTest extends IntegrationAbstractTest {
         discount.setStartDate(LocalDate.now().minusDays(1));
         discount.setEndDate(LocalDate.now().plusDays(30));
         discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+        agreement.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreement);
 
         entityManager.flush();
 

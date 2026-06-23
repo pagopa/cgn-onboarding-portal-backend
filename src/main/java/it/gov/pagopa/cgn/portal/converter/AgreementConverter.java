@@ -25,9 +25,20 @@ public class AgreementConverter
         enumMap.put(AgreementStateEnum.PENDING, AgreementState.PENDING_AGREEMENT);
         enumMap.put(AgreementStateEnum.APPROVED, AgreementState.APPROVED_AGREEMENT);
         enumMap.put(AgreementStateEnum.REJECTED, AgreementState.REJECTED_AGREEMENT);
+        enumMap.put(AgreementStateEnum.ACTIVE, AgreementState.ACTIVE_AGREEMENT);
+        enumMap.put(AgreementStateEnum.INACTIVE, AgreementState.INACTIVE_AGREEMENT);
+        enumMap.put(AgreementStateEnum.TERMINATION_REMINDER_SENT, AgreementState.TERMINATION_REMINDER_SENT_AGREEMENT);
+        enumMap.put(AgreementStateEnum.TERMINATION_IN_PROGRESS, AgreementState.TERMINATION_IN_PROGRESS_AGREEMENT);
+        enumMap.put(AgreementStateEnum.TERMINATED, AgreementState.TERMINATED_AGREEMENT);
 
         entityTypeEnumMap.put(EntityTypeEnum.PRIVATE, EntityType.PRIVATE);
         entityTypeEnumMap.put(EntityTypeEnum.PUBLIC_ADMINISTRATION, EntityType.PUBLIC_ADMINISTRATION);
+    }
+
+    private ApprovedAgreement fillApprovedAgreementFields(ApprovedAgreement dto, AgreementEntity entity) {
+        dto.setStartDate(entity.getStartDate());
+        dto.setFirstDiscountPublishingDate(entity.getFirstDiscountPublishingDate());
+        return dto;
     }
 
     private final Function<AgreementEntity, Agreement> toDtoWithStatusFilled = entity -> {
@@ -40,16 +51,27 @@ public class AgreementConverter
                 dto = new PendingAgreement();
                 break;
             case APPROVED:
-                ApprovedAgreement approvedAgreement;
-                approvedAgreement = new ApprovedAgreement();
-                approvedAgreement.setStartDate(entity.getStartDate());
-                approvedAgreement.setFirstDiscountPublishingDate(entity.getFirstDiscountPublishingDate());
-                dto = approvedAgreement;
+                dto = fillApprovedAgreementFields(new ApprovedAgreement(), entity);
                 break;
             case REJECTED:
                 RejectedAgreement rejectedAgreement = new RejectedAgreement();
                 rejectedAgreement.setReasonMessage(entity.getRejectReasonMessage());
                 dto = rejectedAgreement;
+                break;
+            case ACTIVE:
+                dto = fillApprovedAgreementFields(new ActiveAgreement(), entity);
+                break;
+            case INACTIVE:
+                dto = fillApprovedAgreementFields(new InactiveAgreement(), entity);
+                break;
+            case TERMINATION_REMINDER_SENT:
+                dto = fillApprovedAgreementFields(new TerminationReminderSentAgreement(), entity);
+                break;
+            case TERMINATION_IN_PROGRESS:
+                dto = fillApprovedAgreementFields(new TerminationInProgressAgreement(), entity);
+                break;
+            case TERMINATED:
+                dto = fillApprovedAgreementFields(new TerminatedAgreement(), entity);
                 break;
             default:
                 dto = new Agreement();
@@ -75,8 +97,7 @@ public class AgreementConverter
     };
     protected Function<Agreement, AgreementEntity> toEntityWithStatusFilled = dto -> {
         AgreementEntity entity = new AgreementEntity();
-        if (AgreementState.APPROVED_AGREEMENT.equals(dto.getState())) {
-            ApprovedAgreement state = (ApprovedAgreement) dto;
+        if (dto instanceof ApprovedAgreement state) {
             entity.setStartDate(state.getStartDate());
             entity.setFirstDiscountPublishingDate(state.getFirstDiscountPublishingDate());
         }

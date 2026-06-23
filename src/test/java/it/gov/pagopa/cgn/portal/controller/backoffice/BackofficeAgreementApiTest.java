@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -91,6 +92,208 @@ class BackofficeAgreementApiTest
                     .andExpect(jsonPath("$.items[0].documents", hasSize(1)))
                     .andExpect(jsonPath("$.items[0].entityType").value(EntityType.PUBLIC_ADMINISTRATION.getValue()));
 
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsDraftAndPending_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(2)))
+                    .andExpect(jsonPath("$.total").value(2))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + draftAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.DRAFT_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + draftAgreement.getId() +
+                                        "')].organizationName").value(hasItem(draftAgreement.getOrganizationName())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + pendingAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.PENDING_AGREEMENT.getValue())));
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsRejectedDraftAndPending_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(3)))
+                    .andExpect(jsonPath("$.total").value(3))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + draftAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.DRAFT_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + pendingAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.PENDING_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + rejectedAgreement.getId() + "')].state").value(hasItem(
+                            AgreementState.REJECTED_AGREEMENT.getValue())))
+                    .andExpect(jsonPath("$.items[?(@.id == '" + rejectedAgreement.getId() +
+                                        "')].reasonMessage").value(hasItem(rejectedAgreement.getRejectReasonMessage())));
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsDefaultSortedByWorkflowStatus_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_D5",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
+        AgreementEntity assignedToCurrentUserAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                                DiscountCodeTypeEnum.STATIC,
+                                                                                2,
+                                                                                false).getAgreementEntity();
+        assignedToCurrentUserAgreement = backofficeAgreementService.assignAgreement(
+                assignedToCurrentUserAgreement.getId());
+        AgreementEntity assignedToOtherUserAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                              DiscountCodeTypeEnum.STATIC,
+                                                                              3,
+                                                                              false).getAgreementEntity();
+        assignedToOtherUserAgreement.setBackofficeAssignee("Other Admin");
+        assignedToOtherUserAgreement = agreementRepository.save(assignedToOtherUserAgreement);
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   4,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(5)))
+                    .andExpect(jsonPath("$.total").value(5))
+                    .andExpect(jsonPath("$.items[0].id").value(pendingAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.PENDING_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].assignee").doesNotExist())
+                    .andExpect(jsonPath("$.items[1].id").value(assignedToCurrentUserAgreement.getId()))
+                    .andExpect(jsonPath("$.items[1].state").value(AgreementState.ASSIGNED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[1].assignee.fullName").value(assignedToCurrentUserAgreement.getBackofficeAssignee()))
+                    .andExpect(jsonPath("$.items[2].id").value(assignedToOtherUserAgreement.getId()))
+                    .andExpect(jsonPath("$.items[2].state").value(AgreementState.ASSIGNED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[2].assignee.fullName").value(assignedToOtherUserAgreement.getBackofficeAssignee()))
+                    .andExpect(jsonPath("$.items[3].id").value(draftAgreement.getId()))
+                    .andExpect(jsonPath("$.items[3].state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[4].id").value(rejectedAgreement.getId()))
+                    .andExpect(jsonPath("$.items[4].state").value(AgreementState.REJECTED_AGREEMENT.getValue()));
+    }
+
+    @Test
+    void GetAgreements_GetDraftAgreementWithStatusFilter_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        createPendingAgreement();
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithStatusFilterPath("DraftAgreement",
+                                                                                    Optional.empty())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(draftAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].organizationName").value(draftAgreement.getOrganizationName()));
+    }
+
+    @Test
+    void GetAgreements_GetRejectedAgreementWithStatusFilter_Ok()
+            throws Exception {
+        agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                    EntityType.PRIVATE,
+                                                    "Draft Organization");
+        createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, 1, false);
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithStatusFilterPath("RejectedAgreement",
+                                                                                    Optional.empty())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(rejectedAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.REJECTED_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].reasonMessage").value(rejectedAgreement.getRejectReasonMessage()));
+    }
+
+    @Test
+    void GetAgreements_GetPendingAgreementWithStatusFilterExcludesDraft_Ok()
+            throws Exception {
+        agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                    EntityType.PRIVATE,
+                                                    "Draft Organization");
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+        AgreementEntity pendingAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                  DiscountCodeTypeEnum.STATIC,
+                                                                  1,
+                                                                  false).getAgreementEntity();
+
+        this.mockMvc.perform(get(TestUtils.getAgreementRequestsWithStatusFilterPath("PendingAgreement",
+                                                                                    Optional.empty())))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(pendingAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.PENDING_AGREEMENT.getValue()));
+    }
+
+    @Test
+    void GetAgreements_GetDraftAgreementWithOrganizationNameFilter_Ok()
+            throws Exception {
+        AgreementEntity draftAgreement = agreementService.createAgreementIfNotExists(TestUtils.FAKE_ID + "_DRAFT",
+                                                                                     EntityType.PRIVATE,
+                                                                                     "Draft Organization");
+        createPendingAgreement();
+
+        this.mockMvc.perform(get(TestUtils.AGREEMENT_REQUESTS_CONTROLLER_PATH).param("profileFullName",
+                                                                                    "draft organization"))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items").isArray())
+                    .andExpect(jsonPath("$.items", hasSize(1)))
+                    .andExpect(jsonPath("$.total").value(1))
+                    .andExpect(jsonPath("$.items[0].id").value(draftAgreement.getId()))
+                    .andExpect(jsonPath("$.items[0].state").value(AgreementState.DRAFT_AGREEMENT.getValue()))
+                    .andExpect(jsonPath("$.items[0].organizationName").value(draftAgreement.getOrganizationName()));
     }
 
     @Test
@@ -480,6 +683,9 @@ class BackofficeAgreementApiTest
 
         discountEntity.setState(DiscountStateEnum.PUBLISHED);
         discountRepository.save(discountEntity);
+        agreementEntity = agreementServiceLight.findAgreementById(agreementEntity.getId());
+        agreementEntity.setState(AgreementStateEnum.ACTIVE);
+        agreementRepository.save(agreementEntity);
 
         this.mockMvc.perform(get(TestUtils.getAgreementRequestsDiscountBucketCodePath(agreementEntity.getId(),
                                                                                       discountEntity.getId()
