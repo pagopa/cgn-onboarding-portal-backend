@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp; // NOSONAR java:S2143 - Native query projection returns java.sql.Timestamp.
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
@@ -57,8 +56,7 @@ public class ChangeAuditService {
 
     private OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
         return timestamp.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toOffsetDateTime();
+                        .atOffset(ZoneOffset.UTC);
     }
 
     private String resolvePartnerFullName(ChangeAuditEvent event) {
