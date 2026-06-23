@@ -2,7 +2,6 @@ package it.gov.pagopa.cgn.portal.facade;
 
 
 import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
-import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
@@ -54,13 +53,7 @@ public class AgreementFacade {
 
     private List<CompletedStep> getCompletedSteps(AgreementEntity agreementEntity) {
         switch (agreementEntity.getState()) {
-            case PENDING:
-            case APPROVED:
-            case ACTIVE:
-            case INACTIVE:
-            case TERMINATION_REMINDER_SENT:
-            case TERMINATION_IN_PROGRESS:
-            case TERMINATED:
+            case PENDING, APPROVED, ACTIVE, INACTIVE, TERMINATION_REMINDER_SENT, TERMINATION_IN_PROGRESS, TERMINATED:
                 return Arrays.asList(CompletedStep.values());
             default:
                 break;

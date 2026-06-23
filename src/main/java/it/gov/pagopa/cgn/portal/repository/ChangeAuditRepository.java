@@ -5,12 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
 import java.sql.Timestamp;
+import java.util.Optional;
 
 public interface ChangeAuditRepository
         extends JpaRepository<ChangeAuditEntity, Long> {
 
+        @SuppressWarnings("java:S2143")
         @Query(value = """
                         WITH ordered_audits AS (
                                 SELECT

@@ -97,8 +97,7 @@ public class AgreementConverter
     };
     protected Function<Agreement, AgreementEntity> toEntityWithStatusFilled = dto -> {
         AgreementEntity entity = new AgreementEntity();
-        if (dto instanceof ApprovedAgreement) {
-            ApprovedAgreement state = (ApprovedAgreement) dto;
+        if (dto instanceof ApprovedAgreement state) {
             entity.setStartDate(state.getStartDate());
             entity.setFirstDiscountPublishingDate(state.getFirstDiscountPublishingDate());
         }

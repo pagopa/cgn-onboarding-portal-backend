@@ -298,7 +298,7 @@ public class IntegrationAbstractTest {
                                                                           BucketCodeExpiringThresholdEnum threshold,
                                                                           DiscountEntity discountEntity) {
         int thresholdCodes = (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
-        log.info("Will leave " + thresholdCodes + " codes.");
+        log.info("Will leave {} codes.", thresholdCodes);
         DiscountBucketCodeSummaryEntity summary = discountBucketCodeSummaryRepository.findByDiscount(discountEntity);
         summary.setAvailableCodes((long) thresholdCodes);
         discountBucketCodeSummaryRepository.save(summary);
@@ -308,7 +308,7 @@ public class IntegrationAbstractTest {
                                                                 BucketCodeExpiringThresholdEnum threshold,
                                                                 DiscountEntity discountEntity) {
         int codeToUse = totalCodes - (int) Math.floor((float) totalCodes * threshold.getValue() / 100);
-        log.info("Will use " + codeToUse + " codes.");
+        log.info("Will use {} codes.", codeToUse);
         discountBucketCodeRepository.findAllByDiscount(discountEntity).stream().limit(codeToUse).forEach(c -> {
             c.setIsUsed(true);
             discountBucketCodeRepository.save(c);

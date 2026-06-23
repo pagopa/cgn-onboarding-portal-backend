@@ -22,11 +22,15 @@ import java.util.Map;
 public class AgreementInterceptor
         implements HandlerInterceptor {
 
-    @Autowired
-    private AgreementUserRepository userRepository;
+    private final AgreementUserRepository userRepository;
+
+    private final AgreementRepository agreementRepository;
 
     @Autowired
-    private AgreementRepository agreementRepository;
+    public AgreementInterceptor(AgreementUserRepository userRepository, AgreementRepository agreementRepository) {
+        this.userRepository = userRepository;
+        this.agreementRepository = agreementRepository;
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

@@ -21,6 +21,8 @@ import java.util.Objects;
 public class BackofficeAgreementToValidateSpecification
         extends CommonBackofficeSpecification<AgreementEntity> {
 
+    private static final String STATE_FIELD = "state";
+
     private enum DefaultAgreementOrder {
         PENDING_AGREEMENT,
         ASSIGNED_TO_CURRENT_USER_AGREEMENT,
@@ -64,7 +66,7 @@ public class BackofficeAgreementToValidateSpecification
     protected void addStaticFiltersPredicate(Root<AgreementEntity> root,
                                              CriteriaBuilder cb,
                                              List<Predicate> predicateList) {
-        predicateList.add(root.get("state")
+        predicateList.add(root.get(STATE_FIELD)
                               .in(AgreementStateEnum.DRAFT, AgreementStateEnum.PENDING, AgreementStateEnum.REJECTED));
     }
 
@@ -91,7 +93,7 @@ public class BackofficeAgreementToValidateSpecification
     }
 
     private Expression<Integer> getDefaultAgreementPriorityExpression(Root<AgreementEntity> root, CriteriaBuilder cb) {
-        Path<AgreementStateEnum> statePath = root.get("state");
+        Path<AgreementStateEnum> statePath = root.get(STATE_FIELD);
         Path<String> assigneePath = getBackofficeAssigneePath(root);
         Predicate pendingAgreement = cb.equal(statePath, AgreementStateEnum.PENDING);
 
@@ -123,7 +125,7 @@ public class BackofficeAgreementToValidateSpecification
     private Expression<OffsetDateTime> getDefaultAgreementDateExpression(Root<AgreementEntity> root,
                                                                          CriteriaBuilder cb) {
         return cb.<OffsetDateTime>selectCase()
-                 .when(cb.equal(root.get("state"), AgreementStateEnum.DRAFT), getInsertTimePath(root))
+                 .when(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.DRAFT), getInsertTimePath(root))
                  .otherwise(getRequestApprovalTimePath(root));
     }
 
@@ -132,11 +134,8 @@ public class BackofficeAgreementToValidateSpecification
             case ASSIGNEE:
                 return new OrderImpl(getBackofficeAssigneePath(root), isSortAscending());
             case STATE:
-                        /* if order direction is ASC --> draft, pending not assigned, pending assigned;
-                            otherwise the same groups are reversed.
-                         */
                 return new OrderImpl(cb.selectCase()
-                                       .when(cb.equal(root.get("state"), AgreementStateEnum.DRAFT), 1)
+                                                                             .when(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.DRAFT), 1)
                                        .when(cb.isNull(getBackofficeAssigneePath(root)), 2)
                                        .otherwise(3),
                                      isSortAscending());
@@ -167,16 +166,16 @@ public class BackofficeAgreementToValidateSpecification
             AgreementStateEnum agreementStateEnum = BackofficeAgreementConverter.getAgreementStateEnumFromDtoCode(
                     filter.getAgreementState());
             if (AgreementStateEnum.DRAFT.equals(agreementStateEnum)) {
-                predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.DRAFT));
+                predicateList.add(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.DRAFT));
                 return;
             }
             if (AgreementStateEnum.REJECTED.equals(agreementStateEnum)) {
-                predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.REJECTED));
+                predicateList.add(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.REJECTED));
                 return;
             }
             //if assigned, database status is Pending but assignee should be used (if present or else not null)
             if (BackofficeAgreementConverter.isAgreementStateIsAssigned(filter.getAgreementState())) {
-                predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
+                predicateList.add(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.PENDING));
                 if (filter.getAssignee()!=null) {
                     addAssigneeFilter(root, cb, predicateList);
                 } else {
@@ -184,7 +183,7 @@ public class BackofficeAgreementToValidateSpecification
                 }
             } else if (AgreementStateEnum.PENDING.equals(agreementStateEnum)) {
                 // pending filter
-                predicateList.add(cb.equal(root.get("state"), AgreementStateEnum.PENDING));
+                predicateList.add(cb.equal(root.get(STATE_FIELD), AgreementStateEnum.PENDING));
                 predicateList.add(cb.isNull(getBackofficeAssigneePath(root)));
             } else {
                 predicateList.add(cb.disjunction());

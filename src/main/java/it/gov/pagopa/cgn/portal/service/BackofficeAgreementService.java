@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -113,10 +114,11 @@ public class BackofficeAgreementService {
             throw new InvalidRequestException(ErrorCodeEnum.MANDATORY_DOCUMENT_ARE_MISSING.getValue());
         }
 
+        LocalDate currentDate = LocalDate.now(ZoneOffset.UTC);
         agreementEntity.setRejectReasonMessage(null);
-        agreementEntity.setStartDate(LocalDate.now());
+        agreementEntity.setStartDate(currentDate);
         agreementEntity.setState(AgreementStateEnum.APPROVED);
-        agreementEntity.setInformationLastUpdateDate(LocalDate.now());  //default equals to start date
+        agreementEntity.setInformationLastUpdateDate(currentDate);  //default equals to start date
         agreementEntity = agreementRepository.save(agreementEntity);
 
         var profile = agreementEntity.getProfile();
@@ -183,7 +185,7 @@ public class BackofficeAgreementService {
     private AgreementEntity updateAgreementState(AgreementEntity agreementEntity,
                                                  AgreementStateEnum targetState) {
         agreementEntity.setState(targetState);
-        agreementEntity.setInformationLastUpdateDate(LocalDate.now());
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now(ZoneOffset.UTC));
         return agreementRepository.save(agreementEntity);
     }
 

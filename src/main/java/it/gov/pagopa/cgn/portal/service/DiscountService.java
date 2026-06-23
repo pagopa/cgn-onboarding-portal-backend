@@ -24,6 +24,7 @@ import javax.transaction.Transactional;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -267,8 +268,9 @@ public class DiscountService {
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
 
         DiscountEntity discount = findDiscountById(discountId);
-        if (LocalDate.now().isAfter(discount.getStartDate())) {
-            discount.setStartDate(LocalDate.now());
+        LocalDate currentDate = LocalDate.now(ZoneOffset.UTC);
+        if (currentDate.isAfter(discount.getStartDate())) {
+            discount.setStartDate(currentDate);
         }
         validatePublishingDiscount(agreementEntity, discount, profileEntity);
         discount.setState(DiscountStateEnum.PUBLISHED);
@@ -413,7 +415,7 @@ public class DiscountService {
     public void sendNotificationDiscountExpiring(DiscountEntity discount) {
 
         emailNotificationFacade.notifyMerchantDiscountExpiring(discount);
-        discount.setExpirationWarningSentDateTime(OffsetDateTime.now());
+        discount.setExpirationWarningSentDateTime(OffsetDateTime.now(ZoneOffset.UTC));
         discountRepository.save(discount);
     }
 
@@ -500,6 +502,7 @@ public class DiscountService {
     private void validateTestingDiscount(ProfileEntity profileEntity,
                                          AgreementEntity agreementEntity,
                                          DiscountEntity discount) {
+        LocalDate currentDate = LocalDate.now(ZoneOffset.UTC);
         if (DiscountCodeTypeEnum.BUCKET.equals(profileEntity.getDiscountCodeType()) &&
             (discount.getLastBucketCodeLoad()==null ||
              bucketService.isLastBucketLoadStillLoading(discount.getLastBucketCodeLoad().getId()))) {
@@ -515,7 +518,7 @@ public class DiscountService {
         if (DiscountStateEnum.SUSPENDED.equals(discount.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_SUSPENDED_DISCOUNT.getValue());
         }
-        if (LocalDate.now().isAfter(discount.getEndDate())) {
+        if (currentDate.isAfter(discount.getEndDate())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_EXPIRED_DISCOUNT.getValue());
         }
 
@@ -523,7 +526,7 @@ public class DiscountService {
 
         long publishedDiscount = discountRepository.countByAgreementIdAndStateAndEndDateGreaterThan(agreementEntity.getId(),
                                                                                                     DiscountStateEnum.PUBLISHED,
-                                                                                                    LocalDate.now());
+                                                                                                    currentDate);
 
         if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
             throw new InvalidRequestException(ErrorCodeEnum.MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED.getValue());

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Service
@@ -37,7 +38,7 @@ public class ChangeAuditService {
         entity.setActorRef(event.getActorRef());
         entity.setSubjectType(event.getSubjectType());
         entity.setOperationType(event.getOperationType());
-        entity.setInsertTime(OffsetDateTime.now());
+        entity.setInsertTime(OffsetDateTime.now(ZoneOffset.UTC));
         entity.setValue(event.getValue());
         return changeAuditRepository.save(entity);
     }

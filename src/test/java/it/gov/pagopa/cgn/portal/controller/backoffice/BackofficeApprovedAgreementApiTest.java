@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,7 +79,7 @@ class BackofficeApprovedAgreementApiTest
                                                                             .sorted(Comparator.comparing(a -> a.getProfileEntity()
                                                                                                                .getFullName()))
                                                                             .map(AgreementTestObject::getAgreementEntity)
-                                                                            .collect(Collectors.toList());
+                                                                            .toList();
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
@@ -100,11 +99,7 @@ class BackofficeApprovedAgreementApiTest
     void GetAgreements_GetAgreementsApprovedSortedByPublishedDiscounts_Ok()
             throws Exception {
         final int numRows = 3;
-        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows, true);
-        testObjectList.stream()
-                      .sorted(Comparator.comparing(a -> a.getProfileEntity().getFullName()))
-                      .map(AgreementTestObject::getAgreementEntity)
-                      .collect(Collectors.toList());
+        createMultipleApprovedAgreement(numRows, true);
 
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.PUBLISHED_DISCOUNTS,
                                                                                 Sort.Direction.ASC)))
@@ -135,7 +130,7 @@ class BackofficeApprovedAgreementApiTest
                                                                                   .sorted(Comparator.comparing(a -> a.getAgreementEntity()
                                                                                                                      .getInformationLastUpdateDate()))
                                                                                   .map(AgreementTestObject::getAgreementEntity)
-                                                                                  .collect(Collectors.toList());
+                                                                                  .toList();
 
         this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR,
                                                                                 Sort.Direction.ASC)))
