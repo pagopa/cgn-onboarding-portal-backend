@@ -96,6 +96,27 @@ class BackofficeAgreementServiceTest
     }
 
     @Test
+    void GetAgreement_GetRejectedAgreementWithStatusFilter_AgreementFound() {
+        AgreementEntity rejectedAgreement = createPendingAgreement(SalesChannelEnum.ONLINE,
+                                                                   DiscountCodeTypeEnum.STATIC,
+                                                                   2,
+                                                                   false).getAgreementEntity();
+        rejectedAgreement = backofficeAgreementService.rejectAgreement(rejectedAgreement.getId(), "Rejected reason");
+        createPendingAgreement(SalesChannelEnum.ONLINE, DiscountCodeTypeEnum.STATIC, 1, false);
+        BackofficeFilter filter = BackofficeFilter.builder()
+                                                  .agreementState(AgreementState.REJECTED_AGREEMENT.getValue())
+                                                  .build();
+        Page<AgreementEntity> page = backofficeAgreementService.getAgreements(filter);
+        Assertions.assertEquals(1L, page.getTotalElements());
+        Assertions.assertEquals(1, page.getTotalPages());
+        Assertions.assertNotNull(page.getContent());
+        Assertions.assertFalse(page.getContent().isEmpty());
+        Assertions.assertEquals(rejectedAgreement.getId(), page.getContent().get(0).getId());
+        Assertions.assertEquals(AgreementStateEnum.REJECTED, page.getContent().get(0).getState());
+        Assertions.assertNotNull(page.getContent().get(0).getEntityType());
+    }
+
+    @Test
     void GetAgreement_GetAgreementWithProfileFullNameFilter_AgreementFound() {
         AgreementEntity pendingAgreement = createPendingAgreement().getAgreementEntity();
         BackofficeFilter filter = BackofficeFilter.builder()

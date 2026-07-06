@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,7 +140,8 @@ class AgreementChangeAuditTest
                                                                                                   agreementEntity.getState());
 
         Assertions.assertTrue(agreementStateSince.isPresent());
-        Assertions.assertEquals(currentActiveBlockStart, agreementStateSince.get());
+        Assertions.assertEquals(ZoneOffset.UTC, agreementStateSince.get().getOffset());
+        Assertions.assertEquals(currentActiveBlockStart.withOffsetSameInstant(ZoneOffset.UTC), agreementStateSince.get());
         Assertions.assertNotEquals(firstHistoricalActiveBlockStart, agreementStateSince.get());
     }
 

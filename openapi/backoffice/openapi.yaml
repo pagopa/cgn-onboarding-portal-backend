@@ -962,6 +962,17 @@ components:
           properties:
             assignee:
               $ref: '#/components/schemas/Assignee'
+    RejectedAgreement:
+      allOf:
+        - $ref: '#/components/schemas/Agreement'
+        - required:
+            - requestDate
+            - reasonMessage
+          type: object
+          properties:
+            reasonMessage:
+              maxLength: 500
+              type: string
     ApprovedAgreement:
       required:
         - agreementId

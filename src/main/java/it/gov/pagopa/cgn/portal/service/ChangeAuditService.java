@@ -12,12 +12,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.sql.Timestamp; // NOSONAR java:S2143 - Native query projection returns java.sql.Timestamp.
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Service
+@SuppressWarnings("java:S2143") // Native query projection returns java.sql.Timestamp, converted to OffsetDateTime.
 public class ChangeAuditService {
 
     private final ChangeAuditRepository changeAuditRepository;
@@ -37,7 +38,7 @@ public class ChangeAuditService {
         entity.setActorRef(event.getActorRef());
         entity.setSubjectType(event.getSubjectType());
         entity.setOperationType(event.getOperationType());
-        entity.setInsertTime(OffsetDateTime.now());
+        entity.setInsertTime(OffsetDateTime.now(ZoneOffset.UTC));
         entity.setValue(event.getValue());
         return changeAuditRepository.save(entity);
     }
@@ -55,8 +56,7 @@ public class ChangeAuditService {
 
     private OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
         return timestamp.toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toOffsetDateTime();
+                        .atOffset(ZoneOffset.UTC);
     }
 
     private String resolvePartnerFullName(ChangeAuditEvent event) {

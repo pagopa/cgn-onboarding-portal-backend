@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp; // NOSONAR java:S2143 - Native query projection returns java.sql.Timestamp.
 import java.util.Optional;
-import java.sql.Timestamp;
 
+@SuppressWarnings("java:S2143") // Native query projection returns java.sql.Timestamp.
 public interface ChangeAuditRepository
         extends JpaRepository<ChangeAuditEntity, Long> {
 

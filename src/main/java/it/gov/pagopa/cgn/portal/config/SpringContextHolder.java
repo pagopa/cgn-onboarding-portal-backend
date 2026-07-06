@@ -11,6 +11,7 @@ public class SpringContextHolder
 
     private static ApplicationContext context;
 
+    @SuppressWarnings("java:S2696")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext)
             throws BeansException {
