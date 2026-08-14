@@ -167,7 +167,7 @@ public class AgreementService
 
     private boolean isApprovedAgreementState(AgreementStateEnum state) {
         switch (state) {
-            case APPROVED,ACTIVE,INACTIVE,TERMINATION_REMINDER_SENT,TERMINATION_IN_PROGRESS,TERMINATED:
+            case APPROVED,ACTIVE,EXPIRED,INACTIVE,TERMINATION_REMINDER_SENT,TERMINATION_IN_PROGRESS,TERMINATED:
                 return true;
             default:
                 return false;

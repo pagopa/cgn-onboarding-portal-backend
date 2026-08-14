@@ -908,6 +908,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/ApprovedAgreement'
         - type: object
+    ExpiredAgreement:
+      allOf:
+        - $ref: '#/components/schemas/ApprovedAgreement'
+        - type: object
     InactiveAgreement:
       allOf:
         - $ref: '#/components/schemas/ApprovedAgreement'
@@ -942,6 +946,7 @@ components:
         - ApprovedAgreement
         - RejectedAgreement
         - ActiveAgreement
+        - ExpiredAgreement
         - InactiveAgreement
         - TerminationReminderSentAgreement
         - TerminationInProgressAgreement

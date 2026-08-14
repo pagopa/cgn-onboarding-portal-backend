@@ -285,6 +285,11 @@ class BackofficeAttributeAuthorityFacadeTest
     }
 
     @Test
+    void GetOrganization_EXPIRED_Ok() {
+        assertMappedAgreementStatus(AgreementStateEnum.EXPIRED, OrganizationStatus.EXPIRED);
+    }
+
+    @Test
     void GetOrganization_TerminationReminderSent_Ok() {
         assertMappedAgreementStatus(AgreementStateEnum.TERMINATION_REMINDER_SENT,
                                     OrganizationStatus.TERMINATION_REMINDER_SENT);

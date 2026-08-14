@@ -53,7 +53,7 @@ public class AgreementFacade {
 
     private List<CompletedStep> getCompletedSteps(AgreementEntity agreementEntity) {
         switch (agreementEntity.getState()) {
-            case PENDING, APPROVED, ACTIVE, INACTIVE, TERMINATION_REMINDER_SENT, TERMINATION_IN_PROGRESS, TERMINATED:
+            case PENDING, APPROVED, ACTIVE, EXPIRED, INACTIVE, TERMINATION_REMINDER_SENT, TERMINATION_IN_PROGRESS, TERMINATED:
                 return Arrays.asList(CompletedStep.values());
             default:
                 break;
