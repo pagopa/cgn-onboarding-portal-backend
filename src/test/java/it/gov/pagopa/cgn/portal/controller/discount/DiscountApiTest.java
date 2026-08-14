@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -897,6 +898,30 @@ class DiscountApiTest
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.items[0].state").value(DiscountState.PUBLISHED.getValue()));
+    }
+
+    @Test
+    void Action_PublishDiscountWithTerminationInProgressAgreement_BadRequest()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(ErrorCodeEnum.CANNOT_PUBLISH_DISCOUNT_FOR_TERMINATION_IN_PROGRESS_AGREEMENT.getValue()));
     }
 
     @Test

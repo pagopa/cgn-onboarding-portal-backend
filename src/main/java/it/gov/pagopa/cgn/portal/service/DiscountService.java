@@ -263,6 +263,10 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity publishDiscount(String agreementId, Long discountId) {
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
+        
+         if (AgreementStateEnum.TERMINATION_IN_PROGRESS.equals(agreementEntity.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PUBLISH_DISCOUNT_FOR_TERMINATION_IN_PROGRESS_AGREEMENT.getValue());
+        }
 
         ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
