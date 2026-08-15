@@ -46,6 +46,7 @@ class InactivateAgreementsJobTest
         AgreementEntity agreement = testObject.getAgreementEntity();
         testObject.getDiscountEntityList().forEach(discount -> {
             discount.setState(DiscountStateEnum.PUBLISHED);
+            discount.setStartDate(cutoff.minusDays(1));
             discount.setEndDate(cutoff);
             discountRepository.save(discount);
         });

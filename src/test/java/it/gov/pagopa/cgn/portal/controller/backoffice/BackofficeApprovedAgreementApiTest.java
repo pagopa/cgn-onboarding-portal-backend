@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 
@@ -301,6 +302,7 @@ class BackofficeApprovedAgreementApiTest
                                     .filter(audit -> agreementId.equals(audit.getSubjectId()))
                                     .filter(audit -> state.name().equals(audit.getValue().get("state")))
                                     .map(ChangeAuditEntity::getInsertTime)
+                                    .map(insertTime -> insertTime.withOffsetSameInstant(ZoneOffset.UTC))
                                     .findFirst()
                                     .orElseThrow();
     }
