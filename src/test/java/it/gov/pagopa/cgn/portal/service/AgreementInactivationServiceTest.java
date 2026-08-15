@@ -65,6 +65,7 @@ class AgreementInactivationServiceTest
         AgreementTestObject testObject = createApprovedAgreement(1, true);
         AgreementEntity agreement = testObject.getAgreementEntity();
         testObject.getDiscountEntityList().forEach(discount -> {
+            discount.setStartDate(cutoff.minusDays(1));
             discount.setEndDate(cutoff);
             discountRepository.save(discount);
         });
@@ -82,7 +83,9 @@ class AgreementInactivationServiceTest
         AgreementEntity agreement = testObject.getAgreementEntity();
         DiscountEntity firstDiscount = testObject.getDiscountEntityList().get(0);
         DiscountEntity secondDiscount = testObject.getDiscountEntityList().get(1);
+        firstDiscount.setStartDate(cutoff.minusDays(1));
         firstDiscount.setEndDate(cutoff);
+        secondDiscount.setStartDate(cutoff.minusDays(1));
         secondDiscount.setEndDate(cutoff.plusDays(1));
         discountRepository.save(firstDiscount);
         discountRepository.save(secondDiscount);
@@ -113,6 +116,7 @@ class AgreementInactivationServiceTest
         AgreementTestObject testObject = createApprovedAgreement(1, true);
         AgreementEntity agreement = testObject.getAgreementEntity();
         testObject.getDiscountEntityList().forEach(discount -> {
+            discount.setStartDate(cutoff.minusDays(1));
             discount.setEndDate(cutoff);
             discountRepository.save(discount);
         });
@@ -134,6 +138,7 @@ class AgreementInactivationServiceTest
         Assertions.assertFalse(onlineMerchantRepository.findAll().isEmpty());
 
         testObject.getDiscountEntityList().forEach(discount -> {
+            discount.setStartDate(cutoff.minusDays(1));
             discount.setEndDate(cutoff);
             discountRepository.save(discount);
         });

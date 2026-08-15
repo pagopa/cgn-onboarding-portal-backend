@@ -1,5 +1,6 @@
 package it.gov.pagopa.cgn.portal.controller.backoffice;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -170,30 +172,37 @@ class BackofficeApprovedAgreementApiTest
         OffsetDateTime agreementStateSince = findFirstAuditInsertTimeForState(agreementEntity.getId(),
                                               AgreementStateEnum.ACTIVE);
 
-        this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
-                    .andDo(log())
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
-                .andExpect(jsonPath("agreementStateSince").value(agreementStateSince.toString()))
-                    .andExpect(jsonPath("profile").isNotEmpty())
-                    .andExpect(jsonPath("profile.name").value(profileEntity.getName()))
-                    .andExpect(jsonPath("profile.description").value(profileEntity.getDescription()))
-                    .andExpect(jsonPath("profile.imageUrl").value(agreementEntity.getImageUrl()))
-                    .andExpect(jsonPath("profile.fullName").value(profileEntity.getFullName()))
-                    .andExpect(jsonPath("profile.taxCodeOrVat").value(profileEntity.getTaxCodeOrVat()))
-                    .andExpect(jsonPath("profile.pecAddress").value(profileEntity.getPecAddress()))
-                    .andExpect(jsonPath("profile.legalOffice").value(profileEntity.getLegalOffice()))
-                    .andExpect(jsonPath("profile.telephoneNumber").value(profileEntity.getTelephoneNumber()))
-                    .andExpect(jsonPath("profile.legalRepresentativeFullName").value(profileEntity.getLegalRepresentativeFullName()))
-                    .andExpect(jsonPath("profile.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
-                    .andExpect(jsonPath("profile.referent").isNotEmpty())
-                    .andExpect(jsonPath("profile.salesChannel.discountCodeType").isNotEmpty())
-                    .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
-                    .andExpect(jsonPath("discounts[0].id").value(discountEntity.getId()))
-                    .andExpect(jsonPath("discounts[0].name").value(discountEntity.getName()))
-                    .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()))
-                    .andExpect(jsonPath("discounts[0].visibleOnEyca").value(discountEntity.getVisibleOnEyca()));
+        MvcResult result = this.mockMvc.perform(get(TestUtils.AGREEMENT_APPROVED_CONTROLLER_PATH + agreementEntity.getId()))
+                                       .andDo(log())
+                                       .andExpect(status().isOk())
+                                       .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                       .andExpect(jsonPath("agreementId").value(agreementEntity.getId()))
+                                       .andExpect(jsonPath("profile").isNotEmpty())
+                                       .andExpect(jsonPath("profile.name").value(profileEntity.getName()))
+                                       .andExpect(jsonPath("profile.description").value(profileEntity.getDescription()))
+                                       .andExpect(jsonPath("profile.imageUrl").value(agreementEntity.getImageUrl()))
+                                       .andExpect(jsonPath("profile.fullName").value(profileEntity.getFullName()))
+                                       .andExpect(jsonPath("profile.taxCodeOrVat").value(profileEntity.getTaxCodeOrVat()))
+                                       .andExpect(jsonPath("profile.pecAddress").value(profileEntity.getPecAddress()))
+                                       .andExpect(jsonPath("profile.legalOffice").value(profileEntity.getLegalOffice()))
+                                       .andExpect(jsonPath("profile.telephoneNumber").value(profileEntity.getTelephoneNumber()))
+                                       .andExpect(jsonPath("profile.legalRepresentativeFullName").value(profileEntity.getLegalRepresentativeFullName()))
+                                       .andExpect(jsonPath("profile.legalRepresentativeTaxCode").value(profileEntity.getLegalRepresentativeTaxCode()))
+                                       .andExpect(jsonPath("profile.referent").isNotEmpty())
+                                       .andExpect(jsonPath("profile.salesChannel.discountCodeType").isNotEmpty())
+                                       .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
+                                       .andExpect(jsonPath("discounts[0].id").value(discountEntity.getId()))
+                                       .andExpect(jsonPath("discounts[0].name").value(discountEntity.getName()))
+                                       .andExpect(jsonPath("discounts[0].discountUrl").value(discountEntity.getDiscountUrl()))
+                                       .andExpect(jsonPath("discounts[0].visibleOnEyca").value(discountEntity.getVisibleOnEyca()))
+                                       .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        OffsetDateTime actualAgreementStateSince = OffsetDateTime.parse(new ObjectMapper().readTree(responseBody)
+                                                                                          .get("agreementStateSince")
+                                                                                          .asText());
+
+        Assertions.assertEquals(agreementStateSince, actualAgreementStateSince);
     }
 
     @Test
