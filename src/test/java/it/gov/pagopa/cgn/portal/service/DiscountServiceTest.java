@@ -1036,7 +1036,7 @@ class DiscountServiceTest
     }
 
     @Test
-    void Publish_PublishDiscountWithTerminationInProgressAgreement_ShouldSetAgreementActive_Ok() {
+    void Publish_PublishDiscountWithTerminationInProgressAgreement_ThrowInvalidRequestException() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
         DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
@@ -1051,12 +1051,20 @@ class DiscountServiceTest
         agreementEntity.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
-        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Long discountId = dbDiscount.getId();
+        String agreementId = agreementEntity.getId();
 
-        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
-        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
-        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+        Exception exception = Assertions.assertThrows(InvalidRequestException.class,
+                                                      () -> discountService.publishDiscount(agreementId, discountId));
+
+        agreementEntity = agreementService.findAgreementById(agreementId);
+        dbDiscount = discountService.findDiscountById(discountId);
+
+        Assertions.assertEquals(ErrorCodeEnum.CANNOT_PUBLISH_DISCOUNT_FOR_TERMINATION_IN_PROGRESS_AGREEMENT.getValue(),
+                                exception.getMessage());
+        Assertions.assertEquals(DiscountStateEnum.TEST_PASSED, dbDiscount.getState());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_IN_PROGRESS, agreementEntity.getState());
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
     }
 
     @Test
