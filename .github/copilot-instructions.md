@@ -45,3 +45,4 @@ Keep this file and the related files under `.github/instructions/` updated whene
 - Reuse existing enums, error models, and converters before introducing parallel DTO or state definitions.
 - Do not hand-edit build output under `target/`.
 - Check for existing tests in the matching package before adding new patterns or utilities.
+- Avoid manually pre-sizing collections with summed `size()` values before sequential `addAll(...)` calls; prefer default construction unless there is a clear measured need.

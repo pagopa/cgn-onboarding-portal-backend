@@ -166,6 +166,9 @@ public class ConfigProperties {
     @Value("${inactivate.agreements.job.cron}")
     private String inactivateAgreementsJobCronExpression;
 
+    @Value("${inactivate.agreements.job.expired.stale.months}")
+    private int inactivateAgreementsJobExpiredStaleMonths;
+
 
     public boolean isActiveProfileDev() {
         boolean isDev = "dev".equalsIgnoreCase(getActiveProfile());

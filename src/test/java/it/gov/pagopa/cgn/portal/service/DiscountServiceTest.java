@@ -1036,6 +1036,30 @@ class DiscountServiceTest
     }
 
     @Test
+    void Publish_PublishDiscountWithExpiredAgreement_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        dbDiscount.setState(DiscountStateEnum.TEST_PASSED);
+        dbDiscount = discountRepository.save(dbDiscount);
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);
+        agreementEntity.setState(AgreementStateEnum.EXPIRED);
+        agreementEntity = agreementRepository.save(agreementEntity);
+        Assertions.assertNull(agreementEntity.getFirstDiscountPublishingDate());
+
+        dbDiscount = discountService.publishDiscount(agreementEntity.getId(), dbDiscount.getId());
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, dbDiscount.getState());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(), agreementEntity.getFirstDiscountPublishingDate());
+    }
+
+    @Test
     void Publish_PublishDiscountWithTerminationInProgressAgreement_ThrowInvalidRequestException() {
         setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
 
@@ -1810,6 +1834,24 @@ class DiscountServiceTest
                                                                                               trackingKeyPrefix));
                       Assertions.assertTrue(found);
                   });
+    }
+
+    @Test
+    void TestDiscountWithExpiredAgreement_Ok() {
+        setProfileDiscountType(agreementEntity, DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discountEntity = TestUtils.createSampleDiscountEntity(agreementEntity);
+        DiscountEntity dbDiscount = discountService.createDiscount(agreementEntity.getId(), discountEntity)
+                                                   .getDiscountEntity();
+
+        agreementEntity = agreementService.requestApproval(agreementEntity.getId());
+        agreementEntity = approveAgreement(agreementEntity);
+        agreementEntity.setState(AgreementStateEnum.EXPIRED);
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        dbDiscount = discountService.testDiscount(agreementEntity.getId(), dbDiscount.getId());
+
+        Assertions.assertEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
     }
 
     @Test

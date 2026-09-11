@@ -78,6 +78,12 @@ public class ParamFacade {
                      : paramService.getParam(ParamGroupEnum.INACTIVATE_AGREEMENTS_JOB, "inactivate.agreements.job.cron");
     }
 
+    public int getInactivateAgreementsJobExpiredStaleMonths() {
+        return isDev ? configProperties.getInactivateAgreementsJobExpiredStaleMonths()
+                     : Integer.parseInt(paramService.getParam(ParamGroupEnum.INACTIVATE_AGREEMENTS_JOB,
+                                                             "inactivate.agreements.job.expired.stale.months"));
+    }
+
     public String getSuspendReferentsMailSending() {
 
         return isDev ? configProperties.getSuspendReferentsMailSending()

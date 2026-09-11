@@ -1,7 +1,6 @@
 package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
-import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.repository.AgreementRepository;
 import it.gov.pagopa.cgn.portal.repository.MerchantRepository;
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,49 +20,73 @@ import java.util.List;
 public class AgreementInactivationService {
 
     private final AgreementRepository agreementRepository;
+    private final ChangeAuditService changeAuditService;
     private final MerchantRepository merchantRepository;
     private final OnlineMerchantRepository onlineMerchantRepository;
     private final OfflineMerchantRepository offlineMerchantRepository;
 
     public AgreementInactivationService(AgreementRepository agreementRepository,
+                                        ChangeAuditService changeAuditService,
                                         MerchantRepository merchantRepository,
                                         OnlineMerchantRepository onlineMerchantRepository,
                                         OfflineMerchantRepository offlineMerchantRepository) {
         this.agreementRepository = agreementRepository;
+        this.changeAuditService = changeAuditService;
         this.merchantRepository = merchantRepository;
         this.onlineMerchantRepository = onlineMerchantRepository;
         this.offlineMerchantRepository = offlineMerchantRepository;
     }
 
     @Transactional
-    public int inactivateStaleAgreements() {
-        return inactivateStaleAgreements(LocalDate.now().minusMonths(6));
-    }
+    public int inactivateStaleAgreements(LocalDate currentDate,
+                                         int expiredAgreementStaleMonths) {
+        LocalDate expiredAgreementCutoff = currentDate.minusMonths(expiredAgreementStaleMonths);
 
-    @Transactional
-    public int inactivateStaleAgreements(LocalDate cutoff) {
-        List<AgreementEntity> agreementsToInactivate = agreementRepository.findAgreementsToInactivate(
-                cutoff,
-                AgreementStateEnum.APPROVED,
-                AgreementStateEnum.ACTIVE,
-                DiscountStateEnum.PUBLISHED);
+        List<AgreementEntity> activeAgreementsToExpire = agreementRepository.findActiveAgreementsToExpire(
+            currentDate);
+        List<AgreementEntity> expiredAgreementsToInactivate = agreementRepository.findExpiredAgreementsWithoutValidDiscounts(
+            currentDate)
+                                             .stream()
+                                             .filter(agreement -> changeAuditService.findAgreementStateSince(
+                                                     agreement.getId(),
+                                                     AgreementStateEnum.EXPIRED)
+                                                 .map(stateSince -> !stateSince.toLocalDate()
+                                                              .isAfter(
+                                                                  expiredAgreementCutoff))
+                                                 .orElse(false))
+                                             .toList();
 
-        if (CollectionUtils.isEmpty(agreementsToInactivate)) {
-            log.info("No stale agreements found with cutoff [{}]", cutoff);
+        if (CollectionUtils.isEmpty(activeAgreementsToExpire) &&
+            CollectionUtils.isEmpty(expiredAgreementsToInactivate)) {
+            log.info("No stale agreements found with current date [{}] and expired cutoff [{}]",
+                     currentDate,
+                     expiredAgreementCutoff);
             return 0;
         }
 
-        LocalDate updateDate = LocalDate.now();
-        agreementsToInactivate.forEach(agreement -> {
+        activeAgreementsToExpire.forEach(agreement -> {
+            agreement.setState(AgreementStateEnum.EXPIRED);
+            agreement.setInformationLastUpdateDate(currentDate);
+        });
+        expiredAgreementsToInactivate.forEach(agreement -> {
             agreement.setState(AgreementStateEnum.INACTIVE);
-            agreement.setInformationLastUpdateDate(updateDate);
+            agreement.setInformationLastUpdateDate(currentDate);
         });
 
-        agreementRepository.saveAllAndFlush(agreementsToInactivate);
+        List<AgreementEntity> agreementsToUpdate = new ArrayList<>();
+        agreementsToUpdate.addAll(activeAgreementsToExpire);
+        agreementsToUpdate.addAll(expiredAgreementsToInactivate);
+
+        agreementRepository.saveAllAndFlush(agreementsToUpdate);
         refreshMerchantMaterializedViews();
 
-        log.info("Inactivated [{}] stale agreements with cutoff [{}]", agreementsToInactivate.size(), cutoff);
-        return agreementsToInactivate.size();
+        log.info("Processed [{}] stale agreements with current date [{}]: expired [{}] active agreements, inactivated [{}] expired agreements with cutoff [{}]",
+                 agreementsToUpdate.size(),
+                 currentDate,
+                 activeAgreementsToExpire.size(),
+                 expiredAgreementsToInactivate.size(),
+                 expiredAgreementCutoff);
+        return agreementsToUpdate.size();
     }
 
     private void refreshMerchantMaterializedViews() {

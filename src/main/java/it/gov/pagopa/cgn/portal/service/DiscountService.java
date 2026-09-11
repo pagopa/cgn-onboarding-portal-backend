@@ -514,6 +514,7 @@ public class DiscountService {
         }
         if (!EnumSet.of(AgreementStateEnum.APPROVED,
                         AgreementStateEnum.ACTIVE,
+                        AgreementStateEnum.EXPIRED,
                         AgreementStateEnum.INACTIVE,
                         AgreementStateEnum.TERMINATION_REMINDER_SENT,
                         AgreementStateEnum.TERMINATION_IN_PROGRESS).contains(agreementEntity.getState())) {

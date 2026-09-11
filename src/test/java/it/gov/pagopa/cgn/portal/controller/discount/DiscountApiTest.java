@@ -855,6 +855,32 @@ class DiscountApiTest
     }
 
     @Test
+    void Action_TestDiscountWithExpiredAgreement_Ok()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.EXPIRED);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/testing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.TEST_PENDING.getValue()));
+    }
+
+    @Test
     void Action_TestDiscount_WithNoBucketCodes_ko()
             throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
@@ -893,6 +919,38 @@ class DiscountApiTest
                     .andExpect(status().isNoContent());
 
         // get discount and check it's in PUBLISHED status
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.PUBLISHED.getValue()));
+    }
+
+    @Test
+    void Action_PublishDiscountWithExpiredAgreement_Ok()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.EXPIRED);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreement = agreementService.findAgreementById(agreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreement.getState());
+
         this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
                     .andDo(log())
                     .andExpect(status().isOk())
