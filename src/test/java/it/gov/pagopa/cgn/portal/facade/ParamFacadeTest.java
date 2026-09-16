@@ -51,6 +51,15 @@ class ParamFacadeTest {
 
             assertEquals(5, result);
         }
+
+        @Test
+        void shouldReturnInactivateAgreementsJobExpiredStaleMonthsFromConfig() {
+            when(configProperties.getInactivateAgreementsJobExpiredStaleMonths()).thenReturn(6);
+
+            int result = paramFacade.getInactivateAgreementsJobExpiredStaleMonths();
+
+            assertEquals(6, result);
+        }
     }
 
     @Nested
@@ -80,6 +89,17 @@ class ParamFacadeTest {
             int result = paramFacade.getCheckExpiringDiscountsJobDays();
 
             assertEquals(7, result);
+        }
+
+        @Test
+        void shouldReturnInactivateAgreementsJobExpiredStaleMonthsFromParamService() {
+            when(paramService.getParam(ParamGroupEnum.INACTIVATE_AGREEMENTS_JOB,
+                                       "inactivate.agreements.job.expired.stale.months"))
+                    .thenReturn("6");
+
+            int result = paramFacade.getInactivateAgreementsJobExpiredStaleMonths();
+
+            assertEquals(6, result);
         }
     }
 }

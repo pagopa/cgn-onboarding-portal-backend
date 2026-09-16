@@ -170,32 +170,18 @@ public class DiscountService {
 
         DiscountCodeTypeEnum profileDiscountType = profile.getDiscountCodeType();
 
-        boolean isChangedBucketLoad = DiscountCodeTypeEnum.BUCKET.equals(profileDiscountType) &&
-                                      ((dbEntity.getLastBucketCodeLoad()==null &&
-                                        discountEntity.getLastBucketCodeLoadUid()!=null) ||
-                                       !dbEntity.getLastBucketCodeLoad()
-                                                .getUid()
-                                                .equals(discountEntity.getLastBucketCodeLoadUid()));
+        boolean isChangedBucketLoad = isChangedBucketLoad(profileDiscountType, dbEntity, discountEntity);
+        boolean hasRelevantDiscountDataChanges = hasRelevantDiscountDataChanges(dbEntity,
+                                                                                discountEntity,
+                                                                                isChangedBucketLoad);
 
         if (isChangedBucketLoad && dbEntity.getLastBucketCodeLoad()!=null &&
             bucketService.isLastBucketLoadStillLoading(dbEntity.getLastBucketCodeLoad().getId())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_UPDATE_DISCOUNT_BUCKET_WHILE_PROCESSING_IS_RUNNING.getValue());
         }
 
-        if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState()) &&
-            DiscountCodeTypeEnum.LANDINGPAGE.equals(profileDiscountType) &&
-            (!dbEntity.getLandingPageUrl().equals(discountEntity.getLandingPageUrl()) ||
-             !dbEntity.getLandingPageReferrer().equals(discountEntity.getLandingPageReferrer()))) {
+        if (hasRelevantDiscountDataChanges && !DiscountStateEnum.DRAFT.equals(dbEntity.getState())) {
             dbEntity.setState(DiscountStateEnum.DRAFT);
-        }
-
-        if (DiscountCodeTypeEnum.STATIC.equals(profileDiscountType)
-            && !Objects.equals(dbEntity.getStaticCode(), discountEntity.getStaticCode())) {
-            dbEntity.setState(DiscountStateEnum.TEST_PENDING);
-
-            agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
-
-            applicationEventPublisher.publishEvent(new DiscountChangedToTestPendingEvent(agreementId, discountId));
         }
 
         updateConsumer.accept(discountEntity, dbEntity);
@@ -206,7 +192,7 @@ public class DiscountService {
             dbEntity = bucketService.createPendingBucketLoad(dbEntity);
         }
 
-        if (DiscountStateEnum.PUBLISHED.equals(dbEntity.getState())) {
+        if (hasRelevantDiscountDataChanges) {
             agreementServiceLight.setInformationLastUpdateDate(agreementEntity);
             dbEntity.setExpirationWarningSentDateTime(null);
         }
@@ -263,6 +249,10 @@ public class DiscountService {
     @Transactional(Transactional.TxType.REQUIRED)
     public DiscountEntity publishDiscount(String agreementId, Long discountId) {
         AgreementEntity agreementEntity = agreementServiceLight.findAgreementById(agreementId);
+        
+         if (AgreementStateEnum.TERMINATION_IN_PROGRESS.equals(agreementEntity.getState())) {
+            throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PUBLISH_DISCOUNT_FOR_TERMINATION_IN_PROGRESS_AGREEMENT.getValue());
+        }
 
         ProfileEntity profileEntity = profileService.getProfile(agreementEntity.getId())
                                                     .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.PROFILE_NOT_FOUND.getValue()));
@@ -474,7 +464,7 @@ public class DiscountService {
     }
 
     private void validatePublishingDiscount(ProfileEntity profileEntity, DiscountEntity discount) {
-        if (!SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel()) &&
+        if (requiresDiscountTesting(profileEntity) &&
             !DiscountStateEnum.TEST_PASSED.equals(discount.getState())) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_ONLINE_DISCOUNT_WITH_NOT_PASSED_TEST.getValue());
         }
@@ -490,7 +480,7 @@ public class DiscountService {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_PROCEED_WITH_DISCOUNT_WITH_EMPTY_BUCKET.getValue());
         }
 
-        if (SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel())) {
+        if (!requiresDiscountTesting(profileEntity)) {
             throw new InvalidRequestException(ErrorCodeEnum.CANNOT_TEST_DISCOUNTS_WITH_OFFLINE_MERCHANTS.getValue());
         }
 
@@ -510,6 +500,7 @@ public class DiscountService {
         }
         if (!EnumSet.of(AgreementStateEnum.APPROVED,
                         AgreementStateEnum.ACTIVE,
+                        AgreementStateEnum.EXPIRED,
                         AgreementStateEnum.INACTIVE,
                         AgreementStateEnum.TERMINATION_REMINDER_SENT,
                         AgreementStateEnum.TERMINATION_IN_PROGRESS).contains(agreementEntity.getState())) {
@@ -531,6 +522,59 @@ public class DiscountService {
         if (publishedDiscount >= MAX_NUMBER_PUBLISHED_DISCOUNT) {
             throw new InvalidRequestException(ErrorCodeEnum.MAX_NUMBER_OF_PUBLISHABLE_DISCOUNTS_REACHED.getValue());
         }
+    }
+
+    private boolean hasRelevantDiscountDataChanges(DiscountEntity dbEntity,
+                                                   DiscountEntity discountEntity,
+                                                   boolean isChangedBucketLoad) {
+        return !Objects.equals(dbEntity.getName(), discountEntity.getName()) ||
+               !Objects.equals(dbEntity.getNameEn(), discountEntity.getNameEn()) ||
+               !Objects.equals(dbEntity.getNameDe(), discountEntity.getNameDe()) ||
+               !Objects.equals(dbEntity.getDescription(), discountEntity.getDescription()) ||
+               !Objects.equals(dbEntity.getDescriptionEn(), discountEntity.getDescriptionEn()) ||
+               !Objects.equals(dbEntity.getDescriptionDe(), discountEntity.getDescriptionDe()) ||
+               !Objects.equals(dbEntity.getStartDate(), discountEntity.getStartDate()) ||
+               !Objects.equals(dbEntity.getEndDate(), discountEntity.getEndDate()) ||
+               !Objects.equals(dbEntity.getDiscountValue(), discountEntity.getDiscountValue()) ||
+               !Objects.equals(dbEntity.getCondition(), discountEntity.getCondition()) ||
+               !Objects.equals(dbEntity.getConditionEn(), discountEntity.getConditionEn()) ||
+               !Objects.equals(dbEntity.getConditionDe(), discountEntity.getConditionDe()) ||
+               !Objects.equals(dbEntity.getStaticCode(), discountEntity.getStaticCode()) ||
+               !Objects.equals(dbEntity.getVisibleOnEyca(), discountEntity.getVisibleOnEyca()) ||
+               !Objects.equals(dbEntity.getLandingPageUrl(), discountEntity.getLandingPageUrl()) ||
+               !Objects.equals(dbEntity.getEycaLandingPageUrl(), discountEntity.getEycaLandingPageUrl()) ||
+               !Objects.equals(dbEntity.getLandingPageReferrer(), discountEntity.getLandingPageReferrer()) ||
+               !Objects.equals(dbEntity.getDiscountUrl(), discountEntity.getDiscountUrl()) ||
+               !hasSameProducts(dbEntity.getProducts(), discountEntity.getProducts()) ||
+               isChangedBucketLoad;
+    }
+
+    private boolean hasSameProducts(List<DiscountProductEntity> currentProducts,
+                                    List<DiscountProductEntity> updatedProducts) {
+        if (currentProducts == updatedProducts) {
+            return true;
+        }
+        if (currentProducts == null || updatedProducts == null) {
+            return false;
+        }
+        return currentProducts.size() == updatedProducts.size() &&
+               currentProducts.stream().allMatch(updatedProducts::contains);
+    }
+
+    private boolean isChangedBucketLoad(DiscountCodeTypeEnum profileDiscountType,
+                                        DiscountEntity dbEntity,
+                                        DiscountEntity discountEntity) {
+        if (!DiscountCodeTypeEnum.BUCKET.equals(profileDiscountType)) {
+            return false;
+        }
+        String currentBucketLoadUid = dbEntity.getLastBucketCodeLoad()!=null
+                ? dbEntity.getLastBucketCodeLoad().getUid()
+                : null;
+        return !Objects.equals(currentBucketLoadUid, discountEntity.getLastBucketCodeLoadUid());
+    }
+
+    private boolean requiresDiscountTesting(ProfileEntity profileEntity) {
+        return !SalesChannelEnum.OFFLINE.equals(profileEntity.getSalesChannel());
     }
 
     private void commonDiscountValidation(ProfileEntity profileEntity,
