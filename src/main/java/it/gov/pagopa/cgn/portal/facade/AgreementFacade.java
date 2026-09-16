@@ -36,7 +36,7 @@ public class AgreementFacade {
     public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
         AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
         Agreement dto = agreementConverter.toDto(agreementEntity);
-        dto.setCompletedSteps(getCompletedSteps(agreementEntity));
+        dto.setCompletedSteps(getCompletedSteps(agreementEntity)); //NOSONAR
         return ResponseEntity.ok(dto);
     }
 
