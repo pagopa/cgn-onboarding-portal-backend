@@ -9,7 +9,6 @@ import it.gov.pagopa.cgn.portal.repository.OnlineMerchantRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,8 +55,8 @@ public class AgreementInactivationService {
                                                  .orElse(false))
                                              .toList();
 
-        if (CollectionUtils.isEmpty(activeAgreementsToExpire) &&
-            CollectionUtils.isEmpty(expiredAgreementsToInactivate)) {
+        if (activeAgreementsToExpire.isEmpty() &&
+            expiredAgreementsToInactivate.isEmpty()) {
             log.info("No stale agreements found with current date [{}] and expired cutoff [{}]",
                      currentDate,
                      expiredAgreementCutoff);

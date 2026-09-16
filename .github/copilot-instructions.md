@@ -46,3 +46,4 @@ Keep this file and the related files under `.github/instructions/` updated whene
 - Do not hand-edit build output under `target/`.
 - Check for existing tests in the matching package before adding new patterns or utilities.
 - Avoid manually pre-sizing collections with summed `size()` values before sequential `addAll(...)` calls; prefer default construction unless there is a clear measured need.
+- In handwritten Java code, if a `List` or other collection is guaranteed non-null by the API contract or local control flow, prefer the native `isEmpty()` check instead of `CollectionUtils.isEmpty(...)`; use null-safe utility checks only when the collection may actually be null.

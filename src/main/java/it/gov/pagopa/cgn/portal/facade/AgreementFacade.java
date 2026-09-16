@@ -32,6 +32,7 @@ public class AgreementFacade {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
+    @SuppressWarnings("java:S2259")
     public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
         AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
         Agreement dto = agreementConverter.toDto(agreementEntity);
