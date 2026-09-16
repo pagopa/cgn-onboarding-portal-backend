@@ -3,10 +3,12 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.UploadedImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +34,13 @@ public class AgreementFacade {
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
-    @SuppressWarnings("java:S2259")
     public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
-        AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
+        AgreementEntity agreementEntity =
+                agreementService.getAgreementByMerchantTaxCode(merchantTaxCode)
+                .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+
         Agreement dto = agreementConverter.toDto(agreementEntity);
-        dto.setCompletedSteps(getCompletedSteps(agreementEntity)); //NOSONAR
+        dto.setCompletedSteps(getCompletedSteps(agreementEntity));
         return ResponseEntity.ok(dto);
     }
 

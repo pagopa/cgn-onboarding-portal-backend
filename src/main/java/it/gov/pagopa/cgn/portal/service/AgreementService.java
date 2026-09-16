@@ -69,13 +69,12 @@ public class AgreementService
     }
 
     @Transactional
-    public AgreementEntity getAgreementByMerchantTaxCode(String merchantTaxCode) {
+    public Optional<AgreementEntity> getAgreementByMerchantTaxCode(String merchantTaxCode) {
         AgreementUserEntity userAgreement;
         Optional<AgreementUserEntity> userAgreementOpt = userService.findCurrentAgreementUser(merchantTaxCode);
         if (userAgreementOpt.isPresent()) {
             userAgreement = userAgreementOpt.get();
-            return agreementRepository.findById(userAgreement.getAgreementId())
-                                      .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+            return agreementRepository.findById(userAgreement.getAgreementId());
         } else {
             throw new InvalidRequestException(ErrorCodeEnum.AGREEMENT_USER_NOT_FOUND.getValue());
         }
