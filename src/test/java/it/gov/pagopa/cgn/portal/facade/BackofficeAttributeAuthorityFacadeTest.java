@@ -14,7 +14,6 @@ import it.gov.pagopa.cgnonboardingportal.backoffice.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +26,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -51,12 +58,12 @@ class BackofficeAttributeAuthorityFacadeTest
                                                            profileRepository,
                                                            agreementServiceLight,
                                                            documentService);
-        profileServiceSpy = Mockito.spy(profileService);
+        profileServiceSpy = spy(profileService);
 
         AgreementUserService agreementUserService = new AgreementUserService(agreementUserRepository);
-        agreementUserServiceSpy = Mockito.spy(agreementUserService);
+        agreementUserServiceSpy = spy(agreementUserService);
 
-        attributeAuthorityService = Mockito.mock(AttributeAuthorityService.class);
+        attributeAuthorityService = mock(AttributeAuthorityService.class);
         organizationWithReferentsConverter = new OrganizationWithReferentsConverter();
         backofficeDiscountConverter = new BackofficeDiscountConverter();
         backofficeProfileConverter = new BackofficeProfileConverter();
@@ -106,12 +113,12 @@ class BackofficeAttributeAuthorityFacadeTest
         organizations.setCount(2);
         organizations.setItems(items);
 
-        Mockito.when(attributeAuthorityService.getOrganizations(Mockito.any(),
-                                                                Mockito.any(),
-                                                                Mockito.any(),
-                                                                Mockito.any(),
-                                                                Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organizations));
+        when(attributeAuthorityService.getOrganizations(any(),
+                                                        any(),
+                                                        any(),
+                                                        any(),
+                                                        any()))
+                .thenReturn(ResponseEntity.ok(organizations));
 
         agreementService.createAgreementIfNotExists(organization0.getKeyOrganizationFiscalCode(),
                                                     organization0.getEntityType(),
@@ -143,8 +150,8 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         OrganizationStatus.ACTIVE,
                                                                                                         null);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.ok(
                        organization0));
 
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
@@ -175,8 +182,8 @@ class BackofficeAttributeAuthorityFacadeTest
 
 
         Consumer<OrganizationWithReferentsAndStatus> assertions = org -> {
-            Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-                   .thenReturn(ResponseEntity.ok(org));
+            when(attributeAuthorityService.getOrganization(any()))
+                    .thenReturn(ResponseEntity.ok(org));
 
             agreementService.createAgreementIfNotExists(org.getKeyOrganizationFiscalCode(),
                                                         org.getEntityType(),
@@ -211,8 +218,8 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         null);
 
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organization0));
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -240,8 +247,8 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         OrganizationStatus.ACTIVE,
                                                                                                         null);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organization0));
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -269,8 +276,8 @@ class BackofficeAttributeAuthorityFacadeTest
                                                                                                         null);
 
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organization0));
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.ok(organization0));
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
 
@@ -308,8 +315,8 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void GetOrganization_Ko() {
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.notFound().build());
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.notFound().build());
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 "1234567890");
 
@@ -319,7 +326,7 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void GetOrganization_No_Content() {
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any())).thenReturn(ResponseEntity.ok().build());
+        when(attributeAuthorityService.getOrganization(any())).thenReturn(ResponseEntity.ok().build());
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 "1234567890");
 
@@ -361,8 +368,8 @@ class BackofficeAttributeAuthorityFacadeTest
         assertionsBlock.accept(upsertResult0);
         assertionsBlock.accept(upsertResult1);
 
-        Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
-        Mockito.verify(profileServiceSpy, Mockito.times(0)).updateProfile(Mockito.any(), Mockito.any());
+        verify(agreementUserServiceSpy, times(0)).updateMerchantTaxCode(any(), any());
+        verify(profileServiceSpy, times(0)).updateProfile(any(), any());
     }
 
     @Test
@@ -399,8 +406,8 @@ class BackofficeAttributeAuthorityFacadeTest
         assertionsBlock.accept(upsertResult0);
         assertionsBlock.accept(upsertResult1);
 
-        Mockito.verify(agreementUserServiceSpy, Mockito.times(0)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
-        Mockito.verify(profileServiceSpy, Mockito.times(2)).updateProfile(Mockito.any(), Mockito.any());
+        verify(agreementUserServiceSpy, times(0)).updateMerchantTaxCode(any(), any());
+        verify(profileServiceSpy, times(2)).updateProfile(any(), any());
     }
 
     @Test
@@ -427,30 +434,30 @@ class BackofficeAttributeAuthorityFacadeTest
         Assertions.assertEquals(upsertResult.organizationWithReferents.getInsertedAt(),
                                 upsertResult.response.getBody().getInsertedAt());
 
-        Mockito.verify(agreementUserServiceSpy, Mockito.times(1)).updateMerchantTaxCode(Mockito.any(), Mockito.any());
-        Mockito.verify(profileServiceSpy, Mockito.times(1)).updateProfile(Mockito.any(), Mockito.any());
+        verify(agreementUserServiceSpy, times(1)).updateMerchantTaxCode(any(), any());
+        verify(profileServiceSpy, times(1)).updateProfile(any(), any());
     }
 
     @Test
     void DeleteOrganization_Ok() {
-        Mockito.when(attributeAuthorityService.deleteOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.noContent().build());
+        when(attributeAuthorityService.deleteOrganization(any()))
+                .thenReturn(ResponseEntity.noContent().build());
         ResponseEntity<Void> response = backofficeAttributeAuthorityFacade.deleteOrganization("1234567890");
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
     void DeleteOrganization_Ko() {
-        Mockito.when(attributeAuthorityService.deleteOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.notFound().build());
+        when(attributeAuthorityService.deleteOrganization(any()))
+                .thenReturn(ResponseEntity.notFound().build());
         ResponseEntity<Void> response = backofficeAttributeAuthorityFacade.deleteOrganization("1234567890");
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
     void GetReferents_Ok() {
-        Mockito.when(attributeAuthorityService.getReferents(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").toList()));
+        when(attributeAuthorityService.getReferents(any()))
+                .thenReturn(ResponseEntity.ok(Stream.of("AAAAAA00A00A000A").toList()));
         ResponseEntity<List<String>> response = backofficeAttributeAuthorityFacade.getReferents("1234567890");
         Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
         Assertions.assertEquals("AAAAAA00A00A000A", Objects.requireNonNull(response.getBody()).getFirst());
@@ -458,8 +465,8 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void InsertReferent_Ok() {
-        Mockito.when(attributeAuthorityService.insertReferent(Mockito.anyString(), Mockito.anyString()))
-               .thenReturn(ResponseEntity.noContent().build());
+        when(attributeAuthorityService.insertReferent(anyString(), anyString()))
+                .thenReturn(ResponseEntity.noContent().build());
         ReferentFiscalCode referentFiscalCode = new ReferentFiscalCode();
         referentFiscalCode.setReferentFiscalCode("AAAAAA00A00A000A");
         ResponseEntity<Void> response = backofficeAttributeAuthorityFacade.insertReferent("1234567890",
@@ -469,8 +476,8 @@ class BackofficeAttributeAuthorityFacadeTest
 
     @Test
     void DeleteReferent_Ok() {
-        Mockito.when(attributeAuthorityService.deleteReferent(Mockito.any(), Mockito.any()))
-               .thenReturn(ResponseEntity.noContent().build());
+        when(attributeAuthorityService.deleteReferent(any(), any()))
+                .thenReturn(ResponseEntity.noContent().build());
         ResponseEntity<Void> response = backofficeAttributeAuthorityFacade.deleteReferent("1234567890",
                                                                                           "AAAAAA00A00A000A");
         Assertions.assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -520,8 +527,8 @@ class BackofficeAttributeAuthorityFacadeTest
                 null,
                 null);
 
-        Mockito.when(attributeAuthorityService.getOrganization(Mockito.any()))
-               .thenReturn(ResponseEntity.ok(organization));
+        when(attributeAuthorityService.getOrganization(any()))
+                .thenReturn(ResponseEntity.ok(organization));
 
         ResponseEntity<OrganizationWithReferentsAndStatus> organizationResponse = backofficeAttributeAuthorityFacade.getOrganization(
                 profileEntity.getTaxCodeOrVat());
@@ -545,10 +552,10 @@ class BackofficeAttributeAuthorityFacadeTest
                 entityType);
 
         if (testServiceError) {
-            Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any())).thenThrow(RuntimeException.class);
+            when(attributeAuthorityService.upsertOrganization(any())).thenThrow(RuntimeException.class);
         } else {
-            Mockito.when(attributeAuthorityService.upsertOrganization(Mockito.any()))
-                   .thenReturn(ResponseEntity.ok(organizationWithReferentsConverter.toAttributeAuthorityModel(
+            when(attributeAuthorityService.upsertOrganization(any()))
+                    .thenReturn(ResponseEntity.ok(organizationWithReferentsConverter.toAttributeAuthorityModel(
                            organizationWithReferents)));
         }
 

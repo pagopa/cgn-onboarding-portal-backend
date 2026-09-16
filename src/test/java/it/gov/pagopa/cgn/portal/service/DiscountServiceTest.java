@@ -36,6 +36,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
 @SpringBootTest
 @ActiveProfiles("dev")
 class DiscountServiceTest
@@ -567,9 +572,8 @@ class DiscountServiceTest
 
         Assertions.assertEquals(DiscountStateEnum.DRAFT, dbDiscount.getState());
 
-        org.mockito.Mockito.verify(discountChangedToTestPendingListener,
-                       org.mockito.Mockito.never())
-                   .handle(org.mockito.ArgumentMatchers.any(DiscountChangedToTestPendingEvent.class));
+        verify(discountChangedToTestPendingListener, never())
+                .handle(any(DiscountChangedToTestPendingEvent.class));
     }
 
     @Test
@@ -615,9 +619,8 @@ class DiscountServiceTest
 
         Assertions.assertNotEquals(DiscountStateEnum.TEST_PENDING, dbDiscount.getState());
 
-        org.mockito.Mockito.verify(discountChangedToTestPendingListener,
-                                   org.mockito.Mockito.never())
-                           .handle(org.mockito.ArgumentMatchers.any(DiscountChangedToTestPendingEvent.class));
+        verify(discountChangedToTestPendingListener, never())
+                .handle(any(DiscountChangedToTestPendingEvent.class));
     }
 
     @Test
@@ -677,7 +680,7 @@ class DiscountServiceTest
         agreementEntity.setInformationLastUpdateDate(LocalDate.now().minusDays(3));
         agreementEntity = agreementRepository.save(agreementEntity);
 
-        org.mockito.Mockito.clearInvocations(discountChangedToTestPendingListener);
+        clearInvocations(discountChangedToTestPendingListener);
 
         DiscountEntity updatedDiscount = TestUtils.createSampleDiscountEntityWithStaticCode(agreementEntity,
                                                     STATIC_CODE);
@@ -694,9 +697,8 @@ class DiscountServiceTest
         agreementEntity = agreementRepository.findById(agreementEntity.getId()).orElseThrow();
         Assertions.assertEquals(LocalDate.now(), agreementEntity.getInformationLastUpdateDate());
 
-        org.mockito.Mockito.verify(discountChangedToTestPendingListener,
-                                   org.mockito.Mockito.never())
-                           .handle(org.mockito.ArgumentMatchers.any(DiscountChangedToTestPendingEvent.class));
+        verify(discountChangedToTestPendingListener, never())
+                .handle(any(DiscountChangedToTestPendingEvent.class));
     }
 
     @Test
