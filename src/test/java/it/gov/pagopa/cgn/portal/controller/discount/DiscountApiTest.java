@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
+import it.gov.pagopa.cgn.portal.enums.AgreementStateEnum;
 import it.gov.pagopa.cgn.portal.enums.BucketCodeLoadStatusEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
@@ -454,7 +455,7 @@ class DiscountApiTest
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.id").isNotEmpty())
                     .andExpect(jsonPath("$.agreementId").value(agreement.getId()))
-                    .andExpect(jsonPath("$.state").value(DiscountState.TEST_PENDING.getValue())) // default state
+                    .andExpect(jsonPath("$.state").value(DiscountState.DRAFT.getValue())) // default state
                     .andExpect(jsonPath("$.name").value(updateDiscount.getName()))
                     .andExpect(jsonPath("$.description").value(updateDiscount.getDescription()))
                     .andExpect(jsonPath("$.startDate").value(updateDiscount.getStartDate().toString()))
@@ -854,6 +855,32 @@ class DiscountApiTest
     }
 
     @Test
+    void Action_TestDiscountWithExpiredAgreement_Ok()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.EXPIRED);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/testing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.TEST_PENDING.getValue()));
+    }
+
+    @Test
     void Action_TestDiscount_WithNoBucketCodes_ko()
             throws Exception {
         initTest(DiscountCodeTypeEnum.BUCKET);
@@ -897,6 +924,62 @@ class DiscountApiTest
                     .andExpect(status().isOk())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.items[0].state").value(DiscountState.PUBLISHED.getValue()));
+    }
+
+    @Test
+    void Action_PublishDiscountWithExpiredAgreement_Ok()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.EXPIRED);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreement = agreementService.findAgreementById(agreement.getId());
+        Assertions.assertEquals(AgreementStateEnum.ACTIVE, agreement.getState());
+
+        this.mockMvc.perform(get(discountPath).contentType(MediaType.APPLICATION_JSON))
+                    .andDo(log())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.items[0].state").value(DiscountState.PUBLISHED.getValue()));
+    }
+
+    @Test
+    void Action_PublishDiscountWithTerminationInProgressAgreement_BadRequest()
+            throws Exception {
+        initTest(DiscountCodeTypeEnum.STATIC);
+
+        DiscountEntity discount = TestUtils.createSampleDiscountEntityWithStaticCode(agreement, "static_code");
+        discount = discountService.createDiscount(agreement.getId(), discount).getDiscountEntity();
+
+        discount.setState(DiscountStateEnum.TEST_PASSED);
+        discount = discountRepository.save(discount);
+
+        saveDocumentsForApproval(agreement);
+        agreement = agreementService.requestApproval(agreement.getId());
+        agreement = approveAgreement(agreement, true);
+        agreement = agreementRepository.findById(agreement.getId()).orElseThrow();
+        agreement.setState(AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        agreement = agreementRepository.save(agreement);
+
+        this.mockMvc.perform(post(discountPath + "/" + discount.getId() + "/publishing"))
+                    .andDo(log())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().string(ErrorCodeEnum.CANNOT_PUBLISH_DISCOUNT_FOR_TERMINATION_IN_PROGRESS_AGREEMENT.getValue()));
     }
 
     @Test

@@ -25,11 +25,11 @@ Keep this file and the related files under `.github/instructions/` updated whene
 ## Agreement State Model
 
 - `agreement.state` (`AgreementStateEnum`) is the canonical persisted source of truth for the agreement/convention lifecycle; do not introduce a parallel persisted status axis for the same domain.
-- The canonical lifecycle includes onboarding states (`DRAFT`, `PENDING`, `APPROVED`, `REJECTED`) and post-approval operational states (`ACTIVE`, `INACTIVE`, `TERMINATION_IN_PROGRESS`, `TERMINATED`).
+- The canonical lifecycle includes onboarding states (`DRAFT`, `PENDING`, `APPROVED`, `REJECTED`) and post-approval operational states (`ACTIVE`, `EXPIRED`, `INACTIVE`, `TERMINATION_REMINDER_SENT`, `TERMINATION_IN_PROGRESS`, `TERMINATED`).
 - Backoffice `AssignedAgreement` remains a DTO-only projection of `PENDING` plus `backofficeAssignee`; it is not a persisted agreement state.
-- `/agreement-requests` is the pre-approval/request backoffice surface and can include `DRAFT`, `PENDING`, and `REJECTED`; `AssignedAgreement` remains a DTO-only projection of `PENDING` plus `backofficeAssignee`. `/approved-agreements` is the broader post-approval backoffice surface and can include `APPROVED`, `ACTIVE`, `INACTIVE`, `TERMINATION_IN_PROGRESS`, and `TERMINATED`.
+- `/agreement-requests` is the pre-approval/request backoffice surface and can include `DRAFT`, `PENDING`, and `REJECTED`; `AssignedAgreement` remains a DTO-only projection of `PENDING` plus `backofficeAssignee`. `/approved-agreements` is the broader post-approval backoffice surface and can include `APPROVED`, `ACTIVE`, `EXPIRED`, `INACTIVE`, `TERMINATION_REMINDER_SENT`, `TERMINATION_IN_PROGRESS`, and `TERMINATED`.
 - `OrganizationStatus` is derived at read time and should follow the canonical agreement lifecycle semantics rather than legacy `APPROVED -> ACTIVE` shorthand or removed `Enabled` semantics.
-- Publishing a valid current discount moves the agreement to `ACTIVE`; if the agreement is in `TERMINATION_IN_PROGRESS`, the same publish flow reactivates it back to `ACTIVE`.
+- Publishing a valid current discount moves the agreement to `ACTIVE` in the allowed post-approval states; publish/republish must be rejected while the agreement is in `TERMINATION_IN_PROGRESS`.
 - Operator access to agreement-scoped endpoints under `/agreements/{agreementId}/...` must be blocked when the agreement is `TERMINATED`; the bootstrap operator read on `POST /agreements` remains readable so the frontend can still receive the current agreement state.
 - The backoffice termination API is command-based: `POST /approved-agreements/{agreementId}/termination` with `AgreementTerminationCommand` actions `StartTerminationInProgress`, `CancelTerminationInProgress`, and `CompleteTermination`.
 
@@ -45,3 +45,5 @@ Keep this file and the related files under `.github/instructions/` updated whene
 - Reuse existing enums, error models, and converters before introducing parallel DTO or state definitions.
 - Do not hand-edit build output under `target/`.
 - Check for existing tests in the matching package before adding new patterns or utilities.
+- Avoid manually pre-sizing collections with summed `size()` values before sequential `addAll(...)` calls; prefer default construction unless there is a clear measured need.
+- In handwritten Java code, if a `List` or other collection is guaranteed non-null by the API contract or local control flow, prefer the native `isEmpty()` check instead of `CollectionUtils.isEmpty(...)`; use null-safe utility checks only when the collection may actually be null.
