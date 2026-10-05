@@ -3,10 +3,12 @@ package it.gov.pagopa.cgn.portal.facade;
 
 import it.gov.pagopa.cgn.portal.converter.AgreementConverter;
 import it.gov.pagopa.cgn.portal.enums.DocumentTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.InvalidRequestException;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.service.AgreementService;
 import it.gov.pagopa.cgnonboardingportal.model.Agreement;
 import it.gov.pagopa.cgnonboardingportal.model.CompletedStep;
+import it.gov.pagopa.cgnonboardingportal.model.ErrorCodeEnum;
 import it.gov.pagopa.cgnonboardingportal.model.UploadedImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +35,10 @@ public class AgreementFacade {
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ResponseEntity<Agreement> createAgreement(String merchantTaxCode) {
-        AgreementEntity agreementEntity = agreementService.getAgreementByMerchantTaxCode(merchantTaxCode);
+        AgreementEntity agreementEntity =
+                agreementService.getAgreementByMerchantTaxCode(merchantTaxCode)
+                .orElseThrow(() -> new InvalidRequestException(ErrorCodeEnum.AGREEMENT_NOT_FOUND.getValue()));
+
         Agreement dto = agreementConverter.toDto(agreementEntity);
         dto.setCompletedSteps(getCompletedSteps(agreementEntity));
         return ResponseEntity.ok(dto);
@@ -53,7 +58,7 @@ public class AgreementFacade {
 
     private List<CompletedStep> getCompletedSteps(AgreementEntity agreementEntity) {
         switch (agreementEntity.getState()) {
-            case PENDING, APPROVED, ACTIVE, INACTIVE, TERMINATION_REMINDER_SENT, TERMINATION_IN_PROGRESS, TERMINATED:
+            case PENDING, APPROVED, ACTIVE, EXPIRED, INACTIVE, TERMINATION_REMINDER_SENT, TERMINATION_IN_PROGRESS, TERMINATED:
                 return Arrays.asList(CompletedStep.values());
             default:
                 break;

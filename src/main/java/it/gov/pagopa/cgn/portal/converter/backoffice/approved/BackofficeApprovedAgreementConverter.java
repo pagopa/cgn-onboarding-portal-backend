@@ -23,6 +23,7 @@ public class BackofficeApprovedAgreementConverter
     static {
         approvedAgreementStateEnumMap.put(AgreementStateEnum.APPROVED, ApprovedAgreementState.APPROVED);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.ACTIVE, ApprovedAgreementState.ACTIVE);
+        approvedAgreementStateEnumMap.put(AgreementStateEnum.EXPIRED, ApprovedAgreementState.EXPIRED);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.INACTIVE, ApprovedAgreementState.INACTIVE);
         approvedAgreementStateEnumMap.put(AgreementStateEnum.TERMINATION_REMINDER_SENT,
                                           ApprovedAgreementState.TERMINATION_REMINDER_SENT);

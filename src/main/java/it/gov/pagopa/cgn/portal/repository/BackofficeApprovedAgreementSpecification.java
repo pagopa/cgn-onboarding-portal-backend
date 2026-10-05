@@ -39,6 +39,7 @@ public class BackofficeApprovedAgreementSpecification
         predicateList.add(root.get("state")
                               .in(AgreementStateEnum.APPROVED,
                                   AgreementStateEnum.ACTIVE,
+                                  AgreementStateEnum.EXPIRED,
                                   AgreementStateEnum.INACTIVE,
                                   AgreementStateEnum.TERMINATION_REMINDER_SENT,
                                   AgreementStateEnum.TERMINATION_IN_PROGRESS,

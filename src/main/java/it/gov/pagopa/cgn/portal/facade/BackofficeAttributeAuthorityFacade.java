@@ -47,6 +47,9 @@ public class BackofficeAttributeAuthorityFacade {
             case ACTIVE:
                 organization.setStatus(OrganizationStatus.ACTIVE);
                 break;
+            case EXPIRED:
+                organization.setStatus(OrganizationStatus.EXPIRED);
+                break;
             case INACTIVE:
                 organization.setStatus(OrganizationStatus.INACTIVE);
                 break;

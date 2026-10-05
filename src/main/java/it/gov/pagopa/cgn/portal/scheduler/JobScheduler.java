@@ -12,6 +12,7 @@ import java.util.TimeZone;
 public class JobScheduler {
 
     private static final String DISCOUNTS_JOB_GROUP = "discounts";
+    private static final String AGREEMENTS_JOB_GROUP = "agreements";
     private final Scheduler scheduler;
     private final ParamFacade paramFacade;
 
@@ -70,6 +71,12 @@ public class JobScheduler {
         scheduleJob(jobKey,
                     paramFacade.getCleanDiscountsBucketCodesJobCronExpression(),
                     CleanDiscountsBucketCodesJob.class);
+    }
+
+    public void scheduleInactivateAgreementsJob()
+            throws SchedulerException {
+        JobKey jobKey = JobKey.jobKey("inactivate-agreements", AGREEMENTS_JOB_GROUP);
+        scheduleJob(jobKey, paramFacade.getInactivateAgreementsJobCronExpression(), InactivateAgreementsJob.class);
     }
 
     private void scheduleJob(JobKey jobKey, String cronExpression, Class<? extends Job> jobClass)

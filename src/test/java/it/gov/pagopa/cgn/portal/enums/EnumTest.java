@@ -34,10 +34,11 @@ public class EnumTest {
                                  .sorted(Comparator.comparing(AgreementStateEnum::getCode))
                                  .map(AgreementStateEnum::getCode)
                                  .toArray(String[]::new);
-        Assertions.assertEquals(9, sortedValues.length);
+        Assertions.assertEquals(10, sortedValues.length);
         Assertions.assertArrayEquals(new String[]{"ACTIVE",
                                                   "APPROVED",
                                                   "DRAFT",
+                                                  "EXPIRED",
                                                   "INACTIVE",
                                                   "PENDING",
                                                   "REJECTED",

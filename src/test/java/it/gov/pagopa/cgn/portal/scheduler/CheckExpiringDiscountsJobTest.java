@@ -68,17 +68,18 @@ class CheckExpiringDiscountsJobTest
 
         job.execute(null);
 
-        discountEntity1 = discountRepository.findById(discountEntity1.getId()).get();
+        discountEntity1 = discountRepository.findById(discountEntity1.getId()).orElseThrow();
 
         Assertions.assertNotNull(discountEntity1.getExpirationWarningSentDateTime());
         Assertions.assertEquals(LocalDate.now(), discountEntity1.getExpirationWarningSentDateTime().toLocalDate());
 
+        discountEntity1.setName("updated_name");
         discountService.updateDiscount(agreementEntity.getId(),discountEntity1.getId(), discountEntity1);
 
-        discountEntity1 = discountRepository.findById(discountEntity1.getId()).get();
+        discountEntity1 = discountRepository.findById(discountEntity1.getId()).orElseThrow();
 
         Assertions.assertNull(discountEntity1.getExpirationWarningSentDateTime());
-        Assertions.assertEquals(DiscountStateEnum.PUBLISHED, discountEntity1.getState());
+        Assertions.assertEquals(DiscountStateEnum.DRAFT, discountEntity1.getState());
 
     }
 

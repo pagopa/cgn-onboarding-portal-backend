@@ -132,6 +132,29 @@ public class AgreementConverterTest {
     }
 
     @Test
+    public void Convert_ConvertExpiredAgreementEntityToDTO_Ok() {
+        AgreementEntity agreementEntity = createApprovedLikeAgreementEntity(AgreementStateEnum.EXPIRED);
+
+        Agreement agreementDto = agreementConverter.toDto(agreementEntity);
+
+        commonAssertionsEntityToDto(agreementEntity, agreementDto);
+        Assert.assertEquals(AgreementState.EXPIRED_AGREEMENT, agreementDto.getState());
+        Assert.assertTrue(agreementDto instanceof ExpiredAgreement);
+        assertApprovedLikeDtoFields((ApprovedAgreement) agreementDto, agreementEntity);
+    }
+
+    @Test
+    public void Convert_ConvertExpiredAgreementDtoToEntity_Ok() {
+        ExpiredAgreement dto = createApprovedLikeAgreementDto(new ExpiredAgreement(), AgreementState.EXPIRED_AGREEMENT);
+
+        AgreementEntity entity = agreementConverter.toEntity(dto);
+
+        commonAssertionsDtoToEntity(entity, dto);
+        Assert.assertEquals(AgreementStateEnum.EXPIRED, entity.getState());
+        assertApprovedLikeEntityFields(entity, dto);
+    }
+
+    @Test
     public void Convert_ConvertInactiveAgreementEntityToDTO_Ok() {
         AgreementEntity agreementEntity = createApprovedLikeAgreementEntity(AgreementStateEnum.INACTIVE);
 

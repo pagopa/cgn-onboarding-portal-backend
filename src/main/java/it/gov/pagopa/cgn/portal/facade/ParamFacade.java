@@ -73,6 +73,17 @@ public class ParamFacade {
                      : paramService.getParam(ParamGroupEnum.CLEAN_DISCOUNTS_BUCKET_CODES_JOB, "clean.discounts.bucket.codes.job.cron");
     }
 
+    public String getInactivateAgreementsJobCronExpression() {
+        return isDev ? configProperties.getInactivateAgreementsJobCronExpression()
+                     : paramService.getParam(ParamGroupEnum.INACTIVATE_AGREEMENTS_JOB, "inactivate.agreements.job.cron");
+    }
+
+    public int getInactivateAgreementsJobExpiredStaleMonths() {
+        return isDev ? configProperties.getInactivateAgreementsJobExpiredStaleMonths()
+                     : Integer.parseInt(paramService.getParam(ParamGroupEnum.INACTIVATE_AGREEMENTS_JOB,
+                                                             "inactivate.agreements.job.expired.stale.months"));
+    }
+
     public String getSuspendReferentsMailSending() {
 
         return isDev ? configProperties.getSuspendReferentsMailSending()

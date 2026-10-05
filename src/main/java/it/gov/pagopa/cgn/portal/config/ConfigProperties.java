@@ -163,6 +163,12 @@ public class ConfigProperties {
     @Value("${clean.discounts.bucket.codes.job.cron}")
     private String cleanDiscountsBucketCodesJobCronExpression;
 
+    @Value("${inactivate.agreements.job.cron}")
+    private String inactivateAgreementsJobCronExpression;
+
+    @Value("${inactivate.agreements.job.expired.stale.months}")
+    private int inactivateAgreementsJobExpiredStaleMonths;
+
 
     public boolean isActiveProfileDev() {
         boolean isDev = "dev".equalsIgnoreCase(getActiveProfile());

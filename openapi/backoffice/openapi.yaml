@@ -1039,6 +1039,7 @@ components:
       enum:
         - Approved
         - Active
+        - Expired
         - Inactive
         - TerminationReminderSent
         - TerminationInProgress
@@ -1521,6 +1522,7 @@ components:
         - Approved
         - Rejected
         - Active
+        - Expired
         - Inactive
         - TerminationReminderSent
         - TerminationInProgress
