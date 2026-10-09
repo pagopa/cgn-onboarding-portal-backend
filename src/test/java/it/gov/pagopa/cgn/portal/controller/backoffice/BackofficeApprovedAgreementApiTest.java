@@ -233,6 +233,27 @@ class BackofficeApprovedAgreementApiTest
     }
 
     @Test
+    void ManageAgreementTermination_SendTerminationReminderFromApproved_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now(ZoneOffset.UTC).minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(ZoneOffset.UTC), agreementEntity.getInformationLastUpdateDate());
+    }
+
+    @Test
     void ManageAgreementTermination_SendTerminationReminder_NoContent()
             throws Exception {
         AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();

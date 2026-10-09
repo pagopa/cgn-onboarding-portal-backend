@@ -32,6 +32,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 @SpringBootTest
 @ActiveProfiles({"dev"})
@@ -461,6 +462,20 @@ class BackofficeAgreementServiceTest
         Assertions.assertNull(agreementEntity.getStartDate());
         Assertions.assertNull(agreementEntity.getRejectReasonMessage());
 
+    }
+
+    @Test
+    void ManageAgreementTermination_SendTerminationReminderFromApproved_Ok() {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now(ZoneOffset.UTC).minusDays(1));
+        agreementEntity = agreementRepository.save(agreementEntity);
+
+        AgreementEntity updatedAgreement = backofficeAgreementService.manageAgreementTermination(agreementEntity.getId(),
+                                                                                                 AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, updatedAgreement.getState());
+        Assertions.assertEquals(LocalDate.now(ZoneOffset.UTC), updatedAgreement.getInformationLastUpdateDate());
     }
 
     @Test
