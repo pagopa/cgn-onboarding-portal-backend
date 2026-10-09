@@ -31,7 +31,7 @@ Keep this file and the related files under `.github/instructions/` updated whene
 - `OrganizationStatus` is derived at read time and should follow the canonical agreement lifecycle semantics rather than legacy `APPROVED -> ACTIVE` shorthand or removed `Enabled` semantics.
 - Publishing a valid current discount moves the agreement to `ACTIVE` in the allowed post-approval states; publish/republish must be rejected while the agreement is in `TERMINATION_IN_PROGRESS`.
 - Operator access to agreement-scoped endpoints under `/agreements/{agreementId}/...` must be blocked when the agreement is `TERMINATED`; the bootstrap operator read on `POST /agreements` remains readable so the frontend can still receive the current agreement state.
-- The backoffice termination API is command-based: `POST /approved-agreements/{agreementId}/termination` with `AgreementTerminationCommand` actions `StartTerminationInProgress`, `CancelTerminationInProgress`, and `CompleteTermination`.
+- The backoffice termination API is command-based: `POST /approved-agreements/{agreementId}/termination` with `AgreementTerminationCommand` actions `SendTerminationReminder`, `StartTerminationInProgress`, `CancelTerminationInProgress`, and `CompleteTermination`. `SendTerminationReminder` accepts `APPROVED` or `INACTIVE` and moves the agreement to `TERMINATION_REMINDER_SENT`.
 
 ## Build And Test
 
