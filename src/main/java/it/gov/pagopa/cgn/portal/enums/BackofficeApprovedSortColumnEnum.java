@@ -14,7 +14,9 @@ public enum BackofficeApprovedSortColumnEnum {
     OPERATOR("Operator"),
     AGREEMENT_DATE("AgreementDate"),
     LAST_MODIFY_DATE("LastModifyDate"),
-    PUBLISHED_DISCOUNTS("PublishedDiscounts");
+    PUBLISHED_DISCOUNTS("PublishedDiscounts"),
+    TEST("Test"),
+    STATE("State");
     private final String value;
 
     public static BackofficeApprovedSortColumnEnum fromValue(String value) {

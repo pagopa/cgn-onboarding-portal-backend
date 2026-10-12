@@ -94,8 +94,8 @@ public class EnumTest {
                                  .sorted(Comparator.comparing(BackofficeApprovedSortColumnEnum::getValue))
                                  .map(BackofficeApprovedSortColumnEnum::getValue)
                                  .toArray(String[]::new);
-        Assertions.assertEquals(4, sortedValues.length);
-        Assertions.assertArrayEquals(new String[]{"AgreementDate", "LastModifyDate", "Operator", "PublishedDiscounts"},
+        Assertions.assertEquals(6, sortedValues.length);
+        Assertions.assertArrayEquals(new String[]{"AgreementDate", "LastModifyDate", "Operator", "PublishedDiscounts", "State", "Test"},
                                      sortedValues);
     }
 

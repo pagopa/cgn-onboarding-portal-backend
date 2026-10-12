@@ -532,6 +532,8 @@ paths:
               - AgreementDate
               - LastModifyDate
               - PublishedDiscounts
+              - Test
+              - State
         - name: sortDirection
           in: query
           description: Sort Direction
@@ -1634,6 +1636,8 @@ components:
           - AgreementDate
           - LastModifyDate
           - PublishedDiscounts
+          - Test
+          - State
     KeyOrganizationFiscalCode:
       name: keyOrganizationFiscalCode
       in: path

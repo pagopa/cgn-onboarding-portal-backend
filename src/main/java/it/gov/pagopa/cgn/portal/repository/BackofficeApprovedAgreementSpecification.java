@@ -64,6 +64,10 @@ public class BackofficeApprovedAgreementSpecification
                 return new OrderImpl(getLastUpdateDatePath(root), isSortAscending());
             case PUBLISHED_DISCOUNTS:
                 return new OrderImpl(root.get("publishedDiscounts"), isSortAscending());
+            case TEST:
+                return new OrderImpl(root.get("testPending"), isSortAscending());
+            case STATE:
+                return new OrderImpl(root.get("state"), isSortAscending());
             default:
                 throw new InvalidRequestException("Invalid sort column");
         }
