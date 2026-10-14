@@ -152,7 +152,7 @@ public class BackofficeAgreementService {
             case SEND_TERMINATION_REMINDER:
                 return updateAgreementState(agreementEntity,
                                             AgreementStateEnum.TERMINATION_REMINDER_SENT,
-                                            EnumSet.of(AgreementStateEnum.INACTIVE),
+                                            EnumSet.of(AgreementStateEnum.APPROVED, AgreementStateEnum.INACTIVE),
                                             action);
             case START_TERMINATION_IN_PROGRESS:
                 return updateAgreementState(agreementEntity,
