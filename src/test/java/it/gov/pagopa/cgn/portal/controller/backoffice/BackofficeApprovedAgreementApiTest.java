@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -136,9 +137,42 @@ class BackofficeApprovedAgreementApiTest
             discountRepository.save(discount);
         }
 
+        LocalDate baseDate = LocalDate.now(ZoneOffset.UTC);
+        List<LocalDate> agreementLastUpdateDates = List.of(baseDate.plusDays(1),
+                                                           baseDate.plusDays(4),
+                                                           baseDate.plusDays(3),
+                                                           baseDate.plusDays(2));
+        List<AgreementEntity> updatedAgreements = IntStream.range(0, numRows)
+                                                          .mapToObj(index -> {
+                                                              AgreementEntity agreement = testObjectList.get(index).getAgreementEntity();
+                                                              agreement.setInformationLastUpdateDate(agreementLastUpdateDates.get(index));
+                                                              if (index == 1) {
+                                                                  agreement.setState(AgreementStateEnum.TERMINATED);
+                                                              }
+                                                              return agreement;
+                                                          })
+                                                          .toList();
+        agreementRepository.saveAll(updatedAgreements);
+
+        Set<String> testPendingAgreementIds = Set.of(testObjectList.get(0).getAgreementEntity().getId(),
+                                                     testObjectList.get(2).getAgreementEntity().getId());
+
         for (Sort.Direction direction : Sort.Direction.values()) {
             List<Boolean> expectedTestPending = direction.isAscending() ? List.of(false, false, true, true) :
                                                                          List.of(true, true, false, false);
+            Comparator<AgreementEntity> agreementComparator = Comparator.comparing(
+                    (AgreementEntity agreement) -> testPendingAgreementIds.contains(agreement.getId())
+            );
+            if (direction.isDescending()) {
+                agreementComparator = agreementComparator.reversed();
+            }
+            List<String> expectedAgreementIds = updatedAgreements.stream()
+                                                                 .sorted(agreementComparator.thenComparing(
+                                                                         AgreementEntity::getInformationLastUpdateDate,
+                                                                         Comparator.reverseOrder())
+                                                                                          .thenComparing(AgreementEntity::getId))
+                                                                 .map(AgreementEntity::getId)
+                                                                 .toList();
             this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.TEST,
                                                                                     direction)))
                         .andDo(log())
@@ -146,7 +180,8 @@ class BackofficeApprovedAgreementApiTest
                         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                         .andExpect(jsonPath("$.items", hasSize(numRows)))
                         .andExpect(jsonPath("$.total").value(numRows))
-                        .andExpect(jsonPath("$.items[*].testPending").value(contains(expectedTestPending.toArray())));
+                        .andExpect(jsonPath("$.items[*].testPending").value(contains(expectedTestPending.toArray())))
+                        .andExpect(jsonPath("$.items[*].agreementId").value(contains(expectedAgreementIds.toArray())));
         }
     }
 
