@@ -532,6 +532,8 @@ paths:
               - AgreementDate
               - LastModifyDate
               - PublishedDiscounts
+              - Test
+              - State
         - name: sortDirection
           in: query
           description: Sort Direction
@@ -1053,6 +1055,11 @@ components:
           $ref: '#/components/schemas/AgreementTerminationAction'
     AgreementTerminationAction:
       type: string
+      description: >-
+        SendTerminationReminder moves an Approved or Inactive agreement to TerminationReminderSent.
+        StartTerminationInProgress moves TerminationReminderSent to TerminationInProgress.
+        CancelTerminationInProgress moves TerminationInProgress back to TerminationReminderSent.
+        CompleteTermination moves TerminationInProgress to Terminated.
       enum:
         - SendTerminationReminder
         - StartTerminationInProgress
@@ -1629,6 +1636,8 @@ components:
           - AgreementDate
           - LastModifyDate
           - PublishedDiscounts
+          - Test
+          - State
     KeyOrganizationFiscalCode:
       name: keyOrganizationFiscalCode
       in: path

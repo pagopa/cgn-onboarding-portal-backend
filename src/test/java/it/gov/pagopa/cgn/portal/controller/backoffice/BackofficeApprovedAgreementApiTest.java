@@ -27,10 +27,15 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
@@ -120,22 +125,128 @@ class BackofficeApprovedAgreementApiTest
     }
 
     @Test
+    void GetAgreements_GetAgreementsApprovedSortedByTestAscendingAndDescending_Ok()
+            throws Exception {
+        final int numRows = 4;
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
+        for (int index : List.of(0, 2, 3)) {
+            DiscountEntity discount = testObjectList.get(index).getDiscountEntityList().get(0);
+            discount.setState(DiscountStateEnum.TEST_PENDING);
+            discount.setStartDate(LocalDate.now().minusDays(3));
+            discount.setEndDate(index == 3 ? LocalDate.now().minusDays(2) : LocalDate.now().plusDays(1));
+            discountRepository.save(discount);
+        }
+
+        LocalDate baseDate = LocalDate.now(ZoneOffset.UTC);
+        List<LocalDate> agreementLastUpdateDates = List.of(baseDate.plusDays(1),
+                                                           baseDate.plusDays(4),
+                                                           baseDate.plusDays(3),
+                                                           baseDate.plusDays(2));
+        List<AgreementEntity> updatedAgreements = IntStream.range(0, numRows)
+                                                          .mapToObj(index -> {
+                                                              AgreementEntity agreement = testObjectList.get(index).getAgreementEntity();
+                                                              agreement.setInformationLastUpdateDate(agreementLastUpdateDates.get(index));
+                                                              if (index == 1) {
+                                                                  agreement.setState(AgreementStateEnum.TERMINATED);
+                                                              }
+                                                              return agreement;
+                                                          })
+                                                          .toList();
+        agreementRepository.saveAll(updatedAgreements);
+
+        Set<String> testPendingAgreementIds = Set.of(testObjectList.get(0).getAgreementEntity().getId(),
+                                                     testObjectList.get(2).getAgreementEntity().getId());
+
+        for (Sort.Direction direction : Sort.Direction.values()) {
+            List<Boolean> expectedTestPending = direction.isAscending() ? List.of(false, false, true, true) :
+                                                                         List.of(true, true, false, false);
+            Comparator<AgreementEntity> agreementComparator = Comparator.comparing(
+                    (AgreementEntity agreement) -> testPendingAgreementIds.contains(agreement.getId())
+            );
+            if (direction.isDescending()) {
+                agreementComparator = agreementComparator.reversed();
+            }
+            List<String> expectedAgreementIds = updatedAgreements.stream()
+                                                                 .sorted(agreementComparator.thenComparing(
+                                                                         AgreementEntity::getInformationLastUpdateDate,
+                                                                         Comparator.reverseOrder())
+                                                                                          .thenComparing(AgreementEntity::getId))
+                                                                 .map(AgreementEntity::getId)
+                                                                 .toList();
+            this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.TEST,
+                                                                                    direction)))
+                        .andDo(log())
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.items", hasSize(numRows)))
+                        .andExpect(jsonPath("$.total").value(numRows))
+                        .andExpect(jsonPath("$.items[*].testPending").value(contains(expectedTestPending.toArray())))
+                        .andExpect(jsonPath("$.items[*].agreementId").value(contains(expectedAgreementIds.toArray())));
+        }
+    }
+
+    @Test
+    void GetAgreements_GetAgreementsApprovedSortedByStateAscendingAndDescending_Ok()
+            throws Exception {
+        List<AgreementStateEnum> states = List.of(AgreementStateEnum.EXPIRED,
+                                                 AgreementStateEnum.ACTIVE,
+                                                 AgreementStateEnum.TERMINATED,
+                                                 AgreementStateEnum.APPROVED,
+                                                 AgreementStateEnum.TERMINATION_REMINDER_SENT,
+                                                 AgreementStateEnum.INACTIVE,
+                                                 AgreementStateEnum.TERMINATION_IN_PROGRESS);
+        List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(states.size());
+        for (int index = 0; index < states.size(); index++) {
+            AgreementEntity agreement = testObjectList.get(index).getAgreementEntity();
+            agreement.setState(states.get(index));
+            agreementRepository.save(agreement);
+        }
+
+        // PostgreSQL sorts enum values in the order declared by the database migrations.
+        List<String> ascendingStates = List.of("Approved",
+                                               "Active",
+                                               "Inactive",
+                                               "TerminationInProgress",
+                                               "Terminated",
+                                               "TerminationReminderSent",
+                                               "Expired");
+        for (Sort.Direction direction : Sort.Direction.values()) {
+            List<String> expectedStates = new ArrayList<>(ascendingStates);
+            if (direction.isDescending()) {
+                Collections.reverse(expectedStates);
+            }
+            this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.STATE,
+                                                                                    direction)))
+                        .andDo(log())
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.items", hasSize(states.size())))
+                        .andExpect(jsonPath("$.total").value(states.size()))
+                        .andExpect(jsonPath("$.items[*].state").value(contains(expectedStates.toArray())));
+        }
+    }
+
+    @Test
     void GetAgreements_GetAgreementsApprovedSortedByLastModifyDate_Ok()
             throws Exception {
         final int numRows = 3;
         List<AgreementTestObject> testObjectList = createMultipleApprovedAgreement(numRows);
 
-        AgreementEntity updatedAgreement = testObjectList.get(2).getAgreementEntity();
-        updatedAgreement.setInformationLastUpdateDate(LocalDate.now().plusDays(3));
-        agreementRepository.save(updatedAgreement);
+        LocalDate baseDate = LocalDate.now();
+        List<AgreementEntity> updatedAgreements = IntStream.range(0, numRows)
+                                                          .mapToObj(index -> {
+                                                              AgreementEntity agreement = testObjectList.get(index).getAgreementEntity();
+                                                              agreement.setInformationLastUpdateDate(baseDate.plusDays(numRows - index));
+                                                              return agreement;
+                                                          })
+                                                          .toList();
+        agreementRepository.saveAll(updatedAgreements);
 
-        List<AgreementEntity> sortedByLastModifyDateAgreementList = testObjectList.stream()
-                                                                                  .sorted(Comparator.comparing(a -> a.getAgreementEntity()
-                                                                                                                     .getInformationLastUpdateDate()))
-                                                                                  .map(AgreementTestObject::getAgreementEntity)
-                                                                                  .toList();
+        List<AgreementEntity> sortedByLastModifyDateAgreementList = updatedAgreements.stream()
+                                                                                   .sorted(Comparator.comparing(AgreementEntity::getInformationLastUpdateDate))
+                                                                                   .toList();
 
-        this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.OPERATOR,
+        this.mockMvc.perform(get(TestUtils.getAgreementApprovalWithSortedColumn(BackofficeApprovedSortColumnEnum.LAST_MODIFY_DATE,
                                                                                 Sort.Direction.ASC)))
                     .andDo(log())
                     .andExpect(status().isOk())
@@ -230,6 +341,27 @@ class BackofficeApprovedAgreementApiTest
                     .andExpect(jsonPath("profile.referent").isNotEmpty())
                     .andExpect(jsonPath("profile.entityType").value(EntityType.PRIVATE.getValue()))
                     .andExpect(jsonPath("discounts", hasSize(0)));
+    }
+
+    @Test
+    void ManageAgreementTermination_SendTerminationReminderFromApproved_NoContent()
+            throws Exception {
+        AgreementEntity agreementEntity = createApprovedAgreement().getAgreementEntity();
+        Assertions.assertEquals(AgreementStateEnum.APPROVED, agreementEntity.getState());
+        agreementEntity.setInformationLastUpdateDate(LocalDate.now(ZoneOffset.UTC).minusDays(1));
+        agreementRepository.save(agreementEntity);
+
+        AgreementTerminationCommand command = new AgreementTerminationCommand(AgreementTerminationAction.SEND_TERMINATION_REMINDER);
+
+        this.mockMvc.perform(post(TestUtils.getApprovedAgreementTerminationPath(agreementEntity.getId()))
+                                     .contentType(MediaType.APPLICATION_JSON)
+                                     .content(TestUtils.getJson(command)))
+                    .andDo(log())
+                    .andExpect(status().isNoContent());
+
+        agreementEntity = agreementService.findAgreementById(agreementEntity.getId());
+        Assertions.assertEquals(AgreementStateEnum.TERMINATION_REMINDER_SENT, agreementEntity.getState());
+        Assertions.assertEquals(LocalDate.now(ZoneOffset.UTC), agreementEntity.getInformationLastUpdateDate());
     }
 
     @Test
