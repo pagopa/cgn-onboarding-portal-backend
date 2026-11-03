@@ -29,7 +29,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -550,22 +552,22 @@ class DocumentServiceTest
             throws Exception {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        ProfileRepository profileRepository = Mockito.mock(ProfileRepository.class);
-        DocumentRepository documentRepository = Mockito.mock(DocumentRepository.class);
-        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
-        AgreementServiceLight agreementServiceLight = Mockito.mock(AgreementServiceLight.class);
-        TemplateEngine templateEngine = Mockito.mock(TemplateEngine.class);
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        DocumentRepository documentRepository = mock(DocumentRepository.class);
+        DiscountRepository discountRepository = mock(DiscountRepository.class);
+        AgreementServiceLight agreementServiceLight = mock(AgreementServiceLight.class);
+        TemplateEngine templateEngine = mock(TemplateEngine.class);
 
-        AzureStorage azureStorageMock = Mockito.mock(AzureStorage.class);
-        ConfigProperties configPropertiesMock = Mockito.mock(ConfigProperties.class);
+        AzureStorage azureStorageMock = mock(AzureStorage.class);
+        ConfigProperties configPropertiesMock = mock(ConfigProperties.class);
 
-        ProfileEntity mockedProfile = Mockito.mock(ProfileEntity.class);
-        Mockito.when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
-        Mockito.when(profileRepository.findByAgreementId(Mockito.anyString()))
+        ProfileEntity mockedProfile = mock(ProfileEntity.class);
+        when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
+        when(profileRepository.findByAgreementId(anyString()))
                .thenReturn(Optional.of(mockedProfile));
 
-        Mockito.when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
-        Mockito.doNothing().when(azureStorageMock).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+        when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
+        doNothing().when(azureStorageMock).uploadCsv(any(), anyString(), anyLong());
 
         DocumentService documentServiceLocal = new DocumentService(documentRepository,
                                                               profileRepository,
