@@ -241,7 +241,8 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
+        byte[] content = ("ABCD123ABB12456CCC12w\n" + "A10b\n".repeat(999)).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
 
@@ -257,7 +258,8 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
+        byte[] content = ("ABCD123ABB12456CCC12w\n" + "A10b\n".repeat(999)).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
 
@@ -302,9 +304,9 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithNotMinimumBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
 
-        byte[] content = "item1\n".repeat(9999).getBytes(StandardCharsets.UTF_8);
+        byte[] content = "item1\n".repeat(999).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
 
@@ -319,11 +321,11 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithNotAlphanumericBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
         //bucket csv without header
-        byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentOnlyChars = "AaB\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentOnlyNum = "123\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
         String agreementId = agreementEntity.getId();
         
         ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
@@ -355,9 +357,9 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithAlphanumericBucketCodes_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
 
-        byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentCharsAndNum = "A10b\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
         String agreementId = agreementEntity.getId();
         Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementId,
                                                                         new ByteArrayInputStream(contentCharsAndNum)));
