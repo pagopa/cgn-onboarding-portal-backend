@@ -658,7 +658,8 @@ public class ExportService {
             }
 
         }
-        DiscountItemEyca discountItem = Optional.ofNullable(sae.getApiResponse())
+        DiscountItemEyca discountItem = Optional.ofNullable(sae)
+                                                .map(SearchApiResponseEyca::getApiResponse)
                                                 .map(SearchApiResponseApiResponseEyca::getData)
                                                 .map(SearchApiResponseApiResponseDataEyca::getDiscounts)
                                                 .map(SearchApiResponseApiResponseDataDiscountsEyca::getData)
