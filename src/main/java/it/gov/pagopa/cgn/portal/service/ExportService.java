@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiFunction;
@@ -96,7 +97,9 @@ public class ExportService {
     }
 
 
-    private final String[] eycaDataExportHeaders = new String[]{"ccdb_id",
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
+
+    private final String[] eycaDataExportHeaders = {"ccdb_id",
                                                                 "discount_id",
                                                                 "id",
                                                                 "state",
@@ -132,7 +135,7 @@ public class ExportService {
                                                                 "referent",
                                                                 "eyca_landing_page_url"};
 
-    private final String[] exportAgreementsHeaders = new String[]{"Stato Convenzione",
+    private final String[] exportAgreementsHeaders = {"Stato Convenzione",
                                                                   "Ragione sociale",
                                                                   "Nome alternativo",
                                                                   "Nome alternativo inglese",
@@ -159,7 +162,7 @@ public class ExportService {
                                                                   "Id Operatore",
                                                                   "Id Agevolazione"};
 
-    private final String[] exportEycaHeaders = new String[]{"DISCOUNT_ID",
+    private final String[] exportEycaHeaders = {"DISCOUNT_ID",
                                                             "LOCAL_ID",
                                                             "STATE",
                                                             "CATEGORIES",
@@ -246,7 +249,7 @@ public class ExportService {
                              .forEach(agreementData -> agreementData.forEach(printerConsumer.apply(printer)));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
-            String filename = "export-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+            String filename = "export-" + LocalDate.now(ZONE_ID).format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
             log.info("exportAgreements end success");
             return ResponseEntity.ok()
@@ -304,7 +307,7 @@ public class ExportService {
                               .forEach(printerConsumer.apply(printer));
 
             byte[] export = writer.toString().getBytes(StandardCharsets.UTF_8);
-            String filename = "export-eyca-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
+            String filename = "export-eyca-" + LocalDate.now(ZONE_ID).format(DateTimeFormatter.ISO_LOCAL_DATE) + ".csv";
 
             log.info("exportEycaDiscounts end success");
             return ResponseEntity.ok()
@@ -852,7 +855,7 @@ public class ExportService {
             maybeDiscount.map(DiscountEntity::getDescriptionEn).orElse(null),
             maybeDiscount.map(DiscountEntity::getDiscountValue).map(Objects::toString).orElse(null),
             maybeDiscount.map(d -> DiscountStateEnum.PUBLISHED.equals(d.getState()) &&
-                                   d.getEndDate().compareTo(LocalDate.now()) < 0 ? "EXPIRED":d.getState())
+                                   d.getEndDate().compareTo(LocalDate.now(ZONE_ID)) < 0 ? "EXPIRED":d.getState())
                          .map(Objects::toString).orElse(null),
             maybeDiscount.map(DiscountEntity::getStartDate).map(Objects::toString).orElse(null),
             maybeDiscount.map(DiscountEntity::getEndDate).map(Objects::toString).orElse(null),

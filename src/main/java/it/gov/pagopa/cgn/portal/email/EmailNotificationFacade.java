@@ -26,7 +26,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,9 +47,11 @@ public class EmailNotificationFacade {
 
     private List<String> bccList;
 
-    private AgreementRepository agreementRepository;
+    private final AgreementRepository agreementRepository;
 
-    private DiscountRepository discountRepository;
+    private final DiscountRepository discountRepository;
+
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     public static final String FAILURE_REASON = "failure_reason";
     public static final String OPERATOR_NAME = "operator_name";
@@ -377,10 +381,10 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.SEND_DISCOUNTS_TO_EYCA, context);
 
-        log.info("MAIL-BODY-ADMIN-JOB-EYCA: " + body);
+        log.info("MAIL-BODY-ADMIN-JOB-EYCA: {}", body);
 
         String subject = "Riepilogo del lancio del job eyca del: " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                         LocalDate.now(ZONE_ID).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String failureMessage = "Non è stato possibile inviare l'email del riepilogo del job eyca";
 
 
@@ -402,7 +406,7 @@ public class EmailNotificationFacade {
         var body = getTemplateHtml(TemplateEmail.SEND_DISCOUNTS_TO_EYCA_FAILURE, context);
 
         String subject = "ERRORE nel lancio del job eyca del: " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                         LocalDate.now(ZONE_ID).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String failureMessage = "Non è stato possibile inviare l'email di errore del job eyca";
         final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA_FAILURE);
 
@@ -424,10 +428,10 @@ public class EmailNotificationFacade {
 
         var body = getTemplateHtml(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT, context);
 
-        log.info("MAIL-BODY-ADMIN-EYCA: " + body);
+        log.info("MAIL-BODY-ADMIN-EYCA: {}", body);
 
         String subject = "Opportunità EYCA da aggiornare - " +
-                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MMM-yy", Locale.ITALIAN));
+                         LocalDate.now(ZONE_ID).format(DateTimeFormatter.ofPattern("dd-MMM-yy", Locale.ITALIAN));
         String failureMessage = "Non è stato possibile inviare l'email di eyca al Dipartimento";
         final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.ADMIN_EYCA);
 
@@ -497,22 +501,26 @@ public class EmailNotificationFacade {
         return createTrackingKeyForEmailEventNotification(emailEvent, "", 0);
     }
     public static String createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum emailEvent, String agreementId, long discountId) {
-        String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+        String timeStamp = LocalDateTime.now(ZONE_ID).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
         return  emailEvent.name()
                 + (agreementId != null && !agreementId.isEmpty() ? "::" + agreementId : "")
-                + (discountId != 0 ? "::" + discountId : "")
+                + (discountId == 0 ? "" : "::" + discountId)
                 + "::" + timeStamp;
     }
 
     public static String createTrackingKeyForExpirationNotification(DiscountEntity discount,
                                                                     BucketCodeExpiringThresholdEnum threshold) {
-        return threshold.name() + "::" + discount.getId() + "::" + Year.now().getValue() + "::" +
-               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+        return threshold.name() + "::" + discount.getId() + "::" + Year.now(ZONE_ID).getValue() + "::" +
+               currentWeekOfYear();
     }
 
     public static String createTrackingKeyForWeeklySummaryNotification(ProfileEntity profile) {
-        return "WEEKLY-SUMMARY" + "::" + profile.getId() + "::" + Year.now().getValue() + "::" +
-               Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
+        return "WEEKLY-SUMMARY" + "::" + profile.getId() + "::" + Year.now(ZONE_ID).getValue() + "::" +
+               currentWeekOfYear();
+    }
+
+    private static int currentWeekOfYear() {
+        return LocalDate.now(ZONE_ID).get(WeekFields.of(Locale.getDefault()).weekOfYear());
     }
 
 

@@ -45,6 +45,7 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -1019,8 +1020,8 @@ class EycaExportServiceTest
         entity.setName("Test Discount");
         entity.setImage("https://www.example.com/image.jpg");
         entity.setLive("Y");
-        entity.setStartDate(LocalDate.of(2026, 1, 1));
-        entity.setEndDate(LocalDate.of(2026, 12, 31));
+        entity.setStartDate(LocalDate.of(2026, Month.JANUARY, 1));
+        entity.setEndDate(LocalDate.of(2026, Month.DECEMBER, 31));
 
         when(eycaDataExportRepository.findAll()).thenReturn(List.of(entity));
 
