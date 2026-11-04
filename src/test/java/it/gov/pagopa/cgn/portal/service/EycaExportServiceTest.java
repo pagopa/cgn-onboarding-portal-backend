@@ -110,7 +110,8 @@ class EycaExportServiceTest
         configProperties = mock(ConfigProperties.class);
         paramFacade = mock(ParamFacade.class);
         eycaApiMock = mock(EycaApi.class);
-        when(eycaApiMock.getApiClient()).thenReturn(mock(ApiClient.class));
+        ApiClient apiClientMock = mock(ApiClient.class);
+        when(eycaApiMock.getApiClient()).thenReturn(apiClientMock);
 
         eycaExportService = new EycaExportService(eycaApiMock, configProperties, paramFacade);
 

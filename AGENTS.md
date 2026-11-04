@@ -2,7 +2,7 @@
 
 ## Scope And Maintenance
 
-- This file is the single source of shared project instructions for coding agents working in this repository. Read it at the start of each session and follow the sections applicable to the task.
+- This file is the single source of shared project instructions for coding agents working in this repository. Read it at the start of each session and follow the sections applicable to the task. Always apply "Quality Gate: Sonar, Coverage And Guidelines" during and at the end of every change.
 - When a task changes the project structure, stack, architecture, API contracts, agreement lifecycle, build/test workflows, or coding conventions described here, update the affected instructions in the same change before completing the task.
 - Before completing implementation or review work, check whether the affected instructions still match the project. Correct stale guidance when necessary; do not add cosmetic updates for unchanged rules.
 - Record lasting project conventions and verified behavior here, not temporary task progress or individual test results.
@@ -33,7 +33,7 @@
 - `agreement.state` (`AgreementStateEnum`) is the canonical persisted source of truth for the agreement/convention lifecycle; do not introduce a parallel persisted status axis for the same domain.
 - The canonical lifecycle includes onboarding states (`DRAFT`, `PENDING`, `APPROVED`, `REJECTED`) and post-approval operational states (`ACTIVE`, `EXPIRED`, `INACTIVE`, `TERMINATION_REMINDER_SENT`, `TERMINATION_IN_PROGRESS`, `TERMINATED`).
 - Backoffice `AssignedAgreement` remains a DTO-only projection of `PENDING` plus `backofficeAssignee`; it is not a persisted agreement state.
-- `/agreement-requests` is the pre-approval/request backoffice surface and can include `DRAFT`, `PENDING`, and `REJECTED`; `AssignedAgreement` remains a DTO-only projection of `PENDING` plus `backofficeAssignee`. `/approved-agreements` is the broader post-approval backoffice surface and can include `APPROVED`, `ACTIVE`, `EXPIRED`, `INACTIVE`, `TERMINATION_REMINDER_SENT`, `TERMINATION_IN_PROGRESS`, and `TERMINATED`.
+- `/agreement-requests` is the pre-approval/request backoffice surface and can include `DRAFT`, `PENDING`, and `REJECTED`. `/approved-agreements` is the broader post-approval backoffice surface and can include `APPROVED`, `ACTIVE`, `EXPIRED`, `INACTIVE`, `TERMINATION_REMINDER_SENT`, `TERMINATION_IN_PROGRESS`, and `TERMINATED`.
 - `OrganizationStatus` is derived at read time and should follow the canonical agreement lifecycle semantics rather than legacy `APPROVED -> ACTIVE` shorthand or removed `Enabled` semantics.
 - Publishing a valid current discount moves the agreement to `ACTIVE` in the allowed post-approval states; publish/republish must be rejected while the agreement is in `TERMINATION_IN_PROGRESS`.
 - Operator access to agreement-scoped endpoints under `/agreements/{agreementId}/...` must be blocked when the agreement is `TERMINATED`; the bootstrap operator read on `POST /agreements` remains readable so the frontend can still receive the current agreement state.
@@ -45,6 +45,39 @@
 - Prefer `mvn test` for the test suite and `mvn clean install` or `mvn clean verify` when a full build is needed.
 - Most tests are Spring Boot integration tests built around `IntegrationAbstractTest`, Testcontainers-backed infrastructure, and MockMvc.
 - When changing entities, repositories, or SQL, keep Flyway migrations aligned so the application still passes Hibernate validation.
+
+## Quality Gate: Sonar, Coverage And Guidelines
+
+Applies to every code change (new feature, fix, refactoring, test), in main and test code. Sonar analyses the lines added or touched, so these rules are mandatory, not optional.
+
+Process (all three steps are required):
+
+1. Before coding: read the applicable sections of this file and the checklist below.
+2. While coding: apply the checklist as you write, not afterwards. Write the tests together with the code, not at the end.
+3. Before finishing: re-run the review explicitly against (a) this file, (b) the Sonar checklist, (c) test coverage, then run the tests. Report any guideline you could not meet. Never declare the work finished before this review.
+
+Authorization rule: if complying with a Sonar rule requires edits in the touched file that are outside the requested scope, ask the user before finishing; never skip them silently and never mention them only after the fact.
+
+Coverage rule:
+
+- Every line and branch you add or modify must be covered by tests: success path, error/exception paths, null/empty inputs, and each branch of conditionals (for example retry paths, header present/absent, unparseable values, interrupted threads).
+- Every new public or package-private method, including trivial getters in facades such as `ParamFacade` (both the dev and the param-table profile), needs a test.
+- Check the coverage of the changed files (for example with the IDE coverage run or the Sonar report) and add the missing tests; do not rely only on the existing tests passing.
+
+Sonar checklist (issues already raised in this project; do not reintroduce them):
+
+- Logging: use `{}` placeholders, never string concatenation or `toString()` calls in log arguments.
+- Null safety: do not dereference a value that can be null, including variables reassigned from a method result (for example a second call that may return null); use `Optional`/explicit checks and throw a meaningful exception.
+- Date and time: use `java.time` only (no `Calendar`/`Date`); always pass a `ZoneId`/`ZoneOffset`/`Clock` to `now()`. Existing code uses `ZoneOffset.UTC` or a zone constant; keep the behaviour of the existing code unless the user decides otherwise. Use `java.time.Month` constants instead of int literals in `LocalDate.of(...)`.
+- Fields: private fields that are never reassigned after construction are `final`.
+- Conditions: avoid negated conditions with an else/ternary branch; invert the condition and swap the branches.
+- Arrays: in declarations omit the redundant `new Type[]` prefix when the type is already declared.
+- Tests: follow the static-import rule in "Java Test Guidelines"; do not nest a `mock(...)` call inside another call, extract it into a local variable.
+
+Tooling rules:
+
+- Create and modify files only with the editor tools (`create`/`edit`); do not rewrite source files with shell scripts or bulk regex replacements.
+- When a new Sonar issue type appears, add it to the checklist above in the same change.
 
 ## Working Rules
 
@@ -98,10 +131,7 @@ Applies when adding or updating tests under `src/test/java`, including Spring Bo
 
 Applies when editing OpenAPI contracts under `openapi/`, generated API models/interfaces, handwritten controller signatures, or DTO mappings for the operator, backoffice, public, and EYCA APIs.
 
-- Treat the files under `openapi/` as the source of truth for API contracts.
-- `openapi/openapi.yaml` drives the main operator API, `openapi/backoffice/openapi.yaml` drives backoffice APIs, `openapi/public.yaml` drives public APIs, and `openapi/eyca-data-export/openapi.yaml` drives the EYCA client generation.
-- Maven generates the related `it.gov.pagopa.cgnonboardingportal.*` sources into `target/generated-sources`; do not hand-edit generated output.
-- When a spec changes, check the handwritten controller that implements the generated interface and the converter/facade classes that map between JPA entities and generated models.
+- `openapi/openapi.yaml` drives the main operator API, `openapi/backoffice/openapi.yaml` drives backoffice APIs, `openapi/public.yaml` drives public APIs, and `openapi/eyca-data-export/openapi.yaml` drives the EYCA client generation.- When a spec changes, check the handwritten controller that implements the generated interface and the converter/facade classes that map between JPA entities and generated models.
 - Keep contract changes within the correct API surface instead of mixing operator, backoffice, public, and EYCA models.
 
 ## Flyway Migration Guidelines
