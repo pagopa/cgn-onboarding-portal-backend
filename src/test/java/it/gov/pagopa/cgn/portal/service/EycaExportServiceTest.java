@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.converter.UpdateDataExportEycaWrapperConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
 import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -51,7 +52,9 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -608,6 +611,93 @@ class EycaExportServiceTest
         assertNotNull(spyService.listDiscounts(1, 1000, "json"));
 
         verify(spyService).sleep(30_000L);
+    }
+
+    @Test
+    void rateLimit_withoutResponseHeaders_usesConfiguredWait() {
+        when(paramFacade.getEycaRateLimitMaxRetries()).thenReturn(1);
+        when(paramFacade.getEycaRateLimitWaitMs()).thenReturn(7L);
+        EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
+        doNothing().when(spyService).sleep(anyLong());
+        HttpClientErrorException noHeaders = HttpClientErrorException.create(HttpStatus.TOO_MANY_REQUESTS,
+                                                                           "Too Many Requests",
+                                                                           null,
+                                                                           new byte[0],
+                                                                           null);
+        when(eycaApiMock.listDiscount(any(), any())).thenThrow(noHeaders)
+                                                    .thenReturn(TestUtils.getListApiResponseEyca());
+
+        assertNotNull(spyService.listDiscounts(1, 1000, "json"));
+
+        verify(spyService).sleep(7L);
+    }
+
+    @Test
+    void rateLimit_unparseableRetryAfter_usesConfiguredWait() {
+        when(paramFacade.getEycaRateLimitMaxRetries()).thenReturn(1);
+        when(paramFacade.getEycaRateLimitWaitMs()).thenReturn(7L);
+        EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
+        doNothing().when(spyService).sleep(anyLong());
+        when(eycaApiMock.listDiscount(any(), any())).thenThrow(tooManyRequests("Wed, 21 Oct 2026 07:28:00 GMT"))
+                                                    .thenReturn(TestUtils.getListApiResponseEyca());
+
+        assertNotNull(spyService.listDiscounts(1, 1000, "json"));
+
+        verify(spyService).sleep(7L);
+    }
+
+    @Test
+    void sleep_nonPositive_returnsImmediately() {
+        assertDoesNotThrow(() -> eycaExportService.sleep(0));
+    }
+
+    @Test
+    void sleep_positive_waits() {
+        assertDoesNotThrow(() -> eycaExportService.sleep(1));
+    }
+
+    @Test
+    void sleep_interrupted_throwsRestClientExceptionAndKeepsInterruptFlag() {
+        Thread.currentThread().interrupt();
+        try {
+            assertThrows(RestClientException.class, () -> eycaExportService.sleep(10));
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    void authenticateOnEyca_success_setsSessionCookie() {
+        when(eycaApiMock.authentication()).thenReturn("OK: session123 ");
+
+        eycaExportService.authenticateOnEyca();
+
+        verify(eycaApiMock.getApiClient()).addDefaultCookie("ccdb_session", "session123");
+    }
+
+    @Test
+    void authenticateOnEyca_errorResponse_throwsAuthenticationException() {
+        when(eycaApiMock.authentication()).thenReturn("ERR: invalid credentials");
+
+        assertThrows(EycaAuthenticationException.class, () -> eycaExportService.authenticateOnEyca());
+    }
+
+    @Test
+    void createUpdateDeleteDiscount_delegateToEycaApi() {
+        ApiResponseEyca createResp = new ApiResponseEyca();
+        ApiResponseEyca updateResp = new ApiResponseEyca();
+        DeleteApiResponseEyca deleteResp = new DeleteApiResponseEyca();
+        DataExportEyca create = new DataExportEyca();
+        UpdateDataExportEyca update = new UpdateDataExportEyca();
+        DeleteDataExportEyca delete = new DeleteDataExportEyca();
+        when(eycaApiMock.createDiscount("json", create)).thenReturn(createResp);
+        when(eycaApiMock.updateDiscount("json", update)).thenReturn(updateResp);
+        when(eycaApiMock.deleteDiscount("json", delete)).thenReturn(deleteResp);
+
+        assertSame(createResp, eycaExportService.createDiscount(create, "json"));
+        assertSame(updateResp, eycaExportService.updateDiscount(update, "json"));
+        assertSame(deleteResp, eycaExportService.deleteDiscount(delete, "json"));
     }
 
     @Test

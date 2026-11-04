@@ -658,7 +658,14 @@ public class ExportService {
             }
 
         }
-        return sae.getApiResponse().getData().getDiscounts().getData().getFirst().getCcdbId();
+        DiscountItemEyca discountItem = Optional.ofNullable(sae.getApiResponse())
+                                                .map(SearchApiResponseApiResponseEyca::getData)
+                                                .map(SearchApiResponseApiResponseDataEyca::getDiscounts)
+                                                .map(SearchApiResponseApiResponseDataDiscountsEyca::getData)
+                                                .map(List::getFirst)
+                                                .orElseThrow(() -> new CGNException(
+                                                        "Unexpected EYCA search response, discount data is missing"));
+        return discountItem.getCcdbId();
     }
 
 
