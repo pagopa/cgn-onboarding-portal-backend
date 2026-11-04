@@ -30,6 +30,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import javax.transaction.Transactional;
@@ -466,8 +467,17 @@ public class ExportService {
                 }
             }
         } catch (Exception ex) {
-            log.error("sendDiscountsToEyca end failure: " + ex.getMessage());
+            log.error("sendDiscountsToEyca end failure: {}", ex.getMessage());
             log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
+            notifyJobFailure(ex);
+        }
+    }
+
+    private void notifyJobFailure(Exception ex) {
+        try {
+            emailNotificationFacade.notifyAdminForJobEycaFailure(ex.toString());
+        } catch (Exception notifyEx) {
+            log.error("Unable to send EYCA job failure notification: {}", notifyEx.getMessage());
         }
     }
 
@@ -550,7 +560,7 @@ public class ExportService {
 
         exportEycaList.forEach(exportEyca -> {
 
-            log.info("SEARCH SearchDataExportEyca: " + exportEyca.toString());
+            log.info("SEARCH SearchDataExportEyca: {}", exportEyca);
 
             try {
                 String ccdbId = getCcdbIdOnEyca(exportEyca);
@@ -579,8 +589,11 @@ public class ExportService {
                                       .findFirst()
                                       .ifPresent(viewItem -> viewItem.setCcdbId(ccdbId));
                 }
+            } catch (HttpClientErrorException.TooManyRequests tmr) {
+                log.error("SEARCH eycaApi.searchDiscount rate limited, aborting sync: {}", tmr.getMessage());
+                throw tmr;
             } catch (RestClientException rce) {
-                log.info("SEARCH eycaApi.searchDiscount Exception: " + rce.getMessage());
+                log.info("SEARCH eycaApi.searchDiscount Exception: {}", rce.getMessage());
             }
         });
 
@@ -752,7 +765,7 @@ public class ExportService {
         exportEycaList.forEach(exportEycaWrapper -> {
             UpdateDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
-            log.info("UPDATE UpdateDataExportEyca: " + CGNUtils.toJson(exportEyca));
+            log.info("UPDATE UpdateDataExportEyca: {}", CGNUtils.toJson(exportEyca));
             ApiResponseEyca response = null;
             try {
 
@@ -803,7 +816,7 @@ public class ExportService {
                 }
 
             } catch (RestClientException rce) {
-                log.info("DELETE eycaApi.deleteDiscount Exception: " + rce.getMessage());
+                log.info("DELETE eycaApi.deleteDiscount Exception: {}", rce.getMessage());
                 if (rce.getMessage()!=null &&
                     rce.getMessage().contains(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())) {
                     exportEycaWrapper.setToDeleteFromEycaAdmin(true);

@@ -11,6 +11,7 @@ import it.gov.pagopa.cgn.portal.converter.UpdateDataExportEycaWrapperConverter;
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
+import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
 import it.gov.pagopa.cgn.portal.model.DiscountEntity;
@@ -31,10 +32,12 @@ import org.mockito.Mockito;
 import org.quartz.JobExecutionContext;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
 import javax.mail.Message.RecipientType;
@@ -45,8 +48,10 @@ import javax.mail.internet.MimeMessage;
 import java.time.LocalDate;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -63,7 +68,8 @@ class EycaExportServiceTest
     private EycaExportService eycaExportService;
 
     private ConfigProperties configProperties;
-
+    private EmailNotificationFacade emailNotificationFacade;
+    private ParamFacade paramFacade;
     private AgreementEntity agreement;
 
     @BeforeEach
@@ -99,16 +105,17 @@ class EycaExportServiceTest
         discountRepository = Mockito.mock(DiscountRepository.class);
 
         configProperties = Mockito.mock(ConfigProperties.class);
+        paramFacade = Mockito.mock(ParamFacade.class);
         eycaApiMock = Mockito.mock(EycaApi.class);
         Mockito.when(eycaApiMock.getApiClient()).thenReturn(Mockito.mock(ApiClient.class));
 
-        eycaExportService = new EycaExportService(eycaApiMock, configProperties);
+        eycaExportService = new EycaExportService(eycaApiMock, configProperties, paramFacade);
 
         DataExportEycaWrapperConverter dataExportEycaConverter = new DataExportEycaWrapperConverter();
         UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter = new UpdateDataExportEycaWrapperConverter();
         DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter = new DeleteDataExportEycaWrapperConverter();
 
-        EmailNotificationFacade emailNotificationFacade = Mockito.mock(EmailNotificationFacade.class);
+        emailNotificationFacade = Mockito.mock(EmailNotificationFacade.class);
 
         eycaExportServiceMock = Mockito.mock(EycaExportService.class);
         exportServiceMock = Mockito.mock(ExportService.class);
@@ -549,6 +556,98 @@ class EycaExportServiceTest
         exportService.sendDiscountsToEyca();
 
         Mockito.verify(eycaApiMock, times(1)).getApiClient();
+    }
+
+    private static HttpClientErrorException tooManyRequests(String retryAfter) {
+        HttpHeaders headers = new HttpHeaders();
+        if (retryAfter != null) {
+            headers.add("Retry-After", retryAfter);
+        }
+        return HttpClientErrorException.create(HttpStatus.TOO_MANY_REQUESTS, "Too Many Requests", headers, new byte[0], null);
+    }
+
+    @Test
+    void searchDiscount_retriesOn429AndSucceeds() {
+        when(paramFacade.getEycaRateLimitMaxRetries()).thenReturn(2);
+        EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
+        doNothing().when(spyService).sleep(anyLong());
+        SearchApiResponseEyca resp = TestUtils.getSearchApiResponseEyca();
+        when(eycaApiMock.searchDiscount(any(), any())).thenThrow(tooManyRequests("1")).thenReturn(resp);
+
+        SearchApiResponseEyca result = spyService.searchDiscount(TestUtils.createEmptySearchDataExportEyca(), "json", false);
+
+        assertNotNull(result);
+        verify(eycaApiMock, times(2)).searchDiscount(any(), any());
+        verify(spyService).sleep(1000L);
+    }
+
+    @Test
+    void listDiscounts_429persists_throwsAfterMaxRetries() {
+        when(paramFacade.getEycaRateLimitMaxRetries()).thenReturn(2);
+        when(paramFacade.getEycaRateLimitWaitMs()).thenReturn(10L);
+        EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
+        doNothing().when(spyService).sleep(anyLong());
+        when(eycaApiMock.listDiscount(any(), any())).thenThrow(tooManyRequests(null));
+
+        assertThrows(HttpClientErrorException.TooManyRequests.class,
+                                () -> spyService.listDiscounts(1, 1000, "json"));
+
+        verify(eycaApiMock, times(3)).listDiscount(any(), any());
+        verify(spyService, times(2)).sleep(10L);
+    }
+
+    @Test
+    void retryAfter_isAlwaysRespected() {
+        when(paramFacade.getEycaRateLimitMaxRetries()).thenReturn(1);
+        EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
+        doNothing().when(spyService).sleep(anyLong());
+        when(eycaApiMock.listDiscount(any(), any()))
+               .thenThrow(tooManyRequests("30"))
+               .thenReturn(TestUtils.getListApiResponseEyca());
+
+        assertNotNull(spyService.listDiscounts(1, 1000, "json"));
+
+        verify(spyService).sleep(30_000L);
+    }
+
+    @Test
+    void sendDiscountsToEyca_searchRateLimited_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
+        when(eycaExportServiceMock.searchDiscount(any(SearchDataExportEyca.class), anyString(), anyBoolean()))
+               .thenThrow(tooManyRequests(null));
+
+        exportService.sendDiscountsToEyca();
+
+        verify(eycaExportServiceMock, never()).listDiscounts(any(), any(), any());
+        verify(eycaExportServiceMock, never()).createDiscount(any(), any());
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_listRateLimited_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
+        when(eycaExportServiceMock.listDiscounts(any(), any(), any())).thenThrow(tooManyRequests(null));
+
+        exportService.sendDiscountsToEyca();
+
+        verify(eycaExportServiceMock, never()).createDiscount(any(), any());
+        verify(eycaExportServiceMock, never()).deleteDiscount(any(), any());
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_listRateLimited_notifyFailureErrorIsSwallowed() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
+        when(eycaExportServiceMock.listDiscounts(any(), any(), any())).thenThrow(tooManyRequests(null));
+        doThrow(new IllegalStateException("mail down")).when(emailNotificationFacade)
+                                                       .notifyAdminForJobEycaFailure(anyString());
+
+        assertDoesNotThrow(() -> exportService.sendDiscountsToEyca());
     }
 
 

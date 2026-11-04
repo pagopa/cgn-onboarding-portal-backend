@@ -24,6 +24,7 @@ public enum TemplateEmail {
     HELP_REQUEST("email/help-request.html"),
     CLEAN_DISCOUNT_BUCKET_CODES("email/internal/clean-discount-bucket-codes.html"),
     SEND_DISCOUNTS_TO_EYCA("email/internal/send-discounts-to-eyca.html"),
+    SEND_DISCOUNTS_TO_EYCA_FAILURE("email/internal/send-discounts-to-eyca-failure.html"),
     SEND_EYCA_MANUAL_CHANGES_TO_DEPT("email/send-eyca-manual-changes-to-dept.html");
     private final String templateName;
 }

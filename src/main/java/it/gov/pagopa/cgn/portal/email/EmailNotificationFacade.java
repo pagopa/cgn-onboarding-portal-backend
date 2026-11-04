@@ -395,6 +395,25 @@ public class EmailNotificationFacade {
         emailNotificationService.sendAsyncMessage(emailParams, trackingKey,emailParams.getRecipientsSummary());
     }
 
+    public void notifyAdminForJobEycaFailure(String errorDescription) {
+        var context = new Context();
+        context.setVariable("errorDescription", errorDescription);
+
+        var body = getTemplateHtml(TemplateEmail.SEND_DISCOUNTS_TO_EYCA_FAILURE, context);
+
+        String subject = "ERRORE nel lancio del job eyca del: " +
+                         LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String failureMessage = "Non è stato possibile inviare l'email di errore del job eyca";
+        final String trackingKey = createTrackingKeyForEmailEventNotification(EmailNotificationEventEnum.JOB_ADMIN_EYCA_FAILURE);
+
+        EmailParams emailParams = createEmailParams(bccList,
+                                                    subject,
+                                                    body,
+                                                    failureMessage,
+                                                    List.of());
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey, emailParams.getRecipientsSummary());
+    }
+
     public void notifyEycaAdmin(List<ExportService.EycaManualRowView> rowsForCreate,
                                   List<ExportService.EycaManualRowView> rowsForUpdate,
                                   List<ExportService.EycaManualRowView> rowsForDelete) {

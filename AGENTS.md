@@ -48,6 +48,7 @@
 
 ## Working Rules
 
+- Before implementing any feature, search the project for an existing analogous mechanism (parameters, emails, notifications, schedulers, error handling) and follow it; do not introduce a new approach for a concern the project already handles. If configuration, scope, or the choice of mechanism is uncertain, ask the user before implementing. See "Configuration And Parameters Guidelines", "Email Guidelines", and "Resilience Guidelines" below.
 - Write commit messages, including both the subject and body, in English even when the conversation is in Italian, unless the user explicitly requests another language.
 - Reuse existing enums, error models, and converters before introducing parallel DTO or state definitions.
 - Do not hand-edit build output under `target/`.
@@ -56,6 +57,31 @@
 - In handwritten Java code, if a `List` or other collection is guaranteed non-null by the API contract or local control flow, prefer the native `isEmpty()` check instead of `CollectionUtils.isEmpty(...)`; use null-safe utility checks only when the collection may actually be null.
 - When adding or changing handwritten Java code, including tests, keep database reads and writes out of stream operations and collection-processing lambdas or method references (such as `map`, `filter`, `peek`, and `forEach`). This also applies to helper or service calls that access the database indirectly.
 - Prepare or transform data in memory, then perform database access explicitly outside the pipeline (for example, `saveAll` at the repository layer). Preserve the required transaction boundaries and error-handling behavior when moving or grouping calls. When per-element database calls are necessary, use an explicit loop. `saveAll` alone does not guarantee SQL batching or a single SQL statement.
+
+## Configuration And Parameters Guidelines
+
+Applies when adding or changing any configurable value, including job settings, thresholds, retry/wait values, and recipients.
+
+- First check how similar values are already handled. Operational values that must be changeable without a release (for example the EYCA job cron and mail recipients, which are `on-param-table` in `application.properties`) live in the param table, accessed through `ParamFacade`/`ParamService`/`ParamEntity`, with a new `V...` Flyway migration.
+- Param-table values follow the existing placeholder convention in `application.properties`, never the real value: strings use the value `on-param-table` (e.g. `send.discounts.to.eyca.job.cron=on-param-table`); non-string values (numbers, booleans) have their own `#on-param-table` comment line immediately above each property (one comment per property) and carry a neutral placeholder (e.g. `0`; see `check.expiring.discounts.job.days=0`). The real value lives in the Flyway migration for non-dev environments and in `application-dev.properties` for the dev profile (read via `ConfigProperties` when `ParamFacade.isDev`).
+- Use `application.properties`/`@Value` only for static or environment-level configuration. Declare each property explicitly in `application.properties` (and in `application-dev.properties` when the dev profile needs a different value) and reference it as `@Value("${key}")` without inline defaults, as the existing properties do.
+- Add only the parameters that are strictly necessary. Safety bounds that should not change without a release are constants in code.
+- Do not add parameters, limits, or thresholds based on unverified assumptions (for example an unknown third-party rate limit); verify the real value or ask the user first.
+
+## Resilience Guidelines
+
+Applies when adding retry, throttling, timeout, or rate-limit handling for external integrations (for example EYCA, Azure, mail).
+
+- Apply such measures only to the calls that need them (calls made in loops/bursts or already observed failing), not blanket to every call of a client.
+- Make failures explicit: never swallow an error that makes the overall operation incomplete, and never report success in that case. Notify administrators of job failures through the existing email mechanism.
+
+## Email Guidelines
+
+Applies when adding or changing emails sent by the application.
+
+- Every email uses a Thymeleaf template registered in `TemplateEmail` (under `src/main/resources/templates/email`) and covered by a test in `EmailTemplateTest`; never build HTML inline in Java.
+- Each distinct event has its own value in `EmailNotificationEventEnum` and its own tracking key; do not reuse another event's key.
+- Follow the existing `EmailNotificationFacade` patterns for recipients, subject, and failure messages.
 
 ## Java Test Guidelines
 
