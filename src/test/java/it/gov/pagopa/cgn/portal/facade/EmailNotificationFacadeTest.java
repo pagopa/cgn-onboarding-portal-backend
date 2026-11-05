@@ -22,9 +22,12 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -72,8 +75,8 @@ class EmailNotificationFacadeTest {
         );
 
         EmailParams params = emailParamsCaptor.getValue();
-        assertNotNull("EmailParams non deve essere null",params);
-        assertNotNull("Bcc non deve essere null",params.getMailBCCList());
+        assertNotNull(params, "EmailParams non deve essere null");
+        assertNotNull(params.getMailBCCList(), "Bcc non deve essere null");
     }
     @Test
     void notifyMerchantDiscountTestFailed_shouldFillTemplateWithContextValues() {
@@ -109,8 +112,29 @@ class EmailNotificationFacadeTest {
         assertNotNull(contextCaptor.getValue().getVariable(EmailNotificationFacade.FAILURE_REASON));
 
         // Assert
-        assertTrue("Not expected discountName", returnedHtmlBody.contains(discountName));
-        assertTrue("Not expected reason message", returnedHtmlBody.contains(reasonMessage));
+        assertTrue(returnedHtmlBody.contains(discountName), "Not expected discountName");
+        assertTrue(returnedHtmlBody.contains(reasonMessage), "Not expected reason message");
+    }
+
+    @Test
+    void notifyAdminForJobEycaFailure_trackedSendSucceeds_doesNotResend() {
+        when(emailNotificationService.sendAsyncMessage(any(), anyString(), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        emailNotificationFacade.notifyAdminForJobEycaFailure("error");
+
+        verify(emailNotificationService).sendAsyncMessage(any(), anyString(), anyString());
+        verify(emailNotificationService, never()).sendAsyncMessage(any(EmailParams.class));
+    }
+
+    @Test
+    void notifyAdminForJobEycaFailure_trackedSendFails_resendsWithoutTracking() {
+        when(emailNotificationService.sendAsyncMessage(any(), anyString(), anyString()))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("db down")));
+
+        emailNotificationFacade.notifyAdminForJobEycaFailure("error");
+
+        verify(emailNotificationService).sendAsyncMessage(any(EmailParams.class));
     }
 
     @Test
@@ -128,8 +152,10 @@ class EmailNotificationFacadeTest {
 
         String recipientSummary = recipientSummaryCaptor.getValue();
 
-        assertNotNull("recipientSummary non deve essere null",recipientSummary);
-        assertEquals("recipientSummary deve contenere To e Bcc", "To:eycaMailTo@contoso.com Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+        assertNotNull(recipientSummary, "recipientSummary non deve essere null");
+        assertEquals("To:eycaMailTo@contoso.com Bcc:eycaJobMailTo@contoso.com",
+                recipientSummaryCaptor.getValue(),
+                "recipientSummary deve contenere To e Bcc");
 
     }
 
@@ -150,8 +176,10 @@ class EmailNotificationFacadeTest {
 
         String recipientSummary = recipientSummaryCaptor.getValue();
 
-        assertNotNull("recipientSummary non deve essere null",recipientSummary);
-        assertEquals("recipientSummary deve contenere solo bcc", "Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+        assertNotNull(recipientSummary, "recipientSummary non deve essere null");
+        assertEquals("Bcc:eycaJobMailTo@contoso.com",
+                recipientSummaryCaptor.getValue(),
+                "recipientSummary deve contenere solo bcc");
 
     }
 
@@ -185,8 +213,10 @@ class EmailNotificationFacadeTest {
 
         String recipientSummary = recipientSummaryCaptor.getValue();
 
-        assertNotNull("recipientSummary non deve essere null",recipientSummary);
-        assertEquals("recipientSummary deve contenere solo bcc", "Bcc:eycaJobMailTo@contoso.com", recipientSummaryCaptor.getValue());
+        assertNotNull(recipientSummary, "recipientSummary non deve essere null");
+        assertEquals("Bcc:eycaJobMailTo@contoso.com",
+                recipientSummaryCaptor.getValue(),
+                "recipientSummary deve contenere solo bcc");
 
     }
 
@@ -202,7 +232,7 @@ class EmailNotificationFacadeTest {
         assertEquals("NEW_AGREEMENT_REQUEST", parts[0]);
         assertEquals("AG123", parts[1]);
         assertEquals("42", parts[2]);
-        assertTrue("Timestamp atteso con 17 cifre", TS_PATTERN.matcher(parts[3]).matches());
+        assertTrue(TS_PATTERN.matcher(parts[3]).matches(), "Timestamp atteso con 17 cifre");
     }
 
     @Test

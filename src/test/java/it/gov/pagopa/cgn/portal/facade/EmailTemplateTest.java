@@ -30,6 +30,7 @@ class EmailTemplateTest
     void templateFileIsOnClasspath() {
         verifyIsOnPath(TemplateEmail.CLEAN_DISCOUNT_BUCKET_CODES);
         verifyIsOnPath(TemplateEmail.SEND_DISCOUNTS_TO_EYCA);
+        verifyIsOnPath(TemplateEmail.SEND_DISCOUNTS_TO_EYCA_FAILURE);
         verifyIsOnPath(TemplateEmail.SEND_EYCA_MANUAL_CHANGES_TO_DEPT);
     }
 
@@ -83,6 +84,18 @@ class EmailTemplateTest
                    "Body should contain entitiesToUpdateOnEyca");
         assertTrue(body.contains(String.valueOf(entitiesToDeleteOnEyca)),
                    "Body should contain entitiesToDeleteOnEyca");
+    }
+
+    @Test
+    void bodyShouldContainExpectedValuesForSendDiscountsToEycaFailure() {
+        Context ctx = new Context();
+        ctx.setVariable("errorDescription", "429 Too Many Requests <test>");
+
+        String body = htmlTemplateEngine.process(TemplateEmail.SEND_DISCOUNTS_TO_EYCA_FAILURE.getTemplateName(), ctx);
+
+        assertNotNull(body);
+        assertTrue(body.contains("Send Discounts To Eyca Job non è stato completato."));
+        assertTrue(body.contains("429 Too Many Requests &lt;test&gt;"));
     }
 
 
