@@ -12,6 +12,7 @@ import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.email.EmailNotificationFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
+import it.gov.pagopa.cgn.portal.exception.EycaRateLimitInterruptedException;
 import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgn.portal.enums.DiscountStateEnum;
 import it.gov.pagopa.cgn.portal.model.AgreementEntity;
@@ -36,6 +37,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
@@ -73,6 +76,7 @@ class EycaExportServiceTest
     private ConfigProperties configProperties;
     private EmailNotificationFacade emailNotificationFacade;
     private ParamFacade paramFacade;
+    private PlatformTransactionManager transactionManager;
     private AgreementEntity agreement;
 
     @BeforeEach
@@ -109,6 +113,8 @@ class EycaExportServiceTest
 
         configProperties = mock(ConfigProperties.class);
         paramFacade = mock(ParamFacade.class);
+        transactionManager = mock(PlatformTransactionManager.class);
+        when(transactionManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
         eycaApiMock = mock(EycaApi.class);
         ApiClient apiClientMock = mock(ApiClient.class);
         when(eycaApiMock.getApiClient()).thenReturn(apiClientMock);
@@ -132,7 +138,8 @@ class EycaExportServiceTest
                                           dataExportEycaConverter,
                                           updateDataExportEycaConverter,
                                           deleteDataExportEycaConverter,
-                                          emailNotificationFacade);
+                                          emailNotificationFacade,
+                                          transactionManager);
 
     }
 
@@ -583,6 +590,16 @@ class EycaExportServiceTest
         assertNotNull(result);
         verify(eycaApiMock, times(2)).searchDiscount(any(), any());
         verify(spyService).sleep(1000L);
+        verify(paramFacade).getEycaRateLimitMaxRetries();
+    }
+
+    @Test
+    void listDiscounts_success_doesNotReadRetryPolicy() {
+        when(eycaApiMock.listDiscount(any(), any())).thenReturn(TestUtils.getListApiResponseEyca());
+
+        assertNotNull(eycaExportService.listDiscounts(1, 1000, "json"));
+
+        verify(paramFacade, never()).getEycaRateLimitMaxRetries();
     }
 
     @Test
@@ -639,7 +656,7 @@ class EycaExportServiceTest
         when(paramFacade.getEycaRateLimitWaitMs()).thenReturn(7L);
         EycaExportService spyService = spy(new EycaExportService(eycaApiMock, configProperties, paramFacade));
         doNothing().when(spyService).sleep(anyLong());
-        when(eycaApiMock.listDiscount(any(), any())).thenThrow(tooManyRequests("Wed, 21 Oct 2026 07:28:00 GMT"))
+        when(eycaApiMock.listDiscount(any(), any())).thenThrow(tooManyRequests("Wed, 1 Oct 2026 07:28:00 GMT"))
                                                     .thenReturn(TestUtils.getListApiResponseEyca());
 
         assertNotNull(spyService.listDiscounts(1, 1000, "json"));
@@ -658,10 +675,10 @@ class EycaExportServiceTest
     }
 
     @Test
-    void sleep_interrupted_throwsRestClientExceptionAndKeepsInterruptFlag() {
+    void sleep_interrupted_throwsRateLimitInterruptedExceptionAndKeepsInterruptFlag() {
         Thread.currentThread().interrupt();
         try {
-            assertThrows(RestClientException.class, () -> eycaExportService.sleep(10));
+            assertThrows(EycaRateLimitInterruptedException.class, () -> eycaExportService.sleep(10));
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             Thread.interrupted();
@@ -728,6 +745,113 @@ class EycaExportServiceTest
         verify(eycaExportServiceMock, never()).deleteDiscount(any(), any());
         verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
         verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_createRateLimited_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
+        when(eycaExportServiceMock.listDiscounts(anyInt(), anyInt(), anyString()))
+               .thenReturn(TestUtils.getListApiResponseEycaEmpty());
+        when(eycaExportServiceMock.createDiscount(any(DataExportEyca.class), anyString()))
+               .thenThrow(tooManyRequests(null));
+
+        exportService.sendDiscountsToEyca();
+
+        verify(discountRepository, never()).save(any(DiscountEntity.class));
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_updateRateLimited_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForUpdate());
+        when(eycaExportServiceMock.searchDiscount(any(SearchDataExportEyca.class), anyString(), anyBoolean()))
+               .thenReturn(TestUtils.getSearchApiResponseEyca());
+        when(eycaExportServiceMock.updateDiscount(any(UpdateDataExportEyca.class), anyString()))
+               .thenThrow(tooManyRequests(null));
+
+        exportService.sendDiscountsToEyca();
+
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_deleteRateLimited_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
+        when(eycaExportServiceMock.deleteDiscount(any(), any())).thenThrow(tooManyRequests(null));
+
+        exportService.sendDiscountsToEyca();
+
+        verify(eycaExportServiceMock, times(1)).deleteDiscount(any(), any());
+        verify(discountRepository, never()).save(any(DiscountEntity.class));
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_searchInterrupted_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportViewEntityList());
+        when(eycaExportServiceMock.searchDiscount(any(SearchDataExportEyca.class), anyString(), anyBoolean()))
+               .thenThrow(interruptedWait());
+
+        exportService.sendDiscountsToEyca();
+
+        verify(eycaExportServiceMock, never()).listDiscounts(any(), any(), any());
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_createInterrupted_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForCreate());
+        when(eycaExportServiceMock.listDiscounts(anyInt(), anyInt(), anyString()))
+               .thenReturn(TestUtils.getListApiResponseEycaEmpty());
+        when(eycaExportServiceMock.createDiscount(any(DataExportEyca.class), anyString()))
+               .thenThrow(interruptedWait());
+
+        exportService.sendDiscountsToEyca();
+
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_updateInterrupted_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getEycaDataExportForUpdate());
+        when(eycaExportServiceMock.searchDiscount(any(SearchDataExportEyca.class), anyString(), anyBoolean()))
+               .thenReturn(TestUtils.getSearchApiResponseEyca());
+        when(eycaExportServiceMock.updateDiscount(any(UpdateDataExportEyca.class), anyString()))
+               .thenThrow(interruptedWait());
+
+        exportService.sendDiscountsToEyca();
+
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    @Test
+    void sendDiscountsToEyca_deleteInterrupted_abortsAndNotifiesFailure() {
+        initMockitoPreconditions();
+        when(eycaDataExportRepository.findAll()).thenReturn(TestUtils.getTobeDeletedEycaDataExportViewEntityList());
+        when(eycaExportServiceMock.deleteDiscount(any(), any())).thenThrow(interruptedWait());
+
+        exportService.sendDiscountsToEyca();
+
+        verify(eycaExportServiceMock, times(1)).deleteDiscount(any(), any());
+        verify(emailNotificationFacade).notifyAdminForJobEycaFailure(anyString());
+        verify(emailNotificationFacade, never()).notifyAdminForJobEyca(any(), any(), any(), any());
+    }
+
+    private static EycaRateLimitInterruptedException interruptedWait() {
+        return new EycaRateLimitInterruptedException("Interrupted while waiting for EYCA rate limit",
+                                                     new InterruptedException());
     }
 
     @Test

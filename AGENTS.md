@@ -56,6 +56,8 @@ Process (all three steps are required):
 2. While coding: apply the checklist as you write, not afterwards. Write the tests together with the code, not at the end.
 3. Before finishing: re-run the review explicitly against (a) this file, (b) the Sonar checklist, (c) test coverage, then run the tests. Report any guideline you could not meet. Never declare the work finished before this review.
 
+Diff hygiene: do not include formatting-only changes that do not alter behavior or improve required tooling compliance. Preserve the existing layout of surrounding code and avoid reflowing expressions or blocks unrelated to the change, so reviewers can focus on meaningful differences. If formatting is required by a formatter or to satisfy a rule, keep it limited to the changed code.
+
 Authorization rule: if complying with a Sonar rule requires edits in the touched file that are outside the requested scope, ask the user before finishing; never skip them silently and never mention them only after the fact.
 
 Coverage rule:
@@ -131,7 +133,8 @@ Applies when adding or updating tests under `src/test/java`, including Spring Bo
 
 Applies when editing OpenAPI contracts under `openapi/`, generated API models/interfaces, handwritten controller signatures, or DTO mappings for the operator, backoffice, public, and EYCA APIs.
 
-- `openapi/openapi.yaml` drives the main operator API, `openapi/backoffice/openapi.yaml` drives backoffice APIs, `openapi/public.yaml` drives public APIs, and `openapi/eyca-data-export/openapi.yaml` drives the EYCA client generation.- When a spec changes, check the handwritten controller that implements the generated interface and the converter/facade classes that map between JPA entities and generated models.
+- `openapi/openapi.yaml` drives the main operator API, `openapi/backoffice/openapi.yaml` drives backoffice APIs, `openapi/public.yaml` drives public APIs, and `openapi/eyca-data-export/openapi.yaml` drives the EYCA client generation.
+- When a spec changes, check the handwritten controller that implements the generated interface and the converter/facade classes that map between JPA entities and generated models.
 - Keep contract changes within the correct API surface instead of mixing operator, backoffice, public, and EYCA models.
 
 ## Flyway Migration Guidelines

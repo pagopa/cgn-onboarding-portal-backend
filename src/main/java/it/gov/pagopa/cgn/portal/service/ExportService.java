@@ -29,6 +29,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -76,6 +79,7 @@ public class ExportService {
     private final UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter;
     private final DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter;
     private final EmailNotificationFacade emailNotificationFacade;
+    private final TransactionTemplate transactionTemplate;
 
     public record EycaManualRowView(
             String initiativeId,
@@ -225,7 +229,8 @@ public class ExportService {
                          DataExportEycaWrapperConverter dataExportEycaConverter,
                          UpdateDataExportEycaWrapperConverter updateDataExportEycaConverter,
                          DeleteDataExportEycaWrapperConverter deleteDataExportEycaConverter,
-                         EmailNotificationFacade emailNotificationFacade) {
+                         EmailNotificationFacade emailNotificationFacade,
+                         PlatformTransactionManager transactionManager) {
         this.agreementRepository = agreementRepository;
         this.discountRepository = discountRepository;
         this.eycaDataExportRepository = eycaDataExportRepository;
@@ -235,6 +240,8 @@ public class ExportService {
         this.updateDataExportEycaConverter = updateDataExportEycaConverter;
         this.deleteDataExportEycaConverter = deleteDataExportEycaConverter;
         this.emailNotificationFacade = emailNotificationFacade;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
+        this.transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     @Transactional(Transactional.TxType.REQUIRED)
@@ -382,15 +389,41 @@ public class ExportService {
     }
 
 
-    @Transactional(Transactional.TxType.REQUIRED)
     public void sendDiscountsToEyca() {
-
         try {
+            EycaJobResult result = transactionTemplate.execute(status -> processDiscountsToEyca());
+            if (result == null) {
+                return;
+            }
+            if (result.failure() != null) {
+                logJobFailure(result.failure());
+                notifyJobFailure(result.failure());
+                return;
+            }
+            emailNotificationFacade.notifyAdminForJobEyca(result.attachments(),
+                                                          result.createCount(),
+                                                          result.updateCount(),
+                                                          result.deleteCount());
+            log.info("sendDiscountsToEyca end success");
+            if (!result.rowsToCreate().isEmpty() || !result.rowsToUpdate().isEmpty() ||
+                !result.rowsToDelete().isEmpty()) {
+                emailNotificationFacade.notifyEycaAdmin(result.rowsToCreate(),
+                                                        result.rowsToUpdate(),
+                                                        result.rowsToDelete());
+                log.info("notifyEycaAdmin end success");
+            }
+        } catch (Exception ex) {
+            logJobFailure(ex);
+            notifyJobFailure(ex);
+        }
+    }
 
+    private EycaJobResult processDiscountsToEyca() {
+        try {
             Optional<Boolean> eycaExportEnabled = Optional.ofNullable(configProperties.getEycaExportEnabled());
             if (!eycaExportEnabled.orElse(false)) {
                 log.info("sendDiscountsToEyca aborted - eyca.export.enabled is FALSE");
-                return;
+                return null;
             }
 
             log.info("sendDiscountsToEyca start");
@@ -420,20 +453,16 @@ public class ExportService {
                                                              entitiesToCreateOnEyca,
                                                              entitiesToUpdateOnEyca,
                                                              entitiesToDeleteOnEyca);
-
-            emailNotificationFacade.notifyAdminForJobEyca(attachments,
-                                                          entitiesToCreateOnEyca.size(),
-                                                          entitiesToUpdateOnEyca.size(),
-                                                          entitiesToDeleteOnEyca.size());
-            log.info("sendDiscountsToEyca end success");
+            List<EycaManualRowView> rowsToCreate = List.of();
+            List<EycaManualRowView> rowsToUpdate = List.of();
+            List<EycaManualRowView> rowsToDelete = List.of();
 
             if (!entitiesToCreateOnEyca.isEmpty() || !entitiesToUpdateOnEyca.isEmpty() ||
                 !entitiesToDeleteOnEyca.isEmpty()) {
-
-                List<EycaManualRowView> rowsToCreate = new ArrayList<>(getListForStaticCode(entitiesToCreateOnEyca, false));
+                rowsToCreate = new ArrayList<>(getListForStaticCode(entitiesToCreateOnEyca, false));
                 rowsToCreate.addAll(getListForLandingPage(entitiesToCreateOnEyca, false));
 
-                List<EycaManualRowView> rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
+                rowsToUpdate = new ArrayList<>(getListForStaticCode(entitiesToUpdateOnEyca, true));
                 rowsToUpdate.addAll(getListForLandingPage(entitiesToUpdateOnEyca, true));
 
                 //only for those that could not be deleted
@@ -441,39 +470,59 @@ public class ExportService {
                                                                .filter(row -> Boolean.TRUE.equals(row.getToDeleteFromEycaAdmin()))
                                                                .toList();
 
-                List<EycaManualRowView> rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
+                rowsToDelete = new ArrayList<>(getListForStaticCode(entitiesToDeleteOnEyca, false));
                 rowsToDelete.addAll(getListForLandingPage(entitiesToDeleteOnEyca, false));
 
                 if (!rowsToCreate.isEmpty() || !rowsToUpdate.isEmpty() || !rowsToDelete.isEmpty()) {
-
-                    emailNotificationFacade.notifyEycaAdmin(rowsToCreate, rowsToUpdate, rowsToDelete);
-                    log.info("notifyEycaAdmin end success");
-
-                    entitiesToUpdateOnEyca.stream()
-                                          .filter(row -> Boolean.TRUE.equals(row.getEycaEmailUpdateRequired()))
-                                          .forEach(row -> {
-                                              Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(
-                                                      row.getEycaUpdateId());
-                                              if (dbEntityOpt.isPresent()) {
-                                                  DiscountEntity dbEntity = dbEntityOpt.get();
-                                                  dbEntity.setEycaEmailUpdateRequired(false);
-                                                  discountRepository.save(dbEntity);
-                                              } else {
-                                                  log.info(
-                                                          "EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: " +
-                                                          row.getEycaUpdateId());
-                                              }
-                                          });
+                    updateEycaEmailUpdateRequired(entitiesToUpdateOnEyca);
                 } else {
                     log.info("MAIL-BODY-ADMIN-EYCA: no data to send");
                     log.info("notifyEycaAdmin not sended");
                 }
             }
+
+            return new EycaJobResult(attachments,
+                                     entitiesToCreateOnEyca.size(),
+                                     entitiesToUpdateOnEyca.size(),
+                                     entitiesToDeleteOnEyca.size(),
+                                     rowsToCreate,
+                                     rowsToUpdate,
+                                     rowsToDelete,
+                                     null);
         } catch (Exception ex) {
-            log.error("sendDiscountsToEyca end failure: {}", ex.getMessage());
-            log.error(Arrays.stream(ex.getStackTrace()).map(StackTraceElement::toString).collect(joining("\n")));
-            notifyJobFailure(ex);
+            return new EycaJobResult(List.of(), 0, 0, 0, List.of(), List.of(), List.of(), ex);
         }
+    }
+
+    private void updateEycaEmailUpdateRequired(
+            List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca) {
+        for (DataExportEycaWrapper<UpdateDataExportEyca> row : entitiesToUpdateOnEyca) {
+            if (Boolean.TRUE.equals(row.getEycaEmailUpdateRequired())) {
+                Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(row.getEycaUpdateId());
+                if (dbEntityOpt.isPresent()) {
+                    DiscountEntity dbEntity = dbEntityOpt.get();
+                    dbEntity.setEycaEmailUpdateRequired(false);
+                    discountRepository.save(dbEntity);
+                } else {
+                    log.info("EycaEmailUpdateRequired not setted to false, discount not found on CGN with eyca_update_id: {}",
+                             row.getEycaUpdateId());
+                }
+            }
+        }
+    }
+
+    private void logJobFailure(Exception ex) {
+        log.error("sendDiscountsToEyca end failure", ex);
+    }
+
+    private record EycaJobResult(List<Attachment> attachments,
+                                 int createCount,
+                                 int updateCount,
+                                 int deleteCount,
+                                 List<EycaManualRowView> rowsToCreate,
+                                 List<EycaManualRowView> rowsToUpdate,
+                                 List<EycaManualRowView> rowsToDelete,
+                                 Exception failure) {
     }
 
     private void notifyJobFailure(Exception ex) {
@@ -757,6 +806,9 @@ public class ExportService {
                     exportEycaWrapper.setEycaUpdateId(die.getId());
                     exportEycaWrapper.setCcdbId(die.getCcdbId());
                 }
+            } catch (HttpClientErrorException.TooManyRequests tmr) {
+                log.error("CREATE eycaApi.createDiscount rate limited, aborting sync: {}", tmr.getMessage());
+                throw tmr;
             } catch (RestClientException | CGNException e) {
                 log.info("CREATE eycaApi.createDiscount Exception>>: {}", e.getMessage());
             }
@@ -786,6 +838,9 @@ public class ExportService {
                     log.info("Update Response:");
                     log.info(response.toString());
                 }
+            } catch (HttpClientErrorException.TooManyRequests tmr) {
+                log.error("UPDATE eycaApi.updateDiscount rate limited, aborting sync: {}", tmr.getMessage());
+                throw tmr;
             } catch (RestClientException | CGNException e) {
                 log.info("UPDATE eycaApi.updateDiscount Exception: {}", e.getMessage());
             }
@@ -826,6 +881,9 @@ public class ExportService {
                     discountRepository.save(entity);
                 }
 
+            } catch (HttpClientErrorException.TooManyRequests tmr) {
+                log.error("DELETE eycaApi.deleteDiscount rate limited, aborting sync: {}", tmr.getMessage());
+                throw tmr;
             } catch (RestClientException rce) {
                 log.info("DELETE eycaApi.deleteDiscount Exception: {}", rce.getMessage());
                 if (rce.getMessage()!=null &&

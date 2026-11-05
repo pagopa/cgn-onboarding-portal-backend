@@ -415,7 +415,14 @@ public class EmailNotificationFacade {
                                                     body,
                                                     failureMessage,
                                                     List.of());
-        emailNotificationService.sendAsyncMessage(emailParams, trackingKey, emailParams.getRecipientsSummary());
+        // the tracking key requires the DB: if tracking fails, resend without it so admins are still alerted
+        emailNotificationService.sendAsyncMessage(emailParams, trackingKey, emailParams.getRecipientsSummary())
+                                .exceptionally(ex -> {
+                                    log.warn("Tracked EYCA failure email not sent, resending without tracking: {}",
+                                             ex.getMessage());
+                                    emailNotificationService.sendAsyncMessage(emailParams);
+                                    return null;
+                                });
     }
 
     public void notifyEycaAdmin(List<ExportService.EycaManualRowView> rowsForCreate,
@@ -520,7 +527,11 @@ public class EmailNotificationFacade {
     }
 
     private static int currentWeekOfYear() {
-        return LocalDate.now(ZONE_ID).get(WeekFields.of(Locale.getDefault()).weekOfYear());
+        return weekOfYear(LocalDate.now(ZONE_ID), Locale.getDefault());
+    }
+
+    static int weekOfYear(LocalDate date, Locale locale) {
+        return date.get(WeekFields.of(locale).weekOfWeekBasedYear());
     }
 
 

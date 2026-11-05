@@ -22,6 +22,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
@@ -111,6 +112,27 @@ class EmailNotificationFacadeTest {
         // Assert
         assertTrue("Not expected discountName", returnedHtmlBody.contains(discountName));
         assertTrue("Not expected reason message", returnedHtmlBody.contains(reasonMessage));
+    }
+
+    @Test
+    void notifyAdminForJobEycaFailure_trackedSendSucceeds_doesNotResend() {
+        when(emailNotificationService.sendAsyncMessage(any(), anyString(), anyString()))
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        emailNotificationFacade.notifyAdminForJobEycaFailure("error");
+
+        verify(emailNotificationService).sendAsyncMessage(any(), anyString(), anyString());
+        verify(emailNotificationService, never()).sendAsyncMessage(any(EmailParams.class));
+    }
+
+    @Test
+    void notifyAdminForJobEycaFailure_trackedSendFails_resendsWithoutTracking() {
+        when(emailNotificationService.sendAsyncMessage(any(), anyString(), anyString()))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("db down")));
+
+        emailNotificationFacade.notifyAdminForJobEycaFailure("error");
+
+        verify(emailNotificationService).sendAsyncMessage(any(EmailParams.class));
     }
 
     @Test

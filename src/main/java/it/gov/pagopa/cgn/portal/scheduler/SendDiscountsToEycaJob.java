@@ -2,6 +2,7 @@ package it.gov.pagopa.cgn.portal.scheduler;
 
 import it.gov.pagopa.cgn.portal.service.ExportService;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import java.time.Instant;
 
 @Component
 @Slf4j
+@DisallowConcurrentExecution
 public class SendDiscountsToEycaJob
         implements Job {
 

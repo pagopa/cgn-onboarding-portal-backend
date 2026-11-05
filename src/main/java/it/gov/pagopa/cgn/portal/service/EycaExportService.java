@@ -3,6 +3,7 @@ package it.gov.pagopa.cgn.portal.service;
 
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
+import it.gov.pagopa.cgn.portal.exception.EycaRateLimitInterruptedException;
 import it.gov.pagopa.cgn.portal.facade.ParamFacade;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
@@ -12,12 +13,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 @Slf4j
 @Service
 public class EycaExportService {
+
+    private static final DateTimeFormatter HTTP_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("EEE, dd MMM uuuu HH:mm:ss 'GMT'", Locale.US)
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     private final EycaApi eycaApi;
     private final ApiClient apiClient;
@@ -32,7 +46,7 @@ public class EycaExportService {
     }
 
     private <T> T callWithRateLimitRetry(Supplier<T> call) {
-        int maxRetries = Math.max(0, paramFacade.getEycaRateLimitMaxRetries());
+        int maxRetries = -1;
         int attempt = 0;
         while (true) {
             try {
@@ -42,6 +56,9 @@ public class EycaExportService {
                          tmr.getStatusCode(),
                          tmr.getResponseHeaders(),
                          tmr.getResponseBodyAsString());
+                if (maxRetries < 0) {
+                    maxRetries = Math.max(0, paramFacade.getEycaRateLimitMaxRetries());
+                }
                 if (attempt >= maxRetries) {
                     log.error("EYCA rate limit (429) persists after {} retries", attempt);
                     throw tmr;
@@ -58,10 +75,21 @@ public class EycaExportService {
         long waitMs = Math.max(0, paramFacade.getEycaRateLimitWaitMs());
         String retryAfter = ex.getResponseHeaders() != null ? ex.getResponseHeaders().getFirst("Retry-After") : null;
         if (retryAfter != null) {
-            try {
-                waitMs = Long.parseLong(retryAfter.trim()) * 1000L;
-            } catch (NumberFormatException nfe) {
-                log.warn("Unparseable Retry-After header: {}", retryAfter);
+            String retryAfterValue = retryAfter.trim();
+            if (retryAfterValue.matches("[0-9]+")) {
+                try {
+                    waitMs = Math.multiplyExact(Long.parseLong(retryAfterValue), 1000L);
+                } catch (NumberFormatException | ArithmeticException ex1) {
+                    log.warn("Unparseable Retry-After header: {}", retryAfter);
+                }
+            } else {
+                try {
+                    LocalDateTime retryDate = LocalDateTime.parse(retryAfterValue, HTTP_DATE_FORMATTER);
+                    waitMs = Duration.between(Instant.now(Clock.systemUTC()), retryDate.toInstant(ZoneOffset.UTC))
+                            .toMillis();
+                } catch (DateTimeParseException | ArithmeticException ex1) {
+                    log.warn("Unparseable Retry-After header: {}", retryAfter);
+                }
             }
         }
         return Math.max(waitMs, 0);
@@ -75,7 +103,7 @@ public class EycaExportService {
             Thread.sleep(millis);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new RestClientException("Interrupted while waiting for EYCA rate limit", ie);
+            throw new EycaRateLimitInterruptedException("Interrupted while waiting for EYCA rate limit", ie);
         }
     }
 
@@ -133,4 +161,3 @@ public class EycaExportService {
     }
 
 }
-
