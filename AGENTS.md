@@ -74,7 +74,9 @@ Sonar checklist (issues already raised in this project; do not reintroduce them)
 - Fields: private fields that are never reassigned after construction are `final`.
 - Conditions: avoid negated conditions with an else/ternary branch; invert the condition and swap the branches.
 - Arrays: in declarations omit the redundant `new Type[]` prefix when the type is already declared.
-- Tests: follow the static-import rule in "Java Test Guidelines"; do not nest a `mock(...)` call inside another call, extract it into a local variable.
+- Regular expressions: prefer concise character classes such as `\d` over equivalent forms such as `[0-9]`.
+- Imports: do not leave duplicate imports.
+- Tests: follow the static-import rule in "Java Test Guidelines"; JUnit Jupiter tests must use Jupiter assertions, not JUnit 4 assertions; do not nest a `mock(...)` call inside another call, extract it into a local variable.
 
 Tooling rules:
 

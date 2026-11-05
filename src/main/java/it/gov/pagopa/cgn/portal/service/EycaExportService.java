@@ -76,7 +76,7 @@ public class EycaExportService {
         String retryAfter = ex.getResponseHeaders() != null ? ex.getResponseHeaders().getFirst("Retry-After") : null;
         if (retryAfter != null) {
             String retryAfterValue = retryAfter.trim();
-            if (retryAfterValue.matches("[0-9]+")) {
+            if (retryAfterValue.matches("\\d+")) {
                 try {
                     waitMs = Math.multiplyExact(Long.parseLong(retryAfterValue), 1000L);
                 } catch (NumberFormatException | ArithmeticException ex1) {
