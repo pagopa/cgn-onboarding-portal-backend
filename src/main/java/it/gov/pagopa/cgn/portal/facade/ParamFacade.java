@@ -33,6 +33,16 @@ public class ParamFacade {
         return (isDev ? configProperties.getEycaAdminMailTo() : paramService.getParam(ParamGroupEnum.SEND_DISCOUNTS_EYCA_JOB, "eyca.admin.mailto")).split(";");
     }
 
+    public int getEycaRateLimitMaxRetries() {
+        return isDev ? configProperties.getEycaRateLimitMaxRetries()
+                     : Integer.parseInt(paramService.getParam(ParamGroupEnum.SEND_DISCOUNTS_EYCA_JOB, "eyca.export.rate-limit.max-retries"));
+    }
+
+    public long getEycaRateLimitWaitMs() {
+        return isDev ? configProperties.getEycaRateLimitWaitMs()
+                     : Long.parseLong(paramService.getParam(ParamGroupEnum.SEND_DISCOUNTS_EYCA_JOB, "eyca.export.rate-limit.wait-ms"));
+    }
+
     public String getCheckExpiringDiscountsJobCronExpression() {
         return isDev ? configProperties.getCheckExpiringDiscountsJobCronExpression()
                      : paramService.getParam(ParamGroupEnum.CHECK_EXPIRING_DISC_JOB, "check.expiring.discounts.job.cron");

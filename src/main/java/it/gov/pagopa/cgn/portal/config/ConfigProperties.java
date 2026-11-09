@@ -120,6 +120,12 @@ public class ConfigProperties {
     @Value("${eyca.export.enabled}")
     private Boolean eycaExportEnabled;
 
+    @Value("${eyca.export.rate-limit.max-retries}")
+    private int eycaRateLimitMaxRetries;
+
+    @Value("${eyca.export.rate-limit.wait-ms}")
+    private long eycaRateLimitWaitMs;
+
     @Value("${eyca.job.mailto}")
     private String eycaJobMailTo;
 
