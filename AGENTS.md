@@ -89,6 +89,8 @@ Tooling rules:
 - Write commit messages, including both the subject and body, in English even when the conversation is in Italian, unless the user explicitly requests another language.
 - Reuse existing enums, error models, and converters before introducing parallel DTO or state definitions.
 - Do not hand-edit build output under `target/`.
+- Always consider the Sonar rules and guidelines (including those listed in this file) when changing handwritten code or tests, and make the new or modified code compliant.
+- If complying with a Sonar guideline requires changes elsewhere in a file being modified, outside the scope of the requested change, never ignore them: ask the user for authorization before making those changes.
 - Check for existing tests in the matching package before adding new patterns or utilities.
 - Avoid manually pre-sizing collections with summed `size()` values before sequential `addAll(...)` calls; prefer default construction unless there is a clear measured need.
 - In handwritten Java code, if a `List` or other collection is guaranteed non-null by the API contract or local control flow, prefer the native `isEmpty()` check instead of `CollectionUtils.isEmpty(...)`; use null-safe utility checks only when the collection may actually be null.
@@ -127,7 +129,7 @@ Applies when adding or updating tests under `src/test/java`, including Spring Bo
 - Most repository, service, scheduler, and controller tests are `@SpringBootTest` integration tests that extend `IntegrationAbstractTest`.
 - Reuse `IntegrationAbstractTest` for container-backed infrastructure and shared cleanup instead of creating a separate Testcontainers bootstrap.
 - For controller/API tests, follow the existing MockMvc pattern with `@AutoConfigureMockMvc`; many existing endpoint tests use `addFilters = false` and auth helpers such as `setOperatorAuth()` or `setAdminAuth()` from the base test utilities.
-- In Java tests that use Mockito, statically import core methods from `org.mockito.Mockito` and `org.mockito.ArgumentMatchers` instead of calling them as `Mockito.*` or `ArgumentMatchers.*`; prefer imports such as `mock`, `spy`, `when`, `verify`, `times`, `any`, and `anyString`.
+- In Java tests that use Mockito, statically import core methods from `org.mockito.Mockito` and `org.mockito.ArgumentMatchers` instead of calling them as `Mockito.*` or `ArgumentMatchers.*`; prefer imports such as `mock`, `spy`, `when`, `verify`, `times`, `any`, and `anyString`. This is a Sonar rule: when touching a test file that still has non-static `Mockito.*`/`ArgumentMatchers.*` calls, follow the Sonar rule in the Working Rules for out-of-scope fixes. The Sonar findings seen so far concern only Mockito, not `Assertions`.
 - Reuse `TestUtils` and existing sample-entity helpers before creating new ad hoc fixture builders.
 - Keep test package placement aligned with the main code package being exercised and keep class names in the existing `*Test` style.
 

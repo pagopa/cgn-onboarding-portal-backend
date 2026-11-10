@@ -29,7 +29,6 @@ import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -241,7 +243,8 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
+        byte[] content = ("ABCD123ABB12456CCC12w\n" + "A10b\n".repeat(999)).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
 
@@ -257,7 +260,8 @@ class DocumentServiceTest
     void Upload_UploadBucketWithMaxLengthNotValid_KoPA() {
         setProfileDiscountTypePA(DiscountCodeTypeEnum.BUCKET);
 
-        byte[] content = "ABCD123ABB12456CCC12w".getBytes(StandardCharsets.UTF_8);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
+        byte[] content = ("ABCD123ABB12456CCC12w\n" + "A10b\n".repeat(999)).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntityPA.getId();
 
@@ -302,9 +306,9 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithNotMinimumBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
 
-        byte[] content = "item1\n".repeat(9999).getBytes(StandardCharsets.UTF_8);
+        byte[] content = "item1\n".repeat(999).getBytes(StandardCharsets.UTF_8);
         InputStream in = new ByteArrayInputStream(content);
         String agreementId = agreementEntity.getId();
 
@@ -319,11 +323,11 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithNotAlphanumericBucketCodes_Ko() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
         //bucket csv without header
-        byte[] contentOnlyChars = "AaB\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentOnlyNum = "123\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
-        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentOnlyChars = "AaB\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentOnlyNum = "123\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentNotAllowedSpChar = "1AaB€\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
         String agreementId = agreementEntity.getId();
         
         ByteArrayInputStream bisOc = new ByteArrayInputStream(contentOnlyChars);
@@ -355,9 +359,9 @@ class DocumentServiceTest
     @Test
     void Upload_UploadBucketWithAlphanumericBucketCodes_Ok() {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
-        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 10000);
+        ReflectionTestUtils.setField(configProperties, "bucketMinCsvRows", 1000);
 
-        byte[] contentCharsAndNum = "A10b\n".repeat(10000).getBytes(StandardCharsets.UTF_8);
+        byte[] contentCharsAndNum = "A10b\n".repeat(1000).getBytes(StandardCharsets.UTF_8);
         String agreementId = agreementEntity.getId();
         Assertions.assertDoesNotThrow(() -> documentService.storeBucket(agreementId,
                                                                         new ByteArrayInputStream(contentCharsAndNum)));
@@ -548,22 +552,22 @@ class DocumentServiceTest
             throws Exception {
         setProfileDiscountType(DiscountCodeTypeEnum.BUCKET);
 
-        ProfileRepository profileRepository = Mockito.mock(ProfileRepository.class);
-        DocumentRepository documentRepository = Mockito.mock(DocumentRepository.class);
-        DiscountRepository discountRepository = Mockito.mock(DiscountRepository.class);
-        AgreementServiceLight agreementServiceLight = Mockito.mock(AgreementServiceLight.class);
-        TemplateEngine templateEngine = Mockito.mock(TemplateEngine.class);
+        ProfileRepository profileRepository = mock(ProfileRepository.class);
+        DocumentRepository documentRepository = mock(DocumentRepository.class);
+        DiscountRepository discountRepository = mock(DiscountRepository.class);
+        AgreementServiceLight agreementServiceLight = mock(AgreementServiceLight.class);
+        TemplateEngine templateEngine = mock(TemplateEngine.class);
 
-        AzureStorage azureStorageMock = Mockito.mock(AzureStorage.class);
-        ConfigProperties configPropertiesMock = Mockito.mock(ConfigProperties.class);
+        AzureStorage azureStorageMock = mock(AzureStorage.class);
+        ConfigProperties configPropertiesMock = mock(ConfigProperties.class);
 
-        ProfileEntity mockedProfile = Mockito.mock(ProfileEntity.class);
-        Mockito.when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
-        Mockito.when(profileRepository.findByAgreementId(Mockito.anyString()))
+        ProfileEntity mockedProfile = mock(ProfileEntity.class);
+        when(mockedProfile.getDiscountCodeType()).thenReturn(DiscountCodeTypeEnum.BUCKET);
+        when(profileRepository.findByAgreementId(anyString()))
                .thenReturn(Optional.of(mockedProfile));
 
-        Mockito.when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
-        Mockito.doNothing().when(azureStorageMock).uploadCsv(Mockito.any(), Mockito.anyString(), Mockito.anyLong());
+        when(configPropertiesMock.getBucketMinCsvRows()).thenReturn(1);
+        doNothing().when(azureStorageMock).uploadCsv(any(), anyString(), anyLong());
 
         DocumentService documentServiceLocal = new DocumentService(documentRepository,
                                                               profileRepository,
