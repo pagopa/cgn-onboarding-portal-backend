@@ -3,7 +3,7 @@ package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.UpdateDiscountRequestEyca;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 
@@ -13,22 +13,22 @@ import java.util.function.Function;
 
 @Service
 public class UpdateDataExportEycaWrapperConverter
-        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDataExportEyca>> {
+        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDiscountRequestEyca>> {
 
     @Override
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDataExportEyca>> toDtoFunction() {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDiscountRequestEyca>> toDtoFunction() {
         return toDto;
     }
 
     @Override
-    protected Function<DataExportEycaWrapper<UpdateDataExportEyca>, EycaDataExportViewEntity> toEntityFunction() {
+    protected Function<DataExportEycaWrapper<UpdateDiscountRequestEyca>, EycaDataExportViewEntity> toEntityFunction() {
         throw new NotImplementedException();
     }
 
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDataExportEyca>> toDto = entity -> {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<UpdateDiscountRequestEyca>> toDto = entity -> {
 
 
-        UpdateDataExportEyca updateDataExportEyca = new UpdateDataExportEyca();
+        UpdateDiscountRequestEyca updateDataExportEyca = new UpdateDiscountRequestEyca();
         updateDataExportEyca.setId(entity.getEycaUpdateId());
         updateDataExportEyca.setEmail(entity.getEmail());
         updateDataExportEyca.setName(entity.getName());
@@ -40,7 +40,7 @@ public class UpdateDataExportEycaWrapperConverter
         updateDataExportEyca.setTextLocal(entity.getTextLocal());
         updateDataExportEyca.setImageSourceWeb(entity.getImage());
 
-        DataExportEycaWrapper<UpdateDataExportEyca> dto = new DataExportEycaWrapper<>(
+        DataExportEycaWrapper<UpdateDiscountRequestEyca> dto = new DataExportEycaWrapper<>(
                 updateDataExportEyca);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());

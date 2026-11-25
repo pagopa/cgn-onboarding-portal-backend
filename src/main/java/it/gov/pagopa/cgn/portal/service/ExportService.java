@@ -196,7 +196,7 @@ public class ExportService {
                                                             "LANDING_PAGE_URL",
                                                             "LANDING PAGE REFERRER",
                                                             "EYCA_LANDING_PAGE_URL",};
-    private final Predicate<SearchApiResponseEyca> notExistsOnEycaPredicate = sae -> sae.getApiResponse()!=null &&
+    private final Predicate<SearchResponseEyca> notExistsOnEycaPredicate = sae -> sae.getApiResponse()!=null &&
                                                                                      sae.getApiResponse().getData()!=
                                                                                      null && sae.getApiResponse()
                                                                                                 .getData()
@@ -206,14 +206,7 @@ public class ExportService {
                                                                                                             .getDiscounts()
                                                                                                             .getData());
 
-    private final Predicate<ListApiResponseEyca> hasDiscountsListApiPredicate =
-            r -> r != null
-                 && r.getApiResponse() != null
-                 && r.getApiResponse().getData() != null
-                 && r.getApiResponse().getData().getDiscount() != null
-                 && !r.getApiResponse().getData().getDiscount().isEmpty();
-
-    private final Predicate<ApiResponseEyca> hasDiscountsApiPredicate =
+    private final Predicate<DiscountResponseEyca> hasDiscountsApiPredicate =
             r -> r != null
                  && r.getApiResponse() != null
                  && r.getApiResponse().getData() != null
@@ -431,13 +424,13 @@ public class ExportService {
 
             syncEycaUpdateIdOnEyca(exportViewEntities);
 
-            List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(
+            List<DataExportEycaWrapper<CreateDiscountRequestEyca>> entitiesToCreateOnEyca = getWrappersToCreateOnEyca(
                     exportViewEntities);
 
-            List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca = getWrappersToUpdateOnEyca(
+            List<DataExportEycaWrapper<UpdateDiscountRequestEyca>> entitiesToUpdateOnEyca = getWrappersToUpdateOnEyca(
                     exportViewEntities);
 
-            List<DataExportEycaWrapper<DeleteDataExportEyca>> entitiesToDeleteOnEyca = getWrappersToDeleteOnEyca(
+            List<DataExportEycaWrapper<IdRequestEyca>> entitiesToDeleteOnEyca = getWrappersToDeleteOnEyca(
                     exportViewEntities);
 
             log.info("EYCA_LOG_CREATE:");
@@ -495,8 +488,8 @@ public class ExportService {
     }
 
     private void updateEycaEmailUpdateRequired(
-            List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca) {
-        for (DataExportEycaWrapper<UpdateDataExportEyca> row : entitiesToUpdateOnEyca) {
+            List<DataExportEycaWrapper<UpdateDiscountRequestEyca>> entitiesToUpdateOnEyca) {
+        for (DataExportEycaWrapper<UpdateDiscountRequestEyca> row : entitiesToUpdateOnEyca) {
             if (Boolean.TRUE.equals(row.getEycaEmailUpdateRequired())) {
                 Optional<DiscountEntity> dbEntityOpt = discountRepository.findByEycaUpdateId(row.getEycaUpdateId());
                 if (dbEntityOpt.isPresent()) {
@@ -534,9 +527,9 @@ public class ExportService {
     }
 
     private List<Attachment> createAttachments(List<EycaDataExportViewEntity> exportViewEntities,
-                                               List<DataExportEycaWrapper<DataExportEyca>> entitiesToCreateOnEyca,
-                                               List<DataExportEycaWrapper<UpdateDataExportEyca>> entitiesToUpdateOnEyca,
-                                               List<DataExportEycaWrapper<DeleteDataExportEyca>> entitiesToDeleteOnEyca) {
+                                               List<DataExportEycaWrapper<CreateDiscountRequestEyca>> entitiesToCreateOnEyca,
+                                               List<DataExportEycaWrapper<UpdateDiscountRequestEyca>> entitiesToUpdateOnEyca,
+                                               List<DataExportEycaWrapper<IdRequestEyca>> entitiesToDeleteOnEyca) {
         List<Attachment> attachments = new ArrayList<>();
 
         if (!exportViewEntities.isEmpty()) {
@@ -600,7 +593,7 @@ public class ExportService {
 
     public void syncEycaUpdateIdOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 
-        List<SearchDataExportEyca> exportEycaList = getItemsToSearchOnEyca(exportViewEntities);
+        List<SearchDiscountRequestEyca> exportEycaList = getItemsToSearchOnEyca(exportViewEntities);
 
         if (exportEycaList.isEmpty()) {
             log.info("No discounts to search for sync eycaUpdateId");
@@ -649,7 +642,7 @@ public class ExportService {
             }
         });
 
-        ListApiResponseEyca response = eycaExportService.listDiscounts(1, 1000, JSON);
+        DiscountResponseEyca response = eycaExportService.listDiscounts(1, 1000, JSON);
 
         log.info("Verifying that discounts to delete on Eyca...");
 
@@ -675,9 +668,9 @@ public class ExportService {
 
     }
 
-    public List<DiscountItemEyca> getDiscountItemsOnEyca(ListApiResponseEyca response) {
+    public List<DiscountItemEyca> getDiscountItemsOnEyca(DiscountResponseEyca response) {
 
-        if (hasDiscountsListApiPredicate.test(response)) {
+        if (hasDiscountsApiPredicate.test(response)) {
 
             List<DiscountItemEyca> discountItemsEyca = response.getApiResponse()
                                                                .getData()
@@ -700,9 +693,9 @@ public class ExportService {
         }
     }
 
-    String getCcdbIdOnEyca(SearchDataExportEyca exportEyca)
+    String getCcdbIdOnEyca(SearchDiscountRequestEyca exportEyca)
             throws RestClientException {
-        SearchApiResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);
+        SearchResponseEyca sae = eycaExportService.searchDiscount(exportEyca, JSON, false);
         if(notExistsOnEycaPredicate.test(sae)){
             sae = eycaExportService.searchDiscount(exportEyca, JSON, true);
             if(notExistsOnEycaPredicate.test(sae)){
@@ -711,10 +704,10 @@ public class ExportService {
 
         }
         DiscountItemEyca discountItem = Optional.ofNullable(sae)
-                                                .map(SearchApiResponseEyca::getApiResponse)
-                                                .map(SearchApiResponseApiResponseEyca::getData)
-                                                .map(SearchApiResponseApiResponseDataEyca::getDiscounts)
-                                                .map(SearchApiResponseApiResponseDataDiscountsEyca::getData)
+                                                .map(SearchResponseEyca::getApiResponse)
+                                                .map(SearchResponseApiResponseEyca::getData)
+                                                .map(SearchResponseApiResponseAllOfDataEyca::getDiscounts)
+                                                .map(SearchResponseApiResponseAllOfDataDiscountsEyca::getData)
                                                 .map(List::getFirst)
                                                 .orElseThrow(() -> new CGNException(
                                                         "Unexpected EYCA search response, discount data is missing"));
@@ -722,30 +715,39 @@ public class ExportService {
     }
 
 
-    private List<SearchDataExportEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+    private List<SearchDiscountRequestEyca> getItemsToSearchOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         return updateOnEycaStream(exportViewEntities).map(this::convertToSearchDataExportEyca).toList();
     }
 
-    public SearchDataExportEyca convertToSearchDataExportEyca(EycaDataExportViewEntity entity) {
-        SearchDataExportEyca searchDataExportEyca = new SearchDataExportEyca();
+    public SearchDiscountRequestEyca convertToSearchDataExportEyca(EycaDataExportViewEntity entity) {
+        SearchDiscountRequestEyca searchDataExportEyca = new SearchDiscountRequestEyca();
         Optional<String> optDiscountId = Optional.ofNullable(entity.getEycaUpdateId());
         searchDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException(
                 "Error during viewEntity to search conversion, eycaUpdateId is empty")));
-        searchDataExportEyca.setLive(1);
+        searchDataExportEyca.setLive(SearchDiscountRequestEyca.LiveEnum.NUMBER_1);
+        searchDataExportEyca.setAccessibility(null);
         return searchDataExportEyca;
     }
 
 
-    private List<DataExportEycaWrapper<UpdateDataExportEyca>> getWrappersToUpdateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+    private List<DataExportEycaWrapper<UpdateDiscountRequestEyca>> getWrappersToUpdateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
         return updateOnEycaStream(exportViewEntities).map(updateDataExportEycaConverter::toDto).toList();
     }
 
-    private List<DataExportEycaWrapper<DataExportEyca>> getWrappersToCreateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+    private List<DataExportEycaWrapper<CreateDiscountRequestEyca>> getWrappersToCreateOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 
-        return createOnEycaStream(exportViewEntities).map(dataExportEycaConverter::toDto).toList();
+        List<DataExportEycaWrapper<CreateDiscountRequestEyca>> wrappers = new ArrayList<>();
+        for (EycaDataExportViewEntity entity : createOnEycaStream(exportViewEntities).toList()) {
+            try {
+                wrappers.add(dataExportEycaConverter.toDto(entity));
+            } catch (IllegalArgumentException e) {
+                log.error("CREATE skipped for discountId {}: invalid EYCA code - {}", entity.getDiscountId(), e.getMessage());
+            }
+        }
+        return wrappers;
     }
 
-    public List<DataExportEycaWrapper<DeleteDataExportEyca>> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
+    public List<DataExportEycaWrapper<IdRequestEyca>> getWrappersToDeleteOnEyca(List<EycaDataExportViewEntity> exportViewEntities) {
 
         return deleteOnEycaStream(exportViewEntities).map(deleteDataExportEycaConverter::toDto).toList();
     }
@@ -768,7 +770,7 @@ public class ExportService {
                                  .filter(e -> StringUtils.isEmpty(e.getEycaUpdateId()));
     }
 
-    private void createDiscountsOnEyca(List<DataExportEycaWrapper<DataExportEyca>> exportEycaList) {
+    private void createDiscountsOnEyca(List<DataExportEycaWrapper<CreateDiscountRequestEyca>> exportEycaList) {
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be created is empty");
@@ -780,10 +782,10 @@ public class ExportService {
         log.info("Creating new discount on EYCA...");
 
         exportEycaList.forEach(exportEycaWrapper -> {
-            DataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
+            CreateDiscountRequestEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
             log.info("CREATE DataExportEyca: {}", CGNUtils.toJson(exportEyca));
-            ApiResponseEyca response = null;
+            DiscountResponseEyca response = null;
             try {
                 response = eycaExportService.createDiscount(exportEyca, JSON);
 
@@ -815,7 +817,7 @@ public class ExportService {
         });
     }
 
-    private void updateDiscountsOnEyca(List<DataExportEycaWrapper<UpdateDataExportEyca>> exportEycaList) {
+    private void updateDiscountsOnEyca(List<DataExportEycaWrapper<UpdateDiscountRequestEyca>> exportEycaList) {
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be updated is empty");
@@ -826,10 +828,10 @@ public class ExportService {
         log.info("Updating old discount on EYCA...");
 
         exportEycaList.forEach(exportEycaWrapper -> {
-            UpdateDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
+            UpdateDiscountRequestEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
             log.info("UPDATE UpdateDataExportEyca: {}", CGNUtils.toJson(exportEyca));
-            ApiResponseEyca response = null;
+            DiscountResponseEyca response = null;
             try {
 
                 response = eycaExportService.updateDiscount(exportEyca, JSON);
@@ -848,7 +850,7 @@ public class ExportService {
     }
 
 
-    public void deleteDiscountsOnEyca(List<DataExportEycaWrapper<DeleteDataExportEyca>> exportEycaList) {
+    public void deleteDiscountsOnEyca(List<DataExportEycaWrapper<IdRequestEyca>> exportEycaList) {
 
         if (exportEycaList.isEmpty()) {
             log.info("List of EYCA Discounts to be deleted is empty");
@@ -859,10 +861,10 @@ public class ExportService {
         log.info("Deleting discount on EYCA...");
 
         exportEycaList.forEach(exportEycaWrapper -> {
-            DeleteDataExportEyca exportEyca = exportEycaWrapper.getDataExportEyca();
+            IdRequestEyca exportEyca = exportEycaWrapper.getDataExportEyca();
 
             log.info("DELETE DeleteDataExportEyca: {}", exportEyca.toString());
-            DeleteApiResponseEyca response = null;
+            DeleteDiscountResponseEyca response = null;
             try {
                 if (!eycaApiDeleteDebug) {
                     response = eycaExportService.deleteDiscount(exportEyca, JSON);

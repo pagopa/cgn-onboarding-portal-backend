@@ -1,608 +1,1568 @@
-openapi: 3.0.1
+openapi: "3.0.1"
 info:
-  title: EYCA Data Export
-  version: 1.1.0
+  title: "EYCA Data Export - CCDB Discounts v2.3"
+  version: "2.3.0"
+  description: "EYCA CCDB Discounts API v2.3 as used by the CGN backend. Reconstructed from the EYCA manuals, not an official specification. References: \"Manual p. N\" is CCDB HTTP API for Discounts v2.3; \"Content guide p. N\" is How to Create Discounts on CCDB."
 servers:
-  - url: https://ccdb.eyca.org/
+  -
+    url: "https://ccdb.eyca.org/"
+    description: "EYCA PRODUCTION."
+tags:
+  -
+    name: "Eyca"
+    description: "EYCA Data Export: API v2 operations."
 paths:
-  /api/auth:
+  "/api/v2/auth":
     get:
       tags:
-        - Eyca
-      summary: session authentication
-      description: authenticated session
-      operationId: authentication
+        - "Eyca"
+      summary: "Authenticate and open a session"
+      description: "HTTP Basic credentials in the Authorization header (Manual pp. 6-7 also allows them as parameters). The session, 128 hex characters, is returned in api_response.text and expires after 30 minutes of inactivity. The v2 API answers JSON even without type."
+      operationId: "authentication"
+      security:
+        - basicAuth: []
+      "x-source-pages":
+        - 6
+        - 7
       responses:
         "200":
-          description: OK
-          content:
-            application/json:
+          description: "On success error=0 and api_response.text holds the session. Wrong credentials also return HTTP 200, with error=1 and code=30 (Manual p. 6). application/json comes first because the client generator uses only the first content type; text/plain is the manual's text format (OK: session, or ERR: code, message)."
+          headers:
+            "Set-Cookie":
+              description: "Not sent by the v2 API: the session is only in api_response.text."
               schema:
-                type: string
+                type: "string"
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+            "text/plain":
+              schema:
+                type: "string"
+              example: "OK: {{eyca_session_id}}"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/ping":
+    get:
+      tags:
+        - "Eyca"
+      summary: "Check the session or keep it alive"
+      description: "Manual p. 6: a session expires after 30 minutes of inactivity; ping about every 25 minutes to keep it."
+      operationId: "ping"
       security:
-        - basicAuth: [ ]
-  /api/search_discount:
+        - Bearer: []
+        - SessionCookie: []
+      "x-source-pages":
+        - 4
+        - 6
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      responses:
+        "200":
+          description: "Successful when api_response.error=0."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/BasicResponse"
+              example:
+                api_response:
+                  code: 1
+                  error: 0
+                  http_status: 200
+                  text: "Ping successful."
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/read_discount":
     post:
       tags:
-        - Eyca
-      summary: Search a discount.
-      description: Search a discount.
-      operationId: searchDiscount
+        - "Eyca"
+      summary: "Read a discount by id"
+      description: "Manual p. 23. Unknown id: HTTP 404, error=1, code=104."
+      operationId: "readDiscount"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 23
+        - 24
+        - 25
       parameters:
-        - name: type
-          in: query
-          description: type text or json
-          schema:
-            type: string
+        -
+          $ref: "#/components/parameters/ResponseFormat"
       requestBody:
+        required: true
         content:
-          application/json:
+          "application/json":
             schema:
-              $ref: '#/components/schemas/SearchDataExport'
-        required: false
+              $ref: "#/components/schemas/IdRequest"
+            example:
+              id: "{{discount_id}}"
       responses:
         "200":
-          description: Discount found.
+          description: "JSON response; check api_response.error."
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/SearchApiResponse'
+                $ref: "#/components/schemas/DiscountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Discount not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
-      security:
-        - Bearer: [ ]
-      x-codegen-request-body-name: body
-  /api/list_discount:
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/search_discount":
     post:
       tags:
-        - Eyca
-      summary: return list of discounts with paging
-      description: return list of discounts with paging
-      operationId: listDiscount
+        - "Eyca"
+      summary: "Search discounts (live=1 or live=0)"
+      description: "Manual pp. 8-11. All filters are optional; live defaults to 1, so unpublished discounts need live=0. Searches the discounts of all members."
+      operationId: "searchDiscount"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 8
+        - 9
+        - 10
+        - 11
+        - 12
       parameters:
-        - name: type
-          in: query
-          description: type text or json
-          schema:
-            type: string
+        -
+          $ref: "#/components/parameters/ResponseFormat"
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ListDataExport'
         required: false
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/SearchDiscountRequest"
+            example:
+              id: "{{discount_id}}"
+              live: 1
+              limit: 1
+              page: 1
       responses:
         "200":
-          description: Discounts found.
+          description: "JSON response; check api_response.error."
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/ListApiResponse'
+                $ref: "#/components/schemas/SearchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Discounts not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
-      security:
-        - Bearer: [ ]
-      x-codegen-request-body-name: body
-  /api/create_discount:
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/list_discount":
     post:
       tags:
-        - Eyca
-      summary: create a new discount.
-      description: Create a new discount.
-      operationId: createDiscount
+        - "Eyca"
+      summary: "List the caller's discounts with paging"
+      description: "Manual p. 25. rows with page or offset. Only the caller's own discounts; when there are none the API answers HTTP 404 with code=104."
+      operationId: "listDiscount"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 25
+        - 26
+        - 27
+        - 28
+        - 29
       parameters:
-        - name: type
-          in: query
-          description: type text or json
-          schema:
-            type: string
+        -
+          $ref: "#/components/parameters/ResponseFormat"
       requestBody:
+        required: true
         content:
-          application/json:
+          "application/json":
             schema:
-              $ref: '#/components/schemas/DataExport'
-        required: false
+              $ref: "#/components/schemas/ListDiscountRequest"
+            example:
+              rows: 2
+              page: 1
       responses:
         "200":
-          description: Discount created.
+          description: "JSON response; check api_response.error."
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/DiscountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
-      security:
-        - Bearer: [ ]
-      x-codegen-request-body-name: body
-  /api/update_discount:
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/search_geo_location":
     post:
       tags:
-        - Eyca
-      summary: update a discount.
-      description: update a new discount.
-      operationId: updateDiscount
+        - "Eyca"
+      summary: "Search discounts near a point"
+      description: "Manual p. 12. distance in km (default 20, max 200); no paging. Each result is a location with its discount."
+      operationId: "searchGeoLocation"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 12
+        - 13
+        - 14
+        - 15
       parameters:
-        - name: type
-          in: query
-          description: type text or json
-          schema:
-            type: string
+        -
+          $ref: "#/components/parameters/ResponseFormat"
       requestBody:
+        required: true
         content:
-          application/json:
+          "application/json":
             schema:
-              $ref: '#/components/schemas/UpdateDataExport'
-        required: false
+              $ref: "#/components/schemas/GeoSearchRequest"
+            example:
+              limit: 1
+              distance: 20
+              near:
+                point_x: "12.4964"
+                point_y: "41.9028"
       responses:
         "200":
-          description: Discount updated.
+          description: "JSON response; check api_response.error."
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/GeoSearchResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
-      security:
-        - Bearer: [ ]
-      x-codegen-request-body-name: body
-  /api/delete_discount:
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/create_discount":
     post:
       tags:
-        - Eyca
-      summary: delete a discount.
-      description: delete a discount.
-      operationId: deleteDiscount
+        - "Eyca"
+      summary: "WRITE - Create a discount"
+      description: "Manual pp. 15-18. Writes real data: live=0 hides the discount but does not isolate it. The new discount is returned in data.discount; use its id, not ccdb_id, in later calls."
+      operationId: "createDiscount"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 15
+        - 16
+        - 17
+        - 18
+        - 19
       parameters:
-        - name: type
-          in: query
-          description: type text or json
-          schema:
-            type: string
+        -
+          $ref: "#/components/parameters/ResponseFormat"
       requestBody:
+        required: true
         content:
-          application/json:
+          "application/json":
             schema:
-              $ref: '#/components/schemas/DeleteDataExport'
-        required: false
+              $ref: "#/components/schemas/CreateDiscountRequest"
+            example:
+              vendor: "CGN API TEST"
+              name: "CGN API TEST - not published"
+              text: "Synthetic discount for a technical check."
+              brand_description: "Test brand."
+              instructions: "Test discount, not meant to be used."
+              terms_and_conditions: "Technical check on an agreed record only."
+              web: "https://example.com"
+              expiry_date: "2027-03-01"
+              local_id: "{{test_local_id}}"
+              "+categories":
+                - "SH"
+              live: 0
       responses:
         "200":
-          description: Discount created.
+          description: "JSON response; check api_response.error."
           content:
-            application/json:
+            "application/json":
               schema:
-                $ref: '#/components/schemas/DeleteApiResponse'
+                $ref: "#/components/schemas/DiscountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
         "404":
-          description: Not found.
-          content: { }
+          $ref: "#/components/responses/NotFound"
         "500":
-          description: Service unavailable.
-          content: { }
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/update_discount":
+    post:
+      tags:
+        - "Eyca"
+      summary: "WRITE - Update a discount"
+      description: "Manual p. 20. Only id is required. The manual does not say whether an omitted field and a null or empty field behave the same."
+      operationId: "updateDiscount"
       security:
-        - Bearer: [ ]
-      x-codegen-request-body-name: body
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 20
+        - 21
+        - 22
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/UpdateDiscountRequest"
+            example:
+              id: "{{test_discount_id}}"
+              name: "CGN API TEST - updated title"
+              live: 0
+      responses:
+        "200":
+          description: "JSON response; check api_response.error."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/DiscountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/delete_discount":
+    post:
+      tags:
+        - "Eyca"
+      summary: "DELETE - Delete a discount"
+      description: "Manual p. 22. Deleting an unknown id succeeds with an empty data object. Content guide pp. 42-43: discounts with vouchers cannot be deleted from the CCDB UI; the API error for that case is not documented."
+      operationId: "deleteDiscount"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 22
+        - 23
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/IdRequest"
+            example:
+              id: "{{test_discount_id}}"
+      responses:
+        "200":
+          description: "JSON response; check api_response.error."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/DeleteDiscountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/create_location":
+    post:
+      tags:
+        - "Eyca"
+      summary: "WRITE - Add a location to a discount"
+      description: "Manual pp. 19 and 29. Coordinates may be omitted: CCDB then geocodes the address (see CreateLocationFields). The new location is returned in data.location."
+      operationId: "createLocation"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 19
+        - 29
+        - 30
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/CreateLocationRequest"
+            example:
+              discount_id: "{{test_discount_id}}"
+              location_local_id: "{{test_location_local_id}}"
+              street: "{{test_street}}"
+              city: "{{test_city}}"
+              zip: "{{test_zip}}"
+              country: "IT"
+              point_x: "{{test_longitude}}"
+              point_y: "{{test_latitude}}"
+              accessibility: "N"
+      responses:
+        "200":
+          description: "JSON response; check api_response.error."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/LocationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/update_location":
+    post:
+      tags:
+        - "Eyca"
+      summary: "WRITE - Update a location"
+      description: "Manual p. 31. Needs the id of the location, not of the discount, and at least one field to change."
+      operationId: "updateLocation"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 31
+        - 32
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/UpdateLocationRequest"
+            example:
+              id: "{{test_location_id}}"
+              street: "{{test_street}}"
+      responses:
+        "200":
+          description: "JSON response; check api_response.error."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/LocationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
+  "/api/v2/delete_location":
+    post:
+      tags:
+        - "Eyca"
+      summary: "DELETE - Delete a location"
+      description: "Manual p. 32. The result of deleting an already deleted location is not documented."
+      operationId: "deleteLocation"
+      security:
+        - Bearer: []
+        - SessionCookie: []
+      x-codegen-request-body-name: "body"
+      "x-source-pages":
+        - 32
+      parameters:
+        -
+          $ref: "#/components/parameters/ResponseFormat"
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/IdRequest"
+            example:
+              id: "{{test_location_id}}"
+      responses:
+        "200":
+          description: "JSON response; check api_response.error."
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/BasicResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+        default:
+          $ref: "#/components/responses/OtherError"
 components:
-  schemas:
-    ListDataExport:
-      required:
-        - page
-        - rows
-      type: object
-      properties:
-        page:
-          type: integer
-        rows:
-          type: integer
-    SearchDataExport:
-      required:
-        - id
-        - live
-      type: object
-      properties:
-        id:
-          type: string
-        live:
-          type: integer
-    DataExport:
-      required:
-        - name
-        - text
-        - vendor
-      type: object
-      properties:
-        local_id:
-          type: string
-        vendor:
-          type: string
-        name:
-          type: string
-        name_local:
-          type: string
-        text:
-          type: string
-        text_local:
-          type: string
-        "+locations":
-          type: array
-          items:
-            $ref: '#/components/schemas/Location'
-        phone:
-          type: string
-        web:
-          type: string
-        email:
-          type: string
-        "+tags":
-          type: array
-          items:
-            type: string
-        "+categories":
-          type: array
-          items:
-            type: string
-        live:
-          type: integer
-        image_source__web:
-          type: string
-        image_source__file:
-          type: string
-        files:
-          type: array
-          items:
-            $ref: '#/components/schemas/File'
-    UpdateDataExport:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: string
-        vendor:
-          type: string
-        name:
-          type: string
-        name_local:
-          type: string
-        text:
-          type: string
-        text_local:
-          type: string
-        "+locations":
-          type: array
-          items:
-            $ref: '#/components/schemas/Location'
-        phone:
-          type: string
-        web:
-          type: string
-        email:
-          type: string
-        "+tags":
-          type: array
-          items:
-            type: string
-        "+categories":
-          type: array
-          items:
-            type: string
-        image_source__web:
-          type: string
-        image_source__file:
-          type: string
-        files:
-          type: array
-          items:
-            $ref: '#/components/schemas/File'
-    DeleteDataExport:
-      required:
-        - id
-      type: object
-      properties:
-        id:
-          type: string
-    File:
-      type: object
-      properties:
-        name:
-          type: string
-        base64:
-          type: string
-    ApiResponse:
-      type: object
-      properties:
-        api_response:
-          type: object
-          properties:
-            code:
-              type: integer
-              example: 1
-            data:
-              type: object
-              properties:
-                discount:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DiscountItem'
-            error:
-              type: integer
-              example: 0
-            http_status:
-              type: integer
-              example: 200
-            text:
-              type: string
-              example: OK
-    SearchApiResponse:
-      type: object
-      properties:
-        api_response:
-          type: object
-          properties:
-            data:
-              type: object
-              properties:
-                discounts:
-                  type: object
-                  properties:
-                    CCDB:
-                      type: object
-                      properties:
-                        pageNumber:
-                          type: integer
-                        rowsTotal:
-                          type: integer
-                        rowsReturned:
-                          type: integer
-                        rowsPerPage:
-                          type: integer
-                        pagesTotal:
-                          type: integer
-                        offset:
-                          type: integer
-                    realCount:
-                      type: integer
-                    data:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/DiscountItem'
-                    count:
-                      type: integer
-            error:
-              type: integer
-              example: 0
-            http_status:
-              type: integer
-              example: 200
-            text:
-              type: string
-              example: OK
-            code:
-              type: integer
-              example: 1
-    ListApiResponse:
-      type: object
-      properties:
-        api_response:
-          type: object
-          properties:
-            data:
-              type: object
-              properties:
-                discount:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/DiscountItem'
-            error:
-              type: integer
-              example: 0
-            http_status:
-              type: integer
-              example: 200
-            text:
-              type: string
-              example: OK
-            code:
-              type: integer
-              example: 1
-    DeleteApiResponse:
-      type: object
-      properties:
-        api_response:
-          type: object
-          properties:
-            data:
-              type: object
-              properties: { }
-            error:
-              type: integer
-              example: 0
-            http_status:
-              type: integer
-              example: 200
-            text:
-              type: string
-              example: OK
-            code:
-              type: integer
-              example: 1
-    DiscountItem:
-      type: object
-      properties:
-        categories:
-          type: array
-          items:
-            $ref: '#/components/schemas/Category'
-        ccdb_id:
-          type: string
-          example: "38905"
-        ccdb_member_id:
-          type: integer
-          example: 20
-        created:
-          type: string
-          example: 2017-08-02 08:41:04
-        deleted:
-          type: integer
-          example: 0
-        email:
-          type: string
-          example: suministros@bomarhosteleria.com
-        id:
-          type: string
-          example: 598190209328fd0739980027
-        image:
-          type: string
-          example: https://ccdb.eyca.org/cstatic/lhbophmzefwgqzbpkwrbiopsemgocxqn_1611584193.jpg
-        international:
-          type: integer
-          example: 0
-        live:
-          type: integer
-          example: 1
-        local_id:
-          type: string
-          example: "null"
-        member_id:
-          type: string
-          example: 59086ccdbddd883747454dd0
-        name:
-          type: string
-          example: 10% discount
-        name_local:
-          type: string
-          example: "null"
-        online:
-          type: integer
-          example: 0
-        phone:
-          type: string
-          example: "0034927233125"
-        physical:
-          type: integer
-          example: 1
-        tags:
-          type: array
-          items:
-            type: string
-        text:
-          type: string
-          example: "10% on all hotel supplies, uniforms, tableware, cuberturias, household\
-            \ items and furniture"
-        text_local:
-          type: string
-          example: "10% de descuentos en suministros de hostelería, uniforme, vajillas,\
-            \ cuberterías, menaje y mobiliario."
-        updated:
-          type: string
-        vendor:
-          type: string
-          example: Bomar Hostelería
-        web:
-          type: string
-          example: http://www.bomarhosteleria.com/
-    Category:
-      type: object
-      properties:
-        ccdb_id:
-          type: string
-          example: "40102"
-        id:
-          type: string
-          example: SH
-        name:
-          type: string
-          example: Shopping
-    LocationData:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 1
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Location'
-    Location:
-      type: object
-      properties:
-        street:
-          type: string
-          example: "1150"
-        city:
-          type: string
-          example: Cáceres
-        country:
-          type: string
-          example: IT
-        point_x:
-          type: string
-          example: "-6.38247299"
-        point_y:
-          type: string
-          example: "39.44942093"
-        zip:
-          type: string
-          example: "10195"
-        region:
-          type: string
-          example: "10195"
-    Country:
-      type: object
-      properties:
-        ccdb_id:
-          type: integer
-          example: 132
-        id:
-          type: string
-          example: ES
-        name:
-          type: string
-          example: Spain
-        region:
-          type: string
-          example: Extremadura
-    GeoData:
-      type: object
-      properties:
-        lat:
-          type: string
-          example: "39.44942093"
-        lng:
-          type: string
-          example: "-6.38247299"
-        point_x:
-          type: string
-          example: "-6.38247299"
-        point_y:
-          type: string
-          example: "39.44942093"
   securitySchemes:
     basicAuth:
-      type: http
-      scheme: basic
+      type: "http"
+      scheme: "basic"
+      description: "Authorization: Basic base64(username:password), on auth only. Accepted by the v2 API, although the manual shows the credentials as parameters."
     Bearer:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-x-original-swagger-version: "2.0"
+      type: "http"
+      scheme: "bearer"
+      description: "Kept from the previous specification. The v2 API rejects it with HTTP 401 even with a valid session: the client does not use it."
+    SessionCookie:
+      type: "apiKey"
+      in: "cookie"
+      name: "ccdb_session"
+      description: "Session used by the client (Manual p. 6): Cookie: ccdb_session=<session from auth>. auth sends no Set-Cookie. The session expires after 30 minutes of inactivity."
+  parameters:
+    ResponseFormat:
+      name: "type"
+      in: "query"
+      required: false
+      description: "Response format (Manual pp. 3-5). Without it the server answers text; the client sends json, the only format described by the schemas."
+      schema:
+        type: "string"
+        enum:
+          - "json"
+          - "text"
+          - "xml"
+          - "yaml"
+        example: "json"
+      example: "json"
+  schemas:
+    ObjectId:
+      type: "string"
+      description: "EYCA id, 24 characters. Use id, not ccdb_id."
+      minLength: 24
+      maxLength: 24
+    CategoryCode:
+      type: "string"
+      enum:
+        - "CU"
+        - "ET"
+        - "FD"
+        - "FS"
+        - "GO"
+        - "HB"
+        - "HE"
+        - "HT"
+        - "LR"
+        - "SH"
+        - "SP"
+        - "SV"
+        - "TT"
+      description: "Manual p. 33: CU Culture, ET Entertainment, FD Food & Drink, FS Festivals, GO Going out, HB Beauty & Lifestyle, HE Health, HT Accommodation, LR Learning, SH Shopping, SP Sports, SV Services, TT Travelling."
+    TagCode:
+      type: "string"
+      enum:
+        - "tag_mobility"
+        - "tag_accessible"
+        - "tag_rainbow"
+        - "tag_summer"
+        - "tag_winter"
+      description: "Predefined EYCA tags only; tags are optional (Manual p. 33)."
+    FileUpload:
+      type: "object"
+      description: "Base64 image named in image_source__file (Manual p. 17)."
+      properties:
+        name:
+          type: "string"
+        base64:
+          type: "string"
+          format: "byte"
+    DiscountFields:
+      type: "object"
+      description: "Writable discount fields; which ones are required differs between create and update. The manual does not fully define null, empty strings or clearing a field."
+      properties:
+        local_id:
+          type: "string"
+          description: "Caller's own id, unique within the member organisation."
+        vendor:
+          type: "string"
+          description: "Vendor or brand name."
+        name:
+          type: "string"
+          description: "Discount title."
+        name_local:
+          type: "string"
+          description: "Title in the local language; optional."
+        text:
+          type: "string"
+          description: "Benefit description. Content guide p. 4: up to 200 characters; not enforced by the API, longer texts are cut by the EYCA site and app."
+          "x-guideline-maxLength": 200
+        text_local:
+          type: "string"
+          description: "Description in the local language; optional. Content guide p. 4: 200 characters."
+          "x-guideline-maxLength": 200
+        brand_description:
+          type: "string"
+          description: "Brand description. Content guide p. 4: 700 characters, not enforced by the API."
+          "x-guideline-maxLength": 700
+        brand_description_local:
+          type: "string"
+          description: "Brand description in the local language; optional. Content guide p. 4: 700 characters."
+          "x-guideline-maxLength": 700
+        instructions:
+          type: "string"
+          description: "How to get the discount. Content guide p. 5: 300 characters, not enforced by the API."
+          "x-guideline-maxLength": 300
+        instructions_local:
+          type: "string"
+          description: "Instructions in the local language; optional. Content guide p. 5: 300 characters."
+          "x-guideline-maxLength": 300
+        terms_and_conditions:
+          type: "string"
+          description: "Terms and conditions. Content guide p. 5: 300 characters, not enforced by the API."
+          "x-guideline-maxLength": 300
+        terms_and_conditions_local:
+          type: "string"
+          description: "Terms and conditions in the local language; optional. Content guide p. 5: 300 characters."
+          "x-guideline-maxLength": 300
+        web:
+          type: "string"
+          description: "URL of the discount page; required on create (Manual p. 16)."
+        email:
+          type: "string"
+          description: "Public email; optional."
+        phone:
+          type: "string"
+          description: "Public phone number; optional."
+        instagram:
+          type: "string"
+          description: "Instagram account; optional."
+        expiry_date:
+          type: "string"
+          format: "date"
+          description: "YYYY-MM-DD. After this date CCDB sets live=0 automatically (Manual p. 16); time and time zone of the switch are not documented."
+        live:
+          type: "integer"
+          description: "0: not published; 1: published. On update, omit it to leave the visibility unchanged."
+          enum:
+            - 0
+            - 1
+        image_source__web:
+          type: "string"
+          description: "Image URL (Manual p. 16): max 1 MB, WebP/JPG/JPEG/PNG, 1080x1080 recommended. Downloaded asynchronously: read image_source_error with read_discount; to download again use a different URL or nocache. Without an image CCDB uses the category image."
+        image_source__file:
+          type: "string"
+          description: "File name matching files[].name."
+        files:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/FileUpload"
+    CreateDiscountRequest:
+      allOf:
+        -
+          $ref: "#/components/schemas/DiscountFields"
+        -
+          type: "object"
+          required:
+            - "vendor"
+            - "name"
+            - "text"
+            - "brand_description"
+            - "instructions"
+            - "terms_and_conditions"
+            - "web"
+            - "expiry_date"
+          properties:
+            live:
+              type: "integer"
+              description: "Defaults to 0 (not published) on create."
+              enum:
+                - 0
+                - 1
+              default: 0
+            "+categories":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CategoryCode"
+            "+tags":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/TagCode"
+            "+locations":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CreateLocationFields"
+      description: "Manual pp. 15-18. Content guide p. 9 asks for at least one category; the manual sets no minimum for +categories. Physical discounts need locations, online-only discounts do not."
+    UpdateDiscountRequest:
+      allOf:
+        -
+          $ref: "#/components/schemas/DiscountFields"
+        -
+          type: "object"
+          required:
+            - "id"
+          properties:
+            id:
+              $ref: "#/components/schemas/ObjectId"
+            "-tags":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/TagCode"
+            "+tags":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/TagCode"
+            "-categories":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CategoryCode"
+            "+categories":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CategoryCode"
+            "-locations":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/IdRequest"
+            locations:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/UpdateLocationRequest"
+            "+locations":
+              type: "array"
+              items:
+                $ref: "#/components/schemas/CreateLocationFields"
+      description: "Manual p. 20: only id is required; the create requirements do not apply. Operations run in this order: -tags, +tags, -categories, +categories, -locations, locations, +locations."
+    IdRequest:
+      type: "object"
+      required:
+        - "id"
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+    LocationFields:
+      type: "object"
+      properties:
+        location_local_id:
+          type: "string"
+          description: "Caller's own id, unique among the locations of the same discount."
+        street:
+          type: "string"
+          description: "Street and number, where applicable."
+        zip:
+          type: "string"
+          description: "Postal code, as a string to keep leading zeros."
+        city:
+          type: "string"
+        country:
+          type: "string"
+          minLength: 2
+          maxLength: 2
+          description: "ISO 3166 alpha-2 code, e.g. IT."
+        region:
+          type: "string"
+        point_x:
+          type: "string"
+          description: "Longitude, as a numeric string."
+        point_y:
+          type: "string"
+          description: "Latitude, as a numeric string."
+        accessibility:
+          type: "string"
+          enum:
+            - "Y"
+            - "N"
+          description: "Wheelchair accessibility (Manual p. 19). The manual does not say whether N also covers an unknown value."
+    CreateLocationFields:
+      allOf:
+        -
+          $ref: "#/components/schemas/LocationFields"
+        -
+          type: "object"
+          required:
+            - "street"
+            - "zip"
+            - "city"
+            - "country"
+            - "accessibility"
+      description: "Manual p. 19. Coordinates may be omitted: CCDB then geocodes the address (up to 2000 ms per location); a 503 asks to retry, a 400 asks for explicit coordinates. Creation is not documented as idempotent."
+    CreateLocationRequest:
+      allOf:
+        -
+          $ref: "#/components/schemas/CreateLocationFields"
+        -
+          type: "object"
+          required:
+            - "discount_id"
+          properties:
+            discount_id:
+              $ref: "#/components/schemas/ObjectId"
+    UpdateLocationRequest:
+      allOf:
+        -
+          $ref: "#/components/schemas/LocationFields"
+        -
+          type: "object"
+          required:
+            - "id"
+          properties:
+            id:
+              $ref: "#/components/schemas/ObjectId"
+          anyOf:
+            -
+              required:
+                - "location_local_id"
+            -
+              required:
+                - "street"
+            -
+              required:
+                - "zip"
+            -
+              required:
+                - "city"
+            -
+              required:
+                - "country"
+            -
+              required:
+                - "region"
+            -
+              required:
+                - "point_x"
+            -
+              required:
+                - "point_y"
+            -
+              required:
+                - "accessibility"
+      description: "Manual p. 31: id and at least one field to change."
+    SearchDiscountRequest:
+      type: "object"
+      description: "Manual pp. 8-11. All filters are optional. Documented aliases: member/member_oid for member_id; discount/discount_id/discount_oid for id; pageno for page; skip for offset. type in the body is a filter, unlike type in the query."
+      properties:
+        limit:
+          type: "integer"
+          description: "Number of results; up to 1000 on the private API."
+          maximum: 1000
+        page:
+          type: "integer"
+          description: "Page number."
+        offset:
+          type: "integer"
+          description: "Rows to skip, zero-based."
+          minimum: 0
+        nocache:
+          type: "integer"
+          description: "Disables caching; private access only."
+          enum:
+            - 0
+            - 1
+        member_id:
+          $ref: "#/components/schemas/ObjectId"
+        ccdb_member_id:
+          type: "integer"
+          description: "Member primary key in CCDB."
+        ccdb_id:
+          type: "string"
+          description: "Discount primary key in CCDB, distinct from id."
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        local_id:
+          type: "string"
+        live:
+          type: "integer"
+          description: "Published (1) or unpublished (0) discounts."
+          enum:
+            - 0
+            - 1
+          default: 1
+        country:
+          type: "string"
+          minLength: 2
+          maxLength: 2
+        region:
+          type: "string"
+        category:
+          $ref: "#/components/schemas/CategoryCode"
+        tag:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/TagCode"
+        online:
+          type: "integer"
+          description: "Filter on online discounts."
+          enum:
+            - 0
+            - 1
+        physical:
+          type: "integer"
+          description: "Filter on discounts with a physical location."
+          enum:
+            - 0
+            - 1
+        international:
+          type: "integer"
+          description: "Filter on international discounts."
+          enum:
+            - 0
+            - 1
+        city:
+          type: "string"
+        accessibility:
+          type: "string"
+          enum:
+            - "Y"
+            - "N"
+          default: "N"
+          description: "Accessibility filter; the default N applies to search only."
+        type:
+          type: "string"
+          enum:
+            - "ONLINE"
+            - "PHYSICAL"
+            - "INTERNATIONAL"
+          description: "Legacy filter in the body."
+        keyword:
+          type: "string"
+          description: "Wildcard text search."
+    ListDiscountRequest:
+      type: "object"
+      required:
+        - "rows"
+      oneOf:
+        -
+          required:
+            - "page"
+        -
+          required:
+            - "offset"
+      properties:
+        rows:
+          type: "integer"
+          description: "Number of rows; at most 1000 on the private API."
+          maximum: 1000
+        page:
+          type: "integer"
+          description: "Page number, starting from 1."
+        offset:
+          type: "integer"
+          description: "Rows to skip, zero-based."
+          minimum: 0
+      description: "Manual p. 25: rows with either page or offset. Integers here; the manual examples also use numeric strings."
+    GeoSearchRequest:
+      type: "object"
+      properties:
+        limit:
+          type: "integer"
+          description: "Maximum results; no paging."
+          maximum: 1000
+        nocache:
+          type: "integer"
+          description: "Disables caching."
+          enum:
+            - 0
+            - 1
+        near:
+          description: "Search centre: an object with point_x (longitude) and point_y (latitude), or the string longitude:latitude."
+          oneOf:
+            -
+              type: "object"
+              required:
+                - "point_x"
+                - "point_y"
+              properties:
+                point_x:
+                  type: "string"
+                point_y:
+                  type: "string"
+            -
+              type: "string"
+        distance:
+          type: "number"
+          default: 20
+          maximum: 200
+          description: "Distance in km (Manual p. 12)."
+    Category:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        ccdb_id:
+          type: "string"
+        name:
+          type: "string"
+    Country:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        ccdb_id:
+          type: "integer"
+        name:
+          type: "string"
+        region:
+          type: "string"
+          nullable: true
+    Geo:
+      type: "object"
+      properties:
+        point_x:
+          type: "string"
+          nullable: true
+        point_y:
+          type: "string"
+          nullable: true
+        lng:
+          type: "string"
+          nullable: true
+        lat:
+          type: "string"
+          nullable: true
+    LocationItem:
+      type: "object"
+      description: "Location as returned by the API: country is an object here and a code in requests. Not every field is always present."
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        ccdb_id:
+          type: "string"
+        location_local_id:
+          type: "string"
+          nullable: true
+        street:
+          type: "string"
+        zip:
+          type: "string"
+        city:
+          type: "string"
+        country:
+          $ref: "#/components/schemas/Country"
+        point_x:
+          type: "string"
+          nullable: true
+        point_y:
+          type: "string"
+          nullable: true
+        geo:
+          $ref: "#/components/schemas/Geo"
+        accessibility:
+          type: "string"
+          enum:
+            - "Y"
+            - "N"
+          nullable: true
+    LocationList:
+      type: "object"
+      properties:
+        count:
+          type: "integer"
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/LocationItem"
+    Member:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          nullable: true
+        email:
+          type: "string"
+          nullable: true
+        address:
+          type: "string"
+          nullable: true
+        web:
+          type: "string"
+          nullable: true
+        phone:
+          type: "string"
+          nullable: true
+        image:
+          type: "string"
+          nullable: true
+        member_subpage:
+          type: "string"
+          nullable: true
+    DiscountItem:
+      type: "object"
+      description: "Discount as returned by the API, rebuilt from the manual examples. Extra fields are allowed; a null in a response does not mean null is accepted in requests."
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        ccdb_id:
+          type: "string"
+        ccdb_member_id:
+          type: "integer"
+        local_id:
+          type: "string"
+          nullable: true
+        member_id:
+          type: "string"
+          nullable: true
+        vendor:
+          type: "string"
+          nullable: true
+        name:
+          type: "string"
+          nullable: true
+        name_local:
+          type: "string"
+          nullable: true
+        nameLocal:
+          type: "string"
+          nullable: true
+        text:
+          type: "string"
+          nullable: true
+        text_local:
+          type: "string"
+          nullable: true
+        textLocal:
+          type: "string"
+          nullable: true
+        brand_description:
+          type: "string"
+          nullable: true
+        brand_description_local:
+          type: "string"
+          nullable: true
+        instructions:
+          type: "string"
+          nullable: true
+        instructions_local:
+          type: "string"
+          nullable: true
+        terms_and_conditions:
+          type: "string"
+          nullable: true
+        terms_and_conditions_local:
+          type: "string"
+          nullable: true
+        web:
+          type: "string"
+          nullable: true
+        email:
+          type: "string"
+          nullable: true
+        phone:
+          type: "string"
+          nullable: true
+        instagram:
+          type: "string"
+          nullable: true
+        image:
+          type: "string"
+          nullable: true
+        default_image:
+          type: "string"
+          nullable: true
+        image_source_error:
+          type: "string"
+          nullable: true
+        expiry_date:
+          type: "string"
+          format: "date"
+          nullable: true
+        created:
+          type: "string"
+          description: "Timestamp without offset, e.g. 2026-09-10 19:51:58 (not RFC 3339)."
+        updated:
+          type: "string"
+          description: "Timestamp without offset, e.g. 2026-09-10 19:51:58 (not RFC 3339)."
+        live:
+          type: "integer"
+          description: "Publication status."
+          enum:
+            - 0
+            - 1
+        deleted:
+          type: "integer"
+          description: "Deletion flag."
+          enum:
+            - 0
+            - 1
+        online:
+          type: "integer"
+          description: "Online flag."
+          enum:
+            - 0
+            - 1
+        physical:
+          type: "integer"
+          description: "Physical location flag."
+          enum:
+            - 0
+            - 1
+        international:
+          type: "integer"
+          description: "International flag."
+          enum:
+            - 0
+            - 1
+        ccdb_voucher_available:
+          type: "integer"
+          description: "Voucher availability flag."
+          enum:
+            - 0
+            - 1
+        discount_priority:
+          type: "integer"
+        discount_priority__member:
+          type: "integer"
+        categories:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Category"
+        tags:
+          type: "array"
+          items:
+            type: "string"
+        locations:
+          $ref: "#/components/schemas/LocationList"
+        member:
+          $ref: "#/components/schemas/Member"
+    Paging:
+      type: "object"
+      properties:
+        pageNumber:
+          type: "integer"
+        rowsTotal:
+          type: "integer"
+        rowsReturned:
+          type: "integer"
+        rowsPerPage:
+          type: "integer"
+        pagesTotal:
+          type: "integer"
+        offset:
+          type: "integer"
+    GeoLocationResult:
+      allOf:
+        -
+          $ref: "#/components/schemas/LocationItem"
+        -
+          type: "object"
+          properties:
+            discount:
+              $ref: "#/components/schemas/DiscountItem"
+    Envelope:
+      type: "object"
+      required:
+        - "error"
+      properties:
+        code:
+          type: "integer"
+          description: "Error code (Manual p. 34, Appendix A). Do not read code=1 alone as success: Appendix A lists it as Unauthorized, the examples use it for successes too."
+        error:
+          type: "integer"
+          enum:
+            - 0
+            - 1
+          description: "0: success; 1: application error, possibly with HTTP 200."
+        http_status:
+          type: "integer"
+        text:
+          type: "string"
+    BasicResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "JSON envelope; data may be missing or empty."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  additionalProperties: true
+    AuthResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "With error=0, api_response.text holds the session (128 hex characters); with error=1, the error message."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties: {}
+    DiscountResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "Create, update, read and list return data.discount; on error data may be missing."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    discount:
+                      type: "array"
+                      items:
+                        $ref: "#/components/schemas/DiscountItem"
+    SearchResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "Search returns data.discounts, not data.discount. count is the number of matches, realCount the number of rows returned."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    discounts:
+                      type: "object"
+                      properties:
+                        data:
+                          type: "array"
+                          items:
+                            $ref: "#/components/schemas/DiscountItem"
+                        CCDB:
+                          $ref: "#/components/schemas/Paging"
+                        count:
+                          type: "integer"
+                        realCount:
+                          type: "integer"
+    GeoSearchResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "Geo search returns data.locations; it does not support paging."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    locations:
+                      type: "object"
+                      properties:
+                        data:
+                          type: "array"
+                          items:
+                            $ref: "#/components/schemas/GeoLocationResult"
+                        CCDB:
+                          $ref: "#/components/schemas/Paging"
+                        count:
+                          type: "integer"
+                        realCount:
+                          type: "integer"
+    LocationResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "Create and update location return data.location as a single object."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    location:
+                      $ref: "#/components/schemas/LocationItem"
+    DeletedDiscount:
+      type: "object"
+      properties:
+        id:
+          $ref: "#/components/schemas/ObjectId"
+        ccdb_id:
+          type: "string"
+    DeleteDiscountResponse:
+      type: "object"
+      required:
+        - "api_response"
+      description: "data.discount lists the deleted discount; when the id does not exist the call still succeeds, with data={} (Manual p. 22)."
+      properties:
+        api_response:
+          allOf:
+            -
+              $ref: "#/components/schemas/Envelope"
+            -
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    discount:
+                      type: "array"
+                      items:
+                        $ref: "#/components/schemas/DeletedDiscount"
+  responses:
+    BadRequest:
+      description: "Missing or invalid parameters, e.g. code=103 with text \"id: missing.\"; a failed geocoding asks for explicit coordinates."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    Unauthorized:
+      description: "Authentication missing or session expired."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    Forbidden:
+      description: "Insufficient permissions."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    NotFound:
+      description: "Unknown object (code=104) or path."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    ServerError:
+      description: "Temporary server error. The manual says to retry; it gives no guarantee against duplicate writes."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    Unavailable:
+      description: "Service temporarily unavailable, e.g. during geocoding (Manual p. 19)."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+    OtherError:
+      description: "Unspecified response: check the HTTP status and api_response.error. The manual defines no rate limit."
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/BasicResponse"
+"x-sources":
+  -
+    file: "[2026] CCDB HTTP API for Discounts v 2.3.pdf"
+    pages: 34
+  -
+    file: "[2026] CCDB Discount Creation.pdf"
+    pages: 66
+"x-profile-notes":
+  - "Private API only (/api/v2, Manual p. 7); the public endpoints under /public/api are not modelled."
+  - "Schemas describe JSON responses; text, XML and YAML can be selected with type but have no schema."
+  - "force_http_success=1 (Manual p. 5) is not used, so that HTTP statuses stay meaningful."
+  - "Examples use {{...}} placeholders and contain no real credentials, sessions or ids."

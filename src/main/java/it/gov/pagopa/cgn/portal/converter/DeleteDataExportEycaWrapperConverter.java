@@ -3,7 +3,7 @@ package it.gov.pagopa.cgn.portal.converter;
 
 import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DeleteDataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.IdRequestEyca;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,28 +13,28 @@ import java.util.function.Function;
 
 @Service
 public class DeleteDataExportEycaWrapperConverter
-        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<DeleteDataExportEyca>> {
+        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<IdRequestEyca>> {
 
     @Value("${eyca.api.debug}")
     boolean eycaApiDebug;
 
     @Override
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DeleteDataExportEyca>> toDtoFunction() {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<IdRequestEyca>> toDtoFunction() {
         return toDto;
     }
 
     @Override
-    protected Function<DataExportEycaWrapper<DeleteDataExportEyca>, EycaDataExportViewEntity> toEntityFunction() {
+    protected Function<DataExportEycaWrapper<IdRequestEyca>, EycaDataExportViewEntity> toEntityFunction() {
         return null;
     }
 
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DeleteDataExportEyca>> toDto = entity -> {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<IdRequestEyca>> toDto = entity -> {
 
-        DeleteDataExportEyca deleteDataExport = new DeleteDataExportEyca();
+        IdRequestEyca deleteDataExport = new IdRequestEyca();
 
         deleteDataExport.setId(entity.getEycaUpdateId());
 
-        DataExportEycaWrapper<DeleteDataExportEyca> dto = new DataExportEycaWrapper<>(deleteDataExport);
+        DataExportEycaWrapper<IdRequestEyca> dto = new DataExportEycaWrapper<>(deleteDataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setVendor(entity.getVendor());
 

@@ -529,6 +529,13 @@
                             <generateApiTests>false</generateApiTests>
                             <generateModelTests>false</generateModelTests>
                             <modelNameSuffix>Eyca</modelNameSuffix>
+                            <nameMappings>
+                                <nameMapping>-tags=minusTags</nameMapping>
+                                <nameMapping>-categories=minusCategories</nameMapping>
+                                <nameMapping>-locations=minusLocations</nameMapping>
+                                <nameMapping>nameLocal=nameLocalAlias</nameMapping>
+                                <nameMapping>textLocal=textLocalAlias</nameMapping>
+                            </nameMappings>
                             <library>resttemplate</library>
                             <enablePostProcessFile>true</enablePostProcessFile>
                             <configOptions>
@@ -542,6 +549,7 @@
                                 <serializableModel>true</serializableModel>
                                 <serializationLibrary>jackson</serializationLibrary>
                                 <generateClientAsBean>true</generateClientAsBean>
+                                <additionalModelTypeAnnotations>@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)</additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>
                     </execution>

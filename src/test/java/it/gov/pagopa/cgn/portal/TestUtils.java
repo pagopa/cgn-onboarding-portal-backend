@@ -529,7 +529,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getListWIthLandingPageAndReferent() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
         entity0.setName("name_0");
@@ -684,7 +684,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getEycaDataExportForCreate() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setEycaUpdateId("");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
@@ -711,7 +711,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getEycaDataExportForUpdate() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setEycaUpdateId("1234");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
@@ -730,7 +730,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
         entity0.setName("name_0");
@@ -745,7 +745,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity1 = new EycaDataExportViewEntity();
         entity1.setId(1L);
-        entity1.setCategories("products");
+        entity1.setCategories("SV");
         entity1.setProfileId(1L);
         entity1.setVendor("vendor_0");
         entity1.setName("name_0");
@@ -764,7 +764,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity2 = new EycaDataExportViewEntity();
         entity2.setId(1L);
-        entity2.setCategories("products");
+        entity2.setCategories("SV");
         entity2.setProfileId(1L);
         entity2.setVendor("vendor_0");
         entity2.setName("name_0");
@@ -782,7 +782,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity3 = new EycaDataExportViewEntity();
         entity3.setId(1L);
-        entity3.setCategories("products");
+        entity3.setCategories("SV");
         entity3.setProfileId(1L);
         entity3.setVendor("vendor_0");
         entity3.setName("name_0");
@@ -800,7 +800,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity4 = new EycaDataExportViewEntity();
         entity4.setId(1L);
-        entity4.setCategories("products");
+        entity4.setCategories("SV");
         entity4.setProfileId(1L);
         entity4.setVendor("vendor_0");
         entity4.setName("name_0");
@@ -818,7 +818,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity5 = new EycaDataExportViewEntity();
         entity5.setId(1L);
-        entity5.setCategories("products");
+        entity5.setCategories("SV");
         entity5.setProfileId(1L);
         entity5.setVendor("vendor_0");
         entity5.setName("name_0");
@@ -832,12 +832,12 @@ public class TestUtils {
         entity5.setCity("city");
         entity5.setStreet("address0");
         entity5.setLongitude("12");
-        entity5.setTags("tag1, tag2");
+        entity5.setTags("tag_mobility,tag_accessible");
         entity5.setEycaEmailUpdateRequired(true);
 
         EycaDataExportViewEntity entity6 = new EycaDataExportViewEntity();
         entity6.setId(1L);
-        entity6.setCategories("products");
+        entity6.setCategories("SV");
         entity6.setProfileId(1L);
         entity6.setVendor("vendor_0");
         entity6.setName("name_0");
@@ -850,7 +850,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity7 = new EycaDataExportViewEntity();
         entity7.setId(2L);
-        entity7.setCategories("products");
+        entity7.setCategories("SV");
         entity7.setProfileId(1L);
         entity7.setVendor("vendor_0");
         entity7.setName("name_0");
@@ -863,7 +863,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity8 = new EycaDataExportViewEntity();
         entity8.setId(1L);
-        entity8.setCategories("products");
+        entity8.setCategories("SV");
         entity8.setProfileId(1L);
         entity8.setVendor("vendor_0");
         entity8.setName("name_0");
@@ -879,7 +879,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity9 = new EycaDataExportViewEntity();
         entity9.setId(1L);
-        entity9.setCategories("products");
+        entity9.setCategories("SV");
         entity9.setProfileId(1L);
         entity9.setVendor("vendor_1");
         entity9.setName("name_1");
@@ -896,7 +896,7 @@ public class TestUtils {
         EycaDataExportViewEntity entity10 = new EycaDataExportViewEntity();
 
         entity10.setId(1L);
-        entity10.setCategories("products");
+        entity10.setCategories("SV");
         entity10.setProfileId(1L);
         entity10.setVendor("vendor_2");
         entity10.setName("name_2");
@@ -913,7 +913,7 @@ public class TestUtils {
         EycaDataExportViewEntity entity11 = new EycaDataExportViewEntity();
 
         entity11.setId(1L);
-        entity11.setCategories("products");
+        entity11.setCategories("SV");
         entity11.setProfileId(1L);
         entity11.setVendor("vendor_2");
         entity11.setName("name_2");
@@ -929,7 +929,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity12 = new EycaDataExportViewEntity();
         entity12.setId(1L);
-        entity12.setCategories("products");
+        entity12.setCategories("SV");
         entity12.setProfileId(1L);
         entity12.setVendor("vendor_0");
         entity12.setName("name_0");
@@ -941,7 +941,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity13 = new EycaDataExportViewEntity();
         entity13.setId(1L);
-        entity13.setCategories("products");
+        entity13.setCategories("SV");
         entity13.setProfileId(1L);
         entity13.setVendor("vendor_0");
         entity13.setName("name_0");
@@ -953,7 +953,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity14 = new EycaDataExportViewEntity();
         entity14.setId(1L);
-        entity14.setCategories("products");
+        entity14.setCategories("SV");
         entity14.setProfileId(1L);
         entity14.setVendor("vendor_0");
         entity14.setName("name_0");
@@ -965,7 +965,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity15 = new EycaDataExportViewEntity();
         entity15.setId(1L);
-        entity15.setCategories("products");
+        entity15.setCategories("SV");
         entity15.setProfileId(1L);
         entity15.setVendor("vendor_0");
         entity15.setName("name_0");
@@ -976,7 +976,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity16 = new EycaDataExportViewEntity();
         entity16.setId(1L);
-        entity16.setCategories("products");
+        entity16.setCategories("SV");
         entity16.setEycaUpdateId("hughgt7y98565");
         entity16.setProfileId(1L);
         entity16.setVendor("vendor_0");
@@ -1010,7 +1010,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getTobeDeletedEycaDataExportViewEntityList() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
         entity0.setName("name_0");
@@ -1028,7 +1028,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity1 = new EycaDataExportViewEntity();
         entity1.setId(2L);
-        entity1.setCategories("products");
+        entity1.setCategories("SV");
         entity1.setProfileId(1L);
         entity1.setVendor("vendor_0");
         entity1.setName("name_0");
@@ -1045,7 +1045,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity2 = new EycaDataExportViewEntity();
         entity2.setId(1L);
-        entity2.setCategories("products");
+        entity2.setCategories("SV");
         entity2.setProfileId(1L);
         entity2.setVendor("vendor_0");
         entity2.setName("name_0");
@@ -1062,7 +1062,7 @@ public class TestUtils {
 
         EycaDataExportViewEntity entity3 = new EycaDataExportViewEntity();
         entity3.setId(1L);
-        entity3.setCategories("products");
+        entity3.setCategories("SV");
         entity3.setProfileId(1L);
         entity3.setVendor("vendor_0");
         entity3.setName("name_0");
@@ -1083,7 +1083,7 @@ public class TestUtils {
     public static List<EycaDataExportViewEntity> getListWIthNoDiscountype() {
         EycaDataExportViewEntity entity0 = new EycaDataExportViewEntity();
         entity0.setId(1L);
-        entity0.setCategories("products");
+        entity0.setCategories("SV");
         entity0.setProfileId(1L);
         entity0.setVendor("vendor_0");
         entity0.setName("name_0");
@@ -1133,11 +1133,11 @@ public class TestUtils {
         return suspendDiscount;
     }
 
-    public static SearchApiResponseEyca getSearchApiResponseEyca() {
-        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
-        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
-        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
-        SearchApiResponseApiResponseDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchApiResponseApiResponseDataDiscountsEyca();
+    public static SearchResponseEyca getSearchApiResponseEyca() {
+        SearchResponseEyca searchApiResponseEyca = new SearchResponseEyca();
+        SearchResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchResponseApiResponseEyca();
+        SearchResponseApiResponseAllOfDataEyca searchApiResponseApiResponseDataEyca = new SearchResponseApiResponseAllOfDataEyca();
+        SearchResponseApiResponseAllOfDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchResponseApiResponseAllOfDataDiscountsEyca();
 
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
@@ -1152,12 +1152,12 @@ public class TestUtils {
         return searchApiResponseEyca;
     }
 
-    public static SearchApiResponseEyca getSearchApiResponseWithDataEmptyList() {
+    public static SearchResponseEyca getSearchApiResponseWithDataEmptyList() {
 
-        SearchApiResponseEyca searchApiResponseEyca = new SearchApiResponseEyca();
-        SearchApiResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchApiResponseApiResponseEyca();
-        SearchApiResponseApiResponseDataEyca searchApiResponseApiResponseDataEyca = new SearchApiResponseApiResponseDataEyca();
-        SearchApiResponseApiResponseDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchApiResponseApiResponseDataDiscountsEyca();
+        SearchResponseEyca searchApiResponseEyca = new SearchResponseEyca();
+        SearchResponseApiResponseEyca searchApiResponseApiResponseEyca = new SearchResponseApiResponseEyca();
+        SearchResponseApiResponseAllOfDataEyca searchApiResponseApiResponseDataEyca = new SearchResponseApiResponseAllOfDataEyca();
+        SearchResponseApiResponseAllOfDataDiscountsEyca searchApiResponseApiResponseDataDiscountsEyca = new SearchResponseApiResponseAllOfDataDiscountsEyca();
 
         searchApiResponseApiResponseEyca.setData(searchApiResponseApiResponseDataEyca);
         searchApiResponseApiResponseDataEyca.setDiscounts(searchApiResponseApiResponseDataDiscountsEyca);
@@ -1166,11 +1166,11 @@ public class TestUtils {
         return searchApiResponseEyca;
     }
 
-    public static ApiResponseEyca getApiResponse() {
-        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+    public static DiscountResponseEyca getApiResponse() {
+        DiscountResponseEyca apiResponseEyca = new DiscountResponseEyca();
 
-        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
-        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        DiscountResponseApiResponseEyca apiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
+        DiscountResponseApiResponseAllOfDataEyca apiResponseDataEyca = new DiscountResponseApiResponseAllOfDataEyca();
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
         discountItemEyca.setId(FAKE_OID_1);
@@ -1183,11 +1183,11 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
-    public static ApiResponseEyca getApiResponseWithCcdbId() {
-        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+    public static DiscountResponseEyca getApiResponseWithCcdbId() {
+        DiscountResponseEyca apiResponseEyca = new DiscountResponseEyca();
 
-        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
-        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        DiscountResponseApiResponseEyca apiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
+        DiscountResponseApiResponseAllOfDataEyca apiResponseDataEyca = new DiscountResponseApiResponseAllOfDataEyca();
         List<DiscountItemEyca> items = new ArrayList<>();
         DiscountItemEyca discountItemEyca = new DiscountItemEyca();
         discountItemEyca.setId(FAKE_OID_1);
@@ -1201,24 +1201,24 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_0() {
-        return new ApiResponseEyca();
+    public static DiscountResponseEyca getIncompleteApiResponse_0() {
+        return new DiscountResponseEyca();
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_1() {
-        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+    public static DiscountResponseEyca getIncompleteApiResponse_1() {
+        DiscountResponseEyca apiResponseEyca = new DiscountResponseEyca();
 
-        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
+        DiscountResponseApiResponseEyca apiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
         apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
 
         return apiResponseEyca;
     }
 
-    public static ApiResponseEyca getIncompleteApiResponse_2() {
-        ApiResponseEyca apiResponseEyca = new ApiResponseEyca();
+    public static DiscountResponseEyca getIncompleteApiResponse_2() {
+        DiscountResponseEyca apiResponseEyca = new DiscountResponseEyca();
 
-        ApiResponseApiResponseEyca apiResponseApiResponseEyca = new ApiResponseApiResponseEyca();
-        ApiResponseApiResponseDataEyca apiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+        DiscountResponseApiResponseEyca apiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
+        DiscountResponseApiResponseAllOfDataEyca apiResponseDataEyca = new DiscountResponseApiResponseAllOfDataEyca();
         apiResponseApiResponseEyca.setData(apiResponseDataEyca);
         apiResponseEyca.setApiResponse(apiResponseApiResponseEyca);
 
@@ -1226,11 +1226,23 @@ public class TestUtils {
     }
 
 
-    public static DeleteApiResponseEyca getDeleteApiResponse() {
-        DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
+    public static AuthResponseEyca getAuthResponseEyca(AuthResponseApiResponseEyca.ErrorEnum error,
+                                                       Integer code,
+                                                       String text) {
+        AuthResponseApiResponseEyca authResponseApiResponseEyca = new AuthResponseApiResponseEyca();
+        authResponseApiResponseEyca.setError(error);
+        authResponseApiResponseEyca.setCode(code);
+        authResponseApiResponseEyca.setText(text);
+        AuthResponseEyca authResponseEyca = new AuthResponseEyca();
+        authResponseEyca.setApiResponse(authResponseApiResponseEyca);
+        return authResponseEyca;
+    }
 
-        DeleteApiResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteApiResponseApiResponseEyca();
-        deleteApiResponseApiResponseEyca.setError(0);
+    public static DeleteDiscountResponseEyca getDeleteApiResponse() {
+        DeleteDiscountResponseEyca apiResponseEyca = new DeleteDiscountResponseEyca();
+
+        DeleteDiscountResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteDiscountResponseApiResponseEyca();
+        deleteApiResponseApiResponseEyca.setError(DeleteDiscountResponseApiResponseEyca.ErrorEnum.NUMBER_0);
         deleteApiResponseApiResponseEyca.setCode(1);
         deleteApiResponseApiResponseEyca.setText("DELETED");
         deleteApiResponseApiResponseEyca.setData(null);
@@ -1239,11 +1251,11 @@ public class TestUtils {
         return apiResponseEyca;
     }
 
-    public static DeleteApiResponseEyca getDeleteApiResponseInternalServerError() {
-        DeleteApiResponseEyca apiResponseEyca = new DeleteApiResponseEyca();
+    public static DeleteDiscountResponseEyca getDeleteApiResponseInternalServerError() {
+        DeleteDiscountResponseEyca apiResponseEyca = new DeleteDiscountResponseEyca();
 
-        DeleteApiResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteApiResponseApiResponseEyca();
-        deleteApiResponseApiResponseEyca.setError(1);
+        DeleteDiscountResponseApiResponseEyca deleteApiResponseApiResponseEyca = new DeleteDiscountResponseApiResponseEyca();
+        deleteApiResponseApiResponseEyca.setError(DeleteDiscountResponseApiResponseEyca.ErrorEnum.NUMBER_1);
         deleteApiResponseApiResponseEyca.setCode(4);
         deleteApiResponseApiResponseEyca.setText(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         deleteApiResponseApiResponseEyca.setData(null);
@@ -1350,10 +1362,10 @@ public class TestUtils {
         return Optional.of(discount);
     }
 
-    public static ListApiResponseEyca getListApiResponseEyca() {
-        ListApiResponseEyca response = new ListApiResponseEyca();
-        ListApiResponseApiResponseEyca listApiResponseApiResponseEyca = new ListApiResponseApiResponseEyca();
-        ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+    public static DiscountResponseEyca getListApiResponseEyca() {
+        DiscountResponseEyca response = new DiscountResponseEyca();
+        DiscountResponseApiResponseEyca listApiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
+        DiscountResponseApiResponseAllOfDataEyca apiResponseApiResponseDataEyca = new DiscountResponseApiResponseAllOfDataEyca();
         List<DiscountItemEyca> itemsFromEyca = new ArrayList<>();
         DiscountItemEyca item1 = new DiscountItemEyca();
         item1.setCcdbId(FAKE_CCDB_1);
@@ -1369,10 +1381,10 @@ public class TestUtils {
         return response;
     }
 
-    public static ListApiResponseEyca getListApiResponseEycaEmpty() {
-        ListApiResponseEyca response = new ListApiResponseEyca();
-        ListApiResponseApiResponseEyca listApiResponseApiResponseEyca = new ListApiResponseApiResponseEyca();
-        ApiResponseApiResponseDataEyca apiResponseApiResponseDataEyca = new ApiResponseApiResponseDataEyca();
+    public static DiscountResponseEyca getListApiResponseEycaEmpty() {
+        DiscountResponseEyca response = new DiscountResponseEyca();
+        DiscountResponseApiResponseEyca listApiResponseApiResponseEyca = new DiscountResponseApiResponseEyca();
+        DiscountResponseApiResponseAllOfDataEyca apiResponseApiResponseDataEyca = new DiscountResponseApiResponseAllOfDataEyca();
         apiResponseApiResponseDataEyca.setDiscount(Collections.emptyList());
         listApiResponseApiResponseEyca.setData(apiResponseApiResponseDataEyca);
         response.setApiResponse(listApiResponseApiResponseEyca);
@@ -1572,8 +1584,8 @@ public class TestUtils {
         };
     }
 
-    public static SearchDataExportEyca createEmptySearchDataExportEyca() {
-        return new SearchDataExportEyca();
+    public static SearchDiscountRequestEyca createEmptySearchDataExportEyca() {
+        return new SearchDiscountRequestEyca();
     }
 
     public static void setOperatorAuth() {
