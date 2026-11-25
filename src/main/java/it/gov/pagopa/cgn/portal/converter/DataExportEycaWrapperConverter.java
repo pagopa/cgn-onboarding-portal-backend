@@ -5,7 +5,9 @@ import it.gov.pagopa.cgn.portal.converter.referent.DataExportEycaWrapper;
 import it.gov.pagopa.cgn.portal.enums.DiscountCodeTypeEnum;
 import it.gov.pagopa.cgn.portal.model.EycaDataExportViewEntity;
 import it.gov.pagopa.cgn.portal.service.ExportService;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DataExportEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.CategoryCodeEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.CreateDiscountRequestEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.TagCodeEyca;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,24 +19,24 @@ import java.util.function.Function;
 
 @Service
 public class DataExportEycaWrapperConverter
-        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> {
+        extends AbstractConverter<EycaDataExportViewEntity, DataExportEycaWrapper<CreateDiscountRequestEyca>> {
 
     @Value("${eyca.api.debug}")
     boolean eycaApiDebug;
 
     @Override
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDtoFunction() {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<CreateDiscountRequestEyca>> toDtoFunction() {
         return toDto;
     }
 
     @Override
-    protected Function<DataExportEycaWrapper<DataExportEyca>, EycaDataExportViewEntity> toEntityFunction() {
+    protected Function<DataExportEycaWrapper<CreateDiscountRequestEyca>, EycaDataExportViewEntity> toEntityFunction() {
         return null;
     }
 
-    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<DataExportEyca>> toDto = entity -> {
+    protected Function<EycaDataExportViewEntity, DataExportEycaWrapper<CreateDiscountRequestEyca>> toDto = entity -> {
 
-        DataExportEyca dataExport = new DataExportEyca();
+        CreateDiscountRequestEyca dataExport = new CreateDiscountRequestEyca();
 
         int result = 0;
 
@@ -46,7 +48,7 @@ public class DataExportEycaWrapperConverter
             result = 1;
         }
 
-        dataExport.setLive(result);
+        dataExport.setLive(CreateDiscountRequestEyca.LiveEnum.fromValue(result));
         dataExport.setEmail(entity.getEmail());
         dataExport.setLocalId(entity.getLocationLocalId());
         dataExport.setPhone(entity.getPhone());
@@ -57,14 +59,16 @@ public class DataExportEycaWrapperConverter
         dataExport.setTextLocal(entity.getTextLocal());
         dataExport.setWeb(entity.getWeb());
         if (!StringUtils.isEmpty(entity.getTags())) {
-            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).toList());
+            dataExport.setPlusTags(Arrays.stream(entity.getTags().split(",")).map(TagCodeEyca::fromValue).toList());
         }
         if (!StringUtils.isEmpty(entity.getCategories())) {
-            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(",")).toList());
+            dataExport.setPlusCategories(Arrays.stream(entity.getCategories().split(","))
+                                               .map(CategoryCodeEyca::fromValue)
+                                               .toList());
         }
         dataExport.setImageSourceWeb(entity.getImage());
 
-        DataExportEycaWrapper<DataExportEyca> dto = new DataExportEycaWrapper<>(dataExport);
+        DataExportEycaWrapper<CreateDiscountRequestEyca> dto = new DataExportEycaWrapper<>(dataExport);
         dto.setEycaUpdateId(entity.getEycaUpdateId());
         dto.setDiscountID(entity.getDiscountId());
         dto.setDiscountType(entity.getDiscountType());

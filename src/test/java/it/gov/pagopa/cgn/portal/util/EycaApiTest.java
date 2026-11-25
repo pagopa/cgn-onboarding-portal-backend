@@ -6,7 +6,7 @@ import it.gov.pagopa.cgn.portal.service.ChangeAuditService;
 import it.gov.pagopa.cgn.portal.service.EycaExportService;
 import it.gov.pagopa.cgn.portal.support.TestReferentRepository;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
-import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.ListApiResponseEyca;
+import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.DiscountResponseEyca;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -98,7 +98,7 @@ public class EycaApiTest {
     @Ignore("Only for local launch")
     public void testCallListApiEyca_ok() {
         eycaExportService.authenticateOnEyca();
-        ListApiResponseEyca lare = eycaExportService.listDiscounts(1,1000, "json");
+        DiscountResponseEyca lare = eycaExportService.listDiscounts(1,1000, "json");
         Assert.assertNotNull(lare.getApiResponse().getData().getDiscount());
     }
 }

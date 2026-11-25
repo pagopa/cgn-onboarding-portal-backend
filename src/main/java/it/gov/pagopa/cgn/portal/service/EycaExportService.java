@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.pagopa.cgn.portal.config.ConfigProperties;
 import it.gov.pagopa.cgn.portal.exception.EycaAuthenticationException;
 import it.gov.pagopa.cgn.portal.exception.EycaRateLimitInterruptedException;
@@ -9,8 +11,11 @@ import it.gov.pagopa.cgnonboardingportal.eycadataexport.api.EycaApi;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.client.ApiClient;
 import it.gov.pagopa.cgnonboardingportal.eycadataexport.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 
 import java.time.Clock;
@@ -32,6 +37,8 @@ public class EycaExportService {
     private static final DateTimeFormatter HTTP_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("EEE, dd MMM uuuu HH:mm:ss 'GMT'", Locale.US)
                     .withResolverStyle(ResolverStyle.STRICT);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final int EYCA_CODE_NO_RESULTS = 104;
 
     private final EycaApi eycaApi;
     private final ApiClient apiClient;
@@ -45,9 +52,18 @@ public class EycaExportService {
         this.apiClient.setPassword(configProperties.getEycaPassword());
     }
 
-    private <T> T callWithRateLimitRetry(Supplier<T> call) {
-        int maxRetries = -1;
-        int attempt = 0;
+    private <T> T callWithSessionRetry(Supplier<T> call) {
+        try {
+            return call.get();
+        } catch (HttpClientErrorException.Unauthorized unauthorized) {
+            log.warn("EYCA session rejected (401), authenticating again and retrying once");
+            authenticateOnEyca();
+            return call.get();
+        }
+    }
+
+    private <T> T callWithRateLimitRetry(Supplier<T> call, boolean retryServerErrors) {
+        RetryState state = new RetryState();
         while (true) {
             try {
                 return call.get();
@@ -56,22 +72,39 @@ public class EycaExportService {
                          tmr.getStatusCode(),
                          tmr.getResponseHeaders(),
                          tmr.getResponseBodyAsString());
-                if (maxRetries < 0) {
-                    maxRetries = Math.max(0, paramFacade.getEycaRateLimitMaxRetries());
+                state.rateLimitAttempts = waitBeforeRetry(tmr, state, state.rateLimitAttempts, "rate limit (429)");
+            } catch (HttpServerErrorException hse) {
+                log.warn("EYCA 5xx response - status: {}, body: {}", hse.getStatusCode(), hse.getResponseBodyAsString());
+                if (!retryServerErrors) {
+                    throw hse;
                 }
-                if (attempt >= maxRetries) {
-                    log.error("EYCA rate limit (429) persists after {} retries", attempt);
-                    throw tmr;
-                }
-                attempt++;
-                long waitMs = computeWaitMs(tmr);
-                log.warn("EYCA rate limit (429), retry {}/{} in {} ms", attempt, maxRetries, waitMs);
-                sleep(waitMs);
+                state.serverErrorAttempts = waitBeforeRetry(hse, state, state.serverErrorAttempts, "server error (5xx)");
             }
         }
     }
 
-    private long computeWaitMs(HttpClientErrorException ex) {
+    private int waitBeforeRetry(HttpStatusCodeException ex, RetryState state, int attempt, String reason) {
+        if (state.maxRetries < 0) {
+            state.maxRetries = Math.max(0, paramFacade.getEycaRateLimitMaxRetries());
+        }
+        if (attempt >= state.maxRetries) {
+            log.error("EYCA {} persists after {} retries", reason, attempt);
+            throw ex;
+        }
+        int nextAttempt = attempt + 1;
+        long waitMs = computeWaitMs(ex);
+        log.warn("EYCA {}, retry {}/{} in {} ms", reason, nextAttempt, state.maxRetries, waitMs);
+        sleep(waitMs);
+        return nextAttempt;
+    }
+
+    private static final class RetryState {
+        private int maxRetries = -1;
+        private int rateLimitAttempts;
+        private int serverErrorAttempts;
+    }
+
+    private long computeWaitMs(HttpStatusCodeException ex) {
         long waitMs = Math.max(0, paramFacade.getEycaRateLimitWaitMs());
         String retryAfter = ex.getResponseHeaders() != null ? ex.getResponseHeaders().getFirst("Retry-After") : null;
         if (retryAfter != null) {
@@ -108,27 +141,31 @@ public class EycaExportService {
     }
 
     public void authenticateOnEyca() {
-        String authResponse = eycaApi.authentication();
+        AuthResponseEyca authResponse = eycaApi.authentication();
+        AuthResponseApiResponseEyca apiResponse = authResponse == null ? null : authResponse.getApiResponse();
 
-        if (authResponse.contains("ERR")) {
-            throw new EycaAuthenticationException(authResponse);
+        if (apiResponse == null) {
+            throw new EycaAuthenticationException("Empty EYCA authentication response");
+        }
+        if (apiResponse.getError() != AuthResponseApiResponseEyca.ErrorEnum.NUMBER_0 ||
+            StringUtils.isBlank(apiResponse.getText())) {
+            throw new EycaAuthenticationException("EYCA authentication failed - code: " + apiResponse.getCode() +
+                                                  ", text: " + apiResponse.getText());
         }
 
-        int colonIndex = authResponse.indexOf(':');
-        String sessionId = authResponse.substring(colonIndex + 1).trim();
-        apiClient.addDefaultCookie("ccdb_session", sessionId);
+        apiClient.setApiKey(apiResponse.getText());
     }
 
-    public SearchApiResponseEyca searchDiscount(SearchDataExportEyca searchDataExportEyca, String type, boolean liveN)
+    public SearchResponseEyca searchDiscount(SearchDiscountRequestEyca searchDataExportEyca, String type, boolean liveN)
             throws RestClientException {
         if (liveN) {
-            searchDataExportEyca.setLive(0);
+            searchDataExportEyca.setLive(SearchDiscountRequestEyca.LiveEnum.NUMBER_0);
             log.info("Search Response with Live = N:");
         } else {
-            searchDataExportEyca.setLive(1);
+            searchDataExportEyca.setLive(SearchDiscountRequestEyca.LiveEnum.NUMBER_1);
             log.info("Search Response with Live = S");
         }
-        SearchApiResponseEyca response = callWithRateLimitRetry(() -> eycaApi.searchDiscount(type, searchDataExportEyca));
+        SearchResponseEyca response = callWithSessionRetry(() -> callWithRateLimitRetry(() -> eycaApi.searchDiscount(type, searchDataExportEyca), true));
 
         if (Objects.nonNull(response)) {
             log.info(response.toString());
@@ -137,27 +174,43 @@ public class EycaExportService {
         return response;
     }
 
-    public ListApiResponseEyca listDiscounts(Integer page , Integer rows, String type) {
-        ListDataExportEyca listDataExportEyca = new ListDataExportEyca();
+    public DiscountResponseEyca listDiscounts(Integer page , Integer rows, String type) {
+        ListDiscountRequestEyca listDataExportEyca = new ListDiscountRequestEyca();
         listDataExportEyca.setPage(page);
         listDataExportEyca.setRows(rows);
-        return callWithRateLimitRetry(() -> eycaApi.listDiscount(type, listDataExportEyca));
+        try {
+            return callWithSessionRetry(() -> callWithRateLimitRetry(() -> eycaApi.listDiscount(listDataExportEyca, type), true));
+        } catch (HttpClientErrorException.NotFound notFound) {
+            if (readApiResponseCode(notFound) != EYCA_CODE_NO_RESULTS) {
+                throw notFound;
+            }
+            log.info("EYCA list_discount returned no discounts (404, code {})", EYCA_CODE_NO_RESULTS);
+            return new DiscountResponseEyca();
+        }
     }
 
-    public ApiResponseEyca createDiscount(DataExportEyca dataExportEyca, String type)
-            throws RestClientException {
-        return callWithRateLimitRetry(() -> eycaApi.createDiscount(type, dataExportEyca));
+    private static int readApiResponseCode(HttpClientErrorException ex) {
+        try {
+            return OBJECT_MAPPER.readTree(ex.getResponseBodyAsString()).path("api_response").path("code").asInt(-1);
+        } catch (JsonProcessingException e) {
+            return -1;
+        }
     }
 
-    public ApiResponseEyca updateDiscount(UpdateDataExportEyca updateDataExportEyca, String type)
+    public DiscountResponseEyca createDiscount(CreateDiscountRequestEyca dataExportEyca, String type)
             throws RestClientException {
-        return callWithRateLimitRetry(() -> eycaApi.updateDiscount(type, updateDataExportEyca));
+        return callWithSessionRetry(() -> callWithRateLimitRetry(() -> eycaApi.createDiscount(dataExportEyca, type), false));
+    }
+
+    public DiscountResponseEyca updateDiscount(UpdateDiscountRequestEyca updateDataExportEyca, String type)
+            throws RestClientException {
+        return callWithSessionRetry(() -> callWithRateLimitRetry(() -> eycaApi.updateDiscount(updateDataExportEyca, type), true));
     }
 
 
-    public DeleteApiResponseEyca deleteDiscount(DeleteDataExportEyca deleteDataExportEyca, String type)
+    public DeleteDiscountResponseEyca deleteDiscount(IdRequestEyca deleteDataExportEyca, String type)
             throws RestClientException {
-        return callWithRateLimitRetry(() -> eycaApi.deleteDiscount(type, deleteDataExportEyca));
+        return callWithSessionRetry(() -> callWithRateLimitRetry(() -> eycaApi.deleteDiscount(deleteDataExportEyca, type), true));
     }
 
 }
