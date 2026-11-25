@@ -1,6 +1,8 @@
 package it.gov.pagopa.cgn.portal.service;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.StandardCharset;
 import it.gov.pagopa.cgn.portal.IntegrationAbstractTest;
 import it.gov.pagopa.cgn.portal.TestUtils;
@@ -54,6 +56,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -230,6 +233,19 @@ class EycaExportServiceTest
         SearchDiscountRequestEyca request = new SearchDiscountRequestEyca();
 
         assertThrows(CGNException.class, () -> exportService.getCcdbIdOnEyca(request));
+    }
+
+    @Test
+    void convertToSearchDataExportEyca_serializedRequestHasNoAccessibilityFilter() throws Exception {
+        EycaDataExportViewEntity entity = TestUtils.getEycaDataExportForUpdate().getFirst();
+
+        SearchDiscountRequestEyca request = exportService.convertToSearchDataExportEyca(entity);
+        ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+        JsonNode body = objectMapper.readTree(objectMapper.writeValueAsString(request));
+
+        assertEquals("1234", body.path("id").asText());
+        assertEquals(1, body.path("live").asInt());
+        assertFalse(body.has("accessibility"));
     }
 
     @Test

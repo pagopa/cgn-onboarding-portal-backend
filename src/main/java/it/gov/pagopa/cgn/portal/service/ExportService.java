@@ -725,6 +725,7 @@ public class ExportService {
         searchDataExportEyca.setId(optDiscountId.orElseThrow(() -> new CGNException(
                 "Error during viewEntity to search conversion, eycaUpdateId is empty")));
         searchDataExportEyca.setLive(SearchDiscountRequestEyca.LiveEnum.NUMBER_1);
+        searchDataExportEyca.setAccessibility(null);
         return searchDataExportEyca;
     }
 
